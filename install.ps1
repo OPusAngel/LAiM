@@ -10725,7 +10725,12 @@ main()
 
     $_desktopMinVer = if ($env:LAiM_DESKTOP_BACKEND_VERSION) { $env:LAiM_DESKTOP_BACKEND_VERSION.Trim() } else { "" }
     $_LAiMDesktopInstallSpec = if ($_desktopMinVer) { "LAiM>=$_desktopMinVer" } else { $null }
-    $_LAiMReleaseInstallSpec = if ($_LAiMDesktopInstallSpec) { $_LAiMDesktopInstallSpec } else { "LAiM>=2026.10.6" }
+    # Desktop releases install the branded source directly. LAiM is not published under
+    # this name on PyPI, so a bare package spec could resolve an unrelated distribution.
+    # GitHub archives avoid requiring Git on every Windows desktop that installs LAiM.
+    $LAiMGitInstallSpec = "LAiM @ https://github.com/OPusAngel/LAiM/archive/refs/heads/main.tar.gz"
+    $LAiMZooGitInstallSpec = "LAiM-zoo @ https://github.com/OPusAngel/LAiM-zoo/archive/refs/heads/main.tar.gz"
+    $_LAiMReleaseInstallSpec = if ($PackageName -eq "LAiM") { $LAiMGitInstallSpec } else { $PackageName }
 
     if ($_Migrated) {
         Write-TauriLog "STEP" "Installing LAiM"
@@ -10736,7 +10741,7 @@ main()
             # --no-deps means LAiM's own metadata is never read, so this spec IS the zoo
             # floor for this path. Keep it equal to the LAiM_zoo floor in pyproject.toml
             # (tests/test_installer_zoo_floor_parity.py enforces that).
-            $baseInstallExit = Invoke-InstallCommandRetry -Label "install LAiM (migrated no-torch)" { & $script:UvExe pip install --python $VenvPython --no-deps --reinstall-package LAiM --reinstall-package LAiM-zoo "$_LAiMReleaseInstallSpec" "LAiM-zoo>=2026.10.6" }
+            $baseInstallExit = Invoke-InstallCommandRetry -Label "install LAiM (migrated no-torch)" { & $script:UvExe pip install --python $VenvPython --no-deps --reinstall-package LAiM --reinstall-package LAiM-zoo "$_LAiMReleaseInstallSpec" "$LAiMZooGitInstallSpec" }
             if ($baseInstallExit -eq 0) {
                 # Resolve pydantic WITH deps so pip pins pydantic-core
                 # to the matching version (no-torch-runtime.txt below
@@ -10760,7 +10765,7 @@ main()
             $script:TorchOverridesFile = New-LAiMTorchOverridesFile -PythonExe $VenvPython
             $_migOverrides = @()
             if ($script:TorchOverridesFile) { $_migOverrides = @("--overrides", $script:TorchOverridesFile) }
-            $baseInstallExit = Invoke-InstallCommandRetry -Label "install LAiM (migrated)" { & $script:UvExe pip install --python $VenvPython @_migOverrides --reinstall-package LAiM --reinstall-package LAiM-zoo "$_LAiMReleaseInstallSpec" "LAiM-zoo>=2026.10.6" }
+            $baseInstallExit = Invoke-InstallCommandRetry -Label "install LAiM (migrated)" { & $script:UvExe pip install --python $VenvPython @_migOverrides --reinstall-package LAiM --reinstall-package LAiM-zoo "$_LAiMReleaseInstallSpec" "$LAiMZooGitInstallSpec" }
             if ($script:TorchOverridesFile) {
                 Remove-LAiMTempFileQuietly -Path $script:TorchOverridesFile
                 $script:TorchOverridesFile = $null
@@ -10785,7 +10790,7 @@ main()
                 return (Exit-InstallFailure "Failed to overlay local repo (exit code $overlayExit)" $overlayExit)
             }
             substep "overlaying LAiM-zoo from git main..."
-            $zooOverlayExit = Invoke-InstallCommandRetry -Label "overlay LAiM-zoo (git main)" { & $script:UvExe pip install --python $VenvPython --no-deps --reinstall-package LAiM-zoo "LAiM-zoo @ git+https://github.com/LAiMai/LAiM-zoo" }
+            $zooOverlayExit = Invoke-InstallCommandRetry -Label "overlay LAiM-zoo (git main)" { & $script:UvExe pip install --python $VenvPython --no-deps --reinstall-package LAiM-zoo "$LAiMZooGitInstallSpec" }
             if ($zooOverlayExit -ne 0) {
                 Write-StudioLine "[ERROR] Failed to overlay LAiM-zoo (exit code $zooOverlayExit)" -ForegroundColor Red
                 return (Exit-InstallFailure "Failed to overlay LAiM-zoo (exit code $zooOverlayExit)" $zooOverlayExit)
@@ -11041,7 +11046,7 @@ main()
             # No-torch: install LAiM + LAiM-zoo with --no-deps, then
             # runtime deps (typer, safetensors, transformers, etc.) with --no-deps.
             # --no-deps: this spec IS the zoo floor here. Kept equal to pyproject.toml's.
-            $baseInstallExit = Invoke-InstallCommandRetry -Label "install LAiM (no-torch)" { & $script:UvExe pip install --python $VenvPython --no-deps --upgrade-package LAiM --upgrade-package LAiM-zoo "$_LAiMReleaseInstallSpec" "LAiM-zoo>=2026.10.6" }
+            $baseInstallExit = Invoke-InstallCommandRetry -Label "install LAiM (no-torch)" { & $script:UvExe pip install --python $VenvPython --no-deps --upgrade-package LAiM --upgrade-package LAiM-zoo "$_LAiMReleaseInstallSpec" "$LAiMZooGitInstallSpec" }
             if ($baseInstallExit -eq 0) {
                 # Same pydantic-with-deps trick as the migrated branch.
                 $baseInstallExit = Invoke-InstallCommandRetry -Label "install pydantic" { & $script:UvExe pip install --python $VenvPython pydantic }
@@ -11061,14 +11066,14 @@ main()
             # Freeze the trio so this with-deps resolve cannot downgrade the pinned build.
             $script:TorchOverridesFile = New-LAiMTorchOverridesFile -PythonExe $VenvPython
             if ($script:TorchOverridesFile) {
-            $baseInstallExit = Invoke-InstallCommandRetry -Label "install LAiM (local)" { & $script:UvExe pip install --python $VenvPython --upgrade-package LAiM --overrides $script:TorchOverridesFile "$_LAiMReleaseInstallSpec" "LAiM-zoo>=2026.10.6" }
+            $baseInstallExit = Invoke-InstallCommandRetry -Label "install LAiM (local)" { & $script:UvExe pip install --python $VenvPython --upgrade-package LAiM --overrides $script:TorchOverridesFile "$_LAiMReleaseInstallSpec" "$LAiMZooGitInstallSpec" }
                 Remove-LAiMTempFileQuietly -Path $script:TorchOverridesFile
                 $script:TorchOverridesFile = $null
             } else {
-            $baseInstallExit = Invoke-InstallCommandRetry -Label "install LAiM (local)" { & $script:UvExe pip install --python $VenvPython --upgrade-package LAiM "$_LAiMReleaseInstallSpec" "LAiM-zoo>=2026.10.6" }
+            $baseInstallExit = Invoke-InstallCommandRetry -Label "install LAiM (local)" { & $script:UvExe pip install --python $VenvPython --upgrade-package LAiM "$_LAiMReleaseInstallSpec" "$LAiMZooGitInstallSpec" }
             }
         } else {
-            $_LAiMPkg = if ($PackageName -eq "LAiM" -and $_LAiMDesktopInstallSpec) { $_LAiMDesktopInstallSpec } else { $PackageName }
+            $_LAiMPkg = if ($PackageName -eq "LAiM") { $LAiMGitInstallSpec } else { $PackageName }
             $script:TorchOverridesFile = New-LAiMTorchOverridesFile -PythonExe $VenvPython
             if ($script:TorchOverridesFile) {
                 $baseInstallExit = Invoke-InstallCommandRetry -Label "install LAiM" { & $script:UvExe pip install --python $VenvPython --upgrade-package LAiM --overrides $script:TorchOverridesFile -- "$_LAiMPkg" }
@@ -11091,7 +11096,7 @@ main()
                 return (Exit-InstallFailure "Failed to overlay local repo (exit code $overlayExit)" $overlayExit)
             }
             substep "overlaying LAiM-zoo from git main..."
-            $zooOverlayExit = Invoke-InstallCommandRetry -Label "overlay LAiM-zoo (git main)" { & $script:UvExe pip install --python $VenvPython --no-deps --reinstall-package LAiM-zoo "LAiM-zoo @ git+https://github.com/LAiMai/LAiM-zoo" }
+            $zooOverlayExit = Invoke-InstallCommandRetry -Label "overlay LAiM-zoo (git main)" { & $script:UvExe pip install --python $VenvPython --no-deps --reinstall-package LAiM-zoo "$LAiMZooGitInstallSpec" }
             if ($zooOverlayExit -ne 0) {
                 Write-StudioLine "[ERROR] Failed to overlay LAiM-zoo (exit code $zooOverlayExit)" -ForegroundColor Red
                 return (Exit-InstallFailure "Failed to overlay LAiM-zoo (exit code $zooOverlayExit)" $zooOverlayExit)
@@ -11102,7 +11107,7 @@ main()
         Write-TauriLog "STEP" "Installing LAiM"
         substep "installing LAiM (this may take a few minutes)..."
         if ($StudioLocalInstall) {
-            $baseInstallExit = Invoke-InstallCommandRetry -Label "install LAiM (auto torch backend)" { & $script:UvExe pip install --python $VenvPython "LAiM-zoo>=2026.10.6" "$_LAiMReleaseInstallSpec" --torch-backend=auto }
+            $baseInstallExit = Invoke-InstallCommandRetry -Label "install LAiM (auto torch backend)" { & $script:UvExe pip install --python $VenvPython "$LAiMZooGitInstallSpec" "$_LAiMReleaseInstallSpec" --torch-backend=auto }
             if ($baseInstallExit -ne 0) {
                 Write-StudioLine "[ERROR] Failed to install LAiM (exit code $baseInstallExit)" -ForegroundColor Red
                 return (Exit-InstallFailure "Failed to install LAiM (exit code $baseInstallExit)" $baseInstallExit)
@@ -11114,13 +11119,13 @@ main()
                 return (Exit-InstallFailure "Failed to overlay local repo (exit code $overlayExit)" $overlayExit)
             }
             substep "overlaying LAiM-zoo from git main..."
-            $zooOverlayExit = Invoke-InstallCommandRetry -Label "overlay LAiM-zoo (git main)" { & $script:UvExe pip install --python $VenvPython --no-deps --reinstall-package LAiM-zoo "LAiM-zoo @ git+https://github.com/LAiMai/LAiM-zoo" }
+            $zooOverlayExit = Invoke-InstallCommandRetry -Label "overlay LAiM-zoo (git main)" { & $script:UvExe pip install --python $VenvPython --no-deps --reinstall-package LAiM-zoo "$LAiMZooGitInstallSpec" }
             if ($zooOverlayExit -ne 0) {
                 Write-StudioLine "[ERROR] Failed to overlay LAiM-zoo (exit code $zooOverlayExit)" -ForegroundColor Red
                 return (Exit-InstallFailure "Failed to overlay LAiM-zoo (exit code $zooOverlayExit)" $zooOverlayExit)
             }
         } else {
-            $_LAiMPkg = if ($PackageName -eq "LAiM" -and $_LAiMDesktopInstallSpec) { $_LAiMDesktopInstallSpec } else { $PackageName }
+            $_LAiMPkg = if ($PackageName -eq "LAiM") { $LAiMGitInstallSpec } else { $PackageName }
             $baseInstallExit = Invoke-InstallCommandRetry -Label "install LAiM (auto torch backend)" { & $script:UvExe pip install --python $VenvPython --torch-backend=auto -- "$_LAiMPkg" }
             if ($baseInstallExit -ne 0) {
                 Write-StudioLine "[ERROR] Failed to install LAiM (exit code $baseInstallExit)" -ForegroundColor Red
