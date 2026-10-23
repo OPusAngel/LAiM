@@ -1,0 +1,38 @@
+        Info Looking up installed tauri packages to check mismatched versions...
+     Running beforeBuildCommand `npm run build`
+typecheck: tsc (TypeScript 7.0.2)
+Found 2 warnings while optimizing generated CSS:
+
+Issue #1:
+[2m│   transition: none !important;[22m
+[2m│ }[22m
+[2m│[22m ::highlight(unsloth-find) {
+[2m┆[22m             [33m[2m^--[22m 'highlight' is not recognized as a valid pseudo-element. Did you mean ':highlight' (pseudo-class) or is this a typo?[39m
+[2m┆[22m
+[2m│   background-color: #ffd84d;[22m
+[2m│   color: #1a1a1a;[22m
+
+Issue #2:
+[2m│   color: #1a1a1a;[22m
+[2m│ }[22m
+[2m│[22m ::highlight(unsloth-find-active) {
+[2m┆[22m             [33m[2m^--[22m 'highlight' is not recognized as a valid pseudo-element. Did you mean ':highlight' (pseudo-class) or is this a typo?[39m
+[2m┆[22m
+[2m│   background-color: #ff8c1a;[22m
+[2m│   color: #1a1a1a;[22m
+
+[33m[lightningcss minify] 'highlight' is not recognized as a valid pseudo-element. Did you mean ':highlight' (pseudo-class) or is this a typo?
+1  |  /*! tailwindcss v4.2.4 | MIT License | https://tailwindcss.com */
+2  |  ...nsition:none!important;animation:none!important}::highlight(unsloth-find){color:#1a1a1a;background-color:#ffd84d}:...
+   |                                                                 ^[39m
+[33m[lightningcss minify] 'highlight' is not recognized as a valid pseudo-element. Did you mean ':highlight' (pseudo-class) or is this a typo?
+1  |  /*! tailwindcss v4.2.4 | MIT License | https://tailwindcss.com */
+2  |  ...th-find){color:#1a1a1a;background-color:#ffd84d}::highlight(unsloth-find-active){color:#1a1a1a;background-color:#f...
+   |                                                                 ^[39m
+[33m[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+   Compiling LAiM v2026.4.8 (C:\Users\M.M.Engineers\Desktop\LAiM\LAiM_app\studio\src-tauri)
+warning: LAiM@2026.4.8: STATIC_VCRUNTIME is deprecated; use build.windows.staticVCRuntime in tauri.conf.json or tauri_build::WindowsAttributes::static_vc_runtime instead.

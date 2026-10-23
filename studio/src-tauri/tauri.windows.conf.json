@@ -1,0 +1,19 @@
+{
+  "bundle": {
+    "resources": {
+      "../../install.ps1": "install.ps1"
+    },
+    "windows": {
+      "signCommand": {
+        "cmd": "powershell",
+        "args": [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-Command",
+          "exit 0"
+        ]
+      }
+    }
+  }
+}

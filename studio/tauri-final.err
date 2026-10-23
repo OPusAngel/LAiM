@@ -1,0 +1,210 @@
+        Info Looking up installed tauri packages to check mismatched versions...
+     Running beforeBuildCommand `npm run build`
+typecheck: tsc (TypeScript 7.0.2)
+Found 2 warnings while optimizing generated CSS:
+
+Issue #1:
+[2m│   transition: none !important;[22m
+[2m│ }[22m
+[2m│[22m ::highlight(unsloth-find) {
+[2m┆[22m             [33m[2m^--[22m 'highlight' is not recognized as a valid pseudo-element. Did you mean ':highlight' (pseudo-class) or is this a typo?[39m
+[2m┆[22m
+[2m│   background-color: #ffd84d;[22m
+[2m│   color: #1a1a1a;[22m
+
+Issue #2:
+[2m│   color: #1a1a1a;[22m
+[2m│ }[22m
+[2m│[22m ::highlight(unsloth-find-active) {
+[2m┆[22m             [33m[2m^--[22m 'highlight' is not recognized as a valid pseudo-element. Did you mean ':highlight' (pseudo-class) or is this a typo?[39m
+[2m┆[22m
+[2m│   background-color: #ff8c1a;[22m
+[2m│   color: #1a1a1a;[22m
+
+[33m[lightningcss minify] 'highlight' is not recognized as a valid pseudo-element. Did you mean ':highlight' (pseudo-class) or is this a typo?
+1  |  /*! tailwindcss v4.2.4 | MIT License | https://tailwindcss.com */
+2  |  ...nsition:none!important;animation:none!important}::highlight(unsloth-find){color:#1a1a1a;background-color:#ffd84d}:...
+   |                                                                 ^[39m
+[33m[lightningcss minify] 'highlight' is not recognized as a valid pseudo-element. Did you mean ':highlight' (pseudo-class) or is this a typo?
+1  |  /*! tailwindcss v4.2.4 | MIT License | https://tailwindcss.com */
+2  |  ...th-find){color:#1a1a1a;background-color:#ffd84d}::highlight(unsloth-find-active){color:#1a1a1a;background-color:#f...
+   |                                                                 ^[39m
+[33m[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+warning: LAiM@2026.4.8: STATIC_VCRUNTIME is deprecated; use build.windows.staticVCRuntime in tauri.conf.json or tauri_build::WindowsAttributes::static_vc_runtime instead.
+   Compiling LAiM v2026.4.8 (C:\Users\M.M.Engineers\Desktop\LAiM\LAiM_app\studio\src-tauri)
+warning: unused import: `File`
+ --> src\desktop_updater.rs:4:21
+  |
+4 | use std::fs::{self, File};
+  |                     ^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `std::os::windows::process::CommandExt`
+   --> src\desktop_auth.rs:280:13
+    |
+280 |         use std::os::windows::process::CommandExt;
+    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `std::os::windows::process::CommandExt`
+    --> src\preflight\managed.rs:1024:13
+     |
+1024 |         use std::os::windows::process::CommandExt;
+     |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `std::os::windows::process::CommandExt`
+    --> src\preflight\managed.rs:1101:13
+     |
+1101 |         use std::os::windows::process::CommandExt;
+     |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused variable: `path`
+   --> src\desktop_backend_owner.rs:672:32
+    |
+672 | fn set_private_dir_permissions(path: &Path) {
+    |                                ^^^^ help: if this is intentional, prefix it with an underscore: `_path`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `path`
+   --> src\desktop_backend_owner.rs:680:33
+    |
+680 | fn set_private_file_permissions(path: &Path) {
+    |                                 ^^^^ help: if this is intentional, prefix it with an underscore: `_path`
+
+warning: unused variable: `path`
+  --> src\desktop_updater.rs:72:16
+   |
+72 | fn sync_parent(path: &Path) {
+   |                ^^^^ help: if this is intentional, prefix it with an underscore: `_path`
+
+warning: variable does not need to be mutable
+   --> src\preflight\managed.rs:801:9
+    |
+801 |     let mut modes: u64 = 0;
+    |         ----^^^^^
+    |         |
+    |         help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `reply_pending`
+    --> src\main.rs:1687:17
+     |
+1687 |             let reply_pending = guard.finish();
+     |                 ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_reply_pending`
+
+warning: field `viewport_width` is never read
+  --> src\browser_capture.rs:29:5
+   |
+24 | struct Clip {
+   |        ---- field in this struct
+...
+29 |     viewport_width: f64,
+   |     ^^^^^^^^^^^^^^
+   |
+   = note: `Clip` has a derived impl for the trait `Clone`, but this is intentionally ignored during dead code analysis
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: constant `BLOCKED_HOST_PREFIXES` is never used
+   --> src\browser_webview.rs:380:7
+    |
+380 | const BLOCKED_HOST_PREFIXES: &[&str] = &[
+    |       ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `content_rules_json` is never used
+   --> src\browser_webview.rs:401:4
+    |
+401 | fn content_rules_json() -> String {
+    |    ^^^^^^^^^^^^^^^^^^
+
+warning: variant `Unsupported` is never constructed
+  --> src\long_paths.rs:14:5
+   |
+11 | pub enum LongPathsStatus {
+   |          --------------- variant in this enum
+...
+14 |     Unsupported,
+   |     ^^^^^^^^^^^
+   |
+   = note: `LongPathsStatus` has derived impls for the traits `Clone` and `Debug`, but these are intentionally ignored during dead code analysis
+
+warning: constant `MAX_CLIPBOARD_IMAGE_DIMENSION` is never used
+  --> src\native_clipboard.rs:15:7
+   |
+15 | const MAX_CLIPBOARD_IMAGE_DIMENSION: i32 = 8192;
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: constant `MAX_CLIPBOARD_RGBA_BYTES` is never used
+  --> src\native_clipboard.rs:16:7
+   |
+16 | const MAX_CLIPBOARD_RGBA_BYTES: u64 = 64 * 1024 * 1024;
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: constant `MAX_CLIPBOARD_PNG_BYTES` is never used
+  --> src\native_clipboard.rs:17:7
+   |
+17 | const MAX_CLIPBOARD_PNG_BYTES: usize = 20 * 1024 * 1024;
+   |       ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `validate_dimensions` is never used
+  --> src\native_clipboard.rs:37:4
+   |
+37 | fn validate_dimensions(width: i32, height: i32) -> Result<(), String> {
+   |    ^^^^^^^^^^^^^^^^^^^
+
+warning: function `build_managed_cli_command` is never used
+    --> src\process.rs:1861:15
+     |
+1861 | pub(crate) fn build_managed_cli_command(
+     |               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `LAiM` (bin "LAiM") generated 18 warnings (run `cargo fix --bin "LAiM" -p LAiM` to apply 6 suggestions)
+    Finished `release` profile [optimized] target(s) in 42.69s
+       Built application at: C:\Users\M.M.Engineers\Desktop\LAiM\LAiM_app\studio\src-tauri\target\release\LAiM.exe
+        Info Patching C:\Users\M.M.Engineers\Desktop\LAiM\LAiM_app\studio\src-tauri\target\release\LAiM.exe with bundle type information: nsis
+     Signing C:\Users\M.M.Engineers\Desktop\LAiM\LAiM_app\studio\src-tauri\target\release\LAiM.exe
+     Signing C:\Users\M.M.Engineers\Desktop\LAiM\LAiM_app\studio\src-tauri\target\release\LAiM.exe with a custom signing command
+     Signing Output of signing command:
+
+        Info Verifying NSIS package
+ Downloading https://github.com/tauri-apps/binary-releases/releases/download/nsis-3.11/nsis-3.11.zip
+        Info validating hash
+        Info extracting NSIS
+ Downloading https://github.com/tauri-apps/nsis-tauri-utils/releases/download/nsis_tauri_utils-v0.5.3/nsis_tauri_utils.dll
+        Info validating hash
+        Info Target: x64
+ Downloading https://go.microsoft.com/fwlink/p/?LinkId=2124703
+        Info Signing NSIS plugins
+     Signing C:\Users\M.M.Engineers\Desktop\LAiM\LAiM_app\studio\src-tauri\target\release\nsis\x64\Plugins\x86-unicode\NSISdl.dll
+     Signing C:\Users\M.M.Engineers\Desktop\LAiM\LAiM_app\studio\src-tauri\target\release\nsis\x64\Plugins\x86-unicode\NSISdl.dll with a custom signing command
+     Signing Output of signing command:
+
+     Signing C:\Users\M.M.Engineers\Desktop\LAiM\LAiM_app\studio\src-tauri\target\release\nsis\x64\Plugins\x86-unicode\StartMenu.dll
+     Signing C:\Users\M.M.Engineers\Desktop\LAiM\LAiM_app\studio\src-tauri\target\release\nsis\x64\Plugins\x86-unicode\StartMenu.dll with a custom signing command
+     Signing Output of signing command:
+
+     Signing C:\Users\M.M.Engineers\Desktop\LAiM\LAiM_app\studio\src-tauri\target\release\nsis\x64\Plugins\x86-unicode\System.dll
+     Signing C:\Users\M.M.Engineers\Desktop\LAiM\LAiM_app\studio\src-tauri\target\release\nsis\x64\Plugins\x86-unicode\System.dll with a custom signing command
+     Signing Output of signing command:
+
+     Signing C:\Users\M.M.Engineers\Desktop\LAiM\LAiM_app\studio\src-tauri\target\release\nsis\x64\Plugins\x86-unicode\nsDialogs.dll
+     Signing C:\Users\M.M.Engineers\Desktop\LAiM\LAiM_app\studio\src-tauri\target\release\nsis\x64\Plugins\x86-unicode\nsDialogs.dll with a custom signing command
+     Signing Output of signing command:
+
+     Signing C:\Users\M.M.Engineers\Desktop\LAiM\LAiM_app\studio\src-tauri\target\release\nsis\x64\Plugins\x86-unicode\additional\nsis_tauri_utils.dll
+     Signing C:\Users\M.M.Engineers\Desktop\LAiM\LAiM_app\studio\src-tauri\target\release\nsis\x64\Plugins\x86-unicode\additional\nsis_tauri_utils.dll with a custom signing command
+     Signing Output of signing command:
+
+     Running makensis to produce C:\Users\M.M.Engineers\Desktop\LAiM\LAiM_app\studio\src-tauri\target\release\bundle\nsis\LAiM_2026.4.8_x64-setup.exe
+     Signing C:\Users\M.M.Engineers\Desktop\LAiM\LAiM_app\studio\src-tauri\target\release\bundle\nsis\LAiM_2026.4.8_x64-setup.exe
+     Signing C:\Users\M.M.Engineers\Desktop\LAiM\LAiM_app\studio\src-tauri\target\release\bundle\nsis\LAiM_2026.4.8_x64-setup.exe with a custom signing command
+     Signing Output of signing command:
+
+    Finished 1 bundle at:
+        C:\Users\M.M.Engineers\Desktop\LAiM\LAiM_app\studio\src-tauri\target\release\bundle\nsis\LAiM_2026.4.8_x64-setup.exe
+

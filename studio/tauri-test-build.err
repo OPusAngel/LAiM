@@ -1,0 +1,52 @@
+        Info Looking up installed tauri packages to check mismatched versions...
+     Running beforeBuildCommand `npm run build`
+typecheck: tsc (TypeScript 7.0.2)
+Found 2 warnings while optimizing generated CSS:
+
+Issue #1:
+[2m│   transition: none !important;[22m
+[2m│ }[22m
+[2m│[22m ::highlight(LAiM-find) {
+[2m┆[22m             [33m[2m^--[22m 'highlight' is not recognized as a valid pseudo-element. Did you mean ':highlight' (pseudo-class) or is this a typo?[39m
+[2m┆[22m
+[2m│   background-color: #ffd84d;[22m
+[2m│   color: #1a1a1a;[22m
+
+Issue #2:
+[2m│   color: #1a1a1a;[22m
+[2m│ }[22m
+[2m│[22m ::highlight(LAiM-find-active) {
+[2m┆[22m             [33m[2m^--[22m 'highlight' is not recognized as a valid pseudo-element. Did you mean ':highlight' (pseudo-class) or is this a typo?[39m
+[2m┆[22m
+[2m│   background-color: #ff8c1a;[22m
+[2m│   color: #1a1a1a;[22m
+
+[33m[lightningcss minify] 'highlight' is not recognized as a valid pseudo-element. Did you mean ':highlight' (pseudo-class) or is this a typo?
+1  |  /*! tailwindcss v4.2.4 | MIT License | https://tailwindcss.com */
+2  |  ...nsition:none!important;animation:none!important}::highlight(LAiM-find){color:#1a1a1a;background-color:#ffd84d}::hi...
+   |                                                                 ^[39m
+[33m[lightningcss minify] 'highlight' is not recognized as a valid pseudo-element. Did you mean ':highlight' (pseudo-class) or is this a typo?
+1  |  /*! tailwindcss v4.2.4 | MIT License | https://tailwindcss.com */
+2  |  ...iM-find){color:#1a1a1a;background-color:#ffd84d}::highlight(LAiM-find-active){color:#1a1a1a;background-color:#ff8c...
+   |                                                                 ^[39m
+[33m[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+   Compiling LAiM-studio v2026.4.8 (C:\Users\M.M.Engineers\Desktop\LAiM\LAiM_app\studio\src-tauri)
+   Compiling tauri-plugin-single-instance v2.4.3
+error: linker `link.exe` not found
+  |
+  = note: program not found
+
+note: the msvc targets depend on the msvc linker but `link.exe` was not found
+
+note: please ensure that Visual Studio 2017 or later, or Build Tools for Visual Studio were installed with the Visual C++ option
+
+note: VS Code is a different product, and is not sufficient
+
+error: could not compile `LAiM-studio` (build script) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+failed to build app: failed to build app
+       Error failed to build app: failed to build app
