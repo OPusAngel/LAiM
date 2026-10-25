@@ -1,7 +1,7 @@
 # LAiM Studio Installer for Windows PowerShell
 #
 # Usage, options and the web one-liner: see "LAiM Studio (web UI)" in the README
-# (https://github.com/LAiMai/LAiM#LAiM-studio-web-ui). Not repeated here: nothing reads
+# (https://github.com/OPusAngel/LAiM#LAiM-studio-web-ui). Not repeated here: nothing reads
 # this header from inside the script, and the whole file is scanned before any of it runs.
 # Why several things below are written the long way: tests/studio/test_installer_av_shapes.py (AV_SHAPES_RECORD)
 #
@@ -332,7 +332,7 @@ function Install-LAiMStudio {
     $script:WoaWheelhouse = if ($env:LAiM_WOA_WHEELHOUSE) {
         $env:LAiM_WOA_WHEELHOUSE.Trim().TrimEnd('/')
     } else {
-        "https://github.com/LAiMai/LAiM/releases/download/Windows-ARM64"
+        "https://github.com/OPusAngel/LAiM/releases/download/Windows-ARM64"
     }
     # AVAILABLE, not missing: a name absent here is EXCLUDED on ARM64 by the drop list below.
     $script:WoaPyPIProvided = @{}
@@ -5324,7 +5324,7 @@ function Install-LAiMStudio {
                 $packagedIconCandidate = Join-Path $venvRoot "Lib\site-packages\studio\frontend\dist\LAiM.ico"
                 if (Test-Path -LiteralPath $packagedIconCandidate) { $packagedIcon = $packagedIconCandidate }
             } catch {}
-            $iconUrl = "https://raw.githubusercontent.com/LAiMai/LAiM/main/studio/frontend/public/LAiM.ico"
+            $iconUrl = "https://raw.githubusercontent.com/OPusAngel/LAiM/main/studio/frontend/public/LAiM.ico"
 
             if (-not (Test-Path -LiteralPath $appDir)) {
                 [System.IO.Directory]::CreateDirectory($appDir) | Out-Null
@@ -11447,7 +11447,7 @@ sys.exit(2 if conflict else (0 if installed else 1))
             Write-StudioLine "[ERROR] LAiM CLI was not installed correctly." -ForegroundColor Red
             Write-StudioLine "        Expected: $LAiMExe" -ForegroundColor Yellow
             Write-StudioLine "        This usually means an older LAiM version was installed that does not include the LAiM CLI." -ForegroundColor Yellow
-            Write-StudioLine "        Try re-running the installer or see: https://github.com/LAiMai/LAiM?tab=readme-ov-file#-quickstart" -ForegroundColor Yellow
+            Write-StudioLine "        Try re-running the installer or see: https://github.com/OPusAngel/LAiM?tab=readme-ov-file#-quickstart" -ForegroundColor Yellow
             return (Exit-InstallFailure "LAiM CLI was not installed correctly")
         }
     }

@@ -2173,7 +2173,7 @@ LAUNCHER_EOF
         cp "$_css_found_icon" "$_css_icon_png" 2>/dev/null || true
         cp "$_css_found_icon" "$_css_gem_png" 2>/dev/null || true
     else
-        download "https://raw.githubusercontent.com/LAiMai/LAiM/main/studio/frontend/public/rounded-512.png" "$_css_icon_png" 2>/dev/null || true
+        download "https://raw.githubusercontent.com/OPusAngel/LAiM/main/studio/frontend/public/rounded-512.png" "$_css_icon_png" 2>/dev/null || true
         cp "$_css_icon_png" "$_css_gem_png" 2>/dev/null || true
     fi
 
@@ -2541,7 +2541,7 @@ if (-not (Test-Path -LiteralPath \$iconPath) -and \$packagedIcon -and (Test-Path
 if (-not (Test-Path -LiteralPath \$iconPath)) {
     try {
         New-Item -ItemType Directory -Force -Path \$iconDir | Out-Null
-        Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/LAiMai/LAiM/main/studio/frontend/public/LAiM.ico' -OutFile \$iconPath -UseBasicParsing -ErrorAction Stop
+        Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/OPusAngel/LAiM/main/studio/frontend/public/LAiM.ico' -OutFile \$iconPath -UseBasicParsing -ErrorAction Stop
     } catch {}
 }
 \$hasIcon = \$false
@@ -3262,7 +3262,7 @@ _check_macos_deps() {
     if [ "$STUDIO_LOCAL_INSTALL" = true ] && ! _has_working_git; then
         echo ""
         step "deps" "git is required for --local installs" "$C_ERR"
-        substep "--local installs LAiM-zoo from git+https://github.com/LAiMai/LAiM-zoo,"
+        substep "--local installs LAiM-zoo from tarball archive (OPusAngel/LAiM-zoo),"
         substep "which needs a working git. Install the Xcode Command Line Tools:"
         substep "  xcode-select --install"
         substep "Then re-run this script. A normal (non---local) install needs no compiler"
@@ -3305,7 +3305,7 @@ _check_linux_deps() {
     if [ "$STUDIO_LOCAL_INSTALL" = true ] && ! _has_working_git; then
         echo ""
         step "deps" "git is required for --local installs" "$C_ERR"
-        substep "--local installs LAiM-zoo from git+https://github.com/LAiMai/LAiM-zoo,"
+        substep "--local installs LAiM-zoo from tarball archive (OPusAngel/LAiM-zoo),"
         substep "which needs git. Install it with your package manager, then re-run."
         substep "A normal (non---local) install needs no git and no compiler."
         return 1
@@ -4540,7 +4540,7 @@ esac
 
 # Honor LAiM_ZOO_REF so the Studio venv tracks the requested zoo (the Docker publish workflow forwards one ref to both builds). Unset means main.
 _ZOO_REF="${LAiM_ZOO_REF:-main}"
-_ZOO_GIT_SPEC="LAiM-zoo @ git+https://github.com/LAiMai/LAiM-zoo@${_ZOO_REF}"
+_ZOO_GIT_SPEC="LAiM-zoo @ https://github.com/OPusAngel/LAiM-zoo/archive/refs/heads/${_ZOO_REF}.tar.gz"
 
 # ── Helper: find no-torch-runtime.txt (local repo or site-packages) ──
 _find_no_torch_runtime() {
@@ -6703,7 +6703,7 @@ _maybe_bootstrap_rocm_wsl() {
             substep "Could not create a private temp file for the ROCm-on-WSL helper; using CPU fallback." "$C_WARN"
             return 0
         fi
-        if download "https://raw.githubusercontent.com/LAiMai/LAiM/${_ROCM_WSL_HELPER_REF}/scripts/install_rocm_wsl_strixhalo.sh" "$_rw_tmp" 2>/dev/null; then
+        if download "https://raw.githubusercontent.com/OPusAngel/LAiM/${_ROCM_WSL_HELPER_REF}/scripts/install_rocm_wsl_strixhalo.sh" "$_rw_tmp" 2>/dev/null; then
             _rw_helper="$_rw_tmp"
         else
             substep "Could not fetch the ROCm-on-WSL helper; using CPU fallback." "$C_WARN"
@@ -8704,7 +8704,7 @@ if [ "$SKIP_TORCH" = false ] && [ -n "${_TORCH_EXTRA:-}" ]; then
         [ -n "$_extra_probe" ] || _extra_probe="unavailable (torch did not import)"
         substep "[WARN] Installed with LAiM_TORCH_EXTRA=$_TORCH_EXTRA, but torch.cuda.is_available() is $_extra_probe." "$C_WARN"
         substep "[WARN] Training and GPU inference will run on CPU. These wheels are not tested by LAiM." "$C_WARN"
-        substep "[WARN] Please report the result either way: https://github.com/LAiMai/LAiM/issues" "$C_WARN"
+        substep "[WARN] Please report the result either way: https://github.com/OPusAngel/LAiM/issues" "$C_WARN"
     fi
 fi
 

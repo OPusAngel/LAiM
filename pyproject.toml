@@ -1757,7 +1757,7 @@ rocm711-torch2100 = [
 [project.urls]
 homepage = "https://LAiM.ai"
 documentation = "https://LAiM.ai/docs"
-repository = "https://github.com/LAiMai/LAiM"
+repository = "https://github.com/OPusAngel/LAiM"
 
 [tool.ruff]
 target-version = "py311"
