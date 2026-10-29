@@ -52,4 +52,4 @@ if v >= V('2.12.0') and cuda not in ("12.6", "13.0"): raise RuntimeError(f"Torch
 x = x.format(cuda.replace(".", ""), "-ampere" if False else "") # is_ampere is broken due to flash-attn
 # torch2110+ extras pin +cuNNN builds, which resolve only from the matching index.
 extra_index = f' --extra-index-url https://download.pytorch.org/whl/cu{cuda.replace(".", "")}' if (x.endswith(('-torch2110', '-torch2120', '-torch2121', '-torch2130', '-torch2140')) and cuda in ("12.6", "12.8", "13.0")) else ''
-print(f'pip install --upgrade pip setuptools wheel && pip install --no-deps git+https://github.com/LAiMai/LAiM-zoo.git && pip install "LAiM[{x}] @ git+https://github.com/LAiMai/LAiM.git" --no-build-isolation{extra_index}')
+print(f'pip install --upgrade pip setuptools wheel && pip install --no-deps git+https://github.com/OPusAngel/LAiM-zoo.git && pip install "LAiM[{x}] @ git+https://github.com/OPusAngel/LAiM.git" --no-build-isolation{extra_index}')

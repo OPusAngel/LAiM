@@ -159,7 +159,7 @@ del maybe_set_windows_rocm_bnb_version
 
 # Multi-GPU is not yet supported (beta available on request).
 
-# Fixes https://github.com/LAiMai/LAiM/issues/1266
+# Fixes https://github.com/OPusAngel/LAiM/issues/1266
 os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
 
 # `docker --gpus '"device=N"'` sets NVIDIA_VISIBLE_DEVICES but not
@@ -220,7 +220,7 @@ def _reraise_device_type_error_with_gpu_hint(exception):
         f"LAiM: nvidia-smi sees {gpu_name} but torch.cuda.is_available() is False "
         f"(torch {torch_build}{mask_note}). PyTorch likely does not match this "
         f"machine; reinstall it for {sys.executable} per "
-        f"https://github.com/LAiMai/LAiM#-install"
+        f"https://github.com/OPusAngel/LAiM#-install"
     ) from exception
 
 
