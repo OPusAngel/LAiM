@@ -12,6 +12,7 @@ import subprocess
 import sys
 import threading
 import types
+from contextlib import ExitStack
 from pathlib import Path
 from unittest.mock import patch
 
@@ -5887,3 +5888,206 @@ def test_the_header_scan_refuses_what_it_cannot_parse(tmp_path):
     with pytest.raises(ValueError):
         LlamaCppBackend._gguf_scan_tensor_bytes(str(bad))
     assert LlamaCppBackend()._gguf_tensor_scan(str(bad)) is None
+
+
+# ── the KV-cache OOM rung ──────────────────────────────────────────────
+
+_KV_OOM_OUT = (
+    "llama_kv_cache_iswa: creating non-SWA KV cache, size = 65536 cells\n"
+    "ggml_backend_cuda_buffer_type_alloc_buffer: allocating 2886.00 MiB on device 0: "
+    "cudaMalloc failed: out of memory\n"
+    "llama_init_from_model: failed to initialize the context: failed to allocate buffer "
+    "for kv cache"
+)
+
+
+_KV_HOST_OOM_OUT = (
+    "ggml_backend_cpu_buffer_type_alloc_buffer: failed to allocate buffer of size 15569256448\n"
+    "ggml_backend_buft_alloc_buffer_n_default: failed to allocate CPU buffer of size 15569256448\n"
+    "llama_init_from_model: failed to initialize the context: failed to allocate buffer "
+    "for kv cache"
+)
+
+
+def _launch_crashing_the_kv_cache(
+    tmp_path,
+    *,
+    extra_args = (),
+    n_ctx = 65536,
+    crash_times = 3,
+    fit_load_mode = False,
+    crash_text = _KV_OOM_OUT,
+):
+    """The first ``crash_times`` spawns abort on the KV cache and the ladder respawns.
+
+    The shape of the LFM3-1.7B-Q8 load that failed on an 8 GiB card: every placement
+    rung re-sent the same ``-c``, because llama.cpp's fitter will not shrink a context it
+    was handed, so the load died four times on one arithmetic.
+
+    ``fit_load_mode`` reproduces the second crash the live run found: the launch carries
+    the ``--load-mode none`` the fit chose for a confirmed full offload, which turns the
+    weights into a host allocation instead of a file mapping.
+
+    ``crash_text`` picks which allocator refused the cache: ``_KV_HOST_OOM_OUT`` is the
+    spill-to-CPU refusal, whose lines carry no device marker at all.
+    """
+    backend, gguf = _backend(tmp_path, vulkan = False, memory = [(0, 8 * _GIB, 8 * _GIB)])
+    captured = {"cmds": []}
+
+    def fake_popen(cmd, **kwargs):
+        if not cmd or str(cmd[0]) != "/fake/llama-server":
+            return _REAL_POPEN(cmd, **kwargs)
+        captured["cmds"].append(list(cmd))
+        crashed = len(captured["cmds"]) <= crash_times
+        return type(
+            "Process",
+            (),
+            {
+                "pid": 123 + len(captured["cmds"]),
+                "stdout": iter((crash_text + "\n",)) if crashed else iter(()),
+                "returncode": 1 if crashed else None,
+                "poll": lambda self: 1 if crashed else None,
+                "terminate": lambda self: None,
+                "wait": lambda self, timeout = None: 1 if crashed else 0,
+                "kill": lambda self: None,
+            },
+        )()
+
+    def fake_health(timeout = None, **_kw):
+        if len(captured["cmds"]) <= crash_times:
+            backend._stdout_lines = crash_text.splitlines()
+            return False
+        backend._stdout_lines = []
+        return True
+
+    backend._wait_for_health = fake_health
+    patches = [patch.object(subprocess, "Popen", side_effect = fake_popen)]
+    if fit_load_mode:
+        caps = dict(LlamaCppBackend.probe_server_capabilities.__func__(LlamaCppBackend, None))
+        caps["supports_load_mode"] = True
+        patches = [
+            patch.object(LlamaCppBackend, "probe_server_capabilities", lambda *a, **k: caps),
+            patch.object(LlamaCppBackend, "_fit_derived_load_mode", return_value = "none"),
+            *patches,
+        ]
+    error = ""
+    with ExitStack() as stack:
+        for _p in patches:
+            stack.enter_context(_p)
+        try:
+            loaded = backend.load_model(
+                GgufLoadIntent(
+                    gguf_path = str(gguf),
+                    model_identifier = "test",
+                    n_ctx = n_ctx,
+                    extra_args = list(extra_args),
+                )
+            )
+        except Exception as exc:
+            # The terminal message is what the caller asserts on.
+            loaded, error = None, str(exc)
+    return backend, captured["cmds"], loaded, error
+
+
+def _spawned_ctx(cmds) -> list:
+    return [cmd[cmd.index("-c") + 1] for cmd in cmds if "-c" in cmd]
+
+
+def _load_modes(cmds) -> list:
+    """The ``--load-mode`` of each model launch, None when the launch carries none.
+
+    Filtered to launches: a capability probe is also a spawn of the same binary.
+    """
+    return [
+        cmd[cmd.index("--load-mode") + 1] if "--load-mode" in cmd else None
+        for cmd in cmds
+        if "-m" in cmd
+    ]
+
+
+def test_a_kv_cache_oom_lowers_our_own_context_until_the_load_recovers(tmp_path):
+    backend, cmds, loaded, error = _launch_crashing_the_kv_cache(tmp_path, crash_times = 3)
+
+    assert loaded, error
+    ctxs = _spawned_ctx(cmds)
+    # The first pair is the placement rungs, which repeat the request; only the last two
+    # respawns carry a number LAiM took down itself.
+    assert ctxs[0] == "65536", cmds
+    assert ctxs[-1] == "16384", ctxs
+    assert len(set(ctxs[-2:])) == 2, ctxs
+    assert "Lowered the context window" in (backend.last_load_warning or "")
+    assert backend._effective_context_length == 16384
+
+
+def test_the_terminal_error_names_the_context_it_already_gave_up_on(tmp_path):
+    backend, cmds, loaded, error = _launch_crashing_the_kv_cache(tmp_path, crash_times = 9)
+
+    assert not loaded
+    assert "already lowered the context 2 time(s), from 65536 to 16384" in error, error
+    # Two rounds is the whole budget, and the ladder is four launches total.
+    assert len(cmds) == 4, cmds
+    assert _spawned_ctx(cmds) == ["65536", "65536", "32768", "16384"]
+
+
+def test_a_pass_through_context_is_never_shrunk(tmp_path):
+    """``-c`` in the extras is the user's standing decision, not a fit target: the rung
+    has to leave it alone and let the load fail honestly."""
+    backend, cmds, loaded, error = _launch_crashing_the_kv_cache(
+        tmp_path, extra_args = ["-c", "40960"], crash_times = 9
+    )
+
+    assert not loaded
+    # LAiM suppresses its own ``-c`` when the extras pin one, so every respawn carries
+    # the user's number and the terminal error cannot claim a shrink it never made.
+    assert _spawned_ctx(cmds) == ["40960"] * len(cmds), cmds
+    assert "lowered the context" not in error, error
+
+
+def test_the_shrink_gives_back_a_load_mode_the_fit_chose(tmp_path):
+    """The live run died twice on the KV cache and then, at the lowered context, on
+    ``unable to allocate CUDA_Host buffer`` under ``(load_mode = none)``.
+
+    The fit emitted that mode because it had proved a full offload, and a memory crash is
+    that proof failing: the mode makes the weights a host allocation instead of a mapping
+    of the file. The retry that already doubts the fit has to doubt its load mode too.
+    """
+    backend, cmds, loaded, error = _launch_crashing_the_kv_cache(
+        tmp_path, crash_times = 9, fit_load_mode = True
+    )
+
+    assert not loaded, error
+    assert backend._fit_load_mode_flags == ["--load-mode", "none"]
+    modes = _load_modes(cmds)
+    assert modes[0] == "none", cmds
+    # Every respawn after the first memory crash runs without the fit's mode.
+    assert set(modes[1:]) == {None}, cmds
+    assert len(set(_spawned_ctx(cmds))) > 1, cmds
+
+
+def test_a_user_load_mode_survives_the_shrink(tmp_path):
+    """``--load-mode`` the user typed is theirs: the rung takes back only what the fit
+    chose, exactly as the --fit on retry does."""
+    backend, cmds, loaded, error = _launch_crashing_the_kv_cache(
+        tmp_path, extra_args = ["--load-mode", "none"], crash_times = 9
+    )
+
+    assert not loaded, error
+    assert backend._fit_load_mode_flags == []
+    assert all(cmd[cmd.index("--load-mode") + 1] == "none" for cmd in cmds if "--load-mode" in cmd), cmds
+
+
+def test_a_kv_cache_the_host_refused_gets_lowered_too(tmp_path):
+    """The spill-to-CPU refusal is the same oversized ``-c``.
+
+    Verbatim from the live 131072-token Qwen3-8B load: llama.cpp moved the whole cache to
+    a CPU buffer, the host refused 15.5 GiB, and the lines carry no device marker -- so
+    the GPU-shaped gate alone gave the load no retry at all and returned a raw allocator
+    line on the first spawn.
+    """
+    backend, cmds, loaded, error = _launch_crashing_the_kv_cache(
+        tmp_path, crash_times = 9, crash_text = _KV_HOST_OOM_OUT
+    )
+
+    assert not loaded, error
+    assert len(cmds) > 1, cmds
+    assert "already lowered the context 2 time(s)" in error, error

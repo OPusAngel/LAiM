@@ -90,6 +90,7 @@ from core.inference.llama_server_args import (
     _CACHE_RAM_FLAGS,
     _CACHE_TYPE_K_FLAGS,
     _CACHE_TYPE_V_FLAGS,
+    _CONTEXT_FLAGS,
     _CTX_CHECKPOINTS_FLAGS,
     _DEVICE_FLAGS,
     _GPU_LAYER_FLAGS,
@@ -4323,6 +4324,18 @@ _FIT_FLOOR_MIN_CTX = 256
 # NOT running has no such backstop, so it must hand over this number itself rather than
 # the ceiling that assumed one.
 _LLAMA_FIT_MIN_CTX = 4096
+
+# How many times one load may halve its own ``-c`` after a KV-cache allocation crash.
+# Two: the ladder below has four launches total, and a third shrink would spend the slot
+# a --fit recovery is more likely to use. Halving twice covers the ~2x gap between the
+# "free" a driver reports and the free it will actually hand over.
+_MAX_CTX_SHRINK_ROUNDS = 2
+
+# llama.cpp's own line for a refused KV cache allocation (llama_kv_cache /
+# llama_init_from_model), spelled the way the child prints it and matched
+# case-insensitively. Buffer-type agnostic on purpose: the GPU and the host both print
+# it, one line apart from their own allocator's complaint.
+_KV_CACHE_ALLOCATION_FAILURE = "failed to allocate buffer for kv cache"
 
 # _plan_tensor_parallel's no-KV fallback. A GUESS: may shrink Auto, never a request (#9653).
 _TP_UNMEASURED_CTX = 4096
@@ -23751,6 +23764,78 @@ class LlamaCppBackend:
         )
 
     @staticmethod
+    def _is_kv_cache_allocation_failure(output: str) -> bool:
+        """Whether the crash is the KV cache itself being refused, by ANY backend.
+
+        llama.cpp puts the cache on whichever device has room, so the same oversized
+        ``-c`` is refused by ``cudaMalloc`` on a GPU or by a host ``ggml_aligned_alloc``
+        when it spills the whole cache to CPU (a 131072-token context on an 8 GiB card
+        asks the host for 15.5 GiB). The GPU-shaped matcher above cannot see that line:
+        it carries no device marker at all. Both refusals mean the same thing to the
+        halving rung -- the context is bigger than what this machine will hand over.
+        """
+        return _KV_CACHE_ALLOCATION_FAILURE in (output or "").lower()
+
+    @staticmethod
+    def _halve_own_ctx_after_memory_crash(
+        run_cmd: list[str], extra_args: Optional[Iterable[str]]
+    ) -> Optional[tuple]:
+        """Halve LAiM's own ``-c`` for a respawn after a KV-cache allocation crash.
+
+        ``None`` when the context is not LAiM's to lower, or already at the floor.
+
+        Both LAiM's placement and llama.cpp's ``--fit`` price the cache against a
+        "free" that is bigger than what the driver hands over: on Windows the CUDA
+        reading runs ~750 MiB above NVML's, and neither sees another app taking the
+        rest between the reading and the ``cudaMalloc``. Every existing respawn rung
+        re-runs that same arithmetic, because ``--fit`` refuses to shrink a context it
+        was handed explicitly, so a load pinned at the model's native length fails the
+        same multi-gigabyte allocation four times and then reports a raw crash log.
+        Only lowering our own number recovers.
+        """
+        try:
+            # A pass-through ``-c`` is the user's standing decision, not a fit target.
+            if parse_ctx_override(extra_args) is not None:
+                return None
+        except ValueError:
+            return None
+
+        sites = []
+        i, n = 0, len(run_cmd)
+        while i < n:
+            flag = _flag_name(str(run_cmd[i]))
+            if flag is None or flag not in _CONTEXT_FLAGS:
+                i += 1
+                continue
+            # Attached values (``--ctx-size=65536``) and a missing value both mean this
+            # is not the pair LAiM emitted at its own write site.
+            if "=" in str(run_cmd[i]).strip() or i + 1 >= n:
+                return None
+            if _flag_name(str(run_cmd[i + 1])) is not None:
+                return None
+            try:
+                sites.append((i + 1, int(str(run_cmd[i + 1]).strip())))
+            except ValueError:
+                return None
+            i += 2
+
+        # Zero: auto-fit owns the number and its fitter already had its rung. More than
+        # one: an MTP or CPU-replay rewrite left the last-wins owner ambiguous.
+        if len(sites) != 1:
+            return None
+        at, current = sites[0]
+        if current <= _FIT_MIN_CTX:
+            return None
+        # Aligned down by the fit search's own step, then held at the floor the rest of
+        # the sizing logic refuses to price below.
+        narrowed = max((current // 2 // _FIT_FLOOR_MIN_CTX) * _FIT_FLOOR_MIN_CTX, _FIT_MIN_CTX)
+        if narrowed >= current:
+            return None
+        shrunk = list(run_cmd)
+        shrunk[at] = str(narrowed)
+        return shrunk, current, narrowed
+
+    @staticmethod
     def _is_projector_incompatibility(output: str) -> bool:
         """True when llama-server aborted because it cannot load the model's
         vision/audio projector (mmproj), typically an installed llama.cpp
@@ -32538,11 +32623,19 @@ class LlamaCppBackend:
                 # Memoed only when the load ends terminally, so a recovering fallback is not blocked.
                 _sched_abort_seen = False
 
+                # Load-scoped like the ROCm correction: the budget is per load, not per
+                # ladder, and a replay call site must not get a fresh two rounds. The pair
+                # is what the terminal error names, so a failure says "61568 after 246272"
+                # rather than dumping a crash log.
+                _ctx_shrink_rounds = 0
+                _ctx_shrink_from = _ctx_shrink_to = 0
+
                 def _spawn_and_wait(run_cmd, *, label = ""):
                     """Start llama-server with run_cmd and wait for health.
 
                     Up to four launches: the first, one ROCm env correction, one
-                    retry without the MoE expert cache, and one --fit recovery.
+                    retry without the MoE expert cache, one --fit recovery, and up to
+                    two context halvings after a KV-cache allocation crash.
                     Separate flags, so a library mix does not spend the fit slot
                     and a VRAM crash after the correction can still fit-retry.
                     """
@@ -32551,6 +32644,7 @@ class LlamaCppBackend:
                     # read below an UnboundLocalError instead.
                     nonlocal _last_spawn_cmd, _mem_host_resident, _did_rocm_retry
                     nonlocal _sched_abort_seen
+                    nonlocal _ctx_shrink_rounds, _ctx_shrink_from, _ctx_shrink_to
                     # One revocation point for the tensor-spill plan instead of a
                     # strip per retry site. `label` is empty ONLY on the first
                     # spawn, so a retry added later is covered automatically. The
@@ -32940,6 +33034,87 @@ class LlamaCppBackend:
                                 self._record_memory_state(run_cmd, env)
                             _did_fit_retry = True
                             continue
+                        _crash_tail = "\n".join(self._stdout_lines[-200:])
+                        _memory_crash = self._is_gpu_memory_start_failure(_crash_tail) or (
+                            self._is_kv_cache_allocation_failure(_crash_tail)
+                        )
+                        if (
+                            _ctx_shrink_rounds < _MAX_CTX_SHRINK_ROUNDS
+                            and _startup_crashed
+                            and not _capability_crash
+                            and not _hip_rocr_mismatch
+                            and _memory_crash
+                        ):
+                            # Last rung, after every placement recovery: each one above
+                            # re-sends the ``-c`` this launch died on, because llama.cpp's
+                            # fitter will not shrink a context it was handed. Halving it is
+                            # the only recovery that reaches a model whose KV cache the
+                            # driver will not actually give up.
+                            _shrunk = self._halve_own_ctx_after_memory_crash(run_cmd, extra_args)
+                            if _shrunk is not None:
+                                run_cmd, _ctx_before, _ctx_after = _shrunk
+                                _ctx_shrink_rounds += 1
+                                _ctx_shrink_from = _ctx_shrink_from or _ctx_before
+                                _ctx_shrink_to = _ctx_after
+                                # Same teardown the --fit on rung does, for the same reason:
+                                # the fit's ``--load-mode none`` made the weights a pinned
+                                # host allocation instead of a file mapping, and a memory
+                                # crash is that reservation failing to be made. Only LAiM's
+                                # own tokens; a user's --load-mode is untouched. The records
+                                # stay set -- `cmd` still carries them for the rungs that
+                                # respawn from it, and re-stripping is a no-op.
+                                if self._fit_load_mode_flags:
+                                    run_cmd = _without_subsequence(
+                                        run_cmd, self._fit_load_mode_flags
+                                    )
+                                    logger.info(
+                                        "Load mode: dropping the fit's --load-mode none for "
+                                        "the lowered-context retry; a memory crash is the "
+                                        "reservation it made failing to be granted."
+                                    )
+                                run_cmd = self._drop_managed_dio(
+                                    run_cmd,
+                                    "the lowered-context retry gives up the confirmed full "
+                                    "offload",
+                                    clear_record = False,
+                                )
+                                # No page-lock re-armed here, unlike the --fit on rung: this
+                                # rung fires on a host allocation that could not be granted,
+                                # so asking for a locked copy of the weights is the one thing
+                                # the crash argues against.
+                                self._record_memory_state(run_cmd, env)
+                                # The fit that priced the old ceiling is gone with it.
+                                self._vram_fit_context_length = None
+                                # /props reconciles these after a healthy spawn; set them
+                                # here so a later rung that stops at the same argv cannot
+                                # advertise the context this launch proved it cannot hold.
+                                self._effective_context_length = _ctx_after
+                                self._max_context_length = _ctx_after
+                                logger.warning(
+                                    "llama-server crashed during startup (exit code %s) "
+                                    "allocating the KV cache for a %s token context; "
+                                    "the device did not give up as much memory as it "
+                                    "reported, so retrying with the context lowered to "
+                                    "%s. Crash log: %s",
+                                    _crashed_proc.returncode,
+                                    _ctx_before,
+                                    _ctx_after,
+                                    self._llama_log_path,
+                                )
+                                _shrink_msg = (
+                                    f"Lowered the context window from {_ctx_before} to "
+                                    f"{_ctx_after} tokens: llama-server ran out of GPU "
+                                    "memory allocating the KV cache at the requested size. "
+                                    "Raise it in Context Length if more is free."
+                                )
+                                # Append rather than replace when an earlier advisory already
+                                # spoke: first notice wins, so recording alone would drop this.
+                                if self._last_load_warning:
+                                    self._amend_load_warning(" " + _shrink_msg)
+                                else:
+                                    # Without the logger.warning above this would log twice.
+                                    self._last_load_warning = _shrink_msg
+                                continue
                         return False
 
                 _launched_mmproj_has_audio = self._mmproj_has_audio
@@ -32952,6 +33127,16 @@ class LlamaCppBackend:
                     # No child will carry this budget; left set, the route reads it
                     # ahead of is_active and asks for a reload with nothing loaded.
                     self._vram_fraction_pending = None
+                    if _ctx_shrink_rounds:
+                        # Say what was already tried: without this the user reads a raw
+                        # cudaMalloc line as if LAiM had not attempted anything.
+                        detail = (
+                            f"The model does not fit the memory this GPU has free: LAiM "
+                            f"already lowered the context {_ctx_shrink_rounds} time(s), from "
+                            f"{_ctx_shrink_from} to {_ctx_shrink_to} tokens, and llama-server "
+                            "still could not allocate the KV cache. Close other programs "
+                            "using the GPU, or pick a smaller quantization. " + detail
+                        )
                     raise RuntimeError(detail)
 
                 def _cleanup_cancelled_load(message: str) -> None:

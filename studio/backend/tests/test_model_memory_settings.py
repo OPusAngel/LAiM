@@ -2776,7 +2776,7 @@ class TestTheLaunchWithdrawsTheDio:
         import inspect
         return inspect.getsource(LlamaCppBackend.load_model)
 
-    def test_the_three_weight_moving_rungs_strip_it(self):
+    def test_the_four_weight_moving_rungs_strip_it(self):
         from core.inference.llama_cpp import LlamaCppBackend
         import inspect
 
@@ -2784,12 +2784,14 @@ class TestTheLaunchWithdrawsTheDio:
             self._src(),
             inspect.getsource(LlamaCppBackend._prepare_cpu_fallback_launch),
         )
-        # --fit on retry, arch-crash retry and the proactive arch gate here, CPU replay in
-        # the builder. The gate strips as well as adds, or a narrowed set keeps the pair.
-        assert launch.count("self._drop_managed_dio(") == 3
+        # --fit on retry, arch-crash retry, the proactive arch gate and the
+        # lowered-context retry here, CPU replay in the builder. The gate strips as well
+        # as adds, or a narrowed set keeps the pair.
+        assert launch.count("self._drop_managed_dio(") == 4
         assert replay.count("self._drop_managed_dio(") == 1
-        # Only the rung that strips `cmd` itself may forget the tokens.
-        assert launch.count("clear_record = False") == 1
+        # Only the rungs that strip `cmd` itself may forget the tokens: the --fit on
+        # retry and the lowered-context retry both respawn from a copy.
+        assert launch.count("clear_record = False") == 2
         assert replay.count("clear_record = False") == 1
 
     def test_the_projector_retry_does_not(self):

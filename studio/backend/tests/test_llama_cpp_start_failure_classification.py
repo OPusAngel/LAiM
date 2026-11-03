@@ -1999,3 +1999,89 @@ class TestTensorSplitQuantizedKvUnsupported:
         which is why it needs its own recording path rather than the #6415 one."""
         assert not LlamaCppBackend._should_record_tensor_split_abort(1, self._OUT)
         assert not LlamaCppBackend._is_tensor_split_assert(self._OUT)
+
+
+class TestHalveOwnCtxAfterMemoryCrash:
+    """The KV-cache OOM retry halves only LAiM's own ``-c``, never the user's."""
+
+    _halve = staticmethod(LlamaCppBackend._halve_own_ctx_after_memory_crash)
+
+    def test_it_halves_our_own_ctx_and_aligns_down(self):
+        cmd = ["llama-server", "-m", "x.gguf", "-c", "246272", "--fit", "off"]
+        result = self._halve(cmd, [])
+        assert result is not None
+        shrunk, before, after = result
+        assert before == 246272
+        assert after == 123136
+        assert shrunk[shrunk.index("-c") + 1] == "123136"
+        assert cmd[cmd.index("-c") + 1] == "246272"  # original untouched
+
+    def test_a_user_ctx_override_is_not_touched(self):
+        """An explicit -c is their standing decision; halving it would be ours."""
+        cmd = ["llama-server", "-m", "x.gguf", "-c", "246272"]
+        assert self._halve(cmd, ["-c", "65536"]) is None
+
+    def test_auto_fit_launch_is_not_touched(self):
+        """No LAiM -c: llama.cpp's own fitter owns the number and already had its rung."""
+        cmd = ["llama-server", "-m", "x.gguf", "--fit", "on"]
+        assert self._halve(cmd, []) is None
+
+    def test_a_ctx_at_the_floor_cannot_shrink(self):
+        cmd = ["llama-server", "-m", "x.gguf", "-c", "8192"]
+        assert self._halve(cmd, []) is None
+
+    def test_it_refuses_a_bare_or_double_ctx(self):
+        # No value after the flag (a malformed pair) and two -c sites (ambiguous owner).
+        assert self._halve(["llama-server", "-c", "--fit"], []) is None
+        assert self._halve(["llama-server", "-c", "246272", "-c", "128000"], []) is None
+
+    def test_a_shrink_below_the_floor_is_clamped_to_it(self):
+        """12000 halves to 6000, below _FIT_MIN_CTX; it floors at 8192 instead of
+        undercutting the ceiling the rest of the sizing logic refuses to price below."""
+        cmd = ["llama-server", "-c", "12000"]
+        result = self._halve(cmd, [])
+        assert result is not None and result[1] == 12000 and result[2] == 8192
+
+
+class TestKvCacheAllocationFailure:
+    """The halving rung has to see a KV cache refused by the HOST, not only by a GPU.
+
+    An oversized context on a small card spills the whole cache to CPU, and the host
+    allocator refuses it a line away from the same llama.cpp summary -- with no device
+    marker anywhere near it.
+    """
+
+    _kv = staticmethod(LlamaCppBackend._is_kv_cache_allocation_failure)
+
+    # Verbatim from a live 131072-token load of Qwen3-8B-Q4_K_M on an 8 GiB card.
+    _HOST_REFUSED_KV = (
+        "0.03.948.724 E ggml_backend_cpu_buffer_type_alloc_buffer: failed to allocate "
+        "buffer of size 15569256448\n"
+        "0.03.948.726 E ggml_backend_buft_alloc_buffer_n_default: failed to allocate "
+        "CPU buffer of size 15569256448\n"
+        "0.03.950.861 E llama_init_from_model: failed to initialize the context: "
+        "failed to allocate buffer for kv cache"
+    )
+
+    _GPU_REFUSED_KV = (
+        "ggml_backend_cuda_buffer_type_alloc_buffer: allocating 2886.00 MiB on device 0: "
+        "cudaMalloc failed: out of memory\n"
+        "llama_init_from_model: failed to initialize the context: failed to allocate "
+        "buffer for kv cache"
+    )
+
+    def test_a_host_refused_kv_cache_reads_as_one(self):
+        assert self._kv(self._HOST_REFUSED_KV) is True
+
+    def test_a_gpu_refused_kv_cache_reads_as_one(self):
+        assert self._kv(self._GPU_REFUSED_KV) is True
+
+    def test_the_host_refusal_is_invisible_to_the_gpu_matcher(self):
+        """Why the second predicate exists: widening the first would hand a host OOM to
+        every GPU-shaped arm above it."""
+        assert LlamaCppBackend._is_gpu_memory_start_failure(self._HOST_REFUSED_KV) is False
+
+    def test_an_unrelated_crash_does_not_read_as_one(self):
+        assert self._kv("llama_model_loader: tensor 'x' has invalid shape") is False
+        assert self._kv("") is False
+
