@@ -116,7 +116,7 @@ class Confinement:
 
     @property
     def confines(self) -> bool:
-        """Whether this confines anything; ``unconfined-by-owner`` is a placeholder and must not skip the generic sandbox."""
+        """Whether this confines anything; ``unconfined-by-owner`` is a placeholder and must not skip the generic confinement path."""
         return self.preexec is not None or bool(self.wrapper)
 
 
