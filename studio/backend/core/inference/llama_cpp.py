@@ -4326,10 +4326,12 @@ _FIT_FLOOR_MIN_CTX = 256
 _LLAMA_FIT_MIN_CTX = 4096
 
 # How many times one load may halve its own ``-c`` after a KV-cache allocation crash.
-# Two: the ladder below has four launches total, and a third shrink would spend the slot
-# a --fit recovery is more likely to use. Halving twice covers the ~2x gap between the
-# "free" a driver reports and the free it will actually hand over.
-_MAX_CTX_SHRINK_ROUNDS = 2
+# Three, and the ladder below derives its spawn budget from this instead of spelling a
+# number out: the two launches that precede the first halving are the request as handed
+# over and the --fit off retry that re-sends it unchanged. The three rounds are what a
+# 131072-token request on an 8 GiB card burns before the honest terminal error, and the
+# floor under _FIT_MIN_CTX stops it there anyway -- halving three times covers only ~8x.
+_MAX_CTX_SHRINK_ROUNDS = 3
 
 # llama.cpp's own line for a refused KV cache allocation (llama_kv_cache /
 # llama_init_from_model), spelled the way the child prints it and matched
@@ -32660,7 +32662,13 @@ class LlamaCppBackend:
                     _fit_retry_allowed = self._fit_off_retry_eligible(run_cmd, use_fit)
                     _did_fit_retry = False
                     _did_moe_cache_retry = False
-                    for _spawn_attempt in (0, 1, 2, 3):
+                    # One launch for the request as handed over, one for the --fit off rung
+                    # that re-sends it unchanged, then one per halving this load may make.
+                    # Derived, never counted by hand: a literal budget below rounds + 2 lets
+                    # the last shrink be computed, announced as the context it gave up on and
+                    # never actually spawned -- which is both a claim about a launch that did
+                    # not happen and the one size that might have fit.
+                    for _spawn_attempt in range(2 + _MAX_CTX_SHRINK_ROUNDS):
                         # Defensive kill: drop an orphan Popen a concurrent load may
                         # have stored before we overwrite the reference (#5161).
                         # Also reaps the crashed first attempt on the retry pass.
@@ -42145,7 +42153,17 @@ class LlamaCppBackend:
                         # outlives the closure.
                         _last_result_budget: list = ["<not passed>"]
 
-                        def _invoke_tool(_output_callback):
+                        # Bound as a default, not read off the enclosing scope at call time:
+                        # the executor below runs on a worker thread, and the enclosing
+                        # `_decision` is the approval *verdict* a few lines up -- None on the
+                        # ungated path every desktop chat takes. Late binding there made each
+                        # tool of each turn die as "'NoneType' object has no attribute
+                        # 'tool_name'"; `decision` is this call's, and this is the one place
+                        # that has to see it without change.
+                        def _invoke_tool(
+                            _output_callback,
+                            _decision = decision,
+                        ):
                             # execute_tool is injectable and may be monkey-patched with the
                             # pre-PR signature; forward output_callback only if it's accepted.
                             kwargs = dict(

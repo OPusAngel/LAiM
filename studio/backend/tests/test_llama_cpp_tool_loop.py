@@ -3192,14 +3192,20 @@ def test_gated_python_call_still_streams_its_arguments(monkeypatch):
 
 
 @pytest.mark.parametrize("verdict", ["allow", "deny"])
-def test_only_an_approved_call_is_marked_approved(monkeypatch, verdict):
+def test_only_an_approved_call_reaches_the_executor(monkeypatch, verdict):
+    """What the user's answer gates is execution, not a flag beside it.
+
+    The sandbox-era pin on a ``host_access_approved`` keyword is gone: with the
+    tools running directly in the OS there is no second-class host access left to
+    mark approved.
+    """
     first_stream = _streamed_structured_tool_call("python", {"code": "print(1)"}, "call_gated")
     final_stream = [_sse({"content": "Done."}), _done()]
     backend, _payloads = _backend_and_payloads(monkeypatch, [first_stream, final_stream])
     seen: list = []
     monkeypatch.setattr(
         "core.inference.tools.execute_tool",
-        lambda name, arguments, **kwargs: seen.append(kwargs.get("host_access_approved")) or "OK",
+        lambda name, arguments, **kwargs: seen.append(name) or "OK",
     )
     monkeypatch.setattr("core.inference.llama_cpp.wait_tool_decision", lambda *_a, **_k: verdict)
 
@@ -3211,7 +3217,43 @@ def test_only_an_approved_call_is_marked_approved(monkeypatch, verdict):
         permission_mode = "ask",
     )
 
-    assert seen == ([True] if verdict == "allow" else [])
+    assert seen == (["python"] if verdict == "allow" else [])
+
+
+def test_a_call_that_needed_no_approval_still_reaches_the_executor(monkeypatch):
+    """The desktop app runs with full rights, so nothing waits on a human here.
+
+    On that path the verdict is never read and stays None in the enclosing scope,
+    while the executor runs on a worker thread off a *frozen* copy of the call. When
+    the sandbox removal dropped that freeze, ``_decision`` resolved to the verdict and
+    every tool of every local-model chat died as "'NoneType' object has no attribute
+    'tool_name'" -- an event-ordering test cannot see it, so this one pins the result.
+    """
+    first_stream = _streamed_structured_tool_call(
+        "terminal", {"command": 'mkdir "C:\\Users\\me\\Desktop\\СОВА 1"'}, "call_direct"
+    )
+    final_stream = [_sse({"content": "Done."}), _done()]
+    backend, payloads = _backend_and_payloads(monkeypatch, [first_stream, final_stream])
+    calls = _record_tool_calls(monkeypatch, "Directory created.")
+
+    events = _run_tool_loop(
+        backend,
+        [{"role": "user", "content": "create the folder on my Desktop"}],
+        [{"type": "function", "function": {"name": "terminal"}}],
+        confirm_tool_calls = True,
+        permission_mode = "full",
+        bypass_permissions = True,
+    )
+
+    assert calls, "full rights must not stop the tool from running"
+    ends = [e for e in events if e.get("type") == "tool_end"]
+    assert ends and ends[0]["result"] == "Directory created."
+    assert not any("tool raised an exception" in str(e.get("result", "")) for e in ends)
+    # And the answer goes back to the model as the result of the call it made. The
+    # harness stops at one iteration, so the exhausted-rounds nudge rides along behind it.
+    tool_rows = [m for m in payloads[1]["messages"] if m.get("role") == "tool"]
+    assert tool_rows[-1]["content"].startswith("Directory created.")
+    assert tool_rows[-1]["tool_call_id"] == "call_direct"
 
 
 def test_auto_mode_render_html_suppresses_provisional_card_under_confirm(monkeypatch):

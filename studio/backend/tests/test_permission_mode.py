@@ -2822,48 +2822,38 @@ def test_auto_mode_gates_high_risk_calls():
     assert len(exec_fn.calls) == 1, _diag(events, exec_fn)
 
 
-class _ApprovalRecordingExecuteTool(_FakeExecuteTool):
-    def __init__(self):
-        super().__init__()
-        self.approved_seen = []
+def test_a_host_path_call_and_an_ordinary_one_both_reach_the_executor():
+    """Approval no longer travels to the tool as a flag beside the call.
 
-    def __call__(
-        self,
-        name,
-        arguments,
-        *,
-        host_access_approved = False,
-        **kwargs,
-    ):
-        self.approved_seen.append(host_access_approved)
-        return super().__call__(name, arguments, **kwargs)
-
-
-@pytest.mark.parametrize(
-    "code, decisions, approved",
-    [
+    Under the sandbox the executor was told whether a human had cleared host access,
+    so an ungated call ran with a "not approved" marker. Tools run in the real OS now:
+    both paths execute the same way, and the only difference left is whether someone
+    was asked first.
+    """
+    for code, decisions in (
         # Gated and allowed: the user saw the host path and let it through.
-        ('open(\\"/srv/data.csv\\").read()', ["allow"], [True]),
-        # Not gated in auto, so nobody approved anything.
-        ("print(1)", [], [False]),
-    ],
-)
-def test_the_approval_reaches_the_executor(code, decisions, approved):
-    exec_fn = _ApprovalRecordingExecuteTool()
-    session = f"{_SESSION}-{uuid.uuid4().hex}"
-    decision_iter = iter(decisions)
-    for ev in run_safetensors_tool_loop(
-        single_turn = _multi_turn([_tool_call("python", f'{{"code": "{code}"}}'), "final"]),
-        messages = [{"role": "user", "content": "hi"}],
-        tools = _DEFAULT_TOOLS,
-        execute_tool = exec_fn,
-        session_id = session,
-        confirm_tool_calls = True,
-        permission_mode = "auto",
+        ('open(\\"/srv/data.csv\\").read()', ["allow"]),
+        # Not gated in auto, so nobody was asked.
+        ("print(1)", []),
     ):
-        if ev["type"] == "tool_start" and ev.get("awaiting_confirmation"):
-            resolve_tool_decision(ev["approval_id"], next(decision_iter), session_id = session)
-    assert exec_fn.approved_seen == approved
+        exec_fn = _FakeExecuteTool()
+        session = f"{_SESSION}-{uuid.uuid4().hex}"
+        decision_iter = iter(decisions)
+        prompted = False
+        for ev in run_safetensors_tool_loop(
+            single_turn = _multi_turn([_tool_call("python", f'{{"code": "{code}"}}'), "final"]),
+            messages = [{"role": "user", "content": "hi"}],
+            tools = _DEFAULT_TOOLS,
+            execute_tool = exec_fn,
+            session_id = session,
+            confirm_tool_calls = True,
+            permission_mode = "auto",
+        ):
+            if ev["type"] == "tool_start" and ev.get("awaiting_confirmation"):
+                prompted = True
+                resolve_tool_decision(ev["approval_id"], next(decision_iter), session_id = session)
+        assert prompted is bool(decisions)
+        assert len(exec_fn.calls) == 1, exec_fn.calls
 
 
 def test_auto_mode_does_not_gate_ordinary_mutation():

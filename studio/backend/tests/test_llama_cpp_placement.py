@@ -6006,27 +6006,28 @@ def _load_modes(cmds) -> list:
 
 
 def test_a_kv_cache_oom_lowers_our_own_context_until_the_load_recovers(tmp_path):
-    backend, cmds, loaded, error = _launch_crashing_the_kv_cache(tmp_path, crash_times = 3)
+    backend, cmds, loaded, error = _launch_crashing_the_kv_cache(tmp_path, crash_times = 4)
 
     assert loaded, error
     ctxs = _spawned_ctx(cmds)
-    # The first pair is the placement rungs, which repeat the request; only the last two
+    # The first pair is the placement rungs, which repeat the request; only the last three
     # respawns carry a number LAiM took down itself.
     assert ctxs[0] == "65536", cmds
-    assert ctxs[-1] == "16384", ctxs
-    assert len(set(ctxs[-2:])) == 2, ctxs
+    assert ctxs[-1] == "8192", ctxs
+    assert ctxs[-3:] == ["32768", "16384", "8192"], ctxs
     assert "Lowered the context window" in (backend.last_load_warning or "")
-    assert backend._effective_context_length == 16384
+    assert backend._effective_context_length == 8192
 
 
 def test_the_terminal_error_names_the_context_it_already_gave_up_on(tmp_path):
     backend, cmds, loaded, error = _launch_crashing_the_kv_cache(tmp_path, crash_times = 9)
 
     assert not loaded
-    assert "already lowered the context 2 time(s), from 65536 to 16384" in error, error
-    # Two rounds is the whole budget, and the ladder is four launches total.
-    assert len(cmds) == 4, cmds
-    assert _spawned_ctx(cmds) == ["65536", "65536", "32768", "16384"]
+    assert "already lowered the context 3 time(s), from 65536 to 8192" in error, error
+    # Three halvings is the whole budget, and the ladder is five launches total: a 131072
+    # request on an 8 GiB card needs every one of them before the honest refusal.
+    assert len(cmds) == 5, cmds
+    assert _spawned_ctx(cmds) == ["65536", "65536", "32768", "16384", "8192"]
 
 
 def test_a_pass_through_context_is_never_shrunk(tmp_path):
@@ -6090,4 +6091,4 @@ def test_a_kv_cache_the_host_refused_gets_lowered_too(tmp_path):
 
     assert not loaded, error
     assert len(cmds) > 1, cmds
-    assert "already lowered the context 2 time(s)" in error, error
+    assert "already lowered the context 3 time(s)" in error, error

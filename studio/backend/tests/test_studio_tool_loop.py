@@ -875,7 +875,12 @@ def test_the_model_is_told_about_the_attached_image(executed, monkeypatch):
 
 
 @pytest.mark.parametrize("verdict", ["allow", "deny"])
-def test_only_an_approved_call_is_marked_approved(executed, monkeypatch, verdict):
+def test_only_an_approved_call_reaches_the_executor(executed, monkeypatch, verdict):
+    """The answer gates execution itself; there is no host-access flag beside it.
+
+    Tools run directly in the real OS now, so the sandbox-era ``host_access_approved``
+    keyword this used to read is not sent and nothing replaces it.
+    """
     monkeypatch.setattr(loop_mod, "begin_tool_decision", lambda session, approval: object())
     monkeypatch.setattr(
         loop_mod, "wait_tool_decision", lambda slot, approval, cancel_event = None: verdict
@@ -885,7 +890,7 @@ def test_only_an_approved_call_is_marked_approved(executed, monkeypatch, verdict
     _run(_shared_setup_1(), tools = [PY], permission_mode = "auto", confirm_calls = True)
 
     if verdict == "allow":
-        assert executed[0]["host_access_approved"] is True
+        assert [call["name"] for call in executed] == ["python"]
     else:
         assert executed == []
 
