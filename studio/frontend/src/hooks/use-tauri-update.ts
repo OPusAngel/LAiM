@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { useEffect, useRef, useState } from "react";
 import { isTauri } from "@/lib/api-base";
 import {
@@ -73,7 +74,7 @@ export interface RetainedUpdateFailure {
 
 const DEFAULT_UPDATE_POLICY: DesktopUpdatePolicy = {
   mode: "in_app",
-  releasePageBaseUrl: "https://github.com/LAiMai/LAiM/releases/tag/",
+  releasePageBaseUrl: "https://github.com/OPusAngel/LAiM/releases/tag/",
   releaseTagPrefix: "v",
 };
 const STARTUP_UPDATE_CHECK_DELAY_MS = 5000;
@@ -356,7 +357,7 @@ export function useTauriUpdate(isExternalServer = false) {
     updateStatus("downloading");
     setUpdateProgress(0);
     const version = updateRef.current?.version;
-    if (!version) throw new Error("No desktop update has been checked.");
+    if (!version) throw new Error(translate("uxFeatures.noDesktopUpdateHash0we2"));
     // Attached only once a download is in flight and released whichever way the wait ends.
     let unlisten: (() => void) | null = null;
     const waitUntil = Date.now() + BUNDLE_DOWNLOAD_WAIT_MS;
@@ -403,7 +404,7 @@ export function useTauriUpdate(isExternalServer = false) {
         } catch (manualError) {
           const msg = String(manualError);
           setError(msg);
-          toast.error("Could not open release page", { description: msg });
+          toast.error(translate("uxHooks.couldNotOpenRelease19k3d"), { description: msg });
         }
         return;
       }
@@ -494,9 +495,9 @@ export function useTauriUpdate(isExternalServer = false) {
           const { invoke } = await import("@tauri-apps/api/core");
           await invoke("start_server", { port: 8888 });
           retainFailure(msg, "recovered_after_shell_failure");
-          toast.error("App update failed", {
+          toast.error(translate("uxHooks.appUpdateFailed48khw"), {
             description:
-              "Backend was updated. Copy diagnostics from the update banner if you need support.",
+              translate("uxHooks.backendWasUpdatedCopy1p0hd"),
           });
           setError(null);
           updateStatus("idle");

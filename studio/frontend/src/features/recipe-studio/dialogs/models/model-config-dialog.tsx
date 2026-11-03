@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Collapsible,
@@ -88,24 +89,23 @@ export function ModelConfigDialog({
   return (
     <div className="space-y-4">
       <NameField
-        label="Model preset name"
+        label={translate("uxRecipestudio.modelPresetNamewplgz")}
         value={config.name}
         onChange={(value) => onUpdate({ name: value })}
       />
       <div className="rounded-2xl border border-border/60 bg-muted/10 px-4 py-3">
         <p className="text-sm font-semibold text-foreground">
-          Set up one reusable model choice for your AI steps
+          {translate("uxRecipestudio.setUpOneReusable1gg2s")}
         </p>
         <p className="mt-1 text-xs text-muted-foreground">
-          Choose the provider connection, enter the exact model ID, then save
-          any generation defaults you want to reuse.
+          {translate("uxCopy.chooseTheProviderConnectionmtbq5")}
         </p>
       </div>
       <div className="grid gap-1.5">
         <FieldLabel
-          label="Provider connection"
+          label={translate("uxRecipestudio.providerConnection1307t")}
           htmlFor={providerId}
-          hint="Choose where this model should run."
+          hint={translate("uxRecipestudio.chooseWhereThisModel117rb")}
         />
         <div ref={providerAnchorRef}>
           <Combobox
@@ -123,7 +123,7 @@ export function ModelConfigDialog({
             <ComboboxInput
               id={providerId}
               className="nodrag w-full"
-              placeholder="Choose a provider connection"
+              placeholder={translate("uxRecipestudio.chooseAProviderConnection1ca90")}
               onBlur={() => {
                 const next = providerInputRef.current;
                 if (next !== config.provider) {
@@ -132,7 +132,7 @@ export function ModelConfigDialog({
               }}
             />
             <ComboboxContent anchor={providerAnchorRef}>
-              <ComboboxEmpty>No providers found</ComboboxEmpty>
+              <ComboboxEmpty>{translate("uxCopy.noProvidersFoundubx4m")}</ComboboxEmpty>
               <ComboboxList>
                 {(provider: string) => (
                   <ComboboxItem key={provider} value={provider}>
@@ -145,18 +145,18 @@ export function ModelConfigDialog({
         </div>
         <p className="text-xs text-muted-foreground">
           {providerOptions.length === 0
-            ? "Add a Provider connection step first, then come back here."
-            : "Matching blocks are linked automatically on the canvas."}
+            ? translate("uxRecipestudio.addAProviderConnectionagaps")
+            : translate("uxRecipestudio.matchingBlocksAreLinkedgfrkx")}
         </p>
       </div>
       <div className="grid gap-1.5">
         <FieldLabel
-          label="Model ID"
+          label={translate("uxModelpicker.modelID14cxu")}
           htmlFor={modelId}
           hint={
             isLinkedToLocal
-              ? "Choose the local model Recipes should load before Run or Validate."
-              : "The exact model name sent to the connection."
+              ? translate("uxRecipestudio.chooseTheLocalModelkatpa")
+              : translate("uxRecipestudio.theExactModelName1pvgy")
           }
         />
         {isLinkedToLocal ? (
@@ -178,7 +178,7 @@ export function ModelConfigDialog({
           <Input
             id={modelId}
             className="nodrag"
-            placeholder="gpt-4o-mini"
+            placeholder={translate("uxRecipestudio.gpt4oMininzetj")}
             value={config.model}
             onChange={(event) =>
               onUpdate({
@@ -191,26 +191,25 @@ export function ModelConfigDialog({
         )}
         {isLinkedToLocal ? (
           <p className="text-xs text-muted-foreground">
-            Recipes will load this model automatically. GGUF quantization is
-            saved with the preset.
+            {translate("uxCopy.recipesWillLoadThisz5cz4")}
           </p>
         ) : null}
       </div>
       <div className="grid gap-3">
         <div className="space-y-1">
           <p className="text-sm font-semibold text-foreground">
-            Default generation settings
+            {translate("uxRecipestudio.defaultGenerationSettings14esj")}
           </p>
           <p className="text-xs text-muted-foreground">
-            These defaults are reused anywhere you choose this model preset.
+            {translate("uxRecipestudio.theseDefaultsAreReusedmgsiq")}
           </p>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="grid gap-1.5">
             <FieldLabel
-              label="Temperature"
+              label={translate("settings.resources.liveMonitor.temperature")}
               htmlFor={tempId}
-              hint="Higher values make responses more varied."
+              hint={translate("uxRecipestudio.higherValuesMakeResponses10dot")}
             />
             <Input
               id={tempId}
@@ -223,9 +222,9 @@ export function ModelConfigDialog({
           </div>
           <div className="grid gap-1.5">
             <FieldLabel
-              label="Top-p"
+              label={translate("uxRecipestudio.topPrptck")}
               htmlFor={topPId}
-              hint="Use this to limit how broad token selection can be."
+              hint={translate("uxRecipestudio.useThisToLimitl3ucn")}
             />
             <Input
               id={topPId}
@@ -238,9 +237,9 @@ export function ModelConfigDialog({
           </div>
           <div className="grid gap-1.5">
             <FieldLabel
-              label="Max tokens"
+              label={translate("uxAudio.maxTokenseefvt")}
               htmlFor={maxTokensId}
-              hint="Maximum length of the model response."
+              hint={translate("uxRecipestudio.maximumLengthOfThen718x")}
             />
             <Input
               id={maxTokensId}
@@ -253,9 +252,9 @@ export function ModelConfigDialog({
           </div>
           <div className="grid gap-1.5">
             <FieldLabel
-              label="Timeout (seconds)"
+              label={translate("uxRecipestudio.timeoutSeconds65n31")}
               htmlFor={timeoutId}
-              hint="How long to wait before a request is treated as failed."
+              hint={translate("uxRecipestudio.howLongToWait17q1h")}
             />
             <Input
               id={timeoutId}
@@ -271,16 +270,16 @@ export function ModelConfigDialog({
       <Collapsible open={optionalOpen} onOpenChange={setOptionalOpen}>
         <CollapsibleTrigger asChild={true}>
           <CollapsibleSectionTriggerButton
-            label="Advanced request fields"
+            label={translate("uxRecipestudio.advancedRequestFields4dglo")}
             open={optionalOpen}
           />
         </CollapsibleTrigger>
         <CollapsibleContent className="mt-3 space-y-4">
           <div className="grid gap-1.5">
             <FieldLabel
-              label="Advanced request fields (JSON)"
+              label={translate("uxRecipestudio.advancedRequestFieldsJSONc3er0")}
               htmlFor={extraBodyId}
-              hint="Extra request fields to send with every call."
+              hint={translate("uxRecipestudio.extraRequestFieldsTomhlnl")}
             />
             <Textarea
               id={extraBodyId}
@@ -303,7 +302,7 @@ export function ModelConfigDialog({
                 updateField("skip_health_check", Boolean(value))
               }
             />
-            Skip connection check
+            {translate("uxRecipestudio.skipConnectionChecka9zlu")}
           </label>
         </CollapsibleContent>
       </Collapsible>

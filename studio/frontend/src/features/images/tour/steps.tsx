@@ -1,19 +1,21 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import type { TourStep } from "@/features/tour";
 
 const modeStep: TourStep = {
   id: "mode",
   target: "images-mode",
-  title: "Create or Train",
-  body: (
+  get title() {
+    return translate("uxImages.createOrTrain1h550");
+  },
+  get body() {
+    return (
     <>
-      Create generates images. Train fine-tunes a diffusion LoRA on your own
-      pictures. The sidebar workflows, such as edit, inpaint, extend and
-      upscale, all run in Create.
-    </>
-  ),
+      {translate("uxImages.createGeneratesImagesTrain1ijgn")}</>
+  );
+  },
 };
 
 /** Create and Train swap the whole page body, so each mode gets the anchors it actually has. */
@@ -28,24 +30,28 @@ export function buildImagesTourSteps({
       {
         id: "train-dataset",
         target: "images-train-dataset",
-        title: "Your images",
-        body: (
+        get title() {
+          return translate("uxImages.yourImagess6fjz");
+        },
+        get body() {
+          return (
           <>
-            Drop in a folder, pick a dataset, or start from an example. Captions
-            matter here, so fill gaps in the labeling grid before you train.
-          </>
-        ),
+            {translate("uxImages.dropInAFolder115e2")}</>
+        );
+        },
       },
       {
         id: "train-start",
         target: "images-train-start",
-        title: "Start training",
-        body: (
+        get title() {
+          return translate("uxImages.startTraining1mm8r");
+        },
+        get body() {
+          return (
           <>
-            Runs a LoRA on the base model above. Progress and samples appear on
-            the right, and finished LoRAs load back into Create.
-          </>
-        ),
+            {translate("uxImages.runsALoRAOn130zj")}</>
+        );
+        },
       },
     ];
   }
@@ -55,36 +61,41 @@ export function buildImagesTourSteps({
     {
       id: "model",
       target: "images-model",
-      title: "Pick a model",
-      body: (
+      get title() {
+        return translate("uxVideo.pickAModelx7b6j");
+      },
+      get body() {
+        return (
         <>
-          Image models you have downloaded, plus anything on Hugging Face. The
-          model decides which controls appear below, such as LoRAs and
-          ControlNet.
-        </>
-      ),
+          {translate("uxImages.imageModelsYouHave1aohl")}</>
+      );
+      },
     },
     {
       id: "settings",
       target: "images-settings",
-      title: "Settings",
-      body: (
+      get title() {
+        return translate("shell.navigation.settings");
+      },
+      get body() {
+        return (
         <>
-          Prompt, aspect ratio, steps, guidance, batch size and seed. Save a
-          setup as a preset, and reuse a seed to repeat a result exactly.
-        </>
-      ),
+          {translate("uxImages.promptAspectRatioStepsjjzps")}</>
+      );
+      },
     },
     {
       id: "preview",
       target: "images-preview",
-      title: "Results",
-      body: (
+      get title() {
+        return translate("uxVideo.results17jx8");
+      },
+      get body() {
+        return (
         <>
-          The selected image fills this pane and everything you make lines up
-          below. Save it here, or send it into another workflow like upscale.
-        </>
-      ),
+          {translate("uxImages.theSelectedImageFills72iqi")}</>
+      );
+      },
     },
   ];
 }

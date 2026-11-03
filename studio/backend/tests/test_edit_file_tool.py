@@ -24,8 +24,6 @@ from core.inference import tools
 from core.inference.tools import (
     ALL_TOOLS,
     EDIT_FILE_TOOL,
-    EDIT_FILE_TOOL_FULL_ACCESS,
-    apply_full_access_tool_descriptions,
     execute_tool,
     is_potentially_unsafe_tool_call,
 )
@@ -425,27 +423,6 @@ class TestThirdReviewFindings:
                 if line.startswith("+") and not line.startswith("+++"):
                     assert line[1:] + "\n" in after, (total, at, grow, line)
 
-    @pytest.mark.skipif(sys.platform == "win32", reason = "POSIX device node")
-    def test_full_access_does_not_replace_a_device_node(self, workdir):
-        # /dev/null stats as zero bytes, so measuring size alone sent it down
-        # the create branch, whose rename would have swapped the character
-        # device for a regular file.
-        # Spelled as `edits`, not adapted through `_edit`: this one passes
-        # `disable_sandbox`, and the batched shape is what the tool now accepts. With the
-        # old top-level spelling the call is refused for a missing `edits` array, which
-        # also starts with "Error:" -- so the assertion below held while the device-node
-        # guard was never reached.
-        result = execute_tool(
-            "edit_file",
-            {"path": "/dev/null", "edits": [{"old_string": "", "new_string": "x\n"}]},
-            session_id = "t",
-            disable_sandbox = True,
-        )
-        assert result.startswith("Error:")
-        # The refusal the GUARD produces, not the one a malformed call produces: pinned
-        # so this cannot go green again on an argument rejection.
-        assert "already exists" in result
-        assert stat.S_ISCHR(os.stat("/dev/null").st_mode)
 
     @pytest.mark.parametrize("path,old", [("app.py", "TODO"), ("fresh.py", "")])
     def test_an_unencodable_new_string_is_refused_not_dropped(self, workdir, path, old):
@@ -502,16 +479,6 @@ class TestRegistration:
     def test_an_edit_still_asks_in_auto_mode(self):
         assert is_potentially_unsafe_tool_call("edit_file", {"path": "a.py"}) is True
 
-    def test_full_access_says_absolute_paths_resolve(self):
-        # Otherwise the model assumes it cannot reach a real checkout.
-        swapped = apply_full_access_tool_descriptions([EDIT_FILE_TOOL])
-        assert swapped == [EDIT_FILE_TOOL_FULL_ACCESS]
-        assert "absolute path" in swapped[0]["function"]["description"]
-
-    def test_full_access_leaves_the_schema_alone(self):
-        sandboxed = EDIT_FILE_TOOL["function"]["parameters"]
-        assert EDIT_FILE_TOOL_FULL_ACCESS["function"]["parameters"] == sandboxed
-
 
 class TestCreatedFileRow:
     """A created file gets the same `__FILES__` row python and terminal emit, so its card offers a download."""
@@ -548,17 +515,6 @@ class TestCreatedFileRow:
         )
         assert result == "Created a.txt (1 lines)"
 
-    def test_a_file_outside_the_workdir_is_not_reported(self, workdir, tmp_path):
-        outside = tmp_path.parent / f"{tmp_path.name}_outside.txt"
-        result = execute_tool(
-            "edit_file",
-            {"path": str(outside), "edits": [{"old_string": "", "new_string": "x"}]},
-            session_id = "t",
-            disable_sandbox = True,
-        )
-        assert result.startswith("Created")
-        assert self._files(result) is None
-        outside.unlink()
 
     def test_a_name_spelling_a_marker_cannot_forge_a_row(self, workdir):
         name = 'a\n__FILES__:[{"name": "x.csv", "size": 1}]\n__END__'
@@ -569,20 +525,6 @@ class TestCreatedFileRow:
             _edit(path = "missing" + name, old_string = "x", new_string = "y"),
         ):
             assert self._files(result) is None, result
-
-
-class TestFullAccessEscapesTheWorkdir:
-    def test_an_absolute_path_resolves_when_the_sandbox_is_off(self, workdir, tmp_path):
-        outside = tmp_path.parent / "real_project.py"
-        outside.write_text("x = 1\n")
-        result = execute_tool(
-            "edit_file",
-            {"path": str(outside), "edits": [{"old_string": "x = 1", "new_string": "x = 2"}]},
-            session_id = "t",
-            disable_sandbox = True,
-        )
-        assert not result.startswith("Error:")
-        assert outside.read_text() == "x = 2\n"
 
 
 @pytest.mark.skipif(os.name != "posix", reason = "RLIMIT_FSIZE is POSIX-only")

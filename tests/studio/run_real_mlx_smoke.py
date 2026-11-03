@@ -23,7 +23,7 @@ SEED = 3407
 TRAIN_TEXT = "<<HELLO!!>> My name is LAiM!"
 PROMPT = "<<HELLO!!>> My name is "
 EXPECT_IN_OUTPUT = "LAiM"
-MODEL_NAME = "LAiM/gemma-3-270m-it"
+MODEL_NAME = "unsloth/gemma-3-270m-it"
 
 
 def _seed_everything() -> None:

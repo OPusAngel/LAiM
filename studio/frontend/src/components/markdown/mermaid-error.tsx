@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import type { MermaidErrorComponentProps } from "streamdown";
 
 function hasSlashComment(chart: string): boolean {
@@ -14,10 +15,10 @@ export function MermaidError({
 }: MermaidErrorComponentProps) {
   return (
     <div className="my-4 rounded-lg border border-red-300 bg-red-50 p-3 text-red-800">
-      <p className="text-sm font-semibold">Mermaid render failed</p>
+      <p className="text-sm font-semibold">{translate("uxCopy.mermaidRenderFailed1akgt")}</p>
       <p className="mt-1 break-words font-mono text-xs">{error}</p>
       {hasSlashComment(chart) ? (
-        <p className="mt-1 text-xs">Hint: Mermaid comments use `%%`, not `//`.</p>
+        <p className="mt-1 text-xs">{translate("uxComponents.hintMermaidCommentsUsehdgn5")}</p>
       ) : null}
       <button
         type="button"

@@ -47,7 +47,7 @@ DEFAULT_XET_ATTEMPTS = 2
 _shared: Any = None
 _shared_available: Optional[bool] = None
 _shared_import_error: Optional[BaseException] = None
-# Guards _shared_available AND every LAiM_ZOO_DISABLE_GPU_INIT save/set/restore here.
+# Guards _shared_available AND every UNSLOTH_ZOO_DISABLE_GPU_INIT save/set/restore here.
 # Two locks would still allow A-saves-unset / B-saves-"1" / A-restores-unset / B-restores-"1", leaving it set for the
 # life of the process. RLock because child_environment_for_spawn holds it across a spawn and legitimately nests.
 _load_lock = threading.RLock()
@@ -144,7 +144,7 @@ def _load_shared() -> bool:
                 return True
             except Exception as exc:  # noqa: BLE001 - any import failure must degrade, not crash
                 # LAiM_zoo's __init__ runs torch/GPU detection, which raises on a torch-less/GPU-less
-                # host. The download helper needs none of it, so retry via LAiM_ZOO_DISABLE_GPU_INIT.
+                # host. The download helper needs none of it, so retry via UNSLOTH_ZOO_DISABLE_GPU_INIT.
                 _shared_import_error = exc
                 import os as _os
 
@@ -157,7 +157,7 @@ def _load_shared() -> bool:
 
                     _logging.getLogger(__name__).warning(
                         "LAiM_zoo.hf_xet_fallback unavailable (%s); the Xet stall watchdog is "
-                        "disabled. Not retrying under LAiM_ZOO_DISABLE_GPU_INIT because this host "
+                        "disabled. Not retrying under UNSLOTH_ZOO_DISABLE_GPU_INIT because this host "
                         "has an accelerator and that path would stub out triton/bitsandbytes for the "
                         "whole process.",
                         exc,
@@ -165,10 +165,10 @@ def _load_shared() -> bool:
                     return False
 
                 global _gpu_init_override_depth
-                _prev_gpu_init = _os.environ.get("LAiM_ZOO_DISABLE_GPU_INIT")
+                _prev_gpu_init = _os.environ.get("UNSLOTH_ZOO_DISABLE_GPU_INIT")
                 _ours = _prev_gpu_init != "1"
                 _gpu_init_override_depth += _ours
-                _os.environ["LAiM_ZOO_DISABLE_GPU_INIT"] = "1"
+                _os.environ["UNSLOTH_ZOO_DISABLE_GPU_INIT"] = "1"
                 try:
                     import LAiM_zoo.hf_xet_fallback as shared
 
@@ -190,9 +190,9 @@ def _load_shared() -> bool:
                     return False
                 finally:
                     if _prev_gpu_init is None:
-                        _os.environ.pop("LAiM_ZOO_DISABLE_GPU_INIT", None)
+                        _os.environ.pop("UNSLOTH_ZOO_DISABLE_GPU_INIT", None)
                     else:
-                        _os.environ["LAiM_ZOO_DISABLE_GPU_INIT"] = _prev_gpu_init
+                        _os.environ["UNSLOTH_ZOO_DISABLE_GPU_INIT"] = _prev_gpu_init
                     _gpu_init_override_depth -= _ours
 
 
@@ -242,7 +242,7 @@ def _load_optional(module_name: str) -> Any:
             first_error = exc
 
         # Deliberately the SAME lock _load_shared uses: interleaved save/set/restore would leave
-        # LAiM_ZOO_DISABLE_GPU_INIT set for the life of the process (see _load_lock).
+        # UNSLOTH_ZOO_DISABLE_GPU_INIT set for the life of the process (see _load_lock).
         with _load_lock:
             cached = _optional_modules.get(module_name, _UNTRIED)
             if cached is not _UNTRIED:
@@ -259,7 +259,7 @@ def _load_optional(module_name: str) -> Any:
                 if module is None:
                     import logging as _logging
                     _logging.getLogger(__name__).warning(
-                        "%s unavailable (%s); not retrying under LAiM_ZOO_DISABLE_GPU_INIT because this host has an "
+                        "%s unavailable (%s); not retrying under UNSLOTH_ZOO_DISABLE_GPU_INIT because this host has an "
                         "accelerator and that path would stub out triton/bitsandbytes for the whole process.",
                         module_name,
                         first_error,
@@ -267,12 +267,12 @@ def _load_optional(module_name: str) -> Any:
                 _optional_modules[module_name] = module
                 return module
             global _gpu_init_override_depth
-            previous = _os.environ.get("LAiM_ZOO_DISABLE_GPU_INIT")
+            previous = _os.environ.get("UNSLOTH_ZOO_DISABLE_GPU_INIT")
             ours = previous != "1"
             # Claim BEFORE the write, release AFTER the restore.
             _gpu_init_override_depth += ours
             try:
-                _os.environ["LAiM_ZOO_DISABLE_GPU_INIT"] = "1"
+                _os.environ["UNSLOTH_ZOO_DISABLE_GPU_INIT"] = "1"
                 try:
                     module = importlib.import_module(module_name)
                 except Exception as exc:  # noqa: BLE001
@@ -286,9 +286,9 @@ def _load_optional(module_name: str) -> Any:
                     module = None
                 finally:
                     if previous is None:
-                        _os.environ.pop("LAiM_ZOO_DISABLE_GPU_INIT", None)
+                        _os.environ.pop("UNSLOTH_ZOO_DISABLE_GPU_INIT", None)
                     else:
-                        _os.environ["LAiM_ZOO_DISABLE_GPU_INIT"] = previous
+                        _os.environ["UNSLOTH_ZOO_DISABLE_GPU_INIT"] = previous
             finally:
                 _gpu_init_override_depth -= ours
             _optional_modules[module_name] = module
@@ -312,7 +312,7 @@ def _env_xet_health() -> Any:
     def _on(name: str) -> bool:
         return os.environ.get(name, "").strip().lower() in ("1", "true", "yes", "on")
 
-    if _on("LAiM_DISABLE_XET") or _on("LAiM_STABLE_DOWNLOADS") or _on("HF_HUB_DISABLE_XET"):
+    if _on("LAiM_DISABLE_XET") or _on("UNSLOTH_STABLE_DOWNLOADS") or _on("HF_HUB_DISABLE_XET"):
         return _EnvXetHealth(False, "Xet disabled by environment")
     if _on("LAiM_FORCE_XET"):
         return _EnvXetHealth(True, "Xet forced by environment")
@@ -361,7 +361,7 @@ def xet_health_is_forced(health: Any) -> bool:
     """Is *health* an operator override rather than a measurement of this machine?
 
     ``LAiM_zoo.hf_xet_health`` stamps ``source = "forced"`` on exactly the two env-var verdicts:
-    ``LAiM_DISABLE_XET`` / ``LAiM_STABLE_DOWNLOADS`` / ``HF_HUB_DISABLE_XET`` turning Xet OFF,
+    ``LAiM_DISABLE_XET`` / ``UNSLOTH_STABLE_DOWNLOADS`` / ``HF_HUB_DISABLE_XET`` turning Xet OFF,
     and ``LAiM_FORCE_XET`` turning it ON. Callers already honour the off switches by returning
     early, so this exists for the on switch: the free-RAM gate must stand down for it, or LAiM
     ships an escape hatch that only works in one direction.
@@ -875,7 +875,7 @@ _DEGRADED_ATTRS = {
 }
 
 
-# Nonzero while a loader has LAiM_ZOO_DISABLE_GPU_INIT set process-wide for its retry. Read by
+# Nonzero while a loader has UNSLOTH_ZOO_DISABLE_GPU_INIT set process-wide for its retry. Read by
 # Only counted when the loader introduced the value; an operator who exported it keeps it.
 # utf8_child_env so a child does not inherit it: the zoo injects triton and bitsandbytes STUBS when
 # it is set, so a training child would silently run against no-ops.
@@ -883,7 +883,7 @@ _gpu_init_override_depth = 0
 
 
 def gpu_init_override_active() -> bool:
-    """Is a loader currently holding LAiM_ZOO_DISABLE_GPU_INIT set for its own import?"""
+    """Is a loader currently holding UNSLOTH_ZOO_DISABLE_GPU_INIT set for its own import?"""
     return _gpu_init_override_depth > 0
 
 
@@ -891,7 +891,7 @@ def env_override_barrier() -> Any:
     """Context manager a caller holds across a spawn so no loader can be mid-override.
 
     Spawn children inherit the parent's live ``os.environ`` and there is no env dict to filter, so
-    the only way to keep LAiM_ZOO_DISABLE_GPU_INIT out of a worker is that no loader has it set
+    the only way to keep UNSLOTH_ZOO_DISABLE_GPU_INIT out of a worker is that no loader has it set
     when the child is created. Loaders never spawn, so holding this with the spawn lock cannot
     deadlock, and ``_load_optional`` memoises so the window opens at most once per module per
     process.

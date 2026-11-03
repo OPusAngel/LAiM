@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
-"""LAiM/LTX-2.5-GGUF: the LTX-2.5 DiT as single-file GGUF quants.
+"""unsloth/LTX-2.5-GGUF: the LTX-2.5 DiT as single-file GGUF quants.
 
 Dev DiT at the root, distilled under ``distilled/``; header arch ``ltxv`` (shared with 2.3) with
 ``model_version = 2.5.0``. Every file must load as ``ltx-2.5``, never down the 2.3 assembly.
@@ -19,7 +19,7 @@ from core.inference.video_families import (
     detect_video_family,
 )
 
-REPO = "LAiM/LTX-2.5-GGUF"
+REPO = "unsloth/LTX-2.5-GGUF"
 PACK = "Lightricks/LTX-2.5-Diffusers"
 QUANTS = (
     "Q2_K",
@@ -44,7 +44,7 @@ def test_the_family_curates_the_LAiM_gguf_repo():
     assert fam.gguf_repo == REPO
     assert detect_video_family(REPO).name == LTX25_FAMILY
     # 2.3 keeps its own repo.
-    assert detect_video_family("", override = LTX2_FAMILY).gguf_repo == "LAiM/LTX-2.3-GGUF"
+    assert detect_video_family("", override = LTX2_FAMILY).gguf_repo == "unsloth/LTX-2.3-GGUF"
 
 
 @pytest.mark.parametrize("filename", DEV_FILES + DISTILLED_FILES)
@@ -87,7 +87,7 @@ def test_a_hub_pick_validates_on_the_pack_base_without_touching_the_hub(filename
 def test_a_25_file_in_the_23_repo_and_the_reverse_follow_the_file():
     from core.inference.video import _detect_load_family
     assert (
-        _detect_load_family("LAiM/LTX-2.3-GGUF", DISTILLED_FILES[2], None).name == LTX25_FAMILY
+        _detect_load_family("unsloth/LTX-2.3-GGUF", DISTILLED_FILES[2], None).name == LTX25_FAMILY
     )
     assert (
         _detect_load_family(REPO, "distilled/ltx-2.3-22b-distilled-Q4_K_M.gguf", None).name
@@ -239,13 +239,13 @@ def test_ltx23_and_other_repos_keep_the_root_default():
     from hub.utils.gguf import pick_best_gguf
 
     assert gguf_default_subdir_for_repo(REPO) == "distilled"
-    assert gguf_default_subdir_for_repo("LAiM/LTX-2.3-GGUF") is None
+    assert gguf_default_subdir_for_repo("unsloth/LTX-2.3-GGUF") is None
     files23 = [f.replace("2.5", "2.3") for f in DISTILLED_FILES + DEV_FILES]
-    assert pick_best_gguf(_default_variant_candidates(_rows(files23), "LAiM/LTX-2.3-GGUF")) == (
+    assert pick_best_gguf(_default_variant_candidates(_rows(files23), "unsloth/LTX-2.3-GGUF")) == (
         "ltx-2.3-22b-dev-UD-Q4_K_XL.gguf"
     )
     other = {"distilled/model-Q4_K_M": 1, "Q4_K_M": 1}
-    assert _match_variant(None, other, "LAiM/Qwen3-8B-GGUF") == "Q4_K_M"
+    assert _match_variant(None, other, "unsloth/Qwen3-8B-GGUF") == "Q4_K_M"
     assert _match_variant(None, other, None) == "Q4_K_M"
 
 
@@ -269,7 +269,7 @@ def test_picker_labels_the_root_rows_dev_and_the_subfolder_rows_distilled(tmp_pa
         # Several rows share the distilled/ scope, so the existing rule adds the file stem to tell them apart.
         assert got[f"distilled/ltx-2.5-22b-distilled-{q}.gguf"].startswith(f"{q} · distilled")
     files23 = [f.replace("2.5", "2.3") for f in DEV_FILES + DISTILLED_FILES]
-    got23 = labels(files23, "LAiM/LTX-2.3-GGUF")
+    got23 = labels(files23, "unsloth/LTX-2.3-GGUF")
     assert got23["ltx-2.3-22b-dev-UD-Q4_K_XL.gguf"] is None
     assert got23["distilled/ltx-2.3-22b-distilled-UD-Q4_K_XL.gguf"].startswith(
         "UD-Q4_K_XL · distilled"
@@ -292,7 +292,7 @@ def test_picker_labels_the_root_rows_dev_and_the_subfolder_rows_distilled(tmp_pa
 
 
 def test_a_plain_local_clone_keeps_the_distilled_default_and_dev_labels(tmp_path):
-    """A plain local copy (``/models/LAiM/LTX-2.5-GGUF``) is recognised by its trailing org/repo."""
+    """A plain local copy (``/models/unsloth/LTX-2.5-GGUF``) is recognised by its trailing org/repo."""
     from hub.utils.gguf import default_gguf_subdir, gguf_root_label, list_local_gguf_variants
 
     clone = tmp_path / "models" / "LAiM" / "LTX-2.5-GGUF"
@@ -318,4 +318,4 @@ def test_a_plain_local_clone_keeps_the_distilled_default_and_dev_labels(tmp_path
 def test_unsupported_message_names_both_25_artifacts():
     from core.inference.video_families import unsupported_ltx_message
     text = unsupported_ltx_message("2.6", "x")
-    assert PACK in text and REPO in text and "LAiM/LTX-2.3-GGUF" in text
+    assert PACK in text and REPO in text and "unsloth/LTX-2.3-GGUF" in text

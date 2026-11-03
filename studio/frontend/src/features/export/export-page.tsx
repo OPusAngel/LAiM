@@ -50,7 +50,7 @@ import { GuidedTour, useGuidedTourController } from "@/features/tour";
 import type { LocalModelInfo } from "@/features/training";
 import { useDebouncedValue, useHfTokenValidation } from "@/hooks";
 import { useHardwareInfo } from "@/hooks/use-hardware-info";
-import { useT } from "@/i18n";
+import { translate, useT } from "@/i18n";
 import { ChevronDownStandardIcon } from "@/lib/chevron-icons";
 import {
   AlertCircleIcon,
@@ -255,7 +255,7 @@ export function ExportPage() {
     hardware.loaded && hardware.exportSupported === false;
   const exportUnsupportedMessage =
     hardware.exportUnsupportedMessage ??
-    "Export requires a supported accelerator (NVIDIA, AMD, or Intel GPU, or Apple Silicon) with PyTorch or MLX installed.";
+    translate("uxExport.exportRequiresASupported1ct1f");
   const availableFormats = useMemo<MergedFormatOption[]>(
     () =>
       MERGED_FORMATS.filter((f) => {
@@ -336,7 +336,7 @@ export function ExportPage() {
       .catch((err) => {
         if (!cancelled && !hadCache) {
           setCheckpointError(
-            err instanceof Error ? err.message : "Failed to load checkpoints",
+            err instanceof Error ? err.message : translate("uxExport.failedToLoadCheckpointsd2ze0"),
           );
         }
       })
@@ -381,7 +381,7 @@ export function ExportPage() {
         setLocalModelsError(
           error instanceof Error
             ? error.message
-            : "Failed to load local models",
+            : translate("uxExport.failedToLoadLocalkupct"),
         );
       })
       .finally(() => {
@@ -611,10 +611,10 @@ export function ExportPage() {
       sourceMode === "model"
         ? [
             "Select a Hugging Face or local model to export from",
-            "GGUF is used for non-finetuned model exports",
-            "Pick one or more GGUF quantization levels",
-            "Click Export and choose your destination",
-            "Test your model and compare outputs in Chat",
+            translate("uxExport.gGUFIsUsedForw9v6w"),
+            translate("uxExport.pickOneOrMoreidscs"),
+            translate("uxExport.clickExportAndChooseyy9zg"),
+            translate("uxExport.testYourModelAndoa13h"),
           ]
         : GUIDE_STEPS,
     [sourceMode],
@@ -898,7 +898,7 @@ export function ExportPage() {
     const methodLabel = isDecision
       ? t("exportDecision.methodLabel")
       : ggufAsLora
-        ? "GGUF LoRA adapter"
+        ? translate("uxExport.gGUFLoRAAdapterhu9rh")
         : (EXPORT_METHODS.find((m) => m.value === exportMethod)?.title ??
           exportMethod);
     const adapterExport = sourceMode === "checkpoint" && isAdapter;
@@ -1058,17 +1058,17 @@ export function ExportPage() {
 
         <div className="mb-8 flex flex-col gap-0.5">
           <h1 className="text-ui-30 font-semibold leading-[1.04] tracking-[-0.028em] text-foreground sm:text-ui-34">
-            Export Model
+            {translate("studio.training.exportModel")}
           </h1>
           <p className="text-sm text-muted-foreground">
-            Export fine-tuned or base models for deployment
+            {translate("uxExport.exportFineTunedOr186pf")}
           </p>
         </div>
 
         <SectionCard
           icon={<HugeiconsIcon icon={PackageIcon} className="size-5" />}
-          title="Export Configuration"
-          description="Select source, method, and quantization"
+          title={translate("uxExport.exportConfiguration1l5lg")}
+          description={translate("uxExport.selectSourceMethodAnddidlg")}
           accent="emerald"
           featured={true}
           className="ring-0 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.16)] dark:shadow-none"
@@ -1076,9 +1076,7 @@ export function ExportPage() {
           {/* Loading / error states */}
           {loadingCheckpoints && (
             <div className="flex items-center gap-2 py-6 justify-center text-sm text-muted-foreground">
-              <Spinner className="size-4" />
-              Loading checkpoints…
-            </div>
+              <Spinner className="size-4" />{translate("uxExport.loadingCheckpoints69kqt")}</div>
           )}
 
           {checkpointError && (
@@ -1095,7 +1093,7 @@ export function ExportPage() {
                 <div className="flex flex-col gap-3">
                   <div className="flex flex-col gap-2">
                     <label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                      Source
+                      {translate("uxVideo.sourcer5qyu")}
                       <Tooltip>
                         <TooltipTrigger asChild={true}>
                           <button
@@ -1109,8 +1107,7 @@ export function ExportPage() {
                           </button>
                         </TooltipTrigger>
                         <TooltipContent>
-                          Choose a local model, fine-tuned checkpoint, or
-                          Hugging Face model to export.
+                          {translate("uxCopy.chooseALocalModeln8k52")}
                         </TooltipContent>
                       </Tooltip>
                     </label>
@@ -1127,16 +1124,12 @@ export function ExportPage() {
                           value="local"
                           indicatorClassName="hub-tab-toggle-pill rounded-full"
                           className="h-9 rounded-full border-0 px-3 text-ui-12p5 text-muted-foreground hover:text-foreground data-active:text-foreground data-[state=active]:text-foreground"
-                        >
-                          Local Model
-                        </TabsTrigger>
+                        >{translate("uxExport.localModelj4367")}</TabsTrigger>
                         <TabsTrigger
                           value="checkpoint"
                           indicatorClassName="hub-tab-toggle-pill rounded-full"
                           className="h-9 rounded-full border-0 px-3 text-ui-12p5 text-muted-foreground hover:text-foreground data-active:text-foreground data-[state=active]:text-foreground"
-                        >
-                          Fine-tuned
-                        </TabsTrigger>
+                        >{translate("uxExport.fineTunedgjx94")}</TabsTrigger>
                         <TabsTrigger
                           value="hf"
                           indicatorClassName="hub-tab-toggle-pill rounded-full"
@@ -1155,7 +1148,7 @@ export function ExportPage() {
                         className="flex flex-col gap-2"
                       >
                         <label className="text-xs font-medium text-muted-foreground">
-                          Training Run
+                          {translate("uxExport.trainingRunizywt")}
                         </label>
                         <Select
                           value={selectedModelIdx ?? ""}
@@ -1165,8 +1158,8 @@ export function ExportPage() {
                             <SelectValue
                               placeholder={
                                 models.length === 0
-                                  ? "No training runs found"
-                                  : "Select a training run…"
+                                  ? translate("uxExport.noTrainingRunsFoundwuaqi")
+                                  : translate("uxExport.selectATrainingRunkxvdc")
                               }
                             />
                           </SelectTrigger>
@@ -1188,10 +1181,7 @@ export function ExportPage() {
                                 <SelectItem key={m.name} value={m.name}>
                                   <span className="flex items-center gap-2">
                                     {displayName}
-                                    <span className="text-muted-foreground text-xs">
-                                      {m.checkpoints.length} checkpoint
-                                      {m.checkpoints.length !== 1 ? "s" : ""}
-                                    </span>
+                                    <span className="text-muted-foreground text-xs">{translate("uxExport.checkpointl1boh", { p1: m.checkpoints.length, p2: m.checkpoints.length !== 1 ? "s" : "" })}</span>
                                     {timeStr && (
                                       <span className="text-muted-foreground text-xs">
                                         · {timeStr}
@@ -1210,7 +1200,7 @@ export function ExportPage() {
                         className="flex flex-col gap-2"
                       >
                         <label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                          Checkpoint
+                          {translate("studio.wizard.checkpointLabel")}
                           <Tooltip>
                             <TooltipTrigger asChild={true}>
                               <button
@@ -1231,9 +1221,7 @@ export function ExportPage() {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-primary underline"
-                              >
-                                Read more
-                              </a>
+                              >{translate("uxExport.readMoreivesk")}</a>
                             </TooltipContent>
                           </Tooltip>
                         </label>
@@ -1247,9 +1235,9 @@ export function ExportPage() {
                               placeholder={
                                 selectedModelIdx
                                   ? checkpointsForModel.length === 0
-                                    ? "No checkpoints found"
-                                    : "Select a checkpoint…"
-                                  : "Select a training run first"
+                                    ? translate("uxExport.noCheckpointsFoundm5nzj")
+                                    : translate("uxExport.selectACheckpoint2basy")
+                                  : translate("uxExport.selectATrainingRun36zxh")
                               }
                             />
                           </SelectTrigger>
@@ -1259,9 +1247,7 @@ export function ExportPage() {
                                 <span className="flex items-center gap-2">
                                   {cp.display_name}
                                   {cp.loss != null && (
-                                    <span className="text-muted-foreground text-xs">
-                                      loss: {cp.loss.toFixed(4)}
-                                    </span>
+                                    <span className="text-muted-foreground text-xs">{translate("uxExport.lossgl3sz", { p1: cp.loss.toFixed(4) })}</span>
                                   )}
                                 </span>
                               </SelectItem>
@@ -1276,7 +1262,7 @@ export function ExportPage() {
                         <>
                           <div className="flex flex-col gap-2">
                             <label className="text-xs font-medium text-muted-foreground">
-                              Hugging Face Model
+                              {translate("uxExport.huggingFaceModel15vri")}
                             </label>
                             <div ref={hfComboboxAnchorRef}>
                               <Combobox
@@ -1292,7 +1278,7 @@ export function ExportPage() {
                                 autoHighlight={true}
                               >
                                 <ComboboxInput
-                                  placeholder="Search models..."
+                                  placeholder={translate("uxExport.searchModels1jy7c")}
                                   className="w-full"
                                   onBlur={() =>
                                     applyHfSourceModel(hfModelInputRef.current)
@@ -1313,11 +1299,10 @@ export function ExportPage() {
                                 <ComboboxContent anchor={hfComboboxAnchorRef}>
                                   {isLoadingHfModels ? (
                                     <div className="flex items-center justify-center py-4 gap-2 text-xs text-muted-foreground">
-                                      <Spinner className="size-4" /> Searching…
-                                    </div>
+                                      <Spinner className="size-4" />{translate("uxExport.searchingggxtu")}</div>
                                   ) : (
                                     <ComboboxEmpty>
-                                      No models found
+                                      {translate("uxExport.noModelsFoundffon9")}
                                     </ComboboxEmpty>
                                   )}
                                   <ComboboxList>
@@ -1346,7 +1331,7 @@ export function ExportPage() {
                               consented per model via the load-time review dialog. */}
                           <div className="flex flex-col gap-1.5">
                             <label className="text-xs font-medium text-muted-foreground">
-                              Hugging Face Token (Optional)
+                              {translate("uxExport.huggingFaceTokenOptionalfca0r")}
                             </label>
                             <InputGroup>
                               <InputGroupAddon>
@@ -1359,22 +1344,20 @@ export function ExportPage() {
                                 type="password"
                                 autoComplete="new-password"
                                 name="hf-token-export-source"
-                                placeholder="hf_..."
+                                placeholder={translate("uxRecipestudio.hfdcawb")}
                                 value={hfToken}
                                 onChange={(e) => setHfToken(e.target.value)}
                               />
                             </InputGroup>
                             {isCheckingToken && (
-                              <p className="text-xs text-muted-foreground">
-                                Checking token…
-                              </p>
+                              <p className="text-xs text-muted-foreground">{translate("uxExport.checkingTokenxk1ol")}</p>
                             )}
                           </div>
                         </>
                       ) : (
                         <div className="flex flex-col gap-2">
                           <label className="text-xs font-medium text-muted-foreground">
-                            Local Model Path
+                            {translate("uxExport.localModelPath16hrt")}
                           </label>
                           <div ref={localComboboxAnchorRef}>
                             <Combobox
@@ -1395,7 +1378,7 @@ export function ExportPage() {
                               <ComboboxInput
                                 placeholder={
                                   isLoadingLocalModels
-                                    ? "Scanning local and cached models..."
+                                    ? translate("uxExport.scanningLocalAndCachedc8z7f")
                                     : "./models/my-model"
                                 }
                                 className="w-full"
@@ -1422,15 +1405,14 @@ export function ExportPage() {
                               <ComboboxContent anchor={localComboboxAnchorRef}>
                                 {isLoadingLocalModels ? (
                                   <div className="flex items-center justify-center gap-2 py-4 text-xs text-muted-foreground">
-                                    <Spinner className="size-4" /> Scanning...
-                                  </div>
+                                    <Spinner className="size-4" />{translate("uxExport.scanning0p1u7")}</div>
                                 ) : localModelsError ? (
                                   <div className="px-3 py-2 text-xs text-red-500">
                                     {localModelsError}
                                   </div>
                                 ) : (
                                   <ComboboxEmpty>
-                                    No local models found
+                                    {translate("uxExport.noLocalModelsFoundeq592")}
                                   </ComboboxEmpty>
                                 )}
                                 <ComboboxList>
@@ -1440,8 +1422,8 @@ export function ExportPage() {
                                       model?.source === "hf_cache"
                                         ? "HF cache"
                                         : model?.source === "custom"
-                                          ? "Custom Folders"
-                                          : "Local dir";
+                                          ? translate("uxExport.customFolderscu3jj")
+                                          : translate("uxExport.localDir45olw");
                                     return (
                                       <ComboboxItem
                                         key={id}
@@ -1463,7 +1445,7 @@ export function ExportPage() {
                           </div>
                           {isLoadingLocalModels ? (
                             <p className="text-ui-10 text-muted-foreground">
-                              Scanning local models...
+                              {translate("uxExport.scanningLocalModelsbaxuf")}
                             </p>
                           ) : localModelsError ? (
                             <p className="text-ui-10 text-red-500">
@@ -1473,7 +1455,7 @@ export function ExportPage() {
                             <p className="text-ui-10 text-muted-foreground">
                               {exportableLocalModels.length > 0
                                 ? `${exportableLocalModels.length} local/cached models found`
-                                : "No local models found. Enter path manually."}
+                                : translate("uxExport.noLocalModelsFoundpzxiv")}
                             </p>
                           )}
                         </div>
@@ -1481,7 +1463,7 @@ export function ExportPage() {
 
                       <div className="rounded-xl bg-[color-mix(in_oklab,var(--foreground)_calc(4%*var(--contrast-wash-gain,1)),transparent)] p-3">
                         <p className="text-ui-11 text-muted-foreground">
-                          Direct model exports currently support GGUF only.
+                          {translate("uxExport.directModelExportsCurrently66zo3")}
                         </p>
                       </div>
                     </div>
@@ -1490,12 +1472,12 @@ export function ExportPage() {
                   {sourceMode === "checkpoint" && (
                     <div className="rounded-xl bg-[color-mix(in_oklab,var(--foreground)_calc(4%*var(--contrast-wash-gain,1)),transparent)] p-3 flex flex-col gap-2">
                       <span className="text-ui-11 font-medium text-muted-foreground uppercase tracking-wider">
-                        Training Info
+                        {translate("uxExport.trainingInfo1rw5k")}
                       </span>
                       <div className="grid grid-cols-1 gap-x-6 gap-y-1.5 text-xs sm:grid-cols-2">
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">
-                            Base Model
+                            {translate("uxExport.baseModeleirl9")}
                           </span>
                           <span className="font-medium">{baseModelName}</span>
                         </div>
@@ -1507,7 +1489,7 @@ export function ExportPage() {
                         </div>
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">
-                            Checkpoints
+                            {translate("uxExport.checkpointsl6ltv")}
                           </span>
                           <span className="font-medium">
                             {checkpointsForModel.length}
@@ -1516,7 +1498,7 @@ export function ExportPage() {
                         {isAdapter && (
                           <div className="flex justify-between">
                             <span className="text-muted-foreground">
-                              LoRA Rank
+                              {translate("uxExport.loRARankza5cp")}
                             </span>
                             <span className="font-medium">{loraRank}</span>
                           </div>
@@ -1528,7 +1510,7 @@ export function ExportPage() {
 
                 <div className="flex flex-col gap-2.5">
                   <span className="text-xs font-medium text-muted-foreground">
-                    Quick Guide
+                    {translate("uxExport.quickGuide1nqlx")}
                   </span>
                   <ol className="flex flex-col gap-3">
                     {exportGuideSteps.map((step, i) => (
@@ -1549,7 +1531,7 @@ export function ExportPage() {
               {exportUnsupported && (
                 <Alert variant="destructive">
                   <HugeiconsIcon icon={AlertCircleIcon} className="size-4" />
-                  <AlertTitle>Export unavailable</AlertTitle>
+                  <AlertTitle>{translate("uxExport.exportUnavailablewnl03")}</AlertTitle>
                   <AlertDescription>
                     {exportUnsupportedMessage}
                   </AlertDescription>
@@ -1577,7 +1559,7 @@ export function ExportPage() {
                     : isDecision
                       ? t("exportDecision.ggufOnly")
                       : !effectiveIsAdapter && effectiveIsQuantized
-                        ? "Pre-quantized (BNB 4-bit) models cannot be exported without LoRA adapters"
+                        ? translate("uxExport.preQuantizedBNB4s8pat")
                         : [
                             effectiveIsAdapter
                               ? null
@@ -1596,9 +1578,7 @@ export function ExportPage() {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <div className="text-sm font-medium">Precision</div>
-                      <span className="text-ui-11 text-muted-foreground/70">
-                        — select one or more
-                      </span>
+                      <span className="text-ui-11 text-muted-foreground/70">{translate("uxExport.selectOneOrMoreiqprk")}</span>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {availableFormats
@@ -1636,7 +1616,7 @@ export function ExportPage() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="start" className="w-64">
                             <DropdownMenuLabel>
-                              Additional formats
+                              {translate("uxExport.additionalFormatsgkt3v")}
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             {availableFormats
@@ -1681,18 +1661,14 @@ export function ExportPage() {
                             type="button"
                             onClick={() => setSelectedFormats(["16-bit"])}
                             className="text-ui-11 text-muted-foreground/70 hover:text-foreground transition-colors"
-                          >
-                            Reset to 16-bit
-                          </button>
+                          >{translate("uxExport.resetTo16Bitofgw3")}</button>
                         )}
                       </div>
                     )}
 
                     {hubMultiFormat && (
                       <div className="text-ui-11 text-amber-600 dark:text-amber-500">
-                        Hub export supports one format at a time (each writes to
-                        the repository root). Select a single format, or export
-                        locally to produce several at once.
+                        {translate("uxCopy.hubExportSupportsOne10hvj")}
                       </div>
                     )}
 
@@ -1701,24 +1677,18 @@ export function ExportPage() {
                         MERGED_FORMATS.find((f) => f.value === v)
                           ?.needsCalibration,
                     ) && (
-                      <div className="text-ui-11 text-muted-foreground">
-                        * calibrates on data (uses a small calibration set).
-                      </div>
+                      <div className="text-ui-11 text-muted-foreground">{translate("uxExport.calibratesOnDataUseswu9sg")}</div>
                     )}
 
                     {!hasNvidia && !torchaoUnavailable && (
                       <div className="text-ui-11 text-muted-foreground">
-                        No NVIDIA GPU detected: compressed-tensors formats are
-                        hidden. 16-bit and portable FP8/INT8 (torchao) still
-                        work here and load in vLLM.
+                        {translate("uxCopy.noNVIDIAGPUDetected1q637")}
                       </div>
                     )}
 
                     {torchaoUnavailable && (
                       <div className="text-ui-11 text-muted-foreground">
-                        Portable FP8/INT8 (torchao) export needs torchao 0.15 or
-                        newer, which is not installed here. Update LAiM, or use
-                        16-bit or GGUF.
+                        {translate("uxCopy.portableFP8INT8Torchao1xluz")}
                       </div>
                     )}
                   </div>
@@ -1730,17 +1700,15 @@ export function ExportPage() {
                 !exportUnsupported && (
                   <div className="space-y-3">
                     <div className="space-y-2">
-                      <div className="text-sm font-medium">Adapter format</div>
+                      <div className="text-sm font-medium">{translate("uxExport.adapterFormatn1gkr")}</div>
                       <div className="flex flex-wrap gap-2">
                         <Button
                           type="button"
                           variant={loraAsGguf ? "outline" : "default"}
                           size="sm"
                           onClick={() => setLoraAsGguf(false)}
-                          title="Adapter weights as safetensors."
-                        >
-                          Adapter (safetensors)
-                        </Button>
+                          title={translate("uxExport.adapterWeightsAsSafetensors6ocb7")}
+                        >{translate("uxExport.adapterSafetensorsoa3n9")}</Button>
                         <Button
                           type="button"
                           variant={loraAsGguf ? "default" : "outline"}
@@ -1750,20 +1718,18 @@ export function ExportPage() {
                           title={
                             diffusionDisabledMethods.includes("gguf")
                               ? (diffusionLmInfo?.reason ?? undefined)
-                              : "llama.cpp GGUF LoRA, loadable with `llama-cli --lora`."
+                              : translate("uxExport.llamaCppGGUFLoRAdimxd")
                           }
-                        >
-                          GGUF adapter
-                        </Button>
+                        >{translate("uxExport.gGUFAdapterwu6cm")}</Button>
                       </div>
                       <div className="text-xs text-muted-foreground">
                         {loraAsGguf
                           ? isMacHost
                             ? "Converts the adapter to a GGUF LoRA (llama.cpp `--lora`); the adapter files are written in PEFT format. Not available for adapters with per-module alpha values, rsLoRA with per-module ranks, DoRA, replaced embeddings or modules_to_save, or expert-parameter targets."
-                            : "Converts the adapter to a GGUF LoRA (llama.cpp `--lora`). The base model stays separate."
+                            : translate("uxExport.convertsTheAdapterTopri3e")
                           : isMacHost
                             ? "Adapter weights only; pick the on-disk format below."
-                            : "Standard PEFT adapter files. Pair with the base model at inference."}
+                            : translate("uxExport.standardPEFTAdapterFiles1ncoj")}
                       </div>
                     </div>
 
@@ -1773,7 +1739,7 @@ export function ExportPage() {
                         data-testid="adapter-format-picker"
                       >
                         <div className="text-sm font-medium">
-                          Safetensors format
+                          {translate("uxExport.safetensorsFormat1ul3b")}
                         </div>
                         <div className="flex flex-wrap gap-2">
                           <Button
@@ -1783,7 +1749,7 @@ export function ExportPage() {
                             }
                             size="sm"
                             onClick={() => setAdapterFormat("mlx")}
-                            title="Native mlx-lm adapter (adapters.safetensors)."
+                            title={translate("uxExport.nativeMlxLmAdapter18qul")}
                           >
                             MLX
                           </Button>
@@ -1794,7 +1760,7 @@ export function ExportPage() {
                             }
                             size="sm"
                             onClick={() => setAdapterFormat("peft")}
-                            title="Standard Hugging Face PEFT adapter (adapter_model.safetensors)."
+                            title={translate("uxExport.standardHuggingFacePEFT12xj5")}
                           >
                             PEFT
                           </Button>
@@ -1812,7 +1778,7 @@ export function ExportPage() {
 
                     {loraAsGguf && (
                       <div className="space-y-1.5">
-                        <div className="text-sm font-medium">Output type</div>
+                        <div className="text-sm font-medium">{translate("uxExport.outputType2w78c")}</div>
                         <Select
                           value={loraGgufOuttype}
                           onValueChange={(v) => setLoraGgufOuttype(v)}
@@ -1879,7 +1845,7 @@ export function ExportPage() {
                 <div className="space-y-3">
                   {effectiveIsAdapter && !isMacHost && (
                     <div className="space-y-2">
-                      <div className="text-sm font-medium">Export target</div>
+                      <div className="text-sm font-medium">{translate("uxExport.exportTargetcvm5n")}</div>
                       <div className="flex flex-wrap gap-2">
                         <Button
                           type="button"
@@ -1888,10 +1854,8 @@ export function ExportPage() {
                           }
                           size="sm"
                           onClick={() => setGgufTarget("model")}
-                          title="Merge the adapter into the base model, then quantize the full model to GGUF."
-                        >
-                          Full model
-                        </Button>
+                          title={translate("uxExport.mergeTheAdapterInto1srau")}
+                        >{translate("uxExport.fullModelm6jxo")}</Button>
                         <Button
                           type="button"
                           variant={
@@ -1899,22 +1863,20 @@ export function ExportPage() {
                           }
                           size="sm"
                           onClick={() => setGgufTarget("lora")}
-                          title="Export just the adapter as a GGUF LoRA (llama.cpp `--lora`); the base model stays separate."
-                        >
-                          LoRA adapter
-                        </Button>
+                          title={translate("uxExport.exportJustTheAdaptergearq")}
+                        >{translate("uxExport.loRAAdaptert07l9")}</Button>
                       </div>
                       <div className="text-xs text-muted-foreground">
                         {ggufTarget === "lora"
-                          ? "Converts the adapter to a GGUF LoRA (llama.cpp `--lora`). The base model stays separate."
-                          : "Merges the adapter into the base model, then quantizes the full model to GGUF."}
+                          ? translate("uxExport.convertsTheAdapterTopri3e")
+                          : translate("uxExport.mergesTheAdapterIntorqwpk")}
                       </div>
                     </div>
                   )}
 
                   {ggufAsLora ? (
                     <div className="space-y-1.5">
-                      <div className="text-sm font-medium">Output type</div>
+                      <div className="text-sm font-medium">{translate("uxExport.outputType2w78c")}</div>
                       <Select
                         value={loraGgufOuttype}
                         onValueChange={(v) => setLoraGgufOuttype(v)}
@@ -1941,16 +1903,16 @@ export function ExportPage() {
                       <div className="flex items-center justify-between gap-3 rounded-lg border p-3">
                         <div className="space-y-0.5">
                           <div className="text-sm font-medium">
-                            Importance matrix (imatrix)
+                            {translate("uxExport.importanceMatrixImatrix197ty")}
                           </div>
                           <div className="text-xs text-muted-foreground">
                             {requiresImatrix
-                              ? "Required for the selected IQ low-bit quant."
-                              : "Improves quant quality and unlocks the IQ low-bit quants."}
+                              ? translate("uxExport.requiredForTheSelectedvywfl")
+                              : translate("uxExport.improvesQuantQualityAnd0vubd")}
                           </div>
                         </div>
                         <Switch
-                          aria-label="Importance matrix (imatrix)"
+                          aria-label={translate("uxExport.importanceMatrixImatrix197ty")}
                           checked={effectiveImatrix}
                           onCheckedChange={setUseImatrix}
                           disabled={requiresImatrix}
@@ -1962,7 +1924,7 @@ export function ExportPage() {
                             htmlFor="export-imatrix-path"
                             className="text-sm font-medium"
                           >
-                            Local imatrix file (optional)
+                            {translate("uxCopy.localImatrixFileOptional1oyqc")}
                           </label>
                           <InputGroup>
                             <InputGroupInput
@@ -1982,28 +1944,25 @@ export function ExportPage() {
                             id="export-imatrix-path-help"
                             className="text-xs text-muted-foreground"
                           >
-                            Absolute path to a .dat or .gguf imatrix file on the
-                            machine running LAiM. Leave blank to
-                            auto-download the upstream LAiM imatrix for the
-                            base model, if one exists.
+                            {translate("uxCopy.absolutePathToA2jfh4")}
                           </p>
                         </div>
                       )}
                       <div className="flex items-center justify-between gap-3 rounded-lg border p-3">
                         <div className="space-y-0.5">
                           <div className="text-sm font-medium">
-                            Also convert to Q4NX (AMD NPU)
+                            {translate("uxExport.alsoConvertToQ4NXdn57d")}
                           </div>
                           <div className="text-xs text-muted-foreground">
                             {destination !== "local"
-                              ? "Saves locally only: pick a local destination."
+                              ? translate("uxExport.savesLocallyOnlyPickjomen")
                               : q4nxSourceSelected
-                                ? "Converts the Q4 GGUF into a FastFlowLM folder for Ryzen AI NPUs (XDNA 2), next to the GGUFs."
-                                : "Needs Q4_0, Q4_1 or Q4_K_M in the selection."}
+                                ? translate("uxExport.convertsTheQ4GGUFv0j0i")
+                                : translate("uxExport.needsQ40Q4kkjed")}
                           </div>
                         </div>
                         <Switch
-                          aria-label="Also convert to Q4NX (AMD NPU)"
+                          aria-label={translate("uxExport.alsoConvertToQ4NXdn57d")}
                           checked={effectiveNpuQ4nx}
                           onCheckedChange={setNpuQ4nx}
                           disabled={!q4nxSourceSelected || destination !== "local"}
@@ -2019,7 +1978,7 @@ export function ExportPage() {
                     icon={InformationCircleIcon}
                     className="size-3.5"
                   />
-                  <span>Est. size: {estimatedSize}</span>
+                  <span>{translate("uxExport.estSizeue2v1", { p1: estimatedSize })}</span>
                 </div>
               )}
 
@@ -2073,7 +2032,7 @@ export function ExportPage() {
                       block: "end",
                     })
                   }
-                  aria-label="Scroll to export output"
+                  aria-label={translate("uxExport.scrollToExportOutputb0cuj")}
                   className="fixed bottom-6 right-6 z-30 flex size-10 items-center justify-center rounded-full border border-border/60 bg-background/90 text-foreground shadow-md backdrop-blur transition-colors hover:bg-muted"
                 >
                   <HugeiconsIcon
@@ -2088,9 +2047,7 @@ export function ExportPage() {
                     data-tour="export-cta"
                     disabled={!canExport}
                     onClick={handleOpenPanel}
-                  >
-                    Export Model
-                  </Button>
+                  >{translate("uxExport.exportModelz7e58")}</Button>
                 </div>
               )}
             </>

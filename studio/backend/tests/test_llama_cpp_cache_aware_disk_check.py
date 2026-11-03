@@ -93,7 +93,7 @@ def _preflight(
     repo_files,
     cached_files,
     free_bytes,
-    hf_repo = "LAiM/Example-GGUF",
+    hf_repo = "unsloth/Example-GGUF",
     hf_token = None,
 ):
     """Run the llama_cpp.py preflight arithmetic; return the decision as a dict.

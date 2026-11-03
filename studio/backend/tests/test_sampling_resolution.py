@@ -99,7 +99,7 @@ def test_empty_recommendation_falls_back_to_schema_defaults(monkeypatch):
 
 @pytest.mark.parametrize(
     "model",
-    ["LAiM/gemma-4-E4B", "LAiM/Qwen3-4B", "LAiM/Qwen3.5-9B", "someorg/unknown-xyz"],
+    ["unsloth/gemma-4-E4B", "unsloth/Qwen3-4B", "unsloth/Qwen3.5-9B", "someorg/unknown-xyz"],
 )
 def test_recommendation_matches_ui_source(model):
     # Parity guard: what the server recommends for omitted fields equals the Chat UI's source
@@ -128,8 +128,8 @@ def test_model_recommended_sampling_values_are_in_range():
 
 
 def test_qwen38_reuses_qwen36_sampling_defaults():
-    qwen36 = ic.load_inference_config("LAiM/Qwen3.6-27B-GGUF")
-    qwen38 = ic.load_inference_config("LAiM/Qwen3.8-27B-GGUF")
+    qwen36 = ic.load_inference_config("unsloth/Qwen3.6-27B-GGUF")
+    qwen38 = ic.load_inference_config("unsloth/Qwen3.8-27B-GGUF")
 
     assert qwen38 == qwen36
     assert qwen38 == {
@@ -287,7 +287,7 @@ def test_chat_route_lifts_harness_template_kwargs_before_sampling(monkeypatch, t
 
     llama_backend = SimpleNamespace(
         is_loaded = True,
-        model_identifier = "LAiM/Qwen3.8-27B-GGUF",
+        model_identifier = "unsloth/Qwen3.8-27B-GGUF",
         _is_audio = False,
     )
     request = SimpleNamespace(
@@ -399,7 +399,7 @@ def test_chat_route_normalizes_reasoning_effort_before_generation(
         supports_reasoning = True,
         reasoning_always_on = False,
         _is_audio = False,
-        model_identifier = "LAiM/Qwen3.8-27B-GGUF",
+        model_identifier = "unsloth/Qwen3.8-27B-GGUF",
         context_length = 4096,
         generate_chat_completion = _generate,
     )
@@ -464,12 +464,12 @@ def _qwen_backend(
 @pytest.mark.parametrize(
     "model_identifier, supports_reasoning, reasoning_default, request_kwargs, expected",
     [
-        ("LAiM/Qwen3.6-27B-MTP-GGUF", True, True, {}, (0.6, 0.95, 1.5)),
-        ("LAiM/Qwen3.6-27B-MTP-GGUF", True, True, {"enable_thinking": False}, (0.7, 0.8, 1.5)),
-        ("LAiM/Qwen3.5-4B-GGUF", True, False, {}, (0.7, 0.8, 1.5)),
-        ("LAiM/Qwen3.5-4B-GGUF", True, False, {"reasoning_effort": "high"}, (0.6, 0.95, 1.5)),
-        ("LAiM/Qwen3-8B-GGUF", True, True, {"enable_thinking": False}, (0.7, 0.8, 0.0)),
-        ("LAiM/Qwen3-4B-Instruct-2507-GGUF", False, True, {}, (0.6, 0.95, 0.0)),
+        ("unsloth/Qwen3.6-27B-MTP-GGUF", True, True, {}, (0.6, 0.95, 1.5)),
+        ("unsloth/Qwen3.6-27B-MTP-GGUF", True, True, {"enable_thinking": False}, (0.7, 0.8, 1.5)),
+        ("unsloth/Qwen3.5-4B-GGUF", True, False, {}, (0.7, 0.8, 1.5)),
+        ("unsloth/Qwen3.5-4B-GGUF", True, False, {"reasoning_effort": "high"}, (0.6, 0.95, 1.5)),
+        ("unsloth/Qwen3-8B-GGUF", True, True, {"enable_thinking": False}, (0.7, 0.8, 0.0)),
+        ("unsloth/Qwen3-4B-Instruct-2507-GGUF", False, True, {}, (0.6, 0.95, 0.0)),
     ],
 )
 def test_chat_route_recommends_the_qwen_sampling_for_the_active_thinking_mode(
@@ -543,7 +543,7 @@ def test_messages_route_recommends_the_qwen_sampling_for_the_active_thinking_mod
             return False
 
     captured = {}
-    llama_backend = _qwen_backend("LAiM/Qwen3.6-35B-A3B-GGUF", captured)
+    llama_backend = _qwen_backend("unsloth/Qwen3.6-35B-A3B-GGUF", captured)
     monkeypatch.setattr(inference_route, "get_llama_cpp_backend", lambda: llama_backend)
 
     payload = AnthropicMessagesRequest(
@@ -603,9 +603,9 @@ def test_safetensors_chat_route_recommends_the_qwen_sampling_for_the_active_thin
     captured = {}
 
     class _Backend:
-        active_model_name = "LAiM/Qwen3.6-27B"
+        active_model_name = "unsloth/Qwen3.6-27B"
         models = {
-            "LAiM/Qwen3.6-27B": {
+            "unsloth/Qwen3.6-27B": {
                 "chat_template_info": {"template": template},
                 "context_length": 2048,
             }
@@ -776,7 +776,7 @@ def test_contradictory_controls_are_resolved_for_every_family(
         _architecture = "gpt-oss",
     )
     payload = ChatCompletionRequest(
-        model = "LAiM/gpt-oss-20b-GGUF",
+        model = "unsloth/gpt-oss-20b-GGUF",
         messages = [{"role": "user", "content": "hi"}],
         **request_kwargs,
     )
@@ -814,7 +814,7 @@ def test_normalizing_twice_cannot_change_the_answer(typed, nested):
 
     payload = ChatCompletionRequest.model_validate(
         {
-            "model": "LAiM/Qwen3.8-27B-GGUF",
+            "model": "unsloth/Qwen3.8-27B-GGUF",
             "messages": [{"role": "user", "content": "hi"}],
             **typed,
             "chat_template_kwargs": dict(nested),
@@ -838,7 +838,7 @@ def test_normalizing_does_not_mutate_the_clients_nested_dict():
     client_dict = {"enable_thinking": False, "reasoning_effort": "none", "keep_me": 1}
     payload = ChatCompletionRequest.model_validate(
         {
-            "model": "LAiM/Qwen3.8-27B-GGUF",
+            "model": "unsloth/Qwen3.8-27B-GGUF",
             "messages": [{"role": "user", "content": "hi"}],
             "chat_template_kwargs": client_dict,
         }
@@ -877,7 +877,7 @@ def test_a_nested_enable_thinking_that_is_not_a_json_boolean_is_ignored(nested_e
 
     payload = ChatCompletionRequest.model_validate(
         {
-            "model": "LAiM/Qwen3.8-27B-GGUF",
+            "model": "unsloth/Qwen3.8-27B-GGUF",
             "messages": [{"role": "user", "content": "hi"}],
             "chat_template_kwargs": {"enable_thinking": nested_enable_thinking},
         }
@@ -897,7 +897,7 @@ def test_a_nested_preserve_thinking_that_is_not_a_json_boolean_is_ignored(nested
 
     payload = ChatCompletionRequest.model_validate(
         {
-            "model": "LAiM/Qwen3.8-27B-GGUF",
+            "model": "unsloth/Qwen3.8-27B-GGUF",
             "messages": [{"role": "user", "content": "hi"}],
             "chat_template_kwargs": {"preserve_thinking": nested_preserve_thinking},
         }
@@ -921,7 +921,7 @@ def test_an_ignored_nested_control_resolves_exactly_like_omitting_it():
     def _resolved(nested):
         payload = ChatCompletionRequest.model_validate(
             {
-                "model": "LAiM/Qwen3.8-27B-GGUF",
+                "model": "unsloth/Qwen3.8-27B-GGUF",
                 "messages": [{"role": "user", "content": "hi"}],
                 **({"chat_template_kwargs": nested} if nested is not None else {}),
             }
@@ -960,7 +960,7 @@ def test_an_anthropic_derived_boolean_stays_out_of_the_explicit_field_set():
 
     payload = ChatCompletionRequest.model_validate(
         {
-            "model": "LAiM/Qwen3.8-27B-GGUF",
+            "model": "unsloth/Qwen3.8-27B-GGUF",
             "messages": [{"role": "user", "content": "hi"}],
             "thinking": {"type": "enabled"},
             "chat_template_kwargs": {"enable_thinking": False},

@@ -56,7 +56,7 @@ import {
   type ProjectRecord,
 } from "@/features/chat";
 import { useSettingsDialogStore } from "@/features/settings";
-import { useT } from "@/i18n";
+import { translate, useT } from "@/i18n";
 import { GuidedTour, useGuidedTourController } from "@/features/tour";
 import { buildProjectsTourSteps } from "./tour";
 import { EditProjectDialog } from "./components/edit-project-dialog";
@@ -312,7 +312,7 @@ export function ProjectsPage() {
       setImportTargetId(projects[0]?.id ?? null);
       setImportFile(nativeImportSource(selected));
     } catch (error) {
-      toast.error("Import failed.", {
+      toast.error(translate("settings.chat.importFailed"), {
         description: error instanceof Error ? error.message : String(error),
       });
     }
@@ -459,7 +459,7 @@ export function ProjectsPage() {
         threads = await listStoredChatThreads({ includeArchived: false });
       }
       const ids = [...new Set(threads.map((t) => t.id))];
-      if (ids.length === 0) { toast.info("No conversations to export."); return; }
+      if (ids.length === 0) { toast.info(translate("uxChat.noConversationsToExport543qz")); return; }
       const ts = new Date().toISOString().slice(0, 10);
       const basename = `${scope === "all" ? "all-chats" : "all-projects"}-${ts}`;
       if (merged) {
@@ -469,7 +469,7 @@ export function ProjectsPage() {
       }
     } catch (error) {
       if (!isDownloadCancelled(error)) {
-        toast.error("Export failed.");
+        toast.error(translate("composer.plus.exportFailed"));
       }
     }
   }
@@ -484,7 +484,7 @@ export function ProjectsPage() {
       await renameChatItem(target, name);
       notifyChatHistoryUpdated();
     } catch (err) {
-      toast.error("Failed to rename chat", {
+      toast.error(translate("shell.toast.failedToRenameChat"), {
         description: err instanceof Error ? err.message : undefined,
       });
     }
@@ -499,7 +499,7 @@ export function ProjectsPage() {
     try {
       await archiveChatItem(chat, activeThreadId(), () => {});
     } catch (err) {
-      toast.error("Failed to archive chat", {
+      toast.error(translate("uxChat.failedToArchiveChat1fs9u"), {
         description: err instanceof Error ? err.message : undefined,
       });
     }
@@ -511,7 +511,7 @@ export function ProjectsPage() {
       // Pins are stored apart from the chats, so a deleted one leaves its id behind forever.
       unpinChat(chat.id);
     } catch (err) {
-      toast.error("Failed to delete chat", {
+      toast.error(translate("shell.toast.failedToDeleteChat"), {
         description: err instanceof Error ? err.message : undefined,
       });
     }
@@ -549,7 +549,7 @@ export function ProjectsPage() {
       }
     } catch (error) {
       if (!isDownloadCancelled(error)) {
-        toast.error("Export failed.");
+        toast.error(translate("composer.plus.exportFailed"));
       }
     }
   }
@@ -563,7 +563,7 @@ export function ProjectsPage() {
     try {
       await deleteChatProject(target.id, { deleteFiles });
     } catch (err) {
-      toast.error("Failed to delete project", {
+      toast.error(translate("library.chats.toast.projectDeleteFailed"), {
         description: err instanceof Error ? err.message : undefined,
       });
     }
@@ -589,7 +589,7 @@ export function ProjectsPage() {
       />
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-ui-30 font-semibold leading-[1.04] tracking-[-0.028em] text-foreground sm:text-ui-34">
-          Projects
+          {translate("shell.navigation.projects")}
         </h1>
         {/* The Updated column orders the list, so search takes the room a sort control had.
             Below sm the group wraps to its own row: beside the heading the two buttons left the
@@ -602,9 +602,9 @@ export function ProjectsPage() {
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search projects"
+              placeholder={translate("settings.data.library.searchProjects")}
               className="h-9 w-full rounded-full border-none bg-muted pl-10 pr-4 shadow-none dark:bg-card"
-              aria-label="Search projects"
+              aria-label={translate("settings.data.library.searchProjects")}
             />
           </div>
           <DropdownMenu>
@@ -613,7 +613,7 @@ export function ProjectsPage() {
                 variant="outline"
                 size="icon"
                 data-tour="projects-io"
-                title="Import / Export projects"
+                title={translate("uxChat.importExportProjects1g6ug")}
                 className="rounded-full border-none bg-muted shadow-none dark:bg-card"
               >
                 <HugeiconsIcon icon={Download01Icon} strokeWidth={1.75} className="size-icon" />
@@ -621,16 +621,14 @@ export function ProjectsPage() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuItem onSelect={() => void selectGlobalImportFile()}>
-                <HugeiconsIcon icon={Upload01Icon} strokeWidth={1.75} className="size-icon" />
-                Import chats…
-              </DropdownMenuItem>
+                <HugeiconsIcon icon={Upload01Icon} strokeWidth={1.75} className="size-icon" />{translate("uxChat.importChatsug8qp")}</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuSub>
-                <DropdownMenuSubTrigger>Export All Projects</DropdownMenuSubTrigger>
+                <DropdownMenuSubTrigger>{translate("uxCopy.exportAllProjects1biy8")}</DropdownMenuSubTrigger>
                 <DropdownMenuSubContent className="w-52">
                   <DropdownMenuGroup>
                     <DropdownMenuLabel className="pb-1 pt-2 text-ui-11 font-medium">
-                      Combined
+                      {translate("uxChat.combined3zgyi")}
                     </DropdownMenuLabel>
                     {COMBINED_EXPORT_FORMATS_LIST.map(({ fmt, label }) => (
                       <DropdownMenuItem key={`ap-m-${fmt}`} onSelect={() => void handleBulkProjectExport("projects", fmt, true)}>
@@ -641,7 +639,7 @@ export function ProjectsPage() {
                   <DropdownMenuSeparator />
                   <DropdownMenuGroup>
                     <DropdownMenuLabel className="pb-1 pt-2 text-ui-11 font-medium">
-                      Per chat
+                      {translate("uxChat.perChatlja7b")}
                     </DropdownMenuLabel>
                     {EXPORT_FORMATS_LIST.map(({ fmt, label }) => (
                       <DropdownMenuItem key={`ap-s-${fmt}`} onSelect={() => void handleBulkProjectExport("projects", fmt, false)}>
@@ -652,11 +650,11 @@ export function ProjectsPage() {
                 </DropdownMenuSubContent>
               </DropdownMenuSub>
               <DropdownMenuSub>
-                <DropdownMenuSubTrigger>Export Projects + Recents</DropdownMenuSubTrigger>
+                <DropdownMenuSubTrigger>{translate("uxCopy.exportProjectsRecents1awmw")}</DropdownMenuSubTrigger>
                 <DropdownMenuSubContent className="w-52">
                   <DropdownMenuGroup>
                     <DropdownMenuLabel className="pb-1 pt-2 text-ui-11 font-medium">
-                      Combined
+                      {translate("uxChat.combined3zgyi")}
                     </DropdownMenuLabel>
                     {COMBINED_EXPORT_FORMATS_LIST.map(({ fmt, label }) => (
                       <DropdownMenuItem key={`all-m-${fmt}`} onSelect={() => void handleBulkProjectExport("all", fmt, true)}>
@@ -667,7 +665,7 @@ export function ProjectsPage() {
                   <DropdownMenuSeparator />
                   <DropdownMenuGroup>
                     <DropdownMenuLabel className="pb-1 pt-2 text-ui-11 font-medium">
-                      Per chat
+                      {translate("uxChat.perChatlja7b")}
                     </DropdownMenuLabel>
                     {EXPORT_FORMATS_LIST.map(({ fmt, label }) => (
                       <DropdownMenuItem key={`all-s-${fmt}`} onSelect={() => void handleBulkProjectExport("all", fmt, false)}>
@@ -680,7 +678,7 @@ export function ProjectsPage() {
             </DropdownMenuContent>
           </DropdownMenu>
           <Button data-tour="projects-new" onClick={() => setCreating(true)}>
-            New project
+            {translate("library.chats.toolbar.newProject")}
           </Button>
         </div>
       </div>
@@ -711,8 +709,8 @@ export function ProjectsPage() {
         <div className="mt-16 flex flex-col items-center justify-center gap-2 text-center text-muted-foreground">
           <p className="text-sm">
             {projects.length === 0
-              ? "No projects yet."
-              : "No projects match your search."}
+              ? translate("uxChat.noProjectsYeto612v")
+              : translate("uxChat.noProjectsMatchYourng7g0")}
           </p>
           {projects.length === 0 && (
             <Button
@@ -721,7 +719,7 @@ export function ProjectsPage() {
               onClick={() => setCreating(true)}
             >
               <HugeiconsIcon icon={FolderAddIcon} strokeWidth={1.75} className="size-icon" />
-              Create your first project
+              {translate("uxChat.createYourFirstProject1f40v")}
             </Button>
           )}
         </div>
@@ -739,7 +737,7 @@ export function ProjectsPage() {
             <button
               type="button"
               onClick={() => setSortDir((dir) => (dir === "desc" ? "asc" : "desc"))}
-              title={sortDir === "desc" ? "Newest first" : "Oldest first"}
+              title={sortDir === "desc" ? translate("uxChat.newestFirstqspht") : translate("uxChat.oldestFirstqx1en")}
               className="flex shrink-0 cursor-pointer items-center gap-1 text-left transition-colors hover:text-foreground sm:w-40"
             >
               Updated
@@ -790,7 +788,7 @@ export function ProjectsPage() {
                 {/* Opens the project's chats in place, without leaving the list. */}
                 <button
                   type="button"
-                  aria-label={chatsOpen ? "Hide chats" : "Show chats"}
+                  aria-label={chatsOpen ? translate("uxChat.hideChatsddkg3") : translate("uxChat.showChatsi6795")}
                   aria-expanded={chatsOpen}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -823,7 +821,7 @@ export function ProjectsPage() {
               {/* Pinning is one click here, as it is on a sidebar row. */}
               <button
                 type="button"
-                aria-label={pinned ? "Unpin project" : "Pin project"}
+                aria-label={pinned ? translate("uxChat.unpinProjectlt8u6") : translate("uxChat.pinProjectwz7lp")}
                 onClick={(e) => {
                   e.stopPropagation();
                   togglePinProject(project.id);
@@ -844,7 +842,7 @@ export function ProjectsPage() {
                     <button
                       type="button"
                       onClick={(e) => e.stopPropagation()}
-                      aria-label="Project options"
+                      aria-label={translate("uxChat.projectOptions1yhqf")}
                       className="absolute right-0 flex size-7 shrink-0 items-center justify-center rounded-full text-muted-foreground transition hover:bg-[rgb(6_29_33_/_calc(0.05*var(--contrast-wash-gain,1)))] hover:text-foreground data-[state=open]:bg-[rgb(6_29_33_/_calc(0.05*var(--contrast-wash-gain,1)))] dark:hover:bg-[rgb(249_226_222_/_calc(0.1*var(--contrast-wash-gain,1)))] dark:data-[state=open]:bg-[rgb(249_226_222_/_calc(0.1*var(--contrast-wash-gain,1)))]"
                     >
                       <MoreHorizontalIcon strokeWidth={1.75} className="size-icon" />
@@ -879,10 +877,10 @@ export function ProjectsPage() {
                     onClick={() => loadProjectChats(project.id)}
                     className="cursor-pointer self-start py-1 text-left text-sm text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
                   >
-                    Could not load chats. Retry
+                    {translate("uxCopy.couldNotLoadChatsb3kdu")}
                   </button>
                 ) : chats.length === 0 ? (
-                  <p className="py-1 text-sm text-muted-foreground">No chats</p>
+                  <p className="py-1 text-sm text-muted-foreground">{translate("uxChat.noChatsjwle0")}</p>
                 ) : (
                   <>
                     {chats.map((chat) => {
@@ -919,7 +917,7 @@ export function ProjectsPage() {
                             hover-revealed, and show outright without a cursor to hover with. */}
                         <button
                           type="button"
-                          aria-label={chatPinned ? "Unpin chat" : "Pin chat"}
+                          aria-label={chatPinned ? translate("uxChat.unpinChatigaac") : translate("uxChat.pinChat46ck5")}
                           onClick={(e) => {
                             e.stopPropagation();
                             togglePinChat(chat.id);
@@ -941,7 +939,7 @@ export function ProjectsPage() {
                               <button
                                 type="button"
                                 onClick={(e) => e.stopPropagation()}
-                                aria-label="Chat options"
+                                aria-label={translate("browser.fullView.options")}
                                 className="absolute right-0 flex size-7 shrink-0 items-center justify-center rounded-full text-muted-foreground opacity-0 transition hover:bg-[rgb(6_29_33_/_calc(0.05*var(--contrast-wash-gain,1)))] hover:text-foreground focus-visible:opacity-100 group-hover/chat-row:opacity-100 pointer-coarse:opacity-100 data-[state=open]:bg-[rgb(6_29_33_/_calc(0.05*var(--contrast-wash-gain,1)))] data-[state=open]:opacity-100 dark:hover:bg-[rgb(249_226_222_/_calc(0.1*var(--contrast-wash-gain,1)))] dark:data-[state=open]:bg-[rgb(249_226_222_/_calc(0.1*var(--contrast-wash-gain,1)))]"
                               >
                                 <MoreHorizontalIcon strokeWidth={1.75} className="size-icon" />
@@ -1006,9 +1004,7 @@ export function ProjectsPage() {
                                         .getState()
                                         .openDialog("data")
                                     }
-                                  >
-                                    Export all chats…
-                                  </DropdownMenuItem>
+                                  >{translate("uxChat.exportAllChatso9xpo")}</DropdownMenuItem>
                                 </DropdownMenuSubContent>
                               </DropdownMenuSub>
                               <OpenChatFolderItem item={chat} />
@@ -1040,7 +1036,7 @@ export function ProjectsPage() {
                         onClick={() => loadProjectChats(project.id, true)}
                         className="cursor-pointer self-start py-1 text-left text-sm text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
                       >
-                        Could not refresh chats. Retry
+                        {translate("uxCopy.couldNotRefreshChatskncq2")}
                       </button>
                     )}
                   </>
@@ -1090,7 +1086,7 @@ export function ProjectsPage() {
       >
         <DialogContent className="corner-squircle dialog-soft-surface sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Rename chat</DialogTitle>
+            <DialogTitle>{translate("uxChat.renameChat192x7")}</DialogTitle>
           </DialogHeader>
           <Input
             value={chatNameDraft}
@@ -1103,13 +1099,13 @@ export function ProjectsPage() {
             }}
             autoFocus
             maxLength={200}
-            placeholder="Chat name"
-            aria-label="Chat name"
+            placeholder={translate("uxChat.chatNamesvvel")}
+            aria-label={translate("uxChat.chatNamesvvel")}
             className="focus-visible:border-input focus-visible:ring-0"
           />
           <DialogFooter className="flex-wrap gap-2 sm:justify-end">
             <Button type="button" variant="ghost" onClick={() => setRenamingChat(null)}>
-              Cancel
+              {translate("browser.agentSettings.cancel")}
             </Button>
             <Button
               type="button"
@@ -1134,12 +1130,10 @@ export function ProjectsPage() {
       >
         <DialogContent className="menu-flat-destructive corner-squircle dialog-soft-surface sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Delete chat</DialogTitle>
+            <DialogTitle>{translate("uxChat.deleteChataejuz")}</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">
-            Are you sure you want to delete <em>{deletingChat?.title}</em>? Its messages
-            will be permanently deleted.
-          </p>
+            {translate("uxCopy.areYouSureYou18l00")} <em>{deletingChat?.title}</em>{translate("uxChat.itsMessagesWillBef9qc2")}</p>
           {/* The files are a second thing to lose, so the delete says so and can be told not to. */}
           <DeleteChatFilesSwitch
             id="projects-delete-chat-files"
@@ -1148,14 +1142,14 @@ export function ProjectsPage() {
           />
           <DialogFooter className="flex-wrap gap-2 sm:justify-end">
             <Button type="button" variant="ghost" onClick={() => setDeletingChat(null)}>
-              Cancel
+              {translate("browser.agentSettings.cancel")}
             </Button>
             <Button
               type="button"
               variant="destructive"
               onClick={() => void commitChatDelete()}
             >
-              {deleteFilesOnDelete ? "Delete all" : "Delete"}
+              {deleteFilesOnDelete ? translate("uxChat.deleteAllscuzt") : "Delete"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1165,7 +1159,7 @@ export function ProjectsPage() {
       <Dialog open={importFile !== null} onOpenChange={(open) => { if (!open) setImportFile(null); }}>
         <DialogContent className="corner-squircle dialog-soft-surface sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Import chats</DialogTitle>
+            <DialogTitle>{translate("uxChat.importChats5wzsm")}</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">
             Choose where to import{" "}
@@ -1184,7 +1178,7 @@ export function ProjectsPage() {
             onValueChange={(v) => setImportTargetId(v === "__recents__" ? null : v)}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select destination" />
+              <SelectValue placeholder={translate("uxChat.selectDestinationuvsf4")} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="__recents__">Recents</SelectItem>
@@ -1209,12 +1203,10 @@ export function ProjectsPage() {
       >
         <DialogContent className="menu-flat-destructive corner-squircle dialog-soft-surface sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Delete project</DialogTitle>
+            <DialogTitle>{translate("uxChat.deleteProjectxr5do")}</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">
-            Are you sure you want to delete <em>{deleting?.name}</em>? Its chats will
-            be permanently deleted.
-          </p>
+            {translate("uxCopy.areYouSureYou18l00")} <em>{deleting?.name}</em>{translate("uxChat.itsChatsWillBe25cp3")}</p>
           {/* Same offer the sidebar makes, naming the folder when the record carries one. */}
           <DeleteChatFilesSwitch
             id="projects-delete-project-files"
@@ -1222,15 +1214,15 @@ export function ProjectsPage() {
             onCheckedChange={setDeleteFilesOnDelete}
             description={
               deleting?.rootPath ??
-              "The project workspace folder will be removed from disk."
+              translate("uxChat.theProjectWorkspaceFolder7dw2n")
             }
           />
           <DialogFooter className="flex-wrap gap-2 sm:justify-end">
             <Button type="button" variant="ghost" onClick={() => setDeleting(null)}>
-              Cancel
+              {translate("browser.agentSettings.cancel")}
             </Button>
             <Button type="button" variant="destructive" onClick={() => void commitDelete()}>
-              {deleteFilesOnDelete ? "Delete all" : "Delete"}
+              {deleteFilesOnDelete ? translate("uxChat.deleteAllscuzt") : "Delete"}
             </Button>
           </DialogFooter>
         </DialogContent>

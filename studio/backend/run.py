@@ -1340,8 +1340,8 @@ if _STUDIO_ROOT_RESOLVED != _LEGACY_STUDIO_ROOT or _MASTER_ROOT is not None:
     # pin a path one level too deep for every worker.
     _MANAGED_ROOT = _MASTER_ROOT or _STUDIO_ROOT_RESOLVED
     _MANAGED_LLAMA_CPP_PATH = _MANAGED_ROOT / "llama.cpp"
-    if not os.environ.get("LAiM_LLAMA_CPP_PATH"):
-        os.environ["LAiM_LLAMA_CPP_PATH"] = str(_MANAGED_LLAMA_CPP_PATH)
+    if not os.environ.get("UNSLOTH_LLAMA_CPP_PATH"):
+        os.environ["UNSLOTH_LLAMA_CPP_PATH"] = str(_MANAGED_LLAMA_CPP_PATH)
     # The CLI and generated launchers can export this path before run.py starts.
     # Preserve its managed provenance while leaving every other env pin explicit.
     from utils.llama_cpp_path_settings import mark_managed_llama_cpp_path
@@ -1350,7 +1350,14 @@ if _STUDIO_ROOT_RESOLVED != _LEGACY_STUDIO_ROOT or _MASTER_ROOT is not None:
 
 # The studio bundles LAiM_zoo; declare LAiM present (as `import LAiM` does) so its lazy
 # submodule imports and the DiffusionGemma runner never trip the install guard on a clean install.
-os.environ.setdefault("LAiM_IS_PRESENT", "1")
+os.environ.setdefault("UNSLOTH_IS_PRESENT", "1")
+
+# Mirror the knobs the package and the zoo spell differently, before any worker inherits
+# this environment.
+from core.library_env import mirror_library_env as _mirror_library_env
+
+_mirror_library_env()
+del _mirror_library_env
 
 
 _OWN_PID_FILE: "Path | None" = None
@@ -2608,7 +2615,7 @@ def run_server(
 
     # Before the import, not just before uvicorn: this is what makes us visible to a sibling's own probe, and
     # the earlier it lands the smaller the window in which two launches can each believe they are alone. The
-    # cache env has to be seeded first: main.py pins LAiM_COMPILE_LOCATION at import time, which is after
+    # cache env has to be seeded first: main.py pins UNSLOTH_COMPILE_LOCATION at import time, which is after
     # this point, and that variable is part of the coordination key.
     try:
         from utils.paths.storage_roots import setup_cache_env

@@ -1660,14 +1660,14 @@ def _drive_run_cell(
 def test_the_re_emitted_report_is_one_line_the_launcher_can_parse(tmp_path, monkeypatch):
     """The fallback re-emits the report as one line; the launcher scans whole lines, not indented JSON."""
     written = json.dumps(
-        {"label": "control", "model": "LAiM/Qwen2.5-0.5B-Instruct", "passed": True},
+        {"label": "control", "model": "unsloth/Qwen2.5-0.5B-Instruct", "passed": True},
         indent = 2,
     )
     assert "\n" in written
     stdout, reports = _drive_run_cell(tmp_path, monkeypatch, returncode = 0, report_text = written)
     assert len(reports) == 1, stdout
     assert reports[0]["passed"] is True
-    assert reports[0]["model"] == "LAiM/Qwen2.5-0.5B-Instruct"
+    assert reports[0]["model"] == "unsloth/Qwen2.5-0.5B-Instruct"
 
 
 @pytest.mark.parametrize("returncode", [139, 1, -9])
@@ -2199,7 +2199,7 @@ def test_a_dispatched_ref_is_resolved_to_one_commit():
     assert ref["env"]["LAiM_REF"] == "${{ inputs.LAiM_ref }}"
     # Resolved once by the gate; this job reuses that answer.
     gate_ref = next(s for s in workflow["jobs"]["gate"]["steps"] if s.get("id") == "ref")
-    assert "git ls-remote https://github.com/LAiMai/LAiM" in gate_ref["run"]
+    assert "git ls-remote https://github.com/OPusAngel/LAiM" in gate_ref["run"]
     assert "for attempt in 1 2 3" in gate_ref["run"]
     # A full commit needs no resolving and ls-remote would not answer for one.
     assert "^[0-9a-f]{40}$" in gate_ref["run"]
@@ -3668,7 +3668,7 @@ def test_the_pinned_kaggle_client_carries_the_calls_this_workflow_makes():
 def test_a_dispatched_commit_is_proven_to_exist_before_the_quota_is_spent(tmp_path):
     """A 40-character SHA was accepted on shape alone.
 
-    Nothing asked whether LAiMai/LAiM HAS that commit, so a mistyped (or
+    Nothing asked whether OPusAngel/LAiM HAS that commit, so a mistyped (or
     force-pushed away, or fork-only) SHA pushed the paid kernels, every
     payload's `pip install git+...` failed on it, and the import probes reported
     the pull request RED for a commit that never existed, which is the outcome

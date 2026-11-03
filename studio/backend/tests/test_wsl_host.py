@@ -339,7 +339,7 @@ def test_wsl_launch_command(wsl, monkeypatch):
         [1, 3],
         None,
         False,
-        "LAiM/Qwen3-0.6B",
+        "unsloth/Qwen3-0.6B",
         None,
         8123,
     )
@@ -352,7 +352,7 @@ def test_wsl_launch_command(wsl, monkeypatch):
     # Windows paths and secrets never reach the guest command line.
     assert "hf_secret" not in joined and "C:\\" not in joined
     assert env["HF_TOKEN"] == "hf_secret" and "HF_TOKEN/u" in env["WSLENV"]
-    assert "LAiM/Qwen3-0.6B" in command and "--port" in command
+    assert "unsloth/Qwen3-0.6B" in command and "--port" in command
     # The engine key rides WSLENV too: on the guest command line any local user could read it.
     assert engine.key not in joined
     assert env["VLLM_API_KEY"] == engine.key and "VLLM_API_KEY/u" in env["WSLENV"]
@@ -939,11 +939,11 @@ def test_amd_wsl_launch_uses_one_hip_device_and_the_dxg_bridge(amd, monkeypatch)
     engine.context = 2048
     info = {"path": str(guest.parent), "host": "wsl", "platform": "rocm", "profile_digest": "d"}
     monkeypatch.delenv("HSA_OVERRIDE_GFX_VERSION", raising = False)
-    command, _ = engine._wsl_command(info, {}, [0], None, False, "LAiM/Qwen3-0.6B", None, 8123)
+    command, _ = engine._wsl_command(info, {}, [0], None, False, "unsloth/Qwen3-0.6B", None, 8123)
     assert not any(part.startswith("HSA_OVERRIDE_GFX_VERSION=") for part in command)
     # Eligibility accepted the target Studio's override presents; the engine must present it too.
     monkeypatch.setenv("HSA_OVERRIDE_GFX_VERSION", "11.5.1")
-    command, _ = engine._wsl_command(info, {}, [0], None, False, "LAiM/Qwen3-0.6B", None, 8123)
+    command, _ = engine._wsl_command(info, {}, [0], None, False, "unsloth/Qwen3-0.6B", None, 8123)
     assert "HSA_OVERRIDE_GFX_VERSION=11.5.1" in command
     assert "CUDA_VISIBLE_DEVICES=0" in command and "HIP_VISIBLE_DEVICES=0" in command
     assert (

@@ -584,7 +584,7 @@ def test_the_redirect_job_is_triggered_by_what_it_protects():
                             protected.add(first.value.split(".")[-1] + ".py")
 
     assert protected, "the ignored suites no longer import LAiM.models, so this is vacuous"
-    missing = sorted(name for name in protected if f"LAiM/models/{name}" not in text)
+    missing = sorted(name for name in protected if f"unsloth/models/{name}" not in text)
     assert not missing, (
         f"{host.name} runs the suites that cover these modules but is not "
         f"triggered by changes to them: {missing}. A PR touching only that code would "

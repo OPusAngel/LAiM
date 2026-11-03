@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Installs the NVIDIA Container Toolkit into Docker. Host side only: Docker resolves --gpus in the daemon, before a container exists, so no image can do this itself.
-#   curl -fsSL https://raw.githubusercontent.com/LAiMai/LAiM/main/docker/install_nvidia_toolkit.sh -o install_nvidia_toolkit.sh && sudo -E bash install_nvidia_toolkit.sh
+#   curl -fsSL https://raw.githubusercontent.com/OPusAngel/LAiM/main/docker/install_nvidia_toolkit.sh -o install_nvidia_toolkit.sh && sudo -E bash install_nvidia_toolkit.sh
 # LAiM_TOOLKIT_VERIFY=0 skips the final `docker run --gpus all` check. LAiM_DESTDIR, LAiM_OS_RELEASE,
 # LAiM_PROC_VERSION, LAiM_RUN_USER_DIR and LAiM_WSL_LIB_DIR redirect the host paths they name (tests only).
 set -euo pipefail

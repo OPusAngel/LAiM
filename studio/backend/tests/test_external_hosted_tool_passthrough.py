@@ -314,7 +314,7 @@ def test_full_access_on_ollama_keeps_the_date_the_nudge_costs_nothing_to_carry(m
 
     assert seen["messages"][0]["role"] == "system"
     assert seen["messages"][0]["content"].startswith("The current date is 2026-08-15.\n\n")
-    assert "sandbox" in seen["messages"][0]["content"], "the Full access nudge is still delivered"
+    assert "the user's own computer" in seen["messages"][0]["content"], "the Full access nudge is still delivered"
 
 
 def test_a_hosted_code_execution_is_not_dropped(monkeypatch):
@@ -332,7 +332,7 @@ def test_a_code_execution_with_run_tools_locally_still_answers_the_confirm_gate(
     LAiM has no `code_execution`, so the local catalog is empty whatever the
     flag says and the route falls back to the provider. The confirmation
     rejection keys on the request NOT having taken the loop, so a "local"
-    reading here answers a confirm-me request with an unconfirmed sandbox run.
+    reading here answers a confirm-me request with an unconfirmed workdir run.
     """
     from fastapi import HTTPException
 
@@ -573,7 +573,7 @@ def test_b_the_external_and_codex_paths_derive_the_gate_identically():
             confirms.add(ast.unparse(node.value))
     assert modes == {"payload.permission_mode or 'auto'"}
     assert confirms == {
-        "_permission_mode_confirm(payload) or _off_mode_sandbox_gate(payload, _ui_events)"
+        "_permission_mode_confirm(payload) or _off_mode_confirm_gate(payload, _ui_events)"
     }
 
     nudge_values = []
@@ -599,7 +599,7 @@ def test_b_the_external_and_codex_paths_derive_the_gate_identically():
         ("python", {"code": "import shutil; shutil.rmtree('/tmp/x')"}, True),
         # Observed, not endorsed: a bare `subprocess.run` clears the static
         # safety check and is not classified high risk, so auto runs it inside
-        # the sandbox without prompting. Same on every path (local, Codex,
+        # the workdir without prompting. Same on every path (local, Codex,
         # external), so it is not this PR's regression -- pinned so a change
         # to it is a deliberate one.
         ("python", {"code": "import subprocess; subprocess.run(['sh', '-c', 'x'])"}, False),

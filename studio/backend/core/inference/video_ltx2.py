@@ -11,7 +11,7 @@ vocoder that 2.3 moved out of the transformer. This assembles the full 2.3 pipel
 - transformer: from the checkpoint via ``from_single_file`` with the 2.3 config overrides and the
   ``prompt_adaln_single`` keys pre-renamed (the library converter doesn't know them).
 - connectors: from the checkpoint's connector keys plus the ``text_embedding_projection`` tensors,
-  fetched from the companion file in ``LAiM/LTX-2.3-GGUF`` when not bundled.
+  fetched from the companion file in ``unsloth/LTX-2.3-GGUF`` when not bundled.
 - video/audio VAE, vocoder: from the checkpoint when bundled, else the companion files.
 - scheduler, text encoder (Gemma3), tokenizer: from the LTX-2.0 base repo, which 2.3 shares.
 
@@ -35,7 +35,7 @@ logger = get_logger(__name__)
 
 # Companion files (text projections, VAEs incl. vocoder) beside the quants in LAiM's GGUF repo: the official
 # Lightricks weights split out of the combined checkpoint. Keyed by variant.
-LTX23_EXTRAS_REPO = "LAiM/LTX-2.3-GGUF"
+LTX23_EXTRAS_REPO = "unsloth/LTX-2.3-GGUF"
 
 
 def _live_cache_dir() -> str:
@@ -1620,7 +1620,7 @@ def _assemble_ltx23_pipeline(
     if any(k.endswith((".weight_scale", ".input_scale")) for k in groups["dit"]):
         raise ValueError(
             "This LTX checkpoint stores scaled fp8 weights, which this loader does "
-            "not dequantize yet. Use the GGUF quants from LAiM/LTX-2.3-GGUF "
+            "not dequantize yet. Use the GGUF quants from unsloth/LTX-2.3-GGUF "
             "instead (Q8_0 for the highest fidelity) or the official bf16 checkpoint."
         )
 

@@ -7,6 +7,8 @@ import { flushSync } from "react-dom"
 
 import { cn } from "@/lib/utils"
 import { prefersReducedMotion, setTheme } from "@/features/settings"
+import { translate } from "@/i18n";
+
 
 interface AnimatedThemeTogglerProps extends React.ComponentPropsWithoutRef<"button"> {
   duration?: number
@@ -109,7 +111,7 @@ export const AnimatedThemeToggler = ({
       {...props}
     >
       {isDark ? <Sun /> : <Moon />}
-      <span className="sr-only">Toggle theme</span>
+      <span className="sr-only">{translate("uxComponents.toggleThemenivt3")}</span>
     </button>
   )
 }

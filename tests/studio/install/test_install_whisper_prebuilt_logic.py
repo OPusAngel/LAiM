@@ -260,7 +260,7 @@ def _install_env(
         )
     )
     bundle = M.ReleaseBundle(
-        repo = "LAiMai/whisper.cpp",
+        repo = "unslothai/whisper.cpp",
         release_tag = RELEASE_TAG,
         manifest = manifest,
         asset_urls = {asset: f"https://example.invalid/{asset}"},
@@ -373,7 +373,7 @@ def test_resolve_mode_keeps_stdout_json_only(tmp_path, monkeypatch, capsys):
     )
     manifest = _slim_manifest()
     bundle = M.ReleaseBundle(
-        repo = "LAiMai/whisper.cpp",
+        repo = "unslothai/whisper.cpp",
         release_tag = RELEASE_TAG,
         manifest = manifest,
         asset_urls = {
@@ -422,7 +422,7 @@ def test_main_forwards_requested_whisper_tags(tmp_path, monkeypatch):
         M,
         "resolve_prebuilt",
         lambda host, **kwargs: (
-            seen.update(kwargs) or {"prebuilt_available": False, "repo": "LAiMai/whisper.cpp"}
+            seen.update(kwargs) or {"prebuilt_available": False, "repo": "unslothai/whisper.cpp"}
         ),
     )
     assert M.main(["--resolve-prebuilt", "v1.8.0", "--output-format", "json"]) == 0
@@ -461,7 +461,7 @@ def test_resolve_mode_unexpected_error_reports_unavailable(monkeypatch, capsys):
     payload = json.loads(capsys.readouterr().out.strip())
     assert payload == {
         "prebuilt_available": False,
-        "repo": "LAiMai/whisper.cpp",
+        "repo": "unslothai/whisper.cpp",
         "unavailable_reason": "unresolved",
     }
 
@@ -1121,7 +1121,7 @@ def test_llama_runtime_pairs_falls_back_to_mix_suffix(installed, required, pairs
     assert M.llama_runtime_pairs(installed, required) is pairs
 
 
-LLAMA_REPO = "LAiMai/llama.cpp"
+LLAMA_REPO = "unslothai/llama.cpp"
 # Not the default publisher, so a lookup that dropped installed_repo builds a different URL.
 FORK_REPO = "acme-fork/llama.cpp"
 
@@ -1207,7 +1207,7 @@ def test_published_ggml_tree_is_fetched_once_per_tag(monkeypatch):
     assert M.published_llama_ggml_tree(SUFFIX_SHARED_A) == TREE_A
     assert M.published_llama_ggml_tree(SUFFIX_SHARED_A) == TREE_A
     assert calls == [
-        f"https://github.com/LAiMai/llama.cpp/releases/download/"
+        f"https://github.com/unslothai/llama.cpp/releases/download/"
         f"{SUFFIX_SHARED_A}/llama-prebuilt-manifest.json"
     ]
 
@@ -1798,7 +1798,7 @@ def _slim_install_env(monkeypatch, tmp_path, host, *, sha256: str) -> Path:
         )
     )
     bundle = M.ReleaseBundle(
-        repo = "LAiMai/whisper.cpp",
+        repo = "unslothai/whisper.cpp",
         release_tag = RELEASE_TAG,
         manifest = manifest,
         asset_urls = {SLIM_ASSET: f"https://example.invalid/{SLIM_ASSET}"},
@@ -1871,7 +1871,7 @@ def test_slim_rocm_install_pairs_a_runtime_without_a_hipblaslt_catalog(tmp_path,
     )
     manifest = M.parse_manifest(_manifest([_slim_artifact(sha256 = sha256)]))
     bundle = M.ReleaseBundle(
-        repo = "LAiMai/whisper.cpp",
+        repo = "unslothai/whisper.cpp",
         release_tag = RELEASE_TAG,
         manifest = manifest,
         asset_urls = {SLIM_ASSET: f"https://example.invalid/{SLIM_ASSET}"},
@@ -1943,7 +1943,7 @@ _LEGACY_RESOLVER_KEYS = {
 
 def _resolver_payload(monkeypatch, capsys, manifest, host) -> dict:
     bundle = M.ReleaseBundle(
-        repo = "LAiMai/whisper.cpp",
+        repo = "unslothai/whisper.cpp",
         release_tag = RELEASE_TAG,
         manifest = manifest,
         asset_urls = {},
@@ -1968,7 +1968,7 @@ def _release_for_selection(release_tag: str, upstream_tag: str, artifact: dict) 
     payload = _manifest([artifact])
     payload["upstream_tag"] = upstream_tag
     return M.ReleaseBundle(
-        repo = "LAiMai/whisper.cpp",
+        repo = "unslothai/whisper.cpp",
         release_tag = release_tag,
         manifest = M.parse_manifest(payload),
         asset_urls = {},
@@ -2009,7 +2009,7 @@ def test_whisper_tag_selects_matching_published_upstream(monkeypatch):
 
     payload = M.resolve_prebuilt(
         _host("linux", "x64"),
-        published_repo = "LAiMai/whisper.cpp",
+        published_repo = "unslothai/whisper.cpp",
         published_release_tag = None,
         whisper_tag = "v1.9.0",
         backend = "cpu",
@@ -2066,7 +2066,7 @@ def test_macos_walks_back_to_newest_compatible_release(monkeypatch):
 
     payload = M.resolve_prebuilt(
         _host("macos", "arm64", macos_version = (14, 7)),
-        published_repo = "LAiMai/whisper.cpp",
+        published_repo = "unslothai/whisper.cpp",
         published_release_tag = None,
         backend = "cpu",
         cpu_fallback = False,
@@ -2075,7 +2075,7 @@ def test_macos_walks_back_to_newest_compatible_release(monkeypatch):
     assert payload["release_tag"] == compatible.release_tag
     plan = M._release_plan_for_host(
         _host("macos", "arm64", macos_version = (14, 7)),
-        published_repo = "LAiMai/whisper.cpp",
+        published_repo = "unslothai/whisper.cpp",
         published_release_tag = None,
         whisper_tag = "latest",
         requested_backend = "cpu",
@@ -2109,7 +2109,7 @@ def test_macos_walkback_never_masks_checksum_failure(monkeypatch):
     with pytest.raises(PrebuiltFallback, match = "disagrees"):
         M._release_plan_for_host(
             _host("macos", "arm64", macos_version = (14, 7)),
-            published_repo = "LAiMai/whisper.cpp",
+            published_repo = "unslothai/whisper.cpp",
             published_release_tag = None,
             whisper_tag = "latest",
             requested_backend = "cpu",
@@ -2527,7 +2527,7 @@ def _no_network(monkeypatch, *, release_error = None):
 
     def no_release(*_args, **_kwargs):
         raise release_error or PrebuiltFallback(
-            "could not fetch release LAiMai/whisper.cpp@latest: <urlopen error refused>"
+            "could not fetch release unslothai/whisper.cpp@latest: <urlopen error refused>"
         )
 
     def no_listing(_repo):

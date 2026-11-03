@@ -93,7 +93,7 @@ ARTIFACTS = [
 
 def release(artifacts = ARTIFACTS):
     return m.PublishedReleaseBundle(
-        repo = "LAiMai/llama.cpp",
+        repo = "unslothai/llama.cpp",
         release_tag = "v1.0",
         upstream_tag = "b8508",
         assets = {a.asset_name: f"https://example.com/{a.asset_name}" for a in artifacts},

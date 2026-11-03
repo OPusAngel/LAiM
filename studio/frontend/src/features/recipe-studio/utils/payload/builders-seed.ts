@@ -2,6 +2,8 @@
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import type { NodeConfig, SeedConfig } from "../../types";
+import { translate } from "@/i18n";
+
 
 const DEFAULT_CHUNK_SIZE = 1200;
 const DEFAULT_CHUNK_OVERLAP = 200;
@@ -45,7 +47,7 @@ export function buildSeedConfig(
     const start = parseIntStrict(config.selection_start);
     const end = parseIntStrict(config.selection_end);
     if (start === null || end === null) {
-      errors.push(`Seed ${config.name}: selection index range invalid.`);
+      errors.push(translate("uxRecipestudio.seedSelectionIndexRangem5lne", { p1: config.name }));
       return undefined;
     }
     selectionStrategy = { start, end };
@@ -53,7 +55,7 @@ export function buildSeedConfig(
     const index = parseIntStrict(config.selection_index);
     const numPartitions = parseIntStrict(config.selection_num_partitions);
     if (index === null || numPartitions === null) {
-      errors.push(`Seed ${config.name}: selection partition invalid.`);
+      errors.push(translate("uxRecipestudio.seedSelectionPartitionInvalidvn8lg", { p1: config.name }));
       return undefined;
     }
     // biome-ignore lint/style/useNamingConvention: api schema
@@ -86,7 +88,7 @@ export function buildSeedConfig(
       .map((r) => r.trim())
       .filter(Boolean);
     if (repos.length === 0) {
-      errors.push(`Seed ${config.name}: at least one repo is required.`);
+      errors.push(translate("uxRecipestudio.seedAtLeastOnetfkxj", { p1: config.name }));
       return undefined;
     }
     const invalidRepo = repos.find((repo) => {
@@ -103,20 +105,20 @@ export function buildSeedConfig(
       ? config.github_item_types
       : ["issues", "pulls"];
     if (itemTypes.some((itemType) => !GITHUB_ITEM_TYPES.has(itemType))) {
-      errors.push(`Seed ${config.name}: GitHub item types invalid.`);
+      errors.push(translate("uxRecipestudio.seedGitHubItemTypeslnvy5", { p1: config.name }));
       return undefined;
     }
     const limitNum = parseIntStrict(config.github_limit ?? "100");
     if (limitNum === null || limitNum < 1 || limitNum > 5000) {
       errors.push(
-        `Seed ${config.name}: GitHub items per repo must be an integer from 1 to 5000.`,
+        translate("uxRecipestudio.seedGitHubItemsPer46y34", { p1: config.name }),
       );
       return undefined;
     }
     const maxCommentsNum = parseIntStrict(config.github_max_comments_per_item ?? "30");
     if (maxCommentsNum === null || maxCommentsNum < 0 || maxCommentsNum > 200) {
       errors.push(
-        `Seed ${config.name}: GitHub max comments per item must be an integer from 0 to 200.`,
+        translate("uxRecipestudio.seedGitHubMaxCommentsuykom", { p1: config.name }),
       );
       return undefined;
     }
@@ -197,7 +199,7 @@ export function buildSeedDropProcessor(
 
   if (cols.length === 0) {
     errors.push(
-      `Seed ${config.name}: selected drop columns are unavailable.`,
+      translate("uxRecipestudio.seedSelectedDropColumns4a433", { p1: config.name }),
     );
     return null;
   }

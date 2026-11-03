@@ -3,7 +3,7 @@
 
 """GRPO's manual DDP gradient average copies each bucket back with one fused copy.
 
-``_LAiM_average_gradients`` is lifted from ``LAiM/models/rl.py`` with ``ast`` so the test stays
+``_LAiM_average_gradients`` is lifted from ``unsloth/models/rl.py`` with ``ast`` so the test stays
 CPU-only; collectives are stubbed (a 2-rank all_reduce of identical grads is a SUM of two copies).
 """
 

@@ -32,7 +32,7 @@ def _load_failure(
     native: bool = False,
 ) -> HTTPException:
     inference_route = _load_route_module()
-    model_path = "LAiM/Qwen3.6-35B-A3B-NVFP4-Fast"
+    model_path = "unsloth/Qwen3.6-35B-A3B-NVFP4-Fast"
     model_label = "Qwen3.6-35B-A3B-NVFP4-Fast" if native else model_path
     request = LoadRequest(model_path = model_path)
     backend = MagicMock(active_model_name = None)
@@ -66,7 +66,7 @@ def _validation_failure(
     native: bool = False,
 ) -> HTTPException:
     inference_route = _load_route_module()
-    model_path = "LAiM/Qwen3.6-35B-A3B-NVFP4-Fast"
+    model_path = "unsloth/Qwen3.6-35B-A3B-NVFP4-Fast"
     model_label = "Qwen3.6-35B-A3B-NVFP4-Fast" if native else model_path
     request = ValidateModelRequest(model_path = model_path)
     with (
@@ -90,7 +90,7 @@ def _validation_failure(
 @pytest.mark.parametrize("native", [False, True])
 def test_nvfp4_mlx_metadata_error_is_replaced_with_short_message(exception_type, native):
     error = _load_failure(
-        "LAiM: 'LAiM/Qwen3.6-35B-A3B-NVFP4-Fast' has per-module MLX "
+        "LAiM: 'unsloth/Qwen3.6-35B-A3B-NVFP4-Fast' has per-module MLX "
         "quantization metadata {'config_groups': {'group_0': {'format': "
         "'float-quantized'}, 'group_1': {'format': 'nvfp4-pack-quantized'}}}",
         exception_type = exception_type,
@@ -123,7 +123,7 @@ def test_unrelated_value_error_keeps_existing_message(native):
 @pytest.mark.parametrize("native", [False, True])
 def test_nvfp4_validation_error_is_replaced_with_short_message(exception_type, native):
     error = _validation_failure(
-        "LAiM: 'LAiM/Qwen3.6-35B-A3B-NVFP4-Fast' has per-module MLX "
+        "LAiM: 'unsloth/Qwen3.6-35B-A3B-NVFP4-Fast' has per-module MLX "
         "quantization metadata {'config_groups': {'group_0': {'format': "
         "'float-quantized'}, 'group_1': {'format': 'nvfp4-pack-quantized'}}}",
         exception_type = exception_type,

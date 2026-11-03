@@ -9,6 +9,8 @@ import {
   MEMORY_REFUSAL_HEADER,
   MemoryEstimateRefusalError,
 } from "./lib/memory-refusal";
+import { translate } from "@/i18n";
+
 
 // One Advanced control's resolved value and provenance, for the Advanced-panel badges. `value` is the engaged
 // value (null when off), `requested` is what the caller asked for (null = left to the backend), `source` is "auto"
@@ -448,7 +450,7 @@ export async function generateDiffusionImage(
   } catch (err) {
     // fetch itself rejected: the connection dropped, not a backend refusal.
     throw new GenerateResponseLostError(
-      err instanceof Error ? err.message : "Lost connection during image generation",
+      err instanceof Error ? err.message : translate("uxImages.lostConnectionDuringImage9z29h"),
     );
   }
   if (!response.ok && RESPONSE_LOST_STATUSES.has(response.status)) {

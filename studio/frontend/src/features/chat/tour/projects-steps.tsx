@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import type { TourStep } from "@/features/tour";
 
 export function buildProjectsTourSteps({
@@ -12,24 +13,24 @@ export function buildProjectsTourSteps({
     {
       id: "new",
       target: "projects-new",
-      title: "Make a project",
-      body: (
+      title: translate("uxChat.makeAProjectyckvf"),
+      get body() {
+        return (
         <>
-          A project keeps related chats together with shared files and a shared
-          system prompt. Sources you add reach every chat inside it.
-        </>
-      ),
+          {translate("uxChat.aProjectKeepsRelated8f3av")}</>
+      );
+      },
     },
     {
       id: "io",
       target: "projects-io",
-      title: "Import and export",
-      body: (
+      title: translate("browser.importBookmarksSetting"),
+      get body() {
+        return (
         <>
-          Export chats as JSONL, CSV or ShareGPT, a quick way to turn real
-          conversations into training data. Import brings them back.
-        </>
-      ),
+          {translate("uxChat.exportChatsAsJSONL164md")}</>
+      );
+      },
     },
   ];
 
@@ -37,13 +38,13 @@ export function buildProjectsTourSteps({
     steps.push({
       id: "list",
       target: "projects-list",
-      title: "Open a project",
-      body: (
+      title: translate("uxChat.openAProjectu05yq"),
+      get body() {
+        return (
         <>
-          Click a row to open it in Chat. The row menu pins it to the sidebar,
-          renames it, or deletes it with its chats.
-        </>
-      ),
+          {translate("uxChat.clickARowTo9wwd8")}</>
+      );
+      },
     });
   }
 

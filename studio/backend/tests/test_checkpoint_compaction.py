@@ -4162,7 +4162,7 @@ def test_a_rescued_reset_still_offers_recall_but_is_never_replayed(monkeypatch, 
 
 
 CONTRACT = "1. The seller delivers the goods within thirty days of the order. " * 900
-SANDBOX_NOTE = (
+WORKDIR_NOTE = (
     "[contract.pdf: its text is below, so answer from it. For calculations, the python tool has the file at "
     'path = ".LAiM_attachments/0123456789ab/contract.pdf"; fitz.open(path)]'
 )
@@ -4176,7 +4176,7 @@ SANDBOX_NOTE = (
         "[XLSX: prices.xlsx]\n[Sheet: Q3]\n" + CONTRACT,
         "<attachment name=contract.txt>\n" + CONTRACT + "\n</attachment>",
         "<pasted_text name=contract.txt bytes=60300>\n" + CONTRACT + "\n</pasted_text>",
-        SANDBOX_NOTE + "\n[PDF: contract.pdf]\n" + CONTRACT,
+        WORKDIR_NOTE + "\n[PDF: contract.pdf]\n" + CONTRACT,
         "[PDF: a.pdf]\n" + CONTRACT + "\n<attachment name=b.txt>\n" + CONTRACT + "\n</attachment>",
     ],
 )

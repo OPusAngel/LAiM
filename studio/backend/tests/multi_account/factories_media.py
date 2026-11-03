@@ -7,8 +7,8 @@ from .factory_base import Factory, seeder
 SENTINEL = "media-sentinel-prompt"
 
 VIDEO_ID = "media-video-clip"
-SANDBOX_SESSION = "media-sandbox-session"
-SANDBOX_FILE = "notes.txt"
+WORKDIR_SESSION = "media-workdir-session"
+WORKDIR_FILE = "notes.txt"
 SEARCH_IMAGE_ID = "a1b2c3d4e5f6"
 MODEL_ID = "media-local-model-Q4_K_M"
 
@@ -292,17 +292,17 @@ def seed_search_image(account) -> dict[str, str]:
     return {"image_id": SEARCH_IMAGE_ID}
 
 
-@seeder("media-sandbox")
-def seed_sandbox(account) -> dict[str, str]:
+@seeder("media-workdir")
+def seed_workdir(account) -> dict[str, str]:
     import os
 
-    from core.inference.tools import get_sandbox_workdir
+    from core.inference.tools import get_session_workdir
     from utils.account_context import run_as
 
-    workdir = run_as(account, get_sandbox_workdir, SANDBOX_SESSION)
-    with open(os.path.join(workdir, SANDBOX_FILE), "w", encoding = "utf-8") as handle:
+    workdir = run_as(account, get_session_workdir, WORKDIR_SESSION)
+    with open(os.path.join(workdir, WORKDIR_FILE), "w", encoding = "utf-8") as handle:
         handle.write(SENTINEL)
-    return {"session_id": SANDBOX_SESSION, "filename": SANDBOX_FILE}
+    return {"session_id": WORKDIR_SESSION, "filename": WORKDIR_FILE}
 
 
 @seeder("media-monitor")
@@ -372,7 +372,7 @@ FACTORIES = {
         "media-image", {"after_id": None}, fragment = SENTINEL
     ),
     "routes.inference:POST:/images/gallery/{image_id}/project": Factory(
-        "media-image-project", {"project_id": MEDIA_PROJECT_ID}, fragment = "sandbox"
+        "media-image-project", {"project_id": MEDIA_PROJECT_ID}, fragment = "workdir"
     ),
     "routes.inference:GET:/audio/gallery/{audio_id}/file": Factory("media-audio"),
     "routes.inference:GET:/audio/gallery/{audio_id}/source/file": Factory("media-audio-converted"),
@@ -385,7 +385,7 @@ FACTORIES = {
         "media-audio", {"after_id": None}, fragment = SENTINEL
     ),
     "routes.inference:POST:/audio/gallery/{audio_id}/project": Factory(
-        "media-audio-project", {"project_id": MEDIA_PROJECT_ID}, fragment = "sandbox"
+        "media-audio-project", {"project_id": MEDIA_PROJECT_ID}, fragment = "workdir"
     ),
     "routes.inference:GET:/audio/inputs/{input_id}/file": Factory("media-audio-input"),
     "routes.inference:DELETE:/audio/inputs/{input_id}": Factory("media-audio-input"),
@@ -431,7 +431,7 @@ FACTORIES = {
         "media-video", {"after_id": None}, fragment = SENTINEL
     ),
     "routes.video:POST:/video/gallery/{video_id}/project": Factory(
-        "media-video-project", {"project_id": MEDIA_PROJECT_ID}, fragment = "sandbox"
+        "media-video-project", {"project_id": MEDIA_PROJECT_ID}, fragment = "workdir"
     ),
     "routes.video:GET:/videos/{video_id}": Factory("media-video", fragment = SENTINEL),
     "routes.video:GET:/videos/{video_id}/content": Factory("media-video"),
@@ -441,19 +441,19 @@ FACTORIES = {
     ),
     "routes.inference:GET:/monitor/{entry_id}": Factory("media-monitor", fragment = SENTINEL),
     "routes.inference:GET:/models/{model_id:path}": Factory("media-model", fragment = MODEL_ID),
-    "routes.inference:GET:/sandbox/{session_id}": Factory(
-        "media-sandbox",
-        fragment = SANDBOX_FILE,
-        absent = SANDBOX_FILE,
+    "routes.inference:GET:/workdir/{session_id}": Factory(
+        "media-workdir",
+        fragment = WORKDIR_FILE,
+        absent = WORKDIR_FILE,
         owner = (200,),
         wrong = (200,),
-        reason = "a session id resolves inside the caller's own sandbox root, so another account "
+        reason = "a session id resolves inside the caller's own workdir root, so another account "
         "is listed its own empty directory rather than refused",
     ),
-    "routes.inference:GET:/sandbox/{session_id}/{filename:path}": Factory(
-        "media-sandbox", fragment = SENTINEL
+    "routes.inference:GET:/workdir/{session_id}/{filename:path}": Factory(
+        "media-workdir", fragment = SENTINEL
     ),
-    "routes.inference:HEAD:/sandbox/{session_id}/{filename:path}": Factory("media-sandbox"),
+    "routes.inference:HEAD:/workdir/{session_id}/{filename:path}": Factory("media-workdir"),
 }
 
 _NPU_INSTALLATION_MODEL = (
@@ -462,15 +462,15 @@ _NPU_INSTALLATION_MODEL = (
 )
 
 SKIPPED = {
-    "routes.inference:POST:/sandbox/{session_id}/reveal": (
+    "routes.inference:POST:/workdir/{session_id}/reveal": (
         "opens the backend host's file manager, so a success spawns xdg-open on a machine with "
         "no desktop session and the only in-process outcome is the 500 that failure maps to"
     ),
-    "routes.inference:POST:/sandbox/{session_id}/upload": (
+    "routes.inference:POST:/workdir/{session_id}/upload": (
         "needs a multipart body the JSON matrix client cannot send, so every actor stops at the "
-        "same 422; the folder resolves inside the caller's own sandbox root (test_sandbox_upload)"
+        "same 422; the folder resolves inside the caller's own workdir root (test_workdir_upload)"
     ),
-    "routes.inference:POST:/sandbox/{session_id}/open": (
+    "routes.inference:POST:/workdir/{session_id}/open": (
         "launches the backend host's default app for the file and is owner-only "
         "(require_installation_owner), so no account other than the installation's own reaches it"
     ),

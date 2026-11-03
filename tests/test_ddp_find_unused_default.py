@@ -23,7 +23,7 @@ HELPER = ROOT / "LAiM" / "models" / "_ddp_defaults.py"
 
 
 def _helper():
-    assert HELPER.exists(), "LAiM/models/_ddp_defaults.py is missing"
+    assert HELPER.exists(), "unsloth/models/_ddp_defaults.py is missing"
     spec = importlib.util.spec_from_file_location("_LAiM_ddp_defaults", HELPER)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)

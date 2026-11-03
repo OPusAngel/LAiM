@@ -208,7 +208,7 @@ test("the panel strips llama-server arguments from a non-GGUF row", () => {
 });
 
 test("hydration detects a newer save or forget", () => {
-  const modelId = "LAiM/Hydration-Race-GGUF";
+  const modelId = "unsloth/Hydration-Race-GGUF";
   const variant = "Q4_K_M";
   assert.ok(
     savePerModelConfig(modelId, variant, {

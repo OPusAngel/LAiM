@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { useIsAccountOwner } from "@/features/auth";
-import { useT } from "@/i18n";
+import { translate, useT } from "@/i18n";
 import { DEFAULT_HF_ENDPOINT, type HubSource } from "@/lib/hf-endpoint";
 import { cn } from "@/lib/utils";
 import { useEffect, useId, useRef, useState } from "react";
@@ -23,8 +23,8 @@ import { SettingsRow } from "./settings-row";
 import { SettingsSection } from "./settings-section";
 
 const SOURCES: { value: HubSource; label: string }[] = [
-  { value: "huggingface", label: "Hugging Face" },
-  { value: "modelscope", label: "ModelScope" },
+  { value: "huggingface", get label() { return translate("uxSettings.huggingFace1czdc"); } },
+  { value: "modelscope", get label() { return translate("uxSettings.modelScope10ji5"); } },
 ];
 
 export function HubSettingsSection() {

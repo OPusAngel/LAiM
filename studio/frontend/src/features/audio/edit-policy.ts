@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   type AudioSourceSelection,
   EDIT_SOURCE_MAX_SECONDS,
@@ -15,25 +16,24 @@ import { countChanges } from "./edit-diff";
 
 export const EDIT_COPY = {
   recordingLabel: "Recording",
-  recordingHint: "Up to 30 s of one voice.",
-  transcriptLabel: "① Check the transcript",
-  transcriptHint:
-    "Fix any word the recognizer got wrong, so it matches the audio.",
-  changesLabel: "② Make your changes",
-  changesHint: "Change, add or remove words. Each change is marked below.",
+  get recordingHint() { return translate("uxAudio.upTo30Sy2skp"); },
+  get transcriptLabel() { return translate("uxAudio.checkTheTranscript7m8my"); },
+  get transcriptHint() { return translate("uxAudio.fixAnyWordTheq4z4x"); },
+  get changesLabel() { return translate("uxAudio.makeYourChangesg3grg"); },
+  get changesHint() { return translate("uxAudio.changeAddOrRemoven41en"); },
   resetLabel: "Reset to transcript",
   wordsTab: "Words",
   deliveryTab: "Delivery",
   speedLabel: "Speed",
   pitchLabel: "Raise pitch",
-  deliveryLabel: "② Change the delivery",
-  pitchHint:
-    "Below 1× is slower, above is faster. FireRedAudio can raise pitch, not lower it, and makes one pass per change.",
-  howItEditsTitle: "How edits apply",
+  get deliveryLabel() { return translate("uxAudio.changeTheDeliverye42te"); },
+  get pitchHint() { return translate("uxAudio.below1IsSlowerecvgu"); },
+  get howItEditsTitle() { return translate("uxAudio.howEditsApply58kv8"); },
   vevo2SwitchNote:
     "Vevo2 reloads for editing when it was last used on Clone, about 1–9 s.",
-  emptyText:
-    "Edited speech lands here. Add a recording, fix its transcript, change the words, and press Generate.",
+  get emptyText() {
+    return translate("uxAudio.editedSpeechLandsHere1ucxj");
+  },
 } as const;
 
 export const EDIT_NO_SOURCE = "Add a recording to edit.";
@@ -89,13 +89,13 @@ const blocker = (
 export function editBlocker(input: EditBlockerInput): EditBlocker | null {
   if (!input.source && !input.sourceBusy) {
     return blocker("source", input.sourceError || EDIT_NO_SOURCE, [
-      { id: "add-recording", label: "Add recording" },
+      { id: "add-recording", label: translate("uxAudio.addRecordingj2w8m") },
     ]);
   }
   if (input.sourceBusy) return blocker("source-busy", EDIT_SOURCE_BUSY);
   if (input.sourceExpired) {
     return blocker("source-expired", EDIT_SOURCE_EXPIRED, [
-      { id: "add-recording", label: "Add it again" },
+      { id: "add-recording", label: translate("uxAudio.addItAgain1rlob") },
     ]);
   }
   if (
@@ -103,27 +103,27 @@ export function editBlocker(input: EditBlockerInput): EditBlocker | null {
     input.sourceDurationS > EDIT_SOURCE_MAX_SECONDS + EDIT_SOURCE_SLACK_SECONDS
   ) {
     return blocker("source-too-long", EDIT_SOURCE_TOO_LONG, [
-      { id: "choose-recording", label: "Choose another" },
+      { id: "choose-recording", label: translate("uxAudio.chooseAnothermxwd5") },
     ]);
   }
   if (input.mode === "words") {
     if (input.transcribing) return blocker("transcribing", EDIT_TRANSCRIBING);
     if (!input.transcript.trim()) {
       return blocker("transcript", EDIT_TRANSCRIPT_EMPTY, [
-        { id: "transcribe", label: "Transcribe it" },
-        { id: "type-transcript", label: "Type it" },
+        { id: "transcribe", label: translate("uxAudio.transcribeItk36kg") },
+        { id: "type-transcript", label: translate("uxAudio.typeItz208l") },
       ]);
     }
     if (!input.edited.trim()) {
       return blocker("changes-empty", EDIT_CHANGES_EMPTY, [
-        { id: "focus-changes", label: "Go to ②" },
+        { id: "focus-changes", label: translate("uxAudio.goTo1amat") },
       ]);
     }
     const changes = countChanges(input.transcript, input.edited);
     if (changes === null) return blocker("too-long", EDIT_TOO_LONG);
     if (changes === 0) {
       return blocker("changes", EDIT_NO_CHANGES, [
-        { id: "focus-changes", label: "Go to ②" },
+        { id: "focus-changes", label: translate("uxAudio.goTo1amat") },
       ]);
     }
   }

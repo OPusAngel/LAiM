@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { SegmentedPill } from "@/components/segmented-control";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -105,9 +106,10 @@ const B = 1e9;
 const K = 1024;
 const RANGES: readonly RangeSpec[] = [
   {
-    label: "Parameters",
-    about:
-      "Both limits are included. Models that don't publish a parameter count are left out.",
+    get label() {
+      return translate("studio.wizard.paramsTitle");
+    },
+    get about() { return translate("uxHub.bothLimitsAreIncludedgzwee"); },
     min: "minParams",
     max: "maxParams",
     // Labelled stops sit evenly with one step between each pair, as on the Hugging Face Hub.
@@ -128,9 +130,10 @@ const RANGES: readonly RangeSpec[] = [
     format: (n) => `${n / B}B`,
   },
   {
-    label: "Context length",
-    about:
-      "In tokens. The model's published limit, not what your device can fit. Both limits are included; models that don't publish one are left out.",
+    get label() {
+      return translate("studio.progress.contextLength");
+    },
+    get about() { return translate("uxHub.inTokensTheModel2mk6l"); },
     min: "minContext",
     max: "maxContext",
     stops: [16, 24, 32, 48, 64, 96, 128, 192, 256, 512, 1024].map((n) => n * K),
@@ -158,9 +161,10 @@ const ROW_UNITS: readonly [number, string][] = [
   [1e3, "K"],
 ];
 const DATASET_ROWS: RangeSpec = {
-  label: "Size (rows)",
-  about:
-    "The Hub's size category for the dataset. Datasets that don't publish one are left out.",
+  get label() {
+    return translate("uxHub.sizeRows1oaa4");
+  },
+  get about() { return translate("uxHub.theHubSSizenzsvr"); },
   min: "minRows",
   max: "maxRows",
   stops: DATASET_ROW_STOPS,
@@ -271,7 +275,7 @@ function RangeStops({
               strokeWidth={1.75}
               className="size-3"
             />
-            Reset
+            {translate("browser.downloadLocationReset")}
           </button>
         )}
       </legend>
@@ -507,7 +511,7 @@ function HoverInfo({ label, children }: { label: string; children: string }) {
           {label}
           <button
             type="button"
-            aria-label={`About ${label.toLowerCase()}`}
+            aria-label={translate("uxHub.aboutqqrzm", { p1: label.toLowerCase() })}
             className="inline-flex cursor-help items-center opacity-0 transition-opacity focus-visible:opacity-100 group-hover/title:opacity-100"
           >
             <HugeiconsIcon
@@ -549,9 +553,7 @@ function CapabilityTiles({
             type="button"
             onClick={() => onChange([])}
             className="cursor-pointer transition-colors hover:text-foreground"
-          >
-            Select all
-          </button>
+          >{translate("uxHub.selectAllfu43r")}</button>
         )}
       </legend>
       <div className="grid grid-cols-2 gap-1.5 px-3">
@@ -662,7 +664,7 @@ export function ModelSearchFiltersControl({
       <Tooltip>
         <TooltipTrigger asChild={true}>
           <PopoverTrigger asChild={true}>
-            <button type="button" className={className} aria-label="Filters">
+            <button type="button" className={className} aria-label={translate("uxHub.filters345x4")}>
               <HugeiconsIcon
                 icon={FilterMailIcon}
                 strokeWidth={1.75}
@@ -679,7 +681,7 @@ export function ModelSearchFiltersControl({
           </PopoverTrigger>
         </TooltipTrigger>
         <TooltipContent side="bottom" sideOffset={6}>
-          Filters
+          {translate("uxHub.filters345x4")}
         </TooltipContent>
       </Tooltip>
       <PopoverContent
@@ -727,9 +729,7 @@ export function ModelSearchFiltersControl({
                       type="button"
                       onClick={() => onModalitiesChange([])}
                       className="cursor-pointer transition-colors hover:text-foreground"
-                    >
-                      Select all
-                    </button>
+                    >{translate("uxHub.selectAllfu43r")}</button>
                   )}
                 </legend>
                 <div className="grid grid-cols-2 gap-1.5 px-3">
@@ -778,12 +778,12 @@ export function ModelSearchFiltersControl({
           {/* The Hub search's own scope, so it stays on ModelScope too; datasets take none. */}
           {modelSections && (
             <SegmentedRow
-              label="Uploader"
-              about="LAiM lists LAiM's own uploads. All uploaders searches every account on the Hub; a search starts there."
+              label={translate("uxHub.uploadera4jek")}
+              about={translate("uxHub.lAiMListsLAiMSv5vo0")}
               value={LAiMOnly ? "LAiM" : "all"}
               options={[
                 ["LAiM", "LAiM"],
-                ["all", "All uploaders"],
+                ["all", translate("uxHub.allUploadersr01y3")],
               ]}
               onChange={(next) =>
                 onUploadersChange(
@@ -793,8 +793,8 @@ export function ModelSearchFiltersControl({
             />
           )}
           <SwitchField
-            label="Datasets only"
-            about="Lists datasets instead of models."
+            label={translate("uxHub.datasetsOnlysdnwl")}
+            about={translate("uxHub.listsDatasetsInsteadOfaipdj")}
             checked={datasets}
             onCheckedChange={onDatasetsChange}
           />
@@ -809,9 +809,7 @@ export function ModelSearchFiltersControl({
             className={cn(TEXT_BOX, "-my-[0.25em]")}
             disabled={!filtered}
             onClick={onDevice ? onDevice.onReset : onReset}
-          >
-            Reset all
-          </Button>
+          >{translate("uxHub.resetAll53zp9")}</Button>
         </div>
       </PopoverContent>
     </Popover>

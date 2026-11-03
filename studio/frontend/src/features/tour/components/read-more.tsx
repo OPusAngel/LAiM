@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
+
 const EXTERNAL_URL_RE = /^https?:\/\//;
 
 export function ReadMore({ href = "#" }: { href?: string }) {
@@ -14,8 +16,6 @@ export function ReadMore({ href = "#" }: { href?: string }) {
         if (href === "#") e.preventDefault();
       }}
       className="text-control-accent underline underline-offset-2 hover:text-control-accent/80"
-    >
-      Read more
-    </a>
+    >{translate("uxTour.readMorepelqu")}</a>
   );
 }

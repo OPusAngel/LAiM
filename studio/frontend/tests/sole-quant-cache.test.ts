@@ -15,8 +15,8 @@ import {
   verifiedSoleHubVariant,
 } from "../src/features/model-picker/components/model-selector/sole-quant-cache.ts";
 
-const A = "LAiM/Qwen3-8B-GGUF";
-const B = "LAiM/Llama-3.1-8B-Instruct-GGUF";
+const A = "unsloth/Qwen3-8B-GGUF";
+const B = "unsloth/Llama-3.1-8B-Instruct-GGUF";
 
 test("a sole Hub quant collapses only after dependency-aware verification", () => {
   const complete = { quant: "Q4_K_M", downloaded: true };

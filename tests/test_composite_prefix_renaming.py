@@ -292,7 +292,7 @@ def test_a_non_composite_model_is_untouched():
 @pytest.fixture
 def forced_install(monkeypatch):
     """Forces the install gate open so install tests are not vacuous on releases the probe declines."""
-    # Reuse the loaded module: re-importing runs `LAiM/__init__`, which needs LAiM_zoo.
+    # Reuse the loaded module: re-importing runs `unsloth/__init__`, which needs LAiM_zoo.
     import_fixes = sys.modules[_transformers_rescopes_submodule_prefix_renamings.__module__]
 
     conversion_mapping = _conversion_mapping()
@@ -527,7 +527,7 @@ def test_an_unrelated_module_keeps_its_own_same_named_function(
 def test_it_defers_to_the_LAiM_zoo_copy_of_the_same_repair(monkeypatch):
     """LAiM defers to LAiM_zoo's copy of the repair so only one wrapper is installed."""
     conversion_mapping = pytest.importorskip("transformers.conversion_mapping")
-    # Reuse the loaded module: re-importing runs `LAiM/__init__`, which needs LAiM_zoo.
+    # Reuse the loaded module: re-importing runs `unsloth/__init__`, which needs LAiM_zoo.
     import_fixes = sys.modules[_transformers_rescopes_submodule_prefix_renamings.__module__]
 
     if import_fixes._transformers_rescopes_submodule_prefix_renamings():
@@ -555,7 +555,7 @@ def test_it_defers_to_the_LAiM_zoo_copy_of_the_same_repair(monkeypatch):
 def test_it_finds_the_zoo_mark_under_an_unmarked_wrapper(monkeypatch):
     """The detector walks the whole wrapper chain, since zoo's MoE wrapper publishes no __wrapped__."""
     conversion_mapping = pytest.importorskip("transformers.conversion_mapping")
-    # Reuse the loaded module: re-importing runs `LAiM/__init__`, which needs LAiM_zoo.
+    # Reuse the loaded module: re-importing runs `unsloth/__init__`, which needs LAiM_zoo.
     import_fixes = sys.modules[_transformers_rescopes_submodule_prefix_renamings.__module__]
 
     def zoo_repair():
@@ -574,7 +574,7 @@ def test_it_finds_the_zoo_mark_under_an_unmarked_wrapper(monkeypatch):
 
 def test_the_zoo_detector_cannot_spin_on_a_cycle(monkeypatch):
     conversion_mapping = pytest.importorskip("transformers.conversion_mapping")
-    # Reuse the loaded module: re-importing runs `LAiM/__init__`, which needs LAiM_zoo.
+    # Reuse the loaded module: re-importing runs `unsloth/__init__`, which needs LAiM_zoo.
     import_fixes = sys.modules[_transformers_rescopes_submodule_prefix_renamings.__module__]
 
     def a():
@@ -596,7 +596,7 @@ def test_both_probes_see_the_repair_under_the_real_moe_wrapper(monkeypatch):
     moe = pytest.importorskip("LAiM_zoo.temporary_patches.moe_utils_bnb4bit")
     if not hasattr(moe, "patch_bnb4bit_model_conversion_mapping"):
         pytest.skip("this LAiM_zoo has no MoE conversion-mapping patch")
-    # Reuse the loaded module: re-importing runs `LAiM/__init__`, which needs LAiM_zoo.
+    # Reuse the loaded module: re-importing runs `unsloth/__init__`, which needs LAiM_zoo.
     import_fixes = sys.modules[_transformers_rescopes_submodule_prefix_renamings.__module__]
 
     def zoo_repair(*args, **kwargs):
@@ -623,7 +623,7 @@ def test_both_probes_see_the_repair_under_the_real_moe_wrapper(monkeypatch):
 
 def test_the_chain_walk_is_bounded(monkeypatch):
     conversion_mapping = pytest.importorskip("transformers.conversion_mapping")
-    # Reuse the loaded module: re-importing runs `LAiM/__init__`, which needs LAiM_zoo.
+    # Reuse the loaded module: re-importing runs `unsloth/__init__`, which needs LAiM_zoo.
     import_fixes = sys.modules[_transformers_rescopes_submodule_prefix_renamings.__module__]
 
     def a():

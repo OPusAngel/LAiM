@@ -6,25 +6,27 @@ import type {
   LlmType,
   SamplerType,
 } from "../types";
+import { translate } from "@/i18n";
+
 
 const SAMPLER_LABELS: Record<SamplerType, string> = {
-  category: "Category",
-  subcategory: "Subcategory",
-  uniform: "Random number",
-  gaussian: "Bell-curve number",
-  bernoulli: "Yes/no value",
-  datetime: "Date and time",
-  timedelta: "Time offset",
-  uuid: "Unique ID",
-  person: "Synthetic person",
-  person_from_faker: "Synthetic person",
+  get category() { return translate("uxRecipestudio.category1cr1m"); },
+  get subcategory() { return translate("uxRecipestudio.subcategory1ut5b"); },
+  get uniform() { return translate("uxRecipestudio.randomNumber55303"); },
+  get gaussian() { return translate("uxRecipestudio.bellCurveNumber7oiq7"); },
+  get bernoulli() { return translate("uxRecipestudio.yesNoValue5dlmq"); },
+  get datetime() { return translate("uxRecipestudio.dateAndTimexzc0q"); },
+  get timedelta() { return translate("uxRecipestudio.timeOffset159xs"); },
+  get uuid() { return translate("uxRecipestudio.uniqueID1e6mu"); },
+  get person() { return translate("uxRecipestudio.syntheticPerson135dc"); },
+  get person_from_faker() { return translate("uxRecipestudio.syntheticPerson135dc"); },
 };
 
 const LLM_LABELS: Record<LlmType, string> = {
-  text: "AI text",
-  structured: "AI structured data",
-  code: "AI code",
-  judge: "AI scorer",
+  get text() { return translate("uxRecipestudio.aITextzzmie"); },
+  get structured() { return translate("uxRecipestudio.aIStructuredDatauqkn6"); },
+  get code() { return translate("uxRecipestudio.aICode1xoyz"); },
+  get judge() { return translate("uxRecipestudio.aIScorer1yvmy"); },
 };
 
 const EXPRESSION_LABELS: Record<ExpressionDtype, string> = {
@@ -35,7 +37,7 @@ const EXPRESSION_LABELS: Record<ExpressionDtype, string> = {
 };
 
 export function labelForSampler(type: SamplerType): string {
-  return SAMPLER_LABELS[type] ?? "Generated field";
+  return SAMPLER_LABELS[type] ?? translate("uxRecipestudio.generatedFieldtlx6w");
 }
 
 export function labelForLlm(type: LlmType): string {
@@ -43,5 +45,5 @@ export function labelForLlm(type: LlmType): string {
 }
 
 export function labelForExpression(type: ExpressionDtype): string {
-  return EXPRESSION_LABELS[type] ?? "Formula";
+  return EXPRESSION_LABELS[type] ?? translate("uxRecipestudio.formula1b8ag");
 }

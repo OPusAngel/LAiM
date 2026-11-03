@@ -3,6 +3,8 @@
 
 import type { Edge } from "@xyflow/react";
 import { INFRA_NODE_KINDS, type NodeConfig } from "../types";
+import { translate } from "@/i18n";
+
 
 export type GraphWarning = {
   nodeId?: string;
@@ -21,8 +23,7 @@ function checkDataSourceRequired(allConfigs: NodeConfig[]): GraphWarning[] {
     return [
       {
         global: true,
-        message:
-          "Add a data source (seed, sampler, or expression) before LLM blocks can generate data.",
+        get message() { return translate("uxRecipestudio.addADataSourceqwt1w"); },
         severity: "warning",
       },
     ];
@@ -37,7 +38,7 @@ function checkLlmModelAlias(allConfigs: NodeConfig[]): GraphWarning[] {
       warnings.push({
         nodeId: config.id,
         nodeName: config.name,
-        message: "Needs a model preset.",
+        get message() { return translate("uxRecipestudio.needsAModelPreseti7y7j"); },
         severity: "error",
       });
     }
@@ -52,7 +53,7 @@ function checkModelConfigProvider(allConfigs: NodeConfig[]): GraphWarning[] {
       warnings.push({
         nodeId: config.id,
         nodeName: config.name,
-        message: "Needs a provider connection.",
+        get message() { return translate("uxRecipestudio.needsAProviderConnectionsq9v4"); },
         severity: "error",
       });
     }
@@ -75,14 +76,14 @@ function checkSubcategoryParent(allConfigs: NodeConfig[]): GraphWarning[] {
       warnings.push({
         nodeId: config.id,
         nodeName: config.name,
-        message: "Needs a parent category block.",
+        get message() { return translate("uxRecipestudio.needsAParentCategoryxj8kz"); },
         severity: "error",
       });
     } else if (!categoryNames.has(config.subcategory_parent)) {
       warnings.push({
         nodeId: config.id,
         nodeName: config.name,
-        message: `Parent category "${config.subcategory_parent}" not found.`,
+        get message() { return translate("uxRecipestudio.parentCategoryNotFound4abgi", { p1: config.subcategory_parent }); },
         severity: "error",
       });
     }
@@ -100,7 +101,7 @@ function checkValidatorTargets(allConfigs: NodeConfig[]): GraphWarning[] {
       warnings.push({
         nodeId: config.id,
         nodeName: config.name,
-        message: "Needs at least one target column.",
+        get message() { return translate("uxRecipestudio.needsAtLeastOne32d9g"); },
         severity: "warning",
       });
     }
@@ -130,7 +131,7 @@ function checkDisconnectedNodes(
     warnings.push({
       nodeId: config.id,
       nodeName: config.name,
-      message: "This block has no connections.",
+      get message() { return translate("uxRecipestudio.thisBlockHasNoaz829"); },
       severity: "warning",
     });
   }
@@ -184,7 +185,7 @@ function checkLlmMissingDataInput(
     warnings.push({
       nodeId: config.id,
       nodeName: config.name,
-      message: "No data-pipeline connection — connect it to a source or downstream step.",
+      get message() { return translate("uxRecipestudio.noDataPipelineConnectionin8j8"); },
       severity: "warning",
     });
   }

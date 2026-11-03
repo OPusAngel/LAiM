@@ -125,7 +125,7 @@ def _write_llama_install(dir_: Path, tag: str) -> str:
             {
                 "tag": tag,
                 "release_tag": tag,
-                "published_repo": "LAiMai/llama.cpp",
+                "published_repo": "unslothai/llama.cpp",
                 "installed_at_utc": "2020-01-01T00:00:00Z",
             }
         )
@@ -148,7 +148,7 @@ def _write_whisper_install(
             {
                 "release_tag": tag,
                 "upstream_tag": tag.split("-")[0],
-                "published_repo": "LAiMai/whisper.cpp",
+                "published_repo": "unslothai/whisper.cpp",
                 "backend": backend,
                 "installed_at_utc": "2020-01-01T00:00:00Z",
             }
@@ -169,7 +169,7 @@ def _clean_state(monkeypatch, tmp_path):
     monkeypatch.setattr(wfresh, "_cache_dir", lambda: tmp_path / ".whisper_cache")
     for var in (
         "LLAMA_SERVER_PATH",
-        "LAiM_LLAMA_CPP_PATH",
+        "UNSLOTH_LLAMA_CPP_PATH",
         "WHISPER_SERVER_PATH",
         "LAiM_WHISPER_CPP_PATH",
     ):
@@ -447,7 +447,7 @@ def test_whisper_plan_eligible_when_behind(monkeypatch, tmp_path):
     assert plan["update_available"] is True
     assert plan["skip_reason"] is None
     assert plan["phase"]["install_dir"] == install_dir
-    assert plan["phase"]["repo"] == "LAiMai/whisper.cpp"
+    assert plan["phase"]["repo"] == "unslothai/whisper.cpp"
     assert plan["phase"]["backend"] == "cpu"
     # Pin to the exact release the freshness check offered: unpinned, the
     # installer's download-host /releases/latest pointer can lag published_at
@@ -495,7 +495,7 @@ def test_whisper_phase_pins_installer_to_checked_release(monkeypatch, tmp_path):
     wupd.run_chained_phase(
         {
             "install_dir": install_dir,
-            "repo": "LAiMai/whisper.cpp",
+            "repo": "unslothai/whisper.cpp",
             "asset": None,
             "backend": "cpu",
             "script": tmp_path / "install_whisper_prebuilt.py",
@@ -522,7 +522,7 @@ def test_whisper_phase_exit_2_is_a_failed_phase(monkeypatch, tmp_path):
         wupd.run_chained_phase(
             {
                 "install_dir": install_dir,
-                "repo": "LAiMai/whisper.cpp",
+                "repo": "unslothai/whisper.cpp",
                 "asset": None,
                 "backend": "cpu",
                 "script": tmp_path / "install_whisper_prebuilt.py",
@@ -602,7 +602,7 @@ def test_whisper_phase_integrity_failure_is_not_swallowed(monkeypatch, tmp_path)
         wupd.run_chained_phase(
             {
                 "install_dir": install_dir,
-                "repo": "LAiMai/whisper.cpp",
+                "repo": "unslothai/whisper.cpp",
                 "asset": None,
                 "backend": "cpu",
                 "script": tmp_path / "install_whisper_prebuilt.py",
@@ -844,7 +844,7 @@ def test_chained_progress_windows(monkeypatch, tmp_path):
 def _slim_phase(**over):
     phase = {
         "install_dir": "d",
-        "repo": "LAiMai/whisper.cpp",
+        "repo": "unslothai/whisper.cpp",
         "asset": None,
         "backend": "cpu",
         "script": "s",
@@ -943,9 +943,9 @@ def test_the_pre_flight_probes_the_release_that_would_be_installed(monkeypatch):
     monkeypatch.setattr(wupd, "_resolve_prebuilt_for_host", spy)
     monkeypatch.setattr(wupd, "run_chained_phase", lambda phase, _sp: {"to_tag": "t"})
 
-    phase = _slim_phase(repo = "LAiMai/whisper.cpp", pin_release_tag = "v1.9.2-LAiM.12")
+    phase = _slim_phase(repo = "unslothai/whisper.cpp", pin_release_tag = "v1.9.2-LAiM.12")
     wupd.run_chained_phase_after_llama(phase, lambda _f: None)
-    assert seen["published_repo"] == "LAiMai/whisper.cpp"
+    assert seen["published_repo"] == "unslothai/whisper.cpp"
     assert seen["published_release_tag"] == "v1.9.2-LAiM.12"
 
 

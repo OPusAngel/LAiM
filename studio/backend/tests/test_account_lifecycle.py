@@ -106,7 +106,7 @@ def test_owner_alice_bob_endpoint_matrix(matrix, actor, operation, target):
         response = client.post(url + "/setup-code", headers = headers(actor))
     elif operation == "model-access":
         response = client.put(
-            url + "/model-access", headers = headers(actor), json = {"model_allowlist": ["LAiM/*"]}
+            url + "/model-access", headers = headers(actor), json = {"model_allowlist": ["unsloth/*"]}
         )
     elif operation in ("deactivate", "reactivate"):
         response = client.patch(

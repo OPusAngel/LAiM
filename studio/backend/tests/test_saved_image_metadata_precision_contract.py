@@ -472,7 +472,7 @@ def test_the_persisted_recipe_records_the_engaged_build_not_the_load_request(eng
     load = client.post(
         "/api/inference/images/load",
         json = {
-            "model_path": "LAiM/Z-Image-Turbo-GGUF",
+            "model_path": "unsloth/Z-Image-Turbo-GGUF",
             "gguf_filename": "z-image-Q4_K_M.gguf",
             "transformer_quant": _EngagedBackend.requested,
         },
@@ -513,7 +513,7 @@ def test_the_recipe_records_only_the_negative_prompt_the_backend_applied(
     client, backend, saved = engaged_client
     load = client.post(
         "/api/inference/images/load",
-        json = {"model_path": "LAiM/Z-Image-Turbo-GGUF", "gguf_filename": "z-image-Q4_K_M.gguf"},
+        json = {"model_path": "unsloth/Z-Image-Turbo-GGUF", "gguf_filename": "z-image-Q4_K_M.gguf"},
     )
     assert load.status_code == 200, load.text
     body = {"prompt": "a sloth", "negative_prompt": "text, watermark", "guidance": 4.0, "seed": 7}
@@ -539,7 +539,7 @@ def test_the_openai_route_persists_the_same_build(engaged_client):
     load = client.post(
         "/api/inference/images/load",
         json = {
-            "model_path": "LAiM/Z-Image-Turbo-GGUF",
+            "model_path": "unsloth/Z-Image-Turbo-GGUF",
             "gguf_filename": "z-image-Q4_K_M.gguf",
             "transformer_quant": _EngagedBackend.requested,
         },
@@ -605,7 +605,7 @@ def _old_schema_meta() -> dict:
         "steps": 9,
         "guidance": 0.0,
         "seed": 7,
-        "model": "LAiM/Z-Image-Turbo-GGUF",
+        "model": "unsloth/Z-Image-Turbo-GGUF",
         "created_at": 100.0,
     }
 
@@ -763,7 +763,7 @@ def test_recipe_e2e_generate_response_png_and_file_endpoint_agree(recipe_e2e_cli
         client.post(
             "/api/inference/images/load",
             json = {
-                "model_path": "LAiM/Z-Image-Turbo-GGUF",
+                "model_path": "unsloth/Z-Image-Turbo-GGUF",
                 "gguf_filename": "z-image-Q4_K_M.gguf",
             },
         ).status_code
@@ -832,7 +832,7 @@ def test_extend_is_recorded_as_outpaint_but_runs_as_inpaint(recipe_e2e_client):
     from PIL import Image
 
     client, backend = recipe_e2e_client
-    load = {"model_path": "LAiM/Z-Image-Turbo-GGUF", "gguf_filename": "z-image-Q4_K_M.gguf"}
+    load = {"model_path": "unsloth/Z-Image-Turbo-GGUF", "gguf_filename": "z-image-Q4_K_M.gguf"}
     assert client.post("/api/inference/images/load", json = load).status_code == 200
     buf = io.BytesIO()
     Image.new("RGB", (64, 64)).save(buf, format = "PNG")

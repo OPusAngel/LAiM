@@ -83,10 +83,10 @@ def client(monkeypatch):
     app.include_router(profile_stats.router, prefix = "/profile")
     app.include_router(research_runs.router, prefix = "/research")
 
-    async def remove_sandboxes(*args):
+    async def remove_workdirs(*args):
         return 0, []
 
-    monkeypatch.setattr(chat_history, "_remove_sandboxes", remove_sandboxes)
+    monkeypatch.setattr(chat_history, "_remove_workdirs", remove_workdirs)
     monkeypatch.setattr(chat_history, "_remove_thread_rag_data", lambda *args, **kwargs: None)
     with TestClient(app) as test_client:
         yield test_client
@@ -518,9 +518,9 @@ def test_pinned_models_are_per_account(client):
         "embedding": None,
     }
     embed = client.put(
-        "/settings/pinned-models", json = {"embedding": ["LAiM/bge-m3", "LAiM/bge-m3"]}
+        "/settings/pinned-models", json = {"embedding": ["unsloth/bge-m3", "unsloth/bge-m3"]}
     ).json()
-    assert embed["embedding"] == ["LAiM/bge-m3"] and embed["connected"] == ["external::c1::gpt"]
+    assert embed["embedding"] == ["unsloth/bge-m3"] and embed["connected"] == ["external::c1::gpt"]
     cleared = client.put("/settings/pinned-models", json = {"pinned": []}).json()
     assert cleared["pinned"] == [] and cleared["connected"] == ["external::c1::gpt"]
     bob = client.get("/settings/pinned-models", headers = {"x-test-account": "bob"}).json()

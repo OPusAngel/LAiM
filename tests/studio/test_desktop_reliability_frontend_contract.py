@@ -1568,7 +1568,7 @@ def _cn_arguments(body: str) -> list[str]:
 
 
 def test_chat_sidebar_row_actions_visible_on_coarse_pointers():
-    """LAiMai/LAiM#7276: Recents chat kebab must be tappable on iPad."""
+    """OPusAngel/LAiM#7276: Recents chat kebab must be tappable on iPad."""
     sidebar_source = _ui_source(APP_SIDEBAR)
     css_source = _ui_source(INDEX_CSS)
     assert "renderChatSidebarItem" in sidebar_source
@@ -2090,7 +2090,7 @@ def test_compact_media_link_keeps_accessible_name_and_truncation():
 
 
 def test_media_page_link_tooltip_drops_below_titlebar_controls():
-    """LAiMai/LAiM#10226: Images/Video park this link in the top-right header beside
+    """OPusAngel/LAiM#10226: Images/Video park this link in the top-right header beside
     Windows controls; a top tooltip blocks minimize/maximize/close."""
     source = _ui_source(MEDIA_PAGE_LINK)
     tooltip = source.split("<TooltipContent", 1)[1].split("</TooltipContent>", 1)[0]
@@ -2156,7 +2156,7 @@ def test_images_header_tracks_preview_and_preserves_titlebar_controls():
 
 
 def test_a_stopped_repair_update_is_recorded_as_canceled_not_failed():
-    """LAiMai/LAiM#7793: the support report prints final_status verbatim, so a
+    """OPusAngel/LAiM#7793: the support report prints final_status verbatim, so a
     user quitting mid-update must not read as a failed repair."""
     source = _ui_source(TAURI_COMMANDS)
     stopped_arm = source.split("if msg == update::UPDATE_STOPPED", 1)[1].split(

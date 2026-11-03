@@ -4,13 +4,15 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { TranscriptProgress } from "./transcript-stream";
+import { translate } from "@/i18n";
+
 import "./transcription-progress.css";
 
 // audio.cpp reports no progress numbers, so the server says which step it is on instead.
 const PHASE_LABELS: Record<NonNullable<TranscriptProgress["phase"]>, string> = {
-  loading: "Loading the model…",
-  downloading_aligner: "Downloading the timing aligner…",
-  transcribing: "Transcribing…",
+  get loading() { return translate("uxAudio.loadingTheModelvbcrx"); },
+  get downloading_aligner() { return translate("uxAudio.downloadingTheTimingAlignerc8c32"); },
+  get transcribing() { return translate("uxAudio.transcribingEllipsislwgf7"); },
 };
 
 export function TranscriptionProgress({
@@ -65,7 +67,7 @@ export function TranscriptionProgress({
                 : "Transcribing…"
             : "Elapsed"}
         </span>
-        <span className="font-mono tabular-nums" aria-label={`Elapsed time ${elapsed}`}>
+        <span className="font-mono tabular-nums" aria-label={translate("uxAudio.elapsedTimevm2dm", { p1: elapsed })}>
           {elapsed}
         </span>
         {running && (

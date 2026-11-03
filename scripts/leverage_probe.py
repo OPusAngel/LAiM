@@ -20,7 +20,7 @@ from pathlib import Path
 
 import numpy as np
 
-REPO = "LAiM/Z-Image-Turbo-GGUF"
+REPO = "unsloth/Z-Image-Turbo-GGUF"
 GGUF = "z-image-turbo-Q4_K_M.gguf"
 BASE = "Tongyi-MAI/Z-Image-Turbo"
 PROMPT = "A cinematic photograph of a red fox in a snowy forest at dawn, highly detailed"

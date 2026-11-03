@@ -211,13 +211,13 @@ def test_a_cached_gguf_repo_resolves_to_its_repo_id(catalog, tmp_path):
     # containment check, so a snapshot directory refuses its own file ("gguf_filename must
     # resolve to a file inside the repo"). Name the repo the way the picker names a Hub pick.
     repo_dir, _snapshot = _hf_cache_repo(
-        tmp_path, "LAiM/Z-Image-Turbo-GGUF", files = ["z-image-turbo-Q4_K_S.gguf"]
+        tmp_path, "unsloth/Z-Image-Turbo-GGUF", files = ["z-image-turbo-Q4_K_S.gguf"]
     )
-    catalog.append(_gguf_image_info("LAiM/Z-Image-Turbo-GGUF", repo_dir))
+    catalog.append(_gguf_image_info("unsloth/Z-Image-Turbo-GGUF", repo_dir))
 
-    pick = mas.resolve_local_media_model("LAiM/Z-Image-Turbo-GGUF", task = mas.IMAGE_TASK)
+    pick = mas.resolve_local_media_model("unsloth/Z-Image-Turbo-GGUF", task = mas.IMAGE_TASK)
 
-    assert pick.model_path == "LAiM/Z-Image-Turbo-GGUF"
+    assert pick.model_path == "unsloth/Z-Image-Turbo-GGUF"
     assert pick.gguf_filename == "z-image-turbo-Q4_K_S.gguf"
 
 
@@ -252,11 +252,11 @@ def test_the_index_is_keyed_by_task(catalog, tmp_path):
     clip.mkdir()
     (clip / "model_index.json").write_text("{}")
     (clip / "model_index.json").write_text("{}")
-    catalog.append(_info("LAiM/Wan2.2", clip, task = mas.VIDEO_TASK))
+    catalog.append(_info("unsloth/Wan2.2", clip, task = mas.VIDEO_TASK))
 
-    assert mas.resolve_local_media_model("LAiM/Wan2.2", task = mas.VIDEO_TASK) is not None
+    assert mas.resolve_local_media_model("unsloth/Wan2.2", task = mas.VIDEO_TASK) is not None
     # An image request must not be answered by a video model, or the load 400s after eviction.
-    assert mas.resolve_local_media_model("LAiM/Wan2.2", task = mas.IMAGE_TASK) is None
+    assert mas.resolve_local_media_model("unsloth/Wan2.2", task = mas.IMAGE_TASK) is None
 
 
 def test_what_the_index_refuses_to_advertise(catalog, tmp_path):
@@ -598,13 +598,13 @@ def test_the_video_route_switches_before_it_touches_the_backend(monkeypatch):
 
     resp = _client(video_router, "/api/inference").post(
         "/api/inference/video/generate",
-        json = {"prompt": "a sloth", "model": "LAiM/Wan2.2"},
+        json = {"prompt": "a sloth", "model": "unsloth/Wan2.2"},
         headers = {"X-LAiM-HF-Token": "hf_abc"},
     )
 
     assert resp.status_code == 200
     # Not the OpenAI envelope: this route is an LAiM surface and its errors are plain details.
-    assert calls == [("LAiM/Wan2.2", arb.VIDEO, False, "hf_abc")]
+    assert calls == [("unsloth/Wan2.2", arb.VIDEO, False, "hf_abc")]
 
 
 def test_a_sibling_loose_gguf_is_not_treated_as_already_serving(
@@ -839,14 +839,14 @@ def test_an_unverifiable_download_plan_refuses_rather_than_loading(
 ):
     # The video planner reports zero bytes when its own metadata call failed, because its normal
     # caller falls back to an inline pull. Zero there is "unknown", not "nothing to fetch".
-    repo, _snapshot = _hf_cache_repo(tmp_path, "LAiM/Wan2.2-GGUF", files = ["wan-Q4_K_M.gguf"])
-    catalog.append(_gguf_image_info("LAiM/Wan2.2-GGUF", repo, task = mas.VIDEO_TASK))
+    repo, _snapshot = _hf_cache_repo(tmp_path, "unsloth/Wan2.2-GGUF", files = ["wan-Q4_K_M.gguf"])
+    catalog.append(_gguf_image_info("unsloth/Wan2.2-GGUF", repo, task = mas.VIDEO_TASK))
     monkeypatch.setattr(
         backend, "download_plan", lambda model_path, **kw: {"total_bytes": 0, "plan_failed": True}
     )
 
     with pytest.raises(HTTPException) as excinfo:
-        _switch("LAiM/Wan2.2-GGUF", owner = arb.VIDEO, openai_errors = False)
+        _switch("unsloth/Wan2.2-GGUF", owner = arb.VIDEO, openai_errors = False)
 
     assert excinfo.value.status_code == 409
     assert "Could not verify" in excinfo.value.detail
@@ -988,13 +988,13 @@ def test_a_cache_tree_inside_a_scan_folder_still_loads_by_repo_id(catalog, tmp_p
     # collect_local_models rewrites such a row's source to "custom" while the snapshot entries
     # stay symlinks into blobs/, which the loader's containment check refuses.
     repo, _snapshot = _hf_cache_repo(
-        tmp_path, "LAiM/Z-Image-Turbo-GGUF", files = ["z-Q4_K_S.gguf"]
+        tmp_path, "unsloth/Z-Image-Turbo-GGUF", files = ["z-Q4_K_S.gguf"]
     )
-    catalog.append(_gguf_image_info("LAiM/Z-Image-Turbo-GGUF", repo, source = "custom"))
+    catalog.append(_gguf_image_info("unsloth/Z-Image-Turbo-GGUF", repo, source = "custom"))
 
-    pick = mas.resolve_local_media_model("LAiM/Z-Image-Turbo-GGUF", task = mas.IMAGE_TASK)
+    pick = mas.resolve_local_media_model("unsloth/Z-Image-Turbo-GGUF", task = mas.IMAGE_TASK)
 
-    assert pick.model_path == "LAiM/Z-Image-Turbo-GGUF"
+    assert pick.model_path == "unsloth/Z-Image-Turbo-GGUF"
 
 
 def test_the_native_fallback_is_only_verified_when_a_binary_must_be_installed(monkeypatch):
@@ -1256,14 +1256,14 @@ def test_the_video_load_route_records_provenance_without_raising(monkeypatch):
     resp = _client(video_router, "/api/inference").post(
         "/api/inference/video/load",
         json = {
-            "model_path": "LAiM/Wan2.2-GGUF",
+            "model_path": "unsloth/Wan2.2-GGUF",
             "gguf_filename": "wan-Q4_K_M.gguf",
             "model_kind": "gguf",
         },
     )
 
     assert resp.status_code == 200, resp.text
-    assert mk.loaded_by_user_action(arb.VIDEO, "LAiM/Wan2.2-GGUF", "Q4_K_M") is True
+    assert mk.loaded_by_user_action(arb.VIDEO, "unsloth/Wan2.2-GGUF", "Q4_K_M") is True
 
 
 async def _async_none(*args, **kwargs):
@@ -1420,7 +1420,7 @@ def test_a_sharded_encoder_without_its_index_is_incomplete(monkeypatch):
     monkeypatch.setattr(families, "_upstream_is_cached", lambda *a, **k: True)
     monkeypatch.setattr(locality, "_cached_snapshot_file", lambda repo, name: None)
 
-    assert locality.encoder_repo_complete("LAiM/Meta-Llama-3.1-8B-Instruct") is False
+    assert locality.encoder_repo_complete("unsloth/Meta-Llama-3.1-8B-Instruct") is False
     # An unsharded repo keeps the single-file reading.
     assert locality.encoder_repo_complete("org/unsharded-encoder") is True
 
@@ -1484,10 +1484,10 @@ def test_the_images_route_switches_before_it_checks_what_is_loaded(monkeypatch):
         is_loaded = True
 
         def status(self):
-            return {"loaded": True, "repo_id": "LAiM/Z-Image-Turbo-GGUF", "base_repo": None}
+            return {"loaded": True, "repo_id": "unsloth/Z-Image-Turbo-GGUF", "base_repo": None}
 
         def generate(self, **kwargs):
-            return {"images": [object()], "seed": 1, "repo_id": "LAiM/Z-Image-Turbo-GGUF"}
+            return {"images": [object()], "seed": 1, "repo_id": "unsloth/Z-Image-Turbo-GGUF"}
 
     backend = _Backend()
     monkeypatch.setattr(diffusion_module, "get_diffusion_backend", lambda: backend)
@@ -1597,14 +1597,14 @@ def test_a_pre_switch_refusal_evicts_nothing(flux, enabled, backend, loads):
     [
         # 512x512 is not one of the A14B presets.
         (
-            ("LAiM/Wan2.2-T2V-A14B-GGUF", None),
+            ("unsloth/Wan2.2-T2V-A14B-GGUF", None),
             {"width": 512, "height": 512},
             422,
             "not a supported resolution",
         ),
         # Ref2VA conditions on references, so a first frame is unservable on it.
         (
-            ("LAiM/MiniMax-H3-GGUF", "ref2va/minimax_h3_ref2va-Q4_K_M.gguf"),
+            ("unsloth/MiniMax-H3-GGUF", "ref2va/minimax_h3_ref2va-Q4_K_M.gguf"),
             {"first_frame": "data:image/png;base64,AAAA"},
             400,
             "Ref2VA partition",
@@ -1713,11 +1713,11 @@ def test_a_gguf_the_loader_cannot_open_is_not_advertised(catalog, tmp_path):
     # validators refuse for escaping the directory, and the repo id would send the loader to the
     # active cache and download the model again.
     _repo_dir, snapshot = _hf_cache_repo(
-        tmp_path, "LAiM/Z-Image-Turbo-GGUF", files = ["z-image-turbo-Q4_K_S.gguf"]
+        tmp_path, "unsloth/Z-Image-Turbo-GGUF", files = ["z-image-turbo-Q4_K_S.gguf"]
     )
-    catalog.append(_gguf_image_info("LAiM/Z-Image-Turbo-GGUF", snapshot))
+    catalog.append(_gguf_image_info("unsloth/Z-Image-Turbo-GGUF", snapshot))
 
-    assert mas.resolve_local_media_model("LAiM/Z-Image-Turbo-GGUF", task = mas.IMAGE_TASK) is None
+    assert mas.resolve_local_media_model("unsloth/Z-Image-Turbo-GGUF", task = mas.IMAGE_TASK) is None
     assert mas.available_media_model_ids(mas.IMAGE_TASK) == []
 
 
@@ -1867,7 +1867,7 @@ def test_a_native_h3_target_refuses_an_audio_shift_sd_cpp_cannot_apply(monkeypat
         before_switch(
             index.MediaModelPick(
                 requested_model,
-                "LAiM/MiniMax-H3-GGUF",
+                "unsloth/MiniMax-H3-GGUF",
                 "minimax_h3_fl2va-Q4_K_M.gguf",
                 "gguf",
             )
@@ -1885,7 +1885,7 @@ def test_a_native_h3_target_refuses_an_audio_shift_sd_cpp_cannot_apply(monkeypat
         "/api/inference/video/generate",
         json = {
             "prompt": "a sloth",
-            "model": "LAiM/MiniMax-H3-GGUF",
+            "model": "unsloth/MiniMax-H3-GGUF",
             "audio_flow_shift": 4.0,
         },
     )
@@ -2026,7 +2026,7 @@ def test_a_native_h3_target_refuses_max_reference_sizing(monkeypatch):
         before_switch(
             index.MediaModelPick(
                 requested_model,
-                "LAiM/MiniMax-H3-GGUF",
+                "unsloth/MiniMax-H3-GGUF",
                 "ref2va/minimax_h3_ref2va-Q4_K_M.gguf",
                 "gguf",
             )
@@ -2044,7 +2044,7 @@ def test_a_native_h3_target_refuses_max_reference_sizing(monkeypatch):
         "/api/inference/video/generate",
         json = {
             "prompt": "a sloth",
-            "model": "LAiM/MiniMax-H3-GGUF",
+            "model": "unsloth/MiniMax-H3-GGUF",
             "reference_images": ["data:image/png;base64,AAAA"],
             "reference_image_size": "max",
         },
@@ -2067,7 +2067,7 @@ def test_a_modular_component_the_index_keeps_locally_is_checked(
     (modular / "modular_model_index.json").write_text(
         '{"transformer": ["diffusers", "MiniMaxH3Transformer3DModel", {}],'
         ' "text_encoder": ["transformers", "Qwen3VLModel",'
-        ' {"pretrained_model_name_or_path": "LAiM/MiniMax-H3"}]}'
+        ' {"pretrained_model_name_or_path": "unsloth/MiniMax-H3"}]}'
     )
     catalog.append(_info("MiniMaxAI/MiniMax-H3", modular, task = mas.VIDEO_TASK))
 
@@ -2098,7 +2098,7 @@ def test_a_hosted_modular_component_is_checked_against_the_cache(
     modular.mkdir()
     (modular / "modular_model_index.json").write_text(
         '{"vae": ["diffusers", "AutoencoderKLMiniMaxH3",'
-        ' {"pretrained_model_name_or_path": "LAiM/MiniMax-H3", "subfolder": "vae"}]}'
+        ' {"pretrained_model_name_or_path": "unsloth/MiniMax-H3", "subfolder": "vae"}]}'
     )
     catalog.append(_info("MiniMaxAI/MiniMax-H3", modular, task = mas.VIDEO_TASK))
 
@@ -2118,11 +2118,11 @@ def test_a_cached_single_checkpoint_the_loader_cannot_open_is_not_advertised(cat
     # single_file load and resolve the name through the same containment check a GGUF gets,
     # which a snapshot's symlink into blobs/ fails.
     _repo_dir, snapshot = _hf_cache_repo(
-        tmp_path, "LAiM/Z-Image-Turbo", files = ["z-image-turbo.safetensors"]
+        tmp_path, "unsloth/Z-Image-Turbo", files = ["z-image-turbo.safetensors"]
     )
-    catalog.append(_info("LAiM/Z-Image-Turbo", snapshot, task = mas.IMAGE_TASK, source = "hf_cache"))
+    catalog.append(_info("unsloth/Z-Image-Turbo", snapshot, task = mas.IMAGE_TASK, source = "hf_cache"))
 
-    assert mas.resolve_local_media_model("LAiM/Z-Image-Turbo", task = mas.IMAGE_TASK) is None
+    assert mas.resolve_local_media_model("unsloth/Z-Image-Turbo", task = mas.IMAGE_TASK) is None
 
 
 def test_a_stalled_load_probe_still_answers_inside_the_budget(flux, enabled, backend, monkeypatch):
@@ -2217,7 +2217,7 @@ def test_a_superseded_snapshot_does_not_vouch_for_the_active_one(
     modular.mkdir()
     (modular / "modular_model_index.json").write_text(
         '{"vae": ["diffusers", "AutoencoderKLMiniMaxH3",'
-        ' {"pretrained_model_name_or_path": "LAiM/MiniMax-H3", "subfolder": "vae"}]}'
+        ' {"pretrained_model_name_or_path": "unsloth/MiniMax-H3", "subfolder": "vae"}]}'
     )
     catalog.append(_info("MiniMaxAI/MiniMax-H3", modular, task = mas.VIDEO_TASK))
 
@@ -2249,7 +2249,7 @@ def test_a_root_level_hosted_component_needs_more_than_one_shard(
     modular.mkdir()
     (modular / "modular_model_index.json").write_text(
         '{"vae": ["diffusers", "AutoencoderKLMiniMaxH3",'
-        ' {"pretrained_model_name_or_path": "LAiM/MiniMax-H3-VAE"}]}'
+        ' {"pretrained_model_name_or_path": "unsloth/MiniMax-H3-VAE"}]}'
     )
     catalog.append(_info("MiniMaxAI/MiniMax-H3", modular, task = mas.VIDEO_TASK))
 
@@ -2300,7 +2300,7 @@ def test_a_pinned_component_revision_is_the_one_checked(
     modular.mkdir()
     (modular / "modular_model_index.json").write_text(
         '{"vae": ["diffusers", "AutoencoderKLMiniMaxH3",'
-        ' {"pretrained_model_name_or_path": "LAiM/MiniMax-H3", "subfolder": "vae",'
+        ' {"pretrained_model_name_or_path": "unsloth/MiniMax-H3", "subfolder": "vae",'
         ' "revision": "' + "c" * 40 + '"}]}'
     )
     catalog.append(_info("MiniMaxAI/MiniMax-H3", modular, task = mas.VIDEO_TASK))
@@ -2329,7 +2329,7 @@ def test_a_pinned_component_variant_needs_its_own_weights(
     modular.mkdir()
     (modular / "modular_model_index.json").write_text(
         '{"vae": ["diffusers", "AutoencoderKLMiniMaxH3",'
-        ' {"pretrained_model_name_or_path": "LAiM/MiniMax-H3", "subfolder": "vae",'
+        ' {"pretrained_model_name_or_path": "unsloth/MiniMax-H3", "subfolder": "vae",'
         ' "variant": "fp16"}]}'
     )
     catalog.append(_info("MiniMaxAI/MiniMax-H3", modular, task = mas.VIDEO_TASK))
@@ -2396,19 +2396,19 @@ def test_a_cached_split_gguf_missing_a_shard_is_not_advertised(catalog, tmp_path
 
     repo_dir, snapshot = _hf_cache_repo(
         tmp_path,
-        "LAiM/Z-Image-Turbo-GGUF",
+        "unsloth/Z-Image-Turbo-GGUF",
         files = ["z-image-Q4_K_M-00001-of-00002.gguf"],
     )
     monkeypatch.setattr(diffusion_module, "hub_cache_dir", lambda: str(tmp_path))
-    catalog.append(_gguf_image_info("LAiM/Z-Image-Turbo-GGUF", repo_dir))
+    catalog.append(_gguf_image_info("unsloth/Z-Image-Turbo-GGUF", repo_dir))
 
-    assert mas.resolve_local_media_model("LAiM/Z-Image-Turbo-GGUF", task = mas.IMAGE_TASK) is None
+    assert mas.resolve_local_media_model("unsloth/Z-Image-Turbo-GGUF", task = mas.IMAGE_TASK) is None
 
     (snapshot / "z-image-Q4_K_M-00002-of-00002.gguf").write_bytes(b"")
     mas.invalidate_index()
 
     assert (
-        mas.resolve_local_media_model("LAiM/Z-Image-Turbo-GGUF", task = mas.IMAGE_TASK) is not None
+        mas.resolve_local_media_model("unsloth/Z-Image-Turbo-GGUF", task = mas.IMAGE_TASK) is not None
     )
 
 
@@ -2530,7 +2530,7 @@ def test_only_a_load_nobody_asked_for_is_kept_off_the_hub(monkeypatch, user_init
 
     asyncio.run(
         load_video_model_gated(
-            VideoLoadRequest(model_path = "LAiM/Wan2.2-GGUF", gguf_filename = "wan-Q4_K_M.gguf"),
+            VideoLoadRequest(model_path = "unsloth/Wan2.2-GGUF", gguf_filename = "wan-Q4_K_M.gguf"),
             "test-user",
             user_initiated = user_initiated,
         )

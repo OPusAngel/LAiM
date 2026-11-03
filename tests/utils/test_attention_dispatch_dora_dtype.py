@@ -1,4 +1,4 @@
-"""Regression test for LAiMai/LAiM#1013: run_attention must downcast DoRA's
+"""Regression test for OPusAngel/LAiM#1013: run_attention must downcast DoRA's
 fp32 q/k/v for FlashAttention while leaving already-16bit tensors untouched."""
 
 import torch

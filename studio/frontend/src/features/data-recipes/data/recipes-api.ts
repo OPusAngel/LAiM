@@ -2,6 +2,8 @@
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { authFetch, getAuthSessionEpoch } from "@/features/auth";
+import { translate } from "@/i18n";
+
 
 export const RECIPES_API = "/api/data-recipe/recipes";
 
@@ -16,7 +18,7 @@ export class RecipeApiError extends Error {
 
 function assertSameSession(epoch: number): void {
   if (getAuthSessionEpoch() !== epoch) {
-    throw new Error("Signed out before the recipe was saved.");
+    throw new Error(translate("uxDatarecipes.signedOutBeforeTheen86l"));
   }
 }
 
@@ -39,7 +41,7 @@ export async function recipeRequest<T>(
   if (!res.ok) {
     const detail = (body as { detail?: unknown } | null)?.detail;
     throw new RecipeApiError(
-      typeof detail === "string" ? detail : `Request failed (${res.status})`,
+      typeof detail === "string" ? detail : translate("uxDatarecipes.requestFailedb9a7f", { p1: res.status }),
       res.status,
     );
   }

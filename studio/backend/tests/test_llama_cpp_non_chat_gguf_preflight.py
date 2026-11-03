@@ -89,12 +89,12 @@ def test_diffusiongemma_arch_is_left_to_the_diffusion_runner(tmp_path):
 
 
 def test_metadata_less_video_gguf_is_refused_and_named(tmp_path):
-    # The shape of LAiM/MiniMax-H3-GGUF: valid GGUF, zero KV pairs, no architecture.
+    # The shape of unsloth/MiniMax-H3-GGUF: valid GGUF, zero KV pairs, no architecture.
     backend, message = _refusal(
         tmp_path,
         arch = None,
         name = "minimax_h3_fl2va_pruned-Q2_K.gguf",
-        identifier = "LAiM/MiniMax-H3-GGUF",
+        identifier = "unsloth/MiniMax-H3-GGUF",
     )
     assert backend._architecture is None
     assert backend._gguf_header_parsed is True
@@ -148,18 +148,18 @@ def test_the_path_probe_does_not_touch_the_live_backend(tmp_path):
     # The refusal runs BEFORE Phase 1 kills the resident model, so reading the header into
     # `self` would overwrite the LIVE model's metadata with the file being rejected.
     live = LlamaCppBackend()
-    live._model_identifier = "LAiM/Qwen3-0.6B-GGUF"
+    live._model_identifier = "unsloth/Qwen3-0.6B-GGUF"
     live._architecture = "qwen3"
     live._context_length = 40960
     live._gguf_header_parsed = True
 
     video = _write_gguf(tmp_path / "minimax_h3-Q2_K.gguf", arch = None)
-    message = LlamaCppBackend._non_chat_gguf_refusal_for_path(str(video), "LAiM/MiniMax-H3-GGUF")
+    message = LlamaCppBackend._non_chat_gguf_refusal_for_path(str(video), "unsloth/MiniMax-H3-GGUF")
     assert message is not None and "Video page" in message
     # The resident model's metadata is untouched.
     assert live._architecture == "qwen3"
     assert live._context_length == 40960
-    assert live._model_identifier == "LAiM/Qwen3-0.6B-GGUF"
+    assert live._model_identifier == "unsloth/Qwen3-0.6B-GGUF"
 
 
 def test_the_path_probe_agrees_with_the_instance_check(tmp_path):
@@ -179,7 +179,7 @@ def test_the_path_probe_agrees_with_the_instance_check(tmp_path):
     "identifier,name",
     [
         # Measured headers (byte-range read of the live repos): both declare "lumina2".
-        ("LAiM/Z-Image-Turbo-GGUF", "z-image-turbo-Q2_K.gguf"),
+        ("unsloth/Z-Image-Turbo-GGUF", "z-image-turbo-Q2_K.gguf"),
         ("Immac/NetaYume-Lumina-Image-2.0-GGUF", "NetaYumev2plus_unet_q2_k.gguf"),
         # The family keyword lives only in the filename, as it does for a local copy.
         (None, "lumina2-q4_k_m.gguf"),
@@ -219,7 +219,7 @@ def test_the_shared_arch_verdict_matches_the_pickers(tmp_path):
 
     assert LlamaCppBackend._AMBIGUOUS_IMAGE_ARCHES == _AMBIGUOUS_DIFFUSION_GGUF_ARCHS
     for identifier, name in (
-        ("LAiM/Z-Image-Turbo-GGUF", "z-image-turbo-Q2_K.gguf"),
+        ("unsloth/Z-Image-Turbo-GGUF", "z-image-turbo-Q2_K.gguf"),
         ("neta-art/neta-lumina-gguf", "checkpoint-e3_s9658-Q2_K.gguf"),
         ("Immac/NetaYume-Lumina-Image-2.0-GGUF", "NetaYumev2plus_unet_q2_k.gguf"),
         (None, "some-random-denoiser.gguf"),
@@ -319,7 +319,7 @@ def test_an_arch_that_names_its_own_family_still_gets_the_video_page(tmp_path):
 
 def _write_split_shard(path: Path) -> Path:
     """A gguf-split shard past the first: split.no / split.count / split.tensors.count and no
-    general.architecture, as measured on LAiM/DeepSeek-R1-GGUF shard 2."""
+    general.architecture, as measured on unsloth/DeepSeek-R1-GGUF shard 2."""
     body = b""
     for key, value in ((b"split.no", 1), (b"split.count", 30), (b"split.tensors.count", 34)):
         body += struct.pack("<Q", len(key)) + key
@@ -335,7 +335,7 @@ def test_a_trailing_split_shard_gets_no_verdict(tmp_path):
     # loaded with the first split" is the accurate answer.
     gguf = _write_split_shard(tmp_path / "DeepSeek-R1.BF16-00002-of-00030.gguf")
     backend = LlamaCppBackend()
-    backend._model_identifier = "LAiM/DeepSeek-R1-GGUF"
+    backend._model_identifier = "unsloth/DeepSeek-R1-GGUF"
     backend._read_gguf_metadata(str(gguf))
     assert backend._gguf_header_parsed is True
     assert backend._architecture is None
@@ -445,7 +445,7 @@ def test_an_image_arch_this_host_cannot_build_promises_no_page(tmp_path, monkeyp
         tmp_path,
         arch = "qwen_image21",
         name = "qwen-image-2.1-Q4_K_M.gguf",
-        identifier = "LAiM/Qwen-Image-2.1-GGUF",
+        identifier = "unsloth/Qwen-Image-2.1-GGUF",
     )
     assert message is not None
     assert "cannot run as a chat model" in message
@@ -456,6 +456,6 @@ def test_an_image_arch_this_host_cannot_build_promises_no_page(tmp_path, monkeyp
         tmp_path,
         arch = "qwen_image21",
         name = "qwen-image-2.1-Q4_K_M.gguf",
-        identifier = "LAiM/Qwen-Image-2.1-GGUF",
+        identifier = "unsloth/Qwen-Image-2.1-GGUF",
     )
     assert "Open it from the Images page" in message

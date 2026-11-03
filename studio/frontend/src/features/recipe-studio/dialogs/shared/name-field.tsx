@@ -4,6 +4,8 @@
 import { Input } from "@/components/ui/input";
 import { type ReactElement, useId } from "react";
 import { FieldLabel } from "./field-label";
+import { translate } from "@/i18n";
+
 
 type NameFieldProps = {
   id?: string;
@@ -25,11 +27,11 @@ export function NameField({
   return (
     <div className="grid gap-1.5">
       <FieldLabel
-        label={label ?? "Field name"}
+        label={label ?? translate("uxRecipestudio.fieldNamey9f15")}
         htmlFor={inputId}
         hint={
           hint ??
-          "This name is used in prompts and in the final dataset."
+          translate("uxRecipestudio.thisNameIsUsedyugks")
         }
       />
       <Input

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -210,7 +211,7 @@ function contentBlocksToText(content: unknown): string {
           parts.push("[thinking]\n" + thinkText + "\n[/thinking]");
         }
       } else if (p.type === "tool-call") {
-        // Keep base64 image payloads and sandbox card metadata out of every export format: use the model-visible text, matching chat replay.
+        // Keep base64 image payloads and workdir card metadata out of every export format: use the model-visible text, matching chat replay.
         const result = toolResultModelText(
           p.result,
           typeof p.toolName === "string" ? p.toolName : undefined,
@@ -483,7 +484,7 @@ export async function exportConversationShareGPT(threadId: string): Promise<void
     if (value.trim()) conversations.push({ from, value });
   }
 
-  if (conversations.length === 0) { toast.info("No exportable content."); return; }
+  if (conversations.length === 0) { toast.info(translate("uxChat.noExportableContentfe4dd")); return; }
   await downloadBlob(
     ndjsonBody([JSON.stringify({ conversations })]),
     "conversation-" + exportTs() + ".jsonl",
@@ -512,7 +513,7 @@ async function exportConversationJsonl(
   if (!messages) return;
 
   const oaiMsgs: OAIMessage[] = messages.flatMap((msg) => messageToOpenAI(msg));
-  if (oaiMsgs.length === 0) { toast.info("No exportable content."); return; }
+  if (oaiMsgs.length === 0) { toast.info(translate("uxChat.noExportableContentfe4dd")); return; }
   await downloadBlob(
     ndjsonBody([conversationJsonlBody(oaiMsgs, layout)]),
     `conversation${layout === "messages" ? "-messages" : ""}-${exportTs()}.jsonl`,
@@ -531,7 +532,7 @@ export async function exportConversationCsv(threadId: string): Promise<void> {
     rows.push(`${csvEscape(msg.role as string)},${csvEscape(content)}`);
   }
 
-  if (rows.length <= 1) { toast.info("No exportable content."); return; }
+  if (rows.length <= 1) { toast.info(translate("uxChat.noExportableContentfe4dd")); return; }
   await downloadBlob(
     csvDocument(rows),
     "conversation-" + exportTs() + ".csv",
@@ -557,7 +558,7 @@ export const exportConversationMarkdown = createConversationMarkdownExporter({
   renderMessage: messageToMarkdown,
   download: downloadBlob,
   exportTimestamp: exportTs,
-  notifyNoContent: () => toast.info("No exportable content."),
+  notifyNoContent: () => toast.info(translate("uxChat.noExportableContentfe4dd")),
 });
 
 // "skipped" is an empty conversation, which has already said so and must not stop the rest of a pair; "failed" has toasted a reason, so stop there rather than stack a second one.
@@ -569,7 +570,7 @@ async function saveConversationAsProjectSource(
   title: string,
 ): Promise<SaveSourceOutcome> {
   const messages = await loadDisplayedBranchMessages(threadId, {
-    emptyMessage: "No messages in this conversation to save.",
+    emptyMessage: translate("uxChat.noMessagesInThis1xu7t"),
     includeInstructions: false,
   });
   if (!messages) return "skipped";
@@ -581,7 +582,7 @@ async function saveConversationAsProjectSource(
     })),
   );
   if (!markdown) {
-    toast.info("No content to save.");
+    toast.info(translate("uxChat.noContentToSave73f8n"));
     return "skipped";
   }
   const saved = await saveMarkdownAsProjectSource(projectId, markdown, title, {
@@ -609,9 +610,9 @@ export async function saveChatItemAsProjectSource(
     if (outcome === "saved") saved += 1;
   }
   // One toast per click, not one per thread in the pair.
-  if (saved === 1) toast.success("Saved to project sources.");
+  if (saved === 1) toast.success(translate("uxChat.savedToProjectSources1fcrb"));
   else if (saved > 1) {
-    toast.success(`Saved ${saved} chats to project sources.`);
+    toast.success(translate("uxChat.savedChatsToProjectilt8x", { p1: saved }));
   }
 }
 
@@ -717,9 +718,9 @@ export async function exportBulkConversationsMerged(
   format: ConvExportFormat,
   basename: string,
 ): Promise<void> {
-  if (threadIds.length === 0) { toast.info("No conversations to export."); return; }
+  if (threadIds.length === 0) { toast.info(translate("uxChat.noConversationsToExport543qz")); return; }
   if (!canMergeConversationExport(format) && threadIds.length > 1) {
-    toast.info("Message JSONL is available per chat.");
+    toast.info(translate("uxChat.messageJSONLIsAvailableuddfs"));
     return;
   }
 
@@ -751,7 +752,7 @@ export async function exportBulkConversationsMerged(
       conversations,
       buildConversationMarkdownForThread,
     );
-    if (!body) { toast.info("No exportable content."); return; }
+    if (!body) { toast.info(translate("uxChat.noExportableContentfe4dd")); return; }
     await downloadBlob(
       body,
       `${basename}.md`,
@@ -768,7 +769,7 @@ export async function exportBulkConversationsMerged(
     if (content) parts.push(content);
   }
 
-  if (parts.length === 0) { toast.info("No exportable content."); return; }
+  if (parts.length === 0) { toast.info(translate("uxChat.noExportableContentfe4dd")); return; }
 
   const body = header
     ? csvDocument([header, ...parts])
@@ -788,7 +789,7 @@ export async function exportBulkConversationsSeparate(
   format: ConvExportFormat,
   basename: string,
 ): Promise<void> {
-  if (threadIds.length === 0) { toast.info("No conversations to export."); return; }
+  if (threadIds.length === 0) { toast.info(translate("uxChat.noConversationsToExport543qz")); return; }
 
   const { zipSync, strToU8 } = await import("fflate");
   const ext = exportExt(format);
@@ -802,7 +803,7 @@ export async function exportBulkConversationsSeparate(
     files[`${id}.${ext}`] = strToU8(body);
   }
 
-  if (Object.keys(files).length === 0) { toast.info("No exportable content."); return; }
+  if (Object.keys(files).length === 0) { toast.info(translate("uxChat.noExportableContentfe4dd")); return; }
 
   const zipped = zipSync(files);
   await downloadBlob(zipped, `${basename}.zip`, "application/zip");
@@ -821,7 +822,7 @@ export async function bulkExportConversationsByScope(
     });
     const ids = [...new Set(threads.map((t) => t.id))];
     if (ids.length === 0) {
-      toast.info("No conversations to export.");
+      toast.info(translate("uxChat.noConversationsToExport543qz"));
       return;
     }
     const ts = new Date().toISOString().slice(0, 10);
@@ -833,7 +834,7 @@ export async function bulkExportConversationsByScope(
     }
   } catch (error) {
     if (!isDownloadCancelled(error)) {
-      toast.error("Export failed.");
+      toast.error(translate("composer.plus.exportFailed"));
     }
   }
 }
@@ -1040,7 +1041,7 @@ export async function exportFineTuneJsonl(
 ): Promise<number> {
   const { lines, conversations, skipped } = await buildFineTuneJsonl(format);
   if (conversations === 0) {
-    toast.info("No chats with a user and assistant exchange to export.");
+    toast.info(translate("uxChat.noChatsWithAcrjos"));
     return 0;
   }
   const suffix = format === "openai" ? "" : `-${format}`;
@@ -1051,7 +1052,10 @@ export async function exportFineTuneJsonl(
   );
   if (skipped > 0) {
     toast.success(
-      `Exported ${conversations} conversation${conversations === 1 ? "" : "s"} (${skipped} without a full exchange skipped).`,
+      translate("uxChat.exportedConversationsH71pn", {
+        p1: conversations,
+        p2: skipped,
+      }),
     );
   }
   return conversations;
@@ -1290,18 +1294,18 @@ function ExportModal({
         const { tab, prompts, lists } = ctx;
         if (scope === "training") {
           if (tab === "prompts") {
-            if (prompts.length === 0) { toast.info("No prompts to export"); return; }
+            if (prompts.length === 0) { toast.info(translate("uxChat.noPromptsToExport8sjk5")); return; }
             await exportPromptsTrainingJsonl(prompts);
           } else {
-            if (lists.length === 0) { toast.info("No prompt lists to export"); return; }
+            if (lists.length === 0) { toast.info(translate("uxChat.noPromptListsTo1fws8")); return; }
             await exportListsTrainingJsonl(lists);
           }
         } else if (tab === "prompts") {
-          if (prompts.length === 0) { toast.info("No prompts to export"); return; }
+          if (prompts.length === 0) { toast.info(translate("uxChat.noPromptsToExport8sjk5")); return; }
           if (format === "csv") await exportAllPromptsCsv(prompts);
           else await exportAllPromptsJsonl(prompts);
         } else {
-          if (lists.length === 0) { toast.info("No prompt lists to export"); return; }
+          if (lists.length === 0) { toast.info(translate("uxChat.noPromptListsTo1fws8")); return; }
           if (format === "csv") await exportAllListsCsv(lists);
           else await exportAllListsJsonl(lists);
         }
@@ -1309,7 +1313,7 @@ function ExportModal({
       onClose();
     } catch (error) {
       if (!isDownloadCancelled(error)) {
-        toast.error("Could not save export.", {
+        toast.error(translate("uxChat.couldNotSaveExport1fkmd"), {
           description: error instanceof Error ? error.message : String(error),
         });
       }
@@ -1318,21 +1322,21 @@ function ExportModal({
 
   const singleLabel =
     ctx.kind === "prompt"
-      ? "Single Prompt"
+      ? translate("uxChat.singlePromptm1gr4")
       : ctx.kind === "list"
-        ? "Prompt List"
+        ? translate("uxChat.promptListpx5h1")
         : ctx.kind === "bulk" && ctx.tab === "prompts"
-          ? "All Prompts"
-          : "All Prompt Lists";
+          ? translate("uxChat.allPromptsxp87b")
+          : translate("uxChat.allPromptListslhzfm");
 
   const singleDesc =
     ctx.kind === "prompt"
-      ? "Export raw prompt name and text"
+      ? translate("uxChat.exportRawPromptName3bz23")
       : ctx.kind === "list"
-        ? "Export list name and all prompt items"
+        ? translate("uxChat.exportListNameAndspeld")
         : ctx.kind === "bulk" && ctx.tab === "prompts"
-          ? "One JSONL or CSV record per saved prompt"
-          : "One JSONL or CSV record per saved list";
+          ? translate("uxChat.oneJSONLOrCSV2xyo2")
+          : translate("uxChat.oneJSONLOrCSV861ym");
 
   return (
     <Dialog open onOpenChange={onClose}>
@@ -1341,12 +1345,12 @@ function ExportModal({
         <div className="flex flex-col gap-5 p-6">
           {/* */}
           <DialogTitle className="text-base font-semibold tracking-tight">Export</DialogTitle>
-          <DialogDescription className="sr-only">Choose export type and format.</DialogDescription>
+          <DialogDescription className="sr-only">{translate("uxCopy.chooseExportTypeAnd1y6ak")}</DialogDescription>
 
           {/* */}
           <div className="flex flex-col gap-2">
             <p className="text-ui-11 font-semibold uppercase tracking-wider text-muted-foreground/60">
-              Export as
+              {translate("uxChat.exportAs1xdja")}
             </p>
             <div className="flex flex-col gap-2">
               {/* */}
@@ -1390,9 +1394,9 @@ function ExportModal({
                   className="mt-0.5 accent-primary shrink-0"
                 />
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold leading-none">Training Style</p>
+                  <p className="text-sm font-semibold leading-none">{translate("uxChat.trainingStyleh01qb")}</p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    ShareGPT format for LAiM fine-tuning
+                    {translate("uxChat.shareGPTFormatForLAiMqal0t")}
                   </p>
                   <code className="mt-2 block w-full truncate rounded-md bg-muted px-2 py-1 font-mono text-ui-10 text-muted-foreground/60">
                     {`{"conversations":[{"from":"human","value":"..."},{"from":"gpt","value":""}]}`}
@@ -1405,7 +1409,7 @@ function ExportModal({
           {/* */}
           <div className="flex flex-col gap-2">
             <p className="text-ui-11 font-semibold uppercase tracking-wider text-muted-foreground/60">
-              Format
+              {translate("uxHub.format1yy13")}
             </p>
             <div className="flex items-center gap-1 self-start rounded-lg bg-muted/60 p-1">
               {(["jsonl", "csv"] as ExportFormat[]).map((f) => {
@@ -1439,7 +1443,7 @@ function ExportModal({
             </div>
             {!csvAvailable && (
               <p className="text-xs text-muted-foreground/60">
-                CSV is not available for this export type
+                {translate("uxChat.cSVIsNotAvailablesg7ss")}
               </p>
             )}
           </div>
@@ -1448,11 +1452,11 @@ function ExportModal({
         {/* */}
         <div className="flex items-center justify-end gap-2 border-t border-border/50 px-6 py-4">
           <Button variant="ghost" size="sm" onClick={onClose}>
-            Cancel
+            {translate("browser.agentSettings.cancel")}
           </Button>
           <Button size="sm" onClick={handleExport}>
             <HugeiconsIcon icon={Download01Icon} className="mr-1.5 size-3.5" />
-            Download
+            {translate("imageViewer.download")}
           </Button>
         </div>
       </DialogContent>
@@ -1522,7 +1526,7 @@ function RailRow({
         {leading}
         <span className="flex-1 truncate text-xs font-medium tracking-tight">{title}</span>
         {dirty && (
-          <span className="size-1.5 shrink-0 rounded-full bg-primary" title="Unsaved changes" />
+          <span className="size-1.5 shrink-0 rounded-full bg-primary" title={translate("uxChat.unsavedChanges1tghr")} />
         )}
         {badge && (
           <span className="shrink-0 rounded-full bg-muted px-1.5 text-ui-11 tabular-nums text-muted-foreground">
@@ -1554,7 +1558,7 @@ function EmptyDetail({
         {hint && <p className="text-xs text-muted-foreground/60">{hint}</p>}
         {onClearSearch && (
           <button type="button" onClick={onClearSearch} className="text-xs text-primary hover:underline">
-            Clear search
+            {translate("skills.clearSearch")}
           </button>
         )}
       </div>
@@ -1580,19 +1584,14 @@ function UnsavedDeleteConfirm({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>
-            Delete {kind} with unsaved changes
-          </AlertDialogTitle>
+          <AlertDialogTitle>{translate("uxChat.deleteWithUnsavedChangesxzy90", { p1: kind })}</AlertDialogTitle>
           <AlertDialogDescription>
-            <span className="font-medium text-foreground">&quot;{name}&quot;</span> has
-            unsaved edits. Deleting discards the saved {kind} and those edits together.
-            This cannot be undone.
-          </AlertDialogDescription>
+            <span className="font-medium text-foreground">&quot;{name}&quot;</span>{translate("uxChat.hasUnsavedEditsDeletingk9mdj", { p1: kind })}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction variant="destructive" onClick={onConfirm}>
-            Delete
+            {translate("common.delete")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
@@ -1652,7 +1651,7 @@ function PromptDetail({
       try {
         await savePromptEntry({
           ...entry,
-          name: name.trim() || "Untitled Prompt",
+          name: name.trim() || translate("uxChat.untitledPrompthqfpu"),
           text: trimText,
           updatedAt: now(),
         });
@@ -1660,8 +1659,8 @@ function PromptDetail({
         await onRefresh();
         onSaved(submitted);
       } catch (err) {
-        toast.error("Could not save prompt", {
-          description: err instanceof Error ? err.message : "Please try again.",
+        toast.error(translate("uxChat.couldNotSavePrompt17rmm"), {
+          description: err instanceof Error ? err.message : translate("uxChat.pleaseTryAgain53jxh"),
         });
       }
     });
@@ -1672,8 +1671,8 @@ function PromptDetail({
       try {
         await deletePromptEntry(entry.id);
       } catch (err) {
-        toast.error("Could not delete prompt", {
-          description: err instanceof Error ? err.message : "Please try again.",
+        toast.error(translate("uxChat.couldNotDeletePrompt1agvz"), {
+          description: err instanceof Error ? err.message : translate("uxChat.pleaseTryAgain53jxh"),
         });
         return;
       }
@@ -1687,7 +1686,7 @@ function PromptDetail({
 
   // Export what the pane shows, normalised as saving would, or a dirty entry writes a file that does not match the screen.
   const exportValue: PromptEntry = dirty
-    ? { ...entry, name: name.trim() || "Untitled Prompt", text: text.trim() }
+    ? { ...entry, name: name.trim() || translate("uxChat.untitledPrompthqfpu"), text: text.trim() }
     : entry;
 
   return (
@@ -1696,7 +1695,7 @@ function PromptDetail({
       <input
         value={name}
         onChange={(e) => update({ name: e.target.value })}
-        placeholder="Prompt name..."
+        placeholder={translate("uxChat.promptNamebesid")}
         className="w-full shrink-0 rounded-lg border-0 bg-background/80 px-3 py-2 text-sm font-medium ring-1 ring-border/60 outline-none focus:ring-ring transition-shadow"
       />
       {preview ? (
@@ -1708,18 +1707,18 @@ function PromptDetail({
         <textarea
           value={text}
           onChange={(e) => update({ text: e.target.value })}
-          placeholder="Prompt text..."
+          placeholder={translate("uxChat.promptText13w5n")}
           className="min-h-0 flex-1 w-full resize-none rounded-lg border-0 bg-background/80 px-3 py-2.5 text-sm ring-1 ring-border/60 outline-none focus:ring-ring transition-shadow leading-relaxed"
         />
       )}
       <div className="flex shrink-0 items-center gap-2 text-ui-11 text-muted-foreground/70">
-        <span className="tabular-nums">{text.length.toLocaleString()} characters</span>
+        <span className="tabular-nums">{translate("uxChat.characterschefg", { p1: text.length.toLocaleString() })}</span>
         <span className="text-muted-foreground/30">·</span>
-        <span>updated {relativeTime(entry.updatedAt)}</span>
+        <span>{translate("uxChat.updated82cs5", { p1: relativeTime(entry.updatedAt) })}</span>
         {dirty && (
           <>
             <span className="text-muted-foreground/30">·</span>
-            <span className="text-primary">unsaved changes</span>
+            <span className="text-primary">{translate("uxChat.unsavedChanges75shg")}</span>
           </>
         )}
       </div>
@@ -1733,7 +1732,7 @@ function PromptDetail({
               ? "text-primary hover:bg-primary/10"
               : "text-muted-foreground hover:bg-muted hover:text-foreground",
           )}
-          title={isPinned ? "Unpin from + menu" : "Pin to + menu"}
+          title={isPinned ? translate("uxChat.unpinFromMenujwayn") : translate("uxChat.pinToMenusf2z2")}
         >
           <BookmarkIcon className={cn("size-4", isPinned && "fill-primary")} />
         </button>
@@ -1741,7 +1740,7 @@ function PromptDetail({
           type="button"
           onClick={() => onExport(exportValue)}
           className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-          title="Export"
+          title={translate("browser.exportBookmarks")}
         >
           <HugeiconsIcon icon={Download01Icon} className="size-4" />
         </button>
@@ -1750,7 +1749,7 @@ function PromptDetail({
           disabled={pending}
           onClick={() => (dirty ? setConfirmingDelete(true) : void handleDelete())}
           className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-muted-foreground"
-          title="Delete"
+          title={translate("common.delete")}
         >
           <Trash2Icon className="size-4" />
         </button>
@@ -1779,7 +1778,7 @@ function PromptDetail({
       open={confirmingDelete}
       onOpenChange={setConfirmingDelete}
       kind="prompt"
-      name={name.trim() || "Untitled Prompt"}
+      name={name.trim() || translate("uxChat.untitledPrompthqfpu")}
       onConfirm={() => {
         setConfirmingDelete(false);
         void handleDelete();
@@ -1852,15 +1851,15 @@ function NewPromptForm({
         try {
           await savePromptEntry({
             id,
-            name: name.trim() || "Untitled Prompt",
+            name: name.trim() || translate("uxChat.untitledPrompthqfpu"),
             text: trimText,
             createdAt: ts,
             updatedAt: ts,
           });
         } catch (err) {
           // Without this the rejection is unhandled and the form just sits there, so the prompt looks saved until the dialog is reopened.
-          toast.error("Could not create prompt", {
-            description: err instanceof Error ? err.message : "Please try again.",
+          toast.error(translate("uxChat.couldNotCreatePrompt1i7hj"), {
+            description: err instanceof Error ? err.message : translate("uxChat.pleaseTryAgain53jxh"),
           });
           return;
         }
@@ -1874,18 +1873,18 @@ function NewPromptForm({
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-3">
-      <p className="shrink-0 text-xs font-semibold text-muted-foreground">New Prompt</p>
+      <p className="shrink-0 text-xs font-semibold text-muted-foreground">{translate("uxChat.newPrompt9zvfn")}</p>
       <input
         value={name}
         onChange={(e) => setName(e.target.value)}
-        placeholder="Prompt name (optional)..."
+        placeholder={translate("uxChat.promptNameOptional8hku2")}
         autoFocus
         className="w-full shrink-0 rounded-lg border-0 bg-background/80 px-3 py-2 text-sm font-medium ring-1 ring-border/60 outline-none focus:ring-ring transition-shadow"
       />
       <textarea
         value={text}
         onChange={(e) => setText(e.target.value)}
-        placeholder="Write your prompt here..."
+        placeholder={translate("uxChat.writeYourPromptHere14ov1")}
         className="min-h-0 flex-1 w-full resize-none rounded-lg border-0 bg-background/80 px-3 py-2.5 text-sm ring-1 ring-border/60 outline-none focus:ring-ring transition-shadow leading-relaxed"
       />
       <div className="flex shrink-0 flex-wrap gap-2 justify-end border-t border-border/50 pt-3">
@@ -1893,8 +1892,7 @@ function NewPromptForm({
           <XIcon className="size-3.5 mr-1" />Cancel
         </Button>
         <Button size="sm" onClick={handleSave} disabled={creating || !text.trim()}>
-          <HugeiconsIcon icon={Tick02Icon} strokeWidth={2} className="size-3.5 mr-1" />Save Prompt
-        </Button>
+          <HugeiconsIcon icon={Tick02Icon} strokeWidth={2} className="size-3.5 mr-1" />{translate("uxChat.savePrompt4jkgh")}</Button>
       </div>
     </div>
   );
@@ -1960,15 +1958,15 @@ function PromptListDetail({
       try {
         await savePromptList({
           ...entry,
-          name: name.trim() || "Untitled List",
+          name: name.trim() || translate("uxChat.untitledListlb2k6"),
           items: filtered,
           updatedAt: now(),
         });
         await onRefresh();
         onSaved(submitted);
       } catch (err) {
-        toast.error("Could not save list", {
-          description: err instanceof Error ? err.message : "Please try again.",
+        toast.error(translate("uxChat.couldNotSaveList10rh4"), {
+          description: err instanceof Error ? err.message : translate("uxChat.pleaseTryAgain53jxh"),
         });
       }
     });
@@ -1979,8 +1977,8 @@ function PromptListDetail({
       try {
         await deletePromptList(entry.id);
       } catch (err) {
-        toast.error("Could not delete list", {
-          description: err instanceof Error ? err.message : "Please try again.",
+        toast.error(translate("uxChat.couldNotDeleteListybmn0"), {
+          description: err instanceof Error ? err.message : translate("uxChat.pleaseTryAgain53jxh"),
         });
         return;
       }
@@ -1997,7 +1995,7 @@ function PromptListDetail({
   const exportValue: PromptListEntry = dirty
     ? {
         ...entry,
-        name: name.trim() || "Untitled List",
+        name: name.trim() || translate("uxChat.untitledListlb2k6"),
         items: items.filter((t) => t.trim()),
       }
     : entry;
@@ -2008,11 +2006,11 @@ function PromptListDetail({
       <input
         value={name}
         onChange={(e) => update({ name: e.target.value })}
-        placeholder="List name..."
+        placeholder={translate("uxChat.listNamez61fh")}
         className="w-full shrink-0 rounded-lg border-0 bg-background/80 px-3 py-2 text-sm font-medium ring-1 ring-border/60 outline-none focus:ring-ring transition-shadow"
       />
       <p className="shrink-0 text-xs font-semibold text-muted-foreground">
-        Prompts, loaded into the composer one at a time
+        {translate("uxChat.promptsLoadedIntoThe1qv8j")}
       </p>
       <div className="min-h-0 flex-1 overflow-y-auto pr-1 flex flex-col gap-2">
         {editorMounted ? (
@@ -2028,8 +2026,7 @@ function PromptListDetail({
                 onClick={() => update({ items: [...items, ""] })}
                 className="flex items-center gap-1.5 self-start text-xs font-medium text-primary hover:text-primary/80 transition-colors"
               >
-                <PlusIcon className="size-3.5" />Add prompt
-              </button>
+                <PlusIcon className="size-3.5" />{translate("uxChat.addPrompt2u9e8")}</button>
             )}
           </>
         ) : (
@@ -2042,28 +2039,24 @@ function PromptListDetail({
                 </p>
               ))}
             </div>
-            <p className="text-ui-11 text-muted-foreground/60">
-              {items.length - 5} more. Opening the editor for a list this long takes a
-              while, so it waits for you.
-            </p>
+            <p className="text-ui-11 text-muted-foreground/60">{translate("uxChat.moreOpeningTheEditorogqgl", { p1: items.length - 5 })}</p>
             <button
               type="button"
               onClick={() => setEditorMounted(true)}
               className="flex items-center gap-1.5 self-start text-xs font-medium text-primary hover:text-primary/80 transition-colors"
             >
-              <PencilIcon className="size-3.5" />Edit all {items.length} prompts
-            </button>
+              <PencilIcon className="size-3.5" />{translate("uxChat.editAllPromptssq42l", { p1: items.length })}</button>
           </>
         )}
       </div>
       <div className="flex shrink-0 items-center gap-2 text-ui-11 text-muted-foreground/70">
-        <span className="tabular-nums">{items.length} prompts</span>
+        <span className="tabular-nums">{translate("uxChat.prompts9z5pr", { p1: items.length })}</span>
         <span className="text-muted-foreground/30">·</span>
-        <span>updated {relativeTime(entry.updatedAt)}</span>
+        <span>{translate("uxChat.updated82cs5", { p1: relativeTime(entry.updatedAt) })}</span>
         {dirty && (
           <>
             <span className="text-muted-foreground/30">·</span>
-            <span className="text-primary">unsaved changes</span>
+            <span className="text-primary">{translate("uxChat.unsavedChanges75shg")}</span>
           </>
         )}
       </div>
@@ -2077,7 +2070,7 @@ function PromptListDetail({
               ? "text-primary hover:bg-primary/10"
               : "text-muted-foreground hover:bg-muted hover:text-foreground",
           )}
-          title={isPinned ? "Unpin from + menu" : "Pin to + menu"}
+          title={isPinned ? translate("uxChat.unpinFromMenujwayn") : translate("uxChat.pinToMenusf2z2")}
         >
           <BookmarkIcon className={cn("size-4", isPinned && "fill-primary")} />
         </button>
@@ -2085,7 +2078,7 @@ function PromptListDetail({
           type="button"
           onClick={() => onExport(exportValue)}
           className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-          title="Export"
+          title={translate("browser.exportBookmarks")}
         >
           <HugeiconsIcon icon={Download01Icon} className="size-4" />
         </button>
@@ -2094,7 +2087,7 @@ function PromptListDetail({
           disabled={pending}
           onClick={() => (dirty ? setConfirmingDelete(true) : void handleDelete())}
           className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-muted-foreground"
-          title="Delete"
+          title={translate("common.delete")}
         >
           <Trash2Icon className="size-4" />
         </button>
@@ -2128,7 +2121,7 @@ function PromptListDetail({
       open={confirmingDelete}
       onOpenChange={setConfirmingDelete}
       kind="list"
-      name={name.trim() || "Untitled List"}
+      name={name.trim() || translate("uxChat.untitledListlb2k6")}
       onConfirm={() => {
         setConfirmingDelete(false);
         void handleDelete();
@@ -2178,14 +2171,14 @@ function NewPromptListForm({
         try {
           await savePromptList({
             id,
-            name: name.trim() || "Untitled List",
+            name: name.trim() || translate("uxChat.untitledListlb2k6"),
             items: filtered,
             createdAt: ts,
             updatedAt: ts,
           });
         } catch (err) {
-          toast.error("Could not create list", {
-            description: err instanceof Error ? err.message : "Please try again.",
+          toast.error(translate("uxChat.couldNotCreateList15pc6"), {
+            description: err instanceof Error ? err.message : translate("uxChat.pleaseTryAgain53jxh"),
           });
           return;
         }
@@ -2199,16 +2192,16 @@ function NewPromptListForm({
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-3">
-      <p className="shrink-0 text-xs font-semibold text-muted-foreground">New Prompt List</p>
+      <p className="shrink-0 text-xs font-semibold text-muted-foreground">{translate("uxChat.newPromptList1rby3")}</p>
       <input
         value={name}
         onChange={(e) => setName(e.target.value)}
-        placeholder="List name..."
+        placeholder={translate("uxChat.listNamez61fh")}
         autoFocus
         className="w-full shrink-0 rounded-lg border-0 bg-background/80 px-3 py-2 text-sm font-medium ring-1 ring-border/60 outline-none focus:ring-ring transition-shadow"
       />
       <p className="shrink-0 text-xs font-semibold text-muted-foreground">
-        Prompts, loaded into the composer one at a time
+        {translate("uxChat.promptsLoadedIntoThe1qv8j")}
       </p>
       <div className="min-h-0 flex-1 overflow-y-auto pr-1 flex flex-col gap-2">
         <SortablePromptItems items={items} onChange={setItems} minItems={1} />
@@ -2217,7 +2210,7 @@ function NewPromptListForm({
           onClick={addItem}
           className="flex items-center gap-1.5 self-start text-xs font-medium text-primary hover:text-primary/80 transition-colors"
         >
-          <PlusIcon className="size-3.5" />Add another prompt
+          <PlusIcon className="size-3.5" />{translate("uxCopy.addAnotherPrompt1rxfs")}
         </button>
       </div>
       <div className="flex shrink-0 flex-wrap gap-2 justify-end border-t border-border/50 pt-3">
@@ -2229,7 +2222,7 @@ function NewPromptListForm({
           onClick={handleSave}
           disabled={creating || items.filter((t) => t.trim()).length === 0}
         >
-          <HugeiconsIcon icon={Tick02Icon} strokeWidth={2} className="size-3.5 mr-1" />Save Prompt List
+          <HugeiconsIcon icon={Tick02Icon} strokeWidth={2} className="size-3.5 mr-1" />{translate("uxCopy.savePromptList638pf")}
         </Button>
       </div>
     </div>
@@ -2498,12 +2491,18 @@ export function PromptStorageDialog({
                 void refreshEntries();
                 void refreshLists();
                 if (total > 0) {
-                  toast.success(`Imported ${total} item${total !== 1 ? "s" : ""}`, {
-                    description: `${result.prompts} prompt${result.prompts !== 1 ? "s" : ""}, ${result.lists} list${result.lists !== 1 ? "s" : ""}`,
-                  });
+                  toast.success(
+                    translate("uxChat.importedItemCountC26ky", { p1: total }),
+                    {
+                      description: translate(
+                        "uxChat.importedPromptsAndListsK8w3f",
+                        { p1: result.prompts, p2: result.lists },
+                      ),
+                    },
+                  );
                 } else {
-                  toast.warning("No items imported", {
-                    description: "The file may be empty or in an unsupported format.",
+                  toast.warning(translate("uxChat.noItemsImported1rjd2"), {
+                    description: translate("uxChat.theFileMayBet7ace"),
                   });
                 }
                 e.target.value = "";
@@ -2525,18 +2524,18 @@ export function PromptStorageDialog({
           void refreshLists();
         }
         if (count > 0) {
-          toast.success(`Imported ${count} item${count !== 1 ? "s" : ""}`, {
-            description: skipped > 0 ? `${skipped} line${skipped !== 1 ? "s" : ""} skipped (unrecognised format)` : undefined,
+          toast.success(translate("uxChat.importedItemsdo0am", { p1: count, p2: count !== 1 ? "s" : "" }), {
+            description: skipped > 0 ? translate("uxChat.linesSkippedUnrecognisedFormat0s0ht", { p1: skipped, p2: skipped !== 1 ? "s" : "" }) : undefined,
           });
         } else {
-          toast.warning("No items imported", {
+          toast.warning(translate("uxChat.noItemsImported1rjd2"), {
             description: skipped > 0
-              ? `${skipped} line${skipped !== 1 ? "s" : ""} could not be parsed.`
-              : "The file may be empty or in an unsupported format.",
+              ? translate("uxChat.linesCouldNotBetq7x8", { p1: skipped, p2: skipped !== 1 ? "s" : "" })
+              : translate("uxChat.theFileMayBejk9i1"),
           });
         }
       } catch {
-        toast.error("Import failed", { description: "Could not parse the file." });
+        toast.error(translate("uxChat.importFailed18e3r"), { description: translate("uxChat.couldNotParseThe1ikoe") });
       }
       e.target.value = "";
     },
@@ -2564,10 +2563,10 @@ export function PromptStorageDialog({
             <div className="flex items-center gap-3">
               <div className="flex-1 min-w-0">
                 <DialogTitle className="text-base font-semibold tracking-tight">
-                  Prompt Storage
+                  {translate("uxChat.promptStorage1tuwz")}
                 </DialogTitle>
                 <p className="mt-0.5 text-xs text-muted-foreground">
-                  Save and reuse prompts across conversations
+                  {translate("uxChat.saveAndReusePrompts1bxrn")}
                 </p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
@@ -2583,10 +2582,10 @@ export function PromptStorageDialog({
                   size="sm"
                   onClick={() => importRef.current?.click()}
                   className="h-8 gap-1.5 text-xs"
-                  title="Import from JSONL, CSV, or collection JSONL"
+                  title={translate("uxChat.importFromJSONLCSV1dh3i")}
                 >
                   <UploadIcon className="size-3.5" />
-                  Import
+                  {translate("settings.chat.importChatsAction")}
                 </Button>
                 <Button
                   variant="outline"
@@ -2596,7 +2595,7 @@ export function PromptStorageDialog({
                   className="h-8 gap-1.5 text-xs"
                 >
                   <HugeiconsIcon icon={Download01Icon} className="size-3.5" />
-                  Export
+                  {translate("browser.exportBookmarks")}
                 </Button>
                 <div className="ml-1 h-5 w-px bg-border/60 shrink-0" />
                 <DialogClose asChild>
@@ -2608,7 +2607,7 @@ export function PromptStorageDialog({
               </div>
             </div>
             <DialogDescription className="sr-only">
-              Save and manage reusable prompts and prompt lists.
+              {translate("uxChat.saveAndManageReusable1w030")}
             </DialogDescription>
           </DialogHeader>
 
@@ -2628,7 +2627,7 @@ export function PromptStorageDialog({
                       : "text-muted-foreground hover:text-foreground",
                   )}
                 >
-                  {tab === "prompts" ? "Saved Prompts" : "Prompt Lists"}
+                  {tab === "prompts" ? translate("uxChat.savedPromptss1zga") : translate("uxChat.promptListshj73h")}
                 </button>
               ))}
             </div>
@@ -2641,7 +2640,7 @@ export function PromptStorageDialog({
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => setShowSuggestions(true)}
                 onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
-                placeholder={`Search ${activeTab === "prompts" ? "prompts by name or text" : "prompt lists by name"}…`}
+                placeholder={`Search ${activeTab === "prompts" ? translate("uxChat.promptsByNameOrx3yut") : translate("uxChat.promptListsByNamecmg6e")}…`}
                 className="w-full rounded-lg border-0 bg-muted/50 pl-9 pr-3 py-2 text-sm outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/60 transition-shadow"
               />
               {showSuggestions && searchQuery.trim() !== "" && suggestions.length > 0 && (
@@ -2679,18 +2678,18 @@ export function PromptStorageDialog({
                 className="flex shrink-0 items-center justify-center gap-1.5 rounded-lg border border-dashed border-border/60 px-3 py-2 text-xs font-medium text-muted-foreground hover:border-border hover:bg-muted/50 hover:text-foreground transition-all"
               >
                 <PlusIcon className="size-3.5" />
-                {activeTab === "prompts" ? "New prompt" : "New prompt list"}
+                {activeTab === "prompts" ? translate("uxChat.newPrompt5w2h8") : translate("uxChat.newPromptListozjmw")}
                 {(activeTab === "prompts" ? newPromptStarted : newListStarted) && (
                   <span
                     className="size-1.5 shrink-0 rounded-full bg-primary"
-                    title="Unsaved draft"
+                    title={translate("uxChat.unsavedDraftwp649")}
                   />
                 )}
               </button>
 
               <div
                 role="group"
-                aria-label={activeTab === "prompts" ? "Saved prompts" : "Prompt lists"}
+                aria-label={activeTab === "prompts" ? translate("uxChat.savedPromptsdfvfm") : translate("uxChat.promptLists5xb8y")}
                 onKeyDown={handleRailKeyDown}
                 className="min-h-0 flex-1 overflow-y-auto flex flex-col gap-0.5"
               >
@@ -2739,12 +2738,12 @@ export function PromptStorageDialog({
 
                 {activeTab === "prompts" && filteredPrompts.length === 0 && (
                   <p className="px-2 py-6 text-center text-ui-11 text-muted-foreground/60">
-                    {searchQuery.trim() ? "No prompts match" : "No saved prompts yet"}
+                    {searchQuery.trim() ? translate("uxChat.noPromptsMatchhwuzq") : translate("uxChat.noSavedPromptsYetc6rl6")}
                   </p>
                 )}
                 {activeTab === "lists" && filteredLists.length === 0 && (
                   <p className="px-2 py-6 text-center text-ui-11 text-muted-foreground/60">
-                    {searchQuery.trim() ? "No lists match" : "No prompt lists yet"}
+                    {searchQuery.trim() ? translate("uxChat.noListsMatch9i31q") : translate("uxChat.noPromptListsYetlt5o1")}
                   </p>
                 )}
               </div>
@@ -2793,8 +2792,8 @@ export function PromptStorageDialog({
                 ) : (
                   <EmptyDetail
                     icon={<BookmarkIcon className="size-5 text-muted-foreground/40" />}
-                    title={searchQuery.trim() ? `No prompts match “${searchQuery}”` : "No saved prompts yet"}
-                    hint={searchQuery.trim() ? undefined : "Save prompts you use often for quick reuse"}
+                    title={searchQuery.trim() ? translate("uxChat.noPromptsMatch436fy", { p1: searchQuery }) : translate("uxChat.noSavedPromptsYetf2a3i")}
+                    hint={searchQuery.trim() ? undefined : translate("uxChat.savePromptsYouUsem1jrr")}
                     onClearSearch={searchQuery.trim() ? () => setSearchQuery("") : undefined}
                   />
                 ))}
@@ -2834,8 +2833,8 @@ export function PromptStorageDialog({
                 ) : (
                   <EmptyDetail
                     icon={<LayoutListIcon className="size-5 text-muted-foreground/40" />}
-                    title={searchQuery.trim() ? `No prompt lists match “${searchQuery}”` : "No prompt lists yet"}
-                    hint={searchQuery.trim() ? undefined : "A prompt list queues a sequence of prompts for quick reuse"}
+                    title={searchQuery.trim() ? translate("uxChat.noPromptListsMatch6k1u7", { p1: searchQuery }) : translate("uxChat.noPromptListsYetq58zg")}
+                    hint={searchQuery.trim() ? undefined : translate("uxChat.aPromptListQueues01ynd")}
                     onClearSearch={searchQuery.trim() ? () => setSearchQuery("") : undefined}
                   />
                 ))}

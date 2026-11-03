@@ -1,6 +1,6 @@
-# Model defaults for LAiM/whisper-large-v3
+# Model defaults for unsloth/whisper-large-v3
 # Based on Whisper.ipynb
-# Also applies to: LAiM/whisper-large-v3, openai/whisper-large-v3
+# Also applies to: unsloth/whisper-large-v3, openai/whisper-large-v3
 
 audio_type: whisper
 audio_input: true
@@ -20,7 +20,7 @@ training:
   random_seed: 3407
   packing: false
   train_on_completions: true
-  gradient_checkpointing: "LAiM"
+  gradient_checkpointing: "unsloth"
   optim: "adamw_8bit"
   lr_scheduler_type: "linear"
 

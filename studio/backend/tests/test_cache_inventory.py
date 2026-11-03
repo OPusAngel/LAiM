@@ -329,7 +329,7 @@ def test_the_compiled_cache_is_cleared_through_the_module_that_owns_it(
     compiled.mkdir()
     (compiled / cache_cleanup.CACHE_MARKER).touch()
     generated = _write(compiled / "LAiM_compiled_module_llama.py", "compiled" * 10)
-    monkeypatch.setenv("LAiM_COMPILE_LOCATION", str(compiled))
+    monkeypatch.setenv("UNSLOTH_COMPILE_LOCATION", str(compiled))
 
     entry = describe_cache(definition_for("LAiM_compiled"))
     assert entry["present"] is True
@@ -349,7 +349,7 @@ def test_a_shared_compiled_cache_only_loses_the_generated_modules(
     shared.mkdir()
     generated = _write(shared / "LAiM_compiled_module_llama.py", "compiled")
     mine = _write(shared / "my_notes.py", "print('hello')")
-    monkeypatch.setenv("LAiM_COMPILE_LOCATION", str(shared))
+    monkeypatch.setenv("UNSLOTH_COMPILE_LOCATION", str(shared))
 
     purge_caches(["LAiM_compiled"])
     assert not generated.exists()
@@ -585,7 +585,7 @@ def test_a_compiled_cache_that_survives_the_clear_says_so(
     compiled.mkdir()
     (compiled / cache_cleanup.CACHE_MARKER).touch()
     survivor = _write(compiled / "LAiM_compiled_module_llama.py", "compiled" * 10)
-    monkeypatch.setenv("LAiM_COMPILE_LOCATION", str(compiled))
+    monkeypatch.setenv("UNSLOTH_COMPILE_LOCATION", str(compiled))
     monkeypatch.setattr(cache_cleanup, "clear_LAiM_compiled_cache", lambda *a, **k: None)
 
     result = purge_caches(["LAiM_compiled"])["results"][0]
@@ -1450,7 +1450,7 @@ def test_a_compiled_cache_the_clear_would_refuse_says_so_on_the_row(
     (compiled / cache_cleanup.CACHE_MARKER).touch()
     generated = _write(compiled / "LAiM_compiled_module_llama.py", "compiled" * 10)
     monkeypatch.setattr(storage_roots, "documents_root", lambda: documents)
-    monkeypatch.setenv("LAiM_COMPILE_LOCATION", str(compiled))
+    monkeypatch.setenv("UNSLOTH_COMPILE_LOCATION", str(compiled))
 
     entry = describe_cache(definition_for("LAiM_compiled"))
     assert entry["purgeable"] is False

@@ -138,11 +138,11 @@ test("a failed read leaves the browser alone and sends nothing", async () => {
 
 test("RAG embedding pins come back after an account switch and mirror every edit", async () => {
   reset();
-  const { puts } = serve({ pinned: null, connected: null, embedding: ["LAiM/bge-m3"] });
+  const { puts } = serve({ pinned: null, connected: null, embedding: ["unsloth/bge-m3"] });
   await hydratePins();
-  assert.deepEqual(useEmbeddingPinsStore.getState().pinned, ["LAiM/bge-m3"]);
-  assert.equal(store.get(EMBEDDING), JSON.stringify(["LAiM/bge-m3"]));
-  useEmbeddingPinsStore.getState().togglePin("LAiM/embeddinggemma-2");
+  assert.deepEqual(useEmbeddingPinsStore.getState().pinned, ["unsloth/bge-m3"]);
+  assert.equal(store.get(EMBEDDING), JSON.stringify(["unsloth/bge-m3"]));
+  useEmbeddingPinsStore.getState().togglePin("unsloth/embeddinggemma-2");
   await settle();
-  assert.deepEqual(puts, [{ embedding: ["LAiM/bge-m3", "LAiM/embeddinggemma-2"] }]);
+  assert.deepEqual(puts, [{ embedding: ["unsloth/bge-m3", "unsloth/embeddinggemma-2"] }]);
 });

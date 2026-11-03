@@ -304,7 +304,7 @@ def _build_training_worker_config(values: dict[str, Any]) -> dict[str, Any]:
         "lora_alpha": values.get("lora_alpha", 16),
         "lora_dropout": values.get("lora_dropout", 0.0),
         "target_modules": values.get("target_modules"),
-        "gradient_checkpointing": values.get("gradient_checkpointing", "LAiM"),
+        "gradient_checkpointing": values.get("gradient_checkpointing", "unsloth"),
         "offload_layers": values.get("offload_layers") or 0,
         "offload_vram_gb": values.get("offload_vram_gb"),
         "offload_vram_gb_per_device": values.get("offload_vram_gb_per_device"),
@@ -785,7 +785,7 @@ class _MLXTrainerAdapter:
         trust_remote_code: bool = False,
         full_finetuning: bool = False,
         gpu_ids: Optional[list[int]] = None,
-        use_gradient_checkpointing: Union[str, bool] = "LAiM",
+        use_gradient_checkpointing: Union[str, bool] = "unsloth",
     ) -> bool:
         self.model_name = model_name
         self.max_seq_length = max_seq_length
@@ -853,7 +853,7 @@ class _MLXTrainerAdapter:
     ) -> bool:
         if use_gradient_checkpointing is _UNSET:
             # This entry overrides load_model's, so default to the mode recorded there.
-            use_gradient_checkpointing = self._model_config.get("gradient_checkpointing", "LAiM")
+            use_gradient_checkpointing = self._model_config.get("gradient_checkpointing", "unsloth")
         self._peft_config = {
             "use_lora": bool(use_lora),
             "lora_r": lora_r,
@@ -981,7 +981,7 @@ class _MLXTrainerAdapter:
             "lora_alpha": 16,
             "lora_dropout": 0.0,
             "target_modules": None,
-            "gradient_checkpointing": "LAiM",
+            "gradient_checkpointing": "unsloth",
             "use_rslora": False,
             "use_loftq": False,
             "use_dora": False,
@@ -1784,7 +1784,7 @@ class TrainingBackend:
             max_seq_length = config.get("max_seq_length", 2048),
             lora_rank = config.get("lora_r", 16),
             target_modules = config.get("target_modules"),
-            gradient_checkpointing = config.get("gradient_checkpointing", "LAiM"),
+            gradient_checkpointing = config.get("gradient_checkpointing", "unsloth"),
             optimizer = config.get("optim", DEFAULT_TRAINING_OPTIMIZER),
         )
 

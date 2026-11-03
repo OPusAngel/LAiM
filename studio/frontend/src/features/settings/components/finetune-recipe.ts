@@ -4,6 +4,7 @@
 // Settings Data tab glue: turn chat history into a fine-tuning JSONL, stage
 // it as a Data Recipe seed upload, and open a new recipe on that file.
 
+import { translate } from "@/i18n";
 import { type FineTuneFormat, buildFineTuneJsonl } from "@/features/chat";
 import { saveRecipe } from "@/features/data-recipes/data/recipes-db";
 import { createEmptyRecipePayload } from "@/features/recipe-studio";
@@ -31,7 +32,7 @@ export async function createFineTuneRecipeFromChats(
 ): Promise<string | null> {
   const { lines, conversations } = await buildFineTuneJsonl(format);
   if (conversations === 0) {
-    toast.info("No chats with a user and assistant exchange to export.");
+    toast.info(translate("uxSettings.noChatsWithAcrjos"));
     return null;
   }
 
@@ -65,7 +66,7 @@ export async function createFineTuneRecipeFromChats(
   payload.ui.local_file_name = filename;
 
   const record = await saveRecipe({
-    name: `Chat fine-tuning ${dateLabel}`,
+    get name() { return translate("uxSettings.chatFineTuning184cf", { p1: dateLabel }); },
     payload,
   });
   return record.id;
@@ -79,7 +80,7 @@ export async function loadFineTuneDatasetInTrainTab(
 ): Promise<boolean> {
   const { lines, conversations } = await buildFineTuneJsonl(format);
   if (conversations === 0) {
-    toast.info("No chats with a user and assistant exchange to export.");
+    toast.info(translate("uxSettings.noChatsWithAcrjos"));
     return false;
   }
 

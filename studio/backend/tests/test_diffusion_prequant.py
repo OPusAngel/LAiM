@@ -33,7 +33,7 @@ def _prequant_source(**overrides):
     return PrequantSource(
         **{
             "kind": "repo",
-            "location": "LAiM/Z-Image-Turbo-FP8",
+            "location": "unsloth/Z-Image-Turbo-FP8",
             "filename": "Z-Image-Turbo-FP8.pt",
             "fallback_filenames": ("transformer_fp8.pt",),
             **overrides,
@@ -82,23 +82,23 @@ def test_resolve_family_repo_by_scheme():
 def test_prequant_repo_filename_convention():
     from core.inference.diffusion_prequant import prequant_repo_filename
 
-    assert prequant_repo_filename("LAiM/Z-Image-Turbo-FP8", "int8") == "Z-Image-Turbo-INT8.pt"
-    assert prequant_repo_filename("LAiM/Z-Image-Turbo-FP8", "fp8") == "Z-Image-Turbo-FP8.pt"
+    assert prequant_repo_filename("unsloth/Z-Image-Turbo-FP8", "int8") == "Z-Image-Turbo-INT8.pt"
+    assert prequant_repo_filename("unsloth/Z-Image-Turbo-FP8", "fp8") == "Z-Image-Turbo-FP8.pt"
     assert (
-        prequant_repo_filename("LAiM/Qwen-Image-2512-INT8", "int8") == "Qwen-Image-2512-INT8.pt"
+        prequant_repo_filename("unsloth/Qwen-Image-2512-INT8", "int8") == "Qwen-Image-2512-INT8.pt"
     )
     assert prequant_repo_filename("org/Some-Model-quantized", "fp8") == "Some-Model-FP8.pt"
     assert prequant_repo_filename("org/PlainRepo", "int8") == "PlainRepo-INT8.pt"
     assert (
-        prequant_repo_filename("LAiM/Wan2.2-TI2V-5B-NVFP4", "nvfp4") == "Wan2.2-TI2V-5B-NVFP4.pt"
+        prequant_repo_filename("unsloth/Wan2.2-TI2V-5B-NVFP4", "nvfp4") == "Wan2.2-TI2V-5B-NVFP4.pt"
     )
-    assert prequant_repo_filename("LAiM/Model-MXFP8", "mxfp8") == "Model-MXFP8.pt"
+    assert prequant_repo_filename("unsloth/Model-MXFP8", "mxfp8") == "Model-MXFP8.pt"
     assert (
-        prequant_repo_filename("LAiM/Wan2.2-T2V-A14B-NVFP4", "nvfp4", component = "transformer_2")
+        prequant_repo_filename("unsloth/Wan2.2-T2V-A14B-NVFP4", "nvfp4", component = "transformer_2")
         == "Wan2.2-T2V-A14B-transformer_2-NVFP4.pt"
     )
     assert (
-        prequant_repo_filename("LAiM/Wan2.2-T2V-A14B-NVFP4", "nvfp4", component = "transformer")
+        prequant_repo_filename("unsloth/Wan2.2-T2V-A14B-NVFP4", "nvfp4", component = "transformer")
         == "Wan2.2-T2V-A14B-NVFP4.pt"
     )
 
@@ -135,14 +135,14 @@ def test_flux1_variant_prequant_wiring():
     from core.inference.diffusion_families import detect_family, family_prequant_repo
     fam = detect_family("black-forest-labs/FLUX.1-schnell")
     for scheme in ("int8", "fp8"):
-        assert family_prequant_repo(fam, scheme) == "LAiM/FLUX.1-schnell-FP8"
+        assert family_prequant_repo(fam, scheme) == "unsloth/FLUX.1-schnell-FP8"
         assert (
             family_prequant_repo(fam, scheme, base_repo = "black-forest-labs/FLUX.1-dev")
-            == "LAiM/FLUX.1-dev-FP8"
+            == "unsloth/FLUX.1-dev-FP8"
         )
         assert (
             family_prequant_repo(fam, scheme, base_repo = "black-forest-labs/FLUX.1-Krea-dev")
-            == "LAiM/FLUX.1-Krea-dev-FP8"
+            == "unsloth/FLUX.1-Krea-dev-FP8"
         )
 
 
@@ -150,7 +150,7 @@ def test_resolve_prefers_a_family_declared_filename():
     # A family may host a SECOND artifact for the same repo and scheme. Naming it makes it the
     # primary and demotes the derived name to the fallback, so a build that knows the new name
     # gets it while an older one still resolves the artifact it already understands.
-    fam = _fam(prequant_repos = (("int8", "LAiM/Model-FP8"),))
+    fam = _fam(prequant_repos = (("int8", "unsloth/Model-FP8"),))
     fam = dataclasses.replace(fam, prequant_filenames = (("int8", "Model-INT8-ConvRot.pt"),))
     src = resolve_prequant_source(fam, "int8")
     assert src.filename == "Model-INT8-ConvRot-ComfyUI.safetensors"
@@ -163,7 +163,7 @@ def test_resolve_prefers_a_family_declared_filename():
     )
     # Only for the scheme that declares one; everything else keeps the plain derived chain.
     other = resolve_prequant_source(
-        dataclasses.replace(fam, prequant_repos = (("fp8", "LAiM/Model-FP8"),)), "fp8"
+        dataclasses.replace(fam, prequant_repos = (("fp8", "unsloth/Model-FP8"),)), "fp8"
     )
     assert other.candidate_filenames == (
         "Model-FP8.safetensors",
@@ -1640,7 +1640,7 @@ def test_prequant_checkpoint_cached_reads_only_the_cache(monkeypatch, tmp_path):
 
     assert prequant_checkpoint_cached(source, cache_dir = "/models/hub", online = True) is True
     # The live root is asked first, and the model-name file resolves, so no legacy lookup.
-    assert asked == [("LAiM/Z-Image-Turbo-FP8", "Z-Image-Turbo-FP8.pt", "/models/hub")]
+    assert asked == [("unsloth/Z-Image-Turbo-FP8", "Z-Image-Turbo-FP8.pt", "/models/hub")]
 
     # A cached name FURTHER DOWN the chain now counts. Primary-only was right while the primary
     # was the only name a repo realistically hosted; with the chain leading on a safetensors name
@@ -1800,7 +1800,7 @@ def test_an_uncached_checkpoint_downloads_into_the_live_root(monkeypatch):
     # The other half: a real fetch must land where LAiM is reading, not under the stale constant.
     asked: list = []
     source = PrequantSource(
-        kind = "repo", location = "LAiM/Z-Image-Turbo-FP8", filename = "Z-Image-Turbo-FP8.pt"
+        kind = "repo", location = "unsloth/Z-Image-Turbo-FP8", filename = "Z-Image-Turbo-FP8.pt"
     )
 
     def _dl(**kwargs):
@@ -1813,7 +1813,7 @@ def test_an_uncached_checkpoint_downloads_into_the_live_root(monkeypatch):
     assert pq._resolve_checkpoint_path(source, "tok", "/live-hub") == "/live-hub/blobs/abc"
     assert asked == [
         {
-            "repo_id": "LAiM/Z-Image-Turbo-FP8",
+            "repo_id": "unsloth/Z-Image-Turbo-FP8",
             "filename": "Z-Image-Turbo-FP8.pt",
             "token": "tok",
             "cache_dir": "/live-hub",
@@ -2034,7 +2034,7 @@ def test_with_no_fallback_name_a_404_keeps_the_other_root_copy(monkeypatch, tmp_
     default_root.mkdir()
     ckpt = default_root / "X-FP8.pt"
     ckpt.write_bytes(b"weights")
-    source = PrequantSource(kind = "repo", location = "LAiM/X-FP8", filename = "X-FP8.pt")
+    source = PrequantSource(kind = "repo", location = "unsloth/X-FP8", filename = "X-FP8.pt")
 
     monkeypatch.setattr(
         "huggingface_hub.try_to_load_from_cache",
@@ -2084,7 +2084,7 @@ def test_load_config_reads_the_same_cache_root_as_the_checkpoint(monkeypatch, tm
             seen.append(cache_dir)
             raise RuntimeError("stop right after the config fetch")
 
-    src = P.PrequantSource(kind = "repo", location = "LAiM/X-FP8", filename = "X-FP8.pt")
+    src = P.PrequantSource(kind = "repo", location = "unsloth/X-FP8", filename = "X-FP8.pt")
     assert (
         P.load_prequantized_transformer(
             _Cls,
@@ -2153,7 +2153,7 @@ def test_the_config_follows_the_checkpoint_into_the_other_cache_root(monkeypatch
         def from_config(config):
             return _Transformer()
 
-    src = P.PrequantSource(kind = "repo", location = "LAiM/X-FP8", filename = "X-FP8.pt")
+    src = P.PrequantSource(kind = "repo", location = "unsloth/X-FP8", filename = "X-FP8.pt")
     out = P.load_prequantized_transformer(
         _Cls,
         "org/base",
@@ -2499,7 +2499,7 @@ def test_the_plan_only_commits_to_a_hosted_name_this_install_can_open(monkeypatc
     monkeypatch.setattr(huggingface_hub, "HfApi", _Api)
     source = pq.PrequantSource(
         kind = "repo",
-        location = "LAiM/Model-FP8",
+        location = "unsloth/Model-FP8",
         filename = "Model-FP8.safetensors",
         fallback_filenames = ("Model-FP8.pt",),
     )
@@ -2507,7 +2507,7 @@ def test_the_plan_only_commits_to_a_hosted_name_this_install_can_open(monkeypatc
     # An install that CAN open the pickle commits to it: the name exists and is readable.
     monkeypatch.setattr(pq, "restricted_prequant_load_supported", lambda *a, **k: True)
     assert DiffusionBackend._prequant_source_hub_entry(source, None, scheme = "fp8") == (
-        "LAiM/Model-FP8",
+        "unsloth/Model-FP8",
         "Model-FP8.pt",
         4096,
     )
@@ -2552,7 +2552,7 @@ def test_the_runtime_resolver_applies_the_same_capability_filter_as_the_plan(mon
     )
     source = pq.PrequantSource(
         kind = "repo",
-        location = "LAiM/Model-FP8",
+        location = "unsloth/Model-FP8",
         filename = "Model-FP8.safetensors",
         fallback_filenames = ("Model-FP8.pt",),
     )
@@ -2574,7 +2574,7 @@ def test_a_cached_pickle_is_not_evidence_for_a_safetensors_artifact(monkeypatch)
         pipeline_class = "ProbePipeline",
         transformer_class = "ProbeTransformer",
         base_repo = "probe/Probe",
-        prequant_repos = (("fp8", "LAiM/Probe-FP8"),),
+        prequant_repos = (("fp8", "unsloth/Probe-FP8"),),
     )
     # This install reads safetensors and cannot deserialize a pickle.
     monkeypatch.setattr(
@@ -2693,7 +2693,7 @@ def _refused(cls, status):
 def _nvfp4_repo_source():
     return PrequantSource(
         kind = "repo",
-        location = "LAiM/Z-Image-Turbo-NVFP4",
+        location = "unsloth/Z-Image-Turbo-NVFP4",
         filename = "Z-Image-Turbo-NVFP4.pt",
     )
 
@@ -3064,7 +3064,7 @@ def test_video_families_get_no_comfy_twin():
 
 def test_task_specific_artifacts_get_no_twin():
     fam = dataclasses.replace(
-        _fam(prequant_repos = (("int8", "LAiM/Model-FP8"),)),
+        _fam(prequant_repos = (("int8", "unsloth/Model-FP8"),)),
         prequant_filenames = (("int8", "keyframe", "Model-KF-INT8.safetensors"),),
     )
     src = resolve_prequant_source(fam, "int8", task = "keyframe")

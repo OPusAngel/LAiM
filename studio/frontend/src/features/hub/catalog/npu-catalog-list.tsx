@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import {
@@ -46,8 +47,8 @@ export function NpuCatalogList({
       return (
         <p className="px-3 pt-6 text-center text-ui-13 text-muted-foreground">
           {onDevice
-            ? "No NPU models on this device yet."
-            : "No matching NPU models."}
+            ? translate("uxHub.noNPUModelsOnidgwa")
+            : translate("uxHub.noMatchingNPUModelsi0iz8")}
         </p>
       );
     }
@@ -107,11 +108,11 @@ function NpuCatalogRow({
     setDeleting(true);
     try {
       await onRemove();
-      toast.success(`Deleted ${model.id}`);
+      toast.success(translate("uxHub.deletedz1712", { p1: model.id }));
       setConfirming(false);
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Failed to delete model",
+        error instanceof Error ? error.message : translate("uxHub.failedToDeleteModelis1ob"),
       );
     } finally {
       setDeleting(false);
@@ -147,19 +148,19 @@ function NpuCatalogRow({
               aria-hidden={true}
               className="size-1.5 rounded-full bg-status-success"
             />
-            On device
+            {translate("settings.general.rag.onDevice")}
           </span>
           <Button size="sm" variant="outline" onClick={onRun}>
             Run
           </Button>
           <Button size="sm" variant="ghost" onClick={() => setConfirming(true)}>
-            Delete
+            {translate("common.delete")}
           </Button>
           <DeleteConfirmDialog
             open={confirming}
             onOpenChange={setConfirming}
-            title={`Delete ${model.id}?`}
-            description="This removes the model's NPU files from this device."
+            title={translate("uxHub.delete124ur", { p1: model.id })}
+            description={translate("uxHub.thisRemovesTheModel1vccz")}
             deleting={deleting}
             onConfirm={() => void remove()}
           />

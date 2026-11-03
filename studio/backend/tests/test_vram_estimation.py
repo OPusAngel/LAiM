@@ -304,7 +304,7 @@ class TestExtractArchConfig(unittest.TestCase):
         }
         with patch("utils.transformers_version._load_config_json", return_value = raw_config):
             config = hardware_module._load_config_for_gpu_estimate(
-                "LAiM/gemma-3-27b-it-bnb-4bit"
+                "unsloth/gemma-3-27b-it-bnb-4bit"
             )
         arch = extract_arch_config(config)
         self.assertEqual(arch.quant_4bit_factor, 3.6)
@@ -607,7 +607,7 @@ class TestEstimateTrainingVram(unittest.TestCase):
             batch_size = 2,
             max_seq_length = 2048,
             lora_rank = 16,
-            gradient_checkpointing = "LAiM",
+            gradient_checkpointing = "unsloth",
             optimizer = "adamw_8bit",
             load_in_4bit = True,
         )
@@ -621,7 +621,7 @@ class TestEstimateTrainingVram(unittest.TestCase):
             training_method = "full",
             batch_size = 2,
             max_seq_length = 2048,
-            gradient_checkpointing = "LAiM",
+            gradient_checkpointing = "unsloth",
             optimizer = "adamw_8bit",
             load_in_4bit = False,
         )
@@ -653,7 +653,7 @@ class TestEstimateTrainingVram(unittest.TestCase):
             batch_size = 2,
             max_seq_length = 2048,
             lora_rank = 16,
-            gradient_checkpointing = "LAiM",
+            gradient_checkpointing = "unsloth",
             optimizer = "adamw_8bit",
             load_in_4bit = True,
         )
@@ -757,7 +757,7 @@ class TestEstimateTrainingVram(unittest.TestCase):
             max_seq_length = 512,
             lora_rank = 16,
             target_modules = ["all-linear"],
-            gradient_checkpointing = "LAiM",
+            gradient_checkpointing = "unsloth",
             optimizer = "adamw_8bit",
             load_in_4bit = True,
         )
@@ -778,7 +778,7 @@ class TestEstimateTrainingVram(unittest.TestCase):
             training_method = "full",
             batch_size = 1,
             max_seq_length = 512,
-            gradient_checkpointing = "LAiM",
+            gradient_checkpointing = "unsloth",
             optimizer = "adamw_8bit",
             load_in_4bit = False,
         )
@@ -797,7 +797,7 @@ class TestEstimateTrainingVram(unittest.TestCase):
             max_seq_length = 4096,
             lora_rank = 16,
             target_modules = ["all-linear"],
-            gradient_checkpointing = "LAiM",
+            gradient_checkpointing = "unsloth",
             optimizer = "adamw_8bit",
             load_in_4bit = True,
             attention_implementation = "eager",

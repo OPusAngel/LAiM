@@ -7,7 +7,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { readSrc, registerStoreStubResolver } from "./helpers/kit.ts";
+import { readSrc, readSrcExpanded, registerStoreStubResolver } from "./helpers/kit.ts";
 
 registerStoreStubResolver();
 
@@ -34,7 +34,7 @@ test("no picks keeps every on-device row", () => {
 test("on-device rows match Discover's capability picks", () => {
   const video = cachedRow("Wan-AI/Wan2.2-T2V-GGUF", "text-to-video", ["diffusers"]);
   const image = cachedRow("black-forest-labs/FLUX.1-dev-GGUF", "text-to-image", ["diffusers"]);
-  const text = cachedRow("LAiM/Qwen3-8B-GGUF", "text-generation");
+  const text = cachedRow("unsloth/Qwen3-8B-GGUF", "text-generation");
   assert.equal(matchesInventoryCapabilities(video, ["video-gen"]), true);
   assert.equal(matchesInventoryCapabilities(video, ["image-gen"]), false);
   assert.equal(matchesInventoryCapabilities(image, ["image-gen"]), true);
@@ -51,7 +51,7 @@ test("a row's own vision flag counts as Vision", () => {
 });
 
 test("Add folder and Free up space are icon buttons with labels", () => {
-  const toolbar = readSrc("features/hub/catalog/models-toolbar.tsx");
+  const toolbar = readSrcExpanded("features/hub/catalog/models-toolbar.tsx");
   for (const label of ["Add folder", "Free up space"]) {
     assert.match(toolbar, new RegExp(`aria-label="${label}"`));
     assert.doesNotMatch(toolbar, new RegExp(`/>\\s*${label}\\s*</button>`));
@@ -59,13 +59,13 @@ test("Add folder and Free up space are icon buttons with labels", () => {
 });
 
 test("On Device keeps format and sort as dropdowns, with MLX and Exports & Fine-tunes", () => {
-  const toolbar = readSrc("features/hub/catalog/models-toolbar.tsx");
+  const toolbar = readSrcExpanded("features/hub/catalog/models-toolbar.tsx");
   assert.match(toolbar, /\{!isDataset && \(\s*<HubOptionMenu<FormatMenuValue>/);
   assert.match(toolbar, /tab === "downloaded" && \(\s*<HubOptionMenu<InventorySort>/);
   assert.match(toolbar, /option\.value === "LAiM"\s*\? tab === "downloaded"\s*: option\.value !== "recommended" \|\| tab === "discover"/);
-  const panel = readSrc("features/hub/catalog/model-search-filters.tsx");
+  const panel = readSrcExpanded("features/hub/catalog/model-search-filters.tsx");
   assert.doesNotMatch(panel, /label="Format"|label="Sort by"/);
-  const page = readSrc("features/hub/hub-page.tsx");
+  const page = readSrcExpanded("features/hub/hub-page.tsx");
   assert.doesNotMatch(page, /InventorySortControl|InventoryTypeFilterControl/);
   assert.match(page, /deferredFormatFilter === "LAiM"\s*\? row\.source === "LAiM"/);
   assert.match(page, /includeLAiMModels: true/);
@@ -92,9 +92,9 @@ test("Size sorts local folders by their scanned size, and Format follows the for
     local("gguf"),
   ].map(inventoryItemFormatRank);
   assert.deepEqual(ranks, [3, 2, 1, 0]);
-  const toolbar = readSrc("features/hub/catalog/models-toolbar.tsx");
+  const toolbar = readSrcExpanded("features/hub/catalog/models-toolbar.tsx");
   assert.match(toolbar, /\{ value: "format", label: "Format" \}/);
-  const view = readSrc("features/hub/inventory/view-models.ts");
+  const view = readSrcExpanded("features/hub/inventory/view-models.ts");
   assert.match(view, /bytes: model\.size_bytes \?\? null/);
 });
 
@@ -114,11 +114,11 @@ test("the MLX format finds MLX folders, which the scan reports as safetensors", 
   }
   assert.equal(matchesFormat(inventoryRowFormat(plain), "mlx"), false);
   assert.equal(matchesFormat(inventoryRowFormat(plain), "checkpoint"), true);
-  const page = readSrc("features/hub/hub-page.tsx");
+  const page = readSrcExpanded("features/hub/hub-page.tsx");
   assert.doesNotMatch(page, /matchesFormat\(row\.modelFormat, deferredFormatFilter\)/);
 });
 
 test("each Hub visit rescans Studio's trained and exported models", () => {
-  const inventory = readSrc("features/hub/inventory/use-hub-inventory.ts");
+  const inventory = readSrcExpanded("features/hub/inventory/use-hub-inventory.ts");
   assert.match(inventory, /if \(LAiMModelsEnabled\) \{\s*refreshLAiMModelInventory\(\)/);
 });

@@ -179,7 +179,7 @@ def test_huggingface_hub_then_serves_the_rebuilt_file(tmp_path):
     from huggingface_hub import try_to_load_from_cache
 
     (repo_dir / "refs" / "main").write_text(COMMIT_NEW)
-    got = try_to_load_from_cache("LAiM/Model-GGUF", NAME, cache_dir = str(tmp_path))
+    got = try_to_load_from_cache("unsloth/Model-GGUF", NAME, cache_dir = str(tmp_path))
     assert Path(got).read_bytes() == NEW
 
 
@@ -350,7 +350,7 @@ def test_media_gate_refuses_before_any_fetch(tmp_path):
 
 def _prepare(tmp_path, metadata, **kw):
     return delta.prepare_media_gguf(
-        "LAiM/Model-GGUF",
+        "unsloth/Model-GGUF",
         NAME,
         None,
         cache_dir = str(tmp_path),
@@ -385,7 +385,7 @@ def test_prepare_rebuilds_after_the_ref_moved(tmp_path):
     assert result.placed, result.reason
     from huggingface_hub import try_to_load_from_cache
 
-    got = try_to_load_from_cache("LAiM/Model-GGUF", NAME, cache_dir = str(tmp_path))
+    got = try_to_load_from_cache("unsloth/Model-GGUF", NAME, cache_dir = str(tmp_path))
     assert Path(got).read_bytes() == NEW
 
 
@@ -424,7 +424,7 @@ def test_wrapper_without_opt_in_never_calls_the_delta(tmp_path, monkeypatch):
     fallback = _fake_shared(monkeypatch, seen)
     monkeypatch.setattr(delta, "prepare_media_gguf", lambda *a, **k: _no_head())
     fallback.hf_hub_download_with_xet_fallback(
-        "LAiM/Model-GGUF", NAME, None, force_download = True, cache_dir = str(tmp_path)
+        "unsloth/Model-GGUF", NAME, None, force_download = True, cache_dir = str(tmp_path)
     )
     assert seen["force_download"] is True
 
@@ -434,7 +434,7 @@ def test_wrapper_opt_in_skips_force_after_a_rebuild(tmp_path, monkeypatch):
     fallback = _fake_shared(monkeypatch, seen)
     monkeypatch.setattr(delta, "prepare_media_gguf", lambda *a, **k: delta.DeltaResult(placed = True))
     fallback.hf_hub_download_with_xet_fallback(
-        "LAiM/Model-GGUF",
+        "unsloth/Model-GGUF",
         NAME,
         None,
         force_download = True,
@@ -449,7 +449,7 @@ def test_wrapper_opt_in_keeps_force_without_a_rebuild(tmp_path, monkeypatch):
     fallback = _fake_shared(monkeypatch, seen)
     monkeypatch.setattr(delta, "prepare_media_gguf", lambda *a, **k: delta.DeltaResult())
     fallback.hf_hub_download_with_xet_fallback(
-        "LAiM/Model-GGUF",
+        "unsloth/Model-GGUF",
         NAME,
         None,
         force_download = True,
@@ -459,7 +459,7 @@ def test_wrapper_opt_in_keeps_force_without_a_rebuild(tmp_path, monkeypatch):
     assert seen["force_download"] is True
 
 
-H3_REPO, H3_NAME = "LAiM/MiniMax-H3-GGUF", "minimax_h3_fl2va_pruned-Q4_K.gguf"
+H3_REPO, H3_NAME = "unsloth/MiniMax-H3-GGUF", "minimax_h3_fl2va_pruned-Q4_K.gguf"
 
 
 def _worker_cache(tmp_path, repo: str, name: str, data: bytes) -> Path:
@@ -489,7 +489,7 @@ def test_download_worker_rebuilds_a_video_gguf(tmp_path, monkeypatch):
 def test_download_worker_leaves_chat_ggufs_alone(tmp_path, monkeypatch):
     from hub.workers import hf_download
 
-    repo, name = "LAiM/Llama-3.2-1B-Instruct-GGUF", "Llama-3.2-1B-Instruct-Q4_K_M.gguf"
+    repo, name = "unsloth/Llama-3.2-1B-Instruct-GGUF", "Llama-3.2-1B-Instruct-Q4_K_M.gguf"
     repo_dir = _worker_cache(tmp_path, repo, name, OLD)
     monkeypatch.setattr("huggingface_hub.constants.HF_HUB_CACHE", str(tmp_path))
     fetch = Fetcher(NEW)
@@ -563,7 +563,7 @@ def test_a_chat_gguf_download_never_reaches_the_delta(tmp_path, monkeypatch):
     monkeypatch.setattr("huggingface_hub.get_hf_file_metadata", lambda *a, **k: _no_head())
     assert (
         fallback.hf_hub_download_with_xet_fallback(
-            "LAiM/Model-GGUF", NAME, None, cache_dir = str(tmp_path)
+            "unsloth/Model-GGUF", NAME, None, cache_dir = str(tmp_path)
         )
         == "path"
     )
@@ -585,7 +585,7 @@ def test_the_image_gguf_prefetch_opts_in(monkeypatch):
     stub = SimpleNamespace(_cancel_event = _threading.Event())
     DiffusionBackend._prefetch_files(
         stub,
-        "LAiM/Qwen-Image-2.1-GGUF",
+        "unsloth/Qwen-Image-2.1-GGUF",
         "qwen-image-2.1-Q4_K_M.gguf",
         "base/x",
         [],

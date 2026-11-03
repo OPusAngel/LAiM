@@ -14,6 +14,8 @@ import {
 import {
   ChevronRightIcon,
 } from "lucide-react";
+import { translate } from "@/i18n";
+
 
 const SKELETON_KEYS = ["s0", "s1", "s2", "s3", "s4"] as const;
 
@@ -70,7 +72,7 @@ export const HubSectionRow = memo(function HubSectionRow({
         <button
           type="button"
           onClick={onOpenList}
-          aria-label={`See all ${title}`}
+          aria-label={translate("uxHub.seeAllzhk78", { p1: title })}
           className="hub-section-title group/section -mx-1 inline-flex cursor-pointer items-center gap-1.5 rounded-md px-1 text-ui-18 font-semibold tracking-[-0.02em] text-foreground outline-none focus-visible:ring-1 focus-visible:ring-ring"
         >
           {title}

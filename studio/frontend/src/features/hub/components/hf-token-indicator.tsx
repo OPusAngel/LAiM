@@ -114,7 +114,7 @@ export function HfTokenIndicator({
             "group relative inline-flex h-[calc(22px*var(--ui-space-scale,1))] w-[calc(22px*var(--ui-space-scale,1))] shrink-0 rounded-full focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
             hasToken
               ? "text-muted-foreground hover:text-foreground/80"
-              : "text-destructive-foreground",
+              : "text-[#061d21]",
           )}
         >
           {/* One SVG: a CSS background and an inline SVG pixel-snap apart, off centre at fractional scales. */}
@@ -131,7 +131,7 @@ export function HfTokenIndicator({
                 "transition-[fill]",
                 hasToken
                   ? "fill-transparent group-hover:fill-[color-mix(in_srgb,var(--foreground)_calc(4%*var(--contrast-wash-gain,1)),transparent)] dark:group-hover:fill-accent"
-                  : "fill-destructive group-hover:fill-destructive/90",
+                  : "fill-primary group-hover:fill-primary/90",
               )}
             />
             <g

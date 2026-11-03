@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "@/lib/toast";
 import { listTrainingRuns } from "../api/history-api";
@@ -127,11 +128,11 @@ export function useTrainingHistorySidebarItems(enabled: boolean) {
     let timer: ReturnType<typeof setTimeout> | null = null;
 
     const showFailureToast = (err: unknown): void => {
-      toast.error("Couldn't load training runs", {
+      toast.error(translate("uxFeatures.couldnTLoadTraining21ogo"), {
         id: LOAD_FAILURE_TOAST_ID,
         description: err instanceof Error ? err.message : undefined,
         action: {
-          label: "Retry",
+          label: translate("common.retry"),
           onClick: () => {
             void (async () => {
               try {

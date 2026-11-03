@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { createRoute, redirect } from "@tanstack/react-router";
 import { getPostAuthRoute } from "@/features/auth";
 import { useSettingsDialogStore } from "@/features/settings";
@@ -13,7 +14,7 @@ import { Route as rootRoute } from "./__root";
 export const Route = createRoute({
   getParentRoute: () => rootRoute,
   path: "/settings",
-  staticData: { title: "Settings" },
+  staticData: { title: translate("shell.navigation.settings") },
   beforeLoad: async () => {
     await requireAuth();
     useSettingsDialogStore.getState().openDialog();

@@ -20,7 +20,7 @@ imports survive that, and forward passes stop emitting deprecation warnings.
 
 Adapted from HuggingFace Transformers `modeling_attn_mask_utils.py`
 (Copyright 2023 The HuggingFace Team, Apache License 2.0).
-See: https://github.com/LAiMai/LAiM/issues/6860
+See: https://github.com/OPusAngel/LAiM/issues/6860
 """
 
 from __future__ import annotations

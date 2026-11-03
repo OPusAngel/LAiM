@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { MarkdownPreview } from "@/components/markdown/markdown-preview";
 import { cn } from "@/lib/utils";
 import { autoscrollDelta, clipSpan } from "./autoscroll";
@@ -341,7 +342,7 @@ export function SortablePromptItems({
           >
             <button
               type="button"
-              aria-label={`Reorder prompt ${i + 1}`}
+              aria-label={translate("uxChat.reorderPrompti5u1w", { p1: i + 1 })}
               onPointerDown={(e) => handlePointerDown(uid, e)}
               onKeyDown={(e) => {
                 if (e.key === "ArrowUp") {
@@ -372,7 +373,7 @@ export function SortablePromptItems({
                 <AutoTextarea
                   value={item}
                   onChange={(v) => onChange(items.map((x, idx) => (idx === i ? v : x)))}
-                  placeholder={`Prompt ${i + 1}...`}
+                  placeholder={translate("uxChat.prompte84g3", { p1: i + 1 })}
                 />
               )}
             </div>
@@ -385,7 +386,7 @@ export function SortablePromptItems({
                 }}
                 disabled={items.length <= minItems}
                 className="mt-1.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                title="Remove"
+                title={translate("browser.pages.remove")}
               >
                 <XIcon className="size-3.5" />
               </button>

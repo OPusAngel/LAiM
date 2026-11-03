@@ -255,7 +255,7 @@ class LlamaServerBackend:
             raise RuntimeError(
                 "llama-server binary not found; cannot use RAG_EMBED_BACKEND="
                 "llama-server. Install llama.cpp or set LLAMA_SERVER_PATH / "
-                "LAiM_LLAMA_CPP_PATH."
+                "UNSLOTH_LLAMA_CPP_PATH."
             )
         # Resolve the real executable before the probe: an entrypoint loses DYLD_* to SIP.
         binary = _resolve_entrypoint(binary)

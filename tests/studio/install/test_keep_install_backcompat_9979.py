@@ -260,7 +260,7 @@ S1 = {
 S2 = {
     **S1,
     "release_tag": "b6210",
-    "published_repo": "LAiMai/llama.cpp",
+    "published_repo": "unslothai/llama.cpp",
     "asset": "app-b6210-linux-x64-cuda12.tar.gz",
     "asset_sha256": "3f" * 32,
     "source": "published",
@@ -290,7 +290,7 @@ S12_REAL = {
     "requested_tag": "latest",
     "tag": "b10698",
     "release_tag": "b10698-mix-67dfc8b",
-    "published_repo": "LAiMai/llama.cpp",
+    "published_repo": "unslothai/llama.cpp",
     "asset": "app-b10698-mix-67dfc8b-linux-x64-cuda13-newer.tar.gz",
     "force_cpu": False,
     "llama_backend": None,
@@ -755,7 +755,7 @@ def test_a_marker_from_a_newer_LAiM_refuses_rather_than_keeping(tmp_path, monkey
         payload_backend = "cuda",
     )
     with pytest.raises(SystemExit) as caught:
-        ILP.install_prebuilt(install_dir, "latest", "LAiMai/llama.cpp", "")
+        ILP.install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
     assert caught.value.code == ILP.EXIT_ERROR
     assert (install_dir / "llama-server").exists()
 
@@ -770,7 +770,7 @@ def test_a_transient_failure_keeps_each_shipped_shape_and_returns_exit_zero(tmp_
             payload_backend = backend,
         )
         # Returns rather than raising SystemExit: main() turns that into exit 0.
-        ILP.install_prebuilt(install_dir, "latest", "LAiMai/llama.cpp", "")
+        ILP.install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
         assert (install_dir / "llama-server").exists(), name
 
 
@@ -781,7 +781,7 @@ def test_a_transient_failure_still_falls_back_when_the_tree_is_not_runnable(tmp_
     _transient_listing_failure(monkeypatch)
     install_dir = build_install(tmp_path, marker = S12, payload_backend = None)
     with pytest.raises(SystemExit) as caught:
-        ILP.install_prebuilt(install_dir, "latest", "LAiMai/llama.cpp", "")
+        ILP.install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
     assert caught.value.code == ILP.EXIT_FALLBACK
 
 
@@ -790,5 +790,5 @@ def test_an_explicit_version_request_is_never_answered_with_the_old_install(tmp_
     _transient_listing_failure(monkeypatch)
     install_dir = build_install(tmp_path, marker = S12, payload_backend = "cuda")
     with pytest.raises(SystemExit) as caught:
-        ILP.install_prebuilt(install_dir, "b9999", "LAiMai/llama.cpp", "")
+        ILP.install_prebuilt(install_dir, "b9999", "unslothai/llama.cpp", "")
     assert caught.value.code in (ILP.EXIT_FALLBACK, ILP.EXIT_ERROR)

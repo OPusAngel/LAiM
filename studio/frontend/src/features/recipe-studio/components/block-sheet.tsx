@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -105,30 +106,30 @@ export type RecipeBlockDragPayload = {
 
 function getSheetTitle(sheetView: SheetView): string {
   if (sheetView === "root") {
-    return "Add a step";
+    return translate("uxRecipestudio.addAStepad8go");
   }
   if (sheetView === "sampler") {
-    return "Generated fields";
+    return translate("uxRecipestudio.generatedFieldsp3bgj");
   }
   if (sheetView === "seed") {
-    return "Source data";
+    return translate("uxRecipestudio.sourceDataupvjm");
   }
   if (sheetView === "expression") {
-    return "Formulas";
+    return translate("uxRecipestudio.formulas10xdp");
   }
   if (sheetView === "validator") {
-    return "Checks";
+    return translate("uxRecipestudio.checks1w0li");
   }
   if (sheetView === "note") {
-    return "Notes";
+    return translate("uxRecipestudio.notes4f76g");
   }
   if (sheetView === "processor") {
-    return "Processor blocks";
+    return translate("uxRecipestudio.processorBlocksxe87z");
   }
   if (sheetView === "model") {
-    return "Models";
+    return translate("uxRecipestudio.modelsTitlel1pjt");
   }
-  return "AI generation";
+  return translate("uxRecipestudio.aIGeneration17kle");
 }
 
 const VIEW_KIND: Record<SheetView, SheetKind | null> = {
@@ -146,8 +147,12 @@ const VIEW_KIND: Record<SheetView, SheetKind | null> = {
 const ROOT_GROUPS: RootGroup[] = [...BLOCK_GROUPS];
 const MODEL_ROOT_GROUP: RootGroup = {
   kind: "model",
-  title: "Models",
-  description: "Connect a provider and pick which model powers your AI steps.",
+  get title() {
+    return translate("shell.search.tabs.models");
+  },
+  get description() {
+    return translate("uxRecipestudio.connectAProviderAnd1lmgf");
+  },
   icon: Settings02Icon,
 };
 const MODEL_SETUP_TYPES = new Set<BlockType>(["model_provider", "model_config"]);
@@ -164,8 +169,8 @@ const SEARCHABLE_KINDS: SheetKind[] = [
   "expression",
   "note",
 ];
-const PROCESSOR_TITLE = "Final dataset shape";
-const PROCESSOR_DESCRIPTION = "Rename, reorder, or reshape the final dataset.";
+const processorTitle = () => translate("uxRecipestudio.finalDatasetShaped16j8");
+const processorDescription = () => translate("uxRecipestudio.renameReorderReshapebv800");
 const SHOW_PROCESSOR_IN_BLOCK_SHEET = false;
 const LLM_SETUP_TYPES = new Set<BlockType>([
   "model_provider",
@@ -346,7 +351,7 @@ export function BlockSheet({
         return true;
       }
       if (group.kind === "processor") {
-        return matchesSearch(PROCESSOR_TITLE, PROCESSOR_DESCRIPTION);
+        return matchesSearch(processorTitle(), processorDescription());
       }
       const blockKind = VIEW_KIND[group.kind];
       return (
@@ -362,7 +367,7 @@ export function BlockSheet({
     (isScopedBlockView && scopedBlocks.length === 0) ||
     (isProcessorView &&
       hasSearch &&
-      !matchesSearch(PROCESSOR_TITLE, PROCESSOR_DESCRIPTION));
+      !matchesSearch(processorTitle(), processorDescription()));
 
   const buildDragStart =
     (kind: SheetKind, type: BlockType) =>
@@ -430,8 +435,8 @@ export function BlockSheet({
             size="icon"
             className={RECIPE_FLOATING_ICON_BUTTON_CLASS}
             variant="ghost"
-            aria-label="Add a step"
-            title="Add a step"
+            aria-label={translate("uxRecipestudio.addAStepm84xt")}
+            title={translate("uxRecipestudio.addAStepm84xt")}
           >
             <HugeiconsIcon
               icon={PlusSignIcon}
@@ -455,8 +460,8 @@ export function BlockSheet({
                   variant="ghost"
                   size="icon-sm"
                   onClick={() => onViewChange("root")}
-                  aria-label="Back to step groups"
-                  title="Back to step groups"
+                  aria-label={translate("uxRecipestudio.backToStepGroups1lgmx")}
+                  title={translate("uxRecipestudio.backToStepGroups1lgmx")}
                 >
                   <ArrowLeftIcon className="size-4" />
                 </Button>
@@ -471,9 +476,9 @@ export function BlockSheet({
               <Input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search steps..."
+                placeholder={translate("uxRecipestudio.searchStepseyuy3")}
                 className="corner-squircle h-9 pl-8"
-                aria-label="Search steps"
+                aria-label={translate("uxRecipestudio.searchStepsfgun8")}
               />
             </div>
           </SheetHeader>
@@ -491,11 +496,10 @@ export function BlockSheet({
                     <div className="min-w-0 flex-1 space-y-2">
                       <div>
                         <p className="text-sm font-semibold text-foreground">
-                          Need a place to start?
+                          {translate("uxRecipestudio.needAPlaceTo1mre8")}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          Open Source data first, then add generation and checks
-                          on top of it.
+                          {translate("uxCopy.openSourceDataFirst1c2t9")}
                         </p>
                       </div>
                       <Button
@@ -505,7 +509,7 @@ export function BlockSheet({
                         className="corner-squircle justify-start px-0 text-primary hover:bg-transparent hover:text-primary/80"
                         onClick={() => onViewChange("seed")}
                       >
-                        Start with source data
+                        {translate("uxRecipestudio.startWithSourceData1ad0b")}
                       </Button>
                     </div>
                   </div>
@@ -568,11 +572,11 @@ export function BlockSheet({
                 ))}
               {SHOW_PROCESSOR_IN_BLOCK_SHEET && isProcessorView && (
                 (!hasSearch ||
-                  matchesSearch(PROCESSOR_TITLE, PROCESSOR_DESCRIPTION)) && (
+                  matchesSearch(processorTitle(), processorDescription())) && (
                   <BlockSheetButton
                     icon={CodeIcon}
-                    title={PROCESSOR_TITLE}
-                    description={PROCESSOR_DESCRIPTION}
+                    title={processorTitle()}
+                    description={processorDescription()}
                     onClick={onOpenProcessors}
                   />
                 )
@@ -583,11 +587,10 @@ export function BlockSheet({
                   <div className="pb-2">
                     <div className="px-3 pb-2">
                       <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                        Recommended first step
+                        {translate("uxRecipestudio.recommendedFirstStep12fyx")}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Best when you want to turn PDFs, DOCX files, or text
-                        files into source rows.
+                        {translate("uxCopy.bestWhenYouWant1293j")}
                       </p>
                     </div>
                     <BlockSheetButton
@@ -600,7 +603,7 @@ export function BlockSheet({
                         featuredSeedBlock.type,
                       )}
                       trailing={getTrailing()}
-                      badge="Start here"
+                      badge={translate("uxRecipestudio.startHerezt2gj")}
                       onClick={() =>
                         onBlockClick(
                           featuredSeedBlock.kind,
@@ -616,11 +619,10 @@ export function BlockSheet({
                 otherSeedBlocks.length > 0 && (
                   <div className="px-3 pt-2 pb-2">
                     <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      Other source options
+                      {translate("uxRecipestudio.otherSourceOptions1jrdd")}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      Use a dataset or structured file when your source is
-                      already tabular.
+                      {translate("uxCopy.useADatasetOrrqybz")}
                     </p>
                   </div>
                 )}
@@ -629,10 +631,10 @@ export function BlockSheet({
                 llmCreateBlocks.length > 0 && (
                   <div className="px-3 pb-2">
                     <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      Create
+                      {translate("uxImages.create16gte")}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      Start with the kind of output you want to generate.
+                      {translate("uxRecipestudio.startWithTheKind1y2k1")}
                     </p>
                   </div>
                 )}
@@ -655,10 +657,10 @@ export function BlockSheet({
                 llmSetupBlocks.length > 0 && (
                   <div className="px-3 pt-4 pb-2">
                     <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      Setup
+                      {translate("uxRecipestudio.setup2a2wn")}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      Add these only when you need a new model or tool setup.
+                      {translate("uxRecipestudio.addTheseOnlyWhen4eoxv")}
                     </p>
                   </div>
                 )}
@@ -719,10 +721,10 @@ export function BlockSheet({
                   >
                     <div className="min-w-0">
                       <p className="text-sm font-medium text-foreground">
-                        Edit final dataset shape
+                        {translate("uxRecipestudio.editFinalDatasetShapez1y2e")}
                       </p>
                       <p className="break-words text-xs text-muted-foreground">
-                        Rename, reorder, or reshape your final output.
+                        {translate("uxRecipestudio.renameReorderOrReshape13hc4")}
                       </p>
                     </div>
                     <HugeiconsIcon
@@ -734,7 +736,7 @@ export function BlockSheet({
               )}
               {showNoMatches && (
                 <p className="px-3 py-2 text-xs text-muted-foreground">
-                  No matching steps.
+                  {translate("uxRecipestudio.noMatchingSteps29hcs")}
                 </p>
               )}
             </div>
@@ -747,8 +749,8 @@ export function BlockSheet({
         size="icon"
         className={RECIPE_FLOATING_ICON_BUTTON_CLASS}
         onClick={onImport}
-        aria-label="Paste recipe JSON"
-        title="Paste recipe JSON"
+        aria-label={translate("uxRecipestudio.pasteRecipeJSONbpkv8")}
+        title={translate("uxRecipestudio.pasteRecipeJSONbpkv8")}
       >
         <HugeiconsIcon
           icon={Upload01Icon}
@@ -761,8 +763,8 @@ export function BlockSheet({
         size="icon"
         className={RECIPE_FLOATING_ICON_BUTTON_CLASS}
         onClick={onCopy}
-        aria-label={copied ? "Recipe JSON copied" : "Copy recipe JSON"}
-        title={copied ? "Recipe JSON copied" : "Copy recipe JSON"}
+        aria-label={copied ? translate("uxRecipestudio.recipeJSONCopied9dgka") : translate("uxRecipestudio.copyRecipeJSONyomw1")}
+        title={copied ? translate("uxRecipestudio.recipeJSONCopied9dgka") : translate("uxRecipestudio.copyRecipeJSONyomw1")}
       >
         <HugeiconsIcon
           icon={copied ? Tick02Icon : Copy02Icon}

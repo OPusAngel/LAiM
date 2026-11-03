@@ -50,7 +50,7 @@ def _write_marker(install_dir: Path, **overrides) -> Path:
         "requested_tag": "latest",
         "release_tag": "v1.9.1-LAiM.1",
         "upstream_tag": "v1.9.1",
-        "published_repo": "LAiMai/whisper.cpp",
+        "published_repo": "unslothai/whisper.cpp",
         "asset": "whisper-v1.9.1-LAiM.1-linux-x64-cpu.tar.gz",
         "asset_sha256": None,
         "source": "published",

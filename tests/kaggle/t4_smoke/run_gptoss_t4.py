@@ -34,7 +34,7 @@ from versions import (  # noqa: E402
 CANARY = "__LAiM__!!!"
 SEED = 3407
 
-DEFAULT_MODEL = "LAiM/gpt-oss-20b"
+DEFAULT_MODEL = "unsloth/gpt-oss-20b"
 
 
 def _log(msg: str) -> None:
@@ -254,7 +254,7 @@ def train_and_infer(args) -> dict:
         lora_alpha = args.lora_r * 2,
         lora_dropout = 0,
         bias = "none",
-        use_gradient_checkpointing = "LAiM",
+        use_gradient_checkpointing = "unsloth",
         random_state = SEED,
     )
 

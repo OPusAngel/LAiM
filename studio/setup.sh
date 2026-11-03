@@ -3718,6 +3718,21 @@ sys.exit(2 if conflict else (0 if version else 1))
         | "$VENV_DIR/bin/python" -c "import sys,json; print(json.load(sys.stdin)['info']['version'])" 2>/dev/null \
         || echo "")
 
+    # A GitHub-archive install answers to a different index entry than this code: the PyPI name can
+    # hold an older, unrelated project, and treating its newest as ours turns every update into a
+    # reinstall that overwrites this tree. Ask the installed metadata where it came from, and when it
+    # did not come from the index, the index has no say in whether this is current.
+    if [ -n "$INSTALLED_VER" ] && [ -n "$LATEST_VER" ] && [ "$INSTALLED_VER" != "$LATEST_VER" ]; then
+        _INSTALLED_FROM_SOURCE=$("$VENV_DIR/bin/python" -c "
+import importlib.metadata as m, sys
+try:
+    print('yes' if m.distribution(sys.argv[1]).read_text('direct_url.json') else 'no')
+except Exception:
+    print('no')
+" "$_PKG_NAME" 2>/dev/null)
+        [ "$_INSTALLED_FROM_SOURCE" = "yes" ] && LATEST_VER="$INSTALLED_VER"
+    fi
+
     if [ "$_INSTALLED_VERSION_PROBE_EXIT" -eq 2 ]; then
         substep "duplicate metadata found for a core package -- forcing package repair..."
     elif [ -n "$INSTALLED_VER" ] && [ -n "$LATEST_VER" ] && [ "$INSTALLED_VER" = "$LATEST_VER" ]; then
@@ -4795,7 +4810,7 @@ _LLAMA_UPDATE_FAIL_REASON=""
 # A GPU host ended on a CPU-only llama.cpp: named in the footer, not just mid-log (#9255).
 _LLAMA_CPU_ONLY_ON_GPU_HOST=false
 _LLAMA_FORCE_COMPILE="${LAiM_LLAMA_FORCE_COMPILE:-0}"
-_REQUESTED_LLAMA_TAG="${LAiM_LLAMA_TAG:-${_DEFAULT_LLAMA_TAG}}"
+_REQUESTED_LLAMA_TAG="${UNSLOTH_LLAMA_TAG:-${_DEFAULT_LLAMA_TAG}}"
 _HOST_SYSTEM="$(uname -s 2>/dev/null || true)"
 _HOST_MACHINE="$(uname -m 2>/dev/null || true)"
 _source_backend_choice="$(printf '%s' "${LAiM_LLAMA_CPP_BACKEND:-}" | awk '{$1=$1; print tolower($0)}')"
@@ -4814,12 +4829,11 @@ if [ "$_HOST_SYSTEM" != "Darwin" ]; then
     esac
 fi
 
-# Pick the release repo install_llama_prebuilt.py plans against. Every host this
-# installer supports now pulls its llama.cpp prebuilt from the LAiMai fork: it
-# ships the CUDA (Linux x64/arm64, Windows), ROCm (Linux/Windows) and macOS
-# bundles, plus the CPU bundles for Linux/Windows on both x86_64 and arm64.
-# ggml-org artifacts are no longer used by default.
-_HELPER_RELEASE_REPO="LAiMai/llama.cpp"
+# Pick the release repo install_llama_prebuilt.py plans against. LAiM installs llama.cpp
+# from the upstream project, so a new model architecture works as soon as llama.cpp supports
+# it. The slug is GitHub's own spelling and must stay exact. LAiM_LLAMA_RELEASE_REPO
+# re-points it (e.g. back at the fork) for a controlled test.
+_HELPER_RELEASE_REPO="${LAiM_LLAMA_RELEASE_REPO:-ggml-org/llama.cpp}"
 # LAiM_ROCM_GFX_ARCH may be set on a host where no probe fired, so the override
 # nested in the AMD-detected branch above never ran and _setup_gfx is still empty.
 # Honour it here so the --rocm-gfx forwarding below still sees it
@@ -4980,11 +4994,11 @@ _gpu_prebuilt_to_keep_over_cpu_build() {
     if [ -n "${LAiM_LLAMA_RELEASE_TAG:-}" ]; then
         _installed_prebuilt_ref_matches "$install_dir" release_tag "$LAiM_LLAMA_RELEASE_TAG" || return 1
     fi
-    case "${LAiM_LLAMA_TAG:-}" in
+    case "${UNSLOTH_LLAMA_TAG:-}" in
         ""|latest|master) ;;
         # A commit pin is recorded beside the build tag, in the source ref fields.
         *) _installed_prebuilt_ref_matches "$install_dir" \
-               tag,requested_source_ref,resolved_source_ref,source_commit "$LAiM_LLAMA_TAG" refs || return 1 ;;
+               tag,requested_source_ref,resolved_source_ref,source_commit "$UNSLOTH_LLAMA_TAG" refs || return 1 ;;
     esac
     _has_local_llama_server "$install_dir" || return 1
     backend="$(_installed_prebuilt_backend "$install_dir")"
@@ -5994,7 +6008,7 @@ if [ "$_LLAMA_CPP_DEGRADED" = true ] \
         python "$SCRIPT_DIR/install_llama_prebuilt.py"
         --install-dir "$LLAMA_CPP_DIR"
         --llama-tag "$_REQUESTED_LLAMA_TAG"
-        --published-repo "LAiMai/llama.cpp"
+        --published-repo "$_HELPER_RELEASE_REPO"
         --cpu-fallback
     )
     # Trust the installer's exit code: it validates the server before exiting 0,

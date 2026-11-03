@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   DocumentAttachmentIcon,
   DocumentCodeIcon,
@@ -43,10 +44,10 @@ export function InlineSeed({
     const invalidCount = repos.filter(hasInvalidGithubRepo).length;
     const summary =
       repos.length === 0
-        ? "Add GitHub repos"
+        ? translate("uxRecipestudio.addGitHubReposfnof7")
         : repos.length === 1
           ? repos[0]
-          : `${repos.length} repositories`;
+          : translate("uxRecipestudio.repositories1mj0b", { p1: repos.length });
     const configuredItems = config.github_item_types;
     const items =
       configuredItems && configuredItems.length > 0
@@ -58,10 +59,10 @@ export function InlineSeed({
       config.github_include_comments === false
         ? "comments off"
         : `comments ≤ ${config.github_max_comments_per_item ?? "30"}`;
-    const tokenLabel = config.github_token?.trim() ? "PAT set" : "server token";
+    const tokenLabel = config.github_token?.trim() ? translate("uxRecipestudio.pATSeth5ttp") : "server token";
     const warning =
       repos.length === 0
-        ? "No repos configured"
+        ? translate("uxRecipestudio.noReposConfigured03cae")
         : invalidCount > 0
           ? `${invalidCount} invalid repo${invalidCount === 1 ? "" : "s"}`
           : null;
@@ -90,7 +91,7 @@ export function InlineSeed({
   if (mode === "hf") {
     return (
       <div className="space-y-2">
-        <InlineField label="Dataset">
+        <InlineField label={translate("studio.wizard.datasetTitle")}>
           <HfDatasetCombobox
             value={config.hf_repo_id}
             accessToken={config.hf_token?.trim() || undefined}
@@ -103,11 +104,11 @@ export function InlineSeed({
                 seed_preview_rows: [],
               })
             }
-            placeholder="org/repo"
+            placeholder={translate("uxRecipestudio.orgRepo1y5m0")}
           />
         </InlineField>
         <p className="text-ui-11 text-muted-foreground">
-          Load columns in dialog.
+          {translate("uxRecipestudio.loadColumnsInDialog1y1ex")}
         </p>
       </div>
     );
@@ -130,12 +131,9 @@ export function InlineSeed({
       </div>
       <div className="min-w-0">
         <p className="truncate text-xs font-medium">
-          {fileName || "No file selected"}
+          {fileName || translate("uxRecipestudio.noFileSelectedcdt03")}
         </p>
-        <p className="text-ui-11 text-muted-foreground">
-          {isLocal ? "Structured file" : "Unstructured document"} · configure in
-          dialog
-        </p>
+        <p className="text-ui-11 text-muted-foreground">{translate("uxRecipestudio.configureInDialogxhly6", { p1: isLocal ? "Structured file" : "Unstructured document" })}</p>
       </div>
       <HugeiconsIcon
         icon={Plant01Icon}

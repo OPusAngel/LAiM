@@ -16,7 +16,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 STRIP_PATH = REPO_ROOT / "docker" / "LAiM_nb_strip_colab.py"
 
 INTRO = 'To run this, press "*Runtime*" and press "*Run all*" on a **free** Tesla T4 Google Colab instance!\n'
-BADGE = '<a href="https://colab.research.google.com/github/LAiMai/notebooks/blob/main/nb/X.ipynb">badge</a>\n'
+BADGE = '<a href="https://colab.research.google.com/github/unslothai/notebooks/blob/main/nb/X.ipynb">badge</a>\n'
 
 
 @pytest.fixture(scope = "module")

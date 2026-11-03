@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -207,7 +208,7 @@ async function openResolvedUrl(
   const win = window.open("", "_blank");
   if (!win) {
     throw new Error(
-      "Your browser blocked the new tab. Allow popups and retry.",
+      translate("uxSettings.yourBrowserBlockedThezgqns"),
     );
   }
   win.opener = null;
@@ -339,8 +340,7 @@ function chatAttachmentRow(att: ChatAttachmentRecord): UploadedFileRow {
         attachmentId: att.id,
       });
     },
-    deleteDescription:
-      "The attachment is removed from its chat message; the message text is kept. This cannot be undone.",
+    get deleteDescription() { return translate("uxSettings.theAttachmentIsRemovedu2x6b"); },
   };
 }
 
@@ -486,7 +486,7 @@ export function UploadedFilesView() {
       await row.open();
     } catch (err) {
       if (isDownloadCancelled(err)) return;
-      toast.error("Failed to open file", {
+      toast.error(translate("uxSettings.failedToOpenFile138o3"), {
         description: err instanceof Error ? err.message : undefined,
       });
     }
@@ -517,9 +517,9 @@ export function UploadedFilesView() {
           current === null ? null : Math.max(0, current - 1),
         );
       }
-      toast.success("File deleted");
+      toast.success(translate("uxSettings.fileDeleted7937a"));
     } catch (err) {
-      toast.error("Failed to delete file", {
+      toast.error(translate("uxSettings.failedToDeleteFile1dbeq"), {
         description: err instanceof Error ? err.message : undefined,
       });
     }
@@ -529,7 +529,7 @@ export function UploadedFilesView() {
     <div className="flex flex-col gap-4">
       {ragFiles.status === "error" ? (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm">
-          <span>RAG documents unavailable: {ragFiles.error}</span>
+          <span>{translate("uxSettings.rAGDocumentsUnavailableybipl", { p1: ragFiles.error })}</span>
           <button
             type="button"
             onClick={retryRagFiles}
@@ -541,7 +541,7 @@ export function UploadedFilesView() {
       ) : null}
       {chatFiles.status === "error" ? (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm">
-          <span>Chat attachments unavailable: {chatFiles.error}</span>
+          <span>{translate("uxSettings.chatAttachmentsUnavailableqxs8d", { p1: chatFiles.error })}</span>
           <button
             type="button"
             onClick={retryChatFiles}
@@ -561,7 +561,7 @@ export function UploadedFilesView() {
         ragFiles.status !== "error" &&
         chatFiles.status !== "error" ? (
         <p className="py-8 text-center text-sm text-muted-foreground">
-          No uploaded files.
+          {translate("uxSettings.noUploadedFiles1godv")}
         </p>
       ) : rows.length > 0 ? (
         <div>
@@ -639,8 +639,8 @@ export function UploadedFilesView() {
                 <button
                   type="button"
                   onClick={() => void handleOpen(row)}
-                  aria-label={`Open ${row.name}`}
-                  title="Open"
+                  aria-label={translate("uxSettings.open6l66w", { p1: row.name })}
+                  title={translate("browser.suggestedMenu.open")}
                   className="inline-flex size-7 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                 >
                   <HugeiconsIcon
@@ -654,8 +654,8 @@ export function UploadedFilesView() {
                     type="button"
                     disabled={loadingMore}
                     onClick={() => setConfirmingDelete(row)}
-                    aria-label={`Delete ${row.name}`}
-                    title="Delete"
+                    aria-label={translate("uxSettings.deletevau21", { p1: row.name })}
+                    title={translate("common.delete")}
                     className="inline-flex size-7 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive disabled:cursor-wait disabled:opacity-50"
                   >
                     <HugeiconsIcon
@@ -691,7 +691,7 @@ export function UploadedFilesView() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete file</AlertDialogTitle>
+            <AlertDialogTitle>{translate("uxSettings.deleteFilel17fa")}</AlertDialogTitle>
             <AlertDialogDescription>
               Delete{" "}
               <span className="font-medium text-foreground">

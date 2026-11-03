@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import type { ReactElement } from "react";
 import { GithubIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -42,12 +43,12 @@ function formatFetchedValue(execution: RecipeExecutionRecord): string {
 function formatGitHubSourceMessage(execution: RecipeExecutionRecord): string {
   const source = execution.source_progress;
   if (!source) {
-    return "Collecting repository threads before rows are available.";
+    return translate("uxRecipestudio.collectingRepositoryThreadsBeforaebtc");
   }
   if (source.status === "rate_limited") {
-    return source.message ?? "Waiting for GitHub rate limit. LAiM will resume automatically.";
+    return source.message ?? translate("uxRecipestudio.waitingForGitHubRaterub96");
   }
-  return source.message ?? "Collecting repository threads before rows are available.";
+  return source.message ?? translate("uxRecipestudio.collectingRepositoryThreadsBeforaebtc");
 }
 
 function RunningDatasetEmptyState({
@@ -61,8 +62,8 @@ function RunningDatasetEmptyState({
   if (source?.source === "github") {
     const title =
       source.status === "rate_limited"
-        ? "Waiting for GitHub rate limit"
-        : "Crawling GitHub source";
+        ? translate("uxRecipestudio.waitingForGitHubRateepmf7")
+        : translate("uxRecipestudio.crawlingGitHubSourceqd20u");
     const showProgress = typeof source.percent === "number";
 
     return (
@@ -86,7 +87,7 @@ function RunningDatasetEmptyState({
             </div>
           </div>
           <Button type="button" size="sm" variant="outline" onClick={onOpenOverview}>
-            Open Overview
+            {translate("uxRecipestudio.openOverview8b0qp")}
           </Button>
         </div>
         {showProgress && <Progress value={source.percent ?? 0} className="mt-3 h-1" />}
@@ -107,11 +108,11 @@ function RunningDatasetEmptyState({
             <span className="font-semibold">{formatFetchedValue(execution)}</span>
           </p>
           <p className="flex items-center justify-between gap-3">
-            <span className="text-muted-foreground">Rate remaining</span>
+            <span className="text-muted-foreground">{translate("uxRecipestudio.rateRemainingn8hel")}</span>
             <span className="font-semibold">{formatMetricValue(source.rate_remaining)}</span>
           </p>
           <p className="flex items-center justify-between gap-3">
-            <span className="text-muted-foreground">Retry wait</span>
+            <span className="text-muted-foreground">{translate("uxRecipestudio.retryWaitam3p0")}</span>
             <span className="font-semibold">
               {typeof source.retry_after_sec === "number"
                 ? `${formatMetricValue(source.retry_after_sec)}s`
@@ -128,17 +129,15 @@ function RunningDatasetEmptyState({
       <div className="flex flex-col items-center justify-center gap-3 py-6">
         <Spinner className="size-5" />
         <div className="space-y-1">
-          <p className="text-sm font-medium text-muted-foreground">
-            Generating data…
-          </p>
+          <p className="text-sm font-medium text-muted-foreground">{translate("uxRecipestudio.generatingDatacns2t")}</p>
           <p className="text-xs text-muted-foreground">
             {execution.current_column
               ? `Current column: ${execution.current_column}`
-              : "Rows will appear here once the run produces a dataset sample."}
+              : translate("uxRecipestudio.rowsWillAppearHereffhkc")}
           </p>
         </div>
         <Button type="button" size="sm" variant="outline" onClick={onOpenOverview}>
-          Open Overview
+          {translate("uxRecipestudio.openOverview8b0qp")}
         </Button>
       </div>
     </div>
@@ -178,10 +177,10 @@ export function ExecutionDataTab({
     <div className="mt-3">
       <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
         <div className="space-y-0.5">
-          <p className="text-sm font-semibold">Dataset sample</p>
+          <p className="text-sm font-semibold">{translate("uxRecipestudio.datasetSampleakuru")}</p>
           {isExecutionInProgress(execution.status) && execution.dataset.length > 0 && (
             <p className="text-xs text-muted-foreground">
-              Live preview: new rows appear as each batch finishes.
+              {translate("uxRecipestudio.livePreviewNewRows972ng")}
             </p>
           )}
         </div>
@@ -190,11 +189,11 @@ export function ExecutionDataTab({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button type="button" size="sm" variant="outline">
-                  Columns
+                  {translate("studio.dataset.columns")}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Visible columns</DropdownMenuLabel>
+                <DropdownMenuLabel>{translate("uxRecipestudio.visibleColumns1yop6")}</DropdownMenuLabel>
                 {datasetColumnNames.map((columnName) => (
                   <DropdownMenuCheckboxItem
                     key={columnName}
@@ -219,9 +218,7 @@ export function ExecutionDataTab({
           )}
           {canPageDataset && (
             <>
-              <span>
-                Page {currentDatasetPage}/{totalPages}
-              </span>
+              <span>{translate("uxRecipestudio.page7775p", { p1: currentDatasetPage, p2: totalPages })}</span>
               <Button
                 type="button"
                 size="sm"
@@ -256,11 +253,11 @@ export function ExecutionDataTab({
             onOpenOverview={onOpenOverview}
           />
         ) : (
-          <p className="text-xs text-muted-foreground">No rows returned.</p>
+          <p className="text-xs text-muted-foreground">{translate("uxRecipestudio.noRowsReturnedla9ss")}</p>
         )
       ) : tableColumns.length === 0 ? (
         <p className="text-xs text-muted-foreground">
-          All columns hidden. Use Columns to show at least one.
+          {translate("uxRecipestudio.allColumnsHiddenUse2wfaf")}
         </p>
       ) : (
         <div className="max-h-[55vh] overflow-auto">

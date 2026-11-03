@@ -85,7 +85,7 @@ def test_start_gives_the_model_preflight_only_the_callers_token(
     monkeypatch.setattr("utils.hardware.ensure_hardware_detected", lambda: None)
 
     request = TrainingStartRequest(
-        model_name = "LAiM/tiny-model",
+        model_name = "unsloth/tiny-model",
         training_type = "LoRA/QLoRA",
         format_type = "alpaca",
         hf_token = request_token,
@@ -137,7 +137,7 @@ def test_private_cached_dataset_requires_caller_authorization(
     monkeypatch.setattr(hf_tokens, "_explicit_token_reaches_repo", lambda *a, **k: authorized)
 
     request = TrainingStartRequest(
-        model_name = "LAiM/tiny-model",
+        model_name = "unsloth/tiny-model",
         training_type = "LoRA/QLoRA",
         format_type = "alpaca",
         hf_token = request_token,
@@ -216,7 +216,7 @@ def test_dataset_cached_after_the_first_scan_is_not_pinned(monkeypatch, tmp_path
     monkeypatch.setattr(hf_tokens, "_explicit_token_reaches_repo", lambda *a, **k: False)
 
     request = TrainingStartRequest(
-        model_name = "LAiM/tiny-model",
+        model_name = "unsloth/tiny-model",
         training_type = "LoRA/QLoRA",
         format_type = "alpaca",
         hf_dataset = "org/private-dataset",
@@ -513,7 +513,7 @@ def test_chat_coexistence_preserves_anonymous_token(monkeypatch):
             max_seq_length = 128,
             lora_rank = 16,
             target_modules = None,
-            gradient_checkpointing = "LAiM",
+            gradient_checkpointing = "unsloth",
             optimizer = "adamw_8bit",
             gpu_ids = None,
         )

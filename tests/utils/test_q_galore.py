@@ -197,7 +197,7 @@ def test_projected_step_preserves_full_rank_gradients(out_features, in_features)
 @pytest.mark.skipif(not _adamw_mod._HAS_BNB, reason = "bitsandbytes is required")
 @pytest.mark.parametrize("quant", [True, False])
 def test_resume_from_weights_only_checkpoint_matches_uninterrupted(quant):
-    """LAiMai/LAiM#729: transformers resumes with torch.load(weights_only=True, map_location="cpu")."""
+    """OPusAngel/LAiM#729: transformers resumes with torch.load(weights_only=True, map_location="cpu")."""
     import io
 
     device = "cuda" if torch.cuda.is_available() else "cpu"

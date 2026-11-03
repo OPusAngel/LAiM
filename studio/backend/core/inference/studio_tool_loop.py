@@ -427,7 +427,6 @@ class ToolLoopPolicy:
     on_provider_turn_end: Callable[[], None] | None = None
     # None keeps the request default (on); explicit booleans win.
     deduplicate_tool_calls: bool | None = None
-    sandbox_level: str = "high"
 
 
 def _split_top_level_json_objects(text: str) -> tuple[list[str], str]:
@@ -737,7 +736,7 @@ class _Turn:
                 # the entry looks empty.
                 entry["produced_image"] = True
             # Same normalisation local results get: the frontend sentinels carry a full data URI, and replaying one
-            # sends megabytes of base64. The tool's name goes with it, as the local path passes it: only the sandbox
+            # sends megabytes of base64. The tool's name goes with it, as the local path passes it: only the workdir
             # tools emit __FILES__, so a fetched page ending in a well formed one keeps that line as the content it
             # is.
             stripped = strip_result_for_model(result, entry.get("name"))
@@ -1430,10 +1429,7 @@ async def stream_with_studio_tools(
     from state.tool_policy import (
         account_tool_stream,
         needs_tool_confirmation,
-        normalize_sandbox_level,
         normalize_tool_permissions,
-        requires_os_isolation,
-        runs_without_os_sandbox,
     )
 
     permission_mode, bypass_permissions = normalize_tool_permissions(
@@ -1442,7 +1438,6 @@ async def stream_with_studio_tools(
     scoped_tool_stream = account_tool_stream(stream_tool_execution)
     confirm_tool_calls = policy.confirm_calls
     rag_scope = policy.rag_scope
-    sandbox_level = normalize_sandbox_level(policy.sandbox_level)
 
     from core.inference.skill_mentions import load_mentioned_skills
 
@@ -1958,20 +1953,9 @@ async def stream_with_studio_tools(
                 arguments = arguments,
                 is_high_risk = is_high_risk_tool_call,
                 never_needs = never_needs_approval,
-                sandbox_level = sandbox_level,
             )
             # Sending the user's image always asks, whatever the permission mode.
             needs_confirmation = needs_confirmation or image_share is not None
-            strict_isolation = requires_os_isolation(
-                confirm_tool_calls = confirm_tool_calls,
-                bypass_permissions = bypass_permissions,
-                permission_mode = permission_mode,
-                name = name,
-                arguments = arguments,
-                prompted = needs_confirmation,
-                is_high_risk = is_high_risk_tool_call,
-                sandbox_level = sandbox_level,
-            )
             approval_id = new_approval_id() if needs_confirmation else ""
             decision_slot = (
                 begin_tool_decision(session_id, approval_id) if needs_confirmation else None
@@ -2056,14 +2040,9 @@ async def stream_with_studio_tools(
                 reprompts = max_reprompts
                 continue
 
-            # Only a call the user answered: the executor lets it reach the host paths it names.
-            host_access_approved = verdict not in (None, "deny")
-
             def _invoke(
                 output_callback: Any,
                 call = decision,
-                approved = host_access_approved,
-                strict = strict_isolation,
             ) -> str:
                 kwargs: dict[str, Any] = {
                     "cancel_event": cancel_event,
@@ -2071,22 +2050,12 @@ async def stream_with_studio_tools(
                     "session_id": session_id,
                     "thread_id": thread_id,
                     "rag_scope": rag_scope,
-                    "disable_sandbox": bypass_permissions,
                 }
-                # Run unasked only because the OS sandbox was on: refuse if it is not any more.
-                if strict and accepts_kwarg(execute_tool, "tool_execution_mode"):
-                    kwargs["tool_execution_mode"] = "required"
-                elif runs_without_os_sandbox(call.tool_name, sandbox_level) and accepts_kwarg(
-                    execute_tool, "tool_execution_mode"
-                ):
-                    kwargs["tool_execution_mode"] = "software"
                 # Provider loops share the local catalogue selector, so search_conversation is advertised here too
                 # once a thread has an archive and needs the same branch: the stored rows are the whole DAG, and Retry
                 # leaves the replaced response in them.
                 if accepts_kwarg(execute_tool, "conversation_branch"):
                     kwargs["conversation_branch"] = request_branch
-                if approved and accepts_kwarg(execute_tool, "host_access_approved"):
-                    kwargs["host_access_approved"] = True
                 # And a budget, so the tool's clamp is not skipped. LAiM cannot measure an external model's window,
                 # and a custom OpenAI-compatible endpoint can be a small local server, so a model-chosen 8 chunks is
                 # roughly 4K tokens replayed on every later call. Unmeasurable means one recall's worth. Explicitly

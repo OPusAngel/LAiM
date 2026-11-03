@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
+
 const MLX_DRAFTER_LABELS: Record<string, string> = {
   mtp: "MTP",
   dflash: "DFlash",
@@ -23,17 +25,17 @@ export function mlxSpecFallbackMessage(
         : `so it is drafting with ${MLX_DRAFTER_LABELS[drafterKind] ?? drafterKind} instead`;
   switch (reason) {
     case "drafter_not_found":
-      return `A drafter this load asked for was not found locally, or is not a drafter, ${outcome}. Download it, or check the drafter named in this model's settings, then reload.`;
+      return translate("uxChat.aDrafterThisLoadmbe8e", { p1: outcome });
     case "drafter_incompatible":
-      return `A drafter was found but could not be used with this model or mode, ${outcome}. Try a drafter made for this model and mode, then reload.`;
+      return translate("uxChat.aDrafterWasFound5ebu6", { p1: outcome });
     case "drafter_no_memory":
-      return `The drafter could not be confirmed to fit in memory beside this model, ${outcome}. When memory is the limit, a shorter context length or a smaller drafter can help.`;
+      return translate("uxChat.theDrafterCouldNotf0ddb", { p1: outcome });
     case "runtime_error":
-      return `Speculative decoding could not start for this load, ${outcome}.`;
+      return translate("uxChat.speculativeDecodingCouldNotpingx", { p1: outcome });
     case "kv_quant":
-      return "Speculative decoding cannot run with KV cache quantization, which this load asked for. Setting KV Cache Dtype to Auto in this model's settings removes that obstacle.";
+      return translate("uxChat.speculativeDecodingCannotRun782y0");
     case "auto_context_cost":
-      return `Auto left out a drafter that does not fit beside this model at its full context length, ${outcome}. To try it anyway, choose its mode in this model's settings, with a shorter or automatic context length.`;
+      return translate("uxChat.autoLeftOutAhwksx", { p1: outcome });
     default:
       return null;
   }

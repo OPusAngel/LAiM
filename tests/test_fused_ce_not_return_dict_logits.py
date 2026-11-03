@@ -41,7 +41,7 @@ def _fused_ce_not_return_dict_return(source: str) -> str:
     return out.group(0)
 
 
-@pytest.mark.parametrize("rel", ["LAiM/models/llama.py", "LAiM/models/mistral.py"])
+@pytest.mark.parametrize("rel", ["unsloth/models/llama.py", "unsloth/models/mistral.py"])
 def test_fused_ce_not_return_dict_uses_empty_logits(rel):
     path = _REPO / rel
     source = path.read_text(encoding = "utf-8")

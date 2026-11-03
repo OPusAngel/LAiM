@@ -41,7 +41,7 @@ def expanded_user_path(value: Path | str) -> Path:
 
 def mark_managed_llama_cpp_path(directory: Path | str) -> bool:
     """Mark LAiM's inherited install path without hiding a real env override."""
-    configured = os.environ.get("LAiM_LLAMA_CPP_PATH", "").strip()
+    configured = os.environ.get("UNSLOTH_LLAMA_CPP_PATH", "").strip()
     if not configured:
         os.environ.pop(MANAGED_LLAMA_CPP_PATH_MARKER, None)
         return False
@@ -272,9 +272,9 @@ def _environment_override() -> tuple[Optional[str], Optional[str], bool]:
     direct = os.environ.get("LLAMA_SERVER_PATH", "").strip()
     if direct:
         return direct, "LLAMA_SERVER_PATH", True
-    directory = os.environ.get("LAiM_LLAMA_CPP_PATH", "").strip()
+    directory = os.environ.get("UNSLOTH_LLAMA_CPP_PATH", "").strip()
     if directory and os.environ.get(MANAGED_LLAMA_CPP_PATH_MARKER) != "1":
-        return directory, "LAiM_LLAMA_CPP_PATH", False
+        return directory, "UNSLOTH_LLAMA_CPP_PATH", False
     return None, None, False
 
 

@@ -48,7 +48,7 @@ def test_the_version_file_is_a_literal_in_a_module_with_no_imports():
 
     imports = [n for n in ast.walk(tree) if isinstance(n, (ast.Import, ast.ImportFrom))]
     assert imports == [], (
-        "LAiM/_version.py must import nothing: pyproject reads it with a static AST "
+        "unsloth/_version.py must import nothing: pyproject reads it with a static AST "
         "parse, and the torch-free MLX path imports it directly."
     )
 

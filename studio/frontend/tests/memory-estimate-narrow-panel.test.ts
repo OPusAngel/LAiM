@@ -13,6 +13,8 @@ import type * as MemoryEstimateModule from "../src/features/model-picker/compone
 import * as memoryFit from "../src/features/model-picker/model-config/memory-fit.ts";
 import { loadWithStubs } from "./helpers/module-stubs.ts";
 
+import { englishView } from "./helpers/kit.ts";
+
 const { glueNoteItems, resolveDraftCacheNote, resolveKvNote } = memoryFit;
 const { MemoryEstimateRow } = loadWithStubs<typeof MemoryEstimateModule>(
   new URL(
@@ -209,7 +211,7 @@ test("a note with no separator keeps every break opportunity it had", () => {
 
 test("the notes the row actually builds are left breakable", () => {
   assert.match(render({ expanded: true }), /12 of 28 layers on GPU/);
-  const hostNote = resolveDraftCacheNote(0, 1e9);
+  const hostNote = resolveDraftCacheNote(0, 1e9, englishView);
   assert.equal(hostNote, "host RAM");
   for (const note of ["256 of 257 layers on GPU", hostNote ?? ""]) {
     const spaces = (glueNoteItems(note).match(/ /g) || []).length;
@@ -218,12 +220,10 @@ test("the notes the row actually builds are left breakable", () => {
 });
 
 test("gluing round-trips the note the row actually builds", () => {
-  const note = resolveKvNote({
-    cacheTypeKv: "q8_0",
-    nCtx: 262144,
-    nParallel: 4,
-    kvOnGpu: false,
-  });
+  const note = resolveKvNote(
+    { cacheTypeKv: "q8_0", nCtx: 262144, nParallel: 4, kvOnGpu: false },
+    englishView,
+  );
   // Only whitespace changes.
   assert.equal(glueNoteItems(note).replace(new RegExp(NBSP, "g"), " "), note);
 });

@@ -342,12 +342,12 @@ def test_status_leaves_a_hub_repo_id_alone(monkeypatch):
     monkeypatch.setattr(
         inference_route,
         "_running_load_attempt",
-        _attempt("LAiM/gemma-4-E2B-it-GGUF"),
+        _attempt("unsloth/gemma-4-E2B-it-GGUF"),
     )
 
     response = asyncio.run(inference_route.get_status(current_subject = "test"))
 
-    assert response.loading == ["LAiM/gemma-4-E2B-it-GGUF"]
+    assert response.loading == ["unsloth/gemma-4-E2B-it-GGUF"]
 
 
 def test_status_does_not_list_one_transformers_load_twice(monkeypatch):

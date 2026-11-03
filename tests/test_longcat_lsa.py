@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # Copyright 2026-present the LAiM AI Inc. team. All rights reserved.
 
-"""LongCat-Flash-Lite-Sparse loads via ``LAiM/models/longcat_lsa.py``: load, forward vs an
+"""LongCat-Flash-Lite-Sparse loads via ``unsloth/models/longcat_lsa.py``: load, forward vs an
 SGLang-transcribed reference, cache, and save back to the published layout, on a tiny checkpoint."""
 
 import json

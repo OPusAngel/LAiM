@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # Copyright 2026-present the LAiM AI Inc. team. All rights reserved.
 
-"""torch / torchcodec ABI guardrails (LAiMai/LAiM#7225)."""
+"""torch / torchcodec ABI guardrails (OPusAngel/LAiM#7225)."""
 
 from __future__ import annotations
 import importlib.util

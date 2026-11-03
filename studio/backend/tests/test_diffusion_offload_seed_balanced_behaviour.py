@@ -105,7 +105,7 @@ def fake_checkpoint(monkeypatch):
 
 class _Source:
     kind = "repo"
-    location = "LAiM/Qwen-Image-2.1-FP8"
+    location = "unsloth/Qwen-Image-2.1-FP8"
     filename = "Qwen-Image-2.1-INT8.safetensors"
 
 

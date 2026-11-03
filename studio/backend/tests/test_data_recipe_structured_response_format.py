@@ -14,7 +14,7 @@ from routes.data_recipe import jobs as route
 
 from .test_sf_client_tools_passthrough import _call, _fixed, _ScriptedBackend
 
-MODEL = "LAiM/Qwen3-0.6B"
+MODEL = "unsloth/Qwen3-0.6B"
 SCHEMA = {
     "type": "object",
     "required": ["name", "score"],

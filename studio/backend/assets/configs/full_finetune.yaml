@@ -1,4 +1,4 @@
-model: LAiM/Qwen2.5-0.5B
+model: unsloth/Qwen2.5-0.5B
 
 data:
   dataset: tatsu-lab/alpaca
@@ -20,7 +20,7 @@ training:
   random_seed: 3407
   packing: false
   train_on_completions: false
-  gradient_checkpointing: "LAiM"
+  gradient_checkpointing: "unsloth"
 
 lora:
   lora_r: 64

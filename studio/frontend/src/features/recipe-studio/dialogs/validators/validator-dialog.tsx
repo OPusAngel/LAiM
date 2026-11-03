@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   Collapsible,
   CollapsibleContent,
@@ -112,23 +113,23 @@ export function ValidatorDialog({
   return (
     <div className="space-y-4">
       <NameField
-        label="Check name"
-        hint="Name used for this check in the canvas and run results."
+        label={translate("uxRecipestudio.checkNamev9vja")}
+        hint={translate("uxRecipestudio.nameUsedForThisk66e9")}
         value={config.name}
         onChange={(value) => onUpdate({ name: value })}
       />
       <div className="grid gap-1.5">
         <FieldLabel
           label={config.validator_type === "json" || config.validator_type === "markdown"
-            ? "Field to check"
-            : "Code to check"}
+            ? translate("uxRecipestudio.fieldToCheck8hp3z")
+            : translate("uxRecipestudio.codeToCheckkk4m1")}
           htmlFor={targetColumnId}
           hint={
             config.validator_type === "json"
-              ? "Choose the column that should contain valid JSON."
+              ? translate("uxRecipestudio.chooseTheColumnThat81uqu")
               : config.validator_type === "markdown"
-                ? "Choose the column that should contain valid markdown."
-                : "Choose the AI code step this check should review."
+                ? translate("uxRecipestudio.chooseTheColumnThatan9uw")
+                : translate("uxRecipestudio.chooseTheAICode79oqe")
           }
         />
         <Select
@@ -155,7 +156,7 @@ export function ValidatorDialog({
           }}
         >
           <SelectTrigger className="nodrag w-full" id={targetColumnId}>
-            <SelectValue placeholder="Select code column" />
+            <SelectValue placeholder={translate("uxRecipestudio.selectCodeColumn10x1p")} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value={NONE_VALUE}>None</SelectItem>
@@ -169,12 +170,12 @@ export function ValidatorDialog({
         {targetOptions.length === 0 && (
               <p className="text-xs text-muted-foreground">
                 {config.validator_type === "json"
-                  ? "Add a generation step that outputs JSON first."
+                  ? translate("uxRecipestudio.addAGenerationStepui770")
                   : config.validator_type === "markdown"
-                    ? "Add a generation step that outputs markdown first."
+                    ? translate("uxRecipestudio.addAGenerationStep21n43")
                     : config.validator_type === "oxc"
-                  ? "Add an AI code step that generates JavaScript or TypeScript first."
-                  : "Add an AI code step first."}
+                  ? translate("uxRecipestudio.addAnAICode96ydy")
+                  : translate("uxRecipestudio.addAnAICode5dhzu")}
               </p>
         )}
       </div>
@@ -182,9 +183,9 @@ export function ValidatorDialog({
         <div className="grid gap-3">
           <div className="grid gap-1.5">
             <FieldLabel
-              label="Check mode"
+              label={translate("uxRecipestudio.checkMode1lovl")}
               htmlFor={oxcModeId}
-              hint="Choose whether to check syntax, lint rules, or both."
+              hint={translate("uxRecipestudio.chooseWhetherToCheckmwvan")}
             />
             <div ref={oxcModeAnchorRef}>
               <Combobox
@@ -203,11 +204,11 @@ export function ValidatorDialog({
                 <ComboboxInput
                   id={oxcModeId}
                   className="nodrag w-full"
-                  placeholder="Select validation mode"
+                  placeholder={translate("uxRecipestudio.selectValidationModepe65c")}
                   readOnly={true}
                 />
                 <ComboboxContent anchor={oxcModeAnchorRef}>
-                  <ComboboxEmpty>No modes available</ComboboxEmpty>
+                  <ComboboxEmpty>{translate("uxCopy.noModesAvailabletemj7")}</ComboboxEmpty>
                   <ComboboxList>
                     {(mode: string) => (
                       <ComboboxItem key={mode} value={mode}>
@@ -221,9 +222,9 @@ export function ValidatorDialog({
           </div>
           <div className="grid gap-1.5">
             <FieldLabel
-              label="Code shape"
+              label={translate("uxRecipestudio.codeShape1h7zn")}
               htmlFor={oxcCodeShapeId}
-              hint="Choose whether the code should be treated like a full file or a smaller snippet."
+              hint={translate("uxRecipestudio.chooseWhetherTheCoden9n05")}
             />
             <div ref={oxcCodeShapeAnchorRef}>
               <Combobox
@@ -242,11 +243,11 @@ export function ValidatorDialog({
                 <ComboboxInput
                   id={oxcCodeShapeId}
                   className="nodrag w-full"
-                  placeholder="Select code shape"
+                  placeholder={translate("uxRecipestudio.selectCodeShapeeybug")}
                   readOnly={true}
                 />
                 <ComboboxContent anchor={oxcCodeShapeAnchorRef}>
-                  <ComboboxEmpty>No code-shape options</ComboboxEmpty>
+                  <ComboboxEmpty>{translate("uxRecipestudio.noCodeShapeOptionstl8tj")}</ComboboxEmpty>
                   <ComboboxList>
                     {(shape: string) => (
                       <ComboboxItem key={shape} value={shape}>
@@ -266,16 +267,16 @@ export function ValidatorDialog({
       >
         <CollapsibleTrigger asChild={true}>
           <CollapsibleSectionTriggerButton
-            label="Advanced check settings"
+            label={translate("uxRecipestudio.advancedCheckSettings8b22f")}
             open={advancedOpen}
           />
         </CollapsibleTrigger>
         <CollapsibleContent className="mt-3">
           <div className="grid gap-1.5">
             <FieldLabel
-              label="Batch size"
+              label={translate("studio.progress.batchSize")}
               htmlFor={batchSizeId}
-              hint="How many records to check at a time."
+              hint={translate("uxRecipestudio.howManyRecordsTowkwq3")}
             />
             <Input
               id={batchSizeId}

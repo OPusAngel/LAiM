@@ -136,8 +136,8 @@ def test_edit_only_and_reference_families_keep_their_contracts():
 def test_sampling_defaults_resolve_for_every_21_artifact_name():
     for name in (
         "Qwen/Qwen-Image-2.1",
-        "LAiM/Qwen-Image-2.1-GGUF",
-        "LAiM/Qwen-Image-2.1-FP8",
+        "unsloth/Qwen-Image-2.1-GGUF",
+        "unsloth/Qwen-Image-2.1-FP8",
     ):
         assert default_generation_params(name) == (25, 1.0), name
     # The generic key still owns the other Qwen-Image checkpoints.

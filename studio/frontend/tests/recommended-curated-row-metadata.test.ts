@@ -14,6 +14,11 @@ import { fileURLToPath } from "node:url";
 
 import ts from "@typescript/typescript6";
 
+import { enTranslate } from "./helpers/module-stubs.ts";
+
+// A slice of src run through new Function has no module table, so the catalog stand-in goes in as a global.
+Object.assign(globalThis, { translate: enTranslate });
+
 import { detectCapabilities } from "../src/features/model-picker/components/model-selector/model-capabilities.ts";
 import {
   IMAGE_CATALOG,
@@ -33,9 +38,9 @@ import {
   isAudioCppFolderId,
 } from "../src/features/audio/audio-cpp-catalog.ts";
 
-const H3_GGUF = "LAiM/MiniMax-H3-GGUF";
+const H3_GGUF = "unsloth/MiniMax-H3-GGUF";
 const H3_BF16 = "MiniMaxAI/MiniMax-H3";
-const LTX_GGUF = "LAiM/LTX-2.3-GGUF";
+const LTX_GGUF = "unsloth/LTX-2.3-GGUF";
 const WAN_BF16 = "Wan-AI/Wan2.2-TI2V-5B-Diffusers";
 
 // ── search: a downloaded curated row stays findable ───────────────────────────
@@ -60,8 +65,8 @@ test("a bundled folder is searched on the folder name its row shows", () => {
 });
 
 test("any other row is searched on its aliases and label", () => {
-  const id = "LAiM/Qwen3-8B-GGUF";
-  assert.equal(pickerSearchMatches(id, [id], "Qwen3 8B", "LAiM/qwen3"), true);
+  const id = "unsloth/Qwen3-8B-GGUF";
+  assert.equal(pickerSearchMatches(id, [id], "Qwen3 8B", "unsloth/qwen3"), true);
   assert.equal(pickerSearchMatches(id, [id], "Qwen3 8B", "qwen3 8b"), true);
   assert.equal(pickerSearchMatches(id, [id], null, "gguf"), true);
   assert.equal(pickerSearchMatches(id, [id], "Qwen3 8B", "llama"), false);
@@ -73,11 +78,11 @@ test("a seed the listing pool dropped is still searchable", () => {
   // downloaded model has its own On Device row. The unfiltered Recommended list keeps
   // painting it from the seeds, so search has to as well.
   const seeds = [H3_GGUF, LTX_GGUF];
-  const listing = [LTX_GGUF, "LAiM/Wan2.2-TI2V-5B-GGUF"]; // H3 downloaded -> dropped
+  const listing = [LTX_GGUF, "unsloth/Wan2.2-TI2V-5B-GGUF"]; // H3 downloaded -> dropped
   assert.deepEqual(searchableRecommendedIds(seeds, listing), [
     H3_GGUF,
     LTX_GGUF,
-    "LAiM/Wan2.2-TI2V-5B-GGUF",
+    "unsloth/Wan2.2-TI2V-5B-GGUF",
   ]);
 });
 
@@ -85,20 +90,20 @@ test("seeds come first and no id is listed twice", () => {
   // Same order orderRecommendedRows renders: curated in catalog order, then the rest.
   const out = searchableRecommendedIds(
     [H3_GGUF, LTX_GGUF],
-    ["LAiM/Other-GGUF", LTX_GGUF, H3_GGUF],
+    ["unsloth/Other-GGUF", LTX_GGUF, H3_GGUF],
   );
-  assert.deepEqual(out, [H3_GGUF, LTX_GGUF, "LAiM/Other-GGUF"]);
+  assert.deepEqual(out, [H3_GGUF, LTX_GGUF, "unsloth/Other-GGUF"]);
 });
 
 test("a listing row that only differs in case does not duplicate its seed", () => {
   // The HF cache lowercases repo ids, so the two pools can disagree on casing.
-  const out = searchableRecommendedIds([H3_GGUF], ["LAiM/minimax-h3-gguf"]);
+  const out = searchableRecommendedIds([H3_GGUF], ["unsloth/minimax-h3-gguf"]);
   assert.deepEqual(out, [H3_GGUF]);
 });
 
 test("with no seeds the listing pool is passed through unchanged", () => {
   // Chat (no catalog) must behave exactly as before.
-  const listing = ["LAiM/a-GGUF", "LAiM/b-GGUF"];
+  const listing = ["unsloth/a-GGUF", "unsloth/b-GGUF"];
   assert.deepEqual(searchableRecommendedIds([], listing), listing);
 });
 

@@ -3,6 +3,8 @@
 
 import { getHfEndpoint } from "@/lib/hf-endpoint";
 import { fetchHub } from "@/lib/hub-fetch";
+import { translate } from "@/i18n";
+
 
 const NETWORK_STATUS_EVENT = "LAiM-network-status";
 const REMOTE_OFFLINE_TTL_MS = 30_000;
@@ -291,7 +293,7 @@ export function classifyFetchFailure(
   if (options.timedOut) {
     return {
       kind: "timeout",
-      message: `The request to ${host} timed out.`,
+      get message() { return translate("uxHub.theRequestToTimed4mvz5", { p1: host }); },
       origin,
       retryable: true,
     };
@@ -299,7 +301,7 @@ export function classifyFetchFailure(
   if (isAbortError(error)) {
     return {
       kind: "aborted",
-      message: "The request was cancelled.",
+      get message() { return translate("uxHub.theRequestWasCancelledoo7sk"); },
       origin,
       retryable: true,
     };
@@ -308,21 +310,21 @@ export function classifyFetchFailure(
     if (isNavigatorOffline()) {
       return {
         kind: "browser-offline",
-        message: "This browser reports no network connection.",
+        get message() { return translate("uxHub.thisBrowserReportsNo5hl29"); },
         origin,
         retryable: true,
       };
     }
     return {
       kind: "network-opaque",
-      message: `Unable to reach ${host}. Check your network connection.`,
+      get message() { return translate("uxHub.unableToReachCheck8njtz", { p1: host }); },
       origin,
       retryable: true,
     };
   }
   return {
     kind: "unknown",
-    message: `The request to ${host} failed.`,
+    get message() { return translate("uxHub.theRequestToFailed4sp0f", { p1: host }); },
     origin,
     retryable: true,
   };
@@ -353,7 +355,7 @@ export function hubAuthFailure(
   }
   return {
     kind: "auth-rejected",
-    message: `${hostLabel(origin)} refused the saved Hugging Face token. It may have expired or been revoked. Update or clear it in Settings, then try again.`,
+    get message() { return translate("uxHub.refusedTheSavedHugginggn2ob", { p1: hostLabel(origin) }); },
     origin,
     status: 401,
     retryable: true,

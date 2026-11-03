@@ -29,7 +29,7 @@ def _configured_cache_dirs() -> List[Path]:
     import os
 
     dirs: List[Path] = []
-    configured = (os.environ.get("LAiM_COMPILE_LOCATION") or "").strip()
+    configured = (os.environ.get("UNSLOTH_COMPILE_LOCATION") or "").strip()
     if configured:
         dirs.append(Path(configured).expanduser())
     try:
@@ -77,9 +77,9 @@ def _is_dedicated_cache(path: Path) -> bool:
 
 
 def _trusted_cache_paths() -> set:
-    """Where a cache is ours by where it is: the source-tree candidates, and whatever LAiM_COMPILE_LOCATION names, since that is the caller's answer to where the cache lives. Never the launch directory."""
+    """Where a cache is ours by where it is: the source-tree candidates, and whatever UNSLOTH_COMPILE_LOCATION names, since that is the caller's answer to where the cache lives. Never the launch directory."""
     trusted = _builtin_cache_paths()
-    configured = (os.environ.get("LAiM_COMPILE_LOCATION") or "").strip()
+    configured = (os.environ.get("UNSLOTH_COMPILE_LOCATION") or "").strip()
     if configured:
         trusted.add(str(Path(configured).expanduser()))
     return trusted
@@ -108,7 +108,7 @@ def _builtin_cache_paths() -> set:
 
 
 def _cleanable_cache_dirs() -> "List[tuple]":
-    """``(directory, dedicated)`` for every cache dir something may be removed from. LAiM_COMPILE_LOCATION is a user-set variable, so it can name a directory that holds other things (`$HOME/.cache`). Built-in paths, and any directory carrying the marker, are ours whole; anywhere else only the generated files are ours, so only those may go."""
+    """``(directory, dedicated)`` for every cache dir something may be removed from. UNSLOTH_COMPILE_LOCATION is a user-set variable, so it can name a directory that holds other things (`$HOME/.cache`). Built-in paths, and any directory carrying the marker, are ours whole; anywhere else only the generated files are ours, so only those may go."""
     builtin = _builtin_cache_paths()
     cleanable: "List[tuple]" = []
     for cache_dir in get_existing_cache_dirs():
@@ -121,7 +121,7 @@ def _cleanable_cache_dirs() -> "List[tuple]":
         else:
             logger.warning(
                 "Not clearing %s: LAiM did not create it and it holds no generated "
-                "modules. Point LAiM_COMPILE_LOCATION at a directory used only for "
+                "modules. Point UNSLOTH_COMPILE_LOCATION at a directory used only for "
                 "the compiled cache.",
                 cache_dir,
             )
@@ -156,7 +156,7 @@ def register_compiled_cache_on_path() -> None:
 
 
 def cache_coordination_dir() -> Path:
-    """Where backends of this install find each other: the studio home, the same scope the startup markers use. Two backends of one install share an install-tree compiled cache and that is the case this coordinates; two SEPARATE installs pointed at one LAiM_COMPILE_LOCATION are not coordinated, and clearing is best effort there, as it was before."""
+    """Where backends of this install find each other: the studio home, the same scope the startup markers use. Two backends of one install share an install-tree compiled cache and that is the case this coordinates; two SEPARATE installs pointed at one UNSLOTH_COMPILE_LOCATION are not coordinated, and clearing is best effort there, as it was before."""
     from utils.paths.storage_roots import studio_root
     return studio_root()
 

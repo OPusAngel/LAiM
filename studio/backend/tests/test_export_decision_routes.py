@@ -147,7 +147,7 @@ def test_decision_info_is_null_for_other_models(monkeypatch, tmp_path):
     assert (
         _info(client, _write(tmp_path / "llama", {"config.json": {"model_type": "llama"}})) is None
     )
-    assert _info(client, "LAiM/Llama-3.2-1B") is None
+    assert _info(client, "unsloth/Llama-3.2-1B") is None
 
 
 def test_ineligible_load_is_a_400_with_the_reason(monkeypatch, tmp_path):

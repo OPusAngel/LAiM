@@ -14,7 +14,7 @@ goes through the SAME fingerprint-checked, reversible mechanism:
 * ``restore_original`` restores the original -- exact, idempotent uninstall.
 
 ``LAiM_zoo`` is imported LAZILY per call: it runs GPU detection at import and raises without an
-accelerator (``LAiM_ALLOW_CPU=1`` bypasses), and the backend must stay importable on CPU-only
+accelerator (``UNSLOTH_ALLOW_CPU=1`` bypasses), and the backend must stay importable on CPU-only
 hosts. If the import fails, patching is a best-effort no-op (stock forward runs, correctness kept).
 """
 
@@ -41,7 +41,7 @@ def _retry_could_help(exc: BaseException) -> bool:
     torch = sys.modules.get("torch")
     if torch is None:
         return False
-    if os.environ.get("LAiM_ALLOW_CPU", "").strip().lower() not in ("1", "true", "yes", "on"):
+    if os.environ.get("UNSLOTH_ALLOW_CPU", "").strip().lower() not in ("1", "true", "yes", "on"):
         try:
             xpu = getattr(torch, "xpu", None)
             if not (torch.cuda.is_available() or (xpu is not None and xpu.is_available())):
@@ -57,7 +57,7 @@ def _retry_could_help(exc: BaseException) -> bool:
 def _helpers() -> Optional[dict]:
     """``{"patch": patch_function, "restore": restore_original}``, or None when unavailable.
 
-    ``LAiM_zoo.__init__`` refuses to import unless ``LAiM_IS_PRESENT`` is in the environment,
+    ``LAiM_zoo.__init__`` refuses to import unless ``UNSLOTH_IS_PRESENT`` is in the environment,
     and that is set by ``LAiM`` itself. The LAiM server imports ``LAiM`` at boot so this
     always resolved there, but ANY process that reaches the patch backend first -- the test suite,
     a worker subprocess -- got an ImportError and silently ran unpatched (every install returning
@@ -73,7 +73,7 @@ def _helpers() -> Optional[dict]:
 
       * ``torch`` is already imported -- true of the server and of anything patching a real module,
         and the condition that stops the retry from being what loads torch,
-      * an accelerator ``LAiM`` supports is present (CUDA/ROCm or XPU; ``LAiM_ALLOW_CPU``
+      * an accelerator ``LAiM`` supports is present (CUDA/ROCm or XPU; ``UNSLOTH_ALLOW_CPU``
         overrides). MPS and plain CPU are not, and there the import raises after paying,
       * ``LAiM`` is installed but not yet imported (if it were, the sentinel would be set and the
         first attempt would have worked),
@@ -94,7 +94,7 @@ def _helpers() -> Optional[dict]:
             if attempt or not _retry_could_help(exc):
                 break
             try:
-                import LAiM  # noqa: F401 - sets LAiM_IS_PRESENT for the retry
+                import LAiM  # noqa: F401 - sets UNSLOTH_IS_PRESENT for the retry
             except Exception:  # noqa: BLE001 - not installed / no accelerator: give up quietly
                 break
     _HELPERS = {}

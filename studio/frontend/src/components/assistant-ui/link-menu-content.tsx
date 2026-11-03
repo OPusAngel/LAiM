@@ -21,7 +21,7 @@ import {
   useBrowserPrefsStore,
 } from "@/features/browser";
 import { startLibraryChat } from "@/features/library";
-import { useT } from "@/i18n";
+import { translate, useT } from "@/i18n";
 import { apiUrl, isTauri } from "@/lib/api-base";
 import { copyToClipboard, copyToClipboardFrom } from "@/lib/copy-to-clipboard";
 import { downloadFile, isDownloadCancelled } from "@/lib/native-files";
@@ -41,7 +41,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 import { useNavigate } from "@tanstack/react-router";
-import { sandboxRoutePrefix } from "./sandbox-files";
+import { workdirRoutePrefix } from "./workdir-files";
 
 import type { ContextFile } from "./link-context-menu";
 
@@ -126,8 +126,8 @@ export function WebLinkMenuContent({ href }: { href: string }) {
   );
 }
 
-async function postSandbox(sessionId: string, action: "open" | "reveal", file: string): Promise<void> {
-  const { prefix, query } = sandboxRoutePrefix(sessionId);
+async function postWorkdir(sessionId: string, action: "open" | "reveal", file: string): Promise<void> {
+  const { prefix, query } = workdirRoutePrefix(sessionId);
   const separator = query ? "&" : "?";
   const response = await authFetch(`${prefix}/${action}${query}${separator}file=${encodeURIComponent(file)}`, {
     method: "POST",
@@ -138,12 +138,12 @@ async function postSandbox(sessionId: string, action: "open" | "reveal", file: s
   }
 }
 
-async function sandboxAbsolutePath(sessionId: string, file: string): Promise<string> {
-  const { prefix, query } = sandboxRoutePrefix(sessionId);
+async function workdirAbsolutePath(sessionId: string, file: string): Promise<string> {
+  const { prefix, query } = workdirRoutePrefix(sessionId);
   const response = await authFetch(`${prefix}${query}`);
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   const { path } = (await response.json()) as { path?: unknown };
-  if (typeof path !== "string" || !path) throw new Error("No folder");
+  if (typeof path !== "string" || !path) throw new Error(translate("uxComponents.noFolderxqkyq"));
   const separator = path.includes("\\") && !path.includes("/") ? "\\" : "/";
   return `${path.replace(/[\\/]+$/, "")}${separator}${file.split("/").join(separator)}`;
 }
@@ -155,7 +155,7 @@ export function FileMenuContent({ file }: { file: ContextFile }) {
   const kind = textFileKind(file.name, contentType);
   // Spreadsheet text (CSV/TSV) previews as a sheet but copies as the text it is.
   const copyable = kind !== null || /\.(csv|tsv)$/i.test(file.name) || /^text\//i.test(contentType);
-  const local = file.sandbox !== undefined && backendIsLocal();
+  const local = file.workdir !== undefined && backendIsLocal();
   const failed = (key: "linkMenu.openFailed" | "linkMenu.revealFailed" | "linkMenu.saveFailed") => () =>
     toast.error(t(key, { name: file.name }));
 
@@ -167,7 +167,7 @@ export function FileMenuContent({ file }: { file: ContextFile }) {
           blob,
           name: file.name,
           contentType: contentType || blob.type,
-          key: file.sandbox ? `sandbox:${file.sandbox.sessionId}:${file.sandbox.file}` : undefined,
+          key: file.workdir ? `workdir:${file.workdir.sessionId}:${file.workdir.file}` : undefined,
         }),
       )
       .catch(failed("linkMenu.openFailed"));
@@ -205,7 +205,7 @@ export function FileMenuContent({ file }: { file: ContextFile }) {
       .catch((error) => {
         if (!isDownloadCancelled(error)) failed("linkMenu.saveFailed")();
       });
-  const sandbox = file.sandbox;
+  const workdir = file.workdir;
 
   return (
     <ContextMenuContent className={CONTENT_CLASS}>
@@ -213,9 +213,9 @@ export function FileMenuContent({ file }: { file: ContextFile }) {
         <ItemIcon icon={File01Icon} />
         {t("linkMenu.openFile")}
       </ContextMenuItem>
-      {local && sandbox ? (
+      {local && workdir ? (
         <ContextMenuItem
-          onSelect={() => void postSandbox(sandbox.sessionId, "open", sandbox.file).catch(failed("linkMenu.openFailed"))}
+          onSelect={() => void postWorkdir(workdir.sessionId, "open", workdir.file).catch(failed("linkMenu.openFailed"))}
         >
           <ItemIcon icon={SquareArrowUpRightIcon} />
           {t("linkMenu.openDefaultApp")}
@@ -250,12 +250,12 @@ export function FileMenuContent({ file }: { file: ContextFile }) {
         <ItemIcon icon={Download01Icon} />
         {t("linkMenu.saveAs")}
       </ContextMenuItem>
-      {(local && sandbox) || copyable ? <ContextMenuSeparator /> : null}
-      {local && sandbox ? (
+      {(local && workdir) || copyable ? <ContextMenuSeparator /> : null}
+      {local && workdir ? (
         <ContextMenuItem
           onSelect={() =>
             void copyWithToast(
-              copyToClipboardFrom(() => sandboxAbsolutePath(sandbox.sessionId, sandbox.file)),
+              copyToClipboardFrom(() => workdirAbsolutePath(workdir.sessionId, workdir.file)),
               t("linkMenu.pathCopied"),
               t("linkMenu.copyFailed"),
             )
@@ -279,10 +279,10 @@ export function FileMenuContent({ file }: { file: ContextFile }) {
           {t("linkMenu.copyContents")}
         </ContextMenuItem>
       ) : null}
-      {local && sandbox ? (
+      {local && workdir ? (
         <ContextMenuItem
           onSelect={() =>
-            void postSandbox(sandbox.sessionId, "reveal", sandbox.file).catch(failed("linkMenu.revealFailed"))
+            void postWorkdir(workdir.sessionId, "reveal", workdir.file).catch(failed("linkMenu.revealFailed"))
           }
         >
           <ItemIcon icon={FolderOpenIcon} />

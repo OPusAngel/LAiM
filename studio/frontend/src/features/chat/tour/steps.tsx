@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import type { TourStep } from "@/features/tour";
 
 export function buildChatTourSteps({
@@ -26,50 +27,48 @@ export function buildChatTourSteps({
     {
       id: "model",
       target: "chat-model-selector",
-      title: "Pick a model",
-      body: (
+      title: translate("uxVideo.pickAModelx7b6j"),
+      get body() {
+        return (
         <>
-          Loads a model for inference. Runs local GGUF, safetensors and your own
-          LoRA adapters, plus any cloud provider you add in Settings, such as
-          Gemini, OpenAI, Anthropic or OpenRouter.
-        </>
-      ),
+          {translate("uxChat.loadsAModelForvx0dn")}</>
+      );
+      },
     },
     {
       id: "model-tabs",
       target: "chat-model-selector-popover",
-      title: "Find a model",
-      body: (
+      title: translate("uxChat.findAModel5g12x"),
+      get body() {
+        return (
         <>
-          Recommended is LAiM's curated list, On Device is your downloads and
-          finetunes. Search Hub reaches all of Hugging Face. An OOM tag means it
-          will not fit in your VRAM.
-        </>
-      ),
+          {translate("uxChat.recommendedIsLAiMS1xsbp")}</>
+      );
+      },
       onEnter: openModelSelector,
       onExit: closeModelSelector,
     },
     {
       id: "plus-menu",
       target: "chat-plus-menu",
-      title: "Tools and attachments",
-      body: (
+      title: translate("uxChat.toolsAndAttachments1mnow"),
+      get body() {
+        return (
         <>
-          Open this to attach PDFs, images, audio and code, or to switch on web
-          search, the sandboxed Bash and Python tools, MCP servers and skills.
-        </>
-      ),
+          {translate("uxChat.openThisToAttach1mibd")}</>
+      );
+      },
     },
     {
       id: "settings",
       target: "chat-settings",
-      title: "Run settings",
-      body: (
+      title: translate("uxModelpicker.runSettingsmw4kg"),
+      get body() {
+        return (
         <>
-          Temperature, top-p, top-k, system prompt and the chat template. Lower
-          temperature first when you want steadier answers.
-        </>
-      ),
+          {translate("uxChat.temperatureTopPTopr9h79")}</>
+      );
+      },
       onEnter: openSettings,
       onExit: closeSettings,
     },
@@ -80,14 +79,13 @@ export function buildChatTourSteps({
     steps.unshift({
       id: "nav",
       target: "navbar",
-      title: "Where everything lives",
-      body: (
+      title: translate("uxChat.whereEverythingLivesl206p"),
+      get body() {
+        return (
         <>
-          Chat runs models. Train fine-tunes them, Recipes turns documents into
-          datasets, and Export packages the result. Images, Video and Audio are
-          their own workspaces, and Model hub manages what is on this device.
-        </>
-      ),
+          {translate("uxChat.chatRunsModelsTraina2l8a")}</>
+      );
+      },
     });
   }
 
@@ -97,14 +95,13 @@ export function buildChatTourSteps({
     steps.push({
       id: "compare-view",
       target: "chat-compare-view",
-      title: "Compare two models",
-      body: (
+      title: translate("uxChat.compareTwoModelsi5ymz"),
+      get body() {
+        return (
         <>
-          One prompt, two threads, side by side. The quickest way to check a
-          finetune against its base model. If yours is worse, suspect dataset
-          formatting, too many epochs or the wrong checkpoint.
-        </>
-      ),
+          {translate("uxChat.onePromptTwoThreads1uz60")}</>
+      );
+      },
       onEnter: enterCompare,
       onExit: exitCompare,
     });

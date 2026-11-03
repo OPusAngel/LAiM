@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import type { ReactElement, RefObject, UIEvent } from "react";
 import {
   Database01Icon,
@@ -33,16 +34,16 @@ function formatSourceResource(value: string | null | undefined): string {
 function formatSourceMessage(execution: RecipeExecutionRecord): string {
   const source = execution.source_progress;
   if (!source) {
-    return "No source progress captured.";
+    return translate("uxRecipestudio.noSourceProgressCapturedbd14k");
   }
   if (source.status === "rate_limited") {
     const wait =
       typeof source.retry_after_sec === "number" && source.retry_after_sec > 0
-        ? ` Waiting ~${formatMetricValue(source.retry_after_sec)}s.`
+        ? translate("uxRecipestudio.waitingSutwzx", { p1: formatMetricValue(source.retry_after_sec) })
         : "";
-    return `Waiting for GitHub rate limit. LAiM will resume automatically.${wait}`;
+    return translate("uxRecipestudio.waitingForGitHubRate5zdij", { p1: wait });
   }
-  return source.message ?? "Crawling GitHub source.";
+  return source.message ?? translate("uxRecipestudio.crawlingGitHubSourcev5ed2");
 }
 
 type ExecutionOverviewTabProps = {
@@ -87,7 +88,7 @@ export function ExecutionOverviewTab({
           <div className="grid gap-3 md:grid-cols-2">
             <div className="h-full rounded-xl border border-border/60 bg-card/55 p-3">
               <div className="mb-2 flex items-center justify-between">
-                <p className="text-xs text-muted-foreground">Run summary</p>
+                <p className="text-xs text-muted-foreground">{translate("uxRecipestudio.runSummaryzb95n")}</p>
                 <HugeiconsIcon
                   icon={Database01Icon}
                   className="size-4 text-muted-foreground"
@@ -105,11 +106,11 @@ export function ExecutionOverviewTab({
                   <span className="font-semibold">{runDuration}</span>
                 </p>
                 <p className="flex items-center justify-between gap-3">
-                  <span className="text-muted-foreground">Columns analyzed</span>
+                  <span className="text-muted-foreground">{translate("uxRecipestudio.columnsAnalyzedunhhq")}</span>
                   <span className="font-semibold">{formatMetricValue(columnCount)}</span>
                 </p>
                 <p className="flex items-center justify-between gap-3">
-                  <span className="text-muted-foreground">Final stage</span>
+                  <span className="text-muted-foreground">{translate("uxRecipestudio.finalStagehx7tm")}</span>
                   <span className="truncate font-semibold">{execution.stage ?? "--"}</span>
                 </p>
               </div>
@@ -125,16 +126,16 @@ export function ExecutionOverviewTab({
               <div className="space-y-1.5 text-xs">
                 {llmColumnCount > 0 && (
                   <p className="flex items-center justify-between gap-3">
-                    <span className="text-muted-foreground">LLM columns</span>
+                    <span className="text-muted-foreground">{translate("uxRecipestudio.lLMColumnsvayzu")}</span>
                     <span className="font-semibold">{formatMetricValue(llmColumnCount)}</span>
                   </p>
                 )}
                 <p className="flex items-center justify-between gap-3">
-                  <span className="text-muted-foreground">Null rate</span>
+                  <span className="text-muted-foreground">{translate("uxRecipestudio.nullRate624b9")}</span>
                   <span className="font-semibold">{nullRate?.toFixed(1) ?? "--"}%</span>
                 </p>
                 <p className="flex items-center justify-between gap-3">
-                  <span className="text-muted-foreground">Side-effect columns</span>
+                  <span className="text-muted-foreground">{translate("uxRecipestudio.sideEffectColumnsxcnm8")}</span>
                   <span className="font-semibold">{formatMetricValue(sideEffects.length)}</span>
                 </p>
                 {sideEffects.length > 0 && (
@@ -149,7 +150,7 @@ export function ExecutionOverviewTab({
                   </div>
                 )}
                 <p className="flex items-center justify-between gap-3">
-                  <span className="text-muted-foreground">Low uniqueness flags</span>
+                  <span className="text-muted-foreground">{translate("uxCopy.lowUniquenessFlagshnrjq")}</span>
                   <span className="font-semibold">
                     {formatMetricValue(lowUniquenessColumns.length)}
                   </span>
@@ -163,9 +164,7 @@ export function ExecutionOverviewTab({
                         </Badge>
                       ))}
                       {lowUniquenessColumns.length > 3 && (
-                        <Badge variant="outline">
-                          +{lowUniquenessColumns.length - 3} more
-                        </Badge>
+                        <Badge variant="outline">{translate("uxRecipestudio.morep7cd8", { p1: lowUniquenessColumns.length - 3 })}</Badge>
                       )}
                     </div>
                   </div>
@@ -176,11 +175,11 @@ export function ExecutionOverviewTab({
           {(llmColumnCount > 0 || modelUsageRows.length > 0) && (
             <div className="rounded-xl border border-border/60 bg-card/55 p-3">
               <div className="mb-2 flex items-center justify-between">
-                <p className="text-xs text-muted-foreground">Model usage</p>
+                <p className="text-xs text-muted-foreground">{translate("uxRecipestudio.modelUsagexy5ur")}</p>
                 <HugeiconsIcon icon={Flag02Icon} className="size-4 text-muted-foreground" />
               </div>
               {modelUsageRows.length === 0 ? (
-                <p className="text-xs text-muted-foreground">No model usage yet.</p>
+                <p className="text-xs text-muted-foreground">{translate("uxCopy.noModelUsageYet1okhw")}</p>
               ) : (
                 <div className="overflow-hidden rounded-lg border border-border/60 bg-card/50">
                   <Table>
@@ -214,13 +213,13 @@ export function ExecutionOverviewTab({
       {sourceProgress?.source === "github" && (
         <div className="rounded-xl border border-border/60 bg-card/55 p-3">
           <div className="mb-2 flex items-center justify-between">
-            <p className="text-xs text-muted-foreground">Source data</p>
+            <p className="text-xs text-muted-foreground">{translate("uxRecipestudio.sourceDataf56eo")}</p>
             <HugeiconsIcon icon={GithubIcon} className="size-4 text-muted-foreground" />
           </div>
           <p className="text-sm font-medium text-foreground">
             {sourceProgress.status === "completed"
-              ? "GitHub source complete"
-              : "Crawling GitHub source"}
+              ? translate("uxRecipestudio.gitHubSourceCompletej8z2s")
+              : translate("uxRecipestudio.crawlingGitHubSourceho10e")}
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
             {formatSourceMessage(execution)}
@@ -244,7 +243,7 @@ export function ExecutionOverviewTab({
               </span>
             </p>
             <p className="flex items-center justify-between gap-3">
-              <span className="text-muted-foreground">Rate remaining</span>
+              <span className="text-muted-foreground">{translate("uxRecipestudio.rateRemainingn8hel")}</span>
               <span className="font-semibold">
                 {formatMetricValue(sourceProgress.rate_remaining)}
               </span>
@@ -254,8 +253,8 @@ export function ExecutionOverviewTab({
       )}
       <div className="overflow-hidden rounded-xl corner-squircle border">
         <div className="flex items-center justify-between border-b px-3 py-2">
-          <p className="text-sm font-semibold">Terminal output</p>
-          <p className="text-xs text-muted-foreground">{terminalLines.length} lines</p>
+          <p className="text-sm font-semibold">{translate("uxRecipestudio.terminalOutputnn8wa")}</p>
+          <p className="text-xs text-muted-foreground">{translate("uxRecipestudio.linesm4k4w", { p1: terminalLines.length })}</p>
         </div>
         <div
           ref={terminalRef}
@@ -265,8 +264,8 @@ export function ExecutionOverviewTab({
           {terminalLines.length === 0 ? (
             <p className="text-zinc-400">
               {isExecutionInProgress(execution.status)
-                ? "Waiting for logs..."
-                : "No logs captured."}
+                ? translate("uxRecipestudio.waitingForLogsja8sm")
+                : translate("uxRecipestudio.noLogsCapturedzpox0")}
             </p>
           ) : (
             terminalLines.map((line, index) => (

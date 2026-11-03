@@ -223,7 +223,7 @@ def test_a_wheel_that_raises_anything_at_import_is_disabled(
 def test_a_codec_whose_native_library_fails_to_load_does_not_stop_import(
     broken_torchcodec, monkeypatch, tmp_path
 ):
-    # torchcodec 0.17 on torch 2.10 raises OSError from torch.ops.load_library (LAiMai/notebooks#304).
+    # torchcodec 0.17 on torch 2.10 raises OSError from torch.ops.load_library (unslothai/notebooks#304).
     # The AudioDecoder patch runs first at import, so it must let the disabler see the failure.
     import sys
 

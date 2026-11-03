@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,7 +43,7 @@ type RecipeStudioHeaderProps = {
 
 const STATUS_MESSAGE_CLASS: Record<StatusTone, string> = {
   success: "Saved",
-  error: "Needs saving",
+  get error() { return translate("uxRecipestudio.needsSavingi1tci"); },
 };
 
 export function RecipeStudioHeader({
@@ -67,7 +68,7 @@ export function RecipeStudioHeader({
 
   function closeWorkflowNameEditor(): void {
     if (workflowName.trim().length === 0) {
-      onWorkflowNameChange("Untitled recipe");
+      onWorkflowNameChange(translate("uxRecipestudio.untitledRecipege2c4"));
     }
     setEditingWorkflowName(false);
   }
@@ -105,7 +106,7 @@ export function RecipeStudioHeader({
               onKeyDown={handleWorkflowNameKeyDown}
               autoFocus={true}
               className="h-7 w-full max-w-[min(22rem,50vw)]"
-              aria-label="Recipe name"
+              aria-label={translate("uxRecipestudio.recipeName1xjn9")}
             />
           ) : (
             <button
@@ -156,9 +157,7 @@ export function RecipeStudioHeader({
             </PopoverTrigger>
             <PopoverContent align="end" className="w-80 p-0">
               <div className="border-b px-3 py-2">
-                <p className="text-xs font-semibold text-foreground">
-                  Graph warnings ({warnings.length})
-                </p>
+                <p className="text-xs font-semibold text-foreground">{translate("uxRecipestudio.graphWarnings00g8h", { p1: warnings.length })}</p>
               </div>
               <ul className="max-h-60 overflow-y-auto py-1">
                 {warnings.map((w) => (

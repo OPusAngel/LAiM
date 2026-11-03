@@ -97,7 +97,7 @@ test("a forget clears the server entry, then every record it reports, then refet
   const state = trace(
     () => Promise.resolve(answer([PATH_KEY, PATH_ID])),
     true,
-    [PATH_KEY, "LAiM/Other-GGUF:Q8_0"],
+    [PATH_KEY, "unsloth/Other-GGUF:Q8_0"],
   );
 
   await forgetModelOverride(PATH_KEY, state.deps);
@@ -118,17 +118,17 @@ test("a server that reports nothing still forgets the clicked key here", async (
 
 // Without this an old backend leaves the snapshot record, and the next load applies it.
 test("a server that reports nothing is read off the map it returns", async () => {
-  const repoKey = "LAiM/Repo-GGUF:Q4_K_M";
+  const repoKey = "unsloth/Repo-GGUF:Q4_K_M";
   const snapshotKey =
     "/home/u/.cache/hub/models--LAiM--Repo-GGUF/snapshots/2f1c9ab:Q4_K_M";
   const state = trace(
     () =>
       Promise.resolve({
-        overrides: { "LAiM/Other-GGUF:Q8_0": {} },
+        overrides: { "unsloth/Other-GGUF:Q8_0": {} },
         removedKeys: [],
       }),
     true,
-    [repoKey, snapshotKey, "LAiM/Other-GGUF:Q8_0"],
+    [repoKey, snapshotKey, "unsloth/Other-GGUF:Q8_0"],
   );
 
   await forgetModelOverride(repoKey, state.deps);
@@ -141,11 +141,11 @@ test("a listed key the map still holds under another spelling is not read as cle
   const state = trace(
     () =>
       Promise.resolve({
-        overrides: { "LAiM/b-gguf:q8_0": {} },
+        overrides: { "unsloth/b-gguf:q8_0": {} },
         removedKeys: [],
       }),
     true,
-    [PATH_KEY, "LAiM/B-GGUF:Q8_0"],
+    [PATH_KEY, "unsloth/B-GGUF:Q8_0"],
   );
 
   await forgetModelOverride(PATH_KEY, state.deps);
@@ -156,9 +156,9 @@ test("a listed key the map still holds under another spelling is not read as cle
 test("a key with no quant suffix forgets the whole id", async () => {
   const state = trace();
 
-  await forgetModelOverride("LAiM/Qwen3-4B-GGUF", state.deps);
+  await forgetModelOverride("unsloth/Qwen3-4B-GGUF", state.deps);
 
-  assert.deepEqual(state.removedRemote, [["LAiM/Qwen3-4B-GGUF", null]]);
+  assert.deepEqual(state.removedRemote, [["unsloth/Qwen3-4B-GGUF", null]]);
 });
 
 test("a refused remove leaves this browser's copy and the list alone", async () => {
@@ -198,12 +198,12 @@ test("a path-qualified variant splits off the repo it belongs to", async () => {
   const state = trace();
 
   await forgetModelOverride(
-    "LAiM/Repo-GGUF:distilled/model-Q6_K",
+    "unsloth/Repo-GGUF:distilled/model-Q6_K",
     state.deps,
   );
 
   assert.deepEqual(state.removedRemote, [
-    ["LAiM/Repo-GGUF", "distilled/model-Q6_K"],
+    ["unsloth/Repo-GGUF", "distilled/model-Q6_K"],
   ]);
 });
 
@@ -211,12 +211,12 @@ test("a filename-stem variant splits off the repo too", async () => {
   const state = trace();
 
   await forgetModelOverride(
-    "LAiM/H3-GGUF:minimax_h3_ref2va_pruned-Q6_K",
+    "unsloth/H3-GGUF:minimax_h3_ref2va_pruned-Q6_K",
     state.deps,
   );
 
   assert.deepEqual(state.removedRemote, [
-    ["LAiM/H3-GGUF", "minimax_h3_ref2va_pruned-Q6_K"],
+    ["unsloth/H3-GGUF", "minimax_h3_ref2va_pruned-Q6_K"],
   ]);
 });
 
@@ -230,7 +230,7 @@ test("a colon inside a local path is part of the name, not a separator", async (
   ]);
 });
 
-const REPO_ID = "LAiM/Repo-GGUF";
+const REPO_ID = "unsloth/Repo-GGUF";
 const SNAPSHOT_PATH =
   "/home/u/.cache/huggingface/hub/models--LAiM--Repo-GGUF/snapshots/2f1c9ab";
 const OTHER_PATH = "/home/u/models/Repo-Q4_K_M.gguf";
@@ -361,7 +361,7 @@ test("a key this browser has no record for is nothing to delete", () => {
   savePerModelConfig(REPO_ID, QUANT, config(32768));
 
   assert.equal(
-    deletePerModelConfigsForOverrideKeys(["LAiM/Other-GGUF:Q8_0"]),
+    deletePerModelConfigsForOverrideKeys(["unsloth/Other-GGUF:Q8_0"]),
     true,
   );
 
@@ -418,10 +418,10 @@ test("a forget resolves to the keys the server cleared", async () => {
 });
 
 test("a server that predates the field resolves to none, with the map it returned", async () => {
-  respond(200, { overrides: { "LAiM/Other-GGUF:Q8_0": {} } });
+  respond(200, { overrides: { "unsloth/Other-GGUF:Q8_0": {} } });
 
   assert.deepEqual(await putModelOverride(REPO_ID, QUANT, null), {
-    overrides: { "LAiM/Other-GGUF:Q8_0": {} },
+    overrides: { "unsloth/Other-GGUF:Q8_0": {} },
     removedKeys: [],
   });
 });

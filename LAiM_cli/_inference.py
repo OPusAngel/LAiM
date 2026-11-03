@@ -966,7 +966,7 @@ class HttpChatBackend:
             same = os.path.normcase(model) == os.path.normcase(loaded)
         else:
             # The server loads an ownerless id as LAiM/<id> (ModelConfig.from_identifier).
-            requested = model if "/" in model else f"LAiM/{model}"
+            requested = model if "/" in model else f"unsloth/{model}"
             same = requested.casefold() == loaded.casefold()
         return status.get("gguf_variant") if same else None
 

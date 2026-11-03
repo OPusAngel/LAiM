@@ -163,7 +163,7 @@ def test_the_lora_base_probe_skips_the_download_when_the_file_is_absent(monkeypa
     )
     _patch_metadata(monkeypatch, _raise(EntryNotFoundError("no such file")))
 
-    assert model_config.get_base_model_from_lora_identifier("LAiM/Qwen3-1.7B-GGUF") is None
+    assert model_config.get_base_model_from_lora_identifier("unsloth/Qwen3-1.7B-GGUF") is None
     assert calls == [], "a file the Hub says is absent must never reach the cache"
 
 
@@ -171,11 +171,11 @@ def test_a_present_adapter_config_still_resolves_its_base(monkeypatch, tmp_path)
     from utils.models import model_config
 
     cfg = tmp_path / "adapter_config.json"
-    cfg.write_text('{"base_model_name_or_path": "LAiM/Qwen3-1.7B"}', encoding = "utf-8")
+    cfg.write_text('{"base_model_name_or_path": "unsloth/Qwen3-1.7B"}', encoding = "utf-8")
     monkeypatch.setattr(huggingface_hub, "hf_hub_download", lambda *_a, **_k: str(cfg))
     _patch_metadata(monkeypatch, lambda *_a, **_k: object())
 
-    assert model_config.get_base_model_from_lora_identifier("Org/Adapter") == "LAiM/Qwen3-1.7B"
+    assert model_config.get_base_model_from_lora_identifier("Org/Adapter") == "unsloth/Qwen3-1.7B"
 
 
 def test_the_chat_template_search_skips_paths_the_listing_does_not_name(monkeypatch):

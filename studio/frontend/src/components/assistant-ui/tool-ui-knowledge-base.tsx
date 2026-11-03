@@ -39,6 +39,8 @@ import {
   topCitationPerDocument,
 } from "./citation-utils";
 import { ScrollPane } from "./scroll-pane";
+import { translate } from "@/i18n";
+
 
 export function CitationBadge({
   citation,
@@ -148,9 +150,9 @@ const KnowledgeBaseToolUIImpl: ToolCallMessagePartComponent = ({
             <Spinner className="size-3.5" />
             <span>
               {query ? (
-                <>Searching documents for &ldquo;{query}&rdquo;&hellip;</>
+                <>{translate("uxComponents.searchingDocumentsForir0nl", { p1: query })}</>
               ) : (
-                <>Searching documents&hellip;</>
+                <>{translate("uxComponents.searchingDocumentsr0xi9")}</>
               )}
             </span>
           </div>
@@ -159,11 +161,7 @@ const KnowledgeBaseToolUIImpl: ToolCallMessagePartComponent = ({
           <div className="flex flex-col gap-2 text-sm text-muted-foreground">
             {citations.length > 0 ? (
               <>
-                <div>
-                  Retrieved {citations.length} passage
-                  {citations.length === 1 ? "" : "s"} from {docCount} document
-                  {docCount === 1 ? "" : "s"}.
-                </div>
+                <div>{translate("uxComponents.retrievedPassageFromDocumentipdpw", { p1: citations.length, p2: citations.length === 1 ? "" : "s", p3: docCount, p4: docCount === 1 ? "" : "s" })}</div>
                 <div className="flex flex-wrap gap-1.5">
                   {shown.map((citation, i) => (
                     <CitationBadge
@@ -179,9 +177,7 @@ const KnowledgeBaseToolUIImpl: ToolCallMessagePartComponent = ({
                     type="button"
                     onClick={() => setShowAll(true)}
                     className="self-start text-xs underline-offset-2 hover:text-foreground hover:underline"
-                  >
-                    Show {documents.length - shown.length} more
-                  </button>
+                  >{translate("uxComponents.showMoresyb0o", { p1: documents.length - shown.length })}</button>
                 ) : null}
               </>
             ) : resultText ? (
@@ -192,7 +188,7 @@ const KnowledgeBaseToolUIImpl: ToolCallMessagePartComponent = ({
                 {resultText}
               </ScrollPane>
             ) : (
-              <div>No matching passages.</div>
+              <div>{translate("uxComponents.noMatchingPassages16880")}</div>
             )}
             {query.length > QUERY_INLINE_MAX ? (
               <ScrollPane
@@ -206,9 +202,7 @@ const KnowledgeBaseToolUIImpl: ToolCallMessagePartComponent = ({
               <div
                 data-slot="knowledge-base-query"
                 className="break-words text-xs"
-              >
-                Query: &ldquo;{query}&rdquo;
-              </div>
+              >{translate("uxComponents.queryyaztw", { p1: query })}</div>
             ) : null}
           </div>
         )}

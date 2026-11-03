@@ -64,7 +64,7 @@ test("the notice outlives the POST and settles when the load reports ready", asy
 
   const result = await withBackgroundLoadNotice(
     "image",
-    "LAiM/flux",
+    "unsloth/flux",
     async () => "started",
     async () => {
       const phase = phases[Math.min(read++, phases.length - 1)];
@@ -80,16 +80,16 @@ test("the notice outlives the POST and settles when the load reports ready", asy
   // announcement is the post-commit one, not a settle.
   assert.equal(result, "started");
   assert.deepEqual(seen, [
-    { runtime: "image", loading: true, model: "LAiM/flux" },
-    { runtime: "image", loading: true, model: "LAiM/flux" },
+    { runtime: "image", loading: true, model: "unsloth/flux" },
+    { runtime: "image", loading: true, model: "unsloth/flux" },
   ]);
 
   await settled;
   assert.equal(read, 3);
   assert.deepEqual(seen, [
-    { runtime: "image", loading: true, model: "LAiM/flux" },
-    { runtime: "image", loading: true, model: "LAiM/flux" },
-    { runtime: "image", loading: false, model: "LAiM/flux" },
+    { runtime: "image", loading: true, model: "unsloth/flux" },
+    { runtime: "image", loading: true, model: "unsloth/flux" },
+    { runtime: "image", loading: false, model: "unsloth/flux" },
   ]);
   stop();
 });
@@ -98,16 +98,16 @@ test("an errored load settles the notice too", async () => {
   const { seen, settled, stop } = record();
   await withBackgroundLoadNotice(
     "video",
-    "LAiM/wan",
+    "unsloth/wan",
     async () => null,
     async () => "error",
     TIMING,
   );
   await settled;
   assert.deepEqual(seen, [
-    { runtime: "video", loading: true, model: "LAiM/wan" },
-    { runtime: "video", loading: true, model: "LAiM/wan" },
-    { runtime: "video", loading: false, model: "LAiM/wan" },
+    { runtime: "video", loading: true, model: "unsloth/wan" },
+    { runtime: "video", loading: true, model: "unsloth/wan" },
+    { runtime: "video", loading: false, model: "unsloth/wan" },
   ]);
   stop();
 });
@@ -119,7 +119,7 @@ test("a load that never started settles at once, not from the poll", async () =>
   await assert.rejects(
     withBackgroundLoadNotice(
       "image",
-      "LAiM/flux",
+      "unsloth/flux",
       async () => {
         throw new Error("422 unsupported model kind");
       },
@@ -133,8 +133,8 @@ test("a load that never started settles at once, not from the poll", async () =>
   );
 
   assert.deepEqual(seen, [
-    { runtime: "image", loading: true, model: "LAiM/flux" },
-    { runtime: "image", loading: false, model: "LAiM/flux" },
+    { runtime: "image", loading: true, model: "unsloth/flux" },
+    { runtime: "image", loading: false, model: "unsloth/flux" },
   ]);
   // Exactly one settle, and no poll: the two paths must not both fire.
   await new Promise((resolve) => setTimeout(resolve, 40));
@@ -154,7 +154,7 @@ test("an unreadable progress read does not end a live load", async () => {
 
   await withBackgroundLoadNotice(
     "image",
-    "LAiM/flux",
+    "unsloth/flux",
     async () => null,
     async () => {
       const answer = answers[Math.min(read++, answers.length - 1)];
@@ -171,7 +171,7 @@ test("an unreadable progress read does not end a live load", async () => {
   assert.deepEqual(seen.at(-1), {
     runtime: "image",
     loading: false,
-    model: "LAiM/flux",
+    model: "unsloth/flux",
   });
   stop();
 });
@@ -182,7 +182,7 @@ test("a null phase is terminal, since it means the load left nothing behind", as
 
   await withBackgroundLoadNotice(
     "video",
-    "LAiM/wan",
+    "unsloth/wan",
     async () => null,
     async () => {
       read += 1;
@@ -197,9 +197,9 @@ test("a null phase is terminal, since it means the load left nothing behind", as
   await settled;
   assert.equal(read, 1);
   assert.deepEqual(seen, [
-    { runtime: "video", loading: true, model: "LAiM/wan" },
-    { runtime: "video", loading: true, model: "LAiM/wan" },
-    { runtime: "video", loading: false, model: "LAiM/wan" },
+    { runtime: "video", loading: true, model: "unsloth/wan" },
+    { runtime: "video", loading: true, model: "unsloth/wan" },
+    { runtime: "video", loading: false, model: "unsloth/wan" },
   ]);
   stop();
 });
@@ -215,7 +215,7 @@ test("only downloading and finalizing keep the row up", async () => {
 
   await withBackgroundLoadNotice(
     "image",
-    "LAiM/flux",
+    "unsloth/flux",
     async () => null,
     async () => {
       const phase = phases[Math.min(read++, phases.length - 1)];
@@ -239,7 +239,7 @@ test("a hung read is abandoned, so the deadline still bounds the loop", async ()
 
   await withBackgroundLoadNotice(
     "image",
-    "LAiM/flux",
+    "unsloth/flux",
     async () => null,
     // Accepts the connection and never answers, which is what parks the loop
     // and defeats the deadline unless each read is bounded on its own.
@@ -262,7 +262,7 @@ test("a hung read is abandoned, so the deadline still bounds the loop", async ()
   assert.deepEqual(seen.at(-1), {
     runtime: "image",
     loading: false,
-    model: "LAiM/flux",
+    model: "unsloth/flux",
   });
   stop();
 });
@@ -273,7 +273,7 @@ test("the read signal is not aborted when the read answers in time", async () =>
 
   await withBackgroundLoadNotice(
     "video",
-    "LAiM/wan",
+    "unsloth/wan",
     async () => null,
     async (signal) => {
       signal.addEventListener("abort", () => {
@@ -298,7 +298,7 @@ test("a long but healthy download is never abandoned", async () => {
 
   await withBackgroundLoadNotice(
     "video",
-    "LAiM/wan",
+    "unsloth/wan",
     async () => null,
     async () => {
       read += 1;
@@ -313,9 +313,9 @@ test("a long but healthy download is never abandoned", async () => {
   await settled;
   assert.equal(read, 12);
   assert.deepEqual(seen, [
-    { runtime: "video", loading: true, model: "LAiM/wan" },
-    { runtime: "video", loading: true, model: "LAiM/wan" },
-    { runtime: "video", loading: false, model: "LAiM/wan" },
+    { runtime: "video", loading: true, model: "unsloth/wan" },
+    { runtime: "video", loading: true, model: "unsloth/wan" },
+    { runtime: "video", loading: false, model: "unsloth/wan" },
   ]);
   stop();
 });
@@ -343,7 +343,7 @@ async function settlingRun(healthyAfterMs: number): Promise<{
   let lastRead = began;
   await withBackgroundLoadNotice(
     "image",
-    "LAiM/flux",
+    "unsloth/flux",
     async () => null,
     async () => {
       const now = Date.now();
@@ -404,7 +404,7 @@ test("the load is announced again once the POST has committed", async () => {
 
   await withBackgroundLoadNotice(
     "image",
-    "LAiM/flux",
+    "unsloth/flux",
     async () => {
       // The arbiter has not run yet, so a listener re-reading another runtime
       // here would still see the model this load is about to evict.

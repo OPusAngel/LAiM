@@ -70,8 +70,9 @@ test("a thread RAG source keeps its shape", () => {
   });
 });
 
-// Full access disables the sandbox, so it has to be re-accepted each session.
-test("the full permission mode is never persisted", () => {
+// The server mirror holds the level underneath Full access only: Full access itself lives in
+// local storage (it is restored from there at startup), not in settings the server replays.
+test("the full permission mode is not mirrored to the server", () => {
   assert.deepEqual(sanitized({ permissionMode: "full" }), {});
 });
 
@@ -148,9 +149,9 @@ test("a stored permission level wins over the legacy toggle", () => {
   assert.equal(normalizeStoredPermissionMode("ask", false), "ask");
 });
 
-// "full" is never stored, so reading one back must not restore the sandbox bypass.
-test("an unstorable or unknown level falls through to the derivation", () => {
-  assert.equal(normalizeStoredPermissionMode("full", null), "auto");
-  assert.equal(normalizeStoredPermissionMode("full", true), "ask");
+// Full access is stored locally now, so it is restored until the user changes it.
+test("a stored Full access level is restored, and an unknown one derives as before", () => {
+  assert.equal(normalizeStoredPermissionMode("full", null), "full");
+  assert.equal(normalizeStoredPermissionMode("full", true), "full");
   assert.equal(normalizeStoredPermissionMode("nonsense", false), "off");
 });

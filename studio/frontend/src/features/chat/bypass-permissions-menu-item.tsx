@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { ShieldBanIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
@@ -28,10 +29,10 @@ export function BypassPermissionsMenuItem() {
     <DropdownMenuSub>
       <DropdownMenuSubTrigger>
         <HugeiconsIcon icon={ShieldBanIcon} strokeWidth={2} />
-        Tool permissions
+        {translate("settings.general.permissions.sectionTitle")}
       </DropdownMenuSubTrigger>
       <DropdownMenuSubContent className="LAiM-plus-menu w-[calc(330px*var(--ui-space-scale,1))]">
-        <PermissionMenuLabel sandboxControls />
+        <PermissionMenuLabel />
         <PermissionModeMenuItems
           // Defer past Radix's menu-close focus restoration, or the dropdown grabs focus back
           // and breaks the dialog's focus trap.

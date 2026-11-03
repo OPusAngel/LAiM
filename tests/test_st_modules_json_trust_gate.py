@@ -248,7 +248,7 @@ def test_a_real_dense_config_is_untouched_by_that_check(tmp_path):
     FastSentenceTransformer._check_module_config_class_refs(
         str(load_path),
         "sentence_transformers.models.Dense",
-        "LAiM/embeddinggemma-300m",
+        "unsloth/embeddinggemma-300m",
         False,
         Dense,
     )

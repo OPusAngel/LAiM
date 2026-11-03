@@ -68,7 +68,7 @@ def login_token() -> str:
 
 
 def hf_model(index: int) -> dict:
-    model_id = f"LAiM/playwright-model-{index:03d}"
+    model_id = f"unsloth/playwright-model-{index:03d}"
     return {
         "_id": f"model-{index:03d}",
         "id": model_id,
@@ -548,7 +548,7 @@ def test_model_picker(page) -> None:
 
     search.fill("playwright-model")
     first_result = page.locator(
-        '[data-picker-option="true"][data-picker-values*="LAiM/playwright-model-011"]',
+        '[data-picker-option="true"][data-picker-values*="unsloth/playwright-model-011"]',
     )
     expect(first_result).to_be_visible(timeout = TIMEOUT_MS)
     close_picker(page, search)

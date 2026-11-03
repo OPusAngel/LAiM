@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
+
 export interface CropPoint {
   x: number;
   y: number;
@@ -217,7 +219,7 @@ export function rasterizeReferenceImageCrop(
 ): string {
   const crop = clampCropRect(selection, sourceSize);
   if (crop.width < 1 || crop.height < 1) {
-    throw new Error("Select an area at least one pixel wide and high.");
+    throw new Error(translate("uxFeatures.selectAnAreaAt0y2hn"));
   }
   const output = referenceCropExportSize(crop);
   const canvas = createCanvas();
@@ -225,7 +227,7 @@ export function rasterizeReferenceImageCrop(
   canvas.height = output.height;
   const context = canvas.getContext("2d");
   if (!context)
-    throw new Error("This browser could not start the crop canvas.");
+    throw new Error(translate("uxFeatures.thisBrowserCouldNotxmeg7"));
   context.drawImage(
     source,
     crop.x,

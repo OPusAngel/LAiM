@@ -18,13 +18,13 @@ def test_gemma_2b_base_and_instruct_4bit_are_distinct():
     int_to_float = namespace["INT_TO_FLOAT_MAPPER"]
     float_to_int = namespace["FLOAT_TO_INT_MAPPER"]
 
-    assert int_to_float["LAiM/gemma-2b-bnb-4bit"] == "LAiM/gemma-2b"
+    assert int_to_float["unsloth/gemma-2b-bnb-4bit"] == "unsloth/gemma-2b"
 
-    assert "LAiM/gemma-2b-it-bnb-4bit" in int_to_float
-    assert int_to_float["LAiM/gemma-2b-it-bnb-4bit"] == "LAiM/gemma-2b-it"
+    assert "unsloth/gemma-2b-it-bnb-4bit" in int_to_float
+    assert int_to_float["unsloth/gemma-2b-it-bnb-4bit"] == "unsloth/gemma-2b-it"
 
-    assert float_to_int["LAiM/gemma-2b"] == "LAiM/gemma-2b-bnb-4bit"
-    assert float_to_int["google/gemma-2b"] == "LAiM/gemma-2b-bnb-4bit"
+    assert float_to_int["unsloth/gemma-2b"] == "unsloth/gemma-2b-bnb-4bit"
+    assert float_to_int["google/gemma-2b"] == "unsloth/gemma-2b-bnb-4bit"
 
-    assert float_to_int["LAiM/gemma-2b-it"] == "LAiM/gemma-2b-it-bnb-4bit"
-    assert float_to_int["google/gemma-2b-it"] == "LAiM/gemma-2b-it-bnb-4bit"
+    assert float_to_int["unsloth/gemma-2b-it"] == "unsloth/gemma-2b-it-bnb-4bit"
+    assert float_to_int["google/gemma-2b-it"] == "unsloth/gemma-2b-it-bnb-4bit"

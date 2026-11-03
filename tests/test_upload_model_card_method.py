@@ -13,7 +13,7 @@ class Model:
     config = SimpleNamespace(_name_or_path = "base/model", model_type = "llama")
 
 
-SAVE_PY = Path(__file__).resolve().parents[1] / "LAiM/save.py"
+SAVE_PY = Path(__file__).resolve().parents[1] / "unsloth/save.py"
 
 LIFTED = ("upload_to_huggingface", "create_huggingface_repo")
 

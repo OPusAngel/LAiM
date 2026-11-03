@@ -2,6 +2,8 @@
 
 // eslint-disable-next-line no-restricted-imports -- Avoid the auth barrel's React login page.
 import { authFetch } from "@/features/auth/api";
+import { translate } from "@/i18n";
+
 import type {
   CreateResearchRunInput,
   ResearchEvent,
@@ -58,7 +60,7 @@ async function json<T>(response: Response): Promise<T> {
         ? detail
         : typeof message === "string"
           ? message
-          : `Research request failed (${response.status})`,
+          : translate("uxChat.researchRequestFailedfcp3u", { p1: response.status }),
       response.status,
     );
   }
@@ -175,7 +177,7 @@ export async function* streamResearchEvents(
     await json(response);
   }
   if (!response.body) {
-    throw new Error("Research event stream returned no response body");
+    throw new Error(translate("uxChat.researchEventStreamReturned0iy49"));
   }
   const reader = response.body.getReader();
   const decoder = new TextDecoder();

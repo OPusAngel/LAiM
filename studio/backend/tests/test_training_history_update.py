@@ -18,7 +18,7 @@ from routes import training_history
 BASE_RUN = {
     "id": "run-1",
     "status": "stopped",
-    "model_name": "LAiM/test-model",
+    "model_name": "unsloth/test-model",
     "dataset_name": "test-dataset",
     "display_name": "Existing name",
     "started_at": "2026-01-01T00:00:00Z",
@@ -122,7 +122,7 @@ def test_sanitize_db_config_strips_subject_and_secrets():
 
     db = _sanitize_db_config(
         {
-            "model_name": "LAiM/test-model",
+            "model_name": "unsloth/test-model",
             "subject": "alice@example.com",
             "hf_token": "hf_secret",
             "wandb_token": "wb_secret",
@@ -135,4 +135,4 @@ def test_sanitize_db_config_strips_subject_and_secrets():
     assert "hf_token" not in db and "wandb_token" not in db
     assert "resume_model_load_mode" not in db
     assert "require_validated_model_snapshot" not in db
-    assert db["model_name"] == "LAiM/test-model" and db["lora_r"] == 16
+    assert db["model_name"] == "unsloth/test-model" and db["lora_r"] == 16

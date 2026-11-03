@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -51,7 +52,7 @@ export function McpImageMappings({
     try {
       const probe = await refreshMcpServerTools(id);
       if (!probe.ok) {
-        throw new Error(probe.error ?? "The server did not respond.");
+        throw new Error(probe.error ?? translate("uxChat.theServerDidNotyr2o7"));
       }
       const tools = await listMcpServerTools(id);
       setOptions(
@@ -63,7 +64,7 @@ export function McpImageMappings({
         ),
       );
     } catch (err) {
-      toast.error("Could not list this server's tools", {
+      toast.error(translate("uxChat.couldNotListThis1kphy"), {
         description: err instanceof Error ? err.message : String(err),
       });
     } finally {
@@ -79,11 +80,10 @@ export function McpImageMappings({
       >
         <span className="space-y-0.5">
           <span className="block text-sm font-medium">
-            Send attached images to tools
+            {translate("uxChat.sendAttachedImagesTo1j1jl")}
           </span>
           <span className="block max-w-[70ch] text-xs text-muted-foreground">
-            Images you attach go to the mapped tool field instead of the model,
-            and only after you approve each call.
+            {translate("uxCopy.imagesYouAttachGoy9k70")}
           </span>
         </span>
         <Switch
@@ -98,7 +98,7 @@ export function McpImageMappings({
       </label>
       {enabled && !serverId ? (
         <p className="text-xs text-muted-foreground">
-          Save this server first, then edit it to choose the image field.
+          {translate("uxChat.saveThisServerFirst9u4l8")}
         </p>
       ) : null}
       {enabled && serverId ? (
@@ -127,13 +127,13 @@ export function McpImageMappings({
               >
                 <SelectTrigger
                   className="h-7 w-32"
-                  aria-label={`Image encoding for ${mapping.tool}`}
+                  aria-label={translate("uxChat.imageEncodingForw58ps", { p1: mapping.tool })}
                 >
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="base64">Raw base64</SelectItem>
-                  <SelectItem value="data_url">Data URL</SelectItem>
+                  <SelectItem value="base64">{translate("uxChat.rawBase64zz2kw")}</SelectItem>
+                  <SelectItem value="data_url">{translate("uxChat.dataURLhmk1h")}</SelectItem>
                 </SelectContent>
               </Select>
               <Button
@@ -151,7 +151,7 @@ export function McpImageMappings({
           ))}
           {connectionUnsaved ? (
             <p className="text-xs text-muted-foreground">
-              Save the connection changes first, then choose the image field.
+              {translate("uxChat.saveTheConnectionChangesxkw8r")}
             </p>
           ) : options === null ? (
             <Button
@@ -166,7 +166,7 @@ export function McpImageMappings({
             </Button>
           ) : options.length === 0 ? (
             <p className="text-xs text-muted-foreground">
-              No tool on this server takes a top-level string field.
+              {translate("uxChat.noToolOnThisi39rl")}
             </p>
           ) : addable.length > 0 ? (
             <div className="flex flex-wrap gap-2">
@@ -180,9 +180,9 @@ export function McpImageMappings({
               >
                 <SelectTrigger
                   className="min-w-56 flex-1"
-                  aria-label="Image field"
+                  aria-label={translate("uxRecipestudio.imageFieldbcxbk")}
                 >
-                  <SelectValue placeholder="Add tool / field" />
+                  <SelectValue placeholder={translate("uxChat.addToolField55bzm")} />
                 </SelectTrigger>
                 <SelectContent>
                   {addable.map((option, index) => (

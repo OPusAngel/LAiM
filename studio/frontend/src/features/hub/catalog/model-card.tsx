@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { useVllmAvailable, useVllmPlatform } from "@/features/model-picker";
 import {
   Tooltip,
@@ -9,6 +10,11 @@ import {
 } from "@/components/ui/tooltip";
 import { classifyLAiMSupport } from "@/features/hub/hooks/use-hub-model-search";
 import { ownerPaletteColor } from "@/features/hub/lib/avatar-theme";
+import {
+  HF_SOURCE_OWNER,
+  displayOwnerLabel,
+  isHfFirstPartyOwner,
+} from "@/config/hub-source";
 import { buildAdaptiveCardAccentStyle } from "@/features/hub/lib/card-accent";
 import { useDominantColor } from "@/features/hub/lib/use-dominant-color";
 import { formatModelParamLabel } from "@/features/hub/lib/view-models";
@@ -180,7 +186,7 @@ function resolveTrendingGlow(row: DiscoverRow): Pick<
     };
   }
   if (
-    signature.includes("LAiM") ||
+    signature.includes(HF_SOURCE_OWNER) ||
     signature.includes("lfm") ||
     signature.includes("liquid")
   ) {
@@ -302,10 +308,10 @@ export const ModelCard = memo(function ModelCard({
             {row.repo}
           </p>
           <span className="hub-trending-owner flex min-w-0 items-center gap-1 text-ui-11p5 leading-ui-15 text-muted-foreground/80">
-            <span className="truncate">{row.owner}</span>
-            {row.owner.toLowerCase() === "LAiM" && (
+            <span className="truncate">{displayOwnerLabel(row.owner)}</span>
+            {isHfFirstPartyOwner(row.owner) && (
               <span
-                aria-label="Verified LAiM"
+                aria-label={translate("uxHub.verifiedLAiMqmy0j")}
                 className="hub-verified-badge size-3.5 shrink-0 text-verified"
               />
             )}
@@ -319,14 +325,14 @@ export const ModelCard = memo(function ModelCard({
           {partial && !downloading && (
             <span
               role="img"
-              aria-label="Partial download"
+              aria-label={translate("uxHub.partialDownload1ynvx")}
               className="inline-block size-[calc(5px*var(--ui-space-scale,1))] rounded-full bg-status-warning"
             />
           )}
           {partial && downloading && (
             <span
               role="img"
-              aria-label="Downloading"
+              aria-label={translate("browser.downloads.inProgressLabel")}
               className={cn(
                 "inline-block size-[calc(5px*var(--ui-space-scale,1))] rounded-full",
                 DOWNLOADING_DOT_CLASS,
@@ -336,14 +342,14 @@ export const ModelCard = memo(function ModelCard({
           {unsupported && (
             <span
               role="img"
-              aria-label="May not be supported yet"
+              aria-label={translate("uxHub.mayNotBeSupportedbants")}
               className="inline-block size-[calc(5px*var(--ui-space-scale,1))] rounded-full bg-status-danger"
             />
           )}
           {onDevice && (
             <span
               role="img"
-              aria-label="On device"
+              aria-label={translate("settings.general.rag.onDevice")}
               className="inline-block size-[calc(5px*var(--ui-space-scale,1))] rounded-full bg-status-success"
             />
           )}

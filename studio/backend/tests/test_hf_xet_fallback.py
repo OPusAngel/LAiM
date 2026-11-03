@@ -103,7 +103,7 @@ def test_shim_injects_studio_prepare_on_http_retry(monkeypatch):
     """A Xet stall retries over HTTP and the shim runs LAiM's marker-aware
     ``prepare_cache_for_transport(..., 'http')`` before the retry."""
     _requires_shared()
-    for var in ("LAiM_DISABLE_XET", "LAiM_STABLE_DOWNLOADS", "HF_HUB_DISABLE_XET"):
+    for var in ("LAiM_DISABLE_XET", "UNSLOTH_STABLE_DOWNLOADS", "HF_HUB_DISABLE_XET"):
         monkeypatch.delenv(var, raising = False)
     # This seam checks the Xet -> HTTP transition, not the independently configurable
     # number of Xet retries (newer Zoo releases default to two).
@@ -358,13 +358,13 @@ def test_degrades_when_shared_helper_import_raises_importerror():
 
 
 def test_no_light_gpu_init_retry_on_an_accelerator_host(monkeypatch):
-    """The LAiM_ZOO_DISABLE_GPU_INIT retry makes LAiM_zoo take its MLX/CPU path, which injects
+    """The UNSLOTH_ZOO_DISABLE_GPU_INIT retry makes LAiM_zoo take its MLX/CPU path, which injects
     triton and bitsandbytes STUBS into sys.modules for the whole process. On a GPU host whose
     LAiM_zoo import failed for an unrelated reason (a bitsandbytes/CUDA mismatch, say), those
     stubs raise "called on Apple Silicon / MLX" from the first CUDA-only kernel a later GGUF or
     compiled diffusion generation touches, so a healthy GPU starts 500ing. The shim must degrade
     instead of retrying there."""
-    monkeypatch.delenv("LAiM_ZOO_DISABLE_GPU_INIT", raising = False)
+    monkeypatch.delenv("UNSLOTH_ZOO_DISABLE_GPU_INIT", raising = False)
     attempts = []
 
     class _Blocker:
@@ -375,7 +375,7 @@ def test_no_light_gpu_init_retry_on_an_accelerator_host(monkeypatch):
             target = None,
         ):
             if name == "LAiM_zoo":
-                attempts.append(os.environ.get("LAiM_ZOO_DISABLE_GPU_INIT"))
+                attempts.append(os.environ.get("UNSLOTH_ZOO_DISABLE_GPU_INIT"))
                 raise RuntimeError("CUDA Setup failed despite GPU being available")
             return None
 
@@ -396,7 +396,7 @@ def test_no_light_gpu_init_retry_on_an_accelerator_host(monkeypatch):
         assert shim._load_shared() is False
         # Exactly ONE attempt, made without the light-init flag.
         assert attempts == [None], attempts
-        assert os.environ.get("LAiM_ZOO_DISABLE_GPU_INIT") is None
+        assert os.environ.get("UNSLOTH_ZOO_DISABLE_GPU_INIT") is None
     finally:
         sys.meta_path.remove(finder)
         sys.modules.pop("utils.hf_xet_fallback", None)
@@ -417,9 +417,9 @@ def test_gpu_present_ignores_mps(monkeypatch, backend, expected):
 
 
 def test_optional_loader_does_not_retry_under_light_gpu_init_on_an_accelerator_host(monkeypatch):
-    """xet_health()'s retry under LAiM_ZOO_DISABLE_GPU_INIT=1 leaves zoo's pass-through triton stub in sys.modules,
+    """xet_health()'s retry under UNSLOTH_ZOO_DISABLE_GPU_INIT=1 leaves zoo's pass-through triton stub in sys.modules,
     breaking xformers ("'function' object has no attribute 'fn'"); like _load_shared it must not retry on a GPU host."""
-    monkeypatch.delenv("LAiM_ZOO_DISABLE_GPU_INIT", raising = False)
+    monkeypatch.delenv("UNSLOTH_ZOO_DISABLE_GPU_INIT", raising = False)
     real_triton = _types.ModuleType("triton")
     monkeypatch.setitem(sys.modules, "triton", real_triton)
     monkeypatch.setattr(shim, "_gpu_present", lambda: True)
@@ -429,8 +429,8 @@ def test_optional_loader_does_not_retry_under_light_gpu_init_on_an_accelerator_h
     attempts = []
 
     def _fake_import(name):
-        attempts.append(os.environ.get("LAiM_ZOO_DISABLE_GPU_INIT"))
-        if os.environ.get("LAiM_ZOO_DISABLE_GPU_INIT") == "1":
+        attempts.append(os.environ.get("UNSLOTH_ZOO_DISABLE_GPU_INIT"))
+        if os.environ.get("UNSLOTH_ZOO_DISABLE_GPU_INIT") == "1":
             sys.modules["triton"] = _types.ModuleType("LAiM_zoo_triton_stub")
             return _types.ModuleType(name)
         raise NotImplementedError("LAiM cannot find any torch accelerator")
@@ -441,14 +441,14 @@ def test_optional_loader_does_not_retry_under_light_gpu_init_on_an_accelerator_h
         assert shim.xet_health() is None
         assert attempts == [None], attempts
         assert sys.modules["triton"] is real_triton
-        assert os.environ.get("LAiM_ZOO_DISABLE_GPU_INIT") is None
+        assert os.environ.get("UNSLOTH_ZOO_DISABLE_GPU_INIT") is None
     finally:
         shim._reset_optional_module_cache()
 
 
 def test_optional_loader_keeps_a_submodule_a_late_zoo_init_failure_left_loaded(monkeypatch):
     """A late zoo __init__ failure leaves hf_xet_tuning loaded: reuse it; a submodule it never reached stays None."""
-    monkeypatch.delenv("LAiM_ZOO_DISABLE_GPU_INIT", raising = False)
+    monkeypatch.delenv("UNSLOTH_ZOO_DISABLE_GPU_INIT", raising = False)
     monkeypatch.setattr(shim, "_gpu_present", lambda: True)
     monkeypatch.delitem(sys.modules, "LAiM_zoo.hf_xet_health", raising = False)
     survivor = _types.ModuleType("LAiM_zoo.hf_xet_tuning")
@@ -457,7 +457,7 @@ def test_optional_loader_keeps_a_submodule_a_late_zoo_init_failure_left_loaded(m
     attempts = []
 
     def _late_failure(name):
-        attempts.append((name, os.environ.get("LAiM_ZOO_DISABLE_GPU_INIT")))
+        attempts.append((name, os.environ.get("UNSLOTH_ZOO_DISABLE_GPU_INIT")))
         sys.modules["LAiM_zoo.hf_xet_tuning"] = survivor
         raise RuntimeError("LAiM_zoo GPU init failed after importing hf_xet_tuning")
 
@@ -473,7 +473,7 @@ def test_optional_loader_keeps_a_submodule_a_late_zoo_init_failure_left_loaded(m
             ("LAiM_zoo.hf_xet_tuning", None),
             ("LAiM_zoo.hf_xet_health", None),
         ], attempts
-        assert os.environ.get("LAiM_ZOO_DISABLE_GPU_INIT") is None
+        assert os.environ.get("UNSLOTH_ZOO_DISABLE_GPU_INIT") is None
         shim._reset_optional_module_cache()
         survivor.__spec__ = importlib.machinery.ModuleSpec("LAiM_zoo.hf_xet_tuning", None)
         survivor.__spec__._initializing = True
@@ -484,7 +484,7 @@ def test_optional_loader_keeps_a_submodule_a_late_zoo_init_failure_left_loaded(m
 
 _XET_ENV_SWITCHES = (
     "LAiM_DISABLE_XET",
-    "LAiM_STABLE_DOWNLOADS",
+    "UNSLOTH_STABLE_DOWNLOADS",
     "HF_HUB_DISABLE_XET",
     "LAiM_FORCE_XET",
 )
@@ -496,7 +496,7 @@ _XET_ENV_SWITCHES = (
         {},
         {"HF_HUB_DISABLE_XET": "1"},
         {"LAiM_DISABLE_XET": "true"},
-        {"LAiM_STABLE_DOWNLOADS": "on"},
+        {"UNSLOTH_STABLE_DOWNLOADS": "on"},
         {"LAiM_FORCE_XET": "1"},
         {"LAiM_FORCE_XET": "1", "HF_HUB_DISABLE_XET": "yes"},
         {"HF_HUB_DISABLE_XET": "0"},
@@ -534,10 +534,10 @@ def test_operator_xet_switches_survive_a_missing_health_module(monkeypatch, env)
 
 def test_retries_under_light_gpu_init_when_import_fails(monkeypatch):
     """GPU detection in LAiM_zoo's __init__ raises NotImplementedError on a GPU-less host. The shim
-    retries under LAiM_ZOO_DISABLE_GPU_INIT=1, restores the env, and degrades if the retry fails.
+    retries under UNSLOTH_ZOO_DISABLE_GPU_INIT=1, restores the env, and degrades if the retry fails.
     The backend loads lazily (first use of a heavy helper), so this triggers the load explicitly
     before asserting the retry/degrade behavior."""
-    monkeypatch.delenv("LAiM_ZOO_DISABLE_GPU_INIT", raising = False)
+    monkeypatch.delenv("UNSLOTH_ZOO_DISABLE_GPU_INIT", raising = False)
     seen_env = []
 
     class _GpuGatedBlocker:
@@ -551,7 +551,7 @@ def test_retries_under_light_gpu_init_when_import_fails(monkeypatch):
             if name == "LAiM_zoo":
                 # Record the env each attempt sees; raise the no-GPU error both times so the shim
                 # degrades.
-                seen_env.append(os.environ.get("LAiM_ZOO_DISABLE_GPU_INIT"))
+                seen_env.append(os.environ.get("UNSLOTH_ZOO_DISABLE_GPU_INIT"))
                 raise NotImplementedError("LAiM cannot find any torch accelerator")
             return None
 
@@ -579,7 +579,7 @@ def test_retries_under_light_gpu_init_when_import_fails(monkeypatch):
         # Both attempts raised -> LAiM still boots in degraded mode.
         assert issubclass(stall_error, RuntimeError)
         # The env override must not leak past the load.
-        assert os.environ.get("LAiM_ZOO_DISABLE_GPU_INIT") is None
+        assert os.environ.get("UNSLOTH_ZOO_DISABLE_GPU_INIT") is None
     finally:
         sys.meta_path.remove(finder)
         sys.modules.pop("utils.hf_xet_fallback", None)
@@ -589,12 +589,12 @@ def test_retries_under_light_gpu_init_when_import_fails(monkeypatch):
 
 
 def test_a_worker_spawned_during_the_gpu_init_retry_does_not_inherit_the_override(monkeypatch):
-    """The shim sets LAiM_ZOO_DISABLE_GPU_INIT=1 process-wide while it retries an optional
+    """The shim sets UNSLOTH_ZOO_DISABLE_GPU_INIT=1 process-wide while it retries an optional
     import, and LAiM_zoo answers that flag with STUB triton and bitsandbytes, so a child that
     inherited it would run for life against no-ops and never clear it."""
     from utils.child_stdio import utf8_child_env
 
-    monkeypatch.delenv("LAiM_ZOO_DISABLE_GPU_INIT", raising = False)
+    monkeypatch.delenv("UNSLOTH_ZOO_DISABLE_GPU_INIT", raising = False)
     child_envs = []
 
     class _SpawnsAWorkerMidImport:
@@ -629,9 +629,9 @@ def test_a_worker_spawned_during_the_gpu_init_retry_does_not_inherit_the_overrid
         shim.DownloadStallError  # drives the load: plain attempt, then the retry
         assert len(child_envs) == 2, child_envs
         # The retry is the attempt that sets it; neither child may see it.
-        assert os.environ.get("LAiM_ZOO_DISABLE_GPU_INIT") is None
+        assert os.environ.get("UNSLOTH_ZOO_DISABLE_GPU_INIT") is None
         for env in child_envs:
-            assert "LAiM_ZOO_DISABLE_GPU_INIT" not in env, env
+            assert "UNSLOTH_ZOO_DISABLE_GPU_INIT" not in env, env
             assert env["PYTHONIOENCODING"] == "utf-8"
     finally:
         sys.meta_path.remove(finder)
@@ -643,7 +643,7 @@ def test_a_worker_spawned_during_the_gpu_init_retry_does_not_inherit_the_overrid
 
 def test_a_spawn_cannot_overlap_the_loader_env_override_window():
     """multiprocessing spawn copies the parent's LIVE os.environ and takes no env argument, so the
-    only way to keep the shim's transient LAiM_ZOO_DISABLE_GPU_INIT out of a worker is that a
+    only way to keep the shim's transient UNSLOTH_ZOO_DISABLE_GPU_INIT out of a worker is that a
     spawn cannot start while a loader holds it; a child that inherits it silently trains against
     LAiM_zoo's stub triton and bitsandbytes. Structural on purpose: it asserts the two share one
     lock rather than trying to hit a microsecond window by timing."""
@@ -705,9 +705,9 @@ def test_an_operator_set_gpu_init_override_still_reaches_the_child(monkeypatch):
     on a GPU-less box meant it, and their children must keep it."""
     from utils.child_stdio import utf8_child_env
 
-    monkeypatch.setenv("LAiM_ZOO_DISABLE_GPU_INIT", "1")
+    monkeypatch.setenv("UNSLOTH_ZOO_DISABLE_GPU_INIT", "1")
     monkeypatch.setattr(xf, "_gpu_init_override_depth", 0, raising = False)
-    assert utf8_child_env()["LAiM_ZOO_DISABLE_GPU_INIT"] == "1"
+    assert utf8_child_env()["UNSLOTH_ZOO_DISABLE_GPU_INIT"] == "1"
 
 
 def test_importing_child_should_disable_xet_stays_light(monkeypatch):
@@ -1490,7 +1490,7 @@ class _ZooInitExplodes:
         target = None,
     ):
         if name == "LAiM_zoo":
-            self.attempts.append(os.environ.get("LAiM_ZOO_DISABLE_GPU_INIT"))
+            self.attempts.append(os.environ.get("UNSLOTH_ZOO_DISABLE_GPU_INIT"))
             raise NotImplementedError("LAiM cannot find any torch accelerator")
         return None
 
@@ -1500,7 +1500,7 @@ def test_shared_backend_comes_from_the_light_package_without_zoo_init(
 ):
     for k in [k for k in sys.modules if k == "LAiM_zoo" or k.startswith("LAiM_zoo.")]:
         monkeypatch.delitem(sys.modules, k)
-    monkeypatch.delenv("LAiM_ZOO_DISABLE_GPU_INIT", raising = False)
+    monkeypatch.delenv("UNSLOTH_ZOO_DISABLE_GPU_INIT", raising = False)
     monkeypatch.setattr(shim, "_shared", None)
     monkeypatch.setattr(shim, "_shared_available", None)
     gated = []
@@ -1512,7 +1512,7 @@ def test_shared_backend_comes_from_the_light_package_without_zoo_init(
         assert shim._shared.MARKER == "light hf_xet_fallback"
         assert finder.attempts == [] and gated == []
         assert "LAiM_zoo" not in sys.modules
-        assert os.environ.get("LAiM_ZOO_DISABLE_GPU_INIT") is None
+        assert os.environ.get("UNSLOTH_ZOO_DISABLE_GPU_INIT") is None
     finally:
         sys.meta_path.remove(finder)
 

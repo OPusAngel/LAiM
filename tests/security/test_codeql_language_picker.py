@@ -50,7 +50,7 @@ def _pick(
         PATH = f"{bin_dir}{os.pathsep}{os.environ['PATH']}",
         GITHUB_OUTPUT = str(out),
         EVENT = event,
-        REPO = "LAiMai/LAiM",
+        REPO = "OPusAngel/LAiM",
         PR = "1",
     )
     subprocess.run(["bash", "-c", _script()], env = env, check = True, capture_output = True)
@@ -65,7 +65,7 @@ def test_non_pull_request_events_analyse_everything(tmp_path, event):
 @pytest.mark.parametrize(
     "files, expected",
     [
-        (["LAiM/models/llama.py"], ["python"]),
+        (["unsloth/models/llama.py"], ["python"]),
         (["studio/backend/stubs.pyi"], ["python"]),
         (["studio/frontend/src/app.tsx"], ["javascript-typescript"]),
         (["studio/frontend/package.json"], ["javascript-typescript"]),
@@ -78,7 +78,7 @@ def test_non_pull_request_events_analyse_everything(tmp_path, event):
         (["README.md", "docs/guide.md", "studio/frontend/public/logo.png"], []),
         (["a.py", "b.ts", "c.rs", ".github/workflows/x.yml"], ALL),
         # A rename lists both names; the old one alone still counts.
-        (["docs/moved.txt", "LAiM/old_name.py"], ["python"]),
+        (["docs/moved.txt", "unsloth/old_name.py"], ["python"]),
     ],
 )
 def test_pull_requests_analyse_the_languages_they_touch(tmp_path, files, expected):

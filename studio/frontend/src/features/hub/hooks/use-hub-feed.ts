@@ -13,6 +13,8 @@ import {
   type HfModelResult,
   fetchChannelFirstPage,
 } from "./use-hub-model-search";
+import { translate } from "@/i18n";
+
 
 export type FeedStatus = "idle" | "loading" | "refreshing" | "ready" | "error";
 
@@ -184,7 +186,7 @@ export function useHubFeed(opts: {
           if (isStale() || isAbortError(err)) return;
           scheduleRetry(
             attempt,
-            err instanceof Error ? err.message : "Failed to load",
+            err instanceof Error ? err.message : translate("uxHub.failedToLoadmhut7"),
           );
         }
       };

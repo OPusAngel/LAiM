@@ -3,7 +3,7 @@
 
 """Copy a gallery image or clip into a chat project's folder.
 
-Files land in ``<project root>/sandbox/{images,videos,audio}``, where the project's chats run their
+Files land in ``<project root>/workdir/{images,videos,audio}``, where the project's chats run their
 tools. It is a copy, so the gallery keeps its item.
 """
 
@@ -42,22 +42,22 @@ _USE_DIR_FD = (
 )
 
 
-def _sandbox_dir(project_id: str) -> str:
+def _project_workdir(project_id: str) -> str:
     from storage.studio_db import available_project_working_folder, ensure_chat_project_workspace
 
     project = ensure_chat_project_workspace(project_id)
     if not project:
         raise ProjectNotFound(project_id)
     root_path = project.get("rootPath")
-    sandbox_path = project.get("sandboxPath")
-    if not root_path or not sandbox_path:
+    session_dir_path = project.get("workdirPath")
+    if not root_path or not session_dir_path:
         raise ProjectNotFound(project_id)
     # Same containment check as the chat tools.
     root_real = os.path.realpath(root_path)
-    sandbox_real = os.path.realpath(sandbox_path)
-    if sandbox_real != root_real and not sandbox_real.startswith(root_real + os.sep):
+    session_dir_real = os.path.realpath(session_dir_path)
+    if session_dir_real != root_real and not session_dir_real.startswith(root_real + os.sep):
         raise ProjectNotFound(project_id)
-    return available_project_working_folder(project) or sandbox_real
+    return available_project_working_folder(project) or session_dir_real
 
 
 UNSAFE_NAME_CHARS = r"\\/:*?\"<>|\x00-\x1f\x7f"
@@ -93,18 +93,18 @@ def _tmp_name(name: str) -> str:
     return f".{name}.tmp-{uuid.uuid4().hex}"
 
 
-def _copy_with_dir_fd(source: Union[Path, BinaryIO], sandbox: str, folder: str, name: str) -> bool:
-    """Copy into ``sandbox/folder`` by descriptor; returns whether it was already there."""
-    sandbox_fd = os.open(sandbox, _DIR_FLAGS)
+def _copy_with_dir_fd(source: Union[Path, BinaryIO], workdir: str, folder: str, name: str) -> bool:
+    """Copy into ``workdir/folder`` by descriptor; returns whether it was already there."""
+    workdir_fd = os.open(workdir, _DIR_FLAGS)
     try:
         try:
-            os.mkdir(folder, 0o755, dir_fd = sandbox_fd)
+            os.mkdir(folder, 0o755, dir_fd = workdir_fd)
         except FileExistsError:
             pass
         # O_NOFOLLOW makes a symlinked folder fail here (ELOOP) instead of writing through it.
-        folder_fd = os.open(folder, _DIR_FLAGS, dir_fd = sandbox_fd)
+        folder_fd = os.open(folder, _DIR_FLAGS, dir_fd = workdir_fd)
     finally:
-        os.close(sandbox_fd)
+        os.close(workdir_fd)
     try:
         # Keyed by gallery id and written atomically, so a file here is this item, maybe since edited.
         try:
@@ -133,13 +133,13 @@ def _copy_with_dir_fd(source: Union[Path, BinaryIO], sandbox: str, folder: str, 
     return False
 
 
-def _copy_by_path(source: Union[Path, BinaryIO], sandbox: str, folder: str, name: str) -> bool:
+def _copy_by_path(source: Union[Path, BinaryIO], workdir: str, folder: str, name: str) -> bool:
     """Fallback without dir_fd support (Windows): resolve the folder and re-check containment."""
-    target = Path(sandbox) / folder
+    target = Path(workdir) / folder
     target.mkdir(exist_ok = True)
     real = os.path.realpath(target)
-    if os.path.dirname(real) != sandbox:
-        raise PermissionError(f"{target} resolves outside the project sandbox")
+    if os.path.dirname(real) != workdir:
+        raise PermissionError(f"{target} resolves outside the project folder")
     dest = Path(real) / name
     try:
         if not dest.is_symlink() and dest.is_file():
@@ -155,7 +155,7 @@ def _copy_by_path(source: Union[Path, BinaryIO], sandbox: str, folder: str, name
                 shutil.copyfileobj(source, dst)
         # Without dir_fd the folder can be swapped after the check; check again before the rename.
         if os.path.realpath(tmp.parent) != real:
-            raise PermissionError(f"{target} moved outside the project sandbox")
+            raise PermissionError(f"{target} moved outside the project folder")
         os.replace(tmp, dest)
     except BaseException:
         with contextlib.suppress(OSError):
@@ -176,14 +176,14 @@ def copy_into_project(
     the file it opened hands over that descriptor rather than a name that can be swapped since.
     Keyed by the file name (the gallery id unless ``name`` is given), so a second add is a no-op.
     Written via a temp file so a failed copy leaves nothing behind. Refuses a ``folder`` that leads
-    outside the sandbox. Raises ProjectNotFound, ValueError for a bad ``name``, or OSError."""
+    outside the workdir. Raises ProjectNotFound, ValueError for a bad ``name``, or OSError."""
     if name is None:
         if not isinstance(source, Path):
             raise ValueError("An open file needs a name to be copied as.")
         name = source.name
     if _bad_name(name):
         raise ValueError(f"Bad file name: {name!r}")
-    sandbox = _sandbox_dir(project_id)
+    workdir = _project_workdir(project_id)
     copy = _copy_with_dir_fd if _USE_DIR_FD else _copy_by_path
-    already = copy(source, sandbox, folder, name)
-    return {"path": str(Path(sandbox) / folder / name), "already": already}
+    already = copy(source, workdir, folder, name)
+    return {"path": str(Path(workdir) / folder / name), "already": already}

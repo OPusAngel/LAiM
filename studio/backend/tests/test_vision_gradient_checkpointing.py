@@ -117,7 +117,7 @@ def run_sft_training(monkeypatch):
         t = tmod.LAiMTrainer()
         t.model = _FakeModel()
         t.tokenizer = types.SimpleNamespace()
-        t.model_name = "LAiM/Qwen2-VL-7B-Instruct"
+        t.model_name = "unsloth/Qwen2-VL-7B-Instruct"
         t.is_vlm = not (is_audio_vlm or text)
         t.is_audio_vlm = is_audio_vlm
         # Stands in for the skipped load_model(), which the worker gives the same mode.
@@ -176,7 +176,7 @@ def test_audio_vlm_honours_none_as_well(run_sft_training, use_lora):
 
 
 @pytest.mark.parametrize(
-    ("choice", "mode"), [("LAiM", "LAiM"), ("true", True), ("", "LAiM")]
+    ("choice", "mode"), [("unsloth", "unsloth"), ("true", True), ("", "unsloth")]
 )
 @pytest.mark.parametrize("is_audio_vlm", [False, True])
 def test_the_default_path_still_checkpoints(run_sft_training, choice, mode, is_audio_vlm):
@@ -195,7 +195,7 @@ def test_full_finetuning_honours_none_too(run_sft_training):
     assert seen["for_training"] == [False]
 
 
-@pytest.mark.parametrize(("choice", "enabled"), [("none", False), ("LAiM", True)])
+@pytest.mark.parametrize(("choice", "enabled"), [("none", False), ("unsloth", True)])
 @pytest.mark.parametrize("use_lora", [True, False])
 def test_a_text_run_carries_the_choice_into_sft_config(run_sft_training, choice, enabled, use_lora):
     """TRL defaults checkpointing on, and train() re-enables it from SFTConfig."""
@@ -231,7 +231,7 @@ def load_model_run(monkeypatch):
         @staticmethod
         def get_peft_model(
             model,
-            use_gradient_checkpointing = "LAiM",
+            use_gradient_checkpointing = "unsloth",
             **kwargs,
         ):
             # Adding adapters re-records the mode.
@@ -271,7 +271,7 @@ def load_model_run(monkeypatch):
         t = tmod.LAiMTrainer()
         monkeypatch.setattr(t, "_cleanup_audio_artifacts", lambda: None, raising = True)
         assert t.load_model(
-            model_name = "LAiM/Qwen2-VL-7B-Instruct",
+            model_name = "unsloth/Qwen2-VL-7B-Instruct",
             max_seq_length = 2048,
             is_dataset_image = kind == "vision",
             is_dataset_audio = kind == "audio_vlm",
@@ -285,12 +285,12 @@ def load_model_run(monkeypatch):
 
 
 @pytest.mark.parametrize(
-    ("choice", "mode"), [("none", False), ("true", True), ("LAiM", "LAiM")]
+    ("choice", "mode"), [("none", False), ("true", True), ("unsloth", "unsloth")]
 )
 @pytest.mark.parametrize("kind", ["vision", "audio_vlm", "text"])
 @pytest.mark.parametrize("full_finetuning", [True, False])
 def test_the_loader_is_told_the_choice(load_model_run, kind, full_finetuning, choice, mode):
-    """A full finetune never revisits the loaded mode, which must be True, False or "LAiM"."""
+    """A full finetune never revisits the loaded mode, which must be True, False or "unsloth"."""
     _, seen = load_model_run(choice, full_finetuning = full_finetuning, kind = kind)
 
     assert seen["loads"][-1]["use_gradient_checkpointing"] is mode, (
@@ -319,13 +319,13 @@ def test_a_later_mode_applies_only_where_adapters_are_added(
     load_model_run, monkeypatch, use_lora, kind
 ):
     """LoRA re-applies a prepare-time mode; a full finetune keeps the loaded one."""
-    t, seen = load_model_run("LAiM", full_finetuning = not use_lora, kind = kind)
+    t, seen = load_model_run("unsloth", full_finetuning = not use_lora, kind = kind)
     warnings = []
     monkeypatch.setattr(tmod.logger, "warning", lambda message, *a, **k: warnings.append(message))
 
     assert t.prepare_model_for_training(use_lora = use_lora, use_gradient_checkpointing = "none")
 
-    expected = False if use_lora else "LAiM"
+    expected = False if use_lora else "unsloth"
     assert t._use_gradient_checkpointing == expected
     assert seen["stamp"] == expected
     assert any("load_model" in w for w in warnings) is not use_lora
@@ -383,7 +383,7 @@ def test_the_mlx_adapter_keeps_the_mode_it_was_loaded_with():
     from core.training.training import _MLXTrainerAdapter
 
     adapter = _MLXTrainerAdapter()
-    assert adapter.load_model(model_name = "LAiM/Qwen3-4B", use_gradient_checkpointing = False)
+    assert adapter.load_model(model_name = "unsloth/Qwen3-4B", use_gradient_checkpointing = False)
     assert adapter.prepare_model_for_training(use_lora = True)
 
     assert adapter._peft_config["gradient_checkpointing"] is False
@@ -397,7 +397,7 @@ def test_the_mlx_adapter_rejects_load_arguments_it_would_drop():
     signature = inspect.signature(_MLXTrainerAdapter.load_model)
 
     with pytest.raises(TypeError):
-        signature.bind(object(), model_name = "LAiM/Qwen3-4B", model_revision = "abc123")
+        signature.bind(object(), model_name = "unsloth/Qwen3-4B", model_revision = "abc123")
 
 
 @pytest.mark.parametrize("full_finetuning", [True, False])
@@ -424,7 +424,7 @@ def _trainer_calls_to(method):
 
 
 def _reads_the_memory_tab(keyword):
-    """Old configs lack the key, so the ``"LAiM"`` fallback is part of the contract."""
+    """Old configs lack the key, so the ``"unsloth"`` fallback is part of the contract."""
     node = keyword.value
     if not (isinstance(node, ast.Call) and getattr(node.func, "attr", None) == "get"):
         return False

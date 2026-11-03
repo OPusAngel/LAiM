@@ -63,9 +63,9 @@ function switcher(options: { plan?: Plan | Error; current?: boolean; saveError?:
 }
 
 const PLAN: Plan = {
-  embeddingModel: "LAiM/embeddinggemma-2",
+  embeddingModel: "unsloth/embeddinggemma-2",
   backend: "llama",
-  downloadRepo: "LAiM/embeddinggemma-2-GGUF",
+  downloadRepo: "unsloth/embeddinggemma-2-GGUF",
   cached: true,
   error: null,
 };
@@ -77,7 +77,7 @@ test("switching saves the GGUF repo the resolve picked", async () => {
     needsDownload: false,
   });
   assert.deepEqual(app.saves, [
-    { model: PLAN.embeddingModel, ggufRepo: "LAiM/embeddinggemma-2-GGUF", backend: "llama" },
+    { model: PLAN.embeddingModel, ggufRepo: "unsloth/embeddinggemma-2-GGUF", backend: "llama" },
   ]);
 });
 
@@ -121,10 +121,10 @@ test("a failed resolve still saves, and a failed save is reported", async () => 
 
 test("model names and owners read from repo ids and local paths", () => {
   const { embeddingModelName, embeddingModelOwner } = switcher({});
-  assert.equal(embeddingModelName("LAiM/bge-small-en-v1.5"), "bge-small-en-v1.5");
+  assert.equal(embeddingModelName("unsloth/bge-small-en-v1.5"), "bge-small-en-v1.5");
   assert.equal(embeddingModelName("/models/my-embedder/"), "my-embedder");
   assert.equal(embeddingModelName("bge-small"), "bge-small");
-  assert.equal(embeddingModelOwner("LAiM/bge-small-en-v1.5"), "LAiM");
+  assert.equal(embeddingModelOwner("unsloth/bge-small-en-v1.5"), "LAiM");
   assert.equal(embeddingModelOwner("/models/my-embedder"), "");
   assert.equal(embeddingModelOwner("./my-embedder"), "");
   assert.equal(embeddingModelOwner("~/models/e"), "");
@@ -135,8 +135,8 @@ test("model names and owners read from repo ids and local paths", () => {
 
 test("the menu lists current, default, then pinned models, each once", () => {
   assert.deepEqual(
-    embeddingMenuModels("acme/a", "LAiM/b", ["acme/a", "acme/c", "LAiM/b", " "]),
-    ["acme/a", "LAiM/b", "acme/c"],
+    embeddingMenuModels("acme/a", "unsloth/b", ["acme/a", "acme/c", "unsloth/b", " "]),
+    ["acme/a", "unsloth/b", "acme/c"],
   );
 });
 

@@ -1,6 +1,11 @@
 ﻿// SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import {
+  formatRelativeTime as formatLocaleRelativeTime,
+  getLocale,
+  translate,
+} from "@/i18n";
 import { useAppShellReadySignal } from "@/components/app-readiness";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -69,9 +74,12 @@ type TemplateCard = {
 
 const TEMPLATE_CARDS: TemplateCard[] = [
   {
-    title: "Instruction from Answer",
-    description:
-      "Start from seed answer fields and generate matching user instructions for SFT pairs.",
+    get title() {
+      return translate("uxDatarecipes.instructionFromAnswerj87cy");
+    },
+    get description() {
+      return translate("uxDatarecipes.startFromSeedAnswer1s084");
+    },
     icon: Plant01Icon,
     difficulty: "Easy",
     learningBadges: ["Seed Dataset", "LLM Text", "Prompting"],
@@ -85,9 +93,12 @@ const TEMPLATE_CARDS: TemplateCard[] = [
     learningRecipeId: "instruction-from-answer",
   },
   {
-    title: "PDF Document QA",
-    description:
-      "Unstructured PDF chunks transformed into grounded question-answer training pairs.",
+    get title() {
+      return translate("uxDatarecipes.pDFDocumentQA9izwn");
+    },
+    get description() {
+      return translate("uxDatarecipes.unstructuredPDFChunksTransformed1vqkm");
+    },
     icon: DocumentAttachmentIcon,
     difficulty: "Easy",
     learningBadges: ["Unstructured", "LLM Text"],
@@ -101,9 +112,12 @@ const TEMPLATE_CARDS: TemplateCard[] = [
     learningRecipeId: "pdf-grounded-qa",
   },
   {
-    title: "OCR Document Extraction",
-    description:
-      "Use image context from seed data to generate OCR-style extraction outputs.",
+    get title() {
+      return translate("uxDatarecipes.oCRDocumentExtractionlje21");
+    },
+    get description() {
+      return translate("uxDatarecipes.useImageContextFrom1lofy");
+    },
     icon: Album02Icon,
     difficulty: "Starter",
     learningBadges: ["Vision", "LLM Text", "Image Context"],
@@ -117,9 +131,12 @@ const TEMPLATE_CARDS: TemplateCard[] = [
     learningRecipeId: "ocr-document-extraction",
   },
   {
-    title: "Text to Python",
-    description:
-      "Instruction-to-code pairs for training models that generate clean Python implementations.",
+    get title() {
+      return translate("uxDatarecipes.textToPythonxop2l");
+    },
+    get description() {
+      return translate("uxDatarecipes.instructionToCodePairs1f64s");
+    },
     icon: CodeIcon,
     difficulty: "Intermediate",
     learningBadges: ["LLM Judge", "LLM Code", "Subcategory", "Category"],
@@ -133,9 +150,12 @@ const TEMPLATE_CARDS: TemplateCard[] = [
     learningRecipeId: "text-to-python",
   },
   {
-    title: "Text to SQL",
-    description:
-      "Natural language to SQL pairs, including schema-aware query construction patterns.",
+    get title() {
+      return translate("uxDatarecipes.textToSQL17sot");
+    },
+    get description() {
+      return translate("uxDatarecipes.naturalLanguageToSQLzgx3a");
+    },
     icon: Database02Icon,
     difficulty: "Intermediate",
     learningBadges: ["LLM Code", "Prompting", "Drop Columns"],
@@ -149,9 +169,12 @@ const TEMPLATE_CARDS: TemplateCard[] = [
     learningRecipeId: "text-to-sql",
   },
   {
-    title: "Structured Outputs + Jinja Expressions",
-    description:
-      "Support ticket triage dataset with structured JSON outputs and Jinja if/else refs.",
+    get title() {
+      return translate("uxDatarecipes.structuredOutputsJinjaExpressions1ufow");
+    },
+    get description() {
+      return translate("uxDatarecipes.supportTicketTriageDatasetyj8d6");
+    },
     icon: FunctionIcon,
     difficulty: "Advanced",
     learningBadges: ["Structured LLM", "Expression", "Jinja"],
@@ -165,9 +188,12 @@ const TEMPLATE_CARDS: TemplateCard[] = [
     learningRecipeId: "structured-outputs-jinja",
   },
   {
-    title: "GitHub Crawler",
-    description:
-      "Crawl real GitHub issues and PRs and invert each thread into a {User, Assistant} training pair.",
+    get title() {
+      return translate("uxDatarecipes.gitHubCrawler1xwz9");
+    },
+    get description() {
+      return translate("uxDatarecipes.crawlRealGithubqfnu7");
+    },
     icon: GithubIcon,
     difficulty: "Intermediate",
     learningBadges: ["GitHub", "LLM Text", "Structured LLM"],
@@ -182,11 +208,37 @@ const TEMPLATE_CARDS: TemplateCard[] = [
   },
 ];
 
+// The card data stores the English enum values it also branches on, so the badge and difficulty
+// text is resolved here at render time rather than translated in place.
+const DIFFICULTY_LABELS: Record<string, string> = {
+  get Easy() { return translate("uxDatarecipes.difficultyEasyjfmuj"); },
+  get Starter() { return translate("uxDatarecipes.difficultyStarterzuv6a"); },
+  get Intermediate() { return translate("uxDatarecipes.difficultyIntermediate2uv2s"); },
+  get Advanced() { return translate("uxDatarecipes.difficultyAdvancedg70jf"); },
+};
+
+const BADGE_LABELS: Record<string, string> = {
+  get "Seed Dataset"() { return translate("uxDatarecipes.badgeSeedDataset0m0ps"); },
+  get "LLM Text"() { return translate("uxDatarecipes.badgeLlmTextwj511"); },
+  get Prompting() { return translate("uxDatarecipes.badgePrompting38dz5"); },
+  get Unstructured() { return translate("uxDatarecipes.badgeUnstructurednkvin"); },
+  get Vision() { return translate("uxModelpicker.visionvap9v"); },
+  get "Image Context"() { return translate("uxDatarecipes.badgeImageContext7i5x9"); },
+  get "LLM Judge"() { return translate("uxDatarecipes.badgeLlmJudgeov381"); },
+  get "LLM Code"() { return translate("uxDatarecipes.badgeLlmCodew7glh"); },
+  get Subcategory() { return translate("uxRecipestudio.subcategory1ut5b"); },
+  get Category() { return translate("uxRecipestudio.category1cr1m"); },
+  get "Drop Columns"() { return translate("uxDatarecipes.badgeDropColumns49iuh"); },
+  get "Structured LLM"() { return translate("uxDatarecipes.badgeStructuredLlm7x1y1"); },
+  get Expression() { return translate("uxRecipestudio.expression1tcet"); },
+};
+
 const LEARNING_RECIPE_BY_ID = new Map(
   LEARNING_RECIPES.map((recipe) => [recipe.id, recipe]),
 );
 
 function formatRelativeTime(value: number): string {
+  const locale = getLocale();
   const now = Date.now();
   const diffMs = Math.max(0, now - value);
   const minute = 60 * 1000;
@@ -195,22 +247,18 @@ function formatRelativeTime(value: number): string {
   const week = 7 * day;
 
   if (diffMs < minute) {
-    return "just now";
+    return translate("uxDatarecipes.justNowRelatives3t3f");
   }
   if (diffMs < hour) {
-    const minutes = Math.floor(diffMs / minute);
-    return `${minutes} minute${minutes === 1 ? "" : "s"} ago`;
+    return formatLocaleRelativeTime(locale, -Math.floor(diffMs / minute), "minute");
   }
   if (diffMs < day) {
-    const hours = Math.floor(diffMs / hour);
-    return `${hours} hour${hours === 1 ? "" : "s"} ago`;
+    return formatLocaleRelativeTime(locale, -Math.floor(diffMs / hour), "hour");
   }
   if (diffMs < week) {
-    const days = Math.floor(diffMs / day);
-    return `${days} day${days === 1 ? "" : "s"} ago`;
+    return formatLocaleRelativeTime(locale, -Math.floor(diffMs / day), "day");
   }
-  const weeks = Math.floor(diffMs / week);
-  return `${weeks} week${weeks === 1 ? "" : "s"} ago`;
+  return formatLocaleRelativeTime(locale, -Math.floor(diffMs / week), "week");
 }
 
 function LearningRecipeCards({
@@ -256,7 +304,7 @@ function LearningRecipeCards({
                   template.difficulty === "Advanced" ? "secondary" : "outline"
                 }
               >
-                {template.difficulty}
+                {DIFFICULTY_LABELS[template.difficulty] ?? template.difficulty}
               </Badge>
               <div className="inline-flex size-10 items-center justify-center rounded-xl border border-[color-mix(in_oklab,var(--foreground)_calc(10%*var(--contrast-edge-gain,1)),transparent)] bg-background/80">
                 <HugeiconsIcon
@@ -274,7 +322,7 @@ function LearningRecipeCards({
               </div>
               <div className="flex items-center gap-1 overflow-hidden whitespace-nowrap max-xl:flex-wrap max-xl:gap-y-1">
                 {isLoading ? (
-                  <Badge variant="outline">Loading...</Badge>
+                  <Badge variant="outline">{translate("uxDatarecipes.loadingmq24g")}</Badge>
                 ) : (
                   <>
                     {visibleLearningBadges.map((badge) => (
@@ -283,7 +331,7 @@ function LearningRecipeCards({
                         variant="outline"
                         className="h-5 shrink-0 px-1.5 text-ui-10 dark:text-zinc-300"
                       >
-                        {badge}
+                        {BADGE_LABELS[badge] ?? badge}
                       </Badge>
                     ))}
                     {extraLearningBadgeCount > 0 ? (
@@ -299,7 +347,7 @@ function LearningRecipeCards({
                         variant="secondary"
                         className="h-5 shrink-0 px-1.5 text-ui-10 dark:text-zinc-300"
                       >
-                        Soon
+                        translate("uxDatarecipes.soonBadgejzi9k")
                       </Badge>
                     )}
                   </>
@@ -370,12 +418,12 @@ export function DataRecipesPage(): ReactElement {
       return;
     }
     if (!template.learningRecipeId) {
-      toastError("Learning recipe not ready yet.");
+      toastError(translate("uxDatarecipes.learningRecipeNotReadyw3f14"));
       return;
     }
     const recipeTemplate = LEARNING_RECIPE_BY_ID.get(template.learningRecipeId);
     if (!recipeTemplate) {
-      toastError("Learning recipe not found.");
+      toastError(translate("uxDatarecipes.learningRecipeNotFound8p9rp"));
       return;
     }
 
@@ -395,7 +443,7 @@ export function DataRecipesPage(): ReactElement {
       });
     } catch (error) {
       toastError(
-        "Failed to start learning recipe.",
+        translate("uxDatarecipes.failedToStartLearningnp720"),
         error instanceof Error ? error.message : undefined,
       );
     } finally {
@@ -424,17 +472,17 @@ export function DataRecipesPage(): ReactElement {
         <div className="flex items-center justify-between gap-4">
           <div>
             <h1 className="text-ui-30 font-semibold leading-[1.04] tracking-[-0.028em] text-foreground sm:text-ui-34">
-              Data Recipes
+              {translate("uxDatarecipes.dataRecipeswnh7v")}
             </h1>
             <p className="mt-0.5 text-sm text-muted-foreground">
-              Create and manage local recipe workflows.
+              {translate("uxDatarecipes.createAndManageLocalf5o42")}
             </p>
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild={true}>
               <Button type="button" data-tour="recipes-new" disabled={isBusy}>
                 <HugeiconsIcon icon={PlusSignIcon} className="size-4" />
-                New Recipe
+                {translate("uxDatarecipes.newRecipe1g1zv")}
                 <HugeiconsIcon
                   icon={ChevronDownStandardIcon}
                   className="size-4"
@@ -448,7 +496,7 @@ export function DataRecipesPage(): ReactElement {
                 }}
               >
                 <HugeiconsIcon icon={PlusSignIcon} className="size-4" />
-                Start Empty
+                {translate("uxDatarecipes.startEmpty1niia")}
               </DropdownMenuItem>
               <DropdownMenuItem
                 onSelect={() => {
@@ -456,7 +504,7 @@ export function DataRecipesPage(): ReactElement {
                 }}
               >
                 <HugeiconsIcon icon={CookBookIcon} className="size-4" />
-                Start from Learning Recipe
+                {translate("uxDatarecipes.startFromLearningRecipev65s9")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -472,10 +520,9 @@ export function DataRecipesPage(): ReactElement {
                 <EmptyMedia variant="icon">
                   <HugeiconsIcon icon={CookBookIcon} className="size-5" />
                 </EmptyMedia>
-                <EmptyTitle>No recipes yet</EmptyTitle>
+                <EmptyTitle>{translate("uxDatarecipes.noRecipesYetg32el")}</EmptyTitle>
                 <EmptyDescription>
-                  Browse Learning Recipes below to understand how recipe
-                  workflows work.
+                  {translate("uxCopy.browseLearningRecipesBelowd1clx")}
                 </EmptyDescription>
               </EmptyHeader>
               <EmptyContent className="max-w-6xl 4xl:max-w-none items-stretch">
@@ -521,13 +568,10 @@ export function DataRecipesPage(): ReactElement {
                           {recipe.name}
                         </p>
                         {recipe.learningRecipeId ? (
-                          <Badge variant="outline">Learning Recipe</Badge>
+                          <Badge variant="outline">{translate("uxDatarecipes.learningRecipenorh8")}</Badge>
                         ) : null}
                       </div>
-                      <p className="text-xs text-muted-foreground">
-                        Last updated {formatRelativeTime(recipe.updatedAt)} |
-                        Created {formatRelativeTime(recipe.createdAt)}
-                      </p>
+                      <p className="text-xs text-muted-foreground">{translate("uxDatarecipes.lastUpdatedCreatede1yx8", { p1: formatRelativeTime(recipe.updatedAt), p2: formatRelativeTime(recipe.createdAt) })}</p>
                     </div>
                   </button>
                   <Button
@@ -538,7 +582,7 @@ export function DataRecipesPage(): ReactElement {
                     onClick={() => {
                       handleDeleteRecipe(recipe.id).catch(() => undefined);
                     }}
-                    aria-label={`Delete ${recipe.name}`}
+                    aria-label={translate("uxDatarecipes.deletevau21", { p1: recipe.name })}
                   >
                     <HugeiconsIcon icon={Delete02Icon} className="size-4" />
                   </Button>
@@ -549,10 +593,10 @@ export function DataRecipesPage(): ReactElement {
         ) : (
           <div className="mt-8 rounded-2xl border border-border/70 bg-card px-6 py-10 text-center">
             <p className="text-sm font-medium text-foreground">
-              Loading recipes
+              {translate("uxDatarecipes.loadingRecipes1uoba")}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
-              Fetching your saved recipes and learning templates.
+              {translate("uxDatarecipes.fetchingYourSavedRecipes11y39")}
             </p>
           </div>
         )}
@@ -564,9 +608,9 @@ export function DataRecipesPage(): ReactElement {
           overlayClassName="bg-background/45"
         >
           <DialogHeader>
-            <DialogTitle>Learning Recipes</DialogTitle>
+            <DialogTitle>{translate("uxDatarecipes.learningRecipesw5yj8")}</DialogTitle>
             <DialogDescription>
-              Start from a prebuilt recipe to learn patterns, then edit and run.
+              {translate("uxDatarecipes.startFromAPrebuiltnxn3k")}
             </DialogDescription>
           </DialogHeader>
           <LearningRecipeCards

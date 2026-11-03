@@ -74,7 +74,7 @@ def test_thread_settings_round_trip():
 @pytest.mark.parametrize(
     "field, value",
     [
-        # full access disables the sandbox, so it stays session-only per thread too.
+        # full access disables the workdir, so it stays session-only per thread too.
         ("permissionMode", "full"),
         ("ragTopK", 51),
         ("ragAutoInjectMinScore", 1.5),

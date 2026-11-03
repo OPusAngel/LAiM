@@ -31,18 +31,18 @@ def _helper(monkeypatch):
 
 def test_published_plain_bnb_repo_is_kept(monkeypatch):
     f = _helper(monkeypatch)
-    assert f("LAiM/gemma-3-12b-it-LAiM-bnb-4bit") == "LAiM/gemma-3-12b-it-bnb-4bit"
-    assert f("LAiM/Qwen3-0.6B-LAiM-bnb-4bit") == "LAiM/Qwen3-0.6B-bnb-4bit"
+    assert f("unsloth/gemma-3-12b-it-unsloth-bnb-4bit") == "unsloth/gemma-3-12b-it-bnb-4bit"
+    assert f("unsloth/Qwen3-0.6B-unsloth-bnb-4bit") == "unsloth/Qwen3-0.6B-bnb-4bit"
 
 
 def test_dynamic_only_models_fall_back_to_16bit(monkeypatch):
     # No -bnb-4bit repo is published for these: the old rename hit a 404.
     f = _helper(monkeypatch)
-    assert f("LAiM/Muse-Glimmer-30B-LAiM-bnb-4bit") == "LAiM/Muse-Glimmer-30B"
-    assert f("LAiM/gemma-4-E2B-it-LAiM-bnb-4bit") == "LAiM/gemma-4-E2B-it"
-    assert f("LAiM/Qwen3.8-27B-LAiM-bnb-4bit") == "LAiM/Qwen3.8-27B"
+    assert f("unsloth/Muse-Glimmer-30B-unsloth-bnb-4bit") == "unsloth/Muse-Glimmer-30B"
+    assert f("unsloth/gemma-4-E2B-it-unsloth-bnb-4bit") == "unsloth/gemma-4-E2B-it"
+    assert f("unsloth/Qwen3.8-27B-unsloth-bnb-4bit") == "unsloth/Qwen3.8-27B"
 
 
 def test_unknown_repo_keeps_the_old_rename(monkeypatch):
     f = _helper(monkeypatch)
-    assert f("someone/foo-LAiM-bnb-4bit") == "someone/foo-bnb-4bit"
+    assert f("someone/foo-unsloth-bnb-4bit") == "someone/foo-bnb-4bit"

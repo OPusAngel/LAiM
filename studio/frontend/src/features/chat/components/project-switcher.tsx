@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -66,8 +67,8 @@ export function ProjectSwitcher({
             currentProject
               ? `Project: ${currentProject.name}. Switch project`
               : isLoading
-                ? "Loading project"
-                : "Pick a project"
+                ? translate("uxChat.loadingProject4jqi4")
+                : translate("uxChat.pickAProjectwj9e9")
           }
           className="-mx-1 flex h-[calc(34px*var(--ui-space-scale,1))] shrink-0 items-center gap-2 rounded-full pl-3 pr-2.5 transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         >
@@ -102,13 +103,11 @@ export function ProjectSwitcher({
             the scrollbar side are not squared off. */}
         <div className="max-h-72 overflow-y-auto">
         {showLoadingRow ? (
-          <DropdownMenuItem disabled={true} className="text-muted-foreground">
-            Loading…
-          </DropdownMenuItem>
+          <DropdownMenuItem disabled={true} className="text-muted-foreground">{translate("uxChat.loadingnr34g")}</DropdownMenuItem>
         ) : null}
         {showEmptyRow ? (
           <DropdownMenuItem disabled={true} className="text-muted-foreground">
-            No projects yet
+            {translate("library.chats.empty.projectsTitle")}
           </DropdownMenuItem>
         ) : null}
         {recentProjects.map((project) => {
@@ -139,7 +138,7 @@ export function ProjectSwitcher({
         })}
         <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={onViewAllProjects}>
-          View all projects
+          {translate("uxChat.viewAllProjectsjp1jm")}
         </DropdownMenuItem>
         </div>
       </DropdownMenuContent>

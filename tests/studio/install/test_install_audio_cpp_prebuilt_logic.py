@@ -604,7 +604,7 @@ def test_offline_rerun_keeps_a_complete_install(monkeypatch, tmp_path, capsys):
     [
         pytest.param(
             M.core.PrebuiltFallback(
-                "release LAiMai/audio.cpp@x has no audio-cpp-prebuilt-manifest.json"
+                "release unslothai/audio.cpp@x has no audio-cpp-prebuilt-manifest.json"
             ),
             id = "prebuilt-fallback",
         ),
@@ -614,7 +614,7 @@ def test_offline_rerun_keeps_a_complete_install(monkeypatch, tmp_path, capsys):
         pytest.param(OSError("connection reset"), id = "oserror"),
         pytest.param(
             RuntimeError(
-                "GitHub API returned 403 for https://api.github.com/repos/LAiMai/audio.cpp/releases?per_page=30"
+                "GitHub API returned 403 for https://api.github.com/repos/unslothai/audio.cpp/releases?per_page=30"
             ),
             id = "rate-limit",
         ),
@@ -661,7 +661,7 @@ def test_a_rate_limit_from_the_core_lookup_is_reported_as_one(monkeypatch):
     _lookup_fails(
         monkeypatch,
         RuntimeError(
-            "GitHub API returned 429 for https://api.github.com/repos/LAiMai/audio.cpp/releases"
+            "GitHub API returned 429 for https://api.github.com/repos/unslothai/audio.cpp/releases"
         ),
     )
     with pytest.raises(M.GitHubRateLimited, match = "set GH_TOKEN or GITHUB_TOKEN"):
@@ -903,7 +903,7 @@ def test_an_unknown_accelerator_env_falls_back_to_auto(monkeypatch, capsys):
 
 
 def test_the_default_repo_is_the_fork_with_no_fallback_repo():
-    assert M.DEFAULT_REPO == "LAiMai/audio.cpp" and M._repo() == M.DEFAULT_REPO
+    assert M.DEFAULT_REPO == "unslothai/audio.cpp" and M._repo() == M.DEFAULT_REPO
     # No upstream rung and no in-repo digest table: the fork's own release index is the trust anchor.
     assert not [name for name in vars(M) if "UPSTREAM" in name or "PINS" in name.upper()]
 
@@ -1243,7 +1243,7 @@ _V091_SHA = {
 _V091_MANIFEST = {
     "schema_version": 1,
     "component": "audio.cpp",
-    "source_repo": "LAiMai/audio.cpp",
+    "source_repo": "unslothai/audio.cpp",
     "source_commit": _V091_COMMIT,
     "upstream_repo": "0xShug0/audio.cpp",
     "upstream_tag": "v0.9.1",
@@ -1289,14 +1289,14 @@ _V091_MANIFEST = {
 _V091_INDEX = {
     "schema_version": 1,
     "component": "audio.cpp",
-    "source_repo": "LAiMai/audio.cpp",
+    "source_repo": "unslothai/audio.cpp",
     "source_commit": _V091_COMMIT,
     "upstream_tag": "v0.9.1",
     "release_tag": _V091,
     "artifacts": {
         name: {
             "kind": "bundle",
-            "repo": "LAiMai/audio.cpp",
+            "repo": "unslothai/audio.cpp",
             "sha256": digest,
             "source_commit": _V091_COMMIT,
             "upstream_tag": "v0.9.1",

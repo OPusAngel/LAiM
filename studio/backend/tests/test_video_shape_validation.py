@@ -310,7 +310,7 @@ class _ShapeFakeBackend(video_module.VideoBackend):
         self._state = video_module._VideoLoadState(
             pipe = object(),
             family = fam,
-            repo_id = f"LAiM/{fam.name}",
+            repo_id = f"unsloth/{fam.name}",
             base_repo = fam.base_repo,
             device = "cpu",
             dtype = "bfloat16",

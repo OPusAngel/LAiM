@@ -140,8 +140,8 @@ _LLAMA_CPP_SCRIPTS_WARNING_EMITTED = False
 def _llama_cpp_scripts_pin():
     """Pin convert_hf_to_gguf.py to setup.sh's llama.cpp ref for one conversion.
 
-    Scoped and marked internal because LAiM_LLAMA_CPP_SCRIPTS_DIR is read as the
-    user's own choice: it outranks LAiM_LLAMA_CPP_CONVERTER_TAG, and it exempts the
+    Scoped and marked internal because UNSLOTH_LLAMA_CPP_SCRIPTS_DIR is read as the
+    user's own choice: it outranks UNSLOTH_LLAMA_CPP_CONVERTER_TAG, and it exempts the
     converter from the LAiM_CONVERTER_SCAN_STRICT refusal. A pin the user set is left
     exactly as it is; that one carries their exemption.
     """
@@ -161,7 +161,7 @@ def _llama_cpp_scripts_pin():
         if not _LLAMA_CPP_SCRIPTS_WARNING_EMITTED:
             logger.warning(
                 "LAiM: installed LAiM_zoo does not honor "
-                "LAiM_LLAMA_CPP_SCRIPTS_DIR; convert_hf_to_gguf.py will "
+                "UNSLOTH_LLAMA_CPP_SCRIPTS_DIR; convert_hf_to_gguf.py will "
                 "still be downloaded from llama.cpp master and may drift "
                 "past the pinned llama-quantize binary. Upgrade LAiM_zoo "
                 "to activate the local script pin."
@@ -170,7 +170,7 @@ def _llama_cpp_scripts_pin():
         yield
         return
 
-    if os.environ.get("LAiM_LLAMA_CPP_CONVERTER_TAG", "").strip():
+    if os.environ.get("UNSLOTH_LLAMA_CPP_CONVERTER_TAG", "").strip():
         # The pin outranks the tag, so pinning here is what made setting a tag do nothing.
         yield
         return
@@ -198,16 +198,19 @@ def _llama_cpp_scripts_pin():
         return
 
     # Older LAiM_zoo, no internal pin: scope the variable by hand so it cannot leak.
-    # Strict mode still takes the exemption there; upgrading LAiM_zoo is the fix.
-    existing = os.environ.get("LAiM_LLAMA_CPP_SCRIPTS_DIR")
-    if existing is not None:
+    # Strict mode still takes the exemption there; upgrading LAiM_zoo is the fix. Both
+    # spellings are pinned because the package and the zoo read different ones.
+    _script_dir_keys = ("UNSLOTH_LLAMA_CPP_SCRIPTS_DIR", "LAiM_LLAMA_CPP_SCRIPTS_DIR")
+    if any(os.environ.get(key) is not None for key in _script_dir_keys):
         yield
         return
-    os.environ["LAiM_LLAMA_CPP_SCRIPTS_DIR"] = LLAMA_CPP_DEFAULT_DIR
+    for key in _script_dir_keys:
+        os.environ[key] = LLAMA_CPP_DEFAULT_DIR
     try:
         yield
     finally:
-        os.environ.pop("LAiM_LLAMA_CPP_SCRIPTS_DIR", None)
+        for key in _script_dir_keys:
+            os.environ.pop(key, None)
 
 
 def _multi_gpu_device_map_kwargs() -> dict:
@@ -232,7 +235,7 @@ def _multi_gpu_device_map_kwargs() -> dict:
         else:
             return {}
         # A "balanced"-only whitelist dropped the map the moment CUDA began asking for a planned one.
-        if device_map in ("balanced", "LAiM", "LAiM_balanced"):
+        if device_map in ("balanced", "unsloth", "LAiM_balanced"):
             return {"device_map": device_map}
     except Exception as exc:
         logger.debug(f"multi-GPU device_map resolution failed; using loader default: {exc}")
@@ -567,9 +570,9 @@ language:
 - **License:** apache-2.0
 - **Finetuned from model :** {base_model}
 
-This {model_type} model was trained 2x faster with [LAiM](https://github.com/LAiMai/LAiM) and Huggingface's TRL library.
+This {model_type} model was trained 2x faster with [LAiM](https://github.com/OPusAngel/LAiM) and Huggingface's TRL library.
 
-[<img src="https://raw.githubusercontent.com/LAiMai/LAiM/main/images/LAiM%20made%20with%20love.png" width="200"/>](https://github.com/LAiMai/LAiM)
+[<img src="https://raw.githubusercontent.com/OPusAngel/LAiM/main/images/LAiM%20made%20with%20love.png" width="200"/>](https://github.com/OPusAngel/LAiM)
 """
 
 
@@ -584,7 +587,7 @@ tags:
 
 # {name} : GGUF
 
-This model was converted to GGUF format using [LAiM](https://github.com/LAiMai/LAiM).
+This model was converted to GGUF format using [LAiM](https://github.com/OPusAngel/LAiM).
 
 **Example usage**:
 - For text only LLMs:    `llama-cli -hf {repo_id} --jinja`
@@ -2202,18 +2205,18 @@ class ExportBackend:
         source_dir = os.path.join(os.path.dirname(default_dir), "llama.cpp-source")
         base_source_dir = source_dir
         # A user-set scripts dir is authoritative and is checked before any network revision lookup.
-        pinned_dir = os.environ.get("LAiM_LLAMA_CPP_SCRIPTS_DIR", "").strip()
+        pinned_dir = os.environ.get("UNSLOTH_LLAMA_CPP_SCRIPTS_DIR", "").strip()
         if pinned_dir:
             converter = os.path.join(os.path.expanduser(pinned_dir), "convert_lora_to_gguf.py")
             if not os.path.exists(converter):
                 raise RuntimeError(
-                    f"LAiM_LLAMA_CPP_SCRIPTS_DIR={pinned_dir} has no convert_lora_to_gguf.py; point it "
+                    f"UNSLOTH_LLAMA_CPP_SCRIPTS_DIR={pinned_dir} has no convert_lora_to_gguf.py; point it "
                     "at a full llama.cpp checkout or unset it."
                 )
         elif os.path.exists(os.path.join(default_dir, "convert_lora_to_gguf.py")):
             converter = os.path.join(default_dir, "convert_lora_to_gguf.py")
         else:
-            # The installed binaries' revision (else latest), from its LAiMai/llama.cpp release.
+            # The installed binaries' revision (else latest), from its unslothai/llama.cpp release.
             try:
                 repo, tag = _zoo_llama_cpp._resolve_converter_revision(default_dir)
             except Exception:

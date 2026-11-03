@@ -19,7 +19,7 @@ from fastapi.testclient import TestClient
 from core.training import diffusion_samples as ds
 from core.training.diffusion_train_common import DiffusionLoraConfig, _config_from_dict
 
-_ZIMAGE = "LAiM/Z-Image-Turbo-LAiM-bnb-4bit"
+_ZIMAGE = "unsloth/Z-Image-Turbo-unsloth-bnb-4bit"
 
 
 def _cfg(**kw):
@@ -430,7 +430,7 @@ def test_cfg_combination_matches_each_pipeline():
 @pytest.mark.parametrize(
     "family, base, steps, guidance, uses_cfg, mode, mu",
     [
-        ("z-image", "LAiM/Z-Image-Turbo-LAiM-bnb-4bit", 8, 0.0, False, "cond", None),
+        ("z-image", "unsloth/Z-Image-Turbo-unsloth-bnb-4bit", 8, 0.0, False, "cond", None),
         ("z-image", "Tongyi-MAI/Z-Image", 28, 4.0, True, "cond", None),
         ("krea-2", "krea/Krea-2-Turbo", 8, 0.0, False, "cond", 1.15),
         ("krea-2", "krea/Krea-2-Raw", 20, 4.5, True, "cond", None),

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { MenuTickIcon } from "@/lib/tick-icon";
 import { McpServerIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -48,7 +49,7 @@ import { BlenderMcpSetup } from "./blender-mcp-setup";
 import { ChatMcpServersDialog } from "./chat-mcp-servers-dialog";
 import { normalizeMcpUrl } from "./mcp-server-url";
 import { useChatActive } from "./runtime-provider";
-import { useChatRuntimeStore } from "./stores/chat-runtime-store";
+import { selectToolsSelectable, useChatRuntimeStore } from "./stores/chat-runtime-store";
 import { useMcpServersDialogStore } from "./stores/mcp-servers-dialog-store";
 
 // Matches the Thinking pill chevron so the affordance reads the same.
@@ -66,14 +67,16 @@ type McpPreset = {
 const MCP_PRESETS: readonly McpPreset[] = [
   {
     id: "LAiM-docs",
-    displayName: "LAiM Docs",
+    get displayName() { return translate("uxChat.lAiMDocsg3vr2"); },
     url: "https://LAiM.ai/docs/~gitbook/mcp",
   },
   {
     id: "context7",
     displayName: "Context7",
     url: "https://mcp.context7.com/mcp",
-    label: "Context7 (Realtime Docs)",
+    get label() {
+      return translate("uxChat.context7RealtimeDocs1kj8x");
+    },
   },
   {
     id: "huggingface",
@@ -90,7 +93,7 @@ export function McpComposerButton({
   const modelLoaded = useChatRuntimeStore(
     (s) => !!s.params.checkpoint && !s.modelLoading,
   );
-  const supportsTools = useChatRuntimeStore((s) => s.supportsTools);
+  const supportsTools = useChatRuntimeStore(selectToolsSelectable);
   const mcpEnabledForChat = useChatRuntimeStore((s) => s.mcpEnabledForChat);
   const setMcpEnabledForChat = useChatRuntimeStore(
     (s) => s.setMcpEnabledForChat,
@@ -271,7 +274,7 @@ export function McpComposerButton({
         );
       }
     } catch (err) {
-      toast.error("Failed to update MCP server", {
+      toast.error(translate("uxChat.failedToUpdateMCPi6lo5"), {
         description: err instanceof Error ? err.message : String(err),
       });
     } finally {
@@ -350,14 +353,14 @@ export function McpComposerButton({
             data-active={active ? "true" : "false"}
             aria-label={
               usable
-                ? "MCP servers"
-                : "MCP servers, unavailable for the loaded model"
+                ? translate("uxChat.mCPServers41e8e")
+                : translate("uxChat.mCPServersUnavailableForp0nwn")
             }
           >
             {/* Outside compact mode, the hover X disables MCP without opening the menu. */}
             <span
               role="button"
-              aria-label="Turn off MCP"
+              aria-label={translate("uxChat.turnOffMCP1cp9i")}
               tabIndex={-1}
               onPointerDown={(e) => {
                 if (e.currentTarget.closest('[data-pill-compact="true"]'))
@@ -390,10 +393,10 @@ export function McpComposerButton({
           avoidCollisions={true}
           className="LAiM-plus-menu mcp-menu w-[calc(232px*var(--ui-space-scale,1))]"
         >
-          <DropdownMenuLabel>MCP Servers</DropdownMenuLabel>
+          <DropdownMenuLabel>{translate("uxChat.mCPServersz3du2")}</DropdownMenuLabel>
           {usable ? null : (
             <DropdownMenuLabel className="text-muted-foreground text-xs font-normal">
-              The loaded model cannot use MCP tools
+              {translate("uxChat.theLoadedModelCannot1jrod")}
             </DropdownMenuLabel>
           )}
           {presets.map((preset) => {
@@ -439,7 +442,7 @@ export function McpComposerButton({
               setDialogOpen(true);
             }}
           >
-            Manage MCP servers
+            {translate("uxCopy.manageMCPServers19gyg")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -455,9 +458,9 @@ export function McpComposerButton({
           showCloseButton={!blenderBusy}
         >
           <DialogHeader>
-            <DialogTitle>Blender MCP</DialogTitle>
+            <DialogTitle>{translate("uxChat.blenderMCPxqrom")}</DialogTitle>
             <DialogDescription>
-              Let the model control Blender through MCP.
+              {translate("uxChat.letTheModelControl1rd82")}
             </DialogDescription>
           </DialogHeader>
           {blenderOpen && (

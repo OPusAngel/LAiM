@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
+import { translate } from "@/i18n";
 import { consumeNativePathToken, useNativeFileDrop } from "@/features/native-intents";
 import {
   CloudUploadIcon,
@@ -130,7 +131,7 @@ export function UnstructuredDropZone({
           if (e instanceof DOMException && e.name === "AbortError") {
             updatedError = "Cancelled";
           } else {
-            updatedError = e instanceof Error ? e.message : "Upload failed";
+            updatedError = e instanceof Error ? e.message : translate("uxRecipestudio.uploadFailednv79j");
           }
         }
         onFilesChange((prev) =>
@@ -190,7 +191,7 @@ export function UnstructuredDropZone({
             name: entry.name,
             size: entry.size,
             status: "ok",
-            error: "Remove failed — try again",
+            get error() { return translate("uxRecipestudio.removeFailedTryAgainvizfa"); },
           });
           return next;
         });
@@ -215,7 +216,7 @@ export function UnstructuredDropZone({
       ),
     accept: ACCEPTED_EXTENSIONS.join(","),
     disabled,
-    disabledReason: "This block is busy. Try the drop again in a moment.",
+    get disabledReason() { return translate("uxRecipestudio.thisBlockIsBusy2eupm"); },
   });
 
   const handleClick = useCallback(() => {
@@ -253,12 +254,9 @@ export function UnstructuredDropZone({
           className="text-muted-foreground mb-2 size-8"
         />
         <p className="text-muted-foreground text-sm">
-          Drop files here or click to browse
+          {translate("uxRecipestudio.dropFilesHereOr7jk2d")}
         </p>
-        <p className="text-muted-foreground/60 mt-1 text-xs">
-          PDF, DOCX, TXT, MD - up to {UNSTRUCTURED_RECIPE_UPLOAD_MAX_LABEL}{" "}
-          each, {UNSTRUCTURED_RECIPE_UPLOAD_TOTAL_MAX_LABEL} total
-        </p>
+        <p className="text-muted-foreground/60 mt-1 text-xs">{translate("uxRecipestudio.pDFDOCXTXTMDox10q", { p1: UNSTRUCTURED_RECIPE_UPLOAD_MAX_LABEL, p2: " ", p3: UNSTRUCTURED_RECIPE_UPLOAD_TOTAL_MAX_LABEL })}</p>
       </div>
 
       <input
@@ -315,10 +313,7 @@ export function UnstructuredDropZone({
             </div>
           ))}
           <div className="text-muted-foreground flex justify-between px-1 text-xs">
-            <span>
-              {successFiles.length} file{successFiles.length !== 1 ? "s" : ""}{" "}
-              uploaded
-            </span>
+            <span>{translate("uxRecipestudio.fileUploadedfxrbh", { p1: successFiles.length, p2: successFiles.length !== 1 ? "s" : "", p3: " " })}</span>
             <span>
               {formatSize(totalSize)} /{" "}
               {UNSTRUCTURED_RECIPE_UPLOAD_TOTAL_MAX_LABEL}

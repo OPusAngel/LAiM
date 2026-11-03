@@ -157,7 +157,7 @@ test("the footprint fallback keeps the better quant when footprints tie", () => 
   );
 });
 
-/** LAiM/Qwen-Image-2.1-GGUF: no UD-Q4_K_XL, so the backend's default is Q4_K_M. */
+/** unsloth/Qwen-Image-2.1-GGUF: no UD-Q4_K_XL, so the backend's default is Q4_K_M. */
 const QWEN_IMAGE_21 = [
   variant("F16", 13.25),
   variant("Q2_K", 2.3),

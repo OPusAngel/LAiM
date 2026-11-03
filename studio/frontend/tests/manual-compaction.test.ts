@@ -35,7 +35,7 @@ import {
   takeThreadCompactionRequest,
 } from "../src/features/chat/stores/compact-request-store.ts";
 
-import { readSrc } from "./helpers/kit.ts";
+import { readSrc, readSrcExpanded } from "./helpers/kit.ts";
 
 const fit = (
   boundary: number,
@@ -179,7 +179,7 @@ test("a marker naming a call the reply no longer shows falls back to the prompt"
 });
 
 test("the composer reads /compact before any send path, and only for GGUF or MLX", async () => {
-  const thread = await readSrc("components/assistant-ui/thread.tsx");
+  const thread = await readSrcExpanded("components/assistant-ui/thread.tsx");
   const submit = thread.slice(thread.indexOf("const handleSubmit = useCallback("));
   const command = submit.indexOf("isCompactCommand(composerText)");
   assert.ok(command > 0);
@@ -188,7 +188,7 @@ test("the composer reads /compact before any send path, and only for GGUF or MLX
   assert.match(submit, /resumesThought\(\{/);
   assert.match(submit, /!runtime\.supportsTools \|\|/);
   assert.match(submit, /runtime\.incognito \|\| isThreadIncognito\(referenceThreadId\)/);
-  const adapter = await readSrc("features/chat/api/chat-adapter.ts");
+  const adapter = await readSrcExpanded("features/chat/api/chat-adapter.ts");
   assert.match(adapter, /takeThreadCompactionRequest\(resolvedThreadId\) &&/);
   assert.match(adapter, /compactNow,\n\s+\}\),/);
   // Only a reset started by this request counts; a replayed manual epoch is not one.
@@ -273,7 +273,7 @@ test("two replies reusing a tool call id keep their own dividers", () => {
 function menuCallback(name: string, deps: Record<string, unknown>, argument: number | null = 0) {
   const source = ts.createSourceFile(
     "menu.tsx",
-    readSrc("features/chat/components/chat-header-menu.tsx"),
+    readSrcExpanded("features/chat/components/chat-header-menu.tsx"),
     ts.ScriptTarget.Latest,
     true,
     ts.ScriptKind.TSX,
@@ -537,7 +537,7 @@ test("the compact menu ring follows the selected chat's current context usage", 
 test("the compact menu item binds its action, live ring and busy state", () => {
   const source = ts.createSourceFile(
     "menu.tsx",
-    readSrc("features/chat/components/chat-header-menu.tsx"),
+    readSrcExpanded("features/chat/components/chat-header-menu.tsx"),
     ts.ScriptTarget.Latest,
     true,
     ts.ScriptKind.TSX,

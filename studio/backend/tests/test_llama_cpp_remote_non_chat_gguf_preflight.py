@@ -142,7 +142,7 @@ def test_an_ambiguous_arch_is_resolved_from_the_real_filename(monkeypatch):
         monkeypatch,
         header = _gguf_bytes(arch = sorted(LlamaCppBackend._AMBIGUOUS_IMAGE_ARCHES)[0]),
         filename = "z-image-turbo-Q2_K.gguf",
-        identifier = "LAiM/Z-Image-Turbo-GGUF",
+        identifier = "unsloth/Z-Image-Turbo-GGUF",
     )
     assert message is not None
     assert "Open it from the Images page" in message
@@ -283,9 +283,9 @@ def test_a_media_repo_load_keeps_the_resident_model_and_never_downloads(monkeypa
     with pytest.raises(ValueError, match = "Video page"):
         backend.load_model(
             GgufLoadIntent(
-                hf_repo = "LAiM/Wan2.2-TI2V-5B-GGUF",
+                hf_repo = "unsloth/Wan2.2-TI2V-5B-GGUF",
                 hf_variant = "Q4_K_M",
-                model_identifier = "LAiM/Wan2.2-TI2V-5B-GGUF",
+                model_identifier = "unsloth/Wan2.2-TI2V-5B-GGUF",
             )
         )
 
@@ -313,9 +313,9 @@ def test_a_chat_repo_load_still_proceeds_past_the_teardown(monkeypatch):
     with pytest.raises(RuntimeError, match = "stop here"):
         backend.load_model(
             GgufLoadIntent(
-                hf_repo = "LAiM/Qwen3-0.6B-GGUF",
+                hf_repo = "unsloth/Qwen3-0.6B-GGUF",
                 hf_variant = "Q4_K_M",
-                model_identifier = "LAiM/Qwen3-0.6B-GGUF",
+                model_identifier = "unsloth/Qwen3-0.6B-GGUF",
             )
         )
 
@@ -407,9 +407,9 @@ def test_a_refused_load_leaves_the_resident_process_state_alone(monkeypatch):
     with pytest.raises(ValueError, match = "Video page"):
         backend.load_model(
             GgufLoadIntent(
-                hf_repo = "LAiM/Wan2.2-TI2V-5B-GGUF",
+                hf_repo = "unsloth/Wan2.2-TI2V-5B-GGUF",
                 hf_variant = "Q4_K_M",
-                model_identifier = "LAiM/Wan2.2-TI2V-5B-GGUF",
+                model_identifier = "unsloth/Wan2.2-TI2V-5B-GGUF",
             )
         )
 
@@ -500,9 +500,9 @@ def test_the_probe_runs_under_the_same_offline_guard_as_the_download(monkeypatch
     with pytest.raises(Exception):
         backend.load_model(
             GgufLoadIntent(
-                hf_repo = "LAiM/Qwen3-0.6B-GGUF",
+                hf_repo = "unsloth/Qwen3-0.6B-GGUF",
                 hf_variant = "Q4_K_M",
-                model_identifier = "LAiM/Qwen3-0.6B-GGUF",
+                model_identifier = "unsloth/Qwen3-0.6B-GGUF",
             )
         )
     assert guarded == [True], guarded
@@ -520,7 +520,7 @@ def test_the_route_entry_point_judges_an_intent_before_the_arbiter(monkeypatch, 
     media = tmp_path / "ltx-2-19b-dev-Q4_K_M.gguf"
     media.write_bytes(_gguf_bytes(arch = "ltxv"))
     intent = GgufLoadIntent(
-        model_identifier = "LAiM/LTX-2-GGUF",
+        model_identifier = "unsloth/LTX-2-GGUF",
         gguf_path = str(media),
     )
     message = LlamaCppBackend.non_chat_gguf_refusal_for_intent(intent)
@@ -530,7 +530,7 @@ def test_the_route_entry_point_judges_an_intent_before_the_arbiter(monkeypatch, 
     chat.write_bytes(_gguf_bytes(arch = "qwen3"))
     assert (
         LlamaCppBackend.non_chat_gguf_refusal_for_intent(
-            GgufLoadIntent(model_identifier = "LAiM/Qwen3-0.6B-GGUF", gguf_path = str(chat))
+            GgufLoadIntent(model_identifier = "unsloth/Qwen3-0.6B-GGUF", gguf_path = str(chat))
         )
         is None
     )
@@ -574,31 +574,31 @@ def test_the_route_hands_its_verdict_to_the_load(monkeypatch, tmp_path):
     monkeypatch.setattr(LlamaCppBackend, "_remote_non_chat_gguf_verdict", _verdict)
     monkeypatch.setattr(LlamaCppBackend, "_route_verdict_handoff", None)
     intent = GgufLoadIntent(
-        model_identifier = "LAiM/LTX-2-GGUF",
-        hf_repo = "LAiM/LTX-2-GGUF",
+        model_identifier = "unsloth/LTX-2-GGUF",
+        hf_repo = "unsloth/LTX-2-GGUF",
         hf_variant = "Q4_K_M",
     )
     assert LlamaCppBackend.non_chat_gguf_refusal_for_intent(intent) is not None
-    assert calls == ["LAiM/LTX-2-GGUF"]
+    assert calls == ["unsloth/LTX-2-GGUF"]
 
     # The load that follows reuses it...
     reused = LlamaCppBackend._remote_non_chat_gguf_refusal(
-        hf_repo = "LAiM/LTX-2-GGUF",
+        hf_repo = "unsloth/LTX-2-GGUF",
         hf_variant = "Q4_K_M",
         hf_token = None,
-        model_identifier = "LAiM/LTX-2-GGUF",
+        model_identifier = "unsloth/LTX-2-GGUF",
     )
     assert reused is not None
-    assert calls == ["LAiM/LTX-2-GGUF"]
+    assert calls == ["unsloth/LTX-2-GGUF"]
 
     # ...exactly once. A second load probes for itself rather than trusting a stale answer.
     LlamaCppBackend._remote_non_chat_gguf_refusal(
-        hf_repo = "LAiM/LTX-2-GGUF",
+        hf_repo = "unsloth/LTX-2-GGUF",
         hf_variant = "Q4_K_M",
         hf_token = None,
-        model_identifier = "LAiM/LTX-2-GGUF",
+        model_identifier = "unsloth/LTX-2-GGUF",
     )
-    assert calls == ["LAiM/LTX-2-GGUF"] * 2
+    assert calls == ["unsloth/LTX-2-GGUF"] * 2
 
 
 def test_a_handoff_for_another_model_is_not_taken(monkeypatch):

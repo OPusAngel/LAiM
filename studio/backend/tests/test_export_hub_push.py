@@ -25,7 +25,7 @@ _HELPERS_SPEC.loader.exec_module(_HELPERS)
 
 
 class _Config:
-    _name_or_path = "LAiM/Qwen2.5-0.5B-Instruct"
+    _name_or_path = "unsloth/Qwen2.5-0.5B-Instruct"
     model_type = "qwen2"
 
 
@@ -187,7 +187,7 @@ def test_merged_export_push_uploads_the_saved_folder_instead_of_merging_again(
     assert seen["repo"] == {"repo_id": "model", "private": private, "exist_ok": True}
     assert calls == _expected_merged_calls(private)
     assert f"# Uploaded finetuned {format_type} model" in seen["card"]
-    assert "base_model: LAiM/Qwen2.5-0.5B-Instruct" in seen["card"]
+    assert "base_model: unsloth/Qwen2.5-0.5B-Instruct" in seen["card"]
     assert seen["folder"] == output_path
     assert seen["uploaded"] == ["model.safetensors"]
 
@@ -819,7 +819,7 @@ def test_lora_adapter_push_writes_the_card_the_delegated_push_can_no_longer_writ
 
     assert success is True, message
     assert seen["card_repo"] == "owner/model"
-    assert "base_model: LAiM/Qwen2.5-0.5B-Instruct" in seen["card"]
+    assert "base_model: unsloth/Qwen2.5-0.5B-Instruct" in seen["card"]
     # Same tags upload_to_huggingface produced for this path, trl included and LAiM
     # not duplicated (the template already carries it).
     tags = seen["card"].split("tags:", 1)[1].split("license:", 1)[0]

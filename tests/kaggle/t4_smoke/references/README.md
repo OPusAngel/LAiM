@@ -244,7 +244,7 @@ and nothing should be committed until it is understood.
 `model`, `resolved_checkpoint` and `resolved_revision` travel with the file
 for the same reason `config` does. `load_in_4bit=True` sends the requested
 name through LAiM's `FLOAT_TO_INT_MAPPER`, so the repository that was read
-is `LAiM/Qwen2.5-0.5B-Instruct-LAiM-bnb-4bit` and not the name in
+is `unsloth/Qwen2.5-0.5B-Instruct-unsloth-bnb-4bit` and not the name in
 `--model`; recording its commit is what makes a mirror re-uploaded in place
 show up as `config_mismatch` rather than as an unexplained band failure. A
 `revision=` on the load would not do this job: LAiM drops a revision once

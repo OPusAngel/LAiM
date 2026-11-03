@@ -39,6 +39,8 @@ import {
   studioBackupToConversations,
 } from "./studio-backup-import";
 import { parseConversationMarkdownDocument } from "./conversation-markdown-import";
+import { translate } from "@/i18n";
+
 
 /** CSV and markdown have no record framing to stream on, so they are still read whole. */
 const WHOLE_FILE_MAX_BYTES = 64 * 1024 * 1024;
@@ -95,7 +97,7 @@ async function* nativeBytes(handle: {
     // quietly would pass a partial export off as the whole one.
     if (bytes.byteLength === 0) {
       throw new Error(
-        `${handle.name} ended after ${offset} of ${handle.size} bytes; it changed after it was picked.`,
+        translate("uxChat.endedAfterOfBytes8uop8", { p1: handle.name, p2: offset, p3: handle.size }),
       );
     }
     offset += bytes.byteLength;

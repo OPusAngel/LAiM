@@ -41,7 +41,7 @@ function clip(id: string, audio: Partial<NonNullable<Item["audio"]>> | null): It
       role: "output",
       groupId: null,
       durationS: 42,
-      model: "LAiM/orpheus-3b",
+      model: "unsloth/orpheus-3b",
       mode: null,
       variation: null,
       ...audio,

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { isLAiMProtocol } from "../../src/config/deep-link.ts";
 import { isValidRepoId } from "../../src/features/deep-links/parse-deep-link.ts";
 import * as fields from "../../src/features/model-picker/sharing/fields.ts";
 import * as inbox from "../../src/features/model-picker/sharing/inbox.ts";
@@ -14,6 +15,7 @@ export const { createRunConfigLink, parseRunConfigLink, isShareableModelId } =
       import.meta.url,
     ),
     {
+      "@/config/deep-link": { isLAiMProtocol },
       "@/features/deep-links": { isValidRepoId },
       "./fields": fields,
       "./inbox": inbox,

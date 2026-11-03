@@ -94,7 +94,7 @@ def test_base_repo_override_wins_over_the_family_default():
     assert nine_b[0] > 2 * default[0]
 
     base_nine_b = family_bf16_components_gb(
-        _fam("flux.2-klein"), base_repo = "LAiM/FLUX.2-klein-base-9B"
+        _fam("flux.2-klein"), base_repo = "unsloth/FLUX.2-klein-base-9B"
     )
     assert base_nine_b == nine_b
 
@@ -114,7 +114,7 @@ def test_klein_base_9b_is_sized_like_the_9b_not_the_4b():
     assert base_9b is not None and default is not None and base_9b[0] > 2 * default[0]
     # The LAiM mirror is what LAiM actually loads, and canonical_base has to route it here too.
     assert (
-        family_bf16_components_gb(_fam("flux.2-klein"), base_repo = "LAiM/FLUX.2-klein-base-9B")
+        family_bf16_components_gb(_fam("flux.2-klein"), base_repo = "unsloth/FLUX.2-klein-base-9B")
         == base_9b
     )
     # Same case-insensitivity the trust gate applies: a typed-in base must not fall back to the 4B.

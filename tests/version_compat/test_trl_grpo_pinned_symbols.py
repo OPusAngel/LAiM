@@ -75,7 +75,7 @@ def test_trl_top_level_grpo_sft(tag: str):
     for name in ("GRPOTrainer", "GRPOConfig", "SFTTrainer", "SFTConfig"):
         assert is_bound(src, name), (
             f"{tag}: `from trl import {name}` will fail; "
-            f"LAiM/trainer.py + LAiM/models/rl.py rely on this re-export"
+            f"unsloth/trainer.py + LAiM/models/rl.py rely on this re-export"
         )
 
 
@@ -114,7 +114,7 @@ def test_data_collator_for_preference_resolvable(tag: str):
     assert have, (
         f"{tag}: DataCollatorForPreference defined in NEITHER "
         f"trl/trainer/dpo_trainer.py NOR trl/trainer/utils.py — "
-        f"LAiM/models/rl_replacements.py:318 will ImportError on real install"
+        f"unsloth/models/rl_replacements.py:318 will ImportError on real install"
     )
 
 
@@ -125,7 +125,7 @@ def test_trl_trainer_utils_pad(tag: str):
     assert src is not None, f"{tag}: trl/trainer/utils[.py|/__init__.py] both missing"
     assert is_bound(src, "pad"), (
         f"{tag}: trl.trainer.utils.pad missing — "
-        f"LAiM/models/rl_replacements.py:326 emits `from trl.trainer.utils "
+        f"unsloth/models/rl_replacements.py:326 emits `from trl.trainer.utils "
         f"import pad as _LAiM_trl_pad` into the GRPO compile cell"
     )
 
@@ -155,7 +155,7 @@ def test_trl_experimental_openenv_gated(tag: str):
     utils_src = fetch_text("huggingface/trl", tag, "trl/experimental/openenv/utils.py")
     assert utils_src is not None, (
         f"{tag}: trl.experimental.openenv exists but utils.py missing; "
-        f"LAiM/models/rl_replacements.py:1765 imports openenv.utils explicitly"
+        f"unsloth/models/rl_replacements.py:1765 imports openenv.utils explicitly"
     )
 
 
@@ -173,7 +173,7 @@ def test_trl_generation_vllm_generation_gated(tag: str):
     for method in ("_init_vllm", "sync_weights", "generate"):
         assert has_def(src, method, "func"), (
             f"{tag}: VLLMGeneration.{method} missing; "
-            f"LAiM/models/rl_replacements.py rewrites this method body"
+            f"unsloth/models/rl_replacements.py rewrites this method body"
         )
 
 
@@ -197,7 +197,7 @@ def test_trl_version_parseable(tag: str):
     )
     assert has_literal or has_subimport or has_metadata or has_version_file, (
         f"{tag}: trl.__version__ not exported via any known mechanism; "
-        f"LAiM/models/rl.py:63 will AttributeError"
+        f"unsloth/models/rl.py:63 will AttributeError"
     )
 
 
@@ -213,7 +213,7 @@ def test_trl_sft_trainer_module_internals(tag: str):
     src = fetch_text("huggingface/trl", tag, "trl/trainer/sft_trainer.py")
     assert src is not None, (
         f"{tag}: trl/trainer/sft_trainer.py missing; "
-        f"LAiM/tokenizer_utils.py:1538 wildcard import fails"
+        f"unsloth/tokenizer_utils.py:1538 wildcard import fails"
     )
     assert has_def(src, "SFTTrainer", "class"), f"{tag}: class SFTTrainer missing in sft_trainer.py"
     if "neftune_post_forward_hook" not in src:
@@ -279,7 +279,7 @@ def test_trl_import_utils_available_pattern(tag: str):
     has_pattern = bool(re.search(r"\b\w+_available\b", src))
     assert has_pattern, (
         f"{tag}: trl.import_utils has no `_available` cache var; "
-        f"LAiM/import_fixes.py:508-516 silently no-ops"
+        f"unsloth/import_fixes.py:508-516 silently no-ops"
     )
 
 
@@ -292,7 +292,7 @@ def test_trl_openenv_utils_generators(tag: str):
     assert legacy or new, (
         f"{tag}: openenv.utils has neither `generate_rollout_completions` "
         f"nor `_generate_rollout_completions_colocate`; "
-        f"LAiM/models/rl_replacements.py:1775-1781 patch breaks"
+        f"unsloth/models/rl_replacements.py:1775-1781 patch breaks"
     )
 
 
@@ -306,7 +306,7 @@ def test_trl_grpo_trainer_required_methods(tag: str):
     for m in ("_prepare_inputs", "_generate_and_score_completions", "compute_loss"):
         assert has_def(src, m, "func"), (
             f"{tag}: GRPOTrainer.{m} missing; "
-            f"LAiM/models/rl_replacements.py dispatch by name silently skips"
+            f"unsloth/models/rl_replacements.py dispatch by name silently skips"
         )
     has_legacy = has_def(src, "_get_per_token_logps", "func")
     has_new = has_def(src, "_get_per_token_logps_and_entropies", "func")
@@ -333,7 +333,7 @@ def test_trl_grpo_source_inference_mode_unwrap(tag: str):
     assert has_inference_mode and has_unwrap, (
         f"{tag}: GRPOTrainer source missing torch.inference_mode={has_inference_mode} "
         f"or self.accelerator.unwrap_model={has_unwrap}; "
-        f"LAiM/models/rl_replacements.py:526 autocast insertion no-ops"
+        f"unsloth/models/rl_replacements.py:526 autocast insertion no-ops"
     )
 
 
@@ -365,7 +365,7 @@ def test_trl_kto_get_batch_logps_signature(tag: str):
         return
     pytest.fail(
         f"{tag}: KTO log-prob computation not found in any of {candidates}; "
-        f"LAiM/models/rl_replacements.py KTO rewrite silently skipped"
+        f"unsloth/models/rl_replacements.py KTO rewrite silently skipped"
     )
 
 
@@ -405,7 +405,7 @@ def test_trl_grpo_internal_helpers_in_scope(tag: str):
         f"{tag}: GRPOTrainer source does NOT propagate chat-template kwargs "
         f"via legacy `maybe_apply_chat_template` OR successor "
         f"`apply_chat_template(... **chat_template_kwargs)`; "
-        f"LAiM/models/rl_replacements.py:909-927 rewrite no-ops AND "
+        f"unsloth/models/rl_replacements.py:909-927 rewrite no-ops AND "
         f"native TRL doesn't carry the kwargs either — likely real bug"
     )
 
@@ -435,7 +435,7 @@ def test_trl_grpo_peft_ref_adapter_block_contract(tag: str):
     )
     assert "ref_param.data.copy_(param.data)" in src, (
         f"{tag}: `ref_param.data.copy_(param.data)` end-anchor gone; "
-        f"LAiM/models/rl.py peft_pattern loses its DOTALL end match"
+        f"unsloth/models/rl.py peft_pattern loses its DOTALL end match"
     )
     assert "enable_input_require_grads" in src, (
         f"{tag}: `enable_input_require_grads` block gone from grpo_trainer.py; "

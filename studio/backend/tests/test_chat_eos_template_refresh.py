@@ -54,7 +54,7 @@ def test_turn_end_eos_refreshed_after_generate_time_template(monkeypatch):
     import utils.datasets as ds
 
     backend = InferenceBackend.__new__(InferenceBackend)
-    backend.active_model_name = "LAiM/qwen2.5-0.5b"
+    backend.active_model_name = "unsloth/qwen2.5-0.5b"
 
     # No chat_template at load, so the cache stored only the document eos, though
     # <|im_end|> is atomic in the vocab (unused until the mapper installs a template).
@@ -93,7 +93,7 @@ def test_turn_end_eos_refresh_preserves_load_time_ids_on_destructive_swap(monkey
     import utils.datasets as ds
 
     backend = InferenceBackend.__new__(InferenceBackend)
-    backend.active_model_name = "LAiM/gemma-2b-it"
+    backend.active_model_name = "unsloth/gemma-2b-it"
 
     # Original tokenizer (used by generate_stream): <end_of_turn>=107 distinct from
     # eos=1, so the load-time cache resolved to [1, 107].
@@ -183,7 +183,7 @@ def test_resolve_chat_eos_reads_vision_processor_template():
     model = SimpleNamespace(generation_config = SimpleNamespace(eos_token_id = 1))
 
     backend = InferenceBackend.__new__(InferenceBackend)
-    backend.active_model_name = "LAiM/gemma-3-4b-it"
+    backend.active_model_name = "unsloth/gemma-3-4b-it"
     model_info = {"model": model, "tokenizer": processor, "processor": processor, "is_vision": True}
     backend.models = {backend.active_model_name: model_info}
 

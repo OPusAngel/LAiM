@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { useAppShellReadySignal } from "@/components/app-readiness";
 import { authFetch, getAuthSessionEpoch } from "@/features/auth";
 import { isMcpToolOnly, mcpImageMappingsEnabled } from "./api/mcp-image";
@@ -320,7 +321,7 @@ class PreStreamAwareAttachmentAdapter implements AttachmentAdapter {
     if (Symbol.asyncIterator in added) {
       let last: PendingAttachment | undefined;
       for await (const value of added) last = value;
-      if (!last) throw new Error("The attachment adapter yielded nothing.");
+      if (!last) throw new Error(translate("uxChat.theAttachmentAdapterYieldedzcj3k"));
       return last;
     }
     return added;
@@ -446,20 +447,20 @@ class VisionImageAdapter implements AttachmentAdapter {
           convertedImageType(picked) === null))
     ) {
       const reason =
-        "Images for MCP tools must be PNG, JPEG or WebP and at most 10 MB.";
+        translate("uxChat.imagesForMCPToolsyke9b");
       toast.error(reason);
       throw new Error(reason);
     }
 
     if (mcpToolOnly && this.toolOnlyIds.size > 0) {
-      const reason = "Only one image per message can go to MCP tools.";
+      const reason = translate("uxChat.onlyOneImagePerbxagj");
       toast.error(reason);
       throw new Error(reason);
     }
 
     const maxSize = 20 * 1024 * 1024;
     if (picked.size > maxSize) {
-      throw new Error("Image size exceeds 20MB limit");
+      throw new Error(translate("uxChat.imageSizeExceeds20MBl85w3"));
     }
     const attachment = {
       id: crypto.randomUUID(),
@@ -497,7 +498,7 @@ class VisionImageAdapter implements AttachmentAdapter {
     }
     if (mcpToolOnly && file.size > 10 * 1024 * 1024) {
       const reason =
-        "The converted image is over the 10 MB limit for MCP tools.";
+        translate("uxChat.theConvertedImageIssb3e8");
       this.toolOnlyIds.delete(attachment.id);
       toast.error(reason);
       throw new Error(reason);
@@ -520,7 +521,7 @@ class VisionImageAdapter implements AttachmentAdapter {
       const reason =
         current === null
           ? MCP_LOOKUP_FAILED
-          : "MCP image settings changed since this image was attached. Remove it and attach it again.";
+          : translate("uxChat.mCPImageSettingsChanged6mxc4");
       toast.error(reason);
       throw new Error(reason);
     }
@@ -554,7 +555,7 @@ class VisionImageAdapter implements AttachmentAdapter {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => resolve(reader.result as string);
-      reader.onerror = () => reject(new Error("Failed to read image file"));
+      reader.onerror = () => reject(new Error(translate("uxChat.failedToReadImagexy7x4")));
       reader.readAsDataURL(file);
     });
   }
@@ -643,39 +644,37 @@ class TextAttachmentAdapter implements AttachmentAdapter {
     // Before any read: decoding an .mbox of arbitrary size would hold the bytes
     // and the decoded string at once, and the native path already stops here.
     if (file.size > MAX_TEXT_ATTACHMENT_BYTES) {
-      const reason = `Text attachments are limited to ${
-        MAX_TEXT_ATTACHMENT_BYTES / (1024 * 1024)
-      } MB.`;
+      const reason = translate("uxChat.textAttachmentsAreLimitedwb0qn", { p1: MAX_TEXT_ATTACHMENT_BYTES / (1024 * 1024) });
       toast.error(reason);
       throw new Error(reason);
     }
     if (await isBinaryPropertyList(file)) {
       const reason =
-        "Binary property-list files aren't supported. Convert the file to text before attaching it.";
+        translate("uxChat.binaryPropertyListFilespvvpq");
       toast.error(reason);
       throw new Error(reason);
     }
     if (await isBinaryVobSubSubtitle(file)) {
       const reason =
-        "VobSub bitmap subtitles aren't supported. Convert the .sub file to SRT or VTT before attaching it.";
+        translate("uxChat.vobSubBitmapSubtitlesAren7c5sw");
       toast.error(reason);
       throw new Error(reason);
     }
     if (await isBinaryTrackerModule(file)) {
       const reason =
-        "Tracker .mod audio files aren't supported as text attachments.";
+        translate("uxChat.trackerModAudioFiles5a74m");
       toast.error(reason);
       throw new Error(reason);
     }
     if (await isCompiledFortranModule(file)) {
       const reason =
-        "Compiled Fortran .mod modules aren't supported as text attachments.";
+        translate("uxChat.compiledFortranModModulesftg97");
       toast.error(reason);
       throw new Error(reason);
     }
     if (await isBinaryOfficeTemplate(file)) {
       const reason =
-        "Legacy Word and PowerPoint templates aren't supported as text attachments.";
+        translate("uxChat.legacyWordAndPowerPoint697so");
       toast.error(reason);
       throw new Error(reason);
     }
@@ -814,7 +813,8 @@ class OfficeAttachmentAdapter implements AttachmentAdapter {
       const message = (cause as Error | undefined)?.message;
       const tooLarge = `${label} file is too large: ${file.name}`;
       const error =
-        message === tooLarge || message === "File is too large to preview."
+        message === tooLarge ||
+        message === translate("uxComponents.fileIsTooLargem6kpj")
           ? tooLarge
           : `${label} file could not be read: ${file.name}`;
       toast.error(error);
@@ -1158,14 +1158,15 @@ class OpenDocumentAttachmentAdapter implements AttachmentAdapter {
 
 const MAX_TOOL_ONLY_ATTACHMENT_BYTES = 200 * 1024 * 1024;
 
-/** Whether this turn's python tool runs in Studio's sandbox; chat-adapter.ts decides it the same way. */
+/** Whether this turn's python tool runs in Studio's workdir; chat-adapter.ts decides it the same way. */
 export function pythonToolRunsInStudio(
   state: Parameters<typeof codeToolsOn>[0] = useChatRuntimeStore.getState(),
 ): boolean {
-  // The effective Code state, as the send path computes it: Full access turns it on locally.
+  // The effective Code state, as the send path computes it: local checkpoints always run
+  // LAiM's tools, cloud connections keep their hosted-code opt-in.
   const codeToolsEnabled = codeToolsOn(state);
   const external = parseExternalModelId(state.params.checkpoint);
-  if (!external) return state.supportsTools && codeToolsEnabled;
+  if (!external) return codeToolsEnabled;
   const provider = (
     loadConnectionsEnabled() ? loadExternalProviders() : []
   ).find((p) => p.id === external.providerId);
@@ -1222,9 +1223,9 @@ class ToolOnlyAttachmentAdapter implements AttachmentAdapter {
     file: File;
   }): AsyncGenerator<PendingAttachment, void> {
     const refusal = !pythonToolRunsInStudio()
-      ? `Turn on Tools with a model that runs the python tool to attach ${file.name}.`
+      ? translate("uxChat.turnOnToolsWith7hqz1", { p1: file.name })
       : useChatRuntimeStore.getState().incognito
-        ? `Temporary chats save no files, so the python tool cannot open ${file.name}.`
+        ? translate("uxChat.temporaryChatsSaveNoxxz2v", { p1: file.name })
         : file.size > MAX_TOOL_ONLY_ATTACHMENT_BYTES
           ? `File is too large: ${file.name}`
           : null;
@@ -1248,7 +1249,7 @@ class ToolOnlyAttachmentAdapter implements AttachmentAdapter {
     if (this.uploads.get(attachment.id) !== upload) return;
     if (!original) {
       this.uploads.delete(attachment.id);
-      toast.error(`Could not upload ${file.name}`);
+      toast.error(translate("uxChat.couldNotUploadj7u6d", { p1: file.name }));
       yield { ...attachment, status: { type: "incomplete", reason: "error" } };
       return;
     }
@@ -1985,7 +1986,7 @@ export async function ensureThreadRecord({
 
   const record: ThreadRecord = {
     id: threadId,
-    title: "New Chat",
+    title: translate("uxChat.newChatdnxdf"),
     modelType,
     modelId: modelIdAtInit,
     modelGgufVariant: modelGgufVariantAtInit,
@@ -2088,7 +2089,7 @@ function createStudioDbAdapter(
     async fetch(remoteId: string) {
       const thread = await getStoredChatThread(remoteId);
       if (!thread) {
-        throw new Error(`Thread ${remoteId} not found`);
+        throw new Error(translate("uxChat.threadNotFoundr0qmr", { p1: remoteId }));
       }
       return {
         remoteId: thread.id,
@@ -2191,7 +2192,7 @@ function createStudioDbAdapter(
       const thread = await ensureStoredChatThread(remoteId).catch(
         () => undefined,
       );
-      const defaultTitle = "New Chat";
+      const defaultTitle = translate("uxChat.newChatxtazy");
 
       function streamTitle(title: string) {
         return createAssistantStream((c) => {
@@ -2218,7 +2219,7 @@ function createStudioDbAdapter(
       }
 
       // Only generate once per thread/pair.
-      if (thread.title && thread.title !== "New Chat") {
+      if (thread.title && thread.title !== translate("uxChat.newChatxtazy")) {
         return streamTitle(thread.title);
       }
 
@@ -2414,7 +2415,7 @@ function createPersistedRunAdapter(
           isPreStreamRunReservationCancelled(reservationToken)
         ) {
           releasePreStreamRunReservation(reservationToken);
-          throw new DOMException("The send was cancelled", "AbortError");
+          throw new DOMException(translate("uxChat.theSendWasCancelled53229"), "AbortError");
         }
       };
       throwIfReservationCancelled();
@@ -2954,7 +2955,7 @@ function useStudioRuntimeAdapters(
           }
           markChatThreadDeleted(remoteId);
           await deleteStoredChatThreads([remoteId]);
-          throw new DOMException("Chat history was cleared", "AbortError");
+          throw new DOMException(translate("uxChat.chatHistoryWasClearedyf1mn"), "AbortError");
         };
         const initializeThread = aui
           .threadListItem()
@@ -3717,7 +3718,7 @@ function ThreadScopedSettingsSync({
             // The waits can expire before the fetch is issued; the controller is the only thing stopping one
             // issued a moment later from outliving them.
             read.abort();
-            reject(new Error("thread settings read timed out"));
+            reject(new Error(translate("uxChat.threadSettingsReadTimed7k653")));
           }, THREAD_READ_TIMEOUT_MS),
         ),
       ])
@@ -3769,9 +3770,9 @@ function ThreadScopedSettingsSync({
         // nothing left to resolve it, so give up openly and say so once.
         applyThreadScopedSettings(null, null);
         releaseHeldThreadScopedEdits();
-        toast.error("Could not load this chat's settings", {
+        toast.error(translate("uxChat.couldNotLoadThis1q689"), {
           description:
-            "It is using the default settings. Reopen the chat to try again.",
+            translate("uxChat.itIsUsingThe557e0"),
         });
         return;
       }
@@ -4032,7 +4033,7 @@ function ThreadBackendAutosave({
 
   const reportAutosaveError = useCallback((error: unknown): void => {
     if (!isExpectedBackgroundChatStorageError(error)) {
-      console.error("Failed to autosave chat thread", error);
+      console.error(translate("uxChat.failedToAutosaveChatxr358"), error);
     }
   }, []);
 

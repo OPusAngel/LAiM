@@ -14,7 +14,7 @@ import LAiM_cli.commands.start as start_cli
 
 
 BASE = "http://127.0.0.1:8888"
-MODEL = "LAiM/Qwen3-Coder-480B-A35B-Instruct-GGUF"
+MODEL = "unsloth/Qwen3-Coder-480B-A35B-Instruct-GGUF"
 ADAPTER = "owner/coder-lora"
 ADAPTER_BASE = "owner/coder-base"
 ADAPTER_BYTES = 20 * 1024**2

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Add01Icon, Cancel01Icon } from "@hugeicons/core-free-icons";
@@ -232,7 +233,12 @@ export function WaveformRangeSelect({
                     key={edge}
                     role="slider"
                     tabIndex={ready ? 0 : -1}
-                    aria-label={`${edge === "start" ? "Start" : "End"} of range ${index + 1}`}
+                    aria-label={translate(
+                      edge === "start"
+                        ? "uxAudio.startOfRangef48bq"
+                        : "uxAudio.endOfRangez61dk",
+                      { p1: index + 1 },
+                    )}
                     aria-valuemin={0}
                     aria-valuemax={Math.round(timeline * 10) / 10}
                     aria-valuenow={Math.round(value * 10) / 10}
@@ -287,7 +293,7 @@ export function WaveformRangeSelect({
       <div className="flex flex-wrap items-center gap-1.5">
         <ul
           ref={listRef}
-          aria-label={`Selected parts of ${label}`}
+          aria-label={translate("uxAudio.selectedPartsOfrgxki", { p1: label })}
           className="contents"
         >
           {ranges.map((range, index) => {
@@ -302,9 +308,9 @@ export function WaveformRangeSelect({
                   type="button"
                   data-range-chip=""
                   disabled={disabled}
-                  aria-label={`${rangeLabel(index, range)}${beyond > 0 ? `, ${beyond} seconds past the end` : ""}`}
+                  aria-label={`${rangeLabel(index, range)}${beyond > 0 ? translate("uxAudio.secondsPastTheEndy7r2q", { p1: beyond }) : ""}`}
                   aria-keyshortcuts="Delete Backspace ArrowLeft ArrowRight"
-                  title="Arrow keys move it, Shift+arrow by a second, Delete removes it"
+                  title={translate("uxAudio.arrowKeysMoveIt18ka1")}
                   className={cn(
                     "rounded-l-4xl py-0.5 pl-2.5 pr-1 font-mono text-ui-11p5 tabular-nums text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring",
                     focused === index && "underline underline-offset-2",
@@ -318,7 +324,7 @@ export function WaveformRangeSelect({
                 <button
                   type="button"
                   disabled={disabled}
-                  aria-label={`Remove range ${index + 1}`}
+                  aria-label={translate("uxAudio.removeRangekyo9w", { p1: index + 1 })}
                   className="flex items-center rounded-r-4xl py-1 pl-0.5 pr-2 text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
                   onClick={() => remove(index)}
                 >
@@ -347,7 +353,7 @@ export function WaveformRangeSelect({
             }}
           >
             <HugeiconsIcon icon={Add01Icon} className="size-3" />
-            {ranges.length === 0 ? "Select a part" : "Add a part"}
+            {ranges.length === 0 ? translate("uxAudio.selectAParts9x18") : translate("uxAudio.addAParttdkrh")}
           </Button>
         ) : null}
       </div>

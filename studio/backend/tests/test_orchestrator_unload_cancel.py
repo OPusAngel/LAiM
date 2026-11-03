@@ -908,14 +908,14 @@ def test_unload_matches_active_model_case_insensitively(monkeypatch):
     monkeypatch.setattr(o, "_wait_response", lambda t, timeout = 300.0: {"type": "unloaded"})
     monkeypatch.setattr(o, "_drain_queue", lambda: [])
 
-    o.active_model_name = "LAiM/Qwen3-4B"
-    o.models = {"LAiM/Qwen3-4B": {}}
+    o.active_model_name = "unsloth/Qwen3-4B"
+    o.models = {"unsloth/Qwen3-4B": {}}
 
     # Client unloads with the casing it originally typed, before canonicalization.
-    assert o.unload_model("LAiM/qwen3-4b") is True
+    assert o.unload_model("unsloth/qwen3-4b") is True
     # The guard did not no-op: an unload for the canonical active model reached
     # the worker (not the raw lowercase name, so the worker matches it directly).
-    assert {"type": "unload", "model_name": "LAiM/Qwen3-4B"} in sent
+    assert {"type": "unload", "model_name": "unsloth/Qwen3-4B"} in sent
     # Local state is cleared for the canonical name, not left stale.
     assert o.active_model_name is None
     assert o.models == {}
@@ -930,12 +930,12 @@ def test_unload_of_stale_name_still_no_ops_after_case_insensitive_match(monkeypa
     monkeypatch.setattr(
         o, "_send_cmd", lambda cmd: pytest.fail("must not send an unload for a stale model name")
     )
-    o.active_model_name = "LAiM/Qwen3-4B"
-    o.models = {"LAiM/Qwen3-4B": {}}
+    o.active_model_name = "unsloth/Qwen3-4B"
+    o.models = {"unsloth/Qwen3-4B": {}}
 
-    assert o.unload_model("LAiM/Llama-3.1-8B") is True
-    assert o.active_model_name == "LAiM/Qwen3-4B"
-    assert "LAiM/Qwen3-4B" in o.models
+    assert o.unload_model("unsloth/Llama-3.1-8B") is True
+    assert o.active_model_name == "unsloth/Qwen3-4B"
+    assert "unsloth/Qwen3-4B" in o.models
 
 
 def test_load_does_not_accumulate_stale_models_defeating_the_unload_guard(monkeypatch):
@@ -1061,10 +1061,10 @@ def test_cancel_load_terminates_loading_subprocess_and_sends_no_command(monkeypa
 
 def test_cancel_load_matches_loading_model_case_insensitively(monkeypatch):
     o = _bare_orchestrator()
-    o.loading_models = {"LAiM/Qwen3-4B"}
+    o.loading_models = {"unsloth/Qwen3-4B"}
     monkeypatch.setattr(o, "_shutdown_subprocess", lambda timeout = 5: None)
 
-    assert o.cancel_load("LAiM/qwen3-4b") is True
+    assert o.cancel_load("unsloth/qwen3-4b") is True
     assert o.loading_models == set()
 
 

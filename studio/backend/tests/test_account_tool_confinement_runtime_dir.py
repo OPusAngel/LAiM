@@ -25,7 +25,7 @@ def test_landlock_rules_exclude_the_per_user_runtime_dir(tmp_path):
     if not os.path.isdir(runtime):
         pytest.skip("no per-user runtime dir on this host")
     run_as(BOB, tools._get_workdir, "chat")
-    rules = run_as(BOB, tool_confinement._landlock_rules, 3, tools._SANDBOX_SITE_DIR)
+    rules = run_as(BOB, tool_confinement._landlock_rules, 3, tools._WORKDIR_SITE_DIR)
     assert all(not tool_confinement._contains(p, runtime) for p, _ in rules), [
         p for p, _ in rules if tool_confinement._contains(p, runtime)
     ]

@@ -88,13 +88,8 @@ def _gated_grandchild_sh(gate: Path, sentinel: Path) -> str:
 
 
 def _os_isolated_tools() -> bool:
-    """Whether PID-namespace teardown reaps descendants when the leader exits."""
-    from core.inference import os_sandbox
-
-    capability = os_sandbox.capability_snapshot()
-    return capability.available and (
-        "detached_processes_die_with_the_call" in capability.limitations
-    )
+    """Tools run on the host, so nothing reaps a background job with the leader."""
+    return False
 
 
 def _assert_grandchild_was_killed(gate: Path, sentinel: Path) -> None:
@@ -651,23 +646,6 @@ def test_bash_exec_unlimited_timeout_waits_for_grandchild_output():
     assert "late-grandchild-output" in "".join(chunks)
 
 
-@pytest.mark.skipif(
-    not _os_isolated_tools(), reason = "no PID namespace here, so nothing reaps the job"
-)
-def test_bash_exec_unlimited_timeout_does_not_wait_for_a_job_the_namespace_reaps():
-    from core.inference import tools as tools_module
-
-    command = "( sleep 7; echo late-grandchild-output ) & echo parent-done"
-    started = time.monotonic()
-    result = _bash_exec(command, timeout = None, output_callback = lambda _t: None)
-    elapsed = time.monotonic() - started
-    assert "parent-done" in result
-    if tools_module._last_tool_execution_record.os_isolation:
-        assert elapsed < 5
-    else:
-        assert "late-grandchild-output" in result
-
-
 def test_bash_exec_finite_timeout_kills_grandchild_holding_stdout(tmp_path):
     # A backgrounded grandchild holds the pipe open past the finite timeout, then
     # would write a sentinel. The parent shell has already exited, so killing only
@@ -975,7 +953,7 @@ from core.inference.tools import (
     _env_int,
     _missing_path_hint,
     _truncate,
-    get_sandbox_workdir,
+    get_session_workdir,
 )
 
 
@@ -1154,18 +1132,18 @@ def test_missing_path_hint_generalizes_beyond_convention_prefixes():
     # hint, echoing that path.
     err = (
         "FileNotFoundError: [Errno 2] No such file or directory: "
-        "'/home/ubuntu/Sandbox/flappy_bird.html'"
+        "'/home/ubuntu/Workdir/flappy_bird.html'"
     )
     hint = _missing_path_hint(err)
     assert "working directory is writable" in hint
-    assert "'flappy_bird.html', not '/home/ubuntu/Sandbox/flappy_bird.html'" in hint
+    assert "'flappy_bird.html', not '/home/ubuntu/Workdir/flappy_bird.html'" in hint
     # A bash-style error on an absolute path outside the workdir is echoed too.
     bash_err = "cat: /var/data/report.csv: No such file or directory"
     assert "'report.csv', not '/var/data/report.csv'" in _missing_path_hint(bash_err)
 
 
 def test_missing_path_hint_respects_project_workdir():
-    # Project-backed sessions run under a root OUTSIDE ~/studio_sandbox. A legitimate
+    # Project-backed sessions run under a root OUTSIDE ~/studio_workdir. A legitimate
     # miss INSIDE that project workspace must not be misclassified as an external
     # habit path and flattened to its basename; judged against the real workdir it
     # gets no hint. The fabricated paths carry no convention prefix, so only the
@@ -1173,7 +1151,7 @@ def test_missing_path_hint_respects_project_workdir():
     workdir = "/srv/projroot/session_area"
     missing = "/srv/projroot/session_area/data/missing.csv"
     output = f"FileNotFoundError: [Errno 2] No such file or directory: '{missing}'"
-    # Against the static sandbox root (no workdir) it looks external and wrongly earns the hint.
+    # Against the static workdir root (no workdir) it looks external and wrongly earns the hint.
     assert "working directory is writable" in _missing_path_hint(output)
     # Against the real project workdir it is local -> no hint.
     assert _missing_path_hint(output, workdir) == ""
@@ -1201,8 +1179,8 @@ def test_missing_path_hint_project_workdir_under_convention_prefix():
     # hint (e.g. a /mnt/data habit path with a /workspace-rooted project).
     outside = "FileNotFoundError: [Errno 2] No such file or directory: '/mnt/data/x.html'"
     assert "'x.html', not '/mnt/data/x.html'" in _missing_path_hint(outside, workdir)
-    # Without an explicit workdir the default sandbox root applies, so a
-    # /workspace path is out of sandbox and keeps the habit-path hint.
+    # Without an explicit workdir the default workdir root applies, so a
+    # /workspace path is out of workdir and keeps the habit-path hint.
     assert "working directory is writable" in _missing_path_hint(root_output)
 
 
@@ -1240,7 +1218,7 @@ def test_code_tool_descriptions_mention_relative_paths():
 
 
 def test_python_exec_mnt_data_open_is_remapped_into_workdir():
-    # The shim remaps open()/os.makedirs() on /mnt/data into the sandbox CWD and
+    # The shim remaps open()/os.makedirs() on /mnt/data into the workdir CWD and
     # prints a one-line stderr notice, identically with and without streaming.
     fname = f"remap_{_uuid.uuid4().hex}.txt"
     code = (
@@ -1250,14 +1228,14 @@ def test_python_exec_mnt_data_open_is_remapped_into_workdir():
         "    f.write('hello remap')\n"
         f"print(open('/mnt/data/{fname}').read())\n"
     )
-    target = _os.path.join(get_sandbox_workdir(), fname)
+    target = _os.path.join(get_session_workdir(), fname)
     try:
         baseline = _python_exec(code, timeout = 60)
         assert _os.path.isfile(target), baseline
         with open(target) as f:
             assert f.read() == "hello remap"
         assert "hello remap" in baseline
-        assert "/mnt/data does not exist in this sandbox" in baseline
+        assert "/mnt/data does not exist in this workdir" in baseline
         _shared_setup_2(baseline, code, target)
     finally:
         if _os.path.exists(target):
@@ -1274,14 +1252,14 @@ def test_python_exec_pathlib_write_text_is_remapped_into_workdir():
         "p.write_text('pathlib remap')\n"
         "print(p.read_text())\n"
     )
-    target = _os.path.join(get_sandbox_workdir(), fname)
+    target = _os.path.join(get_session_workdir(), fname)
     try:
         baseline = _python_exec(code, timeout = 60)
         assert _os.path.isfile(target), baseline
         with open(target) as f:
             assert f.read() == "pathlib remap"
         assert "pathlib remap" in baseline
-        assert "/mnt/data does not exist in this sandbox" in baseline
+        assert "/mnt/data does not exist in this workdir" in baseline
         _shared_setup_2(baseline, code, target)
     finally:
         if _os.path.exists(target):
@@ -1291,9 +1269,9 @@ def test_python_exec_pathlib_write_text_is_remapped_into_workdir():
 def test_python_exec_hallucinated_absolute_write_is_remapped_into_workdir():
     # The model invents an absolute path outside the enumerated prefixes and opens
     # it for writing; the write-mode fallback redirects it to the basename in the
-    # sandbox workdir instead of dying with FileNotFoundError.
+    # workdir workdir instead of dying with FileNotFoundError.
     fname = f"remap_{_uuid.uuid4().hex}.html"
-    hallucinated = f"/nonexistent_root_xyz/Sandbox/{fname}"
+    hallucinated = f"/nonexistent_root_xyz/Workdir/{fname}"
     # Read-back goes through the mapped basename: reads are never redirected, only
     # the write is healed.
     code = (
@@ -1301,14 +1279,14 @@ def test_python_exec_hallucinated_absolute_write_is_remapped_into_workdir():
         "    f.write('hello fallback')\n"
         f"print(open('{fname}').read())\n"
     )
-    target = _os.path.join(get_sandbox_workdir(), fname)
+    target = _os.path.join(get_session_workdir(), fname)
     try:
         baseline = _python_exec(code, timeout = 60)
         assert _os.path.isfile(target), baseline
         with open(target) as f:
             assert f.read() == "hello fallback"
         assert "hello fallback" in baseline
-        assert "does not exist in this sandbox" in baseline
+        assert "does not exist in this workdir" in baseline
         _shared_setup_2(baseline, code, target)
     finally:
         if _os.path.exists(target):

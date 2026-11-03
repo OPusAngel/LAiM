@@ -201,7 +201,7 @@ def test_a_start_reports_whether_it_attached_to_a_live_job(monkeypatch):
     # them, and the LAiM download notice keys off it.
     _shared_setup_1(monkeypatch)
 
-    repo = "LAiM/attach-flag-probe"
+    repo = "unsloth/attach-flag-probe"
     key = dl._download_job_key(repo, dl._scope_variant("diffusion"))
     try:
         started = asyncio.run(dl.download_model_response(_request(repo_id = repo)))
@@ -287,14 +287,14 @@ def test_an_images_load_staging_a_repo_blocks_a_download_of_it(monkeypatch):
     monkeypatch.setattr(
         diffusion_engine_router,
         "get_active_diffusion_engine",
-        lambda: _fake_backend("Tongyi-MAI/Z-Image-Turbo", "LAiM/Z-Image-Turbo-GGUF"),
+        lambda: _fake_backend("Tongyi-MAI/Z-Image-Turbo", "unsloth/Z-Image-Turbo-GGUF"),
     )
     monkeypatch.setattr(video_backend, "get_video_backend", lambda: _fake_backend())
 
     # Both the checkpoint and the companion base it is pulling are covered, case-insensitively (the repo id arrives as the user typed it).
     assert dl._load_in_flight("Tongyi-MAI/Z-Image-Turbo") is True
     assert dl._load_in_flight("tongyi-mai/z-image-turbo") is True
-    assert dl._load_in_flight("LAiM/Z-Image-Turbo-GGUF") is True
+    assert dl._load_in_flight("unsloth/Z-Image-Turbo-GGUF") is True
     assert dl._load_in_flight("Org/Unrelated") is False
 
 

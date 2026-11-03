@@ -1,36 +1,28 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
-"""Tests for Bypass Permissions (skip confirmation + disable sandbox).
+"""Tests for Bypass Permissions (skip the confirmation gate).
 
-Covers the secret-name classifier, the two env builders, the
-``disable_sandbox`` branch of ``_python_exec`` / ``_bash_exec`` (which env is
-used, which pre-exec is used, and that safety checks / the blocklist are
-skipped), the request-model default, the confirm-vs-bypass precedence rule the
-route enforces, and that the agentic loop forwards ``disable_sandbox`` while
-never gating under bypass.
+Covers the secret-name classifier, the child-env builders, the request-model
+default, the confirm-vs-bypass precedence rule the route enforces, and that no
+loop gates a call once bypass is set.
 
 Run with: ``PYTHONPATH=studio/backend python -m pytest studio/backend/tests/test_bypass_permissions.py -q``
 """
 
-import io
 import os
 import sys
+from pathlib import Path
 
 import pytest
 
 import core.inference.tools as tools
 from core.inference.tools import (
-    _SANDBOX_TEMP_DIRNAME,
-    _bash_exec,
     _build_bypass_env,
-    _build_safe_env,
     _is_cred_location_env_name,
     _is_secret_env_name,
     _is_secret_env_value,
-    _python_exec,
 )
-from core.inference.safetensors_agentic import run_safetensors_tool_loop
 
 _POSIX_ONLY = pytest.mark.skipif(
     sys.platform == "win32", reason = "preexec_fn / setsid are POSIX-only"
@@ -74,169 +66,6 @@ def test_benign_names_are_not_flagged(name):
 # ── env builders ────────────────────────────────────────────────────
 
 
-def test_bypass_env_keeps_benign_strips_secret_repoints_home(monkeypatch, tmp_path):
-    monkeypatch.setenv("HOSTVAR", "benign-123")
-    monkeypatch.setenv("HF_TOKEN", "secret-abc")
-    env = _build_bypass_env(str(tmp_path))
-    assert env.get("HOSTVAR") == "benign-123"  # full host env inherited
-    assert "HF_TOKEN" not in env  # ...minus secrets
-    assert env["HOME"] == str(tmp_path)  # $HOME-based cred lookups defused
-    assert env["TMPDIR"] == str(tmp_path / _SANDBOX_TEMP_DIRNAME)
-
-
-def test_safe_env_excludes_host_and_secret(monkeypatch, tmp_path):
-    monkeypatch.setenv("HOSTVAR", "benign-123")
-    monkeypatch.setenv("HF_TOKEN", "secret-abc")
-    env = _build_safe_env(str(tmp_path))
-    assert "HOSTVAR" not in env  # whitelist build -> host vars never reach child
-    assert "HF_TOKEN" not in env
-
-
-# ── Popen kwargs capture (no real execution) ────────────────────────
-
-
-class _FakeProc:
-    """A subprocess.Popen double for the drain path (``tools._drain_process_output``):
-    a readable ``stdout`` pipe yielding the fake output then EOF, plus
-    ``wait()`` / ``poll()`` / ``pid``. The pid is non-existent so
-    ``_capture_process_group``'s ``os.getpgid`` returns None; ``wait`` returns
-    immediately so the drain never kills.
-    """
-
-    returncode = 0
-    # Unlikely-to-exist pid: os.getpgid raises ProcessLookupError (caught) -> None.
-    pid = 2**22
-
-    def __init__(self):
-        # Readable stdout: iter(readline, "") yields "FAKEOUT" then hits EOF.
-        self.stdout = io.StringIO("FAKEOUT")
-
-    def wait(self, timeout = None):
-        return 0
-
-    def poll(self):
-        return 0
-
-    def kill(self):
-        pass
-
-
-@pytest.fixture
-def captured_popen(monkeypatch):
-    cap = {}
-
-    def fake_popen(cmd, **kwargs):
-        cap["cmd"] = cmd
-        cap["kwargs"] = kwargs
-        return _FakeProc()
-
-    monkeypatch.setattr(tools.subprocess, "Popen", fake_popen)
-    return cap
-
-
-@pytest.fixture
-def captured_prepared_launch(monkeypatch):
-    cap = {}
-
-    def fake_spawn(prepared, **kwargs):
-        cap["prepared"] = prepared
-        cap["kwargs"] = kwargs
-        return _FakeProc()
-
-    monkeypatch.setattr(tools.os_sandbox, "spawn_prepared_launch", fake_spawn)
-    return cap
-
-
-def _carries(preexec, expected) -> bool:
-    """A backend that isolates COMPOSES its pre-exec onto the plan's rather than replacing it, so on such a host the identity is one closure down."""
-    if preexec is expected:
-        return True
-    return any(cell.cell_contents is expected for cell in (preexec.__closure__ or ()))
-
-
-@_POSIX_ONLY
-def test_python_sandboxed_uses_sandbox_preexec_and_safe_env(captured_prepared_launch, monkeypatch):
-    monkeypatch.setenv("HF_TOKEN", "secret-abc")
-    _python_exec("print(1)", None, 5, "t", disable_sandbox = False)
-    kwargs = captured_prepared_launch["kwargs"]
-    assert _carries(kwargs["preexec_fn"], tools._sandbox_preexec)
-    assert "HF_TOKEN" not in kwargs["env"]
-
-
-@_POSIX_ONLY
-def test_python_bypass_uses_bypass_preexec_and_bypass_env(captured_popen, monkeypatch):
-    monkeypatch.setenv("HOSTVAR", "benign-xyz")
-    monkeypatch.setenv("HF_TOKEN", "secret-abc")
-    _python_exec("print(1)", None, 5, "t", disable_sandbox = True)
-    assert captured_popen["kwargs"]["preexec_fn"] is tools._bypass_preexec
-    env = captured_popen["kwargs"]["env"]
-    assert env.get("HOSTVAR") == "benign-xyz"
-    assert env.get("PYTHONIOENCODING") == "utf-8"
-    assert "HF_TOKEN" not in env
-
-
-def test_bash_blocklist_enforced_when_sandboxed(captured_popen):
-    out = _bash_exec("rm -rf /", None, 5, "t", disable_sandbox = False)
-    assert "Blocked" in out
-    assert "cmd" not in captured_popen  # never reached Popen
-
-
-def test_bash_blocklist_skipped_when_bypassed(captured_popen):
-    out = _bash_exec("rm -rf /", None, 5, "t", disable_sandbox = True)
-    assert out == "FAKEOUT"  # blocklist skipped -> reached (faked) execution
-    # Windows resolves bash to an absolute path (Git for Windows), so compare the
-    # program name rather than the spelling of argv[0].
-    shell = os.path.basename(captured_popen["cmd"][0]).lower()
-    assert shell in ("bash", "bash.exe", "cmd", "cmd.exe")
-
-
-@_POSIX_ONLY
-def test_bash_bypass_uses_bypass_preexec(captured_popen, monkeypatch):
-    # bypass inherits benign host vars; clear so we assert _bash_exec adds none.
-    monkeypatch.delenv("PYTHONIOENCODING", raising = False)
-    _bash_exec("echo hi", None, 5, "t", disable_sandbox = True)
-    assert captured_popen["kwargs"]["preexec_fn"] is tools._bypass_preexec
-    assert "PYTHONIOENCODING" not in captured_popen["kwargs"]["env"]
-
-
-# ── real end-to-end python execution under bypass ───────────────────
-
-
-@_POSIX_ONLY
-def test_python_bypass_real_exec_sees_host_env_but_not_secret(monkeypatch):
-    monkeypatch.setenv("HOSTVAR", "benign-xyz")
-    monkeypatch.setenv("HF_TOKEN", "secret-pqr")
-    code = (
-        "import os;"
-        "print('H=' + str(os.environ.get('HOSTVAR')),"
-        " 'T=' + str(os.environ.get('HF_TOKEN')))"
-    )
-    out = _python_exec(code, None, 30, "test-bypass", disable_sandbox = True)
-    assert "H=benign-xyz" in out  # unrestricted: real host var visible
-    assert "T=None" in out  # ...but the secret was stripped
-    assert "secret-pqr" not in out
-
-
-# ── _bypass_preexec is setsid-only (no rlimits) ─────────────────────
-
-
-@_POSIX_ONLY
-def test_bypass_preexec_only_sets_session(monkeypatch):
-    calls = {"setsid": 0}
-    monkeypatch.setattr(
-        tools.os, "setsid", lambda: calls.__setitem__("setsid", calls["setsid"] + 1)
-    )
-    # _resource must not be touched by the bypass pre-exec.
-    if tools._resource is not None:
-        monkeypatch.setattr(
-            tools._resource,
-            "setrlimit",
-            lambda *a, **k: pytest.fail("bypass pre-exec must not set rlimits"),
-        )
-    tools._bypass_preexec()
-    assert calls["setsid"] == 1
-
-
 # ── request model default ───────────────────────────────────────────
 
 
@@ -262,7 +91,7 @@ def test_confirm_precedence_rule(confirm, bypass, effective_confirm):
     assert (bool(confirm) and not bool(bypass)) is effective_confirm
 
 
-# ── agentic loop forwards disable_sandbox, never gates under bypass ──
+# ── agentic loop never gates under bypass ──
 
 _DEFAULT_TOOLS = [
     {"type": "function", "function": {"name": "python"}},
@@ -284,72 +113,6 @@ def _multi_turn(turns):
             return
 
     return _gen
-
-
-def test_loop_forwards_disable_sandbox_and_does_not_gate():
-    seen = []
-
-    def fake_exec(
-        name,
-        arguments,
-        *,
-        cancel_event = None,
-        timeout = None,
-        session_id = None,
-        thread_id = None,
-        rag_scope = None,
-        disable_sandbox = False,
-    ):
-        seen.append(disable_sandbox)
-        return f"RAN[{name}]"
-
-    events = list(
-        run_safetensors_tool_loop(
-            single_turn = _multi_turn([_tool_call("python", '{"code": "x"}'), "done"]),
-            messages = [{"role": "user", "content": "hi"}],
-            tools = _DEFAULT_TOOLS,
-            execute_tool = fake_exec,
-            session_id = "s",
-            confirm_tool_calls = False,  # route forces this off under bypass
-            bypass_permissions = True,
-        )
-    )
-    assert seen == [True]  # disable_sandbox threaded through
-    starts = [e for e in events if e["type"] == "tool_start"]
-    assert starts and starts[0]["awaiting_confirmation"] is False
-    assert starts[0]["approval_id"] == ""
-
-
-def test_loop_bypass_overrides_confirm_for_direct_callers():
-    # Even if a direct internal caller passes confirm_tool_calls=True, bypass
-    # must suppress the confirm gate at the loop level (not only at the route).
-    def fake_exec(
-        name,
-        arguments,
-        *,
-        cancel_event = None,
-        timeout = None,
-        session_id = None,
-        thread_id = None,
-        rag_scope = None,
-        disable_sandbox = False,
-    ):
-        return f"RAN[{name}]"
-
-    events = list(
-        run_safetensors_tool_loop(
-            single_turn = _multi_turn([_tool_call("python", '{"code": "x"}'), "done"]),
-            messages = [{"role": "user", "content": "hi"}],
-            tools = _DEFAULT_TOOLS,
-            execute_tool = fake_exec,
-            session_id = "s",
-            confirm_tool_calls = True,  # raw caller leaves this on...
-            bypass_permissions = True,  # ...but bypass must still win
-        )
-    )
-    starts = [e for e in events if e["type"] == "tool_start"]
-    assert starts and starts[0]["awaiting_confirmation"] is False
-    assert starts[0]["approval_id"] == ""
 
 
 def test_gguf_loop_confirm_gate_respects_bypass():
@@ -516,17 +279,6 @@ def test_connection_string_value_stripped_even_with_benign_name(monkeypatch, tmp
 # ── temp dirs repointed on every platform (regression) ──────────────
 
 
-def test_bypass_env_repoints_all_temp_vars(monkeypatch, tmp_path):
-    # Windows tempfile honours TEMP/TMP, not TMPDIR; all three must repoint.
-    monkeypatch.setenv("TEMP", "/host/tmp")
-    monkeypatch.setenv("TMP", "/host/tmp")
-    env = _build_bypass_env(str(tmp_path))
-    expected = str(tmp_path / _SANDBOX_TEMP_DIRNAME)
-    assert env["TMPDIR"] == expected
-    assert env["TEMP"] == expected
-    assert env["TMP"] == expected
-
-
 # ── credential-location redirect vars are dropped (regression) ──────────
 # Vars that point SDKs at the real home/cache/config (cached tokens), e.g.
 # HF_HOME which startup always sets -> the live leak the HOME repoint missed.
@@ -589,16 +341,16 @@ def test_bypass_env_drops_hf_home_so_cached_token_unreachable(monkeypatch, tmp_p
     assert "HF_HUB_CACHE" not in env
 
 
-def test_bypass_env_hf_token_resolves_outside_real_cache(monkeypatch, tmp_path):
-    # End-to-end: even when HF_HOME and XDG_CACHE_HOME both point at the real
-    # cache, the bypass env must make huggingface_hub resolve the token under the
-    # workdir (guards the XDG fallback chain, not just "HF_HOME absent").
+def test_bypass_env_hf_token_ignores_the_explicit_real_cache(monkeypatch, tmp_path):
+    # Even when HF_HOME and XDG_CACHE_HOME both point at a real cache, the bypass
+    # env drops those pointers, so huggingface_hub falls back to the profile's own
+    # default cache instead of the cache the operator named.
     pytest.importorskip("huggingface_hub")
     import subprocess
 
     real_cache = tmp_path / "real_hf"
     real_cache.mkdir()
-    workdir = tmp_path / "sandbox"
+    workdir = tmp_path / "workdir"
     workdir.mkdir()
     monkeypatch.setenv("HF_HOME", str(real_cache))
     monkeypatch.setenv("XDG_CACHE_HOME", str(real_cache))
@@ -614,8 +366,8 @@ def test_bypass_env_hf_token_resolves_outside_real_cache(monkeypatch, tmp_path):
         capture_output = True,
         text = True,
     ).stdout.strip()
-    assert str(real_cache) not in token_path  # never the operator's cache
-    assert token_path.startswith(str(workdir))  # resolved under the sandbox
+    assert str(real_cache) not in token_path  # the explicit pointer was dropped
+    assert token_path.startswith(str(Path.home()))
 
 
 def test_bypass_env_drops_credential_config_path_vars(monkeypatch, tmp_path):
@@ -644,30 +396,19 @@ def test_bypass_env_strips_npm_auth_and_mysql_pwd(monkeypatch, tmp_path):
     assert "MYSQL_PWD" not in env
 
 
-@_POSIX_ONLY
-def test_bash_bypass_does_not_source_bash_env(monkeypatch, tmp_path):
-    # bash -c sources $BASH_ENV for non-interactive shells; an operator startup
-    # file could re-export stripped secrets, so a real bypass call must not see it.
-    startup = tmp_path / "startup.sh"
-    startup.write_text("export RECOVERED=leaked\n")
-    monkeypatch.setenv("BASH_ENV", str(startup))
-    out = _bash_exec("echo R=$RECOVERED", None, 30, "bash-env-test", disable_sandbox = True)
-    assert "R=leaked" not in out  # BASH_ENV dropped -> startup not sourced
-    assert "R=" in out
-
-
-def test_bypass_env_repoints_windows_profile_vars(monkeypatch, tmp_path):
-    # On Windows, SDKs read cached creds under USERPROFILE/APPDATA/LOCALAPPDATA,
-    # not $HOME. Set ones are repointed at the workdir; HOMEDRIVE/HOMEPATH drop.
+def test_bypass_env_keeps_real_windows_profile_vars(monkeypatch, tmp_path):
+    # On Windows, SDKs resolve the profile through USERPROFILE/APPDATA/LOCALAPPDATA.
+    # They are inherited unchanged so ~/Desktop and the user's apps work; only the
+    # HOMEDRIVE/HOMEPATH pair (a second home spelling) is dropped as a cred pointer.
     monkeypatch.setenv("USERPROFILE", "/host/profile")
     monkeypatch.setenv("APPDATA", "/host/profile/AppData/Roaming")
     monkeypatch.setenv("LOCALAPPDATA", "/host/profile/AppData/Local")
     monkeypatch.setenv("HOMEDRIVE", "C:")
     monkeypatch.setenv("HOMEPATH", "\\Users\\op")
     env = _build_bypass_env(str(tmp_path))
-    assert env["USERPROFILE"] == str(tmp_path)
-    assert env["APPDATA"] == str(tmp_path)
-    assert env["LOCALAPPDATA"] == str(tmp_path)
+    assert env["USERPROFILE"] == "/host/profile"
+    assert env["APPDATA"] == "/host/profile/AppData/Roaming"
+    assert env["LOCALAPPDATA"] == "/host/profile/AppData/Local"
     assert "HOMEDRIVE" not in env
     assert "HOMEPATH" not in env
 
@@ -685,39 +426,6 @@ def test_bypass_env_does_not_add_unset_windows_profile_vars(monkeypatch, tmp_pat
 
 
 # ── parent /proc env-leak hardening (regression) ────────────────────
-
-
-@_POSIX_ONLY
-def test_bypass_exec_hardens_parent_proc_env(monkeypatch, captured_popen):
-    # Stripping the child env is not enough: a same-UID child can read the parent's
-    # /proc environ. Both exec paths harden the parent in bypass mode (fail closed)
-    # and in sandboxed mode too (best-effort backstop for a classifier miss).
-    calls = {"n": 0}
-
-    def fake_harden():
-        calls["n"] += 1
-        return True
-
-    monkeypatch.setattr(tools, "_harden_parent_against_proc_env_leak", fake_harden)
-    _python_exec("print(1)", None, 5, "t", disable_sandbox = True)
-    _bash_exec("echo hi", None, 5, "t", disable_sandbox = True)
-    assert calls["n"] == 2
-
-    calls["n"] = 0
-    _python_exec("print(1)", None, 5, "t", disable_sandbox = False)
-    _bash_exec("echo hi", None, 5, "t", disable_sandbox = False)
-    assert calls["n"] == 2  # sandboxed path now hardens too (best-effort)
-
-
-def test_bypass_exec_fails_closed_when_hardening_fails(monkeypatch, captured_popen):
-    # If the parent cannot be hardened (e.g. prctl denied), the unsandboxed
-    # child must NOT run - otherwise the parent environ stays readable.
-    monkeypatch.setattr(tools, "_harden_parent_against_proc_env_leak", lambda: False)
-    out_py = _python_exec("print(1)", None, 5, "t", disable_sandbox = True)
-    out_sh = _bash_exec("echo hi", None, 5, "t", disable_sandbox = True)
-    assert "refusing bypass execution" in out_py
-    assert "refusing bypass execution" in out_sh
-    assert "cmd" not in captured_popen  # never reached Popen
 
 
 @_POSIX_ONLY

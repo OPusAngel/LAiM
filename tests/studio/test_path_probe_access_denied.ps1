@@ -65,7 +65,7 @@ $root = Join-Path ([System.IO.Path]::GetTempPath()) ("uns_acl_" + [guid]::NewGui
 $locked = Join-Path $root "llama.cpp"
 New-Item -ItemType Directory -Force -Path $locked | Out-Null
 $meta = Join-Path $locked "LAiM_PREBUILT_INFO.json"
-Set-Content -LiteralPath $meta -Value '{"release_tag":"app-1","published_repo":"LAiMai/llama.cpp"}'
+Set-Content -LiteralPath $meta -Value '{"release_tag":"app-1","published_repo":"unslothai/llama.cpp"}'
 
 $onWindows = ($env:OS -eq "Windows_NT")
 function Set-Denied([bool]$on) {

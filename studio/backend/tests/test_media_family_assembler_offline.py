@@ -176,7 +176,7 @@ def _drive_resolve_gguf(monkeypatch, *, cached_here, local_files_only):
 
     monkeypatch.setattr(huggingface_hub, "hf_hub_download", _download, raising = False)
     diffusion_mod.DiffusionBackend()._resolve_gguf_path(
-        "LAiM/FLUX.1-dev-GGUF",
+        "unsloth/FLUX.1-dev-GGUF",
         "flux1-dev-Q4_K_M.gguf",
         None,
         local_files_only = local_files_only,

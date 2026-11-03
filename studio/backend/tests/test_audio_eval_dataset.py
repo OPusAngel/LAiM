@@ -61,7 +61,7 @@ def audio_trainer(monkeypatch):
     # Avoid MLX substitution on Apple silicon.
     monkeypatch.setattr(tmod, "should_use_mlx_training_backend", lambda *a, **k: False)
     t = tmod.LAiMTrainer()
-    t.model_name = "LAiM/csm-1b"
+    t.model_name = "unsloth/csm-1b"
     return t
 
 
@@ -336,7 +336,7 @@ def test_the_generic_sft_path_uses_the_same_cadence_gate(
     audio_trainer._audio_type = "bicodec"
     audio_trainer.model = object()
     audio_trainer.tokenizer = object()
-    audio_trainer.model_name = "LAiM/spark-tts"
+    audio_trainer.model_name = "unsloth/spark-tts"
 
     rows = [{"text": "a"}, {"text": "b"}]
     try:

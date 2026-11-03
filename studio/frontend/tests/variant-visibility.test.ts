@@ -128,10 +128,10 @@ test("clicking a row held back by its probe opens it", () => {
   // pending probe means it renders nothing.
   const next = toggleAutoExpandedRow(
     { collapsed: new Set(), reopened: new Set() },
-    { repoId: "LAiM/Qwen3-8B-GGUF", showing: false },
+    { repoId: "unsloth/Qwen3-8B-GGUF", showing: false },
   );
   assert.deepEqual([...next.collapsed], []);
-  assert.deepEqual([...next.reopened], ["LAiM/Qwen3-8B-GGUF"]);
+  assert.deepEqual([...next.reopened], ["unsloth/Qwen3-8B-GGUF"]);
   // Reopened rows stop following the preference, so the wait no longer applies.
   assert.equal(
     shouldMountVariantExpander({
@@ -145,10 +145,10 @@ test("clicking a row held back by its probe opens it", () => {
 
 test("clicking a showing row collapses it and clears the reopen mark", () => {
   const next = toggleAutoExpandedRow(
-    { collapsed: new Set(), reopened: new Set(["LAiM/Qwen3-8B-GGUF"]) },
-    { repoId: "LAiM/Qwen3-8B-GGUF", showing: true },
+    { collapsed: new Set(), reopened: new Set(["unsloth/Qwen3-8B-GGUF"]) },
+    { repoId: "unsloth/Qwen3-8B-GGUF", showing: true },
   );
-  assert.deepEqual([...next.collapsed], ["LAiM/Qwen3-8B-GGUF"]);
+  assert.deepEqual([...next.collapsed], ["unsloth/Qwen3-8B-GGUF"]);
   assert.deepEqual([...next.reopened], []);
 });
 

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
+
 export type ChatArtifactSource = "tool" | "fence";
 
 export type ChatArtifactKind = "html" | "react";
@@ -27,11 +29,11 @@ export interface ChatArtifactInput {
   isStreaming?: boolean;
 }
 
-const DEFAULT_ARTIFACT_TITLE = "HTML preview";
+const defaultArtifactTitle = () => translate("uxComponents.hTMLPreview1b19v");
 
 export function normalizeArtifactTitle(title?: string | null): string {
   const trimmed = title?.trim();
-  return trimmed && trimmed.length > 0 ? trimmed : DEFAULT_ARTIFACT_TITLE;
+  return trimmed && trimmed.length > 0 ? trimmed : defaultArtifactTitle();
 }
 
 const NAMED_ENTITIES: Record<string, string> = {

@@ -28,6 +28,8 @@ import {
   applyExecutionStatusSnapshot,
   toExecutionLogLine,
 } from "./runtime";
+import { translate } from "@/i18n";
+
 
 type TrackRecipeExecutionParams = {
   label: string;
@@ -195,7 +197,7 @@ export async function trackRecipeExecution({
           ...latestExecution,
           status: "cancelled",
           finishedAt: Date.now(),
-          error: latestExecution.error ?? "Run cancelled.",
+          error: latestExecution.error ?? translate("uxRecipestudio.runCancelledh3s5h"),
         };
         onUpsert(latestExecution);
         return;
@@ -264,7 +266,7 @@ export async function trackRecipeExecution({
       };
       onUpsert(latestExecution);
       if (notify) {
-        toastError(`${label} failed`, message);
+        toastError(translate("uxRecipestudio.failedvskkh", { p1: label }), message);
       }
       return { success: false, terminal: false };
     }
@@ -364,9 +366,9 @@ export async function trackRecipeExecution({
       if (kind === "preview") {
         onSetPreviewErrors([]);
         onPreviewSuccess?.();
-        toastSuccess(`Preview generated (${rows} rows).`);
+        toastSuccess(translate("uxRecipestudio.previewGeneratedRowsxugkw", { p1: rows }));
       } else {
-        toastSuccess("Full run completed.");
+        toastSuccess(translate("uxRecipestudio.fullRunCompleted9vuqz"));
       }
     }
     return { success: true, terminal: true };
@@ -376,12 +378,12 @@ export async function trackRecipeExecution({
     latestExecution = {
       ...latestExecution,
       status: "cancelled",
-      error: latestExecution.error ?? "Run cancelled.",
+      error: latestExecution.error ?? translate("uxRecipestudio.runCancelledh3s5h"),
       finishedAt: latestExecution.finishedAt ?? Date.now(),
     };
     onUpsert(latestExecution);
     if (notify) {
-      toastError(`${label} cancelled`, "The execution was cancelled.");
+      toastError(translate("uxRecipestudio.cancelledb5s3t", { p1: label }), translate("uxRecipestudio.theExecutionWasCancelledvxhx9"));
     }
     return { success: false, terminal: true };
   }
@@ -394,7 +396,7 @@ export async function trackRecipeExecution({
   };
   onUpsert(latestExecution);
   if (notify) {
-    toastError(`${label} failed`, latestExecution.error ?? "Execution failed.");
+    toastError(translate("uxRecipestudio.failedvskkh", { p1: label }), latestExecution.error ?? translate("uxRecipestudio.executionFailedooxcf"));
   }
   return { success: false, terminal: true };
 }

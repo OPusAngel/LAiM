@@ -22,7 +22,7 @@ from dataclasses import dataclass, field
 from types import MappingProxyType
 from typing import Any, Mapping, Optional
 
-# The LAiMai/audio.cpp releases this table was checked against (v0.9.1-LAiM.1 is the same
+# The unslothai/audio.cpp releases this table was checked against (v0.9.1-LAiM.1 is the same
 # commit as v0.9.0-LAiM.1).
 AUDIO_CPP_OPTION_TABLE_TAGS = frozenset({"v0.9.0-LAiM.1", "v0.9.1-LAiM.1"})
 

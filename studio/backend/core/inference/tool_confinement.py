@@ -181,9 +181,9 @@ def _readable_account_roots() -> list[str]:
 
 
 def _writable_roots() -> list[str]:
-    from core.inference.tools import sandbox_root
+    from core.inference.tools import session_workdir_root
     from utils.paths.storage_roots import project_workspaces_root, tmp_root
-    return _ensure_dirs((sandbox_root(), tmp_root(), project_workspaces_root()))
+    return _ensure_dirs((session_workdir_root(), tmp_root(), project_workspaces_root()))
 
 
 def _hf_cache_roots() -> tuple[str, ...]:
@@ -196,7 +196,7 @@ def _hf_cache_roots() -> tuple[str, ...]:
 
 
 def _protected_roots() -> list[str]:
-    from core.inference.tools import shared_sandbox_root
+    from core.inference.tools import shared_workdir_root
     from utils.paths.storage_roots import (
         shared_project_workspaces_root,
         shared_tmp_root,
@@ -205,7 +205,7 @@ def _protected_roots() -> list[str]:
     return _with_shared_bases(
         _existing((studio_root(),)),
         (
-            shared_sandbox_root(),
+            shared_workdir_root(),
             shared_project_workspaces_root(),
             shared_tmp_root(),
             *_hf_cache_roots(),
@@ -324,7 +324,7 @@ def _device_nodes() -> list[str]:
     return _existing((*_DEVICE_NODES, *_ACCELERATOR_NODES, *sorted(glob.glob("/dev/nvidia[0-9]*"))))
 
 
-def _landlock_rules(abi: int, sandbox_site_dir: str) -> list[tuple[str, int]]:
+def _landlock_rules(abi: int, tools_site_dir: str) -> list[tuple[str, int]]:
     handled = _handled_mask(abi)
     read = _FS_READ_FILE | _FS_READ_DIR | _FS_EXECUTE
     device = _FS_READ_FILE | _FS_WRITE_FILE | (_FS_IOCTL_DEV if abi >= 5 else 0)
@@ -339,7 +339,7 @@ def _landlock_rules(abi: int, sandbox_site_dir: str) -> list[tuple[str, int]]:
         _grant_excluding(path, read, system_protected, rules)
     for path in _interpreter_roots():
         _grant_excluding(path, read, protected, rules)
-    for path in _existing((sandbox_site_dir,)):
+    for path in _existing((tools_site_dir,)):
         _grant_excluding(path, read, protected, rules)
     for path in _readable_account_roots():
         rules.append((path, read))
@@ -400,12 +400,12 @@ def _landlock_preexec(
 _MIN_LANDLOCK_ABI = 6
 
 
-def _linux_confinement(sandbox_site_dir: str) -> Optional[Confinement]:
+def _linux_confinement(tools_site_dir: str) -> Optional[Confinement]:
     abi = landlock_abi()
     if abi < _MIN_LANDLOCK_ABI:
         return None
     handled = _handled_mask(abi)
-    rules = _landlock_rules(abi, sandbox_site_dir)
+    rules = _landlock_rules(abi, tools_site_dir)
     return Confinement(
         mechanism = f"landlock-abi{abi}",
         preexec = partial(_landlock_preexec, handled, rules, _SCOPE_SIGNAL),
@@ -477,11 +477,11 @@ def macos_profile(
     return "\n".join(lines) + "\n"
 
 
-def _macos_confinement(sandbox_site_dir: str) -> Optional[Confinement]:
+def _macos_confinement(tools_site_dir: str) -> Optional[Confinement]:
     sandbox_exec = shutil.which("sandbox-exec")
     if not sandbox_exec:
         return None
-    from core.inference.tools import shared_sandbox_root
+    from core.inference.tools import shared_workdir_root
     from utils.paths.storage_roots import (
         shared_project_workspaces_root,
         shared_tmp_root,
@@ -500,13 +500,13 @@ def _macos_confinement(sandbox_site_dir: str) -> Optional[Confinement]:
             "/opt",
             "/Applications",
             *_interpreter_roots(),
-            sandbox_site_dir,
+            tools_site_dir,
         )
     )
     writable_roots = _writable_roots()
     hidden_roots = _with_shared_bases(
         _existing((str(studio_root()), str(shared_tmp_root()), os.path.expanduser("~"))),
-        (shared_sandbox_root(), str(shared_project_workspaces_root()), *_hf_cache_roots()),
+        (shared_workdir_root(), str(shared_project_workspaces_root()), *_hf_cache_roots()),
     )
     profile = macos_profile(
         read_roots = read_roots,
@@ -517,15 +517,15 @@ def _macos_confinement(sandbox_site_dir: str) -> Optional[Confinement]:
     return Confinement(mechanism = "sandbox-exec", wrapper = (sandbox_exec, "-p", profile))
 
 
-def account_confinement(sandbox_site_dir: str) -> Optional[Confinement]:
+def account_confinement(tools_site_dir: str) -> Optional[Confinement]:
     """Confinement for the account's next tool child; ``None`` for owner, raises on bad host."""
     if is_owner_context():
         return None
     confinement = None
     if sys.platform == "linux":
-        confinement = _linux_confinement(sandbox_site_dir)
+        confinement = _linux_confinement(tools_site_dir)
     elif sys.platform == "darwin":
-        confinement = _macos_confinement(sandbox_site_dir)
+        confinement = _macos_confinement(tools_site_dir)
     if confinement is not None:
         return confinement
     if unconfined_tools_allowed():

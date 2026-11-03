@@ -2592,26 +2592,7 @@ def _normalize_permission_mode(value: Any) -> Any:
     return value
 
 
-def _normalize_sandbox_level(value: Any) -> Any:
-    # Unlike permission_mode, an unknown level is a 422: degrading it either way would guess at
-    # the isolation the user picked. Absent or null is "high", today's behaviour.
-    if value is None:
-        return "high"
-    if isinstance(value, str):
-        return value.strip().lower()
-    return value
-
-
-_SANDBOX_LEVEL_DESCRIPTION = (
-    "[x-LAiM] Sandbox level for the Python and Terminal tools. 'high' (default) runs them "
-    "in the OS sandbox when it works and on software safeguards otherwise. 'low' runs them on "
-    "software safeguards only, so on a streaming UI chat 'off' still asks before their "
-    "high-risk calls; elsewhere 'off' never prompts, as before. Full access overrides both. "
-    "Case-insensitive; any other value is rejected."
-)
-
-
-class SandboxAttachment(BaseModel):
+class SessionAttachment(BaseModel):
     sha256: str = Field(..., pattern = r"^[0-9a-f]{64}$")
     name: str = Field(..., max_length = 1024)
 
@@ -2625,7 +2606,7 @@ class ChatCompletionRequest(BaseModel):
     # Accept unknown fields so future OpenAI fields aren't dropped before route
     # code runs. Mirrors AnthropicMessagesRequest and ResponsesRequest.
     model_config = {"extra": "allow"}
-    # "off" with the client's own confirm_tool_calls=false: no prompt at all, even without OS isolation.
+    # "off" with the client's own confirm_tool_calls=false: no prompt at all.
     _off_confirm_opt_out: bool = PrivateAttr(default = False)
 
     model: str = Field(
@@ -2857,7 +2838,7 @@ class ChatCompletionRequest(BaseModel):
     )
     bypass_permissions: Optional[bool] = Field(
         False,
-        description = "[x-LAiM] Bypass Permissions: when true, skip the tool-call confirmation gate AND disable the python/terminal execution sandbox (safety checks, command blocklist, resource limits). edit_file is likewise unconfined: an absolute path resolves as written and edits the real file there, instead of being held to the conversation's working directory. Secret env vars are still stripped. Takes precedence over confirm_tool_calls.",
+        description = "[x-LAiM] Bypass Permissions: when true, skip the tool-call confirmation gate. Python, Terminal and edit_file then run with the full rights of the account LAiM Studio runs under, on the real filesystem, with no safety checks and no command blocklist; an absolute path in edit_file resolves as written and edits the real file there. Secret env vars are still stripped. Takes precedence over confirm_tool_calls.",
     )
     permission_mode: Optional[str] = Field(
         None,
@@ -2867,16 +2848,12 @@ class ChatCompletionRequest(BaseModel):
             "own (needs a streaming request to deliver prompts). 'auto' ('Approve for "
             "me') only pauses calls detected as high risk (credential reads, privilege "
             "escalation, destructive/persistence, network exfil); ordinary calls run "
-            "immediately, and the sandbox stays on. 'full' is equivalent to "
-            "bypass_permissions=true (no confirmation, no sandbox). Unset defaults to "
+            "immediately. 'full' is equivalent to "
+            "bypass_permissions=true (nothing pauses). Unset defaults to "
             "'auto' for the per-call gate; a non-streaming request without an explicit "
             "mode cannot prompt and runs the loop. An unrecognized value (e.g. from a "
             "newer client) is treated as 'ask'."
         ),
-    )
-    sandbox_level: Literal["high", "low"] = Field(
-        "high",
-        description = _SANDBOX_LEVEL_DESCRIPTION,
     )
     auto_heal_tool_calls: Optional[bool] = Field(
         True,
@@ -2975,14 +2952,14 @@ class ChatCompletionRequest(BaseModel):
     )
     session_id: Optional[str] = Field(
         None,
-        description = "[x-LAiM] Session/thread ID for scoping tool execution sandbox.",
+        description = "[x-LAiM] Session/thread ID: scopes the chat's own working folder for tool execution.",
     )
-    sandbox_attachments: Optional[list[SandboxAttachment]] = Field(
+    session_attachments: Optional[list[SessionAttachment]] = Field(
         None,
         max_length = 64,
         description = (
             "[x-LAiM] Chat attachment originals (hashes from POST /api/chat/attachment-originals) "
-            "to copy into the session sandbox before the tool loop, when the python tool is enabled."
+            "to copy into the chat's working folder before the tool loop, when the python tool is enabled."
         ),
     )
     thread_id: Optional[str] = Field(
@@ -3278,11 +3255,6 @@ class ChatCompletionRequest(BaseModel):
     def _map_thinking_to_enable_thinking(self) -> "ChatCompletionRequest":
         return resolve_thinking_onto_enable_thinking(self)
 
-    @field_validator("sandbox_level", mode = "before")
-    @classmethod
-    def _coerce_sandbox_level(cls, value: Any) -> Any:
-        return _normalize_sandbox_level(value)
-
     @field_validator("permission_mode", mode = "before")
     @classmethod
     def _coerce_permission_mode(cls, value: Any) -> Any:
@@ -3401,14 +3373,10 @@ class ChatCountTokensRequest(ReasoningControlsRequest):
     permission_mode: Optional[str] = Field(
         None,
         description = "[x-LAiM] Permission level the completion would send. 'full' swaps the "
-        "python/terminal descriptions for the unsandboxed pair and adds a sentence to the tool "
+        "python/terminal descriptions for the unrestricted pair and adds a sentence to the tool "
         "nudge; 'ask' holds the tool loop's first-pass retrieval behind its confirmation gate, so "
         "a pending turn under a retrieval scope is countable. A count that omits this prices a "
         "prompt the completion will not send, or declines one it could have priced.",
-    )
-    sandbox_level: Literal["high", "low"] = Field(
-        "high",
-        description = _SANDBOX_LEVEL_DESCRIPTION,
     )
     bypass_permissions: Optional[bool] = Field(
         None,
@@ -3427,11 +3395,6 @@ class ChatCountTokensRequest(ReasoningControlsRequest):
         description = "[x-LAiM] Tool-call budget the completion would send. Zero suppresses the "
         "tool loop, so a count that never sees it prices a catalog the relay does not render.",
     )
-
-    @field_validator("sandbox_level", mode = "before")
-    @classmethod
-    def _coerce_sandbox_level(cls, value: Any) -> Any:
-        return _normalize_sandbox_level(value)
 
     @field_validator("permission_mode", mode = "before")
     @classmethod
@@ -4292,15 +4255,11 @@ class AnthropicMessagesRequest(BaseModel):
     cancel_id: Optional[str] = None
     bypass_permissions: Optional[bool] = Field(
         False,
-        description = "[x-LAiM] Bypass Permissions: when true, disable the python/terminal execution sandbox (safety checks, command blocklist, resource limits) for server-side tool calls. Secret env vars are still stripped. Declared explicitly (not relied on via extra='allow') so omitted requests default to False instead of raising AttributeError.",
+        description = "[x-LAiM] Bypass Permissions: when true, server-side python/terminal tool calls run with the full rights of the account LAiM Studio runs under, with no safety checks and no command blocklist. Secret env vars are still stripped. Declared explicitly (not relied on via extra='allow') so omitted requests default to False instead of raising AttributeError.",
     )
     permission_mode: Optional[str] = Field(
         None,
-        description = "[x-LAiM] Permission level for local tool calls: 'ask' pauses every call, 'auto' ('Approve for me') only pauses calls detected as high risk, 'off' ('Run automatically') never pauses while Python and Terminal run in the OS sandbox and otherwise pauses their high-risk calls in a streaming UI chat, 'full' equals bypass_permissions=true. Unset defaults to 'auto' for the per-call gate; a non-streaming request without an explicit mode runs the loop. An unrecognized value (e.g. from a newer client) is treated as 'ask'. Declared explicitly so omitted requests default to None instead of raising AttributeError.",
-    )
-    sandbox_level: Literal["high", "low"] = Field(
-        "high",
-        description = _SANDBOX_LEVEL_DESCRIPTION,
+        description = "[x-LAiM] Permission level for local tool calls: 'ask' pauses every call, 'auto' ('Approve for me') only pauses calls detected as high risk, 'off' ('Run automatically') never pauses a call: Python and Terminal run on the real system with the app's own rights, 'full' equals bypass_permissions=true. Unset defaults to 'auto' for the per-call gate; a non-streaming request without an explicit mode runs the loop. An unrecognized value (e.g. from a newer client) is treated as 'ask'. Declared explicitly so omitted requests default to None instead of raising AttributeError.",
     )
     auto_heal_tool_calls: Optional[bool] = Field(
         True,
@@ -4406,11 +4365,6 @@ class AnthropicMessagesRequest(BaseModel):
             ]
         return model
 
-    @field_validator("sandbox_level", mode = "before")
-    @classmethod
-    def _coerce_sandbox_level(cls, value: Any) -> Any:
-        return _normalize_sandbox_level(value)
-
     @field_validator("permission_mode", mode = "before")
     @classmethod
     def _coerce_permission_mode(cls, value: Any) -> Any:
@@ -4512,7 +4466,7 @@ class DiffusionLoadRequest(BaseModel):
         "(single-file GGUF transformer, dequantised on-device), single_file (single-file "
         "safetensors transformer, e.g. fp8), or pipeline (a full diffusers repo via "
         "from_pretrained, embedded quant auto-applied). A single_file .safetensors loads from "
-        "any repo; pipeline loads are restricted to LAiM/* repos, the official base repos, "
+        "any repo; pipeline loads are restricted to unsloth/* repos, the official base repos, "
         "or a local path.",
     )
     base_repo: Optional[str] = Field(
@@ -6117,7 +6071,7 @@ class VideoLoadRequest(BaseModel):
         "(single-file GGUF transformer, dequantised on-device), single_file (single-file "
         "safetensors transformer, e.g. fp8), or pipeline (a full diffusers repo via "
         "from_pretrained). A single_file .safetensors loads from any repo; pipeline loads are "
-        "restricted to LAiM/* repos, the official family base repos, or a local path.",
+        "restricted to unsloth/* repos, the official family base repos, or a local path.",
     )
     base_repo: Optional[str] = Field(
         None,

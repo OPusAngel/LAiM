@@ -1022,7 +1022,7 @@ test("unclosed backtick runs of many widths do not rescan the paragraph", () => 
 
 test("a reference label past the old cap still resolves against its definition", () => {
   // A label resolves only when BOTH probes admit it, and the definition one moved to 999 while
-  // this one stayed at 200, so 201..999 stayed on the blocks path (LAiMai/LAiM#9540).
+  // this one stayed at 200, so 201..999 stayed on the blocks path (OPusAngel/LAiM#9540).
   for (const length of [200, 201, 400, 999]) {
     const label = "L".repeat(length);
     const reply = `See [guide][${label}].\n\n[${label}]: https://x.test/a\n`;

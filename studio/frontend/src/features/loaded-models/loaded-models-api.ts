@@ -35,6 +35,8 @@ import {
   sttEngineStatus,
   verifyResident,
 } from "./loaded-models-sources";
+import { translate } from "@/i18n";
+
 
 /** What describeInferenceStatus reads, without importing the chat types path. */
 type InferenceStatus = NonNullable<
@@ -275,14 +277,14 @@ export async function ejectLoadedModel(
     }
     case "stt": {
       const engine = entry.sttEngine;
-      if (!engine) throw new Error("This row names no dictation engine.");
+      if (!engine) throw new Error(translate("uxLoadedmodels.thisRowNamesNond5ql"));
       // Dictation loads on demand and releases when idle, so the engine's
       // resident model can change with no user action at all.
       const before = await bounded(readSttStatus);
       // Unreadable status: say so rather than unload blind or claim success.
       if (!before) {
         throw new Error(
-          "Could not read dictation status, so nothing was ejected.",
+          translate("uxLoadedmodels.couldNotReadDictation3whdr"),
         );
       }
       const resident = sttEngineStatus(before, engine);

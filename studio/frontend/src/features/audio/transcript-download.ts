@@ -9,6 +9,8 @@ import {
   exportFileName,
   exportTranscript,
 } from "./transcript-export";
+import { translate } from "@/i18n";
+
 
 export async function downloadTranscript(
   format: TranscriptExportFormat,
@@ -23,7 +25,7 @@ export async function downloadTranscript(
       toast.error(
         error instanceof Error
           ? error.message
-          : "Could not download transcript.",
+          : translate("uxAudio.couldNotDownloadTranscript1gm3f"),
       );
     return false;
   }

@@ -34,7 +34,7 @@ BASE = os.environ["BASE_URL"]
 NEW = os.environ.get("STUDIO_NEW_PW", "ModelCfg-NEW-2026!")
 LOGIN_PW = os.environ.get("STUDIO_LOGIN_PW")
 LOGIN_USER = os.environ.get("STUDIO_LOGIN_USER", "LAiM")
-GGUF_REPO = os.environ.get("GGUF_REPO", "LAiM/gemma-3-270m-it-GGUF")
+GGUF_REPO = os.environ.get("GGUF_REPO", "unsloth/gemma-3-270m-it-GGUF")
 GGUF_VARIANT = os.environ.get("GGUF_VARIANT", "UD-Q4_K_XL")
 MODEL_HINT = os.environ.get("STUDIO_MODEL_HINT", "gemma-3-270m")
 # A valid (>=128, multiple of 128, below the 32768 ceiling) non-default Context Length.
@@ -1166,7 +1166,7 @@ with sync_playwright() as p:
 
         # Idempotency: a second reload with a different legacy entry must not re-run the migration.
         if migrated_ctx:
-            probe_key = "LAiM/__idem_probe__::Q4_K_M"
+            probe_key = "unsloth/__idem_probe__::Q4_K_M"
             # Seed at document start so no racing write lands in the map compared key-for-key.
             seed_legacy_for_next_document(
                 {probe_key: {"contextLength": DISTINCT_CTX + 2048, "tensorParallel": True}},

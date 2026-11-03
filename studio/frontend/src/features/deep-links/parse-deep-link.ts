@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { isLAiMProtocol } from "@/config/deep-link";
+
 const MAX_REPO_ID_SEGMENT_LENGTH = 96;
 const MAX_GGUF_FILE_LENGTH = 512;
 const REPO_SEGMENT = /^[A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?$/;
@@ -55,11 +57,8 @@ export function parseLAiMDeepLink(
   rawUrl: string,
 ): LAiMDeepLinkIntent | null {
   const queryIndex = rawUrl.indexOf("?");
-  const target = queryIndex === -1 ? rawUrl : rawUrl.slice(0, queryIndex);
-  if (
-    target !== "LAiM://open_from_hf" &&
-    target !== "LAiM://open_from_hf/"
-  ) {
+  const target = (queryIndex === -1 ? rawUrl : rawUrl.slice(0, queryIndex)).toLowerCase();
+  if (target !== "laim://open_from_hf" && target !== "laim://open_from_hf/") {
     return null;
   }
 
@@ -71,7 +70,7 @@ export function parseLAiMDeepLink(
   }
 
   if (
-    url.protocol !== "LAiM:" ||
+    !isLAiMProtocol(url.protocol) ||
     url.hostname !== "open_from_hf" ||
     (url.pathname !== "" && url.pathname !== "/") ||
     url.username !== "" ||

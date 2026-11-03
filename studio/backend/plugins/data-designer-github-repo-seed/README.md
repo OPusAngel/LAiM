@@ -38,7 +38,7 @@ can treat it like any other seed table.
   "seed_config": {
     "source": {
       "seed_type": "github_repo",
-      "repos": ["LAiMai/LAiM", "LAiMai/LAiM-zoo"],
+      "repos": ["OPusAngel/LAiM", "OPusAngel/LAiM-zoo"],
       "token": "",
       "item_types": ["issues", "pulls"],
       "limit": 100,

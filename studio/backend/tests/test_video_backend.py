@@ -764,7 +764,7 @@ def test_validate_rejects_unknown_and_untrusted():
     )
     assert fam.name == "ltx-2"
     with pytest.raises(ValueError, match = "filename"):
-        backend.validate_load_request("LAiM/LTX-2.3-GGUF", model_kind = "gguf")
+        backend.validate_load_request("unsloth/LTX-2.3-GGUF", model_kind = "gguf")
 
 
 def test_validate_gates_base_repo_and_local_paths(tmp_path):
@@ -772,14 +772,14 @@ def test_validate_gates_base_repo_and_local_paths(tmp_path):
     # An arbitrary remote base_repo must not reach from_pretrained via a GGUF pick.
     with pytest.raises(ValueError, match = "base_repo"):
         backend.validate_load_request(
-            "LAiM/LTX-2.3-GGUF",
+            "unsloth/LTX-2.3-GGUF",
             gguf_filename = "x.gguf",
             model_kind = "gguf",
             base_repo = "evil/companions",
         )
     # The family base and local dirs stay allowed.
     fam = backend.validate_load_request(
-        "LAiM/LTX-2.3-GGUF",
+        "unsloth/LTX-2.3-GGUF",
         gguf_filename = "x.gguf",
         model_kind = "gguf",
         base_repo = "Lightricks/LTX-2",
@@ -804,21 +804,21 @@ def test_validate_rejects_kind_extension_mismatch(tmp_path):
     # A kind/extension mismatch must be rejected BEFORE the GPU handoff, not fail in the wrong single-file loader after eviction.
     with pytest.raises(ValueError, match = "needs model_kind 'gguf'"):
         backend.validate_load_request(
-            "LAiM/LTX-2.3-GGUF",
+            "unsloth/LTX-2.3-GGUF",
             gguf_filename = "x.gguf",
             model_kind = "single_file",
             family_override = "ltx-2",
         )
     with pytest.raises(ValueError, match = "requires a .gguf"):
         backend.validate_load_request(
-            "LAiM/LTX-2.3",
+            "unsloth/LTX-2.3",
             gguf_filename = "x.safetensors",
             model_kind = "gguf",
             family_override = "ltx-2",
         )
     with pytest.raises(ValueError, match = "not a loadable single-file checkpoint"):
         backend.validate_load_request(
-            "LAiM/LTX-2.3",
+            "unsloth/LTX-2.3",
             gguf_filename = "readme.md",
             model_kind = "single_file",
             family_override = "ltx-2",
@@ -879,7 +879,7 @@ def test_validate_rejects_windows_shaped_missing_checkpoint(tmp_path):
         )
     # A bare "org/name" Hub id (no path shape) is still left for the background load to resolve.
     fam = backend.validate_load_request(
-        "LAiM/LTX-2.3-GGUF",
+        "unsloth/LTX-2.3-GGUF",
         gguf_filename = "ltx.gguf",
         family_override = "ltx-2",
     )
@@ -962,7 +962,7 @@ def test_validate_rejects_local_base_repo_without_model_index(tmp_path):
     bad_base.mkdir()
     with pytest.raises(ValueError, match = "model_index.json"):
         backend.validate_load_request(
-            "LAiM/LTX-2.3-GGUF",
+            "unsloth/LTX-2.3-GGUF",
             gguf_filename = "x.gguf",
             model_kind = "gguf",
             base_repo = str(bad_base),
@@ -977,7 +977,7 @@ def test_validate_rejects_local_base_repo_without_model_index(tmp_path):
     (bad_base / "scheduler").mkdir()
     (bad_base / "scheduler" / "scheduler_config.json").write_text("{}")
     fam = backend.validate_load_request(
-        "LAiM/LTX-2.3-GGUF",
+        "unsloth/LTX-2.3-GGUF",
         gguf_filename = "x.gguf",
         model_kind = "gguf",
         base_repo = str(bad_base),
@@ -992,9 +992,9 @@ def test_validate_rejects_gguf_repo_as_pipeline():
     backend = VideoBackend()
     # A -GGUF repo with no quant filename resolves to pipeline kind and would only fail minutes later, after eviction.
     with pytest.raises(ValueError, match = "pick one of its .gguf files"):
-        backend.validate_load_request("LAiM/LTX-2.3-GGUF")
+        backend.validate_load_request("unsloth/LTX-2.3-GGUF")
     with pytest.raises(ValueError, match = "pick one of its .gguf files"):
-        backend.validate_load_request("LAiM/Wan2.2-TI2V-5B-GGUF/")
+        backend.validate_load_request("unsloth/Wan2.2-TI2V-5B-GGUF/")
 
 
 def test_detect_load_family_filename_fallback():
@@ -2132,7 +2132,7 @@ def test_video_auto_toggle_not_armed_when_the_dit_cannot_cache(fake_runtime, tmp
 
 
 def test_video_gguf_status_does_not_call_a_bf16_gguf_quantized(fake_runtime, tmp_path):
-    # LAiM/LTX-2.5-GGUF also ships a dense BF16 GGUF: the reason names the file's quant, not "quantized weights".
+    # unsloth/LTX-2.5-GGUF also ships a dense BF16 GGUF: the reason names the file's quant, not "quantized weights".
     filename = "ltx-2.3-22b-distilled-1.1-BF16.gguf"
     (tmp_path / filename).write_bytes(b"w")
     backend = VideoBackend()
@@ -2496,7 +2496,7 @@ def test_begin_load_refuses_dense_quant_on_a_non_pipeline_video_kind(fake_runtim
     backend = VideoBackend()
     with pytest.raises(RuntimeError) as excinfo:
         backend.begin_load(
-            "LAiM/LTX-2.3-GGUF",
+            "unsloth/LTX-2.3-GGUF",
             gguf_filename = "ltx-2.3-Q4_K_M.gguf",
             model_kind = "gguf",
             transformer_quant = "fp8",
@@ -2590,7 +2590,7 @@ def test_wan_a14b_refuses_unpaired_single_file_loads(fake_runtime):
     assert fam.name == "wan2.2-t2v-a14b"
     # The single-DiT 5B family still accepts GGUF.
     fam = backend.validate_load_request(
-        "LAiM/Wan2.2-TI2V-5B-GGUF",
+        "unsloth/Wan2.2-TI2V-5B-GGUF",
         gguf_filename = "Wan2.2-TI2V-5B-Q4_K_M.gguf",
     )
     assert fam.name == "wan2.2-ti2v-5b"
@@ -3108,7 +3108,7 @@ def _plan_api_ltx23(monkeypatch):
     _plan_api(
         monkeypatch,
         {
-            "LAiM/LTX-2.3-GGUF": _LTX23_REPO_SIBLINGS,
+            "unsloth/LTX-2.3-GGUF": _LTX23_REPO_SIBLINGS,
             "Lightricks/LTX-2": _LTX_BASE_SIBLINGS,
         },
     )
@@ -3116,7 +3116,7 @@ def _plan_api_ltx23(monkeypatch):
 
 def _ltx23_download_plan(**kwargs):
     return VideoBackend().download_plan(
-        "LAiM/LTX-2.3-GGUF",
+        "unsloth/LTX-2.3-GGUF",
         gguf_filename = "ltx-2.3-22b-distilled.gguf",
         family_override = "ltx-2",
         **kwargs,
@@ -3176,7 +3176,7 @@ def test_download_plan_omits_cached_video_files_but_keeps_the_footprint(monkeypa
     staged = {f for e in plan["entries"] for f in e["files"]}
     assert "ltx-2.3-22b-distilled.gguf" in staged, "the scoped claim stays stable as the repo warms"
     assert not any(
-        e["checkpoint"] for e in plan["entries"] if e["repo_id"] == "LAiM/LTX-2.3-GGUF"
+        e["checkpoint"] for e in plan["entries"] if e["repo_id"] == "unsloth/LTX-2.3-GGUF"
     )
     assert staged, "its uncached companions still have to be fetched"
     assert plan["checkpoint_bytes"] > 0
@@ -3265,7 +3265,7 @@ def test_download_plan_restages_a_video_base_split_across_cache_roots(monkeypatc
 
     plan = _ltx23_download_plan()
 
-    entry = next(e for e in plan["entries"] if e["repo_id"] == "LAiM/LTX-2.3-GGUF")
+    entry = next(e for e in plan["entries"] if e["repo_id"] == "unsloth/LTX-2.3-GGUF")
     expected_scope = {s.rfilename for s in _LTX23_REPO_SIBLINGS} - {
         "vae/ltx-2.3-22b-dev_video_vae.safetensors"
     }
@@ -3306,7 +3306,7 @@ def test_a_companion_only_entry_is_not_labelled_the_checkpoint(monkeypatch):
 
     plan = _ltx23_download_plan()
 
-    entry = next(e for e in plan["entries"] if e["repo_id"] == "LAiM/LTX-2.3-GGUF")
+    entry = next(e for e in plan["entries"] if e["repo_id"] == "unsloth/LTX-2.3-GGUF")
     assert "ltx-2.3-22b-distilled.gguf" in entry["files"]
     assert entry["bytes"] == 2_400_000_000 + 200_000_000 + 900_000_000
     assert entry["checkpoint"] is False, "companion files only, so not the model file"
@@ -3319,7 +3319,7 @@ def test_the_checkpoint_entry_is_labelled_when_its_file_is_staged(monkeypatch):
 
     plan = _ltx23_download_plan()
 
-    entry = next(e for e in plan["entries"] if e["repo_id"] == "LAiM/LTX-2.3-GGUF")
+    entry = next(e for e in plan["entries"] if e["repo_id"] == "unsloth/LTX-2.3-GGUF")
     assert "ltx-2.3-22b-distilled.gguf" in entry["files"]
     assert entry["checkpoint"] is True
 
@@ -3330,7 +3330,7 @@ def test_h3_native_download_plan_stages_the_complete_runtime(monkeypatch):
     _plan_api(
         monkeypatch,
         {
-            "LAiM/MiniMax-H3-GGUF": [
+            "unsloth/MiniMax-H3-GGUF": [
                 _PlanSibling("minimax_h3_fl2va-Q4_K_M.gguf", 19),
                 _PlanSibling("qwen3vl_32b_minimax_h3-Q4_K_M.gguf", 18),
                 _PlanSibling("vae/minimax_h3_video_vae_fp16.safetensors", 5),
@@ -3340,7 +3340,7 @@ def test_h3_native_download_plan_stages_the_complete_runtime(monkeypatch):
     )
 
     plan = VideoBackend().download_plan(
-        "LAiM/MiniMax-H3-GGUF",
+        "unsloth/MiniMax-H3-GGUF",
         gguf_filename = "minimax_h3_fl2va-Q4_K_M.gguf",
         family_override = "minimax-h3",
         model_kind = "gguf",
@@ -3349,8 +3349,8 @@ def test_h3_native_download_plan_stages_the_complete_runtime(monkeypatch):
     by_repo = {entry["repo_id"]: entry for entry in plan["entries"]}
     # Every owner the plan names, not just the one we went looking for: staging a fresh install
     # from anyone else is the regression this test exists to catch.
-    assert list(by_repo) == ["LAiM/MiniMax-H3-GGUF"]
-    assert by_repo["LAiM/MiniMax-H3-GGUF"]["files"] == [
+    assert list(by_repo) == ["unsloth/MiniMax-H3-GGUF"]
+    assert by_repo["unsloth/MiniMax-H3-GGUF"]["files"] == [
         "minimax_h3_fl2va-Q4_K_M.gguf",
         "qwen3vl_32b_minimax_h3-Q4_K_M.gguf",
         "vae/minimax_h3_video_vae_fp16.safetensors",
@@ -3360,22 +3360,22 @@ def test_h3_native_download_plan_stages_the_complete_runtime(monkeypatch):
 
     assert plan["required_bytes"] == 43
     assert plan["checkpoint_bytes"] == 19
-    assert by_repo["LAiM/MiniMax-H3-GGUF"]["checkpoint"] is True
+    assert by_repo["unsloth/MiniMax-H3-GGUF"]["checkpoint"] is True
 
     _plan_cache(monkeypatch, lambda name: name == "minimax_h3_fl2va-Q4_K_M.gguf")
     warming = VideoBackend().download_plan(
-        "LAiM/MiniMax-H3-GGUF",
+        "unsloth/MiniMax-H3-GGUF",
         gguf_filename = "minimax_h3_fl2va-Q4_K_M.gguf",
         family_override = "minimax-h3",
         model_kind = "gguf",
     )
-    warming_entry = next(e for e in warming["entries"] if e["repo_id"] == "LAiM/MiniMax-H3-GGUF")
-    assert warming_entry["files"] == by_repo["LAiM/MiniMax-H3-GGUF"]["files"]
+    warming_entry = next(e for e in warming["entries"] if e["repo_id"] == "unsloth/MiniMax-H3-GGUF")
+    assert warming_entry["files"] == by_repo["unsloth/MiniMax-H3-GGUF"]["files"]
     assert warming_entry["checkpoint"] is False
 
     _plan_cache(monkeypatch, lambda _name: True)
     cached = VideoBackend().download_plan(
-        "LAiM/MiniMax-H3-GGUF",
+        "unsloth/MiniMax-H3-GGUF",
         gguf_filename = "minimax_h3_fl2va-Q4_K_M.gguf",
         family_override = "minimax-h3",
         model_kind = "gguf",
@@ -3408,7 +3408,7 @@ def test_h3_native_uses_the_local_bundles_own_text_encoder(monkeypatch, tmp_path
     bare.mkdir()
     assert (
         VideoBackend._h3_text_encoder_repo(str(bare), "qwen3vl_32b_minimax_h3-Q4_K_M.gguf")
-        == "LAiM/MiniMax-H3-GGUF"
+        == "unsloth/MiniMax-H3-GGUF"
     )
 
     # And the plan stages only the VAEs: both halves of the local bundle are already on disk.
@@ -3417,7 +3417,7 @@ def test_h3_native_uses_the_local_bundles_own_text_encoder(monkeypatch, tmp_path
         {
             # One repo now: the VAEs were mirrored in beside the denoisers, so the native pick
             # no longer reaches a second, community-owned repo for them.
-            "LAiM/MiniMax-H3-GGUF": [
+            "unsloth/MiniMax-H3-GGUF": [
                 _PlanSibling("minimax_h3_fl2va-Q4_K_M.gguf", 19),
                 _PlanSibling("qwen3vl_32b_minimax_h3-Q4_K_M.gguf", 18),
                 _PlanSibling("vae/minimax_h3_video_vae_fp16.safetensors", 5),
@@ -3430,7 +3430,7 @@ def test_h3_native_uses_the_local_bundles_own_text_encoder(monkeypatch, tmp_path
     )
     # The VAEs are the only staged entry, and they now come from our own mirror rather than the
     # community repack the components used to be served from.
-    assert [entry["repo_id"] for entry in plan["entries"]] == ["LAiM/MiniMax-H3-GGUF"]
+    assert [entry["repo_id"] for entry in plan["entries"]] == ["unsloth/MiniMax-H3-GGUF"]
     assert plan["total_bytes"] == 6
 
 
@@ -3459,7 +3459,7 @@ def test_download_plan_stages_the_prequant_denoiser_it_drops_the_dense_shards_fo
         monkeypatch,
         {
             "MiniMaxAI/MiniMax-H3": _H3_BASE_SIBLINGS,
-            "LAiM/MiniMax-H3-FP8": _H3_PREQUANT_SIBLINGS,
+            "unsloth/MiniMax-H3-FP8": _H3_PREQUANT_SIBLINGS,
         },
     )
 
@@ -3472,7 +3472,7 @@ def test_download_plan_stages_the_prequant_denoiser_it_drops_the_dense_shards_fo
 
     by_repo = {entry["repo_id"]: entry for entry in plan["entries"]}
     # int8 and fp8 share one repo, so the SCHEME picks the file, not the repo.
-    assert by_repo["LAiM/MiniMax-H3-FP8"]["files"] == ["MiniMax-H3-INT8.pt"]
+    assert by_repo["unsloth/MiniMax-H3-FP8"]["files"] == ["MiniMax-H3-INT8.pt"]
     base = by_repo["MiniMaxAI/MiniMax-H3"]
     assert not any(f.startswith("transformer/diffusion_pytorch_model") for f in base["files"])
     # The config still goes, exactly as on the pre-cast encoder path: the class is read from it.
@@ -3492,7 +3492,7 @@ def test_download_plan_keeps_the_dense_denoiser_when_the_prequant_repo_is_missin
             files_metadata = False,
             token = None,
         ):
-            if repo_id == "LAiM/MiniMax-H3-FP8":
+            if repo_id == "unsloth/MiniMax-H3-FP8":
                 raise RuntimeError("404 gated")
             return _PlanInfo(_H3_BASE_SIBLINGS)
 
@@ -3506,7 +3506,7 @@ def test_download_plan_keeps_the_dense_denoiser_when_the_prequant_repo_is_missin
     )
 
     by_repo = {entry["repo_id"]: entry for entry in plan["entries"]}
-    assert "LAiM/MiniMax-H3-FP8" not in by_repo
+    assert "unsloth/MiniMax-H3-FP8" not in by_repo
     assert any(
         f.startswith("transformer/diffusion_pytorch_model")
         for f in by_repo["MiniMaxAI/MiniMax-H3"]["files"]
@@ -3535,7 +3535,7 @@ def test_download_plan_keeps_the_dense_reference_shards_when_its_artifact_is_abs
         {
             "MiniMaxAI/MiniMax-H3": _H3_REF_BASE_SIBLINGS,
             # Only the keyframe artifacts; the reference ones are missing.
-            "LAiM/MiniMax-H3-FP8": _H3_PREQUANT_SIBLINGS,
+            "unsloth/MiniMax-H3-FP8": _H3_PREQUANT_SIBLINGS,
         },
     )
 
@@ -3549,7 +3549,7 @@ def test_download_plan_keeps_the_dense_reference_shards_when_its_artifact_is_abs
 
     by_repo = {entry["repo_id"]: entry for entry in plan["entries"]}
     # No entry may be invented for a file the repo does not have.
-    assert "LAiM/MiniMax-H3-FP8" not in by_repo
+    assert "unsloth/MiniMax-H3-FP8" not in by_repo
     base = by_repo["MiniMaxAI/MiniMax-H3"]["files"]
     assert "transformer_ref/diffusion_pytorch_model-00001-of-00002.safetensors" in base
     assert "transformer_ref/diffusion_pytorch_model-00002-of-00002.safetensors" in base
@@ -3564,7 +3564,7 @@ def test_download_plan_still_drops_the_reference_shards_its_artifact_replaces(mo
         monkeypatch,
         {
             "MiniMaxAI/MiniMax-H3": _H3_REF_BASE_SIBLINGS,
-            "LAiM/MiniMax-H3-FP8": _H3_PREQUANT_SIBLINGS
+            "unsloth/MiniMax-H3-FP8": _H3_PREQUANT_SIBLINGS
             + [_PlanSibling("MiniMax-H3-Ref2VA-FP8.pt", 20)],
         },
     )
@@ -3578,7 +3578,7 @@ def test_download_plan_still_drops_the_reference_shards_its_artifact_replaces(mo
     )
 
     by_repo = {entry["repo_id"]: entry for entry in plan["entries"]}
-    assert by_repo["LAiM/MiniMax-H3-FP8"]["files"] == ["MiniMax-H3-Ref2VA-FP8.pt"]
+    assert by_repo["unsloth/MiniMax-H3-FP8"]["files"] == ["MiniMax-H3-Ref2VA-FP8.pt"]
     base = by_repo["MiniMaxAI/MiniMax-H3"]["files"]
     assert not any(f.startswith("transformer_ref/diffusion_pytorch_model") for f in base)
     assert "transformer_ref/config.json" in base
@@ -3740,7 +3740,7 @@ def test_download_plan_adds_no_prequant_entry_when_bfloat16_is_pinned(monkeypatc
         monkeypatch,
         {
             "MiniMaxAI/MiniMax-H3": _H3_BASE_SIBLINGS,
-            "LAiM/MiniMax-H3-FP8": _H3_PREQUANT_SIBLINGS,
+            "unsloth/MiniMax-H3-FP8": _H3_PREQUANT_SIBLINGS,
         },
     )
 
@@ -3752,7 +3752,7 @@ def test_download_plan_adds_no_prequant_entry_when_bfloat16_is_pinned(monkeypatc
     )
 
     by_repo = {entry["repo_id"]: entry for entry in plan["entries"]}
-    assert "LAiM/MiniMax-H3-FP8" not in by_repo
+    assert "unsloth/MiniMax-H3-FP8" not in by_repo
     assert any(
         f.startswith("transformer/diffusion_pytorch_model")
         for f in by_repo["MiniMaxAI/MiniMax-H3"]["files"]
@@ -3844,10 +3844,10 @@ def test_h3_native_load_claims_the_companion_repos_before_the_preflight(monkeypa
     monkeypatch.setattr("utils.hf_xet_fallback.hf_hub_download_with_xet_fallback", _download)
 
     backend = VideoBackend()
-    fam = _detect_load_family("LAiM/MiniMax-H3-GGUF", None, "minimax-h3")
+    fam = _detect_load_family("unsloth/MiniMax-H3-GGUF", None, "minimax-h3")
     assert fam is not None
     backend._loading = video_mod._VideoLoadingState(
-        repo_id = "LAiM/MiniMax-H3-GGUF", base_repo = fam.base_repo
+        repo_id = "unsloth/MiniMax-H3-GGUF", base_repo = fam.base_repo
     )
     backend._load_token = 11
 
@@ -3855,7 +3855,7 @@ def test_h3_native_load_claims_the_companion_repos_before_the_preflight(monkeypa
         fam = fam,
         token = 11,
         cancel_event = threading.Event(),
-        repo_id = "LAiM/MiniMax-H3-GGUF",
+        repo_id = "unsloth/MiniMax-H3-GGUF",
         gguf_filename = "minimax_h3_fl2va-Q4_K_M.gguf",
     )
 
@@ -3885,7 +3885,7 @@ def test_begin_load_publishes_the_h3_companion_claim_with_the_loading_state(
     )
 
     backend.begin_load(
-        "LAiM/MiniMax-H3-GGUF",
+        "unsloth/MiniMax-H3-GGUF",
         gguf_filename = "minimax_h3_fl2va-Q4_K_M.gguf",
         family_override = "minimax-h3",
         model_kind = "gguf",
@@ -3925,9 +3925,9 @@ def test_begin_load_publishes_the_hosted_ltx23_fp8_claim_with_the_loading_state(
         )
         return backend.loading_repo_ids()
 
-    assert "LAiM/LTX-2.3-FP8" in _claimed(transformer_quant = "fp8")
-    assert "LAiM/LTX-2.3-FP8" not in _claimed()
-    assert "LAiM/LTX-2.3-FP8" not in _claimed(transformer_quant = "fp8", memory_mode = "balanced")
+    assert "unsloth/LTX-2.3-FP8" in _claimed(transformer_quant = "fp8")
+    assert "unsloth/LTX-2.3-FP8" not in _claimed()
+    assert "unsloth/LTX-2.3-FP8" not in _claimed(transformer_quant = "fp8", memory_mode = "balanced")
 
 
 def test_begin_load_claims_no_companion_repos_for_a_non_h3_family(fake_runtime, monkeypatch):
@@ -5862,8 +5862,8 @@ def test_download_plan_narrows_an_ltx23_pick_and_stages_its_extras(monkeypatch):
 
     by_repo = {e["repo_id"]: e for e in plan["entries"]}
     # Checkpoint and extras share one repo, so they must be ONE entry: two jobs for the same repo would collide on the scoped job key.
-    assert set(by_repo) == {"LAiM/LTX-2.3-GGUF", "Lightricks/LTX-2"}
-    ckpt = by_repo["LAiM/LTX-2.3-GGUF"]
+    assert set(by_repo) == {"unsloth/LTX-2.3-GGUF", "Lightricks/LTX-2"}
+    ckpt = by_repo["unsloth/LTX-2.3-GGUF"]
     assert ckpt["gguf_filename"] == "ltx-2.3-22b-distilled.gguf"
     assert "vae/ltx-2.3-22b-distilled_video_vae.safetensors" in ckpt["files"]
     assert "vae/ltx-2.3-22b-distilled_audio_vae.safetensors" in ckpt["files"]
@@ -5895,7 +5895,7 @@ def test_download_plan_stages_the_companions_of_a_cached_checkpoints_content_var
 
     plan = _ltx23_download_plan()
 
-    files = {e["repo_id"]: e for e in plan["entries"]}["LAiM/LTX-2.3-GGUF"]["files"]
+    files = {e["repo_id"]: e for e in plan["entries"]}["unsloth/LTX-2.3-GGUF"]["files"]
     assert "vae/ltx-2.3-22b-dev_video_vae.safetensors" in files
     assert "vae/ltx-2.3-22b-distilled_video_vae.safetensors" not in files
 
@@ -5950,26 +5950,26 @@ def test_base_download_files_skips_precast_text_encoder_weights():
 
 
 def test_download_plan_swaps_the_dense_encoder_for_the_precast_checkpoint(monkeypatch):
-    # An fp8 encoder request loads LAiM/LTX-2-FP8, so staging the dense Gemma3 downloads ~49 GB the pipeline never opens, and the checkpoint it DOES read was missing from the plan.
+    # An fp8 encoder request loads unsloth/LTX-2-FP8, so staging the dense Gemma3 downloads ~49 GB the pipeline never opens, and the checkpoint it DOES read was missing from the plan.
     _cuda_bf16_target(monkeypatch)
     _plan_api(
         monkeypatch,
         {
-            "LAiM/LTX-2.3-GGUF": _LTX23_REPO_SIBLINGS,
+            "unsloth/LTX-2.3-GGUF": _LTX23_REPO_SIBLINGS,
             "Lightricks/LTX-2": _LTX_BASE_SIBLINGS,
-            "LAiM/LTX-2-FP8": _LTX2_FP8_SIBLINGS,
+            "unsloth/LTX-2-FP8": _LTX2_FP8_SIBLINGS,
         },
     )
 
     plan = VideoBackend().download_plan(
-        "LAiM/LTX-2.3-GGUF",
+        "unsloth/LTX-2.3-GGUF",
         gguf_filename = "ltx-2.3-22b-distilled.gguf",
         family_override = "ltx-2",
         text_encoder_quant = "fp8",
     )
 
     by_repo = {e["repo_id"]: e for e in plan["entries"]}
-    assert by_repo["LAiM/LTX-2-FP8"]["files"] == ["LTX-2-text_encoder-FP8.pt"]
+    assert by_repo["unsloth/LTX-2-FP8"]["files"] == ["LTX-2-text_encoder-FP8.pt"]
     base = by_repo["Lightricks/LTX-2"]
     assert not any(f.startswith("text_encoder/") for f in base["files"])
     # The rest of the scoped base list is unchanged.
@@ -5985,7 +5985,7 @@ def test_download_plan_keeps_dense_encoder_for_a_custom_family_pipeline(monkeypa
         monkeypatch,
         {
             custom: _LTX_BASE_SIBLINGS,
-            "LAiM/LTX-2-FP8": _LTX2_FP8_SIBLINGS,
+            "unsloth/LTX-2-FP8": _LTX2_FP8_SIBLINGS,
         },
     )
 
@@ -5997,7 +5997,7 @@ def test_download_plan_keeps_dense_encoder_for_a_custom_family_pipeline(monkeypa
     )
 
     by_repo = {entry["repo_id"]: entry for entry in plan["entries"]}
-    assert "LAiM/LTX-2-FP8" not in by_repo
+    assert "unsloth/LTX-2-FP8" not in by_repo
     assert any(name.startswith("text_encoder/") for name in by_repo[custom]["files"])
 
 
@@ -6009,7 +6009,7 @@ def test_download_plan_keeps_the_dense_encoder_without_an_fp8_request(monkeypatc
     plan = _ltx23_download_plan()
 
     by_repo = {e["repo_id"]: e for e in plan["entries"]}
-    assert "LAiM/LTX-2-FP8" not in by_repo
+    assert "unsloth/LTX-2-FP8" not in by_repo
     assert any(f.startswith("text_encoder/") for f in by_repo["Lightricks/LTX-2"]["files"])
 
 
@@ -6019,14 +6019,14 @@ def test_download_plan_keeps_the_dense_encoder_when_the_precast_repo_is_missing(
     _plan_api_ltx23(monkeypatch)
 
     plan = VideoBackend().download_plan(
-        "LAiM/LTX-2.3-GGUF",
+        "unsloth/LTX-2.3-GGUF",
         gguf_filename = "ltx-2.3-22b-distilled.gguf",
         family_override = "ltx-2",
         text_encoder_quant = "fp8",
     )
 
     by_repo = {e["repo_id"]: e for e in plan["entries"]}
-    assert set(by_repo) == {"LAiM/LTX-2.3-GGUF", "Lightricks/LTX-2"}
+    assert set(by_repo) == {"unsloth/LTX-2.3-GGUF", "Lightricks/LTX-2"}
     assert any(f.startswith("text_encoder/") for f in by_repo["Lightricks/LTX-2"]["files"])
     assert plan["total_bytes"] == sum(e["bytes"] for e in plan["entries"]) > 0
 
@@ -6035,7 +6035,7 @@ def test_fetch_te_prequant_only_reports_what_it_downloaded(monkeypatch):
     # The dense skip is earned by the pre-cast file being on disk; an unreachable checkpoint must report nothing.
     backend = VideoBackend()
     source = types.SimpleNamespace(
-        kind = "repo", location = "LAiM/LTX-2-FP8", filename = "LTX-2-text_encoder-FP8.pt"
+        kind = "repo", location = "unsloth/LTX-2-FP8", filename = "LTX-2-text_encoder-FP8.pt"
     )
 
     def _boom(
@@ -6065,7 +6065,7 @@ def test_fetch_te_prequant_takes_a_mirrored_encoder_without_the_hub(monkeypatch,
 
     backend = VideoBackend()
     source = types.SimpleNamespace(
-        kind = "repo", location = "LAiM/LTX-2-FP8", filename = "LTX-2-text_encoder-FP8.safetensors"
+        kind = "repo", location = "unsloth/LTX-2-FP8", filename = "LTX-2-text_encoder-FP8.safetensors"
     )
     (tmp_path / "LAiM" / "LTX-2-FP8").mkdir(parents = True)
     (tmp_path / "LAiM" / "LTX-2-FP8" / "LTX-2-text_encoder-FP8.safetensors").write_bytes(b"x")
@@ -6431,7 +6431,7 @@ def test_every_h3_asset_comes_from_an_LAiM_repo(monkeypatch):
     _no_legacy_cache(monkeypatch)
     named = {H3_GGUF_REPO, H3_COMPONENT_REPO, H3_TE_QUANT_REPO, h3_te_quant_source("int8")}
     named.update(repo for repo, _ in h3_native_hub_files("minimax_h3_fl2va_pruned-Q2_K.gguf"))
-    offenders = sorted(r for r in named if not r.startswith("LAiM/"))
+    offenders = sorted(r for r in named if not r.startswith("unsloth/"))
     assert not offenders, f"H3 would download from a repo we do not control: {offenders}"
 
 
@@ -6661,7 +6661,7 @@ def test_the_plan_sizes_a_cached_repack_from_the_repo_we_control(monkeypatch):
     _plan_api(
         monkeypatch,
         {
-            "LAiM/MiniMax-H3-GGUF": [
+            "unsloth/MiniMax-H3-GGUF": [
                 _PlanSibling("minimax_h3_fl2va-Q4_K_M.gguf", 19),
                 _PlanSibling("qwen3vl_32b_minimax_h3-Q4_K_M.gguf", 18),
                 _PlanSibling(H3_VIDEO_VAE, 5),
@@ -6671,7 +6671,7 @@ def test_the_plan_sizes_a_cached_repack_from_the_repo_we_control(monkeypatch):
     )
 
     plan = VideoBackend._h3_native_download_plan(
-        "LAiM/MiniMax-H3-GGUF", "minimax_h3_fl2va-Q4_K_M.gguf", hf_token = None
+        "unsloth/MiniMax-H3-GGUF", "minimax_h3_fl2va-Q4_K_M.gguf", hf_token = None
     )
     assert not plan.get("plan_failed")
     by_repo = {entry["repo_id"]: entry for entry in plan["entries"]}
@@ -6746,20 +6746,20 @@ def test_h3_names_the_component_when_a_download_is_refused():
 
     # Private / unpublished: name the repo and the component, and do not blame the token alone.
     denoiser = h3_download_error(
-        "LAiM/MiniMax-H3-GGUF",
+        "unsloth/MiniMax-H3-GGUF",
         "minimax_h3_fl2va_pruned-UD-Q2_K_XL.gguf",
         _hub_error(RepositoryNotFoundError),
     )
     assert isinstance(denoiser, RuntimeError)
     text = str(denoiser)
-    assert "LAiM/MiniMax-H3-GGUF" in text
+    assert "unsloth/MiniMax-H3-GGUF" in text
     assert "denoiser" in text
     assert "not published yet" in text
 
     # The same repo serves the encoder, so the component name has to come from the FILE.
     encoder = str(
         h3_download_error(
-            "LAiM/MiniMax-H3-GGUF", H3_QWEN_Q2, _hub_error(RepositoryNotFoundError)
+            "unsloth/MiniMax-H3-GGUF", H3_QWEN_Q2, _hub_error(RepositoryNotFoundError)
         )
     )
     assert "text encoder" in encoder and "denoiser" not in encoder
@@ -6773,7 +6773,7 @@ def test_h3_names_the_component_when_a_download_is_refused():
     # Anything that is not an access error is passed straight back, so a timeout still reads as a
     # timeout rather than being reworded into a permissions problem.
     timeout = TimeoutError("read timed out")
-    assert h3_download_error("LAiM/MiniMax-H3-GGUF", H3_QWEN_Q2, timeout) is timeout
+    assert h3_download_error("unsloth/MiniMax-H3-GGUF", H3_QWEN_Q2, timeout) is timeout
 
 
 def test_the_h3_native_path_pins_cfg_scale_to_one():
@@ -7174,7 +7174,7 @@ def _h3_native_backend(
             return Path("/tmp/does-not-exist.webm")
 
     backend = VideoBackend()
-    fam = _detect_load_family("LAiM/MiniMax-H3-GGUF", None, "minimax-h3")
+    fam = _detect_load_family("unsloth/MiniMax-H3-GGUF", None, "minimax-h3")
     from core.inference.video import _sd_cli_identity
 
     engine = _Engine()
@@ -7188,7 +7188,7 @@ def _h3_native_backend(
             binary_identity = _sd_cli_identity(str(binary)) if binary is not None else None,
         ),
         family = fam,
-        repo_id = "LAiM/MiniMax-H3-GGUF",
+        repo_id = "unsloth/MiniMax-H3-GGUF",
         base_repo = fam.base_repo,
         device = "cuda",
         dtype = "Q4_K_M",
@@ -7792,7 +7792,7 @@ def test_denoiser_prequant_coverage_is_asked_per_partition():
         transformer_class = "T",
         base_repo = "org/partitioned",
         modular_workflow = "fl2va",
-        prequant_repos = (("int8", "LAiM/Test-FP8"), ("fp8", "LAiM/Test-FP8")),
+        prequant_repos = (("int8", "unsloth/Test-FP8"), ("fp8", "unsloth/Test-FP8")),
         prequant_filenames = (("fp8", "ref2va", "Test-Ref2VA-FP8.pt"),),
         prequant_partition_tasks = ("ref2va",),
     )
@@ -8979,14 +8979,14 @@ def test_h3_status_reports_the_resident_partition(monkeypatch):
 def test_h3_load_refuses_a_task_that_contradicts_the_picked_checkpoint():
     backend = VideoBackend()
     backend.validate_load_request(
-        "LAiM/MiniMax-H3-GGUF",
+        "unsloth/MiniMax-H3-GGUF",
         gguf_filename = "minimax_h3_ref2va_pruned-Q4_K_M.gguf",
         family_override = "minimax-h3",
         h3_task = "ref2va",
     )
     with pytest.raises(ValueError, match = "is the ref2va partition"):
         backend.validate_load_request(
-            "LAiM/MiniMax-H3-GGUF",
+            "unsloth/MiniMax-H3-GGUF",
             gguf_filename = "minimax_h3_ref2va_pruned-Q4_K_M.gguf",
             family_override = "minimax-h3",
             h3_task = "fl2va",
@@ -9807,7 +9807,7 @@ def test_the_video_sidecar_records_the_negative_prompt_that_ran(monkeypatch, tmp
     result = {
         "mp4_bytes": b"MP4",
         "seed": 7,
-        "repo_id": "LAiM/MiniMax-H3-GGUF",
+        "repo_id": "unsloth/MiniMax-H3-GGUF",
         "width": 960,
         "height": 544,
         "num_frames": 124,
@@ -10257,7 +10257,7 @@ def test_the_h3_modular_refusal_reruns_when_the_prequant_checkpoint_does_not_lan
         prequant_mod,
         "resolve_prequant_source",
         lambda fam, scheme, base_repo = None, task = None: types.SimpleNamespace(
-            location = "LAiM/H3-FP8"
+            location = "unsloth/H3-FP8"
         ),
     )
     monkeypatch.setattr(prequant_mod, "load_prequantized_transformer", lambda *a, **k: None)
@@ -10799,7 +10799,7 @@ def _stub_denoiser_seed(
     scheme = "nvfp4",
     components = ("transformer", "transformer_2"),
     seeded = True,
-    repo = "LAiM/Wan2.2-T2V-A14B-NVFP4",
+    repo = "unsloth/Wan2.2-T2V-A14B-NVFP4",
     plan_scheme = "nvfp4",
 ):
     """Stub the whole seeding route: plan-time scheme, registry lookup and checkpoint load."""
@@ -10859,7 +10859,7 @@ def test_wan_a14b_prequant_seeds_both_dits_instead_of_quantising_them(fake_runti
     assert quantised == [], "a seeded DiT must not be quantised again"
     assert status["transformer_quant"] == "nvfp4"
     resolved = status["resolved"]["transformer_quant"]
-    assert "LAiM/Wan2.2-T2V-A14B-NVFP4" in resolved["reason"]
+    assert "unsloth/Wan2.2-T2V-A14B-NVFP4" in resolved["reason"]
     assert resolved["requested"] == "nvfp4" and resolved["value"] == "nvfp4"
     assert resolved["status"] == "applied"
     assert calls and calls[0]["scheme"] == "nvfp4"
@@ -10894,7 +10894,7 @@ def test_a_checkpoint_that_will_not_load_falls_back_to_the_dense_quant(fake_runt
     pipe = backend._state.pipe
     assert quantised == [pipe.transformer, pipe.transformer_2]
     assert status["transformer_quant"] == "nvfp4"
-    assert "LAiM/" not in status["resolved"]["transformer_quant"]["reason"]
+    assert "unsloth/" not in status["resolved"]["transformer_quant"]["reason"]
 
 
 def test_a_superseded_nvfp4_load_cannot_overwrite_the_install_reason(fake_runtime, monkeypatch):
@@ -11125,7 +11125,7 @@ def test_a_seed_the_plan_declined_is_not_re_taken_by_the_load(fake_runtime, monk
     )
     assert calls == [], "a seed the plan declined may not be fetched inline by the load"
     assert status["transformer_quant"] == "nvfp4"
-    assert "LAiM/" not in status["resolved"]["transformer_quant"]["reason"]
+    assert "unsloth/" not in status["resolved"]["transformer_quant"]["reason"]
 
 
 _A14B_SIBLINGS = [
@@ -11190,7 +11190,7 @@ def test_the_download_plan_stages_both_experts_artifacts(monkeypatch):
                 _PlanSibling("text_encoder/model-00001-of-00001.safetensors", 11_000_000_000),
                 _PlanSibling("vae/diffusion_pytorch_model.safetensors", 500_000_000),
             ],
-            "LAiM/Wan2.2-T2V-A14B-NVFP4": [
+            "unsloth/Wan2.2-T2V-A14B-NVFP4": [
                 _PlanSibling("Wan2.2-T2V-A14B-NVFP4.pt", 8_000_000_000),
                 _PlanSibling("Wan2.2-T2V-A14B-transformer_2-NVFP4.pt", 8_100_000_000),
             ],
@@ -11199,13 +11199,13 @@ def test_the_download_plan_stages_both_experts_artifacts(monkeypatch):
     sources = {
         "transformer": types.SimpleNamespace(
             kind = "repo",
-            location = "LAiM/Wan2.2-T2V-A14B-NVFP4",
+            location = "unsloth/Wan2.2-T2V-A14B-NVFP4",
             filename = "Wan2.2-T2V-A14B-NVFP4.pt",
             fallback_filename = None,
         ),
         "transformer_2": types.SimpleNamespace(
             kind = "repo",
-            location = "LAiM/Wan2.2-T2V-A14B-NVFP4",
+            location = "unsloth/Wan2.2-T2V-A14B-NVFP4",
             filename = "Wan2.2-T2V-A14B-transformer_2-NVFP4.pt",
             fallback_filename = None,
         ),
@@ -11251,7 +11251,7 @@ def test_an_explicit_scheme_under_speed_off_stages_the_hosted_experts(monkeypatc
                 _PlanSibling("text_encoder/model-00001-of-00001.safetensors", 11_000_000_000),
                 _PlanSibling("vae/diffusion_pytorch_model.safetensors", 500_000_000),
             ],
-            "LAiM/Wan2.2-T2V-A14B-NVFP4": [
+            "unsloth/Wan2.2-T2V-A14B-NVFP4": [
                 _PlanSibling("Wan2.2-T2V-A14B-NVFP4.pt", 8_000_000_000),
                 _PlanSibling("Wan2.2-T2V-A14B-transformer_2-NVFP4.pt", 8_100_000_000),
             ],
@@ -11260,13 +11260,13 @@ def test_an_explicit_scheme_under_speed_off_stages_the_hosted_experts(monkeypatc
     sources = {
         "transformer": types.SimpleNamespace(
             kind = "repo",
-            location = "LAiM/Wan2.2-T2V-A14B-NVFP4",
+            location = "unsloth/Wan2.2-T2V-A14B-NVFP4",
             filename = "Wan2.2-T2V-A14B-NVFP4.pt",
             fallback_filename = None,
         ),
         "transformer_2": types.SimpleNamespace(
             kind = "repo",
-            location = "LAiM/Wan2.2-T2V-A14B-NVFP4",
+            location = "unsloth/Wan2.2-T2V-A14B-NVFP4",
             filename = "Wan2.2-T2V-A14B-transformer_2-NVFP4.pt",
             fallback_filename = None,
         ),
@@ -11349,7 +11349,7 @@ def _a14b_plan(monkeypatch):
                 _PlanSibling("text_encoder/model-00001-of-00001.safetensors", 11_000_000_000),
                 _PlanSibling("vae/diffusion_pytorch_model.safetensors", 500_000_000),
             ],
-            "LAiM/Wan2.2-T2V-A14B-NVFP4": [
+            "unsloth/Wan2.2-T2V-A14B-NVFP4": [
                 _PlanSibling("Wan2.2-T2V-A14B-NVFP4.pt", 8_000_000_000),
                 _PlanSibling("Wan2.2-T2V-A14B-transformer_2-NVFP4.pt", 8_100_000_000),
             ],
@@ -11358,13 +11358,13 @@ def _a14b_plan(monkeypatch):
     sources = {
         "transformer": types.SimpleNamespace(
             kind = "repo",
-            location = "LAiM/Wan2.2-T2V-A14B-NVFP4",
+            location = "unsloth/Wan2.2-T2V-A14B-NVFP4",
             filename = "Wan2.2-T2V-A14B-NVFP4.pt",
             fallback_filename = None,
         ),
         "transformer_2": types.SimpleNamespace(
             kind = "repo",
-            location = "LAiM/Wan2.2-T2V-A14B-NVFP4",
+            location = "unsloth/Wan2.2-T2V-A14B-NVFP4",
             filename = "Wan2.2-T2V-A14B-transformer_2-NVFP4.pt",
             fallback_filename = None,
         ),
@@ -12170,7 +12170,7 @@ class _Sibling:
         self.size = size
 
 
-def _hub_refusal(cls, repo = "LAiM/Wan2.2-T2V-A14B-NVFP4"):
+def _hub_refusal(cls, repo = "unsloth/Wan2.2-T2V-A14B-NVFP4"):
     # response is optional in huggingface_hub 0.x but required in 1.x; a stub works on either.
     return cls(
         f"401 Client Error. Repository Not Found for url: https://huggingface.co/api/models/{repo}",
@@ -12262,8 +12262,8 @@ def _video_load_to_the_install_gate(repo_id = "Wan-AI/Wan2.2-T2V-A14B-Diffusers"
 @pytest.mark.parametrize(
     "repo_id, hosted",
     [
-        ("Wan-AI/Wan2.2-T2V-A14B-Diffusers", "LAiM/Wan2.2-T2V-A14B-NVFP4"),
-        ("Wan-AI/Wan2.2-TI2V-5B-Diffusers", "LAiM/Wan2.2-TI2V-5B-NVFP4"),
+        ("Wan-AI/Wan2.2-T2V-A14B-Diffusers", "unsloth/Wan2.2-T2V-A14B-NVFP4"),
+        ("Wan-AI/Wan2.2-TI2V-5B-Diffusers", "unsloth/Wan2.2-TI2V-5B-NVFP4"),
     ],
 )
 def test_an_nvfp4_video_checkpoint_the_hub_refuses_installs_no_flashinfer(
@@ -12285,7 +12285,7 @@ def test_an_nvfp4_video_repo_missing_a_denoiser_installs_no_flashinfer(fake_runt
     installs, listed, _ = _video_install_probe(monkeypatch, listing = ["Wan2.2-T2V-A14B-NVFP4.pt"])
     _video_load_to_the_install_gate()
     assert installs == []
-    assert listed == ["LAiM/Wan2.2-T2V-A14B-NVFP4"]
+    assert listed == ["unsloth/Wan2.2-T2V-A14B-NVFP4"]
 
 
 def test_an_nvfp4_video_family_with_no_hosted_checkpoint_installs_no_flashinfer(
@@ -12306,7 +12306,7 @@ def test_a_reachable_nvfp4_video_checkpoint_still_installs_flashinfer(fake_runti
         listing = ["Wan2.2-T2V-A14B-NVFP4.pt", "Wan2.2-T2V-A14B-transformer_2-NVFP4.pt"],
     )
     _video_load_to_the_install_gate()
-    assert listed == ["LAiM/Wan2.2-T2V-A14B-NVFP4"]
+    assert listed == ["unsloth/Wan2.2-T2V-A14B-NVFP4"]
     assert installs == [("cuda", False)]
 
 
@@ -12399,7 +12399,7 @@ def _stub_h3_nvfp4_checkpoint(monkeypatch):
     ):
         return types.SimpleNamespace(
             kind = "repo",
-            location = "LAiM/MiniMax-H3-NVFP4",
+            location = "unsloth/MiniMax-H3-NVFP4",
             filename = f"MiniMax-H3-{task}-NVFP4.pt",
             fallback_filenames = (),
         )
@@ -12419,12 +12419,12 @@ def test_the_minimax_h3_modular_path_skips_the_install_for_a_refused_checkpoint(
     from huggingface_hub.errors import RepositoryNotFoundError
 
     installs, listed, dispatched = _video_install_probe(
-        monkeypatch, refusal = _hub_refusal(RepositoryNotFoundError, "LAiM/MiniMax-H3-NVFP4")
+        monkeypatch, refusal = _hub_refusal(RepositoryNotFoundError, "unsloth/MiniMax-H3-NVFP4")
     )
     tasks = _stub_h3_nvfp4_checkpoint(monkeypatch)
     _video_load_to_the_install_gate("MiniMaxAI/MiniMax-H3", family_override = "minimax-h3")
     assert installs == []
-    assert listed == ["LAiM/MiniMax-H3-NVFP4"]
+    assert listed == ["unsloth/MiniMax-H3-NVFP4"]
     assert dispatched == [None], "the modular load was handed an install outcome it never earned"
     assert "fl2va" in tasks
 
@@ -12437,7 +12437,7 @@ def test_the_minimax_h3_modular_path_installs_for_a_reachable_checkpoint(fake_ru
     _video_load_to_the_install_gate(
         "MiniMaxAI/MiniMax-H3", family_override = "minimax-h3", h3_task = "ref2va"
     )
-    assert listed == ["LAiM/MiniMax-H3-NVFP4"]
+    assert listed == ["unsloth/MiniMax-H3-NVFP4"]
     assert installs == [("cuda", False)]
     assert dispatched == [(True, "installed flashinfer for NVFP4")]
 
@@ -13013,7 +13013,7 @@ def test_ltx23_prequant_source_resolves_the_hosted_fp8_only():
 
     fam = detect_video_family("Lightricks/LTX-2.3")
     source = resolve_prequant_source(fam, "fp8", base_repo = LTX23_PREQUANT_BASE)
-    assert source is not None and source.location == "LAiM/LTX-2.3-FP8"
+    assert source is not None and source.location == "unsloth/LTX-2.3-FP8"
     from core.inference.diffusion_prequant import candidate_filenames_of
 
     assert "LTX-2.3-FP8.pt" in candidate_filenames_of(
@@ -13204,7 +13204,7 @@ def test_ltx23_hub_pick_is_substituted_only_from_the_official_repo(tmp_path, mon
     monkeypatch.setattr(video_ltx2, "_ltx23_hub_cached_file", lambda repo, filename: cached["hit"])
     assert video_ltx2.ltx23_prequant_eligible(name, "Lightricks/LTX-2.3")
     assert video_ltx2.ltx23_prequant_eligible(f"sub/{name}", "lightricks/ltx-2.3")
-    for repo in ("someone/LTX-2.3-finetune", "LAiM/LTX-2.3-GGUF", "Lightricks/LTX-2"):
+    for repo in ("someone/LTX-2.3-finetune", "unsloth/LTX-2.3-GGUF", "Lightricks/LTX-2"):
         assert not video_ltx2.ltx23_prequant_eligible(name, repo), repo
     assert not video_ltx2.ltx23_prequant_eligible(name, None)
     assert not video_ltx2.ltx23_prequant_eligible(
@@ -13346,14 +13346,14 @@ def _load_ltx23_single_file_fp8(
 def test_ltx23_single_file_fp8_seeds_the_hosted_denoiser(fake_runtime, tmp_path, monkeypatch):
     seeded_dit = object()
     source = types.SimpleNamespace(
-        location = "LAiM/LTX-2.3-FP8", kind = "repo", filename = "LTX-2.3-FP8.pt"
+        location = "unsloth/LTX-2.3-FP8", kind = "repo", filename = "LTX-2.3-FP8.pt"
     )
     backend, calls = _load_ltx23_single_file_fp8(tmp_path, monkeypatch, (seeded_dit, source))
     assert calls["prequant"][0] == "fp8" and calls["prequant"][2] == "Lightricks/LTX-2"
     assert calls["override"] is seeded_dit
     status = backend.status()
     assert status["transformer_quant"] == "fp8"
-    assert "LAiM/LTX-2.3-FP8" in str(status["resolved"]["transformer_quant"])
+    assert "unsloth/LTX-2.3-FP8" in str(status["resolved"]["transformer_quant"])
     backend.unload()
 
 
@@ -13365,7 +13365,7 @@ def test_ltx23_single_file_fp8_without_a_checkpoint_is_refused(fake_runtime, tmp
     monkeypatch.setattr(
         video_ltx2, "load_ltx23_pipeline", lambda *a, **k: assembled.append(1), raising = False
     )
-    with pytest.raises(RuntimeError, match = "LAiM/LTX-2.3-FP8"):
+    with pytest.raises(RuntimeError, match = "unsloth/LTX-2.3-FP8"):
         _load_ltx23_single_file_fp8(tmp_path, monkeypatch, None)
 
 
@@ -13416,7 +13416,7 @@ def test_ltx23_single_file_fp8_is_planned_at_the_hosted_dit_size(
     priced = _ltx23_fp8_plan_at(monkeypatch, fits_mib = 30_000)
     seeded_dit = object()
     source = types.SimpleNamespace(
-        location = "LAiM/LTX-2.3-FP8", kind = "repo", filename = "LTX-2.3-FP8.pt"
+        location = "unsloth/LTX-2.3-FP8", kind = "repo", filename = "LTX-2.3-FP8.pt"
     )
     backend, calls = _load_ltx23_single_file_fp8(tmp_path, monkeypatch, (seeded_dit, source))
     assert calls["override"] is seeded_dit
@@ -13432,7 +13432,7 @@ def test_ltx23_single_file_fp8_is_priced_at_the_hosted_artifact_not_the_scaled_f
     priced = _ltx23_fp8_plan_at(monkeypatch, fits_mib = 20_000)
     seeded_dit = object()
     source = types.SimpleNamespace(
-        location = "LAiM/LTX-2.3-FP8", kind = "repo", filename = "LTX-2.3-FP8.pt"
+        location = "unsloth/LTX-2.3-FP8", kind = "repo", filename = "LTX-2.3-FP8.pt"
     )
     backend, calls = _load_ltx23_single_file_fp8(tmp_path, monkeypatch, (seeded_dit, source))
     assert calls["override"] is seeded_dit
@@ -13464,7 +13464,7 @@ def test_ltx2_distilled_detection_follows_the_selected_checkpoint():
     cases = [
         (("ltx-2.3-22b-distilled.safetensors", "Lightricks/LTX-2.3", "Lightricks/LTX-2"), True),
         (
-            ("distilled-1.1/ltx-2.3-22b-distilled-1.1-Q4_K_M.gguf", "LAiM/LTX-2.3-GGUF", None),
+            ("distilled-1.1/ltx-2.3-22b-distilled-1.1-Q4_K_M.gguf", "unsloth/LTX-2.3-GGUF", None),
             True,
         ),
         ((None, "someone/LTX-2.3-distilled-diffusers", None), True),
@@ -13491,8 +13491,8 @@ def test_download_plan_stages_the_hosted_fp8_dit_for_the_ltx23_distilled_single_
                 _PlanSibling("ltx-2.3-22b-distilled.safetensors", 46_000_000_000),
                 _PlanSibling("ltx-2.3-22b-dev.safetensors", 46_000_000_000),
             ],
-            "LAiM/LTX-2.3-GGUF": _LTX23_REPO_SIBLINGS,
-            "LAiM/LTX-2.3-FP8": [
+            "unsloth/LTX-2.3-GGUF": _LTX23_REPO_SIBLINGS,
+            "unsloth/LTX-2.3-FP8": [
                 _PlanSibling("LTX-2.3-FP8.pt", 19_057_628_489),
                 _PlanSibling("LTX-2.3-INT8.pt", 19_000_000_000),
             ],
@@ -13521,7 +13521,7 @@ def test_download_plan_stages_the_hosted_fp8_dit_for_the_ltx23_distilled_single_
     by_repo = {
         e["repo_id"]: e for e in _plan("ltx-2.3-22b-distilled.safetensors", "fp8")["entries"]
     }
-    assert by_repo["LAiM/LTX-2.3-FP8"]["files"] == ["LTX-2.3-FP8.pt"]
+    assert by_repo["unsloth/LTX-2.3-FP8"]["files"] == ["LTX-2.3-FP8.pt"]
     assert "ltx-2.3-22b-distilled.safetensors" in by_repo["Lightricks/LTX-2.3"]["files"]
     for filename, quant in (
         ("ltx-2.3-22b-distilled.safetensors", None),
@@ -13529,16 +13529,16 @@ def test_download_plan_stages_the_hosted_fp8_dit_for_the_ltx23_distilled_single_
         ("ltx-2.3-22b-dev.safetensors", "fp8"),
     ):
         repos = {e["repo_id"] for e in _plan(filename, quant)["entries"]}
-        assert "LAiM/LTX-2.3-FP8" not in repos, (filename, quant)
+        assert "unsloth/LTX-2.3-FP8" not in repos, (filename, quant)
     for memory_mode in ("balanced", "low_vram"):
         repos = {
             e["repo_id"]
             for e in _plan("ltx-2.3-22b-distilled.safetensors", "fp8", memory_mode)["entries"]
         }
-        assert "LAiM/LTX-2.3-FP8" not in repos, memory_mode
+        assert "unsloth/LTX-2.3-FP8" not in repos, memory_mode
     supported[0] = False
     repos = {e["repo_id"] for e in _plan("ltx-2.3-22b-distilled.safetensors", "fp8")["entries"]}
-    assert "LAiM/LTX-2.3-FP8" not in repos
+    assert "unsloth/LTX-2.3-FP8" not in repos
 
 
 @pytest.mark.parametrize("fp8", [False, True], ids = ["sm80", "sm90"])
@@ -13549,8 +13549,8 @@ def test_download_plan_stages_the_hosted_fp8_dit_only_on_an_fp8_card(monkeypatch
             "Lightricks/LTX-2.3": [
                 _PlanSibling("ltx-2.3-22b-distilled.safetensors", 46_149_345_038)
             ],
-            "LAiM/LTX-2.3-GGUF": _LTX23_REPO_SIBLINGS,
-            "LAiM/LTX-2.3-FP8": [_PlanSibling("LTX-2.3-FP8.pt", 19_057_628_489)],
+            "unsloth/LTX-2.3-GGUF": _LTX23_REPO_SIBLINGS,
+            "unsloth/LTX-2.3-FP8": [_PlanSibling("LTX-2.3-FP8.pt", 19_057_628_489)],
             "Lightricks/LTX-2": _LTX_BASE_SIBLINGS,
         },
     )
@@ -13561,7 +13561,7 @@ def test_download_plan_stages_the_hosted_fp8_dit_only_on_an_fp8_card(monkeypatch
         family_override = "ltx-2",
         transformer_quant = "fp8",
     )
-    assert ("LAiM/LTX-2.3-FP8" in {e["repo_id"] for e in plan["entries"]}) is fp8
+    assert ("unsloth/LTX-2.3-FP8" in {e["repo_id"] for e in plan["entries"]}) is fp8
 
 
 class _StopAfterPrefetch(Exception):
@@ -13609,7 +13609,7 @@ def test_the_ltx23_fp8_load_prefetches_the_hosted_dit_under_its_cancel_event(tmp
         _load_token = 7,
         _cancel_event = cancel,
     )
-    assert fetched == [(["LAiM/LTX-2.3-FP8"], cancel, True)]
+    assert fetched == [(["unsloth/LTX-2.3-FP8"], cancel, True)]
     fetched.clear()
     backend._load_token = 8
     backend._run_load(

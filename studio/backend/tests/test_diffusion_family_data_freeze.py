@@ -65,7 +65,7 @@ def _snapshot() -> dict:
         for row in getattr(fam, "prequant_variant_repos", ()):
             repos.update((row[0], row[-1]))
     repos.update(
-        ("LAiM/Qwen-Image-2.1-Turbo-FP8", "LAiM/qwen-image-2.1-turbo-fp8", "", "x/y")
+        ("unsloth/Qwen-Image-2.1-Turbo-FP8", "unsloth/qwen-image-2.1-turbo-fp8", "", "x/y")
     )
     repos = sorted(repos)
 

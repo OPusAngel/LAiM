@@ -225,7 +225,7 @@ import _platform_compat  # noqa: F401
 # LAiM-zoo import below, whose LLAMA_CPP_DEFAULT_DIR binding is import-time.
 from utils.paths.storage_roots import studio_root as _studio_root
 
-# Same reason, same deadline: LAiM_zoo.compiler reads LAiM_COMPILE_LOCATION at import time, and
+# Same reason, same deadline: LAiM_zoo.compiler reads UNSLOTH_COMPILE_LOCATION at import time, and
 # without this a direct start falls back to a CWD-relative LAiM_compiled_cache.
 from utils.paths.storage_roots import setup_cache_env as _setup_cache_env
 
@@ -254,8 +254,8 @@ if _STUDIO_ROOT_RESOLVED != _LEGACY_STUDIO_ROOT or _MASTER_ROOT is not None:
     # the wrong directory managed would make the bundled path look like an immutable override.
     _MANAGED_ROOT = _MASTER_ROOT or _STUDIO_ROOT_RESOLVED
     _MANAGED_LLAMA_CPP_PATH = _MANAGED_ROOT / "llama.cpp"
-    if not os.environ.get("LAiM_LLAMA_CPP_PATH"):
-        os.environ["LAiM_LLAMA_CPP_PATH"] = str(_MANAGED_LLAMA_CPP_PATH)
+    if not os.environ.get("UNSLOTH_LLAMA_CPP_PATH"):
+        os.environ["UNSLOTH_LLAMA_CPP_PATH"] = str(_MANAGED_LLAMA_CPP_PATH)
     # A CLI/desktop launcher may already have exported LAiM's own install path.
     # Classify by the canonical value so that inherited default remains editable.
     from utils.llama_cpp_path_settings import mark_managed_llama_cpp_path
@@ -275,7 +275,14 @@ del _guard_hub_data_files
 
 # The studio bundles LAiM_zoo; declare LAiM present (as `import LAiM` does) so its
 # lazy submodule imports and the DiffusionGemma runner don't trip the install guard.
-os.environ.setdefault("LAiM_IS_PRESENT", "1")
+os.environ.setdefault("UNSLOTH_IS_PRESENT", "1")
+
+# The package and the zoo read the same knobs under different spellings; nothing imports
+# either of them before both halves of every knob below is in place.
+from core.library_env import mirror_library_env as _mirror_library_env
+
+_mirror_library_env()
+del _mirror_library_env
 
 # Same rule as LAiM/__init__.py, reached through Studio's own copy because this parent must
 # not import LAiM: that runs LAiM/__init__.py, whose GPU branch pulls torch, Triton,
@@ -384,7 +391,6 @@ from hub.utils.download_registry import (
     terminate_active_downloads as terminate_hub_downloads,
 )
 from routes.settings import router as settings_router
-from routes.sandbox_capability import router as sandbox_capability_router
 from routes.systemone import MCP_PATH as DECISIONS_MCP_PATH, RequireStudioAuth, decisions_mcp
 from routes.systemone import router as systemone_router
 from routes.prompts import router as prompts_router
@@ -565,6 +571,19 @@ def _start_llama_cpp_probes_if_enabled(app: FastAPI) -> None:
         daemon = True,
         name = "llama-cpp-startup-probe",
     ).start()
+
+    # The same freedom to stay offline the probes have: llama.cpp is LAiM's own runtime, so it is
+    # installed into LAiM's own folder and kept current there, rather than borrowed from the system.
+    try:
+        from utils import llama_managed_runtime
+
+        llama_managed_runtime.start()
+    except Exception as _managed_exc:
+        import structlog as _structlog
+
+        _structlog.get_logger(__name__).debug(
+            "llama.cpp managed runtime unavailable: %s", _managed_exc
+        )
 
 
 _post_warm_thread: Optional[threading.Thread] = None
@@ -788,26 +807,13 @@ async def lifespan(app: FastAPI):
         except Exception:  # noqa: BLE001 -- never block startup over a discovery route
             _lifespan_log.warning("could not install API-only probe denials", exc_info = True)
 
-    # Move the legacy sandbox up here rather than from the first request: the copy can be minutes when the
-    # studio home is on another filesystem.
     try:
-        from core.inference.tools import (
-            migrate_legacy_sandbox_in_background,
-            start_sandbox_recovery,
-        )
-        migrate_legacy_sandbox_in_background()
+        from core.inference.tools import start_workdir_recovery
         # A tree renamed for deletion by a run that was killed, and the workspace deletes it left pending:
         # both waited for the next Python or terminal call, which ordinary chat never makes.
-        start_sandbox_recovery()
+        start_workdir_recovery()
     except Exception:  # noqa: BLE001
         pass
-
-    # Warm the OS sandbox probe so the "off" gate has an answer.
-    try:
-        from core.inference.os_sandbox import start_tool_isolation_warmup
-        start_tool_isolation_warmup()
-    except Exception:  # noqa: BLE001 -- the first tool call probes instead
-        _lifespan_log.warning("could not start the sandbox warm-up", exc_info = True)
 
     # Windows AMD driver with the ROCm/TheRock#7221 idle-eviction bug: one log line, plus gpu.driver_warning.
     try:
@@ -1390,7 +1396,7 @@ from utils.upload_limits import (  # noqa: E402
     STT_AUDIO_JSON_MAX_BYTES,
     STT_AUDIO_RAW_MAX_BYTES,
     LIBRARY_UPLOAD_MAX_BYTES,
-    SANDBOX_UPLOAD_MAX_BYTES,
+    SESSION_UPLOAD_MAX_BYTES,
     UNSTRUCTURED_RECIPE_UPLOAD_MAX_BYTES,
     VIDEO_INPUT_REFERENCE_JSON_MAX_BYTES,
     VIDEO_INPUT_REFERENCE_MAX_BYTES,
@@ -1450,10 +1456,10 @@ _LIBRARY_UPLOAD_PATH = "/api/library/uploads"
 _RAG_DOCUMENT_UPLOAD_RE = _re.compile(
     r"^/api/rag/(?:(?:knowledge-bases|threads|projects)/[^/]+/documents|extract-text)/?$"
 )
-# One file into a chat's sandbox folder (multipart, capped by the route), on both mounts of the router.
-_SANDBOX_UPLOAD_RE = _re.compile(r"^/(?:api/inference|v1)/sandbox/[^/]+/upload/?$")
+# One file into a chat's workdir folder (multipart, capped by the route), on both mounts of the router.
+_SESSION_UPLOAD_RE = _re.compile(r"^/(?:api/inference|v1)/workdir/[^/]+/upload/?$")
 _UPLOAD_PASSTHROUGH_RE = _re.compile(
-    f"(?:{_RAG_DOCUMENT_UPLOAD_RE.pattern})|(?:{_SANDBOX_UPLOAD_RE.pattern})"
+    f"(?:{_RAG_DOCUMENT_UPLOAD_RE.pattern})|(?:{_SESSION_UPLOAD_RE.pattern})"
 )
 # Streamed to disk and capped by the route itself; buffering here would hold 200 MiB in memory.
 _AUDIO_INPUT_UPLOAD_PATHS = ("/api/inference/audio/inputs", "/v1/audio/inputs")
@@ -1490,8 +1496,8 @@ def _get_upload_passthrough_request_max_bytes(path: str) -> int:
         return upload_request_limit_bytes(LIBRARY_UPLOAD_MAX_BYTES)
     if path.rstrip("/") in _AUDIO_INPUT_UPLOAD_PATHS:
         return AUDIO_INPUT_MAX_BYTES
-    if _SANDBOX_UPLOAD_RE.match(path):
-        return upload_request_limit_bytes(SANDBOX_UPLOAD_MAX_BYTES)
+    if _SESSION_UPLOAD_RE.match(path):
+        return upload_request_limit_bytes(SESSION_UPLOAD_MAX_BYTES)
     if _RAG_DOCUMENT_UPLOAD_RE.match(path):
         from core.rag import config as _rag_config
 
@@ -1840,7 +1846,6 @@ app.include_router(providers_router, prefix = "/api/providers", tags = ["provide
 app.include_router(openai_codex_auth_router, prefix = "/api/providers", tags = ["providers"])
 
 app.include_router(settings_router, prefix = "/api/settings", tags = ["settings"])
-app.include_router(sandbox_capability_router, prefix = "/api/sandbox", tags = ["sandbox"])
 app.include_router(mcp_servers_router, prefix = "/api/mcp/servers", tags = ["mcp"])
 app.include_router(skills_router, prefix = "/api/skills", tags = ["skills"])
 app.include_router(prompts_router, prefix = "/api/prompts", tags = ["prompts"])
@@ -2709,6 +2714,10 @@ def get_system_info(
     )
 
     memory = psutil.virtual_memory()
+    # Some Windows/virtualized hosts report no physical core count; the logical one
+    # is still a real number, and the stat cards read 0 as "unavailable".
+    logical_count = psutil.cpu_count(logical = True) or 0
+    physical_count = psutil.cpu_count(logical = False) or logical_count
     memory_total = memory.total
     memory_available = memory.available
     memory_percent = memory.percent
@@ -2776,11 +2785,11 @@ def get_system_info(
         "platform": platform.platform(),
         "python_version": platform.python_version(),
         "device_backend": _backend_label(get_device()),
-        "cpu_count": psutil.cpu_count(logical = True),
+        "cpu_count": logical_count,
         "uptime_seconds": max(0, round(time.time() - boot_time)) if boot_time else None,
         "cpu": {
-            "logical_count": psutil.cpu_count(logical = True),
-            "physical_count": psutil.cpu_count(logical = False),
+            "logical_count": logical_count,
+            "physical_count": physical_count,
             "usage_percent": psutil.cpu_percent(interval = None),
             "frequency_mhz": cpu_freq_mhz,
         },
@@ -3073,7 +3082,7 @@ from utils.origin_policy import (  # noqa: E402
 )
 
 
-# Shared with the routes that must only answer the person at this computer (Settings > Sandbox).
+# Shared with the routes that must only answer the person at this computer (Settings > Workdir).
 from utils.client_ip import (  # noqa: E402
     _PROXIED_CLIENT_HEADERS,
     _is_loopback_ip,

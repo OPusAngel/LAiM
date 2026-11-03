@@ -5,13 +5,13 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 
-import { readSrc, registerBundlerResolver } from "./helpers/kit.ts";
+import { expandI18n, readSrc, readSrcExpanded, registerBundlerResolver } from "./helpers/kit.ts";
 
 registerBundlerResolver();
 
-const THREAD = readSrc("components/assistant-ui/thread.tsx");
-const CHAT_ADAPTER = readSrc("features/chat/api/chat-adapter.ts");
-const AUTO_CONTINUE_RUN_KEEPER = readSrc("features/chat/utils/auto-continue-run-keeper.ts");
+const THREAD = readSrcExpanded("components/assistant-ui/thread.tsx");
+const CHAT_ADAPTER = readSrcExpanded("features/chat/api/chat-adapter.ts");
+const AUTO_CONTINUE_RUN_KEEPER = readSrcExpanded("features/chat/utils/auto-continue-run-keeper.ts");
 
 const {
   AUTO_CONTINUE_CONTINUED_TTL_MS,
@@ -361,10 +361,10 @@ test("a window-exhausted turn is never resumed automatically", () => {
 
 test("the adapter latches the backend window-exhaustion event", () => {
   // The mapping lives in the streaming loop, which cannot be imported here.
-  const adapter = readFileSync(
+  const adapter = expandI18n(readFileSync(
     new URL("../src/features/chat/api/chat-adapter.ts", import.meta.url),
     "utf8",
-  );
+  ));
   assert.match(
     adapter,
     /toolEvent\.type === "context_window_exceeded"[\s\S]{0,120}contextWindowExceeded = true/,
@@ -437,10 +437,10 @@ test("a tool-using turn that fills the window is the case the bar must not miss"
 });
 
 test("the bar offers the way out in place of a Continue that cannot help", () => {
-  const thread = readFileSync(
+  const thread = expandI18n(readFileSync(
     new URL("../src/components/assistant-ui/thread.tsx", import.meta.url),
     "utf8",
-  );
+  ));
   assert.match(
     thread,
     /const remedy = reason \? incompleteRemedy\(reason\) : null/,
@@ -1855,7 +1855,7 @@ test("a losing claim does not follow the row onto the next branch", () => {
   // re-renders this component rather than remounting it, and the flag set for the message
   // that lost carried over onto a message nobody has claimed at all -- no automatic
   // continuation for it, for as long as that row lives.
-  const rows = readSrc("components/assistant-ui/progressive-messages.tsx");
+  const rows = readSrcExpanded("components/assistant-ui/progressive-messages.tsx");
   assert.match(
     rows,
     /<AuiProvider key=\{index\} value=\{gate\.row\(index\)\}>\s*<MessageByIndexProvider index=\{index\}>/,
@@ -2607,10 +2607,10 @@ test("the abort case is wired to the run, not to a clock", () => {
   // the runtime is only reachable through a hook -- so `startRun`'s own return value has to be
   // handed over there. Pinned at both ends, since neither side is exercised by a unit test,
   // and re-pinned against a deadline because a deadline here is the arming timeout coming back.
-  const bar = readFileSync(
+  const bar = expandI18n(readFileSync(
     new URL("../src/components/assistant-ui/thread.tsx", import.meta.url),
     "utf8",
-  );
+  ));
   assert.match(
     bar,
     /return aui\.thread\(\)\.startRun\(/,
@@ -2622,25 +2622,25 @@ test("the abort case is wired to the run, not to a clock", () => {
     "the started run no longer reaches the keeper",
   );
 
-  const probe = readFileSync(
+  const probe = expandI18n(readFileSync(
     new URL(
       "../src/features/chat/utils/auto-continue-issued-run.ts",
       import.meta.url,
     ),
     "utf8",
-  );
+  ));
   assert.match(
     probe,
     /typeof \(started as \{ then\?: unknown \}\)\.then !== "function"/,
     "the declared type is void, so the shape has to be checked rather than assumed",
   );
-  const wiredKeeper = readFileSync(
+  const wiredKeeper = expandI18n(readFileSync(
     new URL(
       "../src/features/chat/utils/auto-continue-run-keeper.ts",
       import.meta.url,
     ),
     "utf8",
-  );
+  ));
   // Every timer, not just `setTimeout(`: a deadline spelled `setInterval` counts its own elapsed
   // time and passed unnoticed. The renewal interval is NAMED, so a second one cannot pose as it.
   const TIMERS =

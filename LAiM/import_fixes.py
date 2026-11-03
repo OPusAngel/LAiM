@@ -2707,7 +2707,7 @@ def fix_transformers_composite_prefix_renaming():
     without re-scoping it, so the text model's `^model.language_model.` -> `^model.` fires on
     the composite model's own names, and every bitsandbytes sidecar renames onto a key that
     does not exist and is dropped. 352 of 352 Linear4bit come back with `quant_state is None`
-    on `LAiM/qwen3.8-27b-LAiM-bnb-4bit` at 5.4.0 and 5.5.4 (Gemma 3n: 439 of 439), and
+    on `unsloth/qwen3.8-27b-unsloth-bnb-4bit` at 5.4.0 and 5.5.4 (Gemma 3n: 439 of 439), and
     the first forward raises `ValueError: quant_state is required`. The checkpoints are fine.
     Fixed upstream in 5.6.0 by PR #45567; a runtime repair because LAiM-zoo caps
     transformers at 5.5.0 on Apple Silicon, putting those users inside the window.
@@ -4766,12 +4766,12 @@ def patch_ipykernel_hf_xet():
 
 
 def patch_trackio():
-    # Customize the Trackio dashboard for experiment tracking; see LAiMai/notebooks#110.
+    # Customize the Trackio dashboard for experiment tracking; see unslothai/notebooks#110.
     os.environ["TRACKIO_LOGO_LIGHT_URL"] = (
-        "https://raw.githubusercontent.com/LAiMai/LAiM/main/images/LAiM%20logo%20black%20text.png"
+        "https://raw.githubusercontent.com/OPusAngel/LAiM/main/images/LAiM%20logo%20black%20text.png"
     )
     os.environ["TRACKIO_LOGO_DARK_URL"] = (
-        "https://raw.githubusercontent.com/LAiMai/LAiM/main/images/LAiM%20logo%20white%20text.png"
+        "https://raw.githubusercontent.com/OPusAngel/LAiM/main/images/LAiM%20logo%20white%20text.png"
     )
     os.environ["TRACKIO_PLOT_ORDER"] = "train/reward"
 
@@ -10093,7 +10093,7 @@ def _is_broken_causal_conv1d_error(error) -> bool:
 # Our Linux x86_64 cp313 CUDA 13 builds for torch 2.13 / 2.14, the minors whose extension ABI no
 # upstream wheel matches (release prebuilt-wheels-cu13, .github/workflows/prebuilt-cuda-wheels.yml).
 _PREBUILT_KERNEL_RELEASE_URL = (
-    "https://github.com/LAiMai/LAiM/releases/download/prebuilt-wheels-cu13"
+    "https://github.com/unslothai/unsloth/releases/download/prebuilt-wheels-cu13"
 )
 _FLASH_ATTN_TORCH213_SOURCE = "flash-attn @ git+https://github.com/Dao-AILab/flash-attention@edb5c76ee329b18ed95d1f7ea9aa522a1331ab7d"
 _PREBUILT_KERNEL_VERSIONS = {

@@ -4,6 +4,8 @@
 import type { ReactElement } from "react";
 import type { NodeConfig } from "../../types";
 import { getConfigErrors } from "../../utils";
+import { translate } from "@/i18n";
+
 
 export function ValidationBanner({
   config,
@@ -16,7 +18,7 @@ export function ValidationBanner({
   }
   return (
     <p className="text-xs text-amber-600">
-      <span className="font-semibold">Needs attention: </span>
+      <span className="font-semibold">{translate("uxRecipestudio.needsAttention0j16f")}</span>
       {errors.join(". ")}.
     </p>
   );

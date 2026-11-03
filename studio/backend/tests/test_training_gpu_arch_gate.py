@@ -431,7 +431,7 @@ class TestSelectorWiring:
                 return_value = [0, 1],
             ),
         ):
-            return auto_select_gpu_ids("LAiM/test")
+            return auto_select_gpu_ids("unsloth/test")
 
     def test_the_ranked_path_never_offers_the_uncovered_gpu(self):
         selected, _meta = self._run(uncovered = {1})
@@ -466,7 +466,7 @@ class TestSelectorWiring:
                 return_value = [0, 1],
             ),
         ):
-            return auto_select_gpu_ids("LAiM/test")[0]
+            return auto_select_gpu_ids("unsloth/test")[0]
 
 
 class TestExportWorkerVisibility:

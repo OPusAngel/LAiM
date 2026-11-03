@@ -18,6 +18,8 @@ import {
   HoverCardTrigger,
   HoverCardContent,
 } from "@/components/ui/hover-card";
+import { translate } from "@/i18n";
+
 
 const extractDomain = (url: string): string => {
   try {
@@ -304,9 +306,7 @@ const SourcesGroup: FC<{ sources?: SourceData[]; allowRemoteIcons?: boolean }> =
               badgeVariants({ variant: "outline", size: "default" }),
               "rounded-full cursor-pointer text-muted-foreground hover:bg-chat-icon-bg-hover! hover:text-chat-icon-fg-hover!",
             )}
-          >
-            +{hiddenCount} more
-          </button>
+          >{translate("uxComponents.more5b069", { p1: hiddenCount })}</button>
         )}
         {shouldCollapse && expanded && (
           <button
@@ -316,9 +316,7 @@ const SourcesGroup: FC<{ sources?: SourceData[]; allowRemoteIcons?: boolean }> =
               badgeVariants({ variant: "outline", size: "default" }),
               "rounded-full cursor-pointer text-muted-foreground hover:bg-chat-icon-bg-hover! hover:text-chat-icon-fg-hover!",
             )}
-          >
-            Show less
-          </button>
+          >{translate("uxComponents.showLessqn712")}</button>
         )}
       </div>
     </div>

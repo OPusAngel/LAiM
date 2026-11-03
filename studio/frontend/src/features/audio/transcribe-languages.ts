@@ -3,10 +3,12 @@
 
 // ISO codes, unlike the name-keyed TTS LanguageSelect; "" means the model detects it.
 
+import { translate } from "@/i18n";
+
 const NAMES = new Intl.DisplayNames(["en"], { type: "language" });
 
 export const TRANSCRIBE_LANGUAGES: readonly { code: string; name: string }[] = [
-  { code: "", name: "Detect automatically" },
+  { code: "", get name() { return translate("uxAudio.detectAutomaticallykkxsc"); } },
   ...(
     "en zh es fr de it pt ru ja ko ar hi nl pl tr uk vi id th sv da fi no cs " +
     "el he hu ro ms yue"

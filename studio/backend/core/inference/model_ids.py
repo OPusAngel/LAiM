@@ -65,7 +65,7 @@ def public_model_id(identifier: Optional[str]) -> Optional[str]:
 
     - HF cache path -> the repo id it came from, e.g.
       ``~/.cache/huggingface/hub/models--LAiM--X-GGUF/snapshots/<sha>`` ->
-      ``LAiM/X-GGUF``.
+      ``unsloth/X-GGUF``.
     - Other local GGUF path -> the file stem with ``.gguf`` stripped, e.g.
       ``/srv/models/Qwen3-30B-A3B-Q4_K_M.gguf`` -> ``Qwen3-30B-A3B-Q4_K_M``.
     - HF repo id (``org/model``) and already-clean names -> returned unchanged.
@@ -127,12 +127,12 @@ def model_id_matches(requested: Optional[str], internal: Optional[str]) -> bool:
 
 
 # Mirror Zoo’s MLX repository substitution without importing the ML stack.
-_BNB_SUFFIXES = ("-LAiM-bnb-4bit", "-bnb-4bit")
+_BNB_SUFFIXES = ("-unsloth-bnb-4bit", "-bnb-4bit")
 
 
 def mlx_bnb_base_repo(model_name: Optional[str]) -> Optional[str]:
     """Return the replacement base repository, or None."""
-    if not isinstance(model_name, str) or not model_name.startswith("LAiM/"):
+    if not isinstance(model_name, str) or not model_name.startswith("unsloth/"):
         return None
     if os.path.exists(model_name):
         return None

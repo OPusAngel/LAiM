@@ -229,7 +229,7 @@ def test_a_scoped_run_ignores_entries_outside_its_paths():
             "--paths",
             "LAiM_zoo/compiler.py"
             if (SCRIPT.parents[1] / "LAiM_zoo").is_dir()
-            else "LAiM/models/loader.py",
+            else "unsloth/models/loader.py",
         ],
         capture_output = True,
         text = True,
@@ -255,7 +255,7 @@ def test_a_root_scope_keeps_every_entry(tmp_path, monkeypatch):
 
 def test_overlapping_paths_scan_a_file_once():
     module = _module()
-    target = "LAiM_zoo" if (module.REPO_ROOT / "LAiM_zoo").is_dir() else "LAiM/models"
+    target = "LAiM_zoo" if (module.REPO_ROOT / "LAiM_zoo").is_dir() else "unsloth/models"
     once = module.collect([target])
     assert module.collect([target, target]) == once
 

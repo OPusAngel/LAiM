@@ -43,7 +43,7 @@ def _load_family_defaults():
 
 
 def get_family_inference_params(model_id: str) -> Dict[str, Any]:
-    """Recommended inference params by model family: extracts the family from the identifier (e.g. "LAiM/Qwen3.5-9B-GGUF" to "qwen3.5") and returns matching params from inference_defaults.json, or {}."""
+    """Recommended inference params by model family: extracts the family from the identifier (e.g. "unsloth/Qwen3.5-9B-GGUF" to "qwen3.5") and returns matching params from inference_defaults.json, or {}."""
     _load_family_defaults()
 
     if not _FAMILY_PATTERNS or not _FAMILY_DEFAULTS:

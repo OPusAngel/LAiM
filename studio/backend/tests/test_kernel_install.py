@@ -47,7 +47,7 @@ def _env(
 def _no_mirror(monkeypatch):
     monkeypatch.delenv("LAiM_PYTORCH_MIRROR", raising = False)
     # Forces the mamba_ssm decision below sm80; an inherited value would override the mocked Triton.
-    monkeypatch.delenv("LAiM_MAMBA_PRE_AMPERE_FAST", raising = False)
+    monkeypatch.delenv("UNSLOTH_MAMBA_PRE_AMPERE_FAST", raising = False)
 
 
 @pytest.mark.parametrize(
@@ -333,22 +333,22 @@ def test_console_entry_drops_an_unwritable_ssl_keylog_file(tmp_path):
         ),
         (
             _env("2.13.0+cu130", "13.0"),
-            "https://github.com/LAiMai/LAiM/releases/download/prebuilt-wheels-cu13/"
+            "https://github.com/unslothai/unsloth/releases/download/prebuilt-wheels-cu13/"
             "flash_attn-2.8.4+cu13torch2.13cxx11abiTRUE-cp313-cp313-linux_x86_64.whl",
         ),
         (
             _env("2.11.0+cu130", "13.0", platform_tag = "win_amd64"),
-            "https://github.com/LAiMai/LAiM/releases/download/prebuilt-wheels-cu13/"
+            "https://github.com/unslothai/unsloth/releases/download/prebuilt-wheels-cu13/"
             "flash_attn-2.8.4+cu13torch2.11cxx11abiTRUE-cp313-cp313-win_amd64.whl",
         ),
         (
             _env("2.10.0+cu130", "13.0", platform_tag = "win_amd64"),
-            "https://github.com/LAiMai/LAiM/releases/download/prebuilt-wheels-cu13/"
+            "https://github.com/unslothai/unsloth/releases/download/prebuilt-wheels-cu13/"
             "flash_attn-2.8.4+cu13torch2.10cxx11abiTRUE-cp313-cp313-win_amd64.whl",
         ),
         (
             _env("2.12.0+cu130", "13.0", platform_tag = "win_amd64"),
-            "https://github.com/LAiMai/LAiM/releases/download/prebuilt-wheels-cu13/"
+            "https://github.com/unslothai/unsloth/releases/download/prebuilt-wheels-cu13/"
             "flash_attn-2.8.4+cu13torch2.12cxx11abiTRUE-cp313-cp313-win_amd64.whl",
         ),
         (_env("2.9.0+cu130", "13.0", platform_tag = "win_amd64"), None),
@@ -375,7 +375,7 @@ def test_sm80_kernels_are_skipped_below_sm80(name, capability, capsys, monkeypat
 @pytest.mark.parametrize("triton", [(3, 4), (3, 6), (4, 0)])
 def test_mamba_ssm_installs_on_sm75_with_a_new_triton(uv, monkeypatch, triton):
     uv(False)
-    monkeypatch.delenv("LAiM_MAMBA_PRE_AMPERE_FAST", raising = False)
+    monkeypatch.delenv("UNSLOTH_MAMBA_PRE_AMPERE_FAST", raising = False)
     monkeypatch.setattr(kernel_install, "_triton_version", lambda run: triton)
     run = _Runner([False, True], capability = "7 5")
     assert kernel_install.install_kernel("mamba_ssm", _COLAB, run = run, exists = lambda url: True) == 0
@@ -386,7 +386,7 @@ def test_mamba_ssm_installs_on_sm75_with_a_new_triton(uv, monkeypatch, triton):
 
 @pytest.mark.parametrize("triton", [(3, 3), (3, 2), None])
 def test_mamba_ssm_is_skipped_on_sm75_with_an_old_triton(monkeypatch, capsys, triton):
-    monkeypatch.delenv("LAiM_MAMBA_PRE_AMPERE_FAST", raising = False)
+    monkeypatch.delenv("UNSLOTH_MAMBA_PRE_AMPERE_FAST", raising = False)
     monkeypatch.setattr(kernel_install, "_triton_version", lambda run: triton)
     run = _Runner([], capability = "7 5")
     assert kernel_install.install_kernel("mamba_ssm", _COLAB, run = run, exists = lambda url: True) == 0
@@ -404,14 +404,14 @@ def test_triton_is_read_from_the_module(uv, monkeypatch, triton, installs):
     """pytorch-triton and other providers ship the `triton` import under another
     distribution name, so the version comes from `triton.__version__`."""
     uv(False)
-    monkeypatch.delenv("LAiM_MAMBA_PRE_AMPERE_FAST", raising = False)
+    monkeypatch.delenv("UNSLOTH_MAMBA_PRE_AMPERE_FAST", raising = False)
     run = _Runner([False, True], capability = "7 5", triton = triton)
     assert kernel_install.install_kernel("mamba_ssm", _COLAB, run = run, exists = lambda url: True) == 0
     assert bool(run.installer_calls) is installs
 
 
 def test_mamba_ssm_is_skipped_below_sm75_whatever_the_triton(monkeypatch, capsys):
-    monkeypatch.delenv("LAiM_MAMBA_PRE_AMPERE_FAST", raising = False)
+    monkeypatch.delenv("UNSLOTH_MAMBA_PRE_AMPERE_FAST", raising = False)
     monkeypatch.setattr(kernel_install, "_triton_version", lambda run: (3, 6))
     run = _Runner([], capability = "7 0")
     assert kernel_install.install_kernel("mamba_ssm", _COLAB, run = run, exists = lambda url: True) == 0
@@ -429,7 +429,7 @@ def test_mamba_ssm_is_skipped_below_sm75_whatever_the_triton(monkeypatch, capsys
 )
 def test_mamba_ssm_follows_the_LAiM_zoo_override(uv, monkeypatch, forced, capability, installs):
     uv(False)
-    monkeypatch.setenv("LAiM_MAMBA_PRE_AMPERE_FAST", forced)
+    monkeypatch.setenv("UNSLOTH_MAMBA_PRE_AMPERE_FAST", forced)
     monkeypatch.setattr(
         kernel_install, "_triton_version", lambda run: (3, 6) if forced == "0" else (3, 3)
     )
@@ -439,17 +439,17 @@ def test_mamba_ssm_follows_the_LAiM_zoo_override(uv, monkeypatch, forced, capabi
 
 
 def test_the_override_skip_message_reads_as_a_sentence(monkeypatch, capsys):
-    monkeypatch.setenv("LAiM_MAMBA_PRE_AMPERE_FAST", "0")
+    monkeypatch.setenv("UNSLOTH_MAMBA_PRE_AMPERE_FAST", "0")
     run = _Runner([], capability = "7 5")
     kernel_install.install_kernel("mamba_ssm", _COLAB, run = run, exists = lambda url: True)
     assert (
-        "LAiM: skipping mamba_ssm, which LAiM_MAMBA_PRE_AMPERE_FAST=0 turns off "
+        "LAiM: skipping mamba_ssm, which UNSLOTH_MAMBA_PRE_AMPERE_FAST=0 turns off "
         "(the best GPU is sm75)." in capsys.readouterr().out
     )
 
 
 def test_flash_attn_stays_sm80_only_with_a_new_triton(monkeypatch):
-    monkeypatch.setenv("LAiM_MAMBA_PRE_AMPERE_FAST", "1")
+    monkeypatch.setenv("UNSLOTH_MAMBA_PRE_AMPERE_FAST", "1")
     monkeypatch.setattr(kernel_install, "_triton_version", lambda run: (3, 6))
     run = _Runner([], capability = "7 5")
     assert (

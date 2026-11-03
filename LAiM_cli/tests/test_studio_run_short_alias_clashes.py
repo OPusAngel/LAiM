@@ -143,21 +143,21 @@ def test_dash_hf_documented_alias_still_works(monkeypatch):
     """`-hf` must keep working: multi-char shorts don't cluster in Click."""
     captured = _invoke(
         monkeypatch,
-        ["-hf", "LAiM/gemma-4-26B-A4B-it-GGUF:UD-Q4_K_XL"],
+        ["-hf", "unsloth/gemma-4-26B-A4B-it-GGUF:UD-Q4_K_XL"],
     )
     assert len(captured) == 1
     argv = captured[0]
-    assert argv[argv.index("--model") + 1] == ("LAiM/gemma-4-26B-A4B-it-GGUF"), argv
+    assert argv[argv.index("--model") + 1] == ("unsloth/gemma-4-26B-A4B-it-GGUF"), argv
     assert argv[argv.index("--gguf-variant") + 1] == "UD-Q4_K_XL", argv
 
 
 @pytest.mark.parametrize(
     "legacy_args,expected_model",
     [
-        (["-m", "LAiM/Qwen3-1.7B-GGUF"], "LAiM/Qwen3-1.7B-GGUF"),
-        (["-m=LAiM/Qwen3-1.7B-GGUF"], "LAiM/Qwen3-1.7B-GGUF"),
-        (["-hfr", "LAiM/Qwen3-1.7B-GGUF"], "LAiM/Qwen3-1.7B-GGUF"),
-        (["-hfr=LAiM/Qwen3-1.7B-GGUF"], "LAiM/Qwen3-1.7B-GGUF"),
+        (["-m", "unsloth/Qwen3-1.7B-GGUF"], "unsloth/Qwen3-1.7B-GGUF"),
+        (["-m=LAiM/Qwen3-1.7B-GGUF"], "unsloth/Qwen3-1.7B-GGUF"),
+        (["-hfr", "unsloth/Qwen3-1.7B-GGUF"], "unsloth/Qwen3-1.7B-GGUF"),
+        (["-hfr=LAiM/Qwen3-1.7B-GGUF"], "unsloth/Qwen3-1.7B-GGUF"),
     ],
 )
 def test_legacy_model_aliases_still_promote_to_model(monkeypatch, legacy_args, expected_model):
@@ -206,11 +206,11 @@ def test_legacy_m_with_repo_variant_syntax(monkeypatch):
     _split_repo_variant into --model + --gguf-variant."""
     captured = _invoke(
         monkeypatch,
-        ["-m", "LAiM/Qwen3-1.7B-GGUF:UD-Q4_K_XL"],
+        ["-m", "unsloth/Qwen3-1.7B-GGUF:UD-Q4_K_XL"],
     )
     assert len(captured) == 1
     argv = captured[0]
-    assert argv[argv.index("--model") + 1] == "LAiM/Qwen3-1.7B-GGUF", argv
+    assert argv[argv.index("--model") + 1] == "unsloth/Qwen3-1.7B-GGUF", argv
     assert argv[argv.index("--gguf-variant") + 1] == "UD-Q4_K_XL", argv
 
 
@@ -225,7 +225,7 @@ def test_legacy_m_inline_value_form(monkeypatch):
     captured = _invoke(monkeypatch, ["-m=LAiM/Qwen3-1.7B-GGUF"])
     assert len(captured) == 1
     argv = captured[0]
-    assert argv[argv.index("--model") + 1] == "LAiM/Qwen3-1.7B-GGUF", argv
+    assert argv[argv.index("--model") + 1] == "unsloth/Qwen3-1.7B-GGUF", argv
 
 
 def test_consume_helper_exact_match_space_form():

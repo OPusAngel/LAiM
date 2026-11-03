@@ -26,7 +26,7 @@ def test_runtime_recovery_uses_laim_owned_sources():
 
     assert f"https://github.com/{OWNER}/LAiM.git" in source
     assert f"https://github.com/{OWNER}/LAiM-zoo.git" in source
-    assert "github.com/LAiMai/" not in source
+    assert "github.com/unslothai/" not in source
 
 
 def test_active_first_party_endpoints_do_not_point_to_previous_owner():
@@ -40,4 +40,4 @@ def test_active_first_party_endpoints_do_not_point_to_previous_owner():
 
     for path in active_files:
         source = path.read_text(encoding="utf-8")
-        assert "github.com/LAiMai/" not in source, path
+        assert "github.com/unslothai/" not in source, path

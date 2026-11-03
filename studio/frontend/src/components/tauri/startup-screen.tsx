@@ -6,6 +6,7 @@ import InstallLocation from "@/components/tauri/install-location";
 import { LogDetails } from "@/components/tauri/log-details";
 import {
   installProgressMessage,
+  startupMessageText,
   startupWaitingMessage,
   STATUS_MESSAGE_ROTATION_MS,
   type StartupMessage,
@@ -381,7 +382,7 @@ function NeedsElevationContent({
 
 function StartingContent({ message }: { message: StartupMessage }) {
   const messageIndex = useRotatingMessageIndex();
-  const displayMessage = startupWaitingMessage(message, messageIndex);
+  const displayMessage = startupMessageText(startupWaitingMessage(message, messageIndex));
 
   return (
     <div className="flex h-full flex-col items-center">

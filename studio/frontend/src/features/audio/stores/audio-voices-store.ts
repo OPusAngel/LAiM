@@ -10,6 +10,8 @@ import {
   updateVoice,
 } from "../api";
 import type { AudioVoiceCreateRequest } from "../audio-run-request";
+import { translate } from "@/i18n";
+
 
 interface AudioVoicesState {
   voices: AudioVoice[];
@@ -51,7 +53,7 @@ export const useAudioVoicesStore = create<AudioVoicesState>()((set, get) => ({
       set({
         loading: false,
         loaded: true,
-        error: message(error, "Could not list saved voices."),
+        error: message(error, translate("uxAudio.couldNotListSavedakvem")),
       });
     }
   },

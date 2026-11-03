@@ -49,7 +49,7 @@ def test_quantized_or_foreign_models_keep_4bit(outputs, tmp_path):
     quantized = _model_dir(outputs, "q", {"quantization_config": {"quant_method": "bitsandbytes"}})
     adapter = _model_dir(outputs, "a", adapter = {})
     outside = _model_dir(tmp_path / "exports", "merged")
-    for path in (quantized, adapter, outside, "LAiM/Qwen3-0.6B"):
+    for path in (quantized, adapter, outside, "unsloth/Qwen3-0.6B"):
         assert worker._resolve_lora_4bit(_mc(path), True) is True, path
     qlora = _model_dir(outputs, "qlora", adapter = {"LAiM_training_method": "qlora"})
     assert worker._resolve_lora_4bit(_mc(qlora, is_lora = True, base_model = "x"), True) is True

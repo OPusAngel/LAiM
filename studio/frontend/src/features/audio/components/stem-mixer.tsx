@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -114,13 +115,13 @@ export function StemMixer({
     }
   };
 
-  const status = loadingCount > 0 ? "Loading stems…" : "";
+  const status = loadingCount > 0 ? translate("uxAudio.loadingStemsn1ih1") : "";
 
   return (
     <section
       // biome-ignore lint/a11y/noNoninteractiveTabindex: the mixer is a keyboard target for Space/K and the arrows.
       tabIndex={0}
-      aria-label="Stem mixer"
+      aria-label={translate("uxAudio.stemMixergnz8u")}
       onKeyDown={handleKeyDown}
       className="@container corner-squircle grid gap-3 rounded-4xl bg-card p-4 ring-1 ring-[color-mix(in_oklab,var(--foreground)_calc(10%*var(--contrast-edge-gain,1)),transparent)] outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
@@ -145,7 +146,7 @@ export function StemMixer({
           variant="muted"
           size="icon"
           className="size-[calc(32px*var(--ui-space-scale,1))] shrink-0"
-          aria-label={playing ? "Pause stems" : "Play stems"}
+          aria-label={playing ? translate("uxAudio.pauseStems8wgfs") : translate("uxAudio.playStemsgldvq")}
           disabled={!ready}
           onClick={toggle}
         >
@@ -169,7 +170,7 @@ export function StemMixer({
             strokeWidth={1.75}
             data-icon="inline-start"
           />
-          Download all
+          {translate("library.audio.downloadRun")}
         </Button>
         {sendTargets.length > 0 ? (
           <DropdownMenu>
@@ -180,7 +181,7 @@ export function StemMixer({
                   strokeWidth={1.75}
                   data-icon="inline-start"
                 />
-                Send to
+                {translate("uxAudio.sendToxvnh7")}
                 <HugeiconsIcon
                   icon={ArrowDown01Icon}
                   strokeWidth={1.75}
@@ -254,7 +255,7 @@ export function StemMixer({
                   type="button"
                   variant="ghost"
                   size="icon-xs"
-                  aria-label={`Solo ${stem.label}`}
+                  aria-label={translate("uxAudio.solo0f2ku", { p1: stem.label })}
                   aria-pressed={level.solo}
                   className="size-[calc(24px*var(--ui-space-scale,1))] text-muted-foreground aria-pressed:bg-foreground aria-pressed:text-background"
                   onClick={() =>
@@ -267,7 +268,7 @@ export function StemMixer({
                   type="button"
                   variant="ghost"
                   size="icon-xs"
-                  aria-label={`Mute ${stem.label}`}
+                  aria-label={translate("uxAudio.mutepluqg", { p1: stem.label })}
                   aria-pressed={level.muted}
                   className="size-[calc(24px*var(--ui-space-scale,1))] text-muted-foreground aria-pressed:bg-foreground aria-pressed:text-background"
                   onClick={() =>
@@ -285,7 +286,7 @@ export function StemMixer({
                   max={100}
                   step={1}
                   value={[percent]}
-                  aria-label={`${stem.label} volume`}
+                  aria-label={translate("uxAudio.volumefvug6", { p1: stem.label })}
                   thumbValueText={(value) => `${stem.label} volume ${value} %`}
                   onValueChange={([value]) =>
                     dispatch({
@@ -299,7 +300,7 @@ export function StemMixer({
                   type="button"
                   variant="ghost"
                   size="icon-xs"
-                  aria-label={`Download ${stem.label}`}
+                  aria-label={translate("uxAudio.downloadtn6d3", { p1: stem.label })}
                   className="size-[calc(24px*var(--ui-space-scale,1))] text-muted-foreground"
                   disabled={!stem.src}
                   onClick={() => onDownloadStem(stem.clipId)}

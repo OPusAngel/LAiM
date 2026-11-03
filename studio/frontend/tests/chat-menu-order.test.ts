@@ -17,26 +17,27 @@ const {
   usePlusMenuPrefsStore,
 } = await import("../src/features/chat/stores/plus-menu-prefs-store.ts");
 
-test("deep research and browser use are menu items, shown by default", () => {
+test("deep research is a menu item shown by default; browser use is not in the menu at all", () => {
   assert.ok(PLUS_MENU_ORDER.includes("deepResearch"));
-  assert.ok(PLUS_MENU_ORDER.includes("browserUse"));
+  assert.ok(!PLUS_MENU_ORDER.includes("browserUse" as never));
   const { pins } = usePlusMenuPrefsStore.getInitialState();
   assert.equal(pins.deepResearch, true);
-  assert.equal(pins.browserUse, true);
+  assert.equal((pins as Record<string, boolean>).browserUse, undefined);
 });
 
 test("a saved order drops unknown ids and slots new ones after their default neighbour", () => {
-  // Saved before this release: no deep research or browser use, one retired id.
-  const saved = ["skills", "chatWithFiles", "retired", "mcp", "skills"];
+  // Saved before this release: no deep research, plus a retired id browser use left behind.
+  const saved = ["skills", "chatWithFiles", "retired", "browserUse", "mcp", "skills"];
   const order = normalizePlusMenuOrder(saved);
   assert.equal(order.length, PLUS_MENU_ORDER.length);
   assert.equal(new Set(order).size, order.length);
   assert.ok(!order.includes("retired" as never));
+  assert.ok(!order.includes("browserUse" as never));
   // The user's own items keep their relative order.
   const mine = order.filter((id) => ["skills", "chatWithFiles", "mcp"].includes(id));
   assert.deepEqual(mine, ["skills", "chatWithFiles", "mcp"]);
-  // Browser use follows chat with files, as it does by default.
-  assert.equal(order[order.indexOf("chatWithFiles") + 1], "browserUse");
+  // Chat with files is followed by MCP, as it is by default.
+  assert.equal(order[order.indexOf("chatWithFiles") + 1], "mcp");
   assert.deepEqual(normalizePlusMenuOrder(undefined), PLUS_MENU_ORDER);
 });
 
@@ -58,24 +59,26 @@ test("the menu shows pinned items in the saved order and the rest under More in 
 test("an install that saved pins before ordering existed gets the default order and new pins", async () => {
   store.set(
     PLUS_MENU_PINS_STORAGE_KEY,
-    JSON.stringify({ state: { pins: { chatWithFiles: false, skills: true } }, version: 1 }),
+    JSON.stringify({ state: { pins: { chatWithFiles: false, skills: true, browserUse: true } }, version: 1 }),
   );
   await usePlusMenuPrefsStore.persist.rehydrate();
   const state = usePlusMenuPrefsStore.getState();
   assert.deepEqual(state.order, PLUS_MENU_ORDER);
   assert.equal(state.pins.chatWithFiles, false);
-  assert.equal(state.pins.browserUse, true);
+  // The retired id is inert: it is not in the order the menu renders.
+  assert.ok(!state.order.includes("browserUse" as never));
   state.setOrder(["projects", ...PLUS_MENU_ORDER]);
   assert.equal(usePlusMenuPrefsStore.getState().order[0], "projects");
   usePlusMenuPrefsStore.getState().resetMenu();
   assert.deepEqual(usePlusMenuPrefsStore.getState().order, PLUS_MENU_ORDER);
 });
 
-test("both + menus render from the saved order, with no hard-coded browser use slot", () => {
+test("both + menus render from the saved order, with no browser use slot", () => {
   for (const path of ["components/assistant-ui/thread.tsx", "features/chat/shared-composer.tsx"]) {
     const src = readSrc(path);
     assert.match(src, /splitPlusMenuItems\(plusOrder, plusPins\)/, path);
-    assert.match(src, /browserUse: <BrowserAgentMenuItem \/>/, path);
+    // Browser use has no composer control: Settings > Browser is its only switch.
+    assert.ok(!src.includes("BrowserAgent"), path);
     assert.ok(!src.includes('pinnedPlusItems.includes("chatWithFiles")'), path);
   }
 });
@@ -92,12 +95,15 @@ test("dragging a chat menu row stays inside the list and saves the order once, o
   assert.ok(!readSrc("features/settings/settings-dialog.tsx").includes("layoutScroll"));
 });
 
-test("a pinned Deep research sits right under Tools, not with the other pinned items", () => {
+test("a pinned Deep research sits right under the fixed rows, not with the other pinned items", () => {
   const src = readSrc("components/assistant-ui/thread.tsx");
-  const tools = src.indexOf("          Tools\n");
+  // The composer no longer carries Tools rows (they live in Settings); the
+  // fixed Add-files row is the anchor the inline Deep research sits under.
+  assert.ok(!src.includes('{t("settings.chat.menu.tools")}'));
+  const addFiles = src.indexOf('{t("settings.chat.menu.addFiles")}');
   const research = src.indexOf("{deepResearchWithTools ? plusMenuNodes.deepResearch : null}");
-  const separator = src.indexOf("<DropdownMenuSeparator />", tools);
-  assert.ok(tools > 0 && research > tools && research < separator, "Deep research is not between Tools and the separator");
+  const separator = src.indexOf("<DropdownMenuSeparator />", addFiles);
+  assert.ok(addFiles > 0 && research > addFiles && research < separator, "Deep research is not between the fixed rows and the separator");
   assert.match(src, /pinnedPlusItems\s*\.filter\(\(id\) => id !== "deepResearch"\)/);
 });
 
@@ -114,10 +120,10 @@ test("Settings shows Deep research under Tools with a switch and no drag handle"
 });
 
 test("moving another row keeps Deep research where it was in More, not at the top", () => {
-  const saved = ["chatWithFiles", "browserUse", "deepResearch", "mcp", "skills"] as const;
+  const saved = ["chatWithFiles", "projects", "deepResearch", "mcp", "skills"] as const;
   // Skills dragged to the top; the list it comes from never shows Deep research.
-  const moved = keepSavedSlot(["skills", "chatWithFiles", "browserUse", "mcp"], [...saved], "deepResearch");
-  assert.deepEqual(moved, ["skills", "chatWithFiles", "deepResearch", "browserUse", "mcp"]);
+  const moved = keepSavedSlot(["skills", "chatWithFiles", "projects", "mcp"], [...saved], "deepResearch");
+  assert.deepEqual(moved, ["skills", "chatWithFiles", "deepResearch", "projects", "mcp"]);
   // A saved slot past the end of the list lands at its end; an order without it puts it first.
   assert.deepEqual(keepSavedSlot(["mcp"], ["mcp", "skills", "deepResearch"], "deepResearch"), ["mcp", "deepResearch"]);
   assert.deepEqual(keepSavedSlot(["mcp"], ["mcp"], "deepResearch"), ["deepResearch", "mcp"]);

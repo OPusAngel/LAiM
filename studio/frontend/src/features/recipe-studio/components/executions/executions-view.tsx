@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { useEffect, useMemo, useRef, useState, type ReactElement } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import {
@@ -53,10 +54,10 @@ type ExecutionsViewProps = {
 };
 
 function downloadOutcomeMessage(outcome: DownloadOutcome): string {
-  if (outcome === "saved") return "Dataset downloaded";
-  if (outcome === "started") return "Dataset download started";
+  if (outcome === "saved") return translate("uxRecipestudio.datasetDownloadeddzdcy");
+  if (outcome === "started") return translate("uxRecipestudio.datasetDownloadStarted41qwt");
   // The server no longer has this run, so what was written is whatever this client still holds.
-  return "Downloaded the rows still loaded for this run";
+  return translate("uxRecipestudio.downloadedTheRowsStill5ky2n");
 }
 
 export function ExecutionsView({
@@ -165,7 +166,7 @@ export function ExecutionsView({
             <div>
               <img
                 src={imagePreview.src}
-                alt={`${name} preview`}
+                alt={translate("uxRecipestudio.previewcwc67", { p1: name })}
                 loading="lazy"
                 className="h-24 w-auto max-w-[calc(260px*var(--ui-space-scale,1))] rounded-md border border-border/60 bg-muted/20 object-contain"
               />
@@ -175,7 +176,7 @@ export function ExecutionsView({
         if (imagePreview?.kind === "too_large") {
           return (
             <p className="text-xs text-muted-foreground">
-              Image too large to preview
+              {translate("uxRecipestudio.imageTooLargeTo1xpis")}
             </p>
           );
         }
@@ -404,7 +405,7 @@ export function ExecutionsView({
       <section className="min-w-0 flex-1 overflow-auto p-4">
         {!selectedExecution ? (
           <div className="rounded-xl border border-dashed border-border/60 p-4 text-sm text-muted-foreground">
-            Select an execution.
+            {translate("uxRecipestudio.selectAnExecution37x95")}
           </div>
         ) : (
           <div className="space-y-4">
@@ -422,40 +423,29 @@ export function ExecutionsView({
                       )}
                     />
                     <p className="text-sm font-semibold text-foreground">
-                      Progress
+                      {translate("uxRecipestudio.progress79u6h")}
                     </p>
                   </div>
                   <p className="text-xs text-muted-foreground">{formatPercent(progressPercent)}</p>
                 </div>
                 <Progress value={progressPercent} className="h-1" />
                 <div className="grid gap-2 text-xs md:grid-cols-4">
-                  <p className="text-muted-foreground">
-                    Done: <span className="text-foreground">{selectedExecution.progress?.done ?? "--"}</span>
+                  <p className="text-muted-foreground">{translate("uxRecipestudio.dones8198")}<span className="text-foreground">{selectedExecution.progress?.done ?? "--"}</span>
                   </p>
-                  <p className="text-muted-foreground">
-                    Total: <span className="text-foreground">{selectedExecution.progress?.total ?? "--"}</span>
+                  <p className="text-muted-foreground">{translate("uxRecipestudio.totalgsm72")}<span className="text-foreground">{selectedExecution.progress?.total ?? "--"}</span>
                   </p>
-                  <p className="text-muted-foreground">
-                    Rate: <span className="text-foreground">{selectedExecution.progress?.rate ?? "--"} rec/s</span>
+                  <p className="text-muted-foreground">{translate("uxRecipestudio.rate5z379")}<span className="text-foreground">{translate("uxRecipestudio.recSd1u21", { p1: selectedExecution.progress?.rate ?? "--" })}</span>
                   </p>
-                  <p className="text-muted-foreground">
-                    ETA: <span className="text-foreground">{formatEta(selectedExecution.progress?.eta_sec)}</span>
+                  <p className="text-muted-foreground">{translate("uxRecipestudio.eTAezg94")}<span className="text-foreground">{formatEta(selectedExecution.progress?.eta_sec)}</span>
                   </p>
                 </div>
                 {selectedExecution.current_column && selectedExecution.column_progress && (
-                  <p className="text-xs text-muted-foreground">
-                    Column {selectedExecution.current_column}:{" "}
-                    {selectedExecution.column_progress.done ?? "--"}/
-                    {selectedExecution.column_progress.total ?? "--"} (
-                    {formatPercent(selectedExecution.column_progress.percent)})
-                  </p>
+                  <p className="text-xs text-muted-foreground">{translate("uxRecipestudio.columnph7hr", { p1: selectedExecution.current_column, p2: " ", p3: selectedExecution.column_progress.done ?? "--", p4: selectedExecution.column_progress.total ?? "--", p5: formatPercent(selectedExecution.column_progress.percent) })}</p>
                 )}
                 {showBatchProgress && (
-                  <p className="text-xs text-muted-foreground">
-                    Processed batch: {batchIdx ?? "--"}/{batchTotal}
-                  </p>
+                  <p className="text-xs text-muted-foreground">{translate("uxRecipestudio.processedBatchztqld", { p1: batchIdx ?? "--", p2: batchTotal })}</p>
                 )}
-                {isStale && <Badge variant="outline">Recipe changed since this run</Badge>}
+                {isStale && <Badge variant="outline">{translate("uxCopy.recipeChangedSinceThis15x4w")}</Badge>}
               </div>
             )}
 
@@ -464,11 +454,11 @@ export function ExecutionsView({
               <div className="rounded-xl border border-destructive/40 bg-destructive/5 p-3">
                 <p className="text-sm font-semibold text-destructive">
                   {selectedExecution.status === "cancelled"
-                    ? "Execution cancelled"
-                    : "Execution failed"}
+                    ? translate("uxRecipestudio.executionCancelledaj184")
+                    : translate("uxRecipestudio.executionFailedomu4n")}
                 </p>
                 <p className="text-xs text-destructive">
-                  {selectedExecution.error ?? "Unknown error."}
+                  {selectedExecution.error ?? translate("uxRecipestudio.unknownErrors5erm")}
                 </p>
               </div>
             )}
@@ -488,8 +478,8 @@ export function ExecutionsView({
                       size="sm"
                       variant="outline"
                       disabled={downloadingDataset}
-                      aria-label={downloadingDataset ? "Downloading dataset" : "Download dataset"}
-                      title="Download dataset as JSONL"
+                      aria-label={downloadingDataset ? translate("uxRecipestudio.downloadingDatasetu4gsm") : translate("uxRecipestudio.downloadDatasettjn5f")}
+                      title={translate("uxRecipestudio.downloadDatasetAsJSONL1cyae")}
                       onClick={() => {
                         if (!selectedExecution) {
                           return;
@@ -503,8 +493,8 @@ export function ExecutionsView({
                             const message =
                               error instanceof Error
                                 ? error.message
-                                : "Could not download this dataset.";
-                            toastError("Download failed", message);
+                                : translate("uxRecipestudio.couldNotDownloadThisr4or3");
+                            toastError(translate("uxRecipestudio.downloadFailedav1b5"), message);
                           })
                           .finally(() => {
                             setDownloadingDataset(false);
@@ -523,7 +513,7 @@ export function ExecutionsView({
                       onClick={() => setPublishDialogOpen(true)}
                     >
                       <HugeiconsIcon icon={Share08Icon} className="mr-2 size-4" />
-                      Publish to Hugging Face
+                      {translate("uxRecipestudio.publishToHuggingFacew4gvt")}
                     </Button>
                   )}
                   {canCancel && (
@@ -623,7 +613,7 @@ export function ExecutionsView({
         execution={canPublish ? selectedExecution : null}
         onPublish={async (payload) => {
           if (!selectedExecution?.jobId) {
-            throw new Error("This run is missing a job id.");
+            throw new Error(translate("uxRecipestudio.thisRunIsMissingvnfzz"));
           }
           const response = await publishRecipeJob(selectedExecution.jobId, payload);
           return { url: response.url };

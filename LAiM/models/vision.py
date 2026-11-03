@@ -893,7 +893,7 @@ def _wrap_move_keeps_host_embeddings(owner, name):
 def _patch_trainer_move_keeps_host_embeddings():
     # Trainer.train() (under bf16/fp16 full eval, LAiM's default) and Accelerator.prepare_model both call
     # model.to(device) when no hf_device_map is set, as on a block swap load; that pulled offloaded tables back onto
-    # the card at the first step (the 4.4 GB Gemma 4 E2B per-layer table, LAiMai/LAiM#7055).
+    # the card at the first step (the 4.4 GB Gemma 4 E2B per-layer table, OPusAngel/LAiM#7055).
     try:
         from transformers.trainer import Trainer
         _wrap_move_keeps_host_embeddings(Trainer, "_move_model_to_device")
@@ -3279,7 +3279,7 @@ class FastBaseModel:
             f"   {chr(92)}{chr(92)}   /|    {gpu_stats_name}Num GPUs = {DEVICE_COUNT}. Max memory: {max_memory} GB. Platform: {platform_system}.\n"
             f"O^O/ {chr(92)}_/ {chr(92)}    Torch: {torch.__version__}. {gpu_stats_snippet} Triton: {triton_version}\n"
             f"{chr(92)}        /    Bfloat16 = {str(SUPPORTS_BFLOAT16).upper()}. FA [Xformers = {xformers_version}. FA2 = {HAS_FLASH_ATTENTION}]\n"
-            f' "-____-"     Free license: http://github.com/LAiMai/LAiM'
+            f' "-____-"     Free license: http://github.com/OPusAngel/LAiM'
         )
 
         print(statistics)
@@ -4383,7 +4383,7 @@ class FastBaseModel:
                     "Otherwise please check that the model has a tokenizer."
                 ) from _last_resort_err
         # FastModel never calls load_correct_tokenizer; heal Gemma 4 base BOS from
-        # the finalized processor / model config (LAiMai/LAiM#7903).
+        # the finalized processor / model config (OPusAngel/LAiM#7903).
         from ..tokenizer_utils import _apply_post_load_tokenizer_fixes
 
         tokenizer = _apply_post_load_tokenizer_fixes(
@@ -4445,6 +4445,10 @@ class FastBaseModel:
             if trust_remote_code
             else None
         )
+        # LAiM_zoo's saving_utils looks these markers up under the upstream spelling, and a
+        # missing marker loses the pinned revision when a custom-code model is merged.
+        model._unsloth_trust_remote_code = trust_remote_code
+        model._unsloth_trust_remote_code_commit = model._LAiM_trust_remote_code_commit
         model = FastBaseModel.post_patch_model(
             model,
             use_gradient_checkpointing = use_gradient_checkpointing,

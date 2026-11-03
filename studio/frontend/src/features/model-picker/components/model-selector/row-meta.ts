@@ -8,6 +8,7 @@ import {
   audioCppDisplayName,
   isAudioCppFolderId,
 } from "../../../audio/audio-cpp-catalog.ts";
+import { isHfFirstPartyOwner } from "@/config/hub-source";
 import type { LoraModelOption } from "./types";
 
 export type FormatTone = "gguf" | "mlx" | "checkpoint" | "adapter" | "npu";
@@ -42,8 +43,7 @@ export function splitRepoLabel(label: string): {
 /** Our official Hub owners. Rows drop the owner prefix, since the LAiM section already carries
  *  it; the full repo id stays in the row tooltip. */
 export function isLAiMOwner(owner: string | null | undefined): boolean {
-  const normalized = owner?.toLowerCase();
-  return normalized === "LAiM" || normalized === "LAiMai";
+  return isHfFirstPartyOwner(owner);
 }
 
 /** On Device label: an audio.cpp umbrella folder reads as its folder, any other id as itself. */

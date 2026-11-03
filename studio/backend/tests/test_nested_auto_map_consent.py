@@ -5,9 +5,9 @@
 
 transformers reads auto_map off whichever config builds the thing being built, so a
 composite model declares it on `text_config` rather than at the top level.
-`LAiM/models/_utils.py` resolves `text_config.auto_map["AutoModelForCausalLM"]`
+`unsloth/models/_utils.py` resolves `text_config.auto_map["AutoModelForCausalLM"]`
 through `get_class_from_dynamic_module`, which downloads and executes that module, and
-`LAiM/models/loader.py` walks every sub-config level for the compiler. A gate that
+`unsloth/models/loader.py` walks every sub-config level for the compiler. A gate that
 read only `cfg["auto_map"]` therefore reported "ships no remote code" for a repo whose
 code the load runs, and allowed it with no scan, no findings and no fingerprint.
 

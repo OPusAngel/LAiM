@@ -157,7 +157,7 @@ def test_peft_lora_model_create_and_replace(tag: str):
     assert has_def(src, "LoraModel", "class"), f"{tag}: class LoraModel missing"
     assert has_def(src, "_create_and_replace", "func"), (
         f"{tag}: LoraModel._create_and_replace missing; "
-        f"LAiM/models/loader.py:1535-1601 monkey-patch breaks (LAiM#4807)"
+        f"unsloth/models/loader.py:1535-1601 monkey-patch breaks (LAiM#4807)"
     )
 
 
@@ -172,7 +172,7 @@ def test_peft_transformers_weight_conversion_module(tag: str):
     _, src = hit
     assert is_bound(src, "build_peft_weight_mapping"), (
         f"{tag}: build_peft_weight_mapping missing in transformers_weight_conversion; "
-        f"LAiM/import_fixes.py:1375-1456 wrap breaks (LAiM#5167)"
+        f"unsloth/import_fixes.py:1375-1456 wrap breaks (LAiM#5167)"
     )
 
 
@@ -223,7 +223,7 @@ def test_peft_modules_to_save_wrapper(tag: str):
             found_in.append(p)
     assert found_in, (
         f"{tag}: ModulesToSaveWrapper not defined in {candidates}; "
-        f"LAiM/training_utils.py:239 + models/llama.py:153 ImportError"
+        f"unsloth/training_utils.py:239 + models/llama.py:153 ImportError"
     )
 
 

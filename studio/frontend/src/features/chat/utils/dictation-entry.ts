@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
+
 export type DictationEntryMode = "live" | "recording-file";
 
 function isLoopbackHostname(hostname: string): boolean {
@@ -43,8 +45,8 @@ export function currentDictationEntryMode(): DictationEntryMode {
 
 export function insecureDictationGuidance(mode: DictationEntryMode): string {
   return mode === "recording-file"
-    ? "Press Dictate to choose a recording on this connection, or open this Studio server through HTTPS to dictate live."
-    : "Open LAiM at http://127.0.0.1 (localhost) or over HTTPS to dictate.";
+    ? translate("uxChat.pressDictateToChooserahx9")
+    : translate("uxChat.openLAiMAtHttplu2s1");
 }
 
 export type RecordingPickerPlatform = "android" | "ios" | "other";

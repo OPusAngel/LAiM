@@ -46,16 +46,16 @@ KIMI_K3_TEMPLATE = """
 """
 
 KIMI_K3_IDS = [
-    "LAiM/Kimi-K3-GGUF",
-    "LAiM/Kimi-K3",
+    "unsloth/Kimi-K3-GGUF",
+    "unsloth/Kimi-K3",
     "moonshotai/Kimi-K3",
-    "LAiM/Kimi-K3-GGUF:UD-IQ1_S",
+    "unsloth/Kimi-K3-GGUF:UD-IQ1_S",
     "/home/u/.cache/huggingface/hub/models--LAiM--Kimi-K3-GGUF/snapshots/deadbeef",
     "/data/models/Kimi-K3-GGUF/UD-IQ1_S/Kimi-K3-UD-IQ1_S-00001-of-00014.gguf",
 ]
 
 
-def _detect(template, model_id = "LAiM/Kimi-K3-GGUF"):
+def _detect(template, model_id = "unsloth/Kimi-K3-GGUF"):
     from core.inference.llama_cpp import detect_reasoning_flags
     return detect_reasoning_flags(template, model_id)
 
@@ -106,12 +106,12 @@ def test_sampling_defaults_resolve_for_every_id_shape(model_id):
 def test_kimi_k2_keeps_its_own_defaults():
     from utils.inference.inference_config import load_inference_config
 
-    config = load_inference_config("LAiM/Kimi-K2-Instruct")
+    config = load_inference_config("unsloth/Kimi-K2-Instruct")
     assert config["temperature"] == 0.6
     assert config["min_p"] == 0.01
 
 
-@pytest.mark.parametrize("model_id", ["LAiM/Kimi-K3", "moonshotai/Kimi-K3"])
+@pytest.mark.parametrize("model_id", ["unsloth/Kimi-K3", "moonshotai/Kimi-K3"])
 def test_training_defaults_still_come_from_default_yaml(model_id):
     # load_model_defaults replaces default.yaml rather than merging with it, so
     # an inference-only YAML would leave the previous model's hyperparameters

@@ -46,7 +46,7 @@ def _spill_error():
 def test_spill_points_at_offload_layers():
     original = _spill_error()
     with pytest.raises(ValueError) as info:
-        raise_if_bnb_cpu_spill(original, "LAiM/Mistral-Small-3.2-24B-Instruct-2506")
+        raise_if_bnb_cpu_spill(original, "unsloth/Mistral-Small-3.2-24B-Instruct-2506")
     message = str(info.value)
     assert message.startswith("LAiM: LAiM/Mistral-Small-3.2-24B-Instruct-2506 does not fit")
     assert 'offload_layers = "auto"' in message
@@ -111,7 +111,7 @@ def test_other_errors_are_left_alone(error):
 
 @pytest.mark.parametrize(
     "path, cls",
-    [("LAiM/models/llama.py", "FastLlamaModel"), ("LAiM/models/vision.py", "FastBaseModel")],
+    [("unsloth/models/llama.py", "FastLlamaModel"), ("unsloth/models/vision.py", "FastBaseModel")],
 )
 def test_both_loaders_route_load_errors_through_it(path, cls):
     import ast

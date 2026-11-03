@@ -256,7 +256,7 @@ the expensive one it replaces". You prove those with a randomized differential: 
 run both paths, compare. The number of frames it clears is then quoted as the evidence, so the
 generator, not the run, is what the claim actually rests on.
 
-Two ways that goes wrong, both paid for on LAiMai/LAiM#9517, where the cheap path repaired a
+Two ways that goes wrong, both paid for on OPusAngel/LAiM#9517, where the cheap path repaired a
 bounded window of an open code fence instead of the whole tail:
 
 - **A fixture that generates only short lines cannot find a bug about long ones.** The first sweep

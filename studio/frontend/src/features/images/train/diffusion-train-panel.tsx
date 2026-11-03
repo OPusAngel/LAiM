@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   type DragEvent,
   type ReactNode,
@@ -146,7 +147,7 @@ const FAMILY_PRESETS: FamilyPreset[] = [
     label: "FLUX.1-dev (12B)",
     base_repos: ["black-forest-labs/FLUX.1-dev"],
     defaults: { rank: 16, lr: 0.0001, resolution: 512 },
-    vram_note: "Gated: needs its license and your HF token.",
+    get vram_note() { return translate("uxImages.gatedNeedsLicenseqaa75"); },
     gated: true,
     params: "12B",
     qlora_vram_gb: 16,
@@ -154,35 +155,35 @@ const FAMILY_PRESETS: FamilyPreset[] = [
   {
     name: "qwen-image",
     label: "Qwen-Image (20B)",
-    base_repos: ["LAiM/Qwen-Image-2512-LAiM-bnb-4bit", "Qwen/Qwen-Image"],
+    base_repos: ["unsloth/Qwen-Image-2512-unsloth-bnb-4bit", "Qwen/Qwen-Image"],
     defaults: { rank: 16, lr: 0.00005, resolution: 512 },
-    vram_note: "The biggest: needs a large GPU. Start at 512px.",
+    get vram_note() { return translate("uxImages.theBiggestNeedsAkdtiu"); },
     params: "20B",
     qlora_vram_gb: 24,
-    note: "The heaviest option. Start at 512px.",
+    get note() { return translate("uxImages.theHeaviestOptionStartn34zt"); },
   },
   {
     name: "z-image",
     label: "Z-Image (6B)",
     base_repos: [
-      "LAiM/Z-Image-Turbo-LAiM-bnb-4bit",
+      "unsloth/Z-Image-Turbo-unsloth-bnb-4bit",
       "Tongyi-MAI/Z-Image-Turbo",
       "Tongyi-MAI/Z-Image",
     ],
     defaults: { rank: 16, lr: 0.0001, resolution: 768 },
-    vram_note: "The smallest and fastest. A good first pick.",
+    get vram_note() { return translate("uxImages.theSmallestAndFastestvgl91"); },
     params: "6B",
     qlora_vram_gb: 12,
-    note: "The smallest and fastest. A good first pick.",
+    get note() { return translate("uxImages.theSmallestAndFastestvgl91"); },
   },
   {
     name: "sdxl",
     label: "SDXL (U-Net)",
     base_repos: ["stabilityai/stable-diffusion-xl-base-1.0", "stabilityai/sdxl-turbo"],
     defaults: { rank: 16, lr: 0.0001, resolution: 1024 },
-    vram_note: "The classic. Fine at 1024px.",
+    get vram_note() { return translate("uxImages.theClassicFineAt7jko8"); },
     qlora_vram_gb: 12,
-    note: "The classic. Fine at 1024px.",
+    get note() { return translate("uxImages.theClassicFineAt7jko8"); },
   },
 ];
 
@@ -236,7 +237,7 @@ function FolderPickButton({
           type="button"
           size="icon"
           variant="outline"
-          aria-label="Add a folder of images"
+          aria-label={translate("uxImages.addAFolderOf1s0kb")}
           className="size-8 shrink-0"
           onClick={onPick}
           disabled={disabled}
@@ -244,7 +245,7 @@ function FolderPickButton({
           <HugeiconsIcon icon={FolderAddIcon} className="size-3.5" />
         </Button>
       </TooltipTrigger>
-      <TooltipContent>Add a whole folder of images</TooltipContent>
+      <TooltipContent>{translate("uxCopy.addAWholeFoldervitfb")}</TooltipContent>
     </Tooltip>
   );
 }
@@ -289,9 +290,7 @@ function FamilyFacts({ family, baseModel }: { family?: FamilyPreset; baseModel?:
           </Badge>
         ) : null}
         {facts.qlora_vram_gb != null ? (
-          <Badge variant="secondary" className="font-normal">
-            QLoRA {facts.qlora_vram_gb}GB+ VRAM
-          </Badge>
+          <Badge variant="secondary" className="font-normal">{translate("uxImages.qLoRAGBVRAMrx21f", { p1: facts.qlora_vram_gb })}</Badge>
         ) : null}
         {/* Access, not a spec: a neutral fill sets it apart from the capability chips. */}
         {facts.gated ? (
@@ -305,7 +304,7 @@ function FamilyFacts({ family, baseModel }: { family?: FamilyPreset; baseModel?:
       </div>
       {(facts.gated || facts.note) && (
         <p className="text-ui-11 leading-snug text-muted-foreground">
-          {facts.gated ? "Needs its license and your HF token." : null}
+          {facts.gated ? translate("uxImages.needsItsLicenseAndha6f2") : null}
           {facts.gated && facts.note ? " " : null}
           {facts.note}
         </p>
@@ -643,7 +642,7 @@ export function DiffusionTrainPanel({
           setInstancePrompt(ex.suggested_trigger);
         }
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "Import failed");
+        toast.error(e instanceof Error ? e.message : translate("uxImages.importFailedqdyms"));
       } finally {
         setImportingId(null);
       }
@@ -817,8 +816,8 @@ export function DiffusionTrainPanel({
   const takenNameUnlisted =
     takenName !== null && (info?.continuation_dataset_names ?? []).includes(takenName);
   const takenNameMessage = takenNameUnlisted
-    ? `A folder named "${takenName}" already exists but holds no images or clips yet, so it is not in the list. Add to it, or choose another name.`
-    : `A set named "${takenName}" already exists. Pick it in the list above to add to it, or choose another name.`;
+    ? translate("uxImages.aFolderNamedAlreadyls5jt", { p1: takenName })
+    : translate("uxImages.aSetNamedAlreadyg6iz2", { p1: takenName });
   useEffect(() => {
     if (!uploadMode || continuingUploadName || uploadNameEdited.current) return;
     setUploadName((current) =>
@@ -879,7 +878,7 @@ export function DiffusionTrainPanel({
     try {
       setViewRun(await getDiffusionTrainingRun(jobId));
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not load that run");
+      toast.error(e instanceof Error ? e.message : translate("uxImages.couldNotLoadThathljyd"));
     }
   }, []);
 
@@ -902,7 +901,7 @@ export function DiffusionTrainPanel({
     async (name: string, picked: File[], createOnly = false) => {
       if (picked.length === 0) return;  // the picker was cancelled
       if (!name) {
-        toast.error("Give the dataset a folder name, e.g. my-style-photos.");
+        toast.error(translate("uxImages.giveTheDatasetAjardl"));
         return;
       }
       const { files, skipped, collisions } = selectDatasetFiles(picked);
@@ -910,27 +909,23 @@ export function DiffusionTrainPanel({
         const { kind, first, second } = collisions[0];
         const more =
           collisions.length > 1
-            ? ` ${collisions.length - 1} other pair${collisions.length === 2 ? "" : "s"} clash too.`
+            ? translate("uxImages.foundMoreClashesn8q3v", { p1: collisions.length - 1 })
             : "";
         toast.error(
           (kind === "name"
-            ? `"${first}" and "${second}" have the same file name, and a dataset folder is ` +
-              "flat, so one would overwrite the other."
-            : `"${first}" and "${second}" differ only by extension, so they would share one ` +
-              "caption file.") + `${more} Rename them and upload again.`,
+            ? translate("uxImages.andHaveTheSame07ofq", { p1: first, p2: second })
+            : translate("uxImages.andDifferOnlyByxx63z", { p1: first, p2: second })) + translate("uxImages.renameThemAndUploadzrjkp", { p1: more }),
         );
         return;
       }
       if (files.length === 0) {
         toast.error(
-          `Nothing to upload. Pick images (${DATASET_IMAGE_EXTS.join(", ")}) or ` +
-            `clips (${DATASET_CLIP_EXTS.join(", ")}) and, ` +
-            "optionally, a caption file beside each one.",
+          translate("uxImages.nothingToUploadPickoiopn", { p1: DATASET_IMAGE_EXTS.join(", "), p2: DATASET_CLIP_EXTS.join(", ") }),
         );
         return;
       }
       if (uploadInFlight.current) {
-        toast.error("An upload is already running. Wait for it to finish, then try again.");
+        toast.error(translate("uxImages.anUploadIsAlreadybht3p"));
         return;
       }
       uploadInFlight.current = true;
@@ -945,8 +940,11 @@ export function DiffusionTrainPanel({
           maxBytes = (await loadUploadLimitSettings({ force: true })).maxUploadSizeBytes;
         } catch (e) {
           toast.error(
-            "Could not read the upload size limit, so nothing was uploaded: " +
-              `${e instanceof Error ? e.message : "the limit could not be read"}. Try again.`,
+            translate("uxImages.nothingWasUploadedTry7k3dm", {
+              p1:
+                translate("uxImages.couldNotReadThewlqf9") +
+                (e instanceof Error ? e.message : translate("uxImages.theLimitCouldNotu19t9")),
+            }),
           );
           return;
         }
@@ -956,8 +954,7 @@ export function DiffusionTrainPanel({
         const over = oversizedChunk(chunks, maxBytes);
         if (over) {
           toast.error(
-            `"${over}" is over the ${getCachedUploadLimitLabel()} upload limit, so nothing was ` +
-              "uploaded. Raise the limit in Settings, or leave that file out.",
+            translate("uxImages.isOverTheUploadj1k2y", { p1: over, p2: getCachedUploadLimitLabel() }),
           );
           return;
         }
@@ -968,7 +965,7 @@ export function DiffusionTrainPanel({
           const known = await refreshInfo();
           if (!known) {
             toast.error(
-              "Could not read the dataset list, so nothing was uploaded. Try again.",
+              translate("uxImages.couldNotReadTheokg19"),
             );
             return;
           }
@@ -985,17 +982,15 @@ export function DiffusionTrainPanel({
               held = await listDiffusionDatasetImages(folder.name);
             } catch (e) {
               toast.error(
-                `Could not read what "${folder.name}" already holds, so nothing was uploaded: ` +
-                  `${e instanceof Error ? e.message : "the dataset could not be listed"}. Try again.`,
+                translate("uxImages.couldNotReadWhatxjdmd", { p1: folder.name }) +
+                  `${e instanceof Error ? e.message : translate("uxImages.theDatasetCouldNot87e5b")}. Try again.`,
               );
               return;
             }
             const clash = existingStemClash(files, held.images.map((i) => i.filename));
             if (clash) {
               toast.error(
-                `"${clash.second}" and "${clash.first}", already in "${folder.name}", differ only by ` +
-                  "extension, so they would share one caption file. Nothing was uploaded; " +
-                  "rename it and try again.",
+                translate("uxImages.andAlreadyInDiffers9oey", { p1: clash.second, p2: clash.first, p3: folder.name }),
               );
               return;
             }
@@ -1009,50 +1004,45 @@ export function DiffusionTrainPanel({
             res = await uploadDiffusionDataset(name, chunk);
             sent += res.uploaded;
           } catch (e) {
-            stopped = e instanceof Error ? e.message : "upload failed";
+            stopped = e instanceof Error ? e.message : translate("uxImages.uploadFailedwkx2f");
             break;
           }
         }
         // caption_count is the folder total the backend resolves over sidecars and metadata alike.
         if (stopped) {
           toast.error(
-            `Uploaded ${sent} of ${files.length} files into "${res.name}", then stopped: ` +
+            translate("uxImages.uploadedOfFilesIntor49vl", { p1: sent, p2: files.length, p3: res.name }) +
               `${stopped}`,
           );
         } else {
           toast.success(
-            `Uploaded ${sent} file${sent === 1 ? "" : "s"} - ` +
-              `"${res.name}" now has ${datasetItemLabel(res)}, ` +
-              `${res.caption_count} captioned`,
+            translate("uxImages.uploadedFilesNowHas9wvx0", { p1: sent, p2: sent === 1 ? "" : "s", p3: res.name, p4: datasetItemLabel(res), p5: res.caption_count }),
           );
         }
         if (skipped > 0) {
           toast.info(
-            `Skipped ${skipped} file${skipped === 1 ? "" : "s"} that ` +
-              `${skipped === 1 ? "was" : "were"} neither an image, a clip, nor a caption.`,
+            translate("uxImages.skippedFilesThatArerw000", { p1: skipped, p2: skipped === 1 ? "" : "s", p3: skipped === 1 ? "was" : "were" }),
           );
         }
         const resultCaptionsOnly = res.image_count === 0 && (res.clip_count ?? 0) === 0;
         if (resultCaptionsOnly) {
           setContinuationDatasetName(res.name);
           toast.info(
-            `"${res.name}" holds captions but no images or clips yet, so it stays out of the ` +
-              "dataset picker until you add some.",
+            translate("uxImages.holdsCaptionsButNo32ls5", { p1: res.name }),
           );
         } else {
           setContinuationDatasetName(null);
         }
         if (misKeyed) {
           toast.info(
-            `${misKeyed} keys its captions on subfolder paths, and a dataset folder is flat, ` +
-              "so those rows will not match. A .txt beside each file always will.",
+            translate("uxImages.keysItsCaptionsOni1dsz", { p1: misKeyed }),
           );
         }
         await refreshInfo();
         setDataset(res.name);
         setGridRefresh((k) => k + 1);
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "Upload failed");
+        toast.error(e instanceof Error ? e.message : translate("uxImages.uploadFailed57hnc"));
       } finally {
         uploadInFlight.current = false;
         setUploading(false);
@@ -1077,11 +1067,11 @@ export function DiffusionTrainPanel({
       event.preventDefault();
       setDropActive(false);
       if (namesLoading) {
-        toast.error("Your image sets are still loading. Drop again in a moment.");
+        toast.error(translate("uxImages.yourImageSetsAre1hfs5"));
         return;
       }
       if (namesUnavailable) {
-        toast.error("Could not load your image sets. Retry before dropping files.");
+        toast.error(translate("uxImages.couldNotLoadYour1ix0c"));
         return;
       }
       if (takenName) {
@@ -1089,7 +1079,7 @@ export function DiffusionTrainPanel({
         return;
       }
       if (uploadInFlight.current) {
-        toast.error("An upload is already running. Wait for it to finish, then drop again.");
+        toast.error(translate("uxImages.anUploadIsAlready1xphi"));
         return;
       }
       let dropped: File[];
@@ -1100,8 +1090,7 @@ export function DiffusionTrainPanel({
         dropped = await filesFromDataTransfer(event.dataTransfer);
       } catch {
         toast.error(
-          "Could not read every file in that folder, so nothing was uploaded. Try the folder " +
-            "button instead.",
+          translate("uxImages.buttonInstead3y14p", { p1: translate("uxImages.couldNotReadEvery1klij") }),
         );
         return;
       } finally {
@@ -1110,7 +1099,7 @@ export function DiffusionTrainPanel({
         setUploading(false);
       }
       if (dropped.length === 0) {
-        toast.error("That drop had no files in it.");
+        toast.error(translate("uxImages.thatDropHadNojyhoc"));
         return;
       }
       await uploadTo(dropTarget, dropped, createsDataset);
@@ -1129,15 +1118,15 @@ export function DiffusionTrainPanel({
   const onStart = useCallback(async () => {
     const baseModel = (effectiveBase === CUSTOM_BASE ? customBase : effectiveBase).trim();
     if (!baseModel) {
-      toast.error("Pick a base model (or fill in the custom repo/path).");
+      toast.error(translate("uxImages.pickABaseModel1rfdf"));
       return;
     }
     if (dataset === UPLOAD_DATASET) {
-      toast.error("Upload your training images first (or pick an existing dataset).");
+      toast.error(translate("uxImages.uploadYourTrainingImagesa0yb3"));
       return;
     }
     if (!outputDir.trim()) {
-      toast.error("Name the adapter (this becomes its folder under LAiM outputs).");
+      toast.error(translate("uxImages.nameTheAdapterThisst9ek"));
       return;
     }
     // Require a trigger prompt whenever ANY image lacks a caption: without an instance_prompt the
@@ -1149,35 +1138,32 @@ export function DiffusionTrainPanel({
     ) {
       toast.error(
         selectedDataset.caption_count === 0
-          ? "This dataset has no captions - add a trigger prompt so the trainer knows " +
-              "what to learn (it becomes the caption for every item)."
-          : `Only ${selectedDataset.caption_count} of ${selectedItemCount} items ` +
-              "have captions - the rest would be silently skipped. Add a trigger prompt " +
-              "(it becomes their caption) or caption every one.",
+          ? translate("uxImages.thisDatasetHasNojdz47")
+          : translate("uxImages.onlyOfItemsHave2wqem", { p1: selectedDataset.caption_count, p2: selectedItemCount }),
       );
       return;
     }
     if (durationUnit === "epochs") {
-      if (epochs < 1) return toast.error("Epochs must be at least 1.");
+      if (epochs < 1) return toast.error(translate("uxImages.epochsMustBeAt2d4ye"));
     } else if (steps < 1) {
-      return toast.error("Steps must be at least 1.");
+      return toast.error(translate("uxImages.stepsMustBeAt1eaep"));
     }
-    if (rank < 1) return toast.error("LoRA rank must be at least 1.");
+    if (rank < 1) return toast.error(translate("uxImages.loRARankMustBesv527"));
     if (resolution < 64 || resolution % 8 !== 0) {
-      return toast.error("Resolution must be a multiple of 8 and at least 64.");
+      return toast.error(translate("uxImages.resolutionMustBeA8qec7"));
     }
-    if (batchSize < 1) return toast.error("Batch size must be at least 1.");
-    if (gradAccum < 1) return toast.error("Gradient accumulation must be at least 1.");
-    if (learningRate <= 0) return toast.error("Learning rate must be greater than 0.");
-    if (lrWarmupSteps < 0) return toast.error("Warmup steps cannot be negative.");
+    if (batchSize < 1) return toast.error(translate("uxImages.batchSizeMustBe80024"));
+    if (gradAccum < 1) return toast.error(translate("uxImages.gradientAccumulationMustBe1hub6"));
+    if (learningRate <= 0) return toast.error(translate("uxImages.learningRateMustBecw7lu"));
+    if (lrWarmupSteps < 0) return toast.error(translate("uxImages.warmupStepsCannotBe83818"));
     if (supportsCfgDropout && !(cfgDropout >= 0 && cfgDropout <= 1)) {
-      return toast.error("Caption dropout must be between 0 and 1.");
+      return toast.error(translate("uxImages.captionDropoutMustBe16kq6"));
     }
     if (!(loraDropout >= 0 && loraDropout < 1)) {
-      return toast.error("LoRA dropout must be at least 0 and below 1.");
+      return toast.error(translate("uxImages.loRADropoutMustBe9qjqv"));
     }
     if (supportsFlowShift && flowShiftMode === "custom" && !(flowShift > 0)) {
-      return toast.error("Timestep shift must be greater than 0.");
+      return toast.error(translate("uxImages.timestepShiftMustBe1nyeg"));
     }
     setStarting(true);
     // A previous run's confirmed stop must not leak into this run: the read-time clamp would re-arm a
@@ -1227,10 +1213,10 @@ export function DiffusionTrainPanel({
         compile_transformer: supportsCompile ? compileTransformer : undefined,
         hf_token: hfApiToken(getHfToken()) || undefined,
       });
-      toast.success("Training started");
+      toast.success(translate("uxImages.trainingStartedgjpv0"));
       void poll();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to start training");
+      toast.error(e instanceof Error ? e.message : translate("uxImages.failedToStartTrainingq4tun"));
     } finally {
       setStarting(false);
     }
@@ -1299,12 +1285,12 @@ export function DiffusionTrainPanel({
         setDismissedJobId(null);
         toast.success(
           detail.checkpoint_step != null
-            ? `Resuming from step ${detail.checkpoint_step}`
-            : "Resuming training",
+            ? translate("uxImages.resumingFromStepgf8fp", { p1: detail.checkpoint_step })
+            : translate("uxImages.resumingTraining9idjx"),
         );
         void poll();
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "Failed to resume training");
+        toast.error(e instanceof Error ? e.message : translate("uxImages.failedToResumeTrainingd71ih"));
       } finally {
         setResumingJobId(null);
       }
@@ -1321,13 +1307,13 @@ export function DiffusionTrainPanel({
         await stopDiffusionTraining(save);
         toast.success(
           save
-            ? "Stop requested; saving the adapter after the current step."
-            : "Stop requested; discarding this run after the current step.",
+            ? translate("uxImages.stopRequestedSavingThegwpff")
+            : translate("uxImages.stopRequestedDiscardingThisklzln"),
         );
         void poll();
       } catch (e) {
         setStopRequestedLocal(false);
-        toast.error(e instanceof Error ? e.message : "Failed to stop training");
+        toast.error(e instanceof Error ? e.message : translate("uxImages.failedToStopTraining2cwzg"));
       }
     },
     [poll],
@@ -1350,12 +1336,12 @@ export function DiffusionTrainPanel({
   );
   const onDeployClick = useCallback(() => {
     if (!status?.catalog_path) {
-      toast.error("The trained adapter is not available yet.");
+      toast.error(translate("uxImages.theTrainedAdapterIsfbfk9"));
       return;
     }
     const trainedBase = status.base_model || (effectiveBase === CUSTOM_BASE ? customBase : effectiveBase);
     if (!trainedBase) {
-      toast.error("Could not determine the base model to load for this adapter.");
+      toast.error(translate("uxImages.couldNotDetermineThedf0yq"));
       return;
     }
     const famName = status.family || family?.name || "";
@@ -1406,9 +1392,7 @@ export function DiffusionTrainPanel({
       <FieldLabel
         hint={
           <>
-            How long the run trains. Steps count optimizer updates; epochs count full
-            passes over your images. 500&ndash;1500 steps suits most small sets.
-          </>
+            {translate("uxImages.howLongTheRun12z6b")}</>
         }
       >
         {durationUnit === "epochs" ? "Epochs" : "Steps"}
@@ -1436,7 +1420,7 @@ export function DiffusionTrainPanel({
           {/* Tighter than the default trigger: it holds one short word, not a model id. */}
           <SelectTrigger
             className="h-8 w-24 pr-2.5 text-xs [&_svg]:size-3.5"
-            aria-label="Run length unit"
+            aria-label={translate("uxImages.runLengthUnit1wsf1")}
           >
             <SelectValue />
           </SelectTrigger>
@@ -1467,56 +1451,54 @@ export function DiffusionTrainPanel({
     <div className="@container flex flex-col gap-6">
       <div className="grid grid-cols-1 gap-x-6 gap-y-5 @min-[324px]:grid-cols-2 @min-[498px]:grid-cols-3">
         {durationField}
-        {numberField("LoRA rank", rank, setRank, 1, {
-          hint: "How much the adapter can learn. Higher captures more detail and makes a bigger file; 16 suits most styles, 32+ for complex subjects.",
+        {numberField(translate("uxImages.loRARankm4ncm"), rank, setRank, 1, {
+          hint: translate("uxImages.howMuchTheAdapter1igy2"),
         })}
         {numberField("Resolution", resolution, setResolution, 512, {
           min: 64,
           step: 64,
-          hint: "The pixel size images train at, in multiples of 64. Higher is sharper and costs noticeably more VRAM.",
+          hint: translate("uxImages.thePixelSizeImages1u0v6"),
         })}
         {!batchIsFixed &&
           numberField("Batch", batchSize, setBatchSize, 1, {
-            hint: "Images trained on per step. Higher is faster per image and needs more VRAM.",
+            hint: translate("uxImages.imagesTrainedOnPer1rvd8"),
           })}
-        {numberField("Grad accumulation", gradAccum, setGradAccum, 1, {
+        {numberField(translate("uxImages.gradAccumulationc5y6t"), gradAccum, setGradAccum, 1, {
           hint: batchIsFixed
-            ? "Collects this many clips before each update. This model trains one clip at a time, so this is the only way to raise the effective batch."
-            : "Collects this many batches before each update, for the effect of a larger batch without the VRAM. Effective batch = Batch x Grad accumulation.",
+            ? translate("uxImages.collectsThisManyClipsuyu0y")
+            : translate("uxImages.collectsThisManyBatchesyt71r"),
         })}
         {numberField("Seed", seed, setSeed, 42, {
           min: 0,
-          hint: "Fixes the run's randomness, so the same settings and images reproduce the same LoRA.",
+          hint: translate("uxImages.fixesTheRunSjlta9"),
         })}
         {supportsCheckpoints &&
-          numberField("Checkpoint every", saveSteps, setSaveSteps, 0, {
+          numberField(translate("uxImages.checkpointEverykbu38"), saveSteps, setSaveSteps, 0, {
             min: 0,
-            hint: "Saves a resume point every this many steps, so a crash or a shutdown can be picked up where it left off. 0 turns it off; stopping and saving always leaves one either way.",
+            get hint() { return translate("uxImages.savesAResumePointj2p87"); },
           })}
         {supportsSamples &&
-          numberField("Sample every", sampleEvery, setSampleEvery, 0, {
+          numberField(translate("uxImages.sampleEvery6o8s9"), sampleEvery, setSampleEvery, 0, {
             min: 0,
-            hint: "Renders preview images with the same prompts and seeds every this many steps, so you can see when the LoRA has learned the subject and when it starts to overfit. 0 turns it off; each round adds a few seconds.",
+            get hint() { return translate("uxImages.rendersPreviewImagesWithv8zts"); },
           })}
         {supportsCheckpoints &&
           saveSteps > 0 &&
-          numberField("Keep checkpoints", saveTotalLimit, setSaveTotalLimit, 2, {
+          numberField(translate("uxImages.keepCheckpointsqbd1x"), saveTotalLimit, setSaveTotalLimit, 2, {
             min: 0,
             markDirty: keepFamilyDefaults,
-            hint: "How many of those checkpoints stay on disk; older ones are deleted as new ones are saved. Raise it to compare earlier steps. 0 keeps every one.",
+            get hint() { return translate("uxImages.howManyOfThosekfq4z"); },
           })}
       </div>
 
       {supportsSamples && sampleEvery > 0 && (
         <div className={fieldClass}>
           <FieldLabel
-            hint={`One prompt per line, up to ${MAX_SAMPLE_PROMPTS}; each renders one image. Leave empty to use the trigger prompt or the first caption.`}
-          >
-            Sample prompts
-          </FieldLabel>
+            hint={translate("uxImages.onePromptPerLine2wdpo", { p1: MAX_SAMPLE_PROMPTS })}
+          >{translate("uxImages.samplePrompts8m6g2")}</FieldLabel>
           <Textarea
             value={samplePromptsText}
-            placeholder={instancePrompt.trim() || "a photo in mystyle"}
+            placeholder={instancePrompt.trim() || translate("uxImages.aPhotoInMystyleqjno1")}
             onChange={(e) => setSamplePromptsText(e.target.value)}
             rows={2}
             className="min-h-0 text-xs"
@@ -1525,14 +1507,14 @@ export function DiffusionTrainPanel({
       )}
 
       <div className="grid grid-cols-1 items-start gap-x-6 gap-y-5 @min-[324px]:grid-cols-2 @min-[498px]:grid-cols-3">
-        {numberField("Learning rate", learningRate, setLearningRate, 0.0001, {
+        {numberField(translate("uxImages.learningRatek1cij"), learningRate, setLearningRate, 0.0001, {
           min: 0,
           step: 0.00001,
-          hint: "How big each update is. Too high burns the style in and adds artifacts; too low barely learns. 0.0001 is a safe start.",
+          hint: translate("uxImages.howBigEachUpdatecxlse"),
         })}
         <div className={fieldClass}>
-          <FieldLabel hint="How the learning rate moves over the run. Constant is fine for most runs; a decay can help a long one settle.">
-            LR schedule
+          <FieldLabel hint={translate("uxImages.howTheLearningRatehke83")}>
+            {translate("uxImages.lRSchedule1qrky")}
           </FieldLabel>
           <Select
             value={lrScheduler}
@@ -1543,21 +1525,21 @@ export function DiffusionTrainPanel({
               setLrScheduler(v as LrScheduler);
             }}
           >
-            <SelectTrigger className={selectClass} aria-label="LR schedule">
+            <SelectTrigger className={selectClass} aria-label={translate("uxImages.lRSchedule1qrky")}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="constant">Constant</SelectItem>
-              <SelectItem value="constant_with_warmup">Constant + warmup</SelectItem>
-              <SelectItem value="cosine">Cosine decay</SelectItem>
-              <SelectItem value="linear">Linear decay</SelectItem>
+              <SelectItem value="constant_with_warmup">{translate("uxImages.constantWarmupx10ct")}</SelectItem>
+              <SelectItem value="cosine">{translate("uxImages.cosineDecaym2zjm")}</SelectItem>
+              <SelectItem value="linear">{translate("uxImages.linearDecaywg6kv")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
         {lrScheduler !== "constant" &&
-          numberField("Warmup steps", lrWarmupSteps, setLrWarmupSteps, 0, {
+          numberField(translate("uxImages.warmupSteps0dge4"), lrWarmupSteps, setLrWarmupSteps, 0, {
             min: 0,
-            hint: "Ramps the learning rate up over the first steps instead of starting at full size.",
+            hint: translate("uxImages.rampsTheLearningRateqio14"),
             // The other half of the pair, so an edit claims the pair's flag and only that, without freezing
             // rank/LR/resolution on their way to the new family.
             markDirty: () => {
@@ -1568,84 +1550,84 @@ export function DiffusionTrainPanel({
 
       <div className="grid grid-cols-1 items-start gap-x-6 gap-y-5 @min-[324px]:grid-cols-2 @min-[498px]:grid-cols-3">
         <div className={fieldClass}>
-          <FieldLabel hint="Recomputes activations instead of holding them in memory: less VRAM, slightly slower steps.">
-            Gradient checkpointing
+          <FieldLabel hint={translate("uxImages.recomputesActivationsInsteadOfacati")}>
+            {translate("uxImages.gradientCheckpointingu7n43")}
           </FieldLabel>
           <Select
             value={gradCheckpoint ? "on" : "off"}
             onValueChange={(v) => setGradCheckpoint(v === "on")}
           >
-            <SelectTrigger className={selectClass} aria-label="Gradient checkpointing">
+            <SelectTrigger className={selectClass} aria-label={translate("uxImages.gradientCheckpointingu7n43")}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="on">On (less VRAM)</SelectItem>
-              <SelectItem value="off">Off (faster steps)</SelectItem>
+              <SelectItem value="on">{translate("uxImages.onLessVRAMxgxkb")}</SelectItem>
+              <SelectItem value="off">{translate("uxImages.offFasterSteps2n3gy")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         {supportsBucketing && (
           <div className={fieldClass}>
-            <FieldLabel hint="Trains each image at the same pixel count but its own shape (portrait, landscape or square), so non-square photos are not cropped square.">
-              Aspect ratio buckets
+            <FieldLabel hint={translate("uxImages.trainsEachImageAt1xp5k")}>
+              {translate("uxImages.aspectRatioBucketsgbd2e")}
             </FieldLabel>
             <Select
               value={bucketing ? "on" : "off"}
               onValueChange={(v) => setBucketing(v === "on")}
             >
-              <SelectTrigger className={selectClass} aria-label="Aspect ratio buckets">
+              <SelectTrigger className={selectClass} aria-label={translate("uxImages.aspectRatioBucketsgbd2e")}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="on">On (keep aspect)</SelectItem>
-                <SelectItem value="off">Off (square crop)</SelectItem>
+                <SelectItem value="on">{translate("uxImages.onKeepAspect8577q")}</SelectItem>
+                <SelectItem value="off">{translate("uxImages.offSquareCrop3c5m0")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
         )}
         {!isH3 && (
           <div className={fieldClass}>
-            <FieldLabel hint="Mirrors images left-right at random for extra variety. Leave off for text, logos or subjects with one-sided features (a side parting, a scar); try on for styles and symmetric subjects.">
-              Random flip
+            <FieldLabel hint={translate("uxImages.mirrorsImagesLeftRighta4f12")}>
+              {translate("uxImages.randomFlip1mk27")}
             </FieldLabel>
             <Select
               value={randomFlip ? "on" : "off"}
               onValueChange={(v) => setRandomFlip(v === "on")}
             >
-              <SelectTrigger className={selectClass} aria-label="Random flip">
+              <SelectTrigger className={selectClass} aria-label={translate("uxImages.randomFlip1mk27")}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="off">Off</SelectItem>
-                <SelectItem value="on">On (mirror images)</SelectItem>
+                <SelectItem value="on">{translate("uxImages.onMirrorImagespclg9")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
         )}
         {supportsCfgDropout &&
-          numberField("Caption dropout", cfgDropout, setCfgDropout, 0, {
+          numberField(translate("uxImages.captionDropoutw09oo"), cfgDropout, setCfgDropout, 0, {
             min: 0,
             markDirty: keepFamilyDefaults,
             step: 0.05,
-            hint: "The chance each image trains with an empty prompt instead of its caption. 0.05 to 0.1 can help a LoRA respond to guidance (CFG) without overfitting to the exact caption; 0 turns it off.",
+            get hint() { return translate("uxImages.theChanceEachImage8mk6o"); },
           })}
-        {numberField("LoRA dropout", loraDropout, setLoraDropout, 0, {
+        {numberField(translate("uxImages.loRADropoutwv3et"), loraDropout, setLoraDropout, 0, {
           min: 0,
           markDirty: keepFamilyDefaults,
           step: 0.05,
-          hint: "Randomly drops part of the LoRA's input each step, a light guard against memorising a small dataset. 0 (off) is the usual choice; try 0.05 to 0.1 if results copy the training images too closely.",
+          get hint() { return translate("uxImages.randomlyDropsPartOfc0ire"); },
         })}
         {supportsFlowShift && (
           <div className={fieldClass}>
-            <FieldLabel hint="Which noise levels training spends its steps on. Default follows the model's own schedule (Qwen-Image and LTX-2 match the one they generate with). Custom sets the shift directly: higher favours composition and layout, lower fine detail.">
-              Timestep shift
+            <FieldLabel hint={translate("uxImages.whichNoiseLevelsTrainingnmv3a")}>
+              {translate("uxImages.timestepShiftk4w90")}
             </FieldLabel>
             <Select
               value={flowShiftMode}
               onValueChange={(v) => setFlowShiftMode(v as "default" | "custom")}
             >
-              <SelectTrigger className={selectClass} aria-label="Timestep shift">
+              <SelectTrigger className={selectClass} aria-label={translate("uxImages.timestepShiftk4w90")}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -1657,17 +1639,17 @@ export function DiffusionTrainPanel({
         )}
         {supportsFlowShift &&
           flowShiftMode === "custom" &&
-          numberField("Shift value", flowShift, setFlowShift, 3, {
+          numberField(translate("uxImages.shiftValuesest6"), flowShift, setFlowShift, 3, {
             min: 0.1,
             step: 0.5,
             markDirty: keepFamilyDefaults,
-            hint: "1 is no shift; around 3 suits most image models.",
+            get hint() { return translate("uxImages.1IsNoShiftzi2z5"); },
           })}
 
         {isDiT ? (
           <div className={fieldClass}>
-            <FieldLabel hint="How the frozen base is quantised while the LoRA trains. Auto picks the best fit for your GPU; nf4 uses the least VRAM.">
-              Base precision
+            <FieldLabel hint={translate("uxImages.howTheFrozenBasezar4r")}>
+              {translate("uxImages.basePrecisionoc91x")}
             </FieldLabel>
             <Select
               value={basePrecision}
@@ -1677,7 +1659,7 @@ export function DiffusionTrainPanel({
               }}
               disabled={familyUntrainable}
             >
-              <SelectTrigger className={selectClass} aria-label="Base precision">
+              <SelectTrigger className={selectClass} aria-label={translate("uxImages.basePrecisionoc91x")}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -1698,35 +1680,35 @@ export function DiffusionTrainPanel({
               <p className="text-ui-11 leading-snug text-muted-foreground">
                 {familyUntrainable
                   ?  // The reason itself already shows in the family picker note above.
-                    "This GPU cannot train this model family."
+                    translate("uxImages.thisGPUCannotTraincxp5i")
                   : "This base is already 4-bit, so only nf4/auto apply."}
               </p>
             )}
           </div>
         ) : (
           <div className={fieldClass}>
-            <FieldLabel hint="The mixed-precision mode for training math. bf16 is right for modern GPUs; fp16 is for older ones that lack it.">
-              Precision
+            <FieldLabel hint={translate("uxImages.theMixedPrecisionMode33l5a")}>
+              {translate("uxVideo.precisionjks6g")}
             </FieldLabel>
             <Select
               value={precision}
               onValueChange={(v) => setPrecision(v as "bf16" | "fp16" | "no")}
             >
-              <SelectTrigger className={selectClass} aria-label="Precision">
+              <SelectTrigger className={selectClass} aria-label={translate("uxVideo.precisionjks6g")}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="bf16">bf16 (default)</SelectItem>
-                <SelectItem value="fp16">fp16 (older GPUs)</SelectItem>
-                <SelectItem value="no">fp32 (no mixed)</SelectItem>
+                <SelectItem value="bf16">{translate("uxImages.bf16Defaulti5q4v")}</SelectItem>
+                <SelectItem value="fp16">{translate("uxImages.fp16OlderGPUsstbxx")}</SelectItem>
+                <SelectItem value="no">{translate("uxImages.fp32NoMixed7hld9")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
         )}
         {supportsCompile && (
           <div className={fieldClass}>
-            <FieldLabel hint="torch.compile the transformer. The first step is slower while it compiles, every step after is faster.">
-              Compile transformer
+            <FieldLabel hint={translate("uxImages.torchCompileTheTransformer139uq")}>
+              {translate("uxImages.compileTransformeryqrm5")}
             </FieldLabel>
             <Select
               value={compileTransformer}
@@ -1734,12 +1716,12 @@ export function DiffusionTrainPanel({
                 setCompileTransformer(v as typeof compileTransformer)
               }
             >
-              <SelectTrigger className={selectClass} aria-label="Compile transformer">
+              <SelectTrigger className={selectClass} aria-label={translate("uxImages.compileTransformeryqrm5")}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="auto">Auto</SelectItem>
-                <SelectItem value="on">On (faster after warmup)</SelectItem>
+                <SelectItem value="on">{translate("uxImages.onFasterAfterWarmuprx2bv")}</SelectItem>
                 <SelectItem value="off">Off</SelectItem>
               </SelectContent>
             </Select>
@@ -1773,20 +1755,20 @@ export function DiffusionTrainPanel({
                 icon={TestTubeOutlineIcon}
                 className="size-[calc(18px*var(--ui-space-scale,1))] shrink-0"
               />
-              Train a LoRA
+              {translate("uxImages.trainALoRAnh7bf")}
             </h2>
             <p className="text-xs leading-snug text-muted-foreground">
-              Teach a model a new style or subject.
+              {translate("uxImages.teachAModelA1mqlc")}
             </p>
           </div>
 
           {/* Family + base */}
           <div className={fieldClass}>
-            <FieldLabel hint="The architecture you are training. Each family brings its own bases, starting hyperparameters and VRAM floor.">
-              Model family
+            <FieldLabel hint={translate("uxImages.theArchitectureYouAre1d77g")}>
+              {translate("uxImages.modelFamilyo4307")}
             </FieldLabel>
             <Select value={familyName} onValueChange={setFamilyName}>
-              <SelectTrigger className={selectClass} aria-label="Model family">
+              <SelectTrigger className={selectClass} aria-label={translate("uxImages.modelFamilyo4307")}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -1801,8 +1783,8 @@ export function DiffusionTrainPanel({
           </div>
 
           <div className={fieldClass}>
-            <FieldLabel hint="The exact checkpoint the LoRA trains against. A 4-bit (bnb) base needs the least VRAM; the dense one needs the most.">
-              Base model
+            <FieldLabel hint={translate("uxImages.theExactCheckpointThefx4rg")}>
+              {translate("library.preview.baseModel")}
             </FieldLabel>
             <Select
               value={effectiveBase}
@@ -1811,7 +1793,7 @@ export function DiffusionTrainPanel({
                 setBaseChoice(v);
               }}
             >
-              <SelectTrigger className={selectClass} aria-label="Base model">
+              <SelectTrigger className={selectClass} aria-label={translate("library.preview.baseModel")}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -1820,13 +1802,13 @@ export function DiffusionTrainPanel({
                     {repo}
                   </SelectItem>
                 ))}
-                <SelectItem value={CUSTOM_BASE}>Custom repo or local path...</SelectItem>
+                <SelectItem value={CUSTOM_BASE}>{translate("uxCopy.customRepoOrLocal1pzvb")}</SelectItem>
               </SelectContent>
             </Select>
             {effectiveBase === CUSTOM_BASE && (
               <Input
                 value={customBase}
-                placeholder="Repo id or local folder"
+                placeholder={translate("uxImages.repoIdOrLocal1eyjx")}
                 spellCheck={false}
                 onChange={(e) => setCustomBase(e.target.value)}
                 className="h-8 text-xs"
@@ -1860,8 +1842,8 @@ export function DiffusionTrainPanel({
             }}
             onDrop={(e) => void onDrop(e)}
           >
-            <FieldLabel hint="The set the LoRA learns from. 10-50 images is plenty, and captions are optional.">
-              Training images
+            <FieldLabel hint={translate("uxImages.theSetTheLoRAkx2yq")}>
+              {translate("uxImages.trainingImagesf3gku")}
             </FieldLabel>
             <div className="flex items-center gap-2">
               <Select
@@ -1883,7 +1865,7 @@ export function DiffusionTrainPanel({
                 }}
                 disabled={importingId !== null}
               >
-                <SelectTrigger className={cn(selectClass, "flex-1")} aria-label="Training images">
+                <SelectTrigger className={cn(selectClass, "flex-1")} aria-label={translate("uxImages.trainingImagesf3gku")}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -1897,13 +1879,11 @@ export function DiffusionTrainPanel({
                     <SelectGroup>
                       <SelectLabel>Examples</SelectLabel>
                       {pendingExamples.map((ex) => (
-                        <SelectItem key={ex.id} value={`${EXAMPLE_PREFIX}${ex.id}`}>
-                          {shortExampleLabel(ex.label)} - {ex.image_cap} images
-                        </SelectItem>
+                        <SelectItem key={ex.id} value={`${EXAMPLE_PREFIX}${ex.id}`}>{translate("uxImages.images4neov", { p1: shortExampleLabel(ex.label), p2: ex.image_cap })}</SelectItem>
                       ))}
                     </SelectGroup>
                   )}
-                  <SelectItem value={UPLOAD_DATASET}>Upload new images...</SelectItem>
+                  <SelectItem value={UPLOAD_DATASET}>{translate("uxImages.uploadNewImagesm4m37")}</SelectItem>
                 </SelectContent>
               </Select>
               {!uploadMode && selectedDataset && (
@@ -1915,7 +1895,7 @@ export function DiffusionTrainPanel({
                     multiple
                     accept={DATASET_FILE_ACCEPT}
                     className="hidden"
-                    aria-label="More training images"
+                    aria-label={translate("uxImages.moreTrainingImages1v30f")}
                     onChange={(e) => {
                       const files = Array.from(e.target.files ?? []);
                       e.target.value = "";
@@ -1944,7 +1924,7 @@ export function DiffusionTrainPanel({
               multiple
               {...({ webkitdirectory: "", directory: "" } as object)}
               className="hidden"
-              aria-label="Training image folder"
+              aria-label={translate("uxImages.trainingImageFolder9ufh7")}
               onChange={(e) => {
                 const files = Array.from(e.target.files ?? []);
                 e.target.value = "";
@@ -1952,15 +1932,13 @@ export function DiffusionTrainPanel({
               }}
             />
             {importingId && (
-              <p className="text-ui-11 text-muted-foreground">
-                Importing {examples.find((e) => e.id === importingId)?.label ?? "example"}...
-              </p>
+              <p className="text-ui-11 text-muted-foreground">{translate("uxImages.importingw4wpb", { p1: examples.find((e) => e.id === importingId)?.label ?? "example" })}</p>
             )}
 
             {uploadMode ? (
               <div className={cn(fieldClass, "pb-4")}>
                 <Label className="text-xs font-normal text-muted-foreground">
-                  Name for this set of images
+                  {translate("uxImages.nameForThisSetmatpn")}
                 </Label>
                 <div className="flex items-center gap-2">
                   <Input
@@ -1972,7 +1950,7 @@ export function DiffusionTrainPanel({
                       setUploadName(e.target.value);
                     }}
                     className="h-8 min-w-0 flex-1 text-xs"
-                    aria-label="New dataset name"
+                    aria-label={translate("uxImages.newDatasetNameflz1r")}
                   />
                   {/* The native input is the file picker but never the control the user sees, so the row keeps the
                       app button styling. */}
@@ -1982,7 +1960,7 @@ export function DiffusionTrainPanel({
                     multiple
                     accept={DATASET_FILE_ACCEPT}
                     className="hidden"
-                    aria-label="Training image files"
+                    aria-label={translate("uxImages.trainingImageFilesley0p")}
                     onChange={(e) => {
                       const files = Array.from(e.target.files ?? []);
                       e.target.value = "";
@@ -1997,7 +1975,7 @@ export function DiffusionTrainPanel({
                     className="h-8 shrink-0 gap-1.5 px-3 text-xs"
                     onClick={() => {
                       if (!uploadName.trim()) {
-                        toast.error("Give the dataset a folder name, e.g. my-style-photos.");
+                        toast.error(translate("uxImages.giveTheDatasetAjardl"));
                         return;
                       }
                       fileInputRef.current?.click();
@@ -2011,7 +1989,7 @@ export function DiffusionTrainPanel({
                     disabled={uploading || namesLoading || namesUnavailable || takenName !== null}
                     onPick={() => {
                       if (!uploadName.trim()) {
-                        toast.error("Give the dataset a folder name, e.g. my-style-photos.");
+                        toast.error(translate("uxImages.giveTheDatasetAjardl"));
                         return;
                       }
                       pickFolder(uploadName.trim(), createsDataset);
@@ -2032,14 +2010,14 @@ export function DiffusionTrainPanel({
                           setContinuationDatasetName(takenName);
                         }}
                       >
-                        Add to it
+                        {translate("uxCopy.addToIt15wx3")}
                       </Button>
                     )}
                   </div>
                 )}
                 {namesUnavailable && (
                   <div className="flex items-center gap-2 text-ui-11 text-destructive">
-                    <span>Could not load existing image sets.</span>
+                    <span>{translate("uxCopy.couldNotLoadExisting11f03")}</span>
                     <Button
                       type="button"
                       size="sm"
@@ -2052,7 +2030,7 @@ export function DiffusionTrainPanel({
                   </div>
                 )}
                 <p className="text-ui-11 leading-snug text-muted-foreground">
-                  {isTauri ? "Pick files or a folder." : "Pick files or a folder, or drop them here."}{" "}
+                  {isTauri ? translate("uxImages.pickFilesOrAvl2wn") : translate("uxImages.pickFilesOrAb6wfg")}{" "}
                   Images, or clips for the video families. A caption file beside one (cat.png and
                   cat.txt, or cat.mp4 and cat.txt) is read as that item's caption.
                 </p>
@@ -2090,7 +2068,7 @@ export function DiffusionTrainPanel({
                   )}
                   {selectedDataset.caption_count === 0 && !gridOpen && (
                     <p className="text-ui-11 leading-snug text-muted-foreground">
-                      No captions yet, so the trigger prompt describes every item.
+                      {translate("uxImages.noCaptionsYetSo1vl54")}
                     </p>
                   )}
                 </>
@@ -2108,26 +2086,23 @@ export function DiffusionTrainPanel({
 
           {/* Trigger first: it describes the dataset, the name just labels the output. */}
           {fullyCaptioned ? (
-            <p className="text-ui-11 leading-snug text-muted-foreground">
-              Every item in {selectedDataset?.name} has a caption, so no trigger prompt
-              is needed.
-            </p>
+            <p className="text-ui-11 leading-snug text-muted-foreground">{translate("uxImages.everyItemInHaskofmn", { p1: selectedDataset?.name })}</p>
           ) : (
             <div className={fieldClass}>
-              <FieldLabel hint="The words you will use later to get this style back. Pick something the base model would not already know.">
-                Trigger prompt
+              <FieldLabel hint={translate("uxImages.theWordsYouWillfyl3t")}>
+                {translate("uxImages.triggerPrompt14oc6")}
               </FieldLabel>
               <Input
                 value={instancePrompt}
-                placeholder="a photo in mystyle"
+                placeholder={translate("uxImages.aPhotoInMystyles2xbm")}
                 onChange={(e) => setInstancePrompt(e.target.value)}
                 className="h-8 text-xs"
               />
             </div>
           )}
           <div className={fieldClass}>
-            <FieldLabel hint="What the finished LoRA is called in the Create tab's picker.">
-              Adapter name
+            <FieldLabel hint={translate("uxImages.whatTheFinishedLoRA1e6mi")}>
+              {translate("uxImages.adapterName1app3")}
             </FieldLabel>
             <Input
               value={outputDir}
@@ -2154,10 +2129,10 @@ export function DiffusionTrainPanel({
             {starting
               ? "Starting..."
               : running
-                ? "Training in progress"
+                ? translate("uxImages.trainingInProgresskwywc")
                 : familyUntrainable
-                  ? "Not supported on this GPU"
-                  : "Start training"}
+                  ? translate("uxImages.notSupportedOnThis0ju63")
+                  : translate("uxImages.startTrainingb3qmo")}
           </Button>
         </div>
       </div>
@@ -2172,9 +2147,7 @@ export function DiffusionTrainPanel({
           <>
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold">
-                  Previous run: {viewRun.adapter || viewRun.job_id.slice(0, 8)}
-                </span>
+                <span className="text-sm font-semibold">{translate("uxImages.previousRun3kdlr", { p1: viewRun.adapter || viewRun.job_id.slice(0, 8) })}</span>
                 <Button
                   type="button"
                   size="sm"
@@ -2185,14 +2158,14 @@ export function DiffusionTrainPanel({
                 </Button>
               </div>
               <div className="grid grid-cols-2 gap-3 @min-[440px]:grid-cols-4">
-                <Stat label="Status" value={viewRun.status} />
-                <Stat label="Steps" value={`${viewRun.step}/${viewRun.total_steps}`} />
+                <Stat label={translate("settings.accounts.status")} value={viewRun.status} />
+                <Stat label={translate("settings.profile.stats.trainingSteps")} value={`${viewRun.step}/${viewRun.total_steps}`} />
                 <Stat
-                  label="Avg loss"
+                  label={translate("uxImages.avgLoss1shpz")}
                   value={viewRun.avg_loss != null ? viewRun.avg_loss.toFixed(4) : "-"}
                 />
                 <Stat
-                  label="Peak VRAM"
+                  label={translate("uxImages.peakVRAM1nkc8")}
                   value={
                     viewRun.peak_memory_gb != null
                       ? `${viewRun.peak_memory_gb.toFixed(1)} GB`
@@ -2223,7 +2196,7 @@ export function DiffusionTrainPanel({
                       })
                     }
                   >
-                    Deploy to Create
+                    {translate("uxImages.deployToCreatee81nh")}
                   </Button>
                 )}
                 {viewRun.saved && viewRun.catalog_path && (
@@ -2248,7 +2221,7 @@ export function DiffusionTrainPanel({
                     viewRun.can_resume
                       ? undefined
                       : viewRun.resume_blocked_reason ||
-                        "This run has no checkpoint to continue from."
+                        translate("uxImages.thisRunHasNobqisq")
                   }
                 >
                   {resumingJobId === viewRun.job_id
@@ -2274,25 +2247,25 @@ export function DiffusionTrainPanel({
                       icon={Settings02Icon}
                       className="size-[calc(18px*var(--ui-space-scale,1))] shrink-0"
                     />
-                    Train settings
+                    {translate("uxImages.trainSettings145vq")}
                   </span>
                   <p className="text-xs leading-snug text-muted-foreground">
-                    Hyperparameters for this run.
+                    {translate("uxImages.hyperparametersForThisRun1sosh")}
                   </p>
                 </div>
                 <span className="text-xs text-muted-foreground">
-                  Applied on Start training
+                  {translate("uxImages.appliedOnStartTraining1l7z5")}
                 </span>
               </div>
               {trainingSettings}
               <p className="text-ui-11 leading-snug text-muted-foreground">
-                Progress and charts take over here once training starts.
+                {translate("uxImages.progressAndChartsTake185zo")}
               </p>
             </div>
 
             {prevRuns.length > 0 && (
               <div className="flex flex-col gap-2 border-t border-border/60 pt-4">
-                <span className="text-sm font-semibold">Previous runs</span>
+                <span className="text-sm font-semibold">{translate("uxImages.previousRuns28twm")}</span>
                 <div className="flex flex-col divide-y divide-border/60">
                   {prevRuns.map((r) => (
                     <button
@@ -2305,16 +2278,11 @@ export function DiffusionTrainPanel({
                         <span className="font-medium">
                           {r.adapter || r.job_id.slice(0, 8)}
                         </span>
-                        <span className="text-muted-foreground">
-                          {r.family ? ` ${r.family}` : ""} - {r.step}/{r.total_steps} steps
-                          {r.avg_loss != null ? `, avg loss ${r.avg_loss.toFixed(3)}` : ""}
-                        </span>
+                        <span className="text-muted-foreground">{translate("uxImages.stepsu3hlp", { p1: r.family ? ` ${r.family}` : "", p2: r.step, p3: r.total_steps, p4: r.avg_loss != null ? `, avg loss ${r.avg_loss.toFixed(3)}` : "" })}</span>
                       </span>
                       <span className="flex shrink-0 items-center gap-2">
                         {r.saved && (
-                          <span className="rounded-full bg-primary/15 px-2 py-0.5 text-ui-10 text-primary">
-                            adapter saved
-                          </span>
+                          <span className="rounded-full bg-primary/15 px-2 py-0.5 text-ui-10 text-primary">{translate("uxImages.adapterSaved23hi2")}</span>
                         )}
                         <span className="text-ui-10 uppercase tracking-wide text-muted-foreground">
                           {r.status}
@@ -2334,7 +2302,7 @@ export function DiffusionTrainPanel({
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-semibold capitalize">
-                  {status?.status === "completed" ? "Training complete \u{1F389}" : status?.status}
+                  {status?.status === "completed" ? translate("uxImages.trainingComplete9q41w") : status?.status}
                 </span>
                 <span className="text-xs text-muted-foreground">
                   {(status?.total_steps ?? 0) > 0
@@ -2350,15 +2318,15 @@ export function DiffusionTrainPanel({
               </div>
               <div className="grid grid-cols-2 gap-3 @min-[440px]:grid-cols-4">
                 <Stat
-                  label="Loss"
+                  label={translate("uxImages.losstdd92")}
                   value={status?.loss != null ? status.loss.toFixed(4) : "-"}
                 />
                 <Stat
-                  label="Avg loss"
+                  label={translate("uxImages.avgLoss1shpz")}
                   value={status?.avg_loss != null ? status.avg_loss.toFixed(4) : "-"}
                 />
                 <Stat
-                  label="Speed"
+                  label={translate("settings.voice.readAloud.speedLabel")}
                   value={
                     status?.samples_per_second != null
                       ? `${status.samples_per_second.toFixed(2)} img/s`
@@ -2366,7 +2334,7 @@ export function DiffusionTrainPanel({
                   }
                 />
                 <Stat
-                  label="Peak VRAM"
+                  label={translate("uxImages.peakVRAM1nkc8")}
                   value={
                     status?.peak_memory_gb != null
                       ? `${status.peak_memory_gb.toFixed(1)} GB`
@@ -2385,7 +2353,7 @@ export function DiffusionTrainPanel({
                   onClick={() => setStopDialogOpen(true)}
                   disabled={stopRequested}
                 >
-                  {stopRequested ? "Stopping..." : "Stop training"}
+                  {stopRequested ? "Stopping..." : translate("uxImages.stopTrainingkaier")}
                 </Button>
               )}
               {/* Terminal runs WITHOUT an adapter card still need a way back to the settings, and can be the
@@ -2414,7 +2382,7 @@ export function DiffusionTrainPanel({
                       className="flex-1"
                       onClick={() => setDismissedJobId(status.job_id)}
                     >
-                      Back to settings
+                      {translate("uxCopy.backToSettings18ghj")}
                     </Button>
                   </div>
                 )}
@@ -2423,7 +2391,7 @@ export function DiffusionTrainPanel({
             {(completed || stoppedWithAdapter) && (
               <div className="flex flex-col gap-2 border-t border-border/60 pt-4">
                 <span className="text-sm font-semibold">
-                  {completed ? "Adapter ready" : "Partial adapter saved"}
+                  {completed ? translate("uxImages.adapterReadyq3d52") : translate("uxImages.partialAdapterSaved5p892")}
                 </span>
                 <p className="text-ui-11 text-muted-foreground">
                   {completed
@@ -2437,17 +2405,17 @@ export function DiffusionTrainPanel({
                     ? " and added to the LoRA picker."
                     : ". Load it from the path below."}
                   {status?.lora_path && (
-                    <span className="mt-1 block break-all">Saved: {status.lora_path}</span>
+                    <span className="mt-1 block break-all">{translate("uxImages.saved9lugk", { p1: status.lora_path })}</span>
                   )}
                   {status?.ema_path && (
-                    <span className="mt-1 block break-all">EMA adapter: {status.ema_path}</span>
+                    <span className="mt-1 block break-all">{translate("uxImages.eMAAdapter0ta3g", { p1: status.ema_path })}</span>
                   )}
                 </p>
                 <div className="mt-1 flex flex-wrap gap-2">
                   {/* A video run publishes no catalog entry, so there is nothing to deploy. */}
                   {status?.catalog_path && (
                     <Button type="button" size="sm" onClick={onDeployClick}>
-                      Deploy to Create
+                      {translate("uxImages.deployToCreatee81nh")}
                     </Button>
                   )}
                   {status?.catalog_path && (
@@ -2478,7 +2446,7 @@ export function DiffusionTrainPanel({
                           ? undefined
                           : liveRunSummary?.resume_blocked_reason ||
                             status.resume_blocked_reason ||
-                            "Saving this run's checkpoint..."
+                            translate("uxImages.savingThisRunSxzfvx")
                       }
                     >
                       {resumingJobId === status.job_id
@@ -2493,9 +2461,7 @@ export function DiffusionTrainPanel({
                     size="sm"
                     variant="outline"
                     onClick={() => status && setDismissedJobId(status.job_id)}
-                  >
-                    Train another
-                  </Button>
+                  >{translate("uxImages.trainAnothero4ywf")}</Button>
                 </div>
               </div>
             )}
@@ -2512,21 +2478,20 @@ export function DiffusionTrainPanel({
       <AlertDialog open={stopDialogOpen} onOpenChange={setStopDialogOpen}>
         <AlertDialogContent overlayClassName="bg-background/40">
           <AlertDialogHeader>
-            <AlertDialogTitle>Stop training?</AlertDialogTitle>
+            <AlertDialogTitle>{translate("uxImages.stopTrainingbj9ow")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Save the adapter trained so far, or discard this run? Either way the current step
-              finishes first.
+              {translate("uxCopy.saveTheAdapterTrained1umof")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           {/* flex-wrap keeps all three buttons visible at narrow widths; a real label on the destructive
               action, since a bare "Stop" read as misaligned. */}
           <AlertDialogFooter className="flex-wrap items-center">
-            <AlertDialogCancel>Continue training</AlertDialogCancel>
+            <AlertDialogCancel>{translate("uxImages.continueTrainingv7j4z")}</AlertDialogCancel>
             <AlertDialogAction variant="destructive" onClick={() => void onStop(false)}>
-              Stop without saving
+              {translate("uxImages.stopWithoutSavingzxrre")}
             </AlertDialogAction>
             <AlertDialogAction onClick={() => void onStop(true)}>
-              Stop and save
+              {translate("uxImages.stopAndSavef2x1g")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

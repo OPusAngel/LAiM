@@ -1374,7 +1374,7 @@ function Get-GpuPrebuiltToKeepOverSourceBuild {
     if ($env:LAiM_LLAMA_FORCE_COMPILE -eq "1" -or $LlamaPr -or $explicitLlamaSourceBackend) { return "" }
     if ($env:LAiM_LLAMA_RELEASE_TAG) { return "" }
     # "master" is a branch, never a release: it asks for a source build, so nothing is kept.
-    if ("$($env:LAiM_LLAMA_TAG)".Trim() -notin @("", "latest")) { return "" }
+    if ("$($env:UNSLOTH_LLAMA_TAG)".Trim() -notin @("", "latest")) { return "" }
     $backend = Get-PrebuiltMarkerBackend -Marker (Join-Path $InstallDir "LAiM_PREBUILT_INFO.json")
     if (-not $backend) { return "" }
     $nvidia = $HasNvidiaDriverEvidence -or [bool]$script:NvidiaDriverLibraryOnly
@@ -5263,7 +5263,7 @@ if (-not $HasGit) {
         $_llamaSrc = $DefaultLlamaSource -replace '\.git$', ''
         # Same tag resolution as Phase 4. "master" is a branch, never a release, so the
         # prebuilt lookup always misses and Phase 4 rebuilds it from source.
-        $_llamaTag = if ($env:LAiM_LLAMA_TAG) { $env:LAiM_LLAMA_TAG } else { $DefaultLlamaTag }
+        $_llamaTag = if ($env:UNSLOTH_LLAMA_TAG) { $env:UNSLOTH_LLAMA_TAG } else { $DefaultLlamaTag }
         if ($_llamaTag -eq "master") { $gitNeeded = $true }
         if ($env:LAiM_LLAMA_FORCE_COMPILE -eq '1') { $gitNeeded = $true }
         if (-not [string]::IsNullOrWhiteSpace($env:LAiM_LLAMA_PR)) { $gitNeeded = $true }
@@ -8454,6 +8454,23 @@ sys.exit(2 if conflict else (0 if version else 1))
         $LatestVer = "$($pypiJson.info.version)".Trim()
     } catch { }
 
+    # A GitHub-archive install answers to a different index entry than this code: the PyPI name can
+    # hold an older, unrelated project, and treating its newest as ours turns every update into a
+    # reinstall that overwrites this tree. Ask the installed metadata where it came from, and when it
+    # did not come from the index, the index has no say in whether this is current.
+    if ($InstalledVer -and $LatestVer -and ($InstalledVer -ne $LatestVer)) {
+        $_FromSource = try {
+            (& python -c "
+import importlib.metadata as m, sys
+try:
+    print('yes' if m.distribution(sys.argv[1]).read_text('direct_url.json') else 'no')
+except Exception:
+    print('no')
+" $_PkgName 2>$null | Out-String).Trim()
+        } catch { "" }
+        if ($_FromSource -eq "yes") { $LatestVer = $InstalledVer }
+    }
+
     if ($_InstalledVersionProbeExit -eq 2) {
         substep "duplicate metadata found for a core package -- forcing package repair..." "Cyan"
     } elseif ($InstalledVer -and $LatestVer -and ($InstalledVer -eq $LatestVer)) {
@@ -8774,7 +8791,7 @@ $script:ROCmMultiArch = $false
 # Also on a name-inferred gfx: the wheels bundle the runtime, so no HIP SDK is needed.
 if (-not $TorchIndexPinned -and ($HasROCm -or $ROCmGfxArch) -and $CuTag -eq "cpu") {
     $amdIndexBase = if ($env:LAiM_ROCM_WINDOWS_MIRROR) { $env:LAiM_ROCM_WINDOWS_MIRROR.TrimEnd('/') } else { "https://repo.amd.com/rocm/whl" }
-    # gfx120X, Strix, gfx103X, gfx110X: null _grouped_mm kernel on torch <2.11.0 (LAiMai/LAiM#11814).
+    # gfx120X, Strix, gfx103X, gfx110X: null _grouped_mm kernel on torch <2.11.0 (OPusAngel/LAiM#11814).
     # Mirrors the $torchFloorMap in install.ps1 so both installers enforce
     # the same floor and ceiling when pulling from AMD's per-arch index.
     $torchFloorMap = @{
@@ -9623,48 +9640,6 @@ if (Test-SetupScriptReplaced) {
 }
 Complete-FrontendBuildBackground -IfDone
 
-# Windows MXC Preview is an optional, pinned prebuilt like the other native
-# runtimes. Keep this outside the Python dependency fast path: a missing or
-# corrupt runtime must be installed or repaired even when the venv is current.
-if ([System.Environment]::OSVersion.Platform -eq [System.PlatformID]::Win32NT) {
-    $_mxcInstaller = Join-Path $PSScriptRoot "install_mxc_prebuilt.py"
-    $_mxcInstallDir = Join-Path $StudioHome "mxc-runtime\windows-x86_64"
-    if (Test-Path -LiteralPath $_mxcInstaller -PathType Leaf) {
-        substep "installing Windows MXC Preview runtime..."
-        # Optional, so a nonzero exit or stderr line must reach the fallback below, not stop setup.
-        $_mxcPrevEAP = $ErrorActionPreference
-        $ErrorActionPreference = "Continue"
-        $_mxcRestoreNative = $PSVersionTable.PSVersion.Major -ge 7
-        if ($_mxcRestoreNative) {
-            $_mxcPrevNative = $PSNativeCommandUseErrorActionPreference
-            $PSNativeCommandUseErrorActionPreference = $false
-        }
-        try {
-            $_mxcOutput = & python $_mxcInstaller --install-dir $_mxcInstallDir 2>&1 | Out-String
-            $_mxcExit = $LASTEXITCODE
-        } finally {
-            $ErrorActionPreference = $_mxcPrevEAP
-            if ($_mxcRestoreNative) {
-                $PSNativeCommandUseErrorActionPreference = $_mxcPrevNative
-            }
-        }
-        if ($_mxcExit -eq 0) {
-            if ($_mxcOutput -match "already matches") {
-                step "MXC Preview" "prebuilt up to date and validated"
-            } else {
-                step "MXC Preview" "prebuilt installed and validated"
-            }
-        } elseif ($_mxcExit -eq 3) {
-            step "MXC Preview" "install blocked by an active MXC process; existing runtime kept" "Yellow"
-        } else {
-            step "MXC Preview" "prebuilt unavailable; Studio will use software safeguards" "Yellow"
-        }
-        if ($script:LAiMVerbose -and $_mxcOutput) {
-            Write-StudioLine $_mxcOutput.Trim() -ForegroundColor $(if ($_mxcExit -eq 0) { "DarkGray" } else { "Yellow" })
-        }
-    }
-}
-
 # ── Pre-install transformers 5.x into .venv_t5_530/, .venv_t5_550/, and .venv_t5_510/ ──
 # Runs outside the deps fast-path gate so that upgrades from the legacy
 # single .venv_t5 are always migrated to the tiered layout.
@@ -9974,9 +9949,10 @@ if (-not (Test-Path -LiteralPath $LAiMHome)) { [System.IO.Directory]::CreateDire
 $NeedLlamaSourceBuild = $false
 $script:LlamaSourceBuildIsFallback = $false
 $SkipPrebuiltInstall = $false
-$RequestedLlamaTag = if ($env:LAiM_LLAMA_TAG) { $env:LAiM_LLAMA_TAG } else { $DefaultLlamaTag }
-# Every host installs the fork's app-* prebuilts; ggml-org artifacts are no longer the default.
-$HelperReleaseRepo = "LAiMai/llama.cpp"
+$RequestedLlamaTag = if ($env:UNSLOTH_LLAMA_TAG) { $env:UNSLOTH_LLAMA_TAG } else { $DefaultLlamaTag }
+# LAiM installs llama.cpp from the upstream project, so a new model architecture works the
+# moment llama.cpp supports it. The slug is GitHub's own spelling and must stay exact.
+$HelperReleaseRepo = if ($env:LAiM_LLAMA_RELEASE_REPO) { $env:LAiM_LLAMA_RELEASE_REPO } else { "ggml-org/llama.cpp" }
 $LlamaPr = if ($env:LAiM_LLAMA_PR) { $env:LAiM_LLAMA_PR.Trim() } else { "" }
 
 $LlamaPrForce = if ($env:LAiM_LLAMA_PR_FORCE) { $env:LAiM_LLAMA_PR_FORCE.Trim() } else { $DefaultLlamaPrForce }

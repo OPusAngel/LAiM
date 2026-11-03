@@ -199,7 +199,7 @@ test("C1b: a legacy chat follows the installation defaults, which a model load m
       ...w.store().params,
       temperature: 0.31,
       topP: 0.41,
-      checkpoint: "LAiM/Qwen3.5-9B-GGUF",
+      checkpoint: "unsloth/Qwen3.5-9B-GGUF",
     },
     { fromModelDefaults: true },
   );
@@ -245,7 +245,7 @@ test("C1c: a legacy chat that the user then edits pins the WHOLE set, not just t
     {
       ...w.store().params,
       temperature: 0.31,
-      checkpoint: "LAiM/Qwen3.5-9B-GGUF",
+      checkpoint: "unsloth/Qwen3.5-9B-GGUF",
     },
     { fromModelDefaults: true },
   );
@@ -305,7 +305,7 @@ test("C3: unknown future keys are dropped, and the known ones still arrive", () 
     samplerOrder: ["min_p", "temperature"],
     dryMultiplier: 0.8,
     xtcThreshold: 0.1,
-    speculativeDraft: { model: "LAiM/tiny", tokens: 4 },
+    speculativeDraft: { model: "unsloth/tiny", tokens: 4 },
     reasoningBudget: 8192,
     __proto__: { polluted: true },
   });
@@ -416,7 +416,7 @@ test("C3e: an out-of-range recommendation never reaches a chat that pinned that 
   await settle(w.mod, (ms) => t.mock.timers.tick(ms));
 
   w.store().setParams(
-    { ...w.store().params, topP: 1.2, checkpoint: "LAiM/Llasa-3B" },
+    { ...w.store().params, topP: 1.2, checkpoint: "unsloth/Llasa-3B" },
     { fromModelDefaults: true },
   );
   w.store().setParams({ ...w.store().params, temperature: 1.37 });
@@ -444,7 +444,7 @@ test("C3f: an out-of-range recommendation taken with no chat open cannot be pinn
 
   // no chat open, so nothing puts an in-range value back
   w.store().setParams(
-    { ...w.store().params, topP: 1.2, checkpoint: "LAiM/Llasa-3B" },
+    { ...w.store().params, topP: 1.2, checkpoint: "unsloth/Llasa-3B" },
     { fromModelDefaults: true },
   );
   await settle(w.mod, (ms) => t.mock.timers.tick(ms));
@@ -549,7 +549,7 @@ test("C4c: a falsy pinned value survives a model load and a model switch", async
       minP: 0.02,
       presencePenalty: 0.25,
       systemPrompt: "the model's",
-      checkpoint: "LAiM/Qwen3.5-9B-GGUF",
+      checkpoint: "unsloth/Qwen3.5-9B-GGUF",
     },
     { fromModelDefaults: true },
   );

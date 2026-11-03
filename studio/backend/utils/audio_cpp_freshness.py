@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
-"""audio.cpp prebuilt freshness: the newest published release of the configured audio.cpp repo (LAiMai/audio.cpp unless LAiM_AUDIO_CPP_REPO says otherwise) and the version policy utils.audio_cpp_update compares the install record against. Fails open on any missing data so we never offer a misleading update. The mechanics (GitHub fetch, memo + disk cache, the shared rate-limit lockout) live in utils.prebuilt.freshness_flow; this module keeps the audio version policy and the per-module caches its tests patch. Unlike whisper it does not use freshness_flow.check_freshness, which reads the repo from the install marker: an install from another repo is checked against the configured one."""
+"""audio.cpp prebuilt freshness: the newest published release of the configured audio.cpp repo (unslothai/audio.cpp unless LAiM_AUDIO_CPP_REPO says otherwise) and the version policy utils.audio_cpp_update compares the install record against. Fails open on any missing data so we never offer a misleading update. The mechanics (GitHub fetch, memo + disk cache, the shared rate-limit lockout) live in utils.prebuilt.freshness_flow; this module keeps the audio version policy and the per-module caches its tests patch. Unlike whisper it does not use freshness_flow.check_freshness, which reads the repo from the install marker: an install from another repo is checked against the configured one."""
 
 from __future__ import annotations
 

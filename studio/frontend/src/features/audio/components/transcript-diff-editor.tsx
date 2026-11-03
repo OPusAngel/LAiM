@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -50,7 +51,7 @@ export function TranscriptDiffEditor({
         </label>
         <div className="flex shrink-0 items-center gap-1.5">
           {changes === null ? (
-            <Badge variant="outline">Too long</Badge>
+            <Badge variant="outline">{translate("uxAudio.tooLongrtloy")}</Badge>
           ) : changes > 0 ? (
             <Badge variant="outline">
               {changes === 1 ? "1 change" : `${changes} changes`}
@@ -79,7 +80,7 @@ export function TranscriptDiffEditor({
       {segments && changes ? (
         <p
           id={diffId}
-          aria-label="Changes from the transcript"
+          aria-label={translate("uxAudio.changesFromTheTranscript1nnlx")}
           className="rounded-xl bg-muted/50 px-3 py-2 text-ui-13 leading-relaxed text-foreground [overflow-wrap:anywhere]"
         >
           {segments.map((segment, index) => {
@@ -112,10 +113,10 @@ export function TranscriptDiffEditor({
         className="min-w-0 text-ui-11p5 leading-snug text-muted-foreground"
       >
         {changes === null
-          ? `Diff shown for up to ${EDIT_DIFF_MAX_WORDS} words.`
+          ? translate("uxAudio.diffShownForUp0fyop", { p1: EDIT_DIFF_MAX_WORDS })
           : changes === 0
             ? EDIT_COPY.changesHint
-            : "Underlined words are new, struck-through words are removed."}
+            : translate("uxAudio.underlinedWordsAreNewa2xu0")}
       </p>
     </div>
   );

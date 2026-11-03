@@ -95,7 +95,7 @@ test("the completion payload carries user_message_id on the local and external t
   // External provider with Studio-run tools: beside session_id.
   assert.match(
     adapter,
-    /\? \{ session_id: sandboxSessionId \}\s*: \{\}\),\s*\.\.\.userMessageIdField,/,
+    /\? \{ session_id: workdirSessionId \}\s*: \{\}\),\s*\.\.\.userMessageIdField,/,
   );
   // The durable run posts the same requestPayload, so the field rides inside it, not beside it.
   assert.match(

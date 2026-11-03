@@ -86,7 +86,7 @@ def test_pretokenized_is_detected_and_needs_no_mapping(with_labels):
 
 def test_format_passes_pretokenized_rows_through_untouched():
     ds = _pretokenized()
-    info = format_and_template_dataset(ds, model_name = "LAiM/Qwen3-0.6B", tokenizer = None)
+    info = format_and_template_dataset(ds, model_name = "unsloth/Qwen3-0.6B", tokenizer = None)
     assert info["success"] is True
     assert info["final_format"] == "pretokenized"
     assert info["dataset"].column_names == ds.column_names

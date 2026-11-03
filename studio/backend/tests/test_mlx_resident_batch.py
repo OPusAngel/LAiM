@@ -222,7 +222,7 @@ def _run_loop(monkeypatch, backend, cmds):
         cmd_queue = _Script([*cmds, {"type": "shutdown"}]),
         resp_queue = resp,
         cancel_event = never,
-        config = {"model_name": "LAiM/orpheus-3b-0.1-ft"},
+        config = {"model_name": "unsloth/orpheus-3b-0.1-ft"},
     )
     return resp
 

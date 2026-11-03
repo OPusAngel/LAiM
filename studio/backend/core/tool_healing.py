@@ -28,7 +28,7 @@ import bisect
 import json
 import re
 
-# The route's ``_LOCAL_CODE_TOOLS`` (a drift test pins that), all unsandboxed under Full
+# The route's ``_LOCAL_CODE_TOOLS`` (a drift test pins that), all unrestricted under Full
 # access. Their markerless forms are indistinguishable from prose quoting the syntax, so a
 # model echoing attacker text would turn a quote into execution: require a wrapper
 # (``<|tool_call>``, ``[TOOL_CALLS]``, ``<function=>``) or a structured call. Same rule for

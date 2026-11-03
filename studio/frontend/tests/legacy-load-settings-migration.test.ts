@@ -33,7 +33,7 @@ const MODULE_PATH = fileURLToPath(
   ),
 );
 
-const MODEL_ID = "LAiM/gemma-3-270m-it-GGUF";
+const MODEL_ID = "unsloth/gemma-3-270m-it-GGUF";
 const VARIANT = "UD-Q4_K_XL";
 const LEGACY_KEY = `${MODEL_ID}::${VARIANT}`;
 const CTX = 4096;
@@ -102,11 +102,11 @@ test("migrating once is enough: a later legacy store is not imported again", asy
   // A fresh document (new module instance) with a DIFFERENT legacy store present. Re-running
   // the import on every reload is the regression that reverted the predecessor of #7207: a
   // model the user has since forgotten would come back from the legacy blob for ever.
-  seedLegacy({ contextLength: CTX + 2048, tensorParallel: true }, "LAiM/other-model::Q4_K_M");
+  seedLegacy({ contextLength: CTX + 2048, tensorParallel: true }, "unsloth/other-model::Q4_K_M");
   const second = await freshModule();
 
   assert.equal(
-    second.resolveInitialConfig("LAiM/other-model", "Q4_K_M").remembered,
+    second.resolveInitialConfig("unsloth/other-model", "Q4_K_M").remembered,
     false,
     "a second document re-ran the one-time legacy import",
   );

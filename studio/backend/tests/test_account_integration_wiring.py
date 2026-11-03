@@ -100,7 +100,6 @@ _REQUESTS = {
     [
         {"bypass_permissions": True},
         {"permission_mode": "full"},
-        {"disable_sandbox": True},
     ],
 )
 @pytest.mark.parametrize("account", [ALICE], ids = ["alice"])
@@ -120,7 +119,7 @@ def test_full_access_is_refused_at_the_door_in_multi_mode(
 @pytest.mark.parametrize("path", sorted(_REQUESTS))
 @pytest.mark.parametrize("multi", [False, True])
 @pytest.mark.parametrize(
-    "flags", [{"permission_mode": "full"}, {"bypass_permissions": True}, {"disable_sandbox": True}]
+    "flags", [{"permission_mode": "full"}, {"bypass_permissions": True}]
 )
 def test_owner_full_access_passes_the_door(monkeypatch, path, multi, flags):
     monkeypatch.setattr(policy, "installation_is_multi_user", lambda: multi)
@@ -147,7 +146,7 @@ def test_admission_runs_after_the_docstring_and_reads_every_flag():
     for handler in (inference.openai_responses, inference.anthropic_messages):
         assert handler.__doc__, handler.__name__
     source = inspect.getsource(inference._admit_tool_access)
-    for flag in ("permission_mode", "bypass_permissions", "disable_sandbox"):
+    for flag in ("permission_mode", "bypass_permissions"):
         assert flag in source
 
 

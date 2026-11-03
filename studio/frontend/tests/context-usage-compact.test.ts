@@ -8,20 +8,23 @@ import test from "node:test";
 
 import { deriveContextUsageBar } from "../src/features/chat/lib/context-usage-bar-state.ts";
 
-import { readSrc } from "./helpers/kit.ts";
+import { englishView, readSrc } from "./helpers/kit.ts";
 
 test("the compact face is the ring, unless there is no window to fill", () => {
   // a known window: the ring alone, with no percent label
-  assert.equal(deriveContextUsageBar({ used: 16384, total: 32768 })?.compactFace, null);
+  assert.equal(deriveContextUsageBar({ used: 16384, total: 32768 }, englishView)?.compactFace, null);
   // nothing counted yet: the empty ring
-  assert.equal(deriveContextUsageBar({ used: null, total: 32768 })?.compactFace, null);
+  assert.equal(deriveContextUsageBar({ used: null, total: 32768 }, englishView)?.compactFace, null);
   // no window: the token count stands in for the ring
-  assert.equal(deriveContextUsageBar({ used: 4096, total: null })?.compactFace, "4.1k");
+  assert.equal(deriveContextUsageBar({ used: 4096, total: null }, englishView)?.compactFace, "4.1k");
 });
 
 test("the bar hands every input to the state, batching flags included", () => {
   const bar = readSrc("features/chat/components/context-usage-bar.tsx");
-  assert.match(bar, /\(\{ className, compactUnknownAsIcon = false, \.\.\.input \}\) => \{\s*const state = deriveContextUsageBar\(input\);/);
+  assert.match(
+    bar,
+    /\(\{ className, compactUnknownAsIcon = false, \.\.\.input \}\) => \{\s*const t = useT\(\);\s*const locale = useLocale\(\);\s*const state = deriveContextUsageBar\(input, \{ t, locale \}\);/,
+  );
 });
 
 test("the header shrinks the context bar before the model name", () => {

@@ -24,7 +24,7 @@ Video-specific behaviour lives here:
 - the result is encoded to MP4 (H.264) via diffusers' PyAV-backed exporter,
   muxing the audio track for families that produce one.
 
-Loads are gated to trusted repos exactly like the image backend: LAiM/*, the
+Loads are gated to trusted repos exactly like the image backend: unsloth/*, the
 family's official base repos, or a local path the user explicitly picked.
 """
 
@@ -734,7 +734,7 @@ def _is_trusted_video_repo(repo_id: str) -> bool:
     except OSError:
         pass
     rid = repo_id.strip().lower()
-    return rid.startswith("LAiM/") or rid in _TRUSTED_NON_GGUF_VIDEO_REPOS
+    return rid.startswith("unsloth/") or rid in _TRUSTED_NON_GGUF_VIDEO_REPOS
 
 
 def _cached_checkpoint_file(repo_id: str, filename: str) -> Optional[Path]:
@@ -3242,14 +3242,14 @@ class VideoBackend:
         ):
             raise ValueError(
                 f"Non-GGUF video loads from '{repo_id}' are limited to a single .safetensors "
-                f"checkpoint; full pipelines and other weight formats load only from LAiM/* "
+                f"checkpoint; full pipelines and other weight formats load only from unsloth/* "
                 f"repos, the official family base repos, and local paths."
             )
         # Companions load with from_pretrained, so a base repo is held to the non-GGUF bar: a GGUF pick must not smuggle
         # in a remote base.
         if base_repo and (base_repo or "").strip() and not _is_trusted_video_repo(base_repo):
             raise ValueError(
-                f"base_repo is limited to LAiM/* repos, the official family base "
+                f"base_repo is limited to unsloth/* repos, the official family base "
                 f"repos, and local paths; '{base_repo}' is neither."
             )
         if base_repo and base_repo.strip():
@@ -7298,7 +7298,7 @@ class VideoBackend:
                         "size, and the hosted fp8 DiT is kept resident only (the text encoders may stream "
                         "around it)"
                         if not plan_keeps_transformer_resident(plan)
-                        else "the hosted fp8 DiT (LAiM/LTX-2.3-FP8) could not be loaded"
+                        else "the hosted fp8 DiT (unsloth/LTX-2.3-FP8) could not be loaded"
                         + (" from the local cache" if local_files_only else "")
                     )
                     if not precision_fallback_allowed():

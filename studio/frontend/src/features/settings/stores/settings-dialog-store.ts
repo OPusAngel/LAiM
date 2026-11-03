@@ -14,7 +14,6 @@ export const SETTINGS_TABS = [
   "appearance",
   "resources",
   "chat",
-  "sandbox",
   "voice",
   "connections",
   "library",
@@ -39,12 +38,8 @@ export type SettingsScrollTarget =
   | "browser-html-network"
   | "general-hub"
   | "general-rag-embedding"
-  /** Old name of sandbox-permissions, from when Permissions lived in General. */
-  | "general-permissions"
   | "library-storage"
-  | "resources-caches"
-  | "sandbox-os"
-  | "sandbox-permissions";
+  | "resources-caches";
 
 export interface AudioApiRequest {
   workflow:
@@ -166,23 +161,9 @@ const SCROLL_TARGET_TAB: Record<SettingsScrollTarget, SettingsTab> = {
   "browser-html-network": "browser",
   "general-hub": "general",
   "general-rag-embedding": "general",
-  "general-permissions": "sandbox",
   "library-storage": "library",
   "resources-caches": "resources",
-  "sandbox-os": "sandbox",
-  "sandbox-permissions": "sandbox",
 };
-
-/** Permissions moved from General to the top of Sandbox; an old link still lands there. */
-export function resolveScrollRequest(
-  tab: SettingsTab | undefined,
-  target: SettingsScrollTarget | undefined,
-): { tab: SettingsTab | undefined; target: SettingsScrollTarget | undefined } {
-  if (target === "general-permissions" || target === "sandbox-permissions") {
-    return { tab: "sandbox", target: "sandbox-permissions" };
-  }
-  return { tab, target };
-}
 
 /**
  * The unconsumed deep-link requests that outlive a navigation landing on `tab`.
@@ -237,14 +218,13 @@ export const useSettingsDialogStore = create<SettingsDialogState>((set) => ({
   decisionTryRequested: null,
   openDialog: (requestedTab, options) =>
     set((state) => {
-      const { tab, target } = resolveScrollRequest(requestedTab, options?.scrollTarget);
-      const next = tab ?? state.activeTab;
-      const pending = requestsFor(state, next);
+      const tab = requestedTab ?? state.activeTab;
+      const pending = requestsFor(state, tab);
       return {
         open: true,
-        activeTab: next,
+        activeTab: tab,
         // A caller that names a target replaces whatever was still pending.
-        scrollTarget: target ?? pending.scrollTarget,
+        scrollTarget: options?.scrollTarget ?? pending.scrollTarget,
         archivedRequested: pending.archivedRequested,
         logFamilyRequested: pending.logFamilyRequested,
         logSourcePathRequested: pending.logSourcePathRequested,

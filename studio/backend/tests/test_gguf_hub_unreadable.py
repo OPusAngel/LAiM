@@ -21,7 +21,7 @@ from utils.models.model_config import (
     detect_gguf_model_remote,
 )
 
-REPO = "LAiM/LFM2.5-VL-1.6B-GGUF"
+REPO = "unsloth/LFM2.5-VL-1.6B-GGUF"
 GGUF = "LFM2.5-VL-1.6B-UD-Q4_K_XL.gguf"
 
 
@@ -159,7 +159,7 @@ def test_offline_uncached_gguf_repo_raises_clear_error(monkeypatch):
 )
 def test_non_gguf_repo_with_hub_failure_keeps_todays_behaviour(monkeypatch, failure):
     monkeypatch.setattr(huggingface_hub, "model_info", _hub(failure))
-    config = ModelConfig.from_identifier("LAiM/Qwen3-0.6B")
+    config = ModelConfig.from_identifier("unsloth/Qwen3-0.6B")
     assert config is not None and not config.is_gguf
 
 
@@ -179,11 +179,11 @@ def test_public_detect_signature_unchanged_outside_from_identifier(monkeypatch):
 @pytest.mark.parametrize(
     "repo_id,expected",
     [
-        ("LAiM/LFM2.5-VL-1.6B-GGUF", True),
+        ("unsloth/LFM2.5-VL-1.6B-GGUF", True),
         ("prism-ml/Ternary-Bonsai-27B-gguf", True),
         ("org/gguf-models", True),
         ("org/model_GGUF.v2", True),
-        ("LAiM/Qwen3-0.6B", False),
+        ("unsloth/Qwen3-0.6B", False),
         ("org/ggufmaker", False),
         ("gguf-org/regular-model", False),
     ],

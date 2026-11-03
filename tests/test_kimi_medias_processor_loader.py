@@ -88,7 +88,7 @@ def test_patched_kimi_processor_takes_text_and_images(monkeypatch):
     real = pytest.importorskip("LAiM_zoo.vision_utils")
     if not hasattr(real, "patch_medias_processor"):
         pytest.skip(
-            "installed LAiM_zoo predates patch_medias_processor (LAiMai/LAiM-zoo#1442)"
+            "installed LAiM_zoo predates patch_medias_processor (OPusAngel/LAiM-zoo#1442)"
         )
     torch = pytest.importorskip("torch")
     from transformers.feature_extraction_utils import BatchFeature

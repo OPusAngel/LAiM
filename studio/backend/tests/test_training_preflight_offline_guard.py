@@ -35,7 +35,7 @@ def test_model_preflight_short_circuits_when_the_hub_is_unreachable(monkeypatch)
 
     started = time.monotonic()
     with pytest.raises(Exception) as excinfo:
-        training_routes._remote_untrainable_model_format("LAiM/does-not-matter", None)
+        training_routes._remote_untrainable_model_format("unsloth/does-not-matter", None)
     elapsed = time.monotonic() - started
 
     # The guard is checked by the caller, so the raw helper still runs; assert it is the only slow path.

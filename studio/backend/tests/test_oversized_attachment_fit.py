@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
-"""An attached file larger than the window: keep its start, point at the sandbox copy."""
+"""An attached file larger than the window: keep its start, point at the workdir copy."""
 
 from __future__ import annotations
 
@@ -95,7 +95,7 @@ def test_an_attachment_that_fits_is_untouched():
     assert _fit(copy.deepcopy(messages)) == messages
 
 
-def test_an_attachment_with_no_sandbox_copy_is_left_to_the_refusal():
+def test_an_attachment_with_no_workdir_copy_is_left_to_the_refusal():
     messages = _messages(marker = "")
 
     assert _fit(copy.deepcopy(messages)) == messages

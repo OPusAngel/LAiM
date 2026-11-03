@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   getHfDatasetsServerBase,
   getHfEndpoint,
@@ -253,7 +254,7 @@ export function fetchDatasetSize(
         },
       };
     },
-    { label: "Dataset", id: repoId },
+    { label: translate("studio.wizard.datasetTitle"), id: repoId },
     resolvedSignal,
   );
 }
@@ -469,7 +470,7 @@ export function fetchModelSize(
         },
       };
     },
-    { label: "Model", id: repoId },
+    { label: translate("settings.voice.dictation.customModelLabel"), id: repoId },
     signal,
   );
 }

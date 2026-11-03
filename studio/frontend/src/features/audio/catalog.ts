@@ -19,6 +19,8 @@ import {
   sttRepoIdForSidecarKey,
   sttSidecarKeyFor,
 } from "./stt-artifacts";
+import { translate } from "@/i18n";
+
 
 export {
   sttEngineForRepoId,
@@ -151,11 +153,11 @@ const CAPABILITY_LABEL: Record<
   AudioTask | "music" | "clone" | "edit" | "convert" | "separate",
   string
 > = {
-  music: "Music generation",
-  separate: "Source separation",
-  clone: "Voice cloning",
-  edit: "Speech editing",
-  convert: "Voice conversion",
+  get music() { return translate("uxAudio.musicGenerationkzn0l"); },
+  get separate() { return translate("uxAudio.sourceSeparation2374o"); },
+  get clone() { return translate("uxAudio.voiceCloninghd50l"); },
+  get edit() { return translate("uxAudio.speechEditing5cqm1"); },
+  get convert() { return translate("uxAudio.voiceConversionq3ss5"); },
   tts: "Text-to-speech",
   stt: "Speech-to-text",
 };

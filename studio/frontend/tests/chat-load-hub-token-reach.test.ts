@@ -35,10 +35,10 @@ test("an Ollama link path prepares no Hub token", () => {
 test("a local path or a native lease prepares no Hub token", () => {
   assert.equal(mayReachHub("/models/llama.gguf", null), false);
   assert.equal(mayReachHub("C:\\models\\llama.gguf", null), false);
-  assert.equal(mayReachHub("LAiM/Llama-3.2-1B-Instruct", "lease-abc"), false);
+  assert.equal(mayReachHub("unsloth/Llama-3.2-1B-Instruct", "lease-abc"), false);
 });
 
 test("a plain Hub repo id still prepares its token", () => {
-  assert.equal(mayReachHub("LAiM/Llama-3.2-1B-Instruct", null), true);
-  assert.equal(mayReachHub("LAiM/gemma-3-4b-it-GGUF", null), true);
+  assert.equal(mayReachHub("unsloth/Llama-3.2-1B-Instruct", null), true);
+  assert.equal(mayReachHub("unsloth/gemma-3-4b-it-GGUF", null), true);
 });

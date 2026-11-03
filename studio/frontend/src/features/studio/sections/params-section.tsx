@@ -22,7 +22,7 @@ import {
   useMaxStepsEpochsToggle,
   useTrainingConfigStore,
 } from "@/features/training";
-import { useT } from "@/i18n";
+import { translate, useT } from "@/i18n";
 import { InformationCircleIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { type ReactElement, useRef, useState } from "react";
@@ -160,7 +160,7 @@ export function ParamsSection({
             <Input
               value={store.projectName || ""}
               onChange={(event) => store.setProjectName(event.target.value)}
-              placeholder="customer-support-lora"
+              placeholder={translate("uxStudio.customerSupportLora1rtje")}
               maxLength={80}
             />
           </div>
@@ -442,7 +442,7 @@ export function ParamsSection({
                 step="0.00001"
                 min="0"
                 max="1"
-                placeholder={`auto (${(store.learningRate / 10).toExponential(1)})`}
+                placeholder={translate("uxStudio.autog5nq5", { p1: (store.learningRate / 10).toExponential(1) })}
                 value={embeddingLearningRateInput}
                 onChange={(event) => {
                   const raw = event.target.value;

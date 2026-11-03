@@ -83,8 +83,8 @@ def run_probe(
         TMPDIR = str(runtime / "tmp"),
         XDG_CACHE_HOME = str(runtime / "cache"),
         LAiM_STUDIO_DOCUMENTS_HOME = str(runtime / "Documents"),
-        LAiM_ALLOW_CPU = "1",
-        LAiM_IS_PRESENT = "1",
+        UNSLOTH_ALLOW_CPU = "1",
+        UNSLOTH_IS_PRESENT = "1",
         LAiM_STUDIO_DISABLE_DEVICE_PROBE = "1",
         LAiM_DIFFUSION_ATTENTION_INSTALL = "0",
     )

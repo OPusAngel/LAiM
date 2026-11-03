@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import type { TrainingMethod } from "@/types/training";
 
 export type ExportMethod = "merged" | "lora" | "gguf";
@@ -14,24 +15,37 @@ export const EXPORT_METHODS: {
 }[] = [
   {
     value: "merged",
-    title: "Merged Model",
-    description: "Full 16-bit model ready for inference.",
-    tooltip:
-      "Merges adapter weights into the base model. Best for direct deployment with vLLM or TGI.",
+    get title() {
+      return translate("uxExport.mergedModelog8kc");
+    },
+    get description() {
+      return translate("uxExport.full16BitModeldz6bo");
+    },
+    get tooltip() {
+      return translate("uxExport.mergesAdapterWeightsIntoacois");
+    },
   },
   {
     value: "lora",
-    title: "LoRA Only",
-    description: "Lightweight adapter files (~100 MB). Needs base model.",
-    tooltip:
-      "Exports only the trained adapter. Pair with the base model at inference time to save storage.",
+    get title() {
+      return translate("uxExport.loRAOnlyfhxtb");
+    },
+    get description() {
+      return translate("uxExport.lightweightAdapterFiles1001jovg");
+    },
+    get tooltip() {
+      return translate("uxExport.exportsOnlyTheTrained1heb8");
+    },
   },
   {
     value: "gguf",
     title: "GGUF / Llama.cpp",
-    description: "Quantized formats for local AI runners.",
-    tooltip:
-      "Converts to GGUF for llama.cpp, Ollama, and other local runners. Pick a quantization level below.",
+    get description() {
+      return translate("uxExport.quantizedFormatsForLocal7tpoh");
+    },
+    get tooltip() {
+      return translate("uxExport.convertsToGGUFForx8y7c");
+    },
   },
 ];
 
@@ -88,13 +102,15 @@ export const MERGED_FORMATS: MergedFormatOption[] = [
   // 16-bit
   {
     value: "16-bit",
-    label: "16-bit",
+    get label() { return translate("uxExport.16Bitv40tu"); },
     bits: 16,
     backend: "plain",
     group: "16-bit",
     common: true,
     needsNvidia: false,
-    hint: "Full precision, runs anywhere.",
+    get hint() {
+      return translate("uxExport.fullPrecisionRunsAnywhere13zfv");
+    },
     formatType: "16-bit (FP16)",
   },
   // 8-bit
@@ -106,17 +122,23 @@ export const MERGED_FORMATS: MergedFormatOption[] = [
     group: "FP8",
     common: true,
     needsNvidia: true,
-    hint: "Dynamic per-token FP8 (W8A8) for vLLM. Data-free.",
+    get hint() {
+      return translate("uxExport.dynamicPerTokenFP8r9q9x");
+    },
   },
   {
     value: "torchao_fp8",
-    label: "FP8 (portable)",
+    get label() {
+      return translate("uxExport.fP8Portablegebnv");
+    },
     bits: 8,
     backend: "torchao",
     group: "Portable",
     common: true,
     needsNvidia: false,
-    hint: "Device-agnostic FP8 (torchao). Produces on any hardware; loads in vLLM.",
+    get hint() {
+      return translate("uxExport.deviceAgnosticFP8Torchao1jplk");
+    },
   },
   {
     value: "w8a8",
@@ -126,28 +148,36 @@ export const MERGED_FORMATS: MergedFormatOption[] = [
     group: "INT",
     common: true,
     needsNvidia: true,
-    hint: "8-bit weights and 8-bit activations for vLLM. Data-free.",
+    get hint() { return translate("uxExport.8BitWeightsAnde06bd"); },
   },
   {
     value: "torchao_int8",
-    label: "INT8 (portable)",
+    get label() {
+      return translate("uxExport.iNT8Portable1k3xn");
+    },
     bits: 8,
     backend: "torchao",
     group: "Portable",
     common: true,
     needsNvidia: false,
-    hint: "Device-agnostic INT8 (torchao). Produces on any hardware; loads in vLLM.",
+    get hint() {
+      return translate("uxExport.deviceAgnosticINT8Torchaogtqrg");
+    },
   },
   {
     value: "fp8_static",
-    label: "FP8 Static",
+    get label() {
+      return translate("uxExport.fP8Staticlq54w");
+    },
     bits: 8,
     backend: "compressed",
     group: "FP8",
     common: false,
     needsNvidia: true,
     needsCalibration: true,
-    hint: "Static per-tensor FP8. Calibrates on data.",
+    get hint() {
+      return translate("uxExport.staticPerTensorFP8m9kmi");
+    },
   },
   {
     value: "w8a16",
@@ -157,7 +187,7 @@ export const MERGED_FORMATS: MergedFormatOption[] = [
     group: "INT",
     common: false,
     needsNvidia: true,
-    hint: "8-bit weight-only. Data-free.",
+    get hint() { return translate("uxExport.8BitWeightOnlyar0rf"); },
   },
   {
     value: "mxfp8",
@@ -167,7 +197,9 @@ export const MERGED_FORMATS: MergedFormatOption[] = [
     group: "MXFP",
     common: false,
     needsNvidia: true,
-    hint: "Microscaling FP8. Needs a newer compressed-tensors stack.",
+    get hint() {
+      return translate("uxExport.microscalingFP8NeedsA19v54");
+    },
   },
   // 4-bit
   {
@@ -178,7 +210,7 @@ export const MERGED_FORMATS: MergedFormatOption[] = [
     group: "INT",
     common: true,
     needsNvidia: true,
-    hint: "4-bit weight-only (GPTQ-style) for vLLM. Data-free.",
+    get hint() { return translate("uxExport.4BitWeightOnly60q0l"); },
   },
   {
     value: "mxfp4",
@@ -188,7 +220,9 @@ export const MERGED_FORMATS: MergedFormatOption[] = [
     group: "MXFP",
     common: true,
     needsNvidia: true,
-    hint: "Microscaling FP4 (W4A4) for vLLM. Data-free.",
+    get hint() {
+      return translate("uxExport.microscalingFP4W4A4For1njjy");
+    },
   },
   {
     value: "nvfp4",
@@ -199,7 +233,9 @@ export const MERGED_FORMATS: MergedFormatOption[] = [
     common: true,
     needsNvidia: true,
     needsCalibration: true,
-    hint: "NVIDIA FP4 (W4A4) for vLLM. Calibrates on data.",
+    get hint() {
+      return translate("uxExport.nVIDIAFP4W4A4For6xrwt");
+    },
   },
 ];
 
@@ -340,7 +376,7 @@ export const METHOD_LABELS: Record<TrainingMethod, string> = {
   qlora: "QLoRA",
   lora: "LoRA",
   full: "Full Fine-tune",
-  cpt: "Continued Pretraining",
+  get cpt() { return translate("uxExport.continuedPretrainingma2l4"); },
 };
 
 export const GUIDE_STEPS = [
@@ -369,8 +405,7 @@ export function adapterCompatibilityTip(
 ): string {
   if (format === "mlx") {
     const base =
-      "MLX (default): the native format for mlx-lm and Apple-silicon " +
-      "workflows — the format training checkpoints are saved in.";
+      translate("uxExport.mLXDefaultTheNative2m16x");
     return features?.non_uniform
       ? base +
           " Adapters with per-module ranks/alphas exported as MLX require " +

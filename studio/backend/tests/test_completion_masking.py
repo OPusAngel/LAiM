@@ -88,7 +88,7 @@ def test_mapped_model_prefers_auto_detection():
     train_fn = _Recorder()
 
     _, applied = apply_completion_masking(
-        trainer, "LAiM/Qwen3-0.6B", train_fn, detect_fn = _detect_ok
+        trainer, "unsloth/Qwen3-0.6B", train_fn, detect_fn = _detect_ok
     )
 
     assert applied is True
@@ -104,7 +104,7 @@ def test_dataset_template_uses_alpaca_markers_without_detection():
 
     result, applied = apply_completion_masking(
         trainer,
-        "LAiM/Llama-3.2-1B-Instruct",
+        "unsloth/Llama-3.2-1B-Instruct",
         train_fn,
         detect_fn = detect,
         dataset_template = "alpaca",
@@ -141,7 +141,7 @@ def test_dataset_template_temporarily_replaces_tokenizer_markers():
 
     result, applied = apply_completion_masking(
         trainer,
-        "LAiM/Llama-3.2-1B-Instruct",
+        "unsloth/Llama-3.2-1B-Instruct",
         train_fn,
         dataset_template = "alpaca",
     )
@@ -167,7 +167,7 @@ def test_dataset_template_restores_tokenizer_markers_after_failure():
     with pytest.raises(RuntimeError, match = "masking failed"):
         apply_completion_masking(
             trainer,
-            "LAiM/Llama-3.2-1B-Instruct",
+            "unsloth/Llama-3.2-1B-Instruct",
             train_fn,
             dataset_template = "alpaca",
         )
@@ -181,7 +181,7 @@ def test_dataset_template_forwards_num_proc():
 
     apply_completion_masking(
         _Trainer(),
-        "LAiM/Llama-3.2-1B-Instruct",
+        "unsloth/Llama-3.2-1B-Instruct",
         train_fn,
         num_proc = 4,
         dataset_template = "alpaca",
@@ -196,7 +196,7 @@ def test_unknown_dataset_template_fails_loudly():
     with pytest.raises(ValueError, match = "Unknown completion masking template"):
         apply_completion_masking(
             _Trainer(),
-            "LAiM/Llama-3.2-1B-Instruct",
+            "unsloth/Llama-3.2-1B-Instruct",
             train_fn,
             dataset_template = "missing",
         )
@@ -212,7 +212,7 @@ def test_gpt_oss_uses_auto_detection_first():
     train_fn = _Recorder()
 
     _, applied = apply_completion_masking(
-        trainer, "LAiM/gpt-oss-20b", train_fn, detect_fn = _detect_ok
+        trainer, "unsloth/gpt-oss-20b", train_fn, detect_fn = _detect_ok
     )
 
     assert applied is True
@@ -224,7 +224,7 @@ def test_gpt_oss_detection_failure_falls_back_to_manual_markers():
     train_fn = _Recorder()
 
     _, applied = apply_completion_masking(
-        trainer, "LAiM/gpt-oss-20b", train_fn, detect_fn = _detect_fail
+        trainer, "unsloth/gpt-oss-20b", train_fn, detect_fn = _detect_fail
     )
 
     assert applied is True
@@ -243,7 +243,7 @@ def test_auto_failure_falls_back_to_template_table():
     notes = _Notes()
 
     result, applied = apply_completion_masking(
-        trainer, "LAiM/Qwen3-0.6B", train_fn, notify = notes, detect_fn = _detect_fail
+        trainer, "unsloth/Qwen3-0.6B", train_fn, notify = notes, detect_fn = _detect_fail
     )
 
     assert applied is True
@@ -305,18 +305,18 @@ def test_num_proc_forwarded_only_when_given():
     # CUDA path passes num_proc; the MLX path omits it.
     train_fn = _Recorder()
     apply_completion_masking(
-        _Trainer(), "LAiM/Qwen3-0.6B", train_fn, num_proc = 4, detect_fn = _detect_ok
+        _Trainer(), "unsloth/Qwen3-0.6B", train_fn, num_proc = 4, detect_fn = _detect_ok
     )
     assert train_fn.calls == [dict(_AUTO, num_proc = 4)]
 
     train_fn = _Recorder()
     apply_completion_masking(
-        _Trainer(), "LAiM/Qwen3-0.6B", train_fn, num_proc = 4, detect_fn = _detect_fail
+        _Trainer(), "unsloth/Qwen3-0.6B", train_fn, num_proc = 4, detect_fn = _detect_fail
     )
     assert train_fn.calls[0]["num_proc"] == 4
 
     train_fn = _Recorder()
-    apply_completion_masking(_Trainer(), "LAiM/Qwen3-0.6B", train_fn, detect_fn = _detect_ok)
+    apply_completion_masking(_Trainer(), "unsloth/Qwen3-0.6B", train_fn, detect_fn = _detect_ok)
     assert train_fn.calls == [dict(_AUTO)]
 
 
@@ -326,7 +326,7 @@ def test_manual_fallback_failure_propagates_to_caller():
         raise RuntimeError("boom")
 
     with pytest.raises(RuntimeError, match = "boom"):
-        apply_completion_masking(_Trainer(), "LAiM/gpt-oss-20b", train_fn)
+        apply_completion_masking(_Trainer(), "unsloth/gpt-oss-20b", train_fn)
 
 
 def test_notify_is_optional():
@@ -338,7 +338,7 @@ def test_notify_is_optional():
 
 
 def test_lookup_manual_markers():
-    template, instruction, response = lookup_manual_markers("LAiM/Qwen3-0.6B")
+    template, instruction, response = lookup_manual_markers("unsloth/Qwen3-0.6B")
     assert template == "qwen3"
     assert instruction == TEMPLATE_TO_RESPONSES_MAPPER["qwen3"]["instruction"]
     assert response == TEMPLATE_TO_RESPONSES_MAPPER["qwen3"]["response"]
@@ -485,7 +485,7 @@ def _gemma4_trained_text(*conversations):
     trainer.eval_dataset = None
 
     trainer, applied = apply_completion_masking(
-        trainer, "LAiM/gemma-4-E2B-it", train_on_responses_only
+        trainer, "unsloth/gemma-4-E2B-it", train_on_responses_only
     )
     assert applied is True
     labels = trainer.train_dataset[0]["labels"]

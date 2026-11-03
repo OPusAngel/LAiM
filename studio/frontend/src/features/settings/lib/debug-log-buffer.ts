@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
+
 /** Buffer and polling maths for the Settings > Logs log viewer. Kept free
  * of React so it can be tested: the tab component pulls in the router, motion
  * and hugeicons and cannot be imported under node:test.
@@ -35,7 +37,7 @@ export function isRequestTimeout(error: unknown): boolean {
  * a cancelled request, for the tie where the deadline won the race but the
  * caller had already asked to stop. */
 function abortError(): Error {
-  const error = new Error("Aborted.");
+  const error = new Error(translate("uxSettings.aborteddkx4i"));
   error.name = "AbortError";
   return error;
 }

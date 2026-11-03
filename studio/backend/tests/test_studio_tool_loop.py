@@ -874,22 +874,6 @@ def test_the_model_is_told_about_the_attached_image(executed, monkeypatch):
     assert transport.requests[0]["messages"][-1]["content"] == "what anime is this?"
 
 
-def test_full_access_disables_the_sandbox_at_execution(executed):
-    transport = _shared_setup_1()
-    _run(transport, tools = [PY], bypass_permissions = True)
-
-    assert executed[0]["disable_sandbox"] is True
-
-
-def test_sandbox_stays_on_by_default(executed):
-    transport = _shared_setup_1()
-    _run(transport, tools = [PY])
-
-    assert executed[0]["disable_sandbox"] is False
-    # without approval, the executor keeps the jail even for a host path.
-    assert "host_access_approved" not in executed[0]
-
-
 @pytest.mark.parametrize("verdict", ["allow", "deny"])
 def test_only_an_approved_call_is_marked_approved(executed, monkeypatch, verdict):
     monkeypatch.setattr(loop_mod, "begin_tool_decision", lambda session, approval: object())

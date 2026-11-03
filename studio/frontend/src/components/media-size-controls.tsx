@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { ArrowLeftRightIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 import { ChevronDown } from "lucide-react";
@@ -38,12 +39,23 @@ export const ASPECT_RATIOS: Record<string, [number, number]> = {
   "21:9": [21, 9],
 };
 export const ASPECT_OPTIONS = ["custom", ...Object.keys(ASPECT_RATIOS)];
+// Getters: this table is built at module scope, before the active catalog loads.
 export const ASPECT_LABELS: Record<string, string> = {
-  "1:1": "Square",
-  "3:2": "Photo",
-  "4:3": "Landscape",
-  "16:9": "Widescreen",
-  "21:9": "Ultrawide",
+  get "1:1"() {
+    return translate("uxComponents.squaresyx9yc");
+  },
+  get "3:2"() {
+    return translate("uxComponents.photoumxd5");
+  },
+  get "4:3"() {
+    return translate("uxComponents.landscapermsfa");
+  },
+  get "16:9"() {
+    return translate("uxComponents.widescreen47i6u");
+  },
+  get "21:9"() {
+    return translate("uxComponents.ultrawidemvrt0");
+  },
 };
 
 // The ratio key is compared long:short, so it survives orientation.
@@ -85,14 +97,16 @@ export function AspectRatioSelect({
         open={open}
         onOpenChange={onOpenChange}
       >
-        <SelectTrigger className="flex-1" aria-label="Aspect ratio">
+        <SelectTrigger className="flex-1" aria-label={translate("uxVideo.aspectRatiodgimx")}>
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
           {extraItems}
           {ASPECT_OPTIONS.map((key) => (
             <SelectItem key={key} value={key}>
-              {key === "custom" ? "Custom" : `${ASPECT_LABELS[key]} (${key})`}
+              {key === "custom"
+                ? translate("uxComponents.custom56hjq")
+                : `${ASPECT_LABELS[key]} (${key})`}
             </SelectItem>
           ))}
         </SelectContent>
@@ -103,7 +117,7 @@ export function AspectRatioSelect({
             type="button"
             variant="secondary"
             size="icon"
-            aria-label="Flip width and height"
+            aria-label={translate("uxComponents.flipWidthAndHeightgnb23")}
             onClick={onFlip}
           >
             {/* Arrows turn with the orientation, showing which way it flips. */}
@@ -117,7 +131,9 @@ export function AspectRatioSelect({
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          {portrait ? "Switch to landscape" : "Switch to portrait"}
+          {portrait
+            ? translate("uxComponents.switchToLandscapewk4gf")
+            : translate("uxComponents.switchToPortraitvsmzf")}
         </TooltipContent>
       </Tooltip>
     </div>
@@ -186,7 +202,7 @@ export function DimensionSelect({
       />
       <DropdownMenu open={open} onOpenChange={onOpenChange}>
         <DropdownMenuTrigger
-          aria-label={`${label} presets`}
+          aria-label={translate("uxComponents.presets48ifp", { p1: label })}
           className="-mr-1 shrink-0 cursor-pointer rounded-full p-1 text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <ChevronDown className="size-4" />

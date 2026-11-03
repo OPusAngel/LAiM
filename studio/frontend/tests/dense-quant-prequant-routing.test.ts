@@ -27,10 +27,10 @@ import {
 } from "../src/features/model-picker/components/model-selector/recommended-fit.ts";
 
 // The bf16 rows are the LAiM mirrors of the vendor repos.
-const Z_TURBO = "LAiM/Z-Image-Turbo";
-const QWEN_IMAGE = "LAiM/Qwen-Image";
-const QWEN_2512 = "LAiM/Qwen-Image-2512";
-const QWEN_21 = "LAiM/Qwen-Image-2.1";
+const Z_TURBO = "unsloth/Z-Image-Turbo";
+const QWEN_IMAGE = "unsloth/Qwen-Image";
+const QWEN_2512 = "unsloth/Qwen-Image-2512";
+const QWEN_21 = "unsloth/Qwen-Image-2.1";
 const H3 = "MiniMaxAI/MiniMax-H3";
 const notDownloaded = () => false;
 
@@ -43,15 +43,15 @@ const onCard = (gpuGb: number, denseQuantSchemes?: readonly string[]) => ({
 
 test("the catalog states the hosted checkpoint each official row would be fetched as", () => {
   for (const [id, repo, fp8, int8] of [
-    [Z_TURBO, "LAiM/Z-Image-Turbo-FP8", 5.86, 5.86],
-    [QWEN_IMAGE, "LAiM/Qwen-Image-FP8", 19.06, 31.73],
+    [Z_TURBO, "unsloth/Z-Image-Turbo-FP8", 5.86, 5.86],
+    [QWEN_IMAGE, "unsloth/Qwen-Image-FP8", 19.06, 31.73],
     [
       "black-forest-labs/FLUX.1-schnell",
-      "LAiM/FLUX.1-schnell-FP8",
+      "unsloth/FLUX.1-schnell-FP8",
       11.09,
       14.13,
     ],
-    ["krea/Krea-2-Turbo", "LAiM/Krea-2-Turbo-FP8", 11.95, 12.19],
+    ["krea/Krea-2-Turbo", "unsloth/Krea-2-Turbo-FP8", 11.95, 12.19],
   ] as const) {
     const hit = artifactForRepoId(id, IMAGE_CATALOG);
     assert.ok(hit, id);
@@ -200,7 +200,7 @@ test("the H3 pipeline row names its precision again", () => {
   );
   assert.equal(
     curatedRowLabelFor(
-      "LAiM/MiniMax-H3-GGUF",
+      "unsloth/MiniMax-H3-GGUF",
       VIDEO_CATALOG,
       "dense-quant",
       ["fp8"],
@@ -211,9 +211,9 @@ test("the H3 pipeline row names its precision again", () => {
 
 test("every diffusion GGUF row is tagged Slow, not only H3's", () => {
   for (const [repoId, catalog, name] of [
-    ["LAiM/Z-Image-Turbo-GGUF", IMAGE_CATALOG, "Z-Image-Turbo-GGUF (Slow)"],
-    ["LAiM/FLUX.1-schnell-GGUF", IMAGE_CATALOG, "FLUX.1-schnell-GGUF (Slow)"],
-    ["LAiM/LTX-2.3-GGUF", VIDEO_CATALOG, "LTX-2.3-GGUF (Slow)"],
+    ["unsloth/Z-Image-Turbo-GGUF", IMAGE_CATALOG, "Z-Image-Turbo-GGUF (Slow)"],
+    ["unsloth/FLUX.1-schnell-GGUF", IMAGE_CATALOG, "FLUX.1-schnell-GGUF (Slow)"],
+    ["unsloth/LTX-2.3-GGUF", VIDEO_CATALOG, "LTX-2.3-GGUF (Slow)"],
   ] as const) {
     assert.equal(
       curatedRowLabelFor(repoId, catalog, "dense-quant", ["fp8"])?.name,
@@ -238,9 +238,9 @@ test("a host with no accelerator is not told which row is slow", () => {
   // warning about the user's one option rather than a comparison.
   for (const host of ["gguf-only", "unknown"] as const) {
     for (const [repoId, catalog] of [
-      ["LAiM/Z-Image-Turbo-GGUF", IMAGE_CATALOG],
-      ["LAiM/LTX-2.3-GGUF", VIDEO_CATALOG],
-      ["LAiM/MiniMax-H3-GGUF", VIDEO_CATALOG],
+      ["unsloth/Z-Image-Turbo-GGUF", IMAGE_CATALOG],
+      ["unsloth/LTX-2.3-GGUF", VIDEO_CATALOG],
+      ["unsloth/MiniMax-H3-GGUF", VIDEO_CATALOG],
     ] as const) {
       const name = curatedRowLabelFor(repoId, catalog, host, ["fp8"])?.name;
       assert.equal(name?.includes("Slow"), false, `${repoId} ${host}`);
@@ -250,8 +250,8 @@ test("a host with no accelerator is not told which row is slow", () => {
 
 test("an audio GGUF keeps its plain name, since it has no dense sibling", () => {
   for (const repoId of [
-    "LAiM/orpheus-3b-0.1-ft-GGUF",
-    "LAiMai/Qwen3-ASR-0.6B-GGUF",
+    "unsloth/orpheus-3b-0.1-ft-GGUF",
+    "unslothai/Qwen3-ASR-0.6B-GGUF",
   ]) {
     for (const group of AUDIO_CATALOG) {
       if (!group.artifacts.some((a) => a.repoId === repoId)) continue;
@@ -295,7 +295,7 @@ test("Qwen-Image-2.1 is badged with the size its verdict used", () => {
 });
 
 test("a transcription row judged on RAM names RAM as the budget's device", () => {
-  const WHISPER = "LAiM/whisper-large-v3";
+  const WHISPER = "unsloth/whisper-large-v3";
   const onRam = curatedArtifactFit(WHISPER, AUDIO_CATALOG, { gpuGb: 1, systemRamGb: 5 });
   assert.equal(onRam?.fits, false);
   assert.equal(onRam?.device, "RAM");
@@ -320,7 +320,7 @@ test("the over-budget text never shows the size below the budget it exceeds", ()
     "Needs ~13.5GB for weights (budget: ~13.3GB, 70% of a 19GB GPU)",
   );
   // A whole 4 GB against a 3.99 allowance: the budget is rounded down so 4.0 still reads as over.
-  const whisper = curatedArtifactFit("LAiM/whisper-large-v3", AUDIO_CATALOG, {
+  const whisper = curatedArtifactFit("unsloth/whisper-large-v3", AUDIO_CATALOG, {
     gpuGb: 1,
     systemRamGb: 5.7,
   });
@@ -346,9 +346,9 @@ test("Qwen-Image-2.1 routes every card as on main", () => {
       isDownloaded: notDownloaded,
     }).repoId;
   // Include 36 GiB to catch changes just below the existing routing threshold.
-  assert.equal(pick(24), "LAiM/Qwen-Image-2.1-GGUF");
-  assert.equal(pick(31.84), "LAiM/Qwen-Image-2.1-GGUF");
-  assert.equal(pick(36), "LAiM/Qwen-Image-2.1-GGUF");
+  assert.equal(pick(24), "unsloth/Qwen-Image-2.1-GGUF");
+  assert.equal(pick(31.84), "unsloth/Qwen-Image-2.1-GGUF");
+  assert.equal(pick(36), "unsloth/Qwen-Image-2.1-GGUF");
   assert.equal(pick(39.5), QWEN_21);
 });
 

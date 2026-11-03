@@ -2,21 +2,21 @@
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 /** Which side of the connection the Tools pill runs code on. `code_execution` runs in the
- *  provider's own sandbox and is billed by them; `python` / `terminal` are LAiM's tools and
+ *  provider's own workdir and is billed by them; `python` / `terminal` are LAiM's tools and
  *  run on the machine LAiM is installed on. They are two different trust boundaries, so which
  *  one a stored toggle means must not change underneath the user. Until LAiM's tool loop
  *  reached the general external providers, only openai_codex carried studio_tools, so the pill on
- *  an OpenAI or Anthropic connection always resolved to the provider's sandbox; now the same
- *  persisted `true` would resolve to local execution. The rule: a connection with its own sandbox
+ *  an OpenAI or Anthropic connection always resolved to the provider's workdir; now the same
+ *  persisted `true` would resolve to local execution. The rule: a connection with its own workdir
  *  keeps it, and a model there that cannot use it runs nothing rather than falling back to the
- *  user's machine. LAiM's local tools are for connections with no sandbox at all. */
+ *  user's machine. LAiM's local tools are for connections with no workdir at all. */
 
 export interface CodeToolPlacementInput {
   /** The composer's Tools pill (persisted as LAiM_chat_code_tools_enabled). */
   codeToolsEnabled: boolean;
-  /** This provider AND this model expose the provider's own code sandbox. */
+  /** This provider AND this model expose the provider's own code workdir. */
   hostedCodeExecutionForThisTurn: boolean;
-  /** This provider type ships a code sandbox at all, model aside. */
+  /** This provider type ships a code workdir at all, model aside. */
   providerHostsCodeExecution: boolean;
 }
 
@@ -31,7 +31,7 @@ export function selectCodeToolNames(input: CodeToolPlacementInput): CodeToolName
   if (!input.codeToolsEnabled) return { local: [], hosted: [] };
   if (input.hostedCodeExecutionForThisTurn) return { local: [], hosted: ["code_execution"] };
   if (input.providerHostsCodeExecution) return { local: [], hosted: [] };
-  // edit_file is local-only: when the provider hosts execution the files live in its sandbox, so a
+  // edit_file is local-only: when the provider hosts execution the files live in its workdir, so a
   // local editor would patch a copy nothing else sees.
   return { local: ["python", "terminal", "edit_file", "view_image"], hosted: [] };
 }
@@ -39,7 +39,7 @@ export function selectCodeToolNames(input: CodeToolPlacementInput): CodeToolName
 /** Whether the Tools pill can do anything on this connection, so the composer can offer it and a
  *  stored preference can be restored. Read out of the placement itself rather than restated,
  *  because the two must not drift: a pill offered where the placement runs nothing is a toggle
- *  the user turns on to no effect. That is the case for a model on a sandbox-owning provider
+ *  the user turns on to no effect. That is the case for a model on a workdir-owning provider
  *  that cannot use it. */
 export function codeToolCanRun(input: {
   hostedCodeExecutionForThisTurn: boolean;

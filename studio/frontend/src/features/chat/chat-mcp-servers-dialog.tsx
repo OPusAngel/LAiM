@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   Delete02Icon,
   Edit03Icon,
@@ -241,12 +242,12 @@ function ArgumentsEditor({
           disabled={disabled}
         >
           <HugeiconsIcon icon={PlusSignIcon} className="size-3.5" />
-          Add argument
+          {translate("uxChat.addArgument16h50")}
         </Button>
       </div>
       {rows.length === 0 ? (
         <div className="text-xs text-muted-foreground">
-          Optional. Each row is one argument; row order is preserved.
+          {translate("uxChat.optionalEachRowIs12hga")}
         </div>
       ) : (
         <div className="flex flex-col gap-2">
@@ -256,7 +257,7 @@ function ArgumentsEditor({
                 data-reload-snapshot-sensitive={true}
                 value={row.value}
                 disabled={disabled}
-                aria-label={`Argument ${index + 1}`}
+                aria-label={translate("uxChat.argumentgx8od", { p1: index + 1 })}
                 placeholder={index === 0 ? "e.g. -y" : undefined}
                 onChange={(event) => update(row.id, event.target.value)}
               />
@@ -266,7 +267,7 @@ function ArgumentsEditor({
                 size="icon"
                 onClick={() => remove(row.id)}
                 disabled={disabled}
-                aria-label={`Remove argument ${index + 1}`}
+                aria-label={translate("uxChat.removeArgumentw5jye", { p1: index + 1 })}
               >
                 <HugeiconsIcon icon={Delete02Icon} className="size-3.5" />
               </Button>
@@ -297,18 +298,18 @@ function HeadersEditor({
 
   const copy = stdio
     ? {
-        label: "Environment variables",
-        add: "Add variable",
-        keyPlaceholder: "Variable name",
-        valuePlaceholder: "Variable value",
-        remove: "Remove variable",
+        label: translate("uxRecipestudio.environmentVariables17826"),
+        add: translate("uxChat.addVariablej6c6o"),
+        get keyPlaceholder() { return translate("uxChat.variableName3gm3z"); },
+        get valuePlaceholder() { return translate("uxChat.variableValue1op79"); },
+        get remove() { return translate("uxChat.removeVariable5au4j"); },
       }
     : {
-        label: "Custom headers",
-        add: "Add header",
-        keyPlaceholder: "Header name",
-        valuePlaceholder: "Header value",
-        remove: "Remove header",
+        label: translate("uxChat.customHeaders15xry"),
+        add: translate("uxChat.addHeadertpu1f"),
+        get keyPlaceholder() { return translate("uxChat.headerName7z1w7"); },
+        get valuePlaceholder() { return translate("uxChat.headerValue2uksb"); },
+        get remove() { return translate("uxChat.removeHeaderq6d55"); },
       };
 
   return (
@@ -329,12 +330,9 @@ function HeadersEditor({
       {rows.length === 0 ? (
         <div className="text-xs text-muted-foreground">
           {stdio ? (
-            "Optional. Environment variables passed to the server process."
+            translate("uxChat.optionalEnvironmentVariablesPassenp1y")
           ) : (
-            <>
-              Optional. Add an <code>Authorization</code> header here for
-              servers that require auth.
-            </>
+            <>{translate("uxChat.optionalAddAnw0z3b")}<code>Authorization</code>{translate("uxChat.headerHereForServers049ov")}</>
           )}
         </div>
       ) : (
@@ -454,7 +452,7 @@ export function ChatMcpServersDialog({
       } catch (err) {
         if (listRefreshGenerationRef.current !== generation || !openRef.current)
           return;
-        toast.error("Failed to load MCP servers", {
+        toast.error(translate("uxChat.failedToLoadMCP1bd4k"), {
           description: err instanceof Error ? err.message : String(err),
         });
       } finally {
@@ -522,12 +520,12 @@ export function ChatMcpServersDialog({
   function oauthSecretPlaceholder(): string {
     const saved =
       view.kind === "edit" ? servers.find((s) => s.id === view.id) : undefined;
-    if (!saved?.has_oauth_client_secret) return "Optional client secret";
+    if (!saved?.has_oauth_client_secret) return translate("uxChat.optionalClientSecret3jkze");
     // The backend drops the stored secret when the client ID or URL changes.
     return form.url.trim() === saved.url &&
       form.oauthClientId.trim() === (saved.oauth_client_id ?? "")
-      ? "Leave blank to keep the stored secret"
-      : "Re-enter the secret: a new client ID or URL clears the stored one";
+      ? translate("uxChat.leaveBlankToKeepweene")
+      : translate("uxChat.reEnterTheSecretvxlhs");
   }
 
   async function startEdit(server: McpServerConfig) {
@@ -594,7 +592,7 @@ export function ChatMcpServersDialog({
       }
       const message = err instanceof Error ? err.message : String(err);
       setCodecError(message);
-      toast.error("Failed to read local command", { description: message });
+      toast.error(translate("uxChat.failedToReadLocal1qxh9"), { description: message });
     } finally {
       if (
         formGenerationRef.current === generation &&
@@ -656,12 +654,12 @@ export function ChatMcpServersDialog({
 
   async function testConnection() {
     if (!form.url.trim() || form.transport === "unknown") {
-      toast.error("Enter an http(s):// URL or a local command first");
+      toast.error(translate("uxChat.enterAnHttpSnrcw6"));
       return;
     }
     const stdio = form.transport === "stdio";
     if (!stdio && !isValidAddress(form.url)) {
-      toast.error("Enter an http(s):// URL or a local command first");
+      toast.error(translate("uxChat.enterAnHttpSnrcw6"));
       return;
     }
     const generation = formGenerationRef.current;
@@ -684,16 +682,18 @@ export function ChatMcpServersDialog({
       if (formGenerationRef.current !== generation) return;
       if (result.ok) {
         toast.success(
-          `Connected (${result.tool_count} tool${result.tool_count === 1 ? "" : "s"})`,
+          translate("uxChat.connectedToolCountX47jr", {
+            p1: result.tool_count,
+          }),
         );
       } else {
-        toast.error("Connection failed", {
-          description: result.error ?? "Unknown error",
+        toast.error(translate("uxChat.connectionFailed1zoa0"), {
+          description: result.error ?? translate("uxChat.unknownErrorb575w"),
         });
       }
     } catch (err) {
       if (formGenerationRef.current !== generation) return;
-      toast.error("Connection test failed", {
+      toast.error(translate("uxChat.connectionTestFailed1bj5h"), {
         description: err instanceof Error ? err.message : String(err),
       });
     } finally {
@@ -704,16 +704,16 @@ export function ChatMcpServersDialog({
   async function submitForm() {
     const trimmedName = form.displayName.trim();
     if (!trimmedName) {
-      toast.error("Display name is required");
+      toast.error(translate("uxChat.displayNameIsRequired1e3h5"));
       return;
     }
     if (!form.url.trim() || form.transport === "unknown") {
-      toast.error("URL or command is required");
+      toast.error(translate("uxChat.uRLOrCommandIs0eata"));
       return;
     }
     const stdio = form.transport === "stdio";
     if (!stdio && !isValidAddress(form.url)) {
-      toast.error("Enter an http(s):// URL or a local command");
+      toast.error(translate("uxChat.enterAnHttpS1xl3b"));
       return;
     }
     const generation = formGenerationRef.current;
@@ -754,7 +754,7 @@ export function ChatMcpServersDialog({
           ),
         });
         if (formGenerationRef.current !== generation) return;
-        toast.success("MCP server updated");
+        toast.success(translate("uxChat.mCPServerUpdatedspwh7"));
       } else {
         if (url === undefined) return;
         await createMcpServer({
@@ -764,13 +764,13 @@ export function ChatMcpServersDialog({
           ...oauthPayload(form, stdio),
         });
         if (formGenerationRef.current !== generation) return;
-        toast.success("MCP server added");
+        toast.success(translate("uxChat.mCPServerAdded1ogzq"));
       }
       if (formGenerationRef.current !== generation) return;
       cancelForm();
     } catch (err) {
       if (formGenerationRef.current !== generation) return;
-      toast.error("Save failed", {
+      toast.error(translate("uxChat.saveFailed1t4oz"), {
         description: err instanceof Error ? err.message : String(err),
       });
     } finally {
@@ -793,7 +793,7 @@ export function ChatMcpServersDialog({
         config = JSON.parse(await file.text());
       } catch {
         if (actionGenerationRef.current === generation && openRef.current)
-          toast.error("Invalid JSON file");
+          toast.error(translate("uxChat.invalidJSONFilesqlve"));
         return;
       }
       if (actionGenerationRef.current !== generation || !openRef.current)
@@ -823,7 +823,7 @@ export function ChatMcpServersDialog({
     } catch (err) {
       if (actionGenerationRef.current !== generation || !openRef.current)
         return;
-      toast.error("Import failed", {
+      toast.error(translate("uxChat.importFailed18e3r"), {
         description: err instanceof Error ? err.message : String(err),
       });
     } finally {
@@ -847,7 +847,7 @@ export function ChatMcpServersDialog({
     } catch (err) {
       if (actionGenerationRef.current !== generation || !openRef.current)
         return;
-      toast.error("Delete failed", {
+      toast.error(translate("uxChat.deleteFailed10vm5"), {
         description: err instanceof Error ? err.message : String(err),
       });
     } finally {
@@ -879,7 +879,7 @@ export function ChatMcpServersDialog({
           row.id === server.id ? { ...row, is_enabled: !next } : row,
         ),
       );
-      toast.error("Update failed", {
+      toast.error(translate("uxChat.updateFailed1rfq7"), {
         description: err instanceof Error ? err.message : String(err),
       });
     } finally {
@@ -905,17 +905,20 @@ export function ChatMcpServersDialog({
         return;
       if (result.ok) {
         toast.success(
-          `Refreshed "${server.display_name}" (${result.tool_count} tool${result.tool_count === 1 ? "" : "s"})`,
+          translate("uxChat.refreshedToolCountV92mq", {
+            p1: server.display_name,
+            p2: result.tool_count,
+          }),
         );
       } else {
-        toast.error(`Refresh failed for "${server.display_name}"`, {
-          description: result.error ?? "Unknown error",
+        toast.error(translate("uxChat.refreshFailedFordgq3p", { p1: server.display_name }), {
+          description: result.error ?? translate("uxChat.unknownErrorb575w"),
         });
       }
     } catch (err) {
       if (actionGenerationRef.current !== generation || !openRef.current)
         return;
-      toast.error("Refresh failed", {
+      toast.error(translate("uxChat.refreshFailedugffq"), {
         description: err instanceof Error ? err.message : String(err),
       });
     } finally {
@@ -941,9 +944,9 @@ export function ChatMcpServersDialog({
         aria-busy={decodingCommand}
       >
         <DialogHeader>
-          <DialogTitle>MCP Servers</DialogTitle>
+          <DialogTitle>{translate("uxChat.mCPServersz3du2")}</DialogTitle>
           <DialogDescription>
-            Register remote (HTTP) or local (stdio command) MCP servers.
+            {translate("uxChat.registerRemoteHTTPOr19ffk")}
           </DialogDescription>
         </DialogHeader>
         <input
@@ -960,7 +963,7 @@ export function ChatMcpServersDialog({
             {view.kind === "create" && (
               <div className="flex items-center justify-between gap-3 rounded-md border border-dashed px-3 py-2">
                 <span className="text-xs text-muted-foreground">
-                  Import servers from a config file.
+                  {translate("uxChat.importServersFromAmk5wp")}
                 </span>
                 <Button
                   type="button"
@@ -969,7 +972,7 @@ export function ChatMcpServersDialog({
                   className="shrink-0"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={importing || formPending}
-                  title="Import servers from a mcpServers JSON config (Claude Desktop, Cursor, VS Code…)"
+                  title={translate("uxChat.importServersFromAv7pyu")}
                 >
                   {importing ? <Spinner /> : <UploadIcon className="size-3.5" />}
                   Import config
@@ -977,7 +980,7 @@ export function ChatMcpServersDialog({
               </div>
             )}
             <div className="grid gap-2">
-              <Label htmlFor="mcp-display-name">Display name</Label>
+              <Label htmlFor="mcp-display-name">{translate("uxChat.displayNamezm3o1")}</Label>
               <Input
                 id="mcp-display-name"
                 value={form.displayName}
@@ -985,7 +988,7 @@ export function ChatMcpServersDialog({
                 onChange={(e) =>
                   setForm((prev) => ({ ...prev, displayName: e.target.value }))
                 }
-                placeholder="e.g. GitHub MCP"
+                placeholder={translate("uxChat.eGGitHubMCP8ioky")}
               />
             </div>
             <div className="grid gap-2">
@@ -994,7 +997,7 @@ export function ChatMcpServersDialog({
                   ? "Executable"
                   : form.transport === "http"
                     ? "URL"
-                    : "URL or executable"}
+                    : translate("uxChat.uRLOrExecutablef8aog")}
               </Label>
               <Input
                 id="mcp-url"
@@ -1022,10 +1025,10 @@ export function ChatMcpServersDialog({
               />
               <span className="text-xs text-muted-foreground">
                 {addressIsCommand
-                  ? "The executable for a local stdio server. Add each local argument in an Arguments row below."
+                  ? translate("uxChat.theExecutableForAb6lyw")
                   : form.transport === "http"
-                    ? "An http(s) URL for a remote server."
-                    : "An http(s) URL for a remote server, or an executable for local stdio. Add local arguments in the Arguments rows."}
+                    ? translate("uxChat.anHttpSURL1m7r3")
+                    : translate("uxChat.anHttpSURLi14kr")}
               </span>
               {decodingCommand && (
                 <span
@@ -1033,9 +1036,7 @@ export function ChatMcpServersDialog({
                   aria-live="polite"
                   className="flex items-center gap-2 text-xs text-muted-foreground"
                 >
-                  <Spinner />
-                  Reading local command…
-                </span>
+                  <Spinner />{translate("uxChat.readingLocalCommandsnaz8")}</span>
               )}
             </div>
 
@@ -1081,12 +1082,10 @@ export function ChatMcpServersDialog({
               <div className="flex items-start justify-between gap-3">
                 <div className="flex flex-col gap-0.5">
                   <Label className="text-sm" htmlFor="mcp-oauth">
-                    Use OAuth sign-in
+                    {translate("uxChat.useOAuthSignIn1y99o")}
                   </Label>
                   <span className="text-xs text-muted-foreground">
-                    For servers that require browser-based authentication
-                    (GitHub, Linear, etc.). A browser window will open on first
-                    connect.
+                    {translate("uxCopy.forServersThatRequirexa8mq")}
                   </span>
                 </div>
                 <Switch
@@ -1103,7 +1102,7 @@ export function ChatMcpServersDialog({
             {form.transport === "http" && form.useOauth && (
               <div className="grid gap-3 rounded-md border p-3">
                 <div className="grid gap-2">
-                  <Label htmlFor="mcp-oauth-client-id">OAuth client ID</Label>
+                  <Label htmlFor="mcp-oauth-client-id">{translate("uxChat.oAuthClientID2x2v0")}</Label>
                   <Input
                     id="mcp-oauth-client-id"
                     value={form.oauthClientId}
@@ -1113,13 +1112,11 @@ export function ChatMcpServersDialog({
                         oauthClientId: e.target.value,
                       }))
                     }
-                    placeholder="Optional pre-registered client ID"
+                    placeholder={translate("uxChat.optionalPreRegisteredClient1pes0")}
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="mcp-oauth-client-secret">
-                    OAuth client secret
-                  </Label>
+                  <Label htmlFor="mcp-oauth-client-secret">{translate("uxChat.oAuthClientSecretr1qkp")}</Label>
                   <Input
                     id="mcp-oauth-client-secret"
                     type="password"
@@ -1195,7 +1192,7 @@ export function ChatMcpServersDialog({
                   }
                 >
                   {saving ? <Spinner /> : null}
-                  {view.kind === "edit" ? "Save changes" : "Add server"}
+                  {view.kind === "edit" ? translate("uxChat.saveChangestb1lr") : translate("uxChat.addServercv4ro")}
                 </Button>
               </div>
             </div>
@@ -1208,14 +1205,14 @@ export function ChatMcpServersDialog({
                 variant="outline"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={importing}
-                title="Import servers from a mcpServers JSON config (Claude Desktop, Cursor, VS Code…)"
+                title={translate("uxChat.importServersFromAv7pyu")}
               >
                 {importing ? <Spinner /> : <UploadIcon className="size-3.5" />}
                 Import config
               </Button>
               <Button size="sm" onClick={startCreate} disabled={importing}>
                 <HugeiconsIcon icon={PlusSignIcon} className="size-3.5" />
-                Add server
+                {translate("uxRecipestudio.addServer16t20")}
               </Button>
             </div>
             {loading ? (
@@ -1224,7 +1221,7 @@ export function ChatMcpServersDialog({
               </div>
             ) : servers.filter((server) => !server.builtin_id).length === 0 ? (
               <div className="rounded-md border border-dashed py-6 text-center text-sm text-muted-foreground">
-                No custom MCP servers configured yet.
+                {translate("uxChat.noCustomMCPServers1hewz")}
               </div>
             ) : (
               <ul className="flex flex-col divide-y rounded-md border">
@@ -1245,7 +1242,7 @@ export function ChatMcpServersDialog({
                       <Switch
                         checked={server.is_enabled}
                         onCheckedChange={(next) => toggleEnabled(server, next)}
-                        aria-label="Enable server"
+                        aria-label={translate("uxChat.enableServer1htse")}
                         disabled={importing || busyIds.has(server.id)}
                       />
                       <Button
@@ -1253,8 +1250,8 @@ export function ChatMcpServersDialog({
                         variant="ghost"
                         size="icon"
                         onClick={() => refreshTools(server)}
-                        aria-label="Refresh tools"
-                        title="Refresh tools from this server"
+                        aria-label={translate("uxChat.refreshToolsdlgvv")}
+                        title={translate("uxChat.refreshToolsFromThistaqxk")}
                         disabled={importing || busyIds.has(server.id)}
                       >
                         {refreshingIds.has(server.id) ? (
@@ -1268,7 +1265,7 @@ export function ChatMcpServersDialog({
                         variant="ghost"
                         size="icon"
                         onClick={() => void startEdit(server)}
-                        aria-label="Edit server"
+                        aria-label={translate("uxChat.editServer4kk0k")}
                         disabled={importing || busyIds.has(server.id)}
                       >
                         <HugeiconsIcon icon={Edit03Icon} className="size-3.5" />
@@ -1278,7 +1275,7 @@ export function ChatMcpServersDialog({
                         variant="ghost"
                         size="icon"
                         onClick={() => setConfirmingDelete(server)}
-                        aria-label="Delete server"
+                        aria-label={translate("uxChat.deleteServerm5rhl")}
                         disabled={importing || busyIds.has(server.id)}
                       >
                         <HugeiconsIcon icon={Delete02Icon} className="size-3.5" />
@@ -1299,14 +1296,12 @@ export function ChatMcpServersDialog({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete MCP server</AlertDialogTitle>
+            <AlertDialogTitle>{translate("uxChat.deleteMCPServerzrvrh")}</AlertDialogTitle>
             <AlertDialogDescription>
               Delete{" "}
               <span className="font-medium text-foreground">
                 &quot;{confirmingDelete?.display_name}&quot;
-              </span>
-              ? Its tools stop being available to chats. This cannot be undone.
-            </AlertDialogDescription>
+              </span>{translate("uxChat.itsToolsStopBeing5zhsy")}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>

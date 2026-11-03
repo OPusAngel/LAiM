@@ -8,9 +8,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { installLocalStorageFake, readSrc } from "./helpers/kit.ts";
+import { installLocalStorageFake, readSrc, readSrcExpanded } from "./helpers/kit.ts";
 
-const LOADED_MODELS_INDICATOR = readSrc(
+const LOADED_MODELS_INDICATOR = readSrcExpanded(
   "features/loaded-models/loaded-models-indicator.tsx",
 );
 
@@ -108,7 +108,7 @@ test("setting the dismissal to what it already is changes nothing", () => {
 });
 
 test("the dismissal key is cleared by Reset all local preferences", () => {
-  const generalTab = readSrc("features/settings/tabs/general-tab.tsx");
+  const generalTab = readSrcExpanded("features/settings/tabs/general-tab.tsx");
   assert.match(generalTab, /LOADED_MODELS_PREFERENCE_KEYS\.dismissed,/);
 });
 

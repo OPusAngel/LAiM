@@ -69,13 +69,13 @@ def _models(via_api_key: bool) -> TestClient:
 
 def _cached_row(**extra) -> dict:
     row = {
-        "repo_id": "LAiM/Llama-3.2-1B-Instruct",
+        "repo_id": "unsloth/Llama-3.2-1B-Instruct",
         "size_bytes": 2471234567,
         "cache_path": REPO_DIR,
         "partial": False,
         "model_format": "safetensors",
         "runtime": "transformers",
-        "load_id": "LAiM/Llama-3.2-1B-Instruct",
+        "load_id": "unsloth/Llama-3.2-1B-Instruct",
     }
     row.update(extra)
     return row
@@ -112,7 +112,7 @@ def test_redaction_keeps_every_non_path_field():
     payload = {"cached": [_cached_row()], "scan_confirmed": True}
     out = redact_host_paths(payload, via_api_key = True)
     row = out["cached"][0]
-    assert row["repo_id"] == "LAiM/Llama-3.2-1B-Instruct"
+    assert row["repo_id"] == "unsloth/Llama-3.2-1B-Instruct"
     assert row["size_bytes"] == 2471234567
     assert row["model_format"] == "safetensors"
     assert out["scan_confirmed"] is True
@@ -172,7 +172,7 @@ _DEFAULT_ROOTS = object()
         (_LOCAL_ADAPTER, ["/home/op"], True),
         (_HUB_ADAPTER, ["/home/op"], False),
         ({"load_id": f"{HOST_ROOT}/snapshots/abc"}, _DEFAULT_ROOTS, True),
-        ({"load_id": "LAiM/Llama-3.2-1B-Instruct"}, _DEFAULT_ROOTS, False),
+        ({"load_id": "unsloth/Llama-3.2-1B-Instruct"}, _DEFAULT_ROOTS, False),
         ({"load_id": "ref:0123456789abcdef"}, _DEFAULT_ROOTS, False),
     ],
 )
@@ -339,7 +339,7 @@ def _cached_inventory(monkeypatch):
         return {
             "cached": [
                 _cached_row(
-                    repo_id = "LAiM/gemma-3-270m-it-GGUF",
+                    repo_id = "unsloth/gemma-3-270m-it-GGUF",
                     model_format = "gguf",
                     cache_path = f"{HOST_ROOT}/models--LAiM--gemma-3-270m-it-GGUF",
                     load_id = f"{HOST_ROOT}/models--LAiM--gemma-3-270m-it-GGUF/snapshots/abc",
@@ -872,7 +872,7 @@ def test_every_request_that_consumes_an_inventory_identity_resolves_the_handle(
         assert getattr(resolved, field) == path, (model_name, field)
 
     # An unissued reference is left as written, so it fails like an unknown model.
-    for written in ("LAiM/Llama-3.2-1B", "ref:" + "0" * 32):
+    for written in ("unsloth/Llama-3.2-1B", "ref:" + "0" * 32):
         echoed = request_model(**{field: written for field in fields}, **extra)
         for field in fields:
             assert getattr(echoed, field) == written, (model_name, field, written)
@@ -909,16 +909,16 @@ def test_a_cache_reference_can_delete_the_copy_it_names(monkeypatch, client, rou
         assert answered.status_code == 200, answered.text
         return answered
 
-    answered = _sent(True, {"repo_id": "LAiM/Llama-3.2-1B", "cache_path": reference})
+    answered = _sent(True, {"repo_id": "unsloth/Llama-3.2-1B", "cache_path": reference})
     assert answered.json()["status"] == "deleted"
     assert seen["cache_path"] == REPO_DIR
 
     # An absent `cache_path` reaches the service as None, not as some resolved root.
-    _sent(True, {"repo_id": "LAiM/Llama-3.2-1B-Instruct", "variant": None})
+    _sent(True, {"repo_id": "unsloth/Llama-3.2-1B-Instruct", "variant": None})
     assert seen["cache_path"] is None
 
     # BOUNDARY. A browser session names the path itself, and it arrives as written.
-    _sent(False, {"repo_id": "LAiM/Llama-3.2-1B", "cache_path": REPO_DIR})
+    _sent(False, {"repo_id": "unsloth/Llama-3.2-1B", "cache_path": REPO_DIR})
     assert seen["cache_path"] == REPO_DIR
 
 
@@ -971,7 +971,7 @@ def test_a_cache_reference_lists_the_quants_of_the_copy_it_names(monkeypatch, cl
     seen.clear()
     answered = client(via_api_key = False).get(f"{route}?repo_id=LAiM/Llama-3.2-1B-GGUF")
     assert answered.status_code == 200, answered.text
-    assert seen["repo_id"] == "LAiM/Llama-3.2-1B-GGUF"
+    assert seen["repo_id"] == "unsloth/Llama-3.2-1B-GGUF"
     assert seen["local_path"] is None
 
 
@@ -984,7 +984,7 @@ def test_a_cache_row_pinned_to_a_snapshot_is_referenced_too(monkeypatch):
     monkeypatch.setattr(cache_inventory, "list_cached_models_response", _models_response)
     payload = _hub(via_api_key = True).get("/api/hub/cached-models").json()
     row = payload["cached"][0]
-    assert row["repo_id"] == "LAiM/Llama-3.2-1B-Instruct"
+    assert row["repo_id"] == "unsloth/Llama-3.2-1B-Instruct"
     assert row["load_id"].startswith("ref:"), row["load_id"]
     assert HOST_ROOT not in json.dumps(payload), payload
     assert response_leaks_host_path(payload, [HOST_ROOT]) is None
@@ -1024,7 +1024,7 @@ def test_the_handle_a_caller_sent_is_the_handle_it_gets_back():
         "display_name": path,
         "inference": {"identifier": f"{path}/snapshots/abc"},
         "warnings": [f"could not read {path}/config.json"],
-        "unrelated": "LAiM/Llama-3.2-1B",
+        "unrelated": "unsloth/Llama-3.2-1B",
     }
     restored = host_paths.restore_inventory_handles(answer)
     assert HOST_ROOT not in json.dumps(restored), restored
@@ -1032,7 +1032,7 @@ def test_the_handle_a_caller_sent_is_the_handle_it_gets_back():
     assert restored["display_name"] == reference
     assert restored["inference"]["identifier"] == f"{reference}/snapshots/abc"
     assert restored["warnings"] == [f"could not read {reference}/config.json"]
-    assert restored["unrelated"] == "LAiM/Llama-3.2-1B"
+    assert restored["unrelated"] == "unsloth/Llama-3.2-1B"
 
     # A request that named a path DIRECTLY has no handle of the caller's to give back.
     named = {"model": f"{HOST_ROOT}/models/Llama-3.2-1B"}
@@ -1238,7 +1238,7 @@ def _assert_redacted(
             {},
         ),
         (
-            {"repo_id": "LAiM/Llama-3.2-1B", "model_name": "LAiM/Llama-3.2-1B"},
+            {"repo_id": "unsloth/Llama-3.2-1B", "model_name": "unsloth/Llama-3.2-1B"},
             {"repo_id": KEPT, "model_name": KEPT},
             {},
         ),
@@ -1247,18 +1247,18 @@ def _assert_redacted(
             {"base_model": REF, "is_lora": KEPT},
             {},
         ),
-        ({"base_model": "LAiM/Llama-3.2-1B"}, {"base_model": KEPT}, {}),
+        ({"base_model": "unsloth/Llama-3.2-1B"}, {"base_model": KEPT}, {}),
         (
             {
                 "id": "run-1",
                 "dataset_name": _DATASET_PATH,
                 "local_datasets": [_DATASET_PATH],
-                "model_name": "LAiM/Llama-3.2-1B",
+                "model_name": "unsloth/Llama-3.2-1B",
             },
             {"dataset_name": REF, "model_name": KEPT},
             {"roots": ("/home/operator",)},
         ),
-        ({"id": "run-2", "dataset_name": "LAiM/Radiology-mini"}, {"dataset_name": KEPT}, {}),
+        ({"id": "run-2", "dataset_name": "unsloth/Radiology-mini"}, {"dataset_name": KEPT}, {}),
         (
             {
                 "error_message": f"FileNotFoundError: no such file: {HOST_ROOT}/data/train.jsonl",
@@ -1272,7 +1272,7 @@ def _assert_redacted(
                 "source": "models_dir",
                 "id": f"{HOST_ROOT}/models/Llama-3.2-1B",
                 "load_id": f"{HOST_ROOT}/models/Llama-3.2-1B",
-                "repo_id": "LAiM/Llama-3.2-1B",
+                "repo_id": "unsloth/Llama-3.2-1B",
             },
             {"id": REF, "load_id": REF, "repo_id": KEPT},
             {"inventory": True},
@@ -1480,7 +1480,7 @@ def test_the_metadata_route_resolves_and_answers_with_the_handle():
         assert restored["model"] == reference
         assert HOST_ROOT not in json.dumps(restored), restored
         assert resolve_inventory_handle("ref:not-one-of-ours") == "ref:not-one-of-ours"
-        assert resolve_inventory_handle("LAiM/Llama-3.2-1B") == "LAiM/Llama-3.2-1B"
+        assert resolve_inventory_handle("unsloth/Llama-3.2-1B") == "unsloth/Llama-3.2-1B"
     finally:
         host_paths._request_handles.reset(token)
 
@@ -1616,7 +1616,7 @@ def test_a_resumable_run_can_still_be_resumed_by_an_api_key_caller():
     assert detail["local_eval_datasets"][1] == "acme/hub-eval"
 
     replayed = TrainingStartRequest(
-        model_name = "LAiM/Llama-3.2-1B",
+        model_name = "unsloth/Llama-3.2-1B",
         training_type = "LoRA/QLoRA",
         format_type = "alpaca",
         local_datasets = detail["local_datasets"],
@@ -1630,7 +1630,7 @@ def test_a_resumable_run_can_still_be_resumed_by_an_api_key_caller():
     # A handle that was never issued resolves to nothing rather than somebody else's data.
     forged = "ref:" + "0" * 32
     unresumable = TrainingStartRequest(
-        model_name = "LAiM/Llama-3.2-1B",
+        model_name = "unsloth/Llama-3.2-1B",
         training_type = "LoRA/QLoRA",
         format_type = "alpaca",
         local_datasets = [forged],
@@ -1734,7 +1734,7 @@ def test_a_local_companion_base_is_referenced_not_returned(kind):
     out must resolve back to the path on the load request that takes it."""
     from models.inference import DiffusionLoadRequest, VideoLoadRequest
 
-    response = _media_status(kind)(loaded = True, repo_id = "LAiM/x", base_repo = BASE_DIR)
+    response = _media_status(kind)(loaded = True, repo_id = "unsloth/x", base_repo = BASE_DIR)
 
     api = redact_host_paths(response, via_api_key = True)
     handle = _base_repo(api)
@@ -1745,7 +1745,7 @@ def test_a_local_companion_base_is_referenced_not_returned(kind):
     assert _base_repo(redact_host_paths(response, via_api_key = False)) == BASE_DIR
 
     request_cls = {"diffusion": DiffusionLoadRequest, "video": VideoLoadRequest}[kind]
-    assert request_cls(model_path = "LAiM/x", base_repo = handle).base_repo == BASE_DIR
+    assert request_cls(model_path = "unsloth/x", base_repo = handle).base_repo == BASE_DIR
 
 
 @pytest.mark.parametrize("kind", ["diffusion", "video"])
@@ -1753,7 +1753,7 @@ def test_a_hub_companion_base_is_not_a_path_and_is_left_alone(kind):
     """BOUNDARY, and the reason this field is decided by VALUE: referencing the ordinary repo
     id would make the field useless to every caller for nothing."""
     response = _media_status(kind)(
-        loaded = True, repo_id = "LAiM/x", base_repo = "black-forest-labs/FLUX.2-klein-4B"
+        loaded = True, repo_id = "unsloth/x", base_repo = "black-forest-labs/FLUX.2-klein-4B"
     )
 
     api = redact_host_paths(response, via_api_key = True)

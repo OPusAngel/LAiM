@@ -9,6 +9,8 @@ import {
   audioModelsFromCatalog,
   chatModelsFromCatalog,
 } from "./openai-model-catalog";
+import { translate } from "@/i18n";
+
 
 export type { AudioApiModel, OpenAIModel };
 
@@ -19,7 +21,7 @@ export type { AudioApiModel, OpenAIModel };
 export async function listOpenAIModels(): Promise<OpenAIModel[]> {
   const res = await authFetch("/v1/models");
   if (!res.ok) {
-    throw new Error(`Failed to list models (${res.status})`);
+    throw new Error(translate("uxSettings.failedToListModelsdaw6m", { p1: res.status }));
   }
   return chatModelsFromCatalog(await res.json());
 }
@@ -28,7 +30,7 @@ export async function listOpenAIModels(): Promise<OpenAIModel[]> {
 export async function listOpenAIAudioModels(): Promise<AudioApiModel[]> {
   const res = await authFetch("/v1/models");
   if (!res.ok) {
-    throw new Error(`Failed to list models (${res.status})`);
+    throw new Error(translate("uxSettings.failedToListModelsdaw6m", { p1: res.status }));
   }
   return audioModelsFromCatalog(await res.json());
 }

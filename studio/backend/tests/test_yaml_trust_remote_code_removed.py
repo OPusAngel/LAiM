@@ -55,8 +55,8 @@ def test_formerly_flagged_models_load_inference_config_without_crash():
     from utils.inference import load_inference_config
     for model in (
         "tiiuae/Falcon-H1-0.5B-Instruct",
-        "LAiM/Llama-3.2-1B-Instruct",
-        "LAiM/Qwen2.5-7B",
+        "unsloth/Llama-3.2-1B-Instruct",
+        "unsloth/Qwen2.5-7B",
     ):
         cfg = load_inference_config(model)
         assert isinstance(cfg, dict)
@@ -105,10 +105,10 @@ def test_loader_defaults_trust_remote_code_off_for_formerly_flagged_models():
     # The 4 models that used to ship trust_remote_code: true must now report no default.
     from utils.models.model_config import load_model_defaults
     for model in (
-        "LAiM/GLM-4.7-Flash",
-        "LAiM/Nemotron-3-Nano-30B-A3B",
-        "LAiM/PaddleOCR-VL",
-        "LAiM/ERNIE-4.5-VL-28B-A3B-PT",
+        "unsloth/GLM-4.7-Flash",
+        "unsloth/Nemotron-3-Nano-30B-A3B",
+        "unsloth/PaddleOCR-VL",
+        "unsloth/ERNIE-4.5-VL-28B-A3B-PT",
     ):
         d = load_model_defaults(model)
         for section in ("training", "inference"):
@@ -133,9 +133,9 @@ def test_formerly_flagged_auto_map_models_still_require_consent_dialog():
     ]
     benign_py = {"modeling_x.py": "class XForCausalLM:\n    pass\n"}
     for model in (
-        "LAiM/Nemotron-3-Nano-30B-A3B",
-        "LAiM/PaddleOCR-VL",
-        "LAiM/ERNIE-4.5-VL-28B-A3B-PT",
+        "unsloth/Nemotron-3-Nano-30B-A3B",
+        "unsloth/PaddleOCR-VL",
+        "unsloth/ERNIE-4.5-VL-28B-A3B-PT",
     ):
         with (
             patch.object(consent, "_load_remote_code_configs", return_value = auto_map_cfg),
@@ -158,6 +158,6 @@ def test_no_auto_map_model_takes_no_dialog():
         consent, "_load_remote_code_configs", return_value = [{"model_type": "glm4_moe_lite"}]
     ):
         decision = preflight_remote_code_consent_for_targets(
-            ["LAiM/GLM-4.7-Flash"], hf_token = None
+            ["unsloth/GLM-4.7-Flash"], hf_token = None
         )
     assert decision.has_remote_code is False

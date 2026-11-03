@@ -27,7 +27,7 @@ RESOLVE_FIRST = os.environ.get("PW_RESOLVE_FIRST", "0") == "1"
 DIFFERENT_QUANT = os.environ.get("PW_DIFFERENT_QUANT", "0") == "1"
 SECOND_FILENAME = FILENAME.replace("Q4_K_M", "Q8_0")
 # The Z-Image-Turbo BF16 row resolves to the LAiM mirror (model-catalog.check.ts).
-SECOND = REPO_ID if LOAD_SECOND else "LAiM/Z-Image-Turbo"
+SECOND = REPO_ID if LOAD_SECOND else "unsloth/Z-Image-Turbo"
 COMPANION = "black-forest-labs/FLUX.2-klein-4B"
 ART = Path(os.environ.get("PW_ART_DIR", "logs/playwright_image_download_queue"))
 ART.mkdir(parents = True, exist_ok = True)

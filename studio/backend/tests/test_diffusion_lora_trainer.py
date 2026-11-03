@@ -219,7 +219,7 @@ def test_config_normalized_mxfp8_rejects_prequant_base():
     # A prequant (bnb-4bit) base cannot serve the dense mxfp8 base precision.
     with pytest.raises(ValueError, match = "mxfp8"):
         DiffusionLoraConfig(
-            base_model = "LAiM/Qwen-Image-2512-LAiM-bnb-4bit",
+            base_model = "unsloth/Qwen-Image-2512-unsloth-bnb-4bit",
             data_dir = "d",
             output_dir = "o",
             base_precision = "mxfp8",
@@ -447,7 +447,7 @@ def test_gradient_checkpointing_string_coercion():
     # LAiM sends a string; the disable words are False, everything else truthy True.
     for off in ("none", "None", "false", "0", "no", "off", ""):
         assert _coerce_gradient_checkpointing(off) is False
-    for on in ("true", "LAiM", "yes"):
+    for on in ("true", "unsloth", "yes"):
         assert _coerce_gradient_checkpointing(on) is True
     assert _coerce_gradient_checkpointing(True) is True
     assert _coerce_gradient_checkpointing(False) is False
@@ -467,10 +467,10 @@ def test_config_rejects_nonpositive_learning_rate():
 def test_config_rejects_untrainable_base_models():
     # GGUF checkpoints and families without a trainer must fail at normalise time (an instant 400), not inside from_pretrained.
     for bad in (
-        "LAiM/FLUX.1-dev-GGUF",
+        "unsloth/FLUX.1-dev-GGUF",
         "z-image-turbo-Q4_K_M.gguf",
         "stabilityai/stable-diffusion-3-medium",
-        "LAiM/FLUX.1-Kontext-dev",
+        "unsloth/FLUX.1-Kontext-dev",
     ):
         with pytest.raises(ValueError):
             DiffusionLoraConfig(base_model = bad, data_dir = "d", output_dir = "o").normalized()
@@ -481,7 +481,7 @@ def test_config_resolves_dit_families():
     for base, fam in (
         ("black-forest-labs/FLUX.1-dev", "flux.1"),
         ("black-forest-labs/FLUX.1-schnell", "flux.1"),
-        ("LAiM/Qwen-Image-2512-LAiM-bnb-4bit", "qwen-image"),
+        ("unsloth/Qwen-Image-2512-unsloth-bnb-4bit", "qwen-image"),
         ("Tongyi-MAI/Z-Image-Turbo", "z-image"),
     ):
         cfg = DiffusionLoraConfig(base_model = base, data_dir = "d", output_dir = "o").normalized()
@@ -641,7 +641,7 @@ def test_config_rejects_bad_lr_scheduler():
 
 def test_config_rejects_fp16_on_bf16_only_family():
     # qwen-image / z-image are bf16-only: an fp16 request must be rejected before spawn, in normalized().
-    for base in ("Tongyi-MAI/Z-Image-Turbo", "LAiM/Qwen-Image-2512-LAiM-bnb-4bit"):
+    for base in ("Tongyi-MAI/Z-Image-Turbo", "unsloth/Qwen-Image-2512-unsloth-bnb-4bit"):
         with pytest.raises(ValueError, match = "bf16"):
             DiffusionLoraConfig(
                 base_model = base, data_dir = "d", output_dir = "o", mixed_precision = "fp16"
@@ -669,7 +669,7 @@ def test_gguf_substring_does_not_reject_local_diffusers_dir(tmp_path):
         resolve_trainable_family(str(local / "weights.gguf"))
     # A *-GGUF repo id (not a local dir) still rejects.
     with pytest.raises(ValueError, match = "GGUF"):
-        resolve_trainable_family("LAiM/FLUX.1-dev-GGUF")
+        resolve_trainable_family("unsloth/FLUX.1-dev-GGUF")
 
 
 def test_sdxl_warns_when_an_unused_accelerator_leaves_it_on_the_cpu(monkeypatch, tmp_path):

@@ -3,6 +3,8 @@
 
 import { authFetch } from "@/features/auth";
 import { hubTokenHeader } from "@/features/hub";
+import { translate } from "@/i18n";
+
 
 interface VisionCheckResponse {
   model_name: string;
@@ -41,7 +43,7 @@ interface BackendTrainingDefaults {
   packing?: boolean;
   train_on_completions?: boolean;
   // Shipped YAML may decode this value as a boolean.
-  gradient_checkpointing?: "none" | "true" | "LAiM" | boolean;
+  gradient_checkpointing?: "none" | "true" | "unsloth" | boolean;
   trust_remote_code?: boolean;
 }
 
@@ -144,7 +146,7 @@ export async function checkVisionModel(
   });
   if (!response.ok) {
     throw new Error(
-      `Failed to check model vision support (${response.status})`,
+      translate("uxFeatures.failedToCheckModelsas79", { p1: response.status }),
     );
   }
   const data = (await response.json()) as VisionCheckResponse;
@@ -194,7 +196,7 @@ export async function getModelConfig(
     },
   );
   if (!response.ok) {
-    throw new Error(`Failed to fetch model config (${response.status})`);
+    throw new Error(translate("uxFeatures.failedToFetchModel8lbph", { p1: response.status }));
   }
   return (await response.json()) as ModelConfigResponse;
 }
@@ -204,7 +206,7 @@ export async function listLocalModels(
 ): Promise<LocalModelInfo[]> {
   const response = await authFetch("/api/models/local", { signal });
   if (!response.ok) {
-    throw new Error(`Failed to fetch local models (${response.status})`);
+    throw new Error(translate("uxFeatures.failedToFetchLocalpts37", { p1: response.status }));
   }
   const data = (await response.json()) as LocalModelListResponse;
   return data.models;

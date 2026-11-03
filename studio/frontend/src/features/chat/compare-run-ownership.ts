@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
+
 export type CompareRun<Model> = {
   readonly id: number;
   readonly controller: AbortController;
@@ -68,7 +70,7 @@ export class CompareRunOwnership<Model> {
 
 export function throwIfCompareCancelled(signal: AbortSignal): void {
   if (signal.aborted) {
-    throw new DOMException("Compare cancelled", "AbortError");
+    throw new DOMException(translate("uxChat.compareCancelledhihyl"), "AbortError");
   }
 }
 

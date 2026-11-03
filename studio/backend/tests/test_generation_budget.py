@@ -157,7 +157,7 @@ def _streaming_backend(monkeypatch, window = _WINDOW):
         pytest.skip(f"full inference backend unavailable ({type(exc).__name__}: {exc})")
 
     backend = InferenceBackend.__new__(InferenceBackend)
-    backend.active_model_name = "LAiM/tinyllama-chat-bnb-4bit"
+    backend.active_model_name = "unsloth/tinyllama-chat-bnb-4bit"
     backend.last_generation_stats = None
     backend._generation_lock = threading.Lock()
     model = _FakeModel(window)

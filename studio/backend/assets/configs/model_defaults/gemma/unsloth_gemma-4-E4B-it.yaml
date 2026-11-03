@@ -1,5 +1,5 @@
-# Model defaults for LAiM/gemma-4-E4B-it
-# Also applies to: google/gemma-4-E4B-it, LAiM/gemma-4-E4B-it-GGUF
+# Model defaults for unsloth/gemma-4-E4B-it
+# Also applies to: google/gemma-4-E4B-it, unsloth/gemma-4-E4B-it-GGUF
 
 training:
   max_seq_length: 2048
@@ -14,7 +14,7 @@ training:
   random_seed: 3407
   packing: false
   train_on_completions: true
-  gradient_checkpointing: "LAiM"
+  gradient_checkpointing: "unsloth"
   optim: "adamw_8bit"
   lr_scheduler_type: "linear"
 

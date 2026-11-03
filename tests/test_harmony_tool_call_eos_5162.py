@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-"""LAiMai/LAiM#5162: gpt-oss must stop on <|call|> (200012). AST-extracted, no LAiM/CUDA import."""
+"""OPusAngel/LAiM#5162: gpt-oss must stop on <|call|> (200012). AST-extracted, no LAiM/CUDA import."""
 
 import ast
 import os
@@ -97,7 +97,7 @@ def harmony_tokenizer():
 
 
 def test_the_shipped_LAiM_stop_set_gains_the_tool_call_token(ns, harmony_tokenizer):
-    """The exact list in `LAiM/gpt-oss-20b/generation_config.json` today."""
+    """The exact list in `unsloth/gpt-oss-20b/generation_config.json` today."""
     model = _Model([RETURN_ID, ENDOFTEXT_ID])
     ns["patch_harmony_tool_call_eos"](model, harmony_tokenizer)
     assert model.generation_config.eos_token_id == [RETURN_ID, ENDOFTEXT_ID, CALL_ID]

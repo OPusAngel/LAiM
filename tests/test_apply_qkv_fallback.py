@@ -82,7 +82,7 @@ def test_no_bare_instance_attribute_call(filename, attr, fallback):
     """A bare self.apply_qkv(...) is the defect; there must be none left."""
     bare = _bare_self_calls(_tree(filename), attr)
     assert bare == [], (
-        f"LAiM/models/{filename} calls self.{attr}(...) with no fallback at "
+        f"unsloth/models/{filename} calls self.{attr}(...) with no fallback at "
         f"line(s) {bare}; use getattr(self, {attr!r}, {fallback}) so an instance that "
         "never reached the loader's attach step still resolves (LAiM#1713, LAiM#2587)"
     )
@@ -95,7 +95,7 @@ def test_call_site_uses_the_module_level_fallback(filename, attr, fallback):
     calls = _fallback_calls(_tree(filename), attr, fallback)
     assert (
         calls
-    ), f"LAiM/models/{filename} has no getattr(self, {attr!r}, {fallback})(...) call site"
+    ), f"unsloth/models/{filename} has no getattr(self, {attr!r}, {fallback})(...) call site"
 
 
 @pytest.mark.parametrize("filename", SIBLING_FILES)
@@ -112,7 +112,7 @@ def test_sibling_files_import_the_fallback_explicitly(filename, attr, fallback):
         for alias in node.names
     }
     assert fallback in imported, (
-        f"LAiM/models/{filename} must carry an explicit `from .llama import {fallback}`; "
+        f"unsloth/models/{filename} must carry an explicit `from .llama import {fallback}`; "
         f"found {sorted(imported)}"
     )
 
@@ -215,7 +215,7 @@ def test_apply_qkv_fallback_end_to_end():
 
     from LAiM import FastLanguageModel
 
-    model_name = "LAiM/Llama-3.2-1B-Instruct"
+    model_name = "unsloth/Llama-3.2-1B-Instruct"
     model, _tokenizer = FastLanguageModel.from_pretrained(
         model_name,
         max_seq_length = 512,

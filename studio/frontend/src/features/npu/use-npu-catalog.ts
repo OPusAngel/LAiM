@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { toast } from "@/lib/toast";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -78,7 +79,7 @@ export function useNpuCatalog(
       onStatusChange(await enableNpu());
       await refreshNpuModels();
     } catch (error) {
-      toast.error("Could not enable the NPU", {
+      toast.error(translate("uxFeatures.couldNotEnableThe6onkm"), {
         description: error instanceof Error ? error.message : String(error),
       });
       await getNpuStatus().then(onStatusChange, () => undefined);

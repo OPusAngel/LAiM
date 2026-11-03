@@ -2,12 +2,15 @@
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import type { CpuFallbackReason, MmprojFallbackReason } from "../types/api";
+import { translate } from "@/i18n";
+
 
 /** Said when the whole model, not just the projector, ended up on the CPU. Here rather than
  *  duplicated in chat-adapter.ts and use-chat-model-runtime.ts, so the two load paths cannot
  *  describe the same condition differently. */
-export const CPU_FALLBACK_MESSAGE =
-  "The auto-selected Vulkan backend crashed during startup, so GPU acceleration is disabled for this model session.";
+export function cpuFallbackMessage(): string {
+  return translate("uxChat.vulkanCrashedGpuDisabledM73cx");
+}
 
 const MMPROJ_FALLBACK_MESSAGES: Record<MmprojFallbackReason, string> = {
   // Three routes reach this one placement: the fit estimate predicting the projector will not fit
@@ -15,12 +18,9 @@ const MMPROJ_FALLBACK_MESSAGES: Record<MmprojFallbackReason, string> = {
   // diagnostic. So the message names the outcome and no cause. "Could not start on the GPU" is
   // untrue of the predicted route, and "does not fit in VRAM" is worse than vague for the crash
   // routes, since it sends someone with a broken GPU runtime off to cut context.
-  cpu_offload:
-    "LAiM is running the vision projector in system memory rather than on the GPU. Image input remains available, but image processing may be slower.",
-  projector_incompatible:
-    "The vision projector is incompatible with the installed llama.cpp build, so LAiM reloaded this model in text-only mode. Update LAiM, then reload the model to restore image input.",
-  projector_startup_failure:
-    "The vision projector could not start on the GPU or CPU, so LAiM reloaded this model in text-only mode. Free memory or check the GPU logs, then reload the model to restore image input.",
+  get cpu_offload() { return translate("uxChat.lAiMIsRunningThethz0q"); },
+  get projector_incompatible() { return translate("uxChat.theVisionProjectorIsol428"); },
+  get projector_startup_failure() { return translate("uxChat.theVisionProjectorCouldjj2t1"); },
 };
 
 export function isTextOnlyMmprojFallback(
@@ -43,8 +43,8 @@ export function mmprojLoadNotice(
   return {
     title:
       reason === "cpu_offload"
-        ? `${modelName} loaded with vision on CPU`
-        : `${modelName} loaded without vision`,
+        ? translate("uxChat.loadedWithVisionOnCpuT25bg", { p1: modelName })
+        : translate("uxChat.loadedWithoutVisionD91ys", { p1: modelName }),
     description: mmprojFallbackMessage(reason),
   };
 }
@@ -70,23 +70,23 @@ export function loadFallbackNotice(
   // entirely is a different fact and is always said.
   let suffix = "";
   if (cpuFallbackReason && textOnly) {
-    suffix = " on CPU, without vision";
+    suffix = translate("uxChat.onCpuWithoutVisionF38hn");
   } else if (cpuFallbackReason) {
-    suffix = " on CPU";
+    suffix = translate("uxChat.onCpuU58fa");
   } else if (offload) {
     suffix = textOnly
-      ? `${offload.titleSuffix}, without vision`
+      ? translate("uxChat.commaWithoutVisionS57dk", { p1: offload.titleSuffix })
       : offload.titleSuffix;
   } else if (mmprojFallbackReason === "cpu_offload") {
-    suffix = " with vision on CPU";
+    suffix = translate("uxChat.withVisionOnCpuJ62wp");
   } else if (textOnly) {
-    suffix = " without vision";
+    suffix = translate("uxChat.withoutVisionQ84lz");
   }
 
   // Both sentences, CPU first: it is the broader condition, and the projector sentence reads as a detail under it.
   const parts: string[] = [];
   if (cpuFallbackReason) {
-    parts.push(CPU_FALLBACK_MESSAGE);
+    parts.push(cpuFallbackMessage());
   }
   if (offload) {
     parts.push(offload.description);

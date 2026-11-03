@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -54,7 +55,7 @@ function ProjectWorkingFolder({ project }: { project: ProjectRecord }) {
       const saved = await setChatProjectWorkingFolder(project.id, lease);
       setFolder(saved.workingFolder ?? null);
     } catch (err) {
-      toast.error("Could not change the project folder", {
+      toast.error(translate("uxChat.couldNotChangeThe1vqxj"), {
         description: err instanceof Error ? err.message : undefined,
       });
     } finally {
@@ -68,7 +69,7 @@ function ProjectWorkingFolder({ project }: { project: ProjectRecord }) {
       const selected = await pickNativeDocumentFolder();
       if (selected) await apply(selected.token);
     } catch (err) {
-      toast.error("Could not open folder", {
+      toast.error(translate("uxChat.couldNotOpenFolder1831p"), {
         description: err instanceof Error ? err.message : undefined,
       });
     }
@@ -76,9 +77,9 @@ function ProjectWorkingFolder({ project }: { project: ProjectRecord }) {
 
   return (
     <div className="flex flex-col gap-1.5">
-      <h3 className="text-ui-15 font-medium text-foreground">Working folder</h3>
+      <h3 className="text-ui-15 font-medium text-foreground">{translate("uxChat.workingFoldersze06")}</h3>
       <p className="text-ui-13 text-muted-foreground">
-        Where code and file tools run for every chat in this project.
+        {translate("uxChat.whereCodeAndFileml7bn")}
       </p>
       <div className="mt-0.5 flex items-center gap-2 rounded-[16px] border border-border px-3 py-2">
         <span
@@ -95,7 +96,7 @@ function ProjectWorkingFolder({ project }: { project: ProjectRecord }) {
             disabled={busy}
             onClick={() => void apply(null)}
           >
-            Use managed folder
+            {translate("uxCopy.useManagedFolder1qbby")}
           </Button>
         )}
         <Button
@@ -105,7 +106,7 @@ function ProjectWorkingFolder({ project }: { project: ProjectRecord }) {
           disabled={busy}
           onClick={() => void choose()}
         >
-          {folder ? "Change…" : "Choose folder…"}
+          {folder ? "Change…" : translate("uxChat.chooseFolderwg9xh")}
         </Button>
       </div>
     </div>
@@ -177,7 +178,7 @@ export function EditProjectDialog({
       }
       onOpenChange(false);
     } catch (err) {
-      toast.error("Failed to save project", {
+      toast.error(translate("uxChat.failedToSaveProject1yvjw"), {
         description: err instanceof Error ? err.message : undefined,
       });
     } finally {
@@ -213,10 +214,9 @@ export function EditProjectDialog({
         }}
       >
         <DialogHeader>
-          <DialogTitle className="text-ui-21">Edit project</DialogTitle>
+          <DialogTitle className="text-ui-21">{translate("uxChat.editProjectsxd8p")}</DialogTitle>
           <DialogDescription className="sr-only">
-            Rename this project, set the instructions its chats follow, and manage the local
-            folders it indexes.
+            {translate("uxCopy.renameThisProjectSetrkwuh")}
           </DialogDescription>
         </DialogHeader>
         {/* The same name field the create dialog uses. */}
@@ -253,8 +253,8 @@ export function EditProjectDialog({
             autoFocus={true}
             disabled={busy}
             maxLength={120}
-            placeholder="Project name"
-            aria-label="Project name"
+            placeholder={translate("uxChat.projectName39ba3")}
+            aria-label={translate("uxChat.projectName39ba3")}
             className="min-w-0 flex-1 bg-transparent py-4 pr-4 pl-2.5 text-base outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed"
           />
         </div>
@@ -266,7 +266,7 @@ export function EditProjectDialog({
             Instructions
           </label>
           <p className="text-ui-13 text-muted-foreground">
-            Sent with every chat in this project, ahead of the conversation.
+            {translate("uxChat.sentWithEveryChat1eqmq")}
           </p>
           <Textarea
             id="edit-project-instructions"
@@ -274,7 +274,7 @@ export function EditProjectDialog({
             onChange={(e) => setInstructions(e.target.value)}
             disabled={busy}
             rows={4}
-            placeholder="How should the model answer in this project?"
+            placeholder={translate("uxChat.howShouldTheModel1h03h")}
             className="mt-0.5 resize-none rounded-[16px]"
           />
         </div>
@@ -282,10 +282,10 @@ export function EditProjectDialog({
         {/* The Sources tab's own manager, so a folder linked here is linked there. */}
         <div className="flex flex-col gap-1.5">
           <h3 className="text-ui-15 font-medium text-foreground">
-            Source folders
+            {translate("uxChat.sourceFolders184cs")}
           </h3>
           <p className="text-ui-13 text-muted-foreground">
-            Indexed and kept in sync, for every chat in this project to search.
+            {translate("uxChat.indexedAndKeptInuu62s")}
           </p>
           <div className="mt-0.5">
             <LinkedFoldersManager
@@ -303,9 +303,7 @@ export function EditProjectDialog({
               onOpenChange(false);
               onDelete(project);
             }}
-          >
-            Delete project
-          </Button>
+          >{translate("uxChat.deleteProjectxr5do")}</Button>
           <span className="flex flex-wrap gap-2">
             <Button
               type="button"

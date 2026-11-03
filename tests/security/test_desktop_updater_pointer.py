@@ -14,7 +14,7 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parents[2]
 UPDATER_WORKFLOW = REPO_ROOT / ".github" / "workflows" / "publish-desktop-updater.yml"
 
-REPOSITORY = "LAiMai/LAiM"
+REPOSITORY = "OPusAngel/LAiM"
 STEP_NAME = "Restore latest complete Desktop release"
 GATE_NAME = "Check for desktop bundles"
 SUFFIXES = ("MacOS.dmg", "Linux.AppImage", "Ubuntu.deb", "Windows.exe")

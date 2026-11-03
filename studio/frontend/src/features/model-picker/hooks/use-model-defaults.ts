@@ -5,6 +5,8 @@ import { useHfTokenStore, useInventoryVersion } from "@/features/hub";
 import { useEffect, useState } from "react";
 import { fetchModelMaxPositionEmbeddings } from "../api/model-metadata";
 import { fetchDefaultChatTemplate } from "../api/templates";
+import { translate } from "@/i18n";
+
 
 export interface DefaultChatTemplateState {
   template: string | null;
@@ -99,7 +101,7 @@ export function useDefaultChatTemplate(
             template: null,
             loading: false,
             error:
-              err instanceof Error ? err.message : "Failed to load template",
+              err instanceof Error ? err.message : translate("uxModelpicker.failedToLoadTemplates2zxe"),
           },
         });
       });
@@ -164,7 +166,7 @@ export function useModelMaxPositionEmbeddings(
             error:
               err instanceof Error
                 ? err.message
-                : "Failed to load model metadata",
+                : translate("uxModelpicker.failedToLoadModelbhru7"),
           },
         });
       });

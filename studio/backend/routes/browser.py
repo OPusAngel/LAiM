@@ -15,7 +15,9 @@ import hashlib
 import hmac
 import html as _html
 import json
+import os
 import re
+import stat
 import threading
 import time
 from collections import OrderedDict
@@ -24,7 +26,7 @@ from typing import Literal, Optional
 from urllib.parse import quote, urljoin, urlsplit
 
 from fastapi import APIRouter, Depends, HTTPException, Request
-from fastapi.responses import Response
+from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel, Field
 
 from auth.authentication import get_current_subject
@@ -56,6 +58,9 @@ EXPOSED_HEADERS = (KIND_HEADER, URL_HEADER, NAME_HEADER)
 _MAX_BROWSER_FETCH_BYTES = 50 * 1024 * 1024
 # HTML goes into srcdoc and the page cache; more would stall the renderer.
 _MAX_BROWSER_HTML_BYTES = 10 * 1024 * 1024
+# Backstop for /local-file: the panel's own cap (32 MB) is what the model normally meets; this only
+# stops a direct caller asking the one route that reads the disk for a pathological whole-file stream.
+_MAX_LOCAL_FILE_BYTES = 128 * 1024 * 1024
 _FETCH_TIMEOUT_S = 25
 _MAX_REFRESH_DELAY_S = 10
 _BROWSER_UA = _USER_AGENTS[1]
@@ -2168,3 +2173,43 @@ async def browser_annotate_script():
             "X-Content-Type-Options": "nosniff",
         },
     )
+
+
+@router.get("/local-file", include_in_schema = False)
+async def browser_local_file(
+    path: str,
+    current_subject: str = Depends(get_current_subject),
+):
+    """The bytes of one file on this machine, for the browser agent to put into a page's file field.
+
+    This is the only route that reads the disk for an upload, and it is the one place a path is judged
+    (the panel does not re-check it; a path refused here is refused outright). Only the panel reaches it,
+    and only with the user's own credential: a page in the framed sandbox is held off by its ``connect-src``
+    (no ``http://127.0.0.1``) and by the desktop CORS lockdown, and the executor asks the user before any
+    file is sent. So no remote page can read the disk here, and a file leaves the machine only when the
+    user says so.
+
+    A ``HEAD`` gives the length (the panel reads it, then pulls the file in ``Range`` pieces to fit the
+    agent's command cap); ``FileResponse`` serves both, and 416s a range past the end. Only a regular
+    file is served -- a directory, a socket, or anything unreadable is refused as though absent."""
+    try:
+        info = os.stat(path)
+    except (OSError, ValueError):
+        raise HTTPException(status_code = 404, detail = "No such file.")
+    if not stat.S_ISREG(info.st_mode):
+        raise HTTPException(status_code = 404, detail = "Not a file.")
+    if info.st_size > _MAX_LOCAL_FILE_BYTES:
+        raise HTTPException(status_code = 413, detail = "File too large.")
+    if not os.access(path, os.R_OK):
+        raise HTTPException(status_code = 403, detail = "Cannot read that file.")
+    return FileResponse(
+        path = path,
+        media_type = "application/octet-stream",
+        headers = {
+            # Read as bytes by the panel, never rendered here: no sniffing, nothing cached off the run.
+            "Cache-Control": "no-store",
+            "X-Content-Type-Options": "nosniff",
+            "Referrer-Policy": "no-referrer",
+        },
+    )
+

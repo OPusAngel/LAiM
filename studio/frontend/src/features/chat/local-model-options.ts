@@ -3,6 +3,8 @@
 
 import type { LocalModelInfo } from "@/features/hub";
 import type { LoraModelOption } from "@/features/model-picker";
+import { translate } from "@/i18n";
+
 
 /** The device-inventory sources Chat lists as local models, deliberately the same set as the
  *  picker's `PICKER_LOCAL_SOURCES`. `/api/hub/local` scans read-only, so an Ollama row's id is an
@@ -28,9 +30,9 @@ function baseModelLabel(source: LocalModelInfo["source"]): string {
     case "hermes":
       return "Hermes";
     case "custom":
-      return "Custom Folders";
+      return translate("uxChat.customFolderscu3jj");
     default:
-      return "Local models";
+      return translate("uxChat.localModelsodaoo");
   }
 }
 

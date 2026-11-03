@@ -272,9 +272,9 @@ def _handle_load(backend, cmd: dict, resp_queue: Any) -> None:
         _cp_lower = checkpoint_path.lower()
         if (
             any(sub in _cp_lower for sub in _NEMOTRON_TRUST_SUBSTRINGS)
-            and (_cp_lower.startswith("LAiM/") or _cp_lower.startswith("nvidia/"))
+            and (_cp_lower.startswith("unsloth/") or _cp_lower.startswith("nvidia/"))
             # Genuine first-party Hub repo only (not a local/spoof name starting
-            # with "LAiM/"); authenticated so private repos resolve.
+            # with "unsloth/"); authenticated so private repos resolve.
             and is_trusted_org_repo(checkpoint_path, hf_token = hf_token)
         ):
             trust_remote_code = True

@@ -71,7 +71,7 @@ def _nb(*sources):
     }
 
 
-GEMMA4_12B = 'model, tok = FastModel.from_pretrained("LAiM/gemma-4-12b-it")\n'
+GEMMA4_12B = 'model, tok = FastModel.from_pretrained("unsloth/gemma-4-12b-it")\n'
 
 
 @pytest.mark.parametrize(
@@ -106,7 +106,7 @@ GEMMA4_12B = 'model, tok = FastModel.from_pretrained("LAiM/gemma-4-12b-it")\n'
 def test_a_mention_that_installs_nothing_is_not_a_pin(run_mod, cell):
     pin, model = run_mod._scan(_nb(cell, GEMMA4_12B))
     assert pin is None, f"{pin!r} came from text that never runs an install"
-    assert model == "LAiM/gemma-4-12b-it"
+    assert model == "unsloth/gemma-4-12b-it"
 
 
 @pytest.mark.parametrize(
@@ -129,7 +129,7 @@ def test_a_mention_that_installs_nothing_is_not_a_pin(run_mod, cell):
         pytest.param(
             "!uv pip install -qqq \\\n"
             '    {_torch} "triton>=3.3.0" {_numpy} torchvision bitsandbytes "transformers==4.56.2" \\\n'
-            '    "LAiM[base] @ git+https://github.com/LAiMai/LAiM"\n',
+            '    "LAiM[base] @ git+https://github.com/OPusAngel/LAiM"\n',
             "4.56.2",
             id = "backslash-continuation",
         ),
@@ -151,7 +151,7 @@ def test_real_install_shapes_still_yield_their_pin(run_mod, cell, expected):
 
 def test_an_install_still_outranks_the_model_tier(run_mod):
     pin, model = run_mod._scan(_nb("!pip install transformers==5.5.0\n", GEMMA4_12B))
-    assert (pin, model) == ("5.5.0", "LAiM/gemma-4-12b-it")
+    assert (pin, model) == ("5.5.0", "unsloth/gemma-4-12b-it")
 
 
 def _launch(run_mod, monkeypatch, tmp_path, nb, name):

@@ -249,7 +249,7 @@ def test_save_publishes_the_deferred_names_back_over_its_own_shims():
     """Without the publish-back, `inspect.signature` would read `(*args, **kwargs)`."""
     source = (_ROOT / "LAiM" / "save.py").read_text(encoding = "utf-8")
     assert "_LAiM_deferred_shim" in source, (
-        "LAiM/save.py no longer publishes the deferred names back to LAiM.models, so "
+        "unsloth/save.py no longer publishes the deferred names back to LAiM.models, so "
         "the shims stay visible after import"
     )
     for module_name in (

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -171,10 +172,7 @@ function modelDisplayName(modelName?: string): string {
 function ProviderSuffix({ provider }: { provider: string | null }) {
   if (!provider) return null;
   return (
-    <>
-      {" "}
-      from{" "}
-      <span className="font-medium text-foreground">"{provider}"</span>
+    <>{translate("uxFeatures.fromldt4a", { p1: " ", p2: " " })}<span className="font-medium text-foreground">"{provider}"</span>
     </>
   );
 }
@@ -238,12 +236,7 @@ export function RemoteCodeConsentDialog() {
                       <span className="font-medium text-foreground">
                         {displayName}
                       </span>
-                      <ProviderSuffix provider={provider} />{" "}
-                      contains files that Hugging Face's security scan flagged as
-                      unsafe (for example, a malicious pickle that would run code
-                      when the model loads). It cannot be loaded. The flagged
-                      files were never downloaded.
-                    </>
+                      <ProviderSuffix provider={provider} />{translate("uxFeatures.containsFilesThatHuggingits2j", { p1: " " })}</>
                   ) : (
                     <>
                       <span className="font-medium text-foreground">
@@ -264,7 +257,7 @@ export function RemoteCodeConsentDialog() {
               {malware ? (
                 <div className="min-w-0 space-y-2">
                   <p className="text-xs font-medium text-muted-foreground">
-                    Our automatic scanner flagged issues including:
+                    {translate("uxFeatures.ourAutomaticScannerFlaggedxx7gk")}
                   </p>
                   <div className="max-h-[calc(14rem*var(--ui-space-scale,1))] min-w-0 space-y-2 overflow-y-auto pr-1">
                     {unsafeFiles.map((f, i) => (
@@ -277,7 +270,7 @@ export function RemoteCodeConsentDialog() {
               {findings.length > 0 ? (
                 <div className="min-w-0 space-y-2">
                   <p className="text-xs font-medium text-muted-foreground">
-                    Our automatic scanner flagged issues including:
+                    {translate("uxFeatures.ourAutomaticScannerFlaggedxx7gk")}
                   </p>
                   <div className="max-h-[calc(22rem*var(--ui-space-scale,1))] min-w-0 space-y-3 overflow-y-auto pr-1">
                     {findings.map((f, i) => (
@@ -289,8 +282,7 @@ export function RemoteCodeConsentDialog() {
 
               {!malware && !blocked && findings.length === 0 ? (
                 <p className="text-xs text-muted-foreground">
-                  Our automatic scanner did not flag any worrying files, but
-                  please double check.
+                  {translate("uxCopy.ourAutomaticScannerDid1gr5y")}
                 </p>
               ) : null}
             </div>
@@ -301,7 +293,7 @@ export function RemoteCodeConsentDialog() {
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           {blocked ? null : (
             <AlertDialogAction onClick={() => resolve(true)}>
-              Enable and continue
+              {translate("uxFeatures.enableAndContinue1lnp7")}
             </AlertDialogAction>
           )}
         </AlertDialogFooter>

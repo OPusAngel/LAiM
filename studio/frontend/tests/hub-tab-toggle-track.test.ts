@@ -4,7 +4,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { readSrc } from "./helpers/kit.ts";
+import { readSrc, readSrcExpanded } from "./helpers/kit.ts";
 
 // The segmented control is a wash on whatever is behind it, so its distance
 // from the selected pill is a property of the surface, not of the control. On
@@ -14,8 +14,8 @@ import { readSrc } from "./helpers/kit.ts";
 // page track back, a raised card in that pane sinking again, and the pill's
 // hover on borrowed-pill buttons.
 
-const HUB_CSS = readSrc("features/hub/hub.css");
-const PICKERS = readSrc(
+const HUB_CSS = readSrcExpanded("features/hub/hub.css");
+const PICKERS = readSrcExpanded(
   "features/model-picker/components/model-selector/pickers.tsx",
 );
 
@@ -72,7 +72,7 @@ test("a page-coloured pane inside a panel gets the page track back", () => {
   );
   // Later in the file, so it beats the panel rule on a tie.
   assert.ok(HUB_CSS.search(PANE_TRACK) > HUB_CSS.search(PANEL_TRACK));
-  const settings = readSrc("features/settings/settings-dialog.tsx");
+  const settings = readSrcExpanded("features/settings/settings-dialog.tsx");
   assert.match(settings, /<main className="[^"]*\bbg-background\b/);
 });
 
@@ -80,7 +80,7 @@ test("a raised card inside a page-coloured pane keeps the panel track", () => {
   // Profile's StatsCard is bg-background washed 6% white in dark. On the page
   // track its pill sat 1.14:1 above the track, against 1.42:1 sunk.
   assert.ok(HUB_CSS.match(PANEL_TRACK), "raised cards lost the sunk track");
-  const card = readSrc("features/profile/components/stats/stat-primitives.tsx");
+  const card = readSrcExpanded("features/profile/components/stats/stat-primitives.tsx");
   assert.match(card, /\bbg-background dark:border-transparent dark:bg-\[/);
 });
 
@@ -93,7 +93,7 @@ test("a selected segment shows no hover, being the tab you are already on", () =
 });
 
 test("no tab pins its hover to a colour that is only right in one theme", () => {
-  const tabs = readSrc(
+  const tabs = readSrcExpanded(
     "features/model-picker/components/model-selector/pill-tabs.tsx",
   );
   // hover:!bg-[var(--background)] carries no mode variant, so in dark it
@@ -120,13 +120,13 @@ test("a highlighted row still lifts clear of the lighter menu", () => {
 test("a white pill in light mode stays put, having nowhere lighter to go", () => {
   // The selected pill is its own span under the tab, and it takes no pointer,
   // so hovering the tab cannot move the pill off white.
-  const pill = readSrc("components/segmented-control.tsx").match(
+  const pill = readSrcExpanded("components/segmented-control.tsx").match(
     /export function SegmentedPill[\s\S]*?className=\{cn\(\s*"([^"]*)"/,
   );
   assert.ok(pill, "SegmentedPill not found");
   assert.match(pill[1] ?? "", /\bhub-tab-toggle-pill\b/);
   assert.match(pill[1] ?? "", /\bpointer-events-none\b/);
-  const tabs = readSrc(
+  const tabs = readSrcExpanded(
     "features/model-picker/components/model-selector/pill-tabs.tsx",
   );
   assert.doesNotMatch(tabs, /&& "hub-tab-toggle-pill"/);

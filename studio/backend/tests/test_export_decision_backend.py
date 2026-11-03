@@ -59,7 +59,7 @@ def _clef_adapter(tmp_path) -> Path:
     return _write(
         tmp_path / "clef_adapter",
         {
-            "adapter_config.json": {"base_model_name_or_path": "LAiM/Qwen3.5-0.8B"},
+            "adapter_config.json": {"base_model_name_or_path": "unsloth/Qwen3.5-0.8B"},
             "adapter_model.safetensors": b"a",
             "joint_head.safetensors": b"h",
             "joint_head_config.json": {},
@@ -355,7 +355,7 @@ def test_studio_quant_list_matches_the_library():
 
     source = _BACKEND_DIR.parent.parent / "LAiM" / "models" / "decision_gguf.py"
     if not source.is_file():
-        pytest.skip("LAiM/models/decision_gguf.py is not in this checkout")
+        pytest.skip("unsloth/models/decision_gguf.py is not in this checkout")
     tree = ast.parse(source.read_text(encoding = "utf-8"))
     values = [
         ast.literal_eval(node.value)
@@ -402,6 +402,6 @@ def test_a_decision_adapter_loads_only_the_authorized_base(env, tmp_path):
     (folder / "LAiM_decision_config.json").write_text(
         json.dumps({"base_model": "owner/private-model"}), encoding = "utf-8"
     )
-    ok, message = backend.load_checkpoint(str(folder), base_model = "LAiM/Qwen3.5-0.8B")
+    ok, message = backend.load_checkpoint(str(folder), base_model = "unsloth/Qwen3.5-0.8B")
     assert not ok and "two different base models" in message
     assert _exports(lib) == []

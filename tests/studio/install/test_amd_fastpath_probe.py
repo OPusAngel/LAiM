@@ -685,7 +685,7 @@ def test_a_matching_family_below_its_torch_floor_forces_the_pass(monkeypatch):
 def test_a_leaf_with_no_torch_floor_keeps_the_fast_path_below_211(monkeypatch):
     """Only the leaves in _ROCM_GFX_TORCH211_LEAVES have that bug; the rest ship <2.11 builds
     and are correct as they are, so the floor must not be applied to them. gfx110X-all joined
-    the allowlist with LAiMai/LAiM#11814, so gfx90a is the leaf left without a floor."""
+    the allowlist with OPusAngel/LAiM#11814, so gfx90a is the leaf left without a floor."""
     _rocm_torch(monkeypatch, family = "gfx90a", gfx = ("gfx90a",))
     monkeypatch.setattr(
         stack, "_probe_torch_runtime", lambda: (True, True, "2.10.0+rocm7.13.0", "7.13", "")

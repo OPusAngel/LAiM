@@ -9,7 +9,7 @@ import test from "node:test";
 
 import { loadWithStubs } from "./helpers/module-stubs.ts";
 
-import { readSrc } from "./helpers/kit.ts";
+import { readSrc, readSrcExpanded } from "./helpers/kit.ts";
 
 type Adapter = {
   StudioSpeechSynthesisAdapter: new () => { speak: (text: string) => unknown };
@@ -358,7 +358,7 @@ test("custom TTS sends no key when the connection already has one saved", async 
 // #9214: a deleted connection left ttsProviderId persisted, so the select pointed at a
 // missing item and every read aloud posted the stale id. Mirrors the dictation guard.
 test("the custom TTS selection is dropped when its connection disappears", () => {
-  const voiceTab = readSrc("features/settings/tabs/voice-tab.tsx");
+  const voiceTab = readSrcExpanded("features/settings/tabs/voice-tab.tsx");
   assert.match(
     voiceTab,
     /if \(ttsProviderId && !hasSelectedTtsConnection\) \{\s*setTtsProviderId\(""\);/,

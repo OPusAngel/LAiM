@@ -25,4 +25,4 @@ export interface S3Config {
   useIamRole?: boolean;
 }
 export type DatasetFormat = "auto" | "alpaca" | "chatml" | "sharegpt" | "raw";
-export type GradientCheckpointing = "none" | "true" | "LAiM" | "mlx";
+export type GradientCheckpointing = "none" | "true" | "unsloth" | "mlx";

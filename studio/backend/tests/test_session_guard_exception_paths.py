@@ -58,13 +58,13 @@ def assert_idle(message = ""):
 
 @pytest.fixture
 def removals(monkeypatch):
-    """Record every sandbox removal instead of touching the filesystem."""
+    """Record every workdir removal instead of touching the filesystem."""
     seen: list[str] = []
 
     def _remove(session_id, delete_files):
         seen.append(session_id)
 
-    monkeypatch.setattr(tools, "_remove_session_sandbox_locked", _remove)
+    monkeypatch.setattr(tools, "_remove_session_workdir_locked", _remove)
     monkeypatch.setattr(tools, "_thread_exists", lambda *a, **k: False)
     return seen
 
@@ -102,7 +102,7 @@ def test_a_recreated_chat_keeps_its_folder_even_when_the_body_raises(monkeypatch
     seen: list[str] = []
     monkeypatch.setattr(
         tools,
-        "_remove_session_sandbox_locked",
+        "_remove_session_workdir_locked",
         lambda s, f: seen.append(s),
     )
     monkeypatch.setattr(tools, "_thread_exists", lambda *a, **k: True)
@@ -123,7 +123,7 @@ def test_a_nested_guard_deletes_only_at_the_outer_exit(removals):
     with tools._session_in_flight("nested"):
         with tools._session_in_flight("nested"):
             assert tools._active_sessions[key] == 2
-        assert removals == [], "the inner exit deleted a sandbox still in use"
+        assert removals == [], "the inner exit deleted a workdir still in use"
         assert tools._active_sessions[key] == 1
     assert removals == ["nested"]
     assert_idle("after a nested guard")
@@ -159,7 +159,7 @@ def test_a_failing_cleanup_still_releases_the_session(monkeypatch):
 
     A key left in ``_removing_sessions`` blocks every later call for it forever.
     """
-    monkeypatch.setattr(tools, "_remove_session_sandbox_locked", _cleanup_explodes)
+    monkeypatch.setattr(tools, "_remove_session_workdir_locked", _cleanup_explodes)
     monkeypatch.setattr(tools, "_thread_exists", lambda *a, **k: False)
     queue_removal("cleanup-fails")
     with pytest.raises(OSError):
@@ -175,7 +175,7 @@ def test_a_failing_cleanup_masks_the_tool_error_but_keeps_it_as_context(monkeypa
     keeps it as ``__context__``. Predates this change (it already happened
     whenever a delete was queued), so it is pinned, not altered.
     """
-    monkeypatch.setattr(tools, "_remove_session_sandbox_locked", _cleanup_explodes)
+    monkeypatch.setattr(tools, "_remove_session_workdir_locked", _cleanup_explodes)
     monkeypatch.setattr(tools, "_thread_exists", lambda *a, **k: False)
     queue_removal("masked")
     tool_error = ValueError("the real tool failure")
@@ -196,7 +196,7 @@ def test_a_failing_cleanup_wakes_a_waiter_for_the_same_chat(monkeypatch):
         release.wait(DEADLINE)
         raise OSError("disk gone")
 
-    monkeypatch.setattr(tools, "_remove_session_sandbox_locked", _slow_failing_remove)
+    monkeypatch.setattr(tools, "_remove_session_workdir_locked", _slow_failing_remove)
     monkeypatch.setattr(tools, "_thread_exists", lambda *a, **k: False)
     queue_removal("waited-on")
 
@@ -244,7 +244,7 @@ def test_one_failing_delete_does_not_silently_drop_the_others(monkeypatch):
         if session_id == "b":
             raise OSError("disk gone")
 
-    monkeypatch.setattr(tools, "_remove_session_sandbox_locked", _remove)
+    monkeypatch.setattr(tools, "_remove_session_workdir_locked", _remove)
     monkeypatch.setattr(tools, "_thread_exists", lambda *a, **k: False)
     key = tools._session_key("a")
     # Same lifecycle key, three exact ids queued behind it.

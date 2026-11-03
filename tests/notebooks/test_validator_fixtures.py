@@ -47,7 +47,7 @@ def test_r_inst_001_silent_after_pin():
 def test_r_inst_001_allowlist_LAiM_zoo_git():
     cell = """%%capture
 !pip install --no-build-isolation git+https://github.com/state-spaces/mamba.git@main
-!pip install "LAiM_zoo[base] @ git+https://github.com/LAiMai/LAiM-zoo"
+!pip install "LAiM_zoo[base] @ git+https://github.com/OPusAngel/LAiM-zoo"
 """
     findings = nv.rule_inst_001_git_plus(cell, "fixture", 0)
     assert findings == []
@@ -203,7 +203,7 @@ def _live_notebooks_dir(candidates: list[Path] | None = None) -> Path | None:
     if candidates is None:
         candidates = [
             Path(__file__).resolve().parents[3] / "notebooks",  # workspace sibling
-            Path("/mnt/disks/LAiMai/ubuntu/workspace_12/notebooks"),
+            Path("/mnt/disks/unslothai/ubuntu/workspace_12/notebooks"),
         ]
     for p in candidates:
         # is_file() only swallows ENOENT/ENOTDIR; EACCES raises on Python <= 3.13 (gh-101357).
@@ -217,17 +217,17 @@ def _live_notebooks_dir(candidates: list[Path] | None = None) -> Path | None:
 
 @pytest.mark.skipif(
     _live_notebooks_dir() is None,
-    reason = "LAiMai/notebooks not cloned at sibling path",
+    reason = "unslothai/notebooks not cloned at sibling path",
 )
 def test_exceptions_passes_on_head():
-    """L1.2 must be silent on live LAiMai/notebooks HEAD; a fire means a DONT_UPDATE_EXCEPTIONS notebook lost its policy clause or the clause set is stale."""
+    """L1.2 must be silent on live unslothai/notebooks HEAD; a fire means a DONT_UPDATE_EXCEPTIONS notebook lost its policy clause or the clause set is stale."""
     findings = nv.rule_l12_exceptions_coverage(_live_notebooks_dir())
     assert findings == [], findings
 
 
 @pytest.mark.skipif(
     _live_notebooks_dir() is None,
-    reason = "LAiMai/notebooks not cloned at sibling path",
+    reason = "unslothai/notebooks not cloned at sibling path",
 )
 def test_lint_smoke_no_module_errors():
     """The lint subcommand walks every nb/kaggle without crashing (findings are fine)."""

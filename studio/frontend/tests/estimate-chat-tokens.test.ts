@@ -13,6 +13,8 @@ import {
   estimateMessagesTokenCount,
 } from "../src/features/chat/utils/estimate-chat-tokens.ts";
 
+import { englishView } from "./helpers/kit.ts";
+
 function record(
   id: string,
   role: MessageRecord["role"],
@@ -68,7 +70,7 @@ test("an estimate without a window reads as approximate tokens", () => {
     promptTokens: 4100,
     completionTokens: 0,
     estimated: true,
-  });
+  }, englishView);
   assert.ok(state);
   assert.equal(state.face, "~4.1k tokens");
   assert.equal(state.compactFace, "~4.1k");
@@ -78,11 +80,11 @@ test("an estimate without a window reads as approximate tokens", () => {
 });
 
 test("an estimate against a window gives a ratio but no limit advice", () => {
-  const state = deriveContextUsageBar({ used: 30000, total: 32768, estimated: true });
+  const state = deriveContextUsageBar({ used: 30000, total: 32768, estimated: true }, englishView);
   assert.ok(state);
   assert.equal(state.face, "~30.0k / 32.8k");
   assert.equal(state.percent, (30000 / 32768) * 100);
   assert.equal(state.advice, "none");
-  const exact = deriveContextUsageBar({ used: 30000, total: 32768 });
+  const exact = deriveContextUsageBar({ used: 30000, total: 32768 }, englishView);
   assert.equal(exact?.advice, "stops-at-limit");
 });

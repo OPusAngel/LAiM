@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
+
 type PresentableGgufVariant = {
   filename: string;
   quant: string;
@@ -133,15 +135,14 @@ export function groupGgufVariantsForPicker<T extends PresentableGgufVariant>(
   return [
     {
       key: "text-frames",
-      title: "Text / first and last frames",
-      description:
-        "Generate from a prompt, optionally using first and last frame images.",
+      get title() { return translate("uxModelpicker.textFirstAndLastb6gv5"); },
+      get description() { return translate("uxModelpicker.generateFromAPromptdbibm"); },
       variants: textFrames,
     },
     {
       key: "reference-media",
-      title: "Reference media",
-      description: "Generate using reference images, video, or audio.",
+      get title() { return translate("uxModelpicker.referenceMediaakieu"); },
+      get description() { return translate("uxModelpicker.generateUsingReferenceImagesxnb61"); },
       variants: referenceMedia,
     },
   ].filter((group) => group.variants.length > 0);

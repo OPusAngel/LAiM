@@ -100,7 +100,7 @@ def asset_choice(**overrides) -> AssetChoice:
     only when it must differ."""
     name = overrides.pop("name", "llama-b9001-bin-ubuntu-x64.tar.gz")
     defaults = dict(
-        repo = "LAiMai/llama.cpp",
+        repo = "unslothai/llama.cpp",
         tag = "release-1",
         name = name,
         url = f"https://example.com/{name}",
@@ -113,7 +113,7 @@ def asset_choice(**overrides) -> AssetChoice:
 
 
 UPSTREAM = ("ggml-org/llama.cpp", "upstream-prebuilt")
-PREBUILT = ("LAiMai/llama.cpp", "prebuilt")
+PREBUILT = ("unslothai/llama.cpp", "prebuilt")
 _SOURCE = ("ggml-org/llama.cpp", "upstream-source")
 
 
@@ -129,7 +129,7 @@ def release_checksums(
     source_commit: str | None = "deadbeef",
     source_sha256: str = "b" * 64,
 ) -> ApprovedReleaseChecksums:
-    """Approved checksums for one LAiMai/llama.cpp release: the upstream source
+    """Approved checksums for one unslothai/llama.cpp release: the upstream source
     archive plus one entry per (asset_name, sha256, origin). source_commit = None
     means "no source archive approved" and drops that entry."""
     artifacts = {}
@@ -139,7 +139,7 @@ def release_checksums(
     for asset_name, sha256, origin in assets:
         artifacts[asset_name] = _artifact_hash(asset_name, sha256, origin)
     return ApprovedReleaseChecksums(
-        repo = "LAiMai/llama.cpp",
+        repo = "unslothai/llama.cpp",
         release_tag = release_tag,
         upstream_tag = upstream_tag,
         source_commit = source_commit,
@@ -200,14 +200,14 @@ def macos_host(**overrides) -> HostInfo:
 
 def approved_release_checksums_for_asset(asset_name: str, sha256: str) -> ApprovedReleaseChecksums:
     return ApprovedReleaseChecksums(
-        repo = "LAiMai/llama.cpp",
+        repo = "unslothai/llama.cpp",
         release_tag = "b9334",
         upstream_tag = "b9334",
         artifacts = {
             asset_name: ApprovedArtifactHash(
                 asset_name = asset_name,
                 sha256 = sha256,
-                repo = "LAiMai/llama.cpp",
+                repo = "unslothai/llama.cpp",
                 kind = "diffusion-visual-server",
             )
         },
@@ -404,7 +404,7 @@ def test_install_prebuilt_uses_explicit_instruction_cleanup_root(
         install_prebuilt(
             install_dir.resolve(),
             "latest",
-            "LAiMai/llama.cpp",
+            "unslothai/llama.cpp",
             "",
             instruction_cleanup_root = linked_root.absolute(),
         )
@@ -482,14 +482,14 @@ def test_hydrate_source_tree_extracts_upstream_archive_contents(
 def test_release_asset_download_url():
     fn = INSTALL_LLAMA_PREBUILT.release_asset_download_url
     assert fn(
-        "LAiMai/llama.cpp", "b9000-mix-abc1234", "llama.cpp-source-commit-deadbeef.tar.gz"
+        "unslothai/llama.cpp", "b9000-mix-abc1234", "llama.cpp-source-commit-deadbeef.tar.gz"
     ) == (
-        "https://github.com/LAiMai/llama.cpp/releases/download/"
+        "https://github.com/unslothai/llama.cpp/releases/download/"
         "b9000-mix-abc1234/llama.cpp-source-commit-deadbeef.tar.gz"
     )
     assert fn(None, "b9000", "x.tar.gz") is None
-    assert fn("LAiMai/llama.cpp", None, "x.tar.gz") is None
-    assert fn("LAiMai/llama.cpp", "b9000", None) is None
+    assert fn("unslothai/llama.cpp", None, "x.tar.gz") is None
+    assert fn("unslothai/llama.cpp", "b9000", None) is None
 
 
 def _mk_source_tarball(path: Path, tag: str) -> None:
@@ -512,10 +512,10 @@ def test_hydrate_source_tree_prefers_release_asset_for_mix(
     archive_path = tmp_path / "merged-source.tar.gz"
     _mk_source_tarball(archive_path, f"b9000-mix-{commit[:7]}")
     asset_url = INSTALL_LLAMA_PREBUILT.release_asset_download_url(
-        "LAiMai/llama.cpp", "b9000-mix-abc1234", f"llama.cpp-source-commit-{commit}.tar.gz"
+        "unslothai/llama.cpp", "b9000-mix-abc1234", f"llama.cpp-source-commit-{commit}.tar.gz"
     )
     codeload_urls = set(
-        INSTALL_LLAMA_PREBUILT.commit_source_archive_urls("LAiMai/llama.cpp", commit)
+        INSTALL_LLAMA_PREBUILT.commit_source_archive_urls("unslothai/llama.cpp", commit)
     )
     seen = []
 
@@ -535,7 +535,7 @@ def test_hydrate_source_tree_prefers_release_asset_for_mix(
         commit,
         install_dir,
         work_dir,
-        source_repo = "LAiMai/llama.cpp",
+        source_repo = "unslothai/llama.cpp",
         expected_sha256 = sha256_file(archive_path),
         exact_source = True,
         asset_url = asset_url,
@@ -552,9 +552,9 @@ def test_hydrate_source_tree_falls_back_to_codeload_when_asset_missing(
     archive_path = tmp_path / "vanilla-source.tar.gz"
     _mk_source_tarball(archive_path, f"commit-{commit[:7]}")
     asset_url = INSTALL_LLAMA_PREBUILT.release_asset_download_url(
-        "LAiMai/llama.cpp", "b9000", f"llama.cpp-source-commit-{commit}.tar.gz"
+        "unslothai/llama.cpp", "b9000", f"llama.cpp-source-commit-{commit}.tar.gz"
     )
-    codeload_urls = INSTALL_LLAMA_PREBUILT.commit_source_archive_urls("LAiMai/llama.cpp", commit)
+    codeload_urls = INSTALL_LLAMA_PREBUILT.commit_source_archive_urls("unslothai/llama.cpp", commit)
 
     def fake_download_file(url: str, destination: Path) -> None:
         if url == asset_url:
@@ -571,7 +571,7 @@ def test_hydrate_source_tree_falls_back_to_codeload_when_asset_missing(
         commit,
         install_dir,
         work_dir,
-        source_repo = "LAiMai/llama.cpp",
+        source_repo = "unslothai/llama.cpp",
         expected_sha256 = sha256_file(archive_path),
         exact_source = True,
         asset_url = asset_url,
@@ -2403,7 +2403,7 @@ def test_install_prebuilt_falls_back_to_older_release_plan(
         lambda install_dir, llama_tag, **kwargs: ensured_tags.append(llama_tag),
     )
 
-    install_prebuilt(install_dir, "latest", "LAiMai/llama.cpp", "")
+    install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
 
     assert call_log == [("b9002", False), ("b9001", True)]
     assert activated["install_dir"] == install_dir
@@ -2695,7 +2695,7 @@ def test_existing_install_matches_plan_windows_cuda_unpaired_skips_cudart_check(
 def test_arch_fields_do_not_change_the_install_fingerprint(tmp_path: Path):
     """gfx_target and mapped_targets stay out of the fingerprint, or every ROCm install goes stale."""
     choice_kwargs = dict(
-        repo = "LAiMai/llama.cpp",
+        repo = "unslothai/llama.cpp",
         tag = "release-1",
         name = "app-b9001-linux-x64-rocm-gfx110X.tar.gz",
         url = "https://example.com/x.tar.gz",
@@ -2766,7 +2766,7 @@ def test_non_rocm_bundles_record_no_mapped_targets(tmp_path: Path):
 def _rocm_choice(**overrides):
     """A published ROCm bundle choice, as published_rocm_choice_for_host returns."""
     fields = dict(
-        repo = "LAiMai/llama.cpp",
+        repo = "unslothai/llama.cpp",
         tag = "b10360",
         name = "app-b10360-linux-x64-rocm-gfx110X.tar.gz",
         url = "https://example.invalid/app.tar.gz",
@@ -2921,10 +2921,10 @@ def test_a_published_bundle_owes_its_visual_server(tmp_path, monkeypatch, visual
     )
 
     if visual_server:
-        install_prebuilt(install_dir, "latest", "LAiMai/llama.cpp", "")
+        install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
     else:
         with pytest.raises(SystemExit) as caught:
-            install_prebuilt(install_dir, "latest", "LAiMai/llama.cpp", "")
+            install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
         assert caught.value.code == INSTALL_LLAMA_PREBUILT.EXIT_FALLBACK
 
 
@@ -2935,7 +2935,7 @@ def test_an_upstream_bundle_does_not_owe_a_visual_server(tmp_path, monkeypatch):
         tmp_path, backend = "vulkan", source = "upstream", visual_server = False
     )
 
-    install_prebuilt(install_dir, "latest", "LAiMai/llama.cpp", "")
+    install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
 
     assert (install_dir / "llama-server").exists()
 
@@ -3025,7 +3025,7 @@ def test_marker_rewrite_preserves_arch_fields(tmp_path: Path):
 
 def _cuda_choice(**overrides):
     fields = dict(
-        repo = "LAiMai/llama.cpp",
+        repo = "unslothai/llama.cpp",
         tag = "b10360",
         name = "app-b10360-linux-x64-cuda13-older.tar.gz",
         url = "https://example.invalid/app.tar.gz",
@@ -3205,7 +3205,7 @@ def test_install_prebuilt_skips_download_when_existing_install_matches(
         ),
     )
 
-    install_prebuilt(install_dir, "latest", "LAiMai/llama.cpp", "")
+    install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
     assert not list(install_dir.rglob("AGENTS.md"))
     assert not list(install_dir.rglob("CLAUDE.md"))
 
@@ -3320,7 +3320,7 @@ def test_install_prebuilt_does_not_skip_unhealthy_existing_install(
     with pytest.raises(
         AssertionError, match = "unhealthy install must continue into normal install flow"
     ):
-        install_prebuilt(install_dir, "latest", "LAiMai/llama.cpp", "")
+        install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
 
 
 def test_install_prebuilt_skips_when_older_release_fallback_matches_existing_install(
@@ -3409,7 +3409,7 @@ def test_install_prebuilt_skips_when_older_release_fallback_matches_existing_ins
         ),
     )
 
-    install_prebuilt(install_dir, "latest", "LAiMai/llama.cpp", "")
+    install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
 
     assert call_log == ["b9002"]
 
@@ -3548,7 +3548,7 @@ def test_install_prebuilt_skips_same_release_fallback_attempt_when_installed(
         ),
     )
 
-    install_prebuilt(install_dir, "latest", "LAiMai/llama.cpp", "")
+    install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
 
     assert attempted_names == [first_choice.name]
 
@@ -3639,7 +3639,7 @@ def test_install_prebuilt_same_tag_upstream_failure_uses_older_LAiM_release_plan
         lambda install_dir, llama_tag, **kwargs: None,
     )
 
-    install_prebuilt(install_dir, "latest", "LAiMai/llama.cpp", "")
+    install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
 
     assert attempted == [("b9002", "release-2", "upstream"), ("b9001", "release-1", "upstream")]
     assert activated["install_dir"] == install_dir
@@ -4047,7 +4047,7 @@ def test_a_reused_install_repairs_a_non_executable_llama_fit_params(
         approved_checksums = release_checksums((choice.name, choice.expected_sha256, UPSTREAM)),
     )
     route = types.SimpleNamespace(
-        host = host, backend = "auto", published_repo = "LAiMai/llama.cpp", published_release_tag = ""
+        host = host, backend = "auto", published_repo = "unslothai/llama.cpp", published_release_tag = ""
     )
     monkeypatch.setattr(M, "route_backend_request", lambda **_k: route)
     monkeypatch.setattr(
@@ -4061,7 +4061,7 @@ def test_a_reused_install_repairs_a_non_executable_llama_fit_params(
         lambda **_k: M.BackendSelection(
             backend = "auto",
             host = host,
-            published_repo = "LAiMai/llama.cpp",
+            published_repo = "unslothai/llama.cpp",
             published_release_tag = "",
             requested_tag = "latest",
             release_plans = [release_plan],
@@ -4073,7 +4073,7 @@ def test_a_reused_install_repairs_a_non_executable_llama_fit_params(
     monkeypatch.setattr(M, "diffusion_visual_server_backfill_needed", lambda *_a, **_k: False)
     monkeypatch.setattr(M, "sync_marker_selection", lambda *_a, **_k: None)
 
-    M.install_prebuilt(install_dir, "latest", "LAiMai/llama.cpp", "")
+    M.install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
 
     assert stat.S_IMODE(helper.stat().st_mode) == 0o755
 
@@ -4241,7 +4241,7 @@ def test_probe_rate_limit_no_longer_forces_a_source_build(tmp_path, monkeypatch)
     host = linux_host()
     choice = asset_choice()
     checksums = ApprovedReleaseChecksums(
-        repo = "LAiMai/llama.cpp",
+        repo = "unslothai/llama.cpp",
         release_tag = "release-1",
         upstream_tag = "b9001",
         source_commit = "deadbeef",
@@ -4278,7 +4278,7 @@ def test_probe_rate_limit_no_longer_forces_a_source_build(tmp_path, monkeypatch)
     )
 
     with pytest.raises(AssertionError, match = "reached the install flow"):
-        install_prebuilt(install_dir, "latest", "LAiMai/llama.cpp", "")
+        install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
 
 
 def test_probe_failure_does_not_demote_to_a_lower_priority_candidate(tmp_path, monkeypatch):
@@ -4300,7 +4300,7 @@ def test_probe_failure_does_not_demote_to_a_lower_priority_candidate(tmp_path, m
 
     def hashless(name: str, install_kind: str) -> AssetChoice:
         return AssetChoice(
-            repo = "LAiMai/llama.cpp",
+            repo = "unslothai/llama.cpp",
             tag = "release-1",
             name = name,
             url = f"https://example.com/{name}",
@@ -4336,7 +4336,7 @@ def test_probe_failure_does_not_demote_to_an_older_release(tmp_path, monkeypatch
 
     def hashless_plan(release_tag: str, llama_tag: str):
         choice = AssetChoice(
-            repo = "LAiMai/llama.cpp",
+            repo = "unslothai/llama.cpp",
             tag = release_tag,
             name = f"llama-{llama_tag}-bin-ubuntu-x64.tar.gz",
             url = f"https://example.com/{llama_tag}.tar.gz",
@@ -4376,7 +4376,7 @@ def test_probe_failure_does_not_demote_to_an_older_release(tmp_path, monkeypatch
     monkeypatch.setattr(INSTALL_LLAMA_PREBUILT, "collect_system_report", lambda *a, **k: "report")
 
     with pytest.raises(SystemExit) as caught:
-        install_prebuilt(install_dir, "latest", "LAiMai/llama.cpp", "")
+        install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
 
     assert caught.value.code == INSTALL_LLAMA_PREBUILT.EXIT_FALLBACK
     assert validated == []
@@ -4444,7 +4444,7 @@ def test_validate_existing_install_missing_server_raises(tmp_path, monkeypatch):
 def test_diffusion_visual_server_uses_approved_checksum_download(monkeypatch, tmp_path: Path):
     asset_name = "llama-diffusion-gemma-visual-server-linux-x64"
     expected_sha = "a" * 64
-    asset_url = "https://github.com/LAiMai/llama.cpp/releases/download/b9334/" + asset_name
+    asset_url = "https://github.com/unslothai/llama.cpp/releases/download/b9334/" + asset_name
     calls: list[tuple[str, Path, str | None, str | None]] = []
 
     monkeypatch.setattr(
@@ -4513,7 +4513,7 @@ def test_diffusion_visual_server_skips_when_the_manifest_names_no_visual_server(
         linux_host(),
         "b9334",
         ApprovedReleaseChecksums(
-            repo = "LAiMai/llama.cpp",
+            repo = "unslothai/llama.cpp",
             release_tag = "b9334",
             upstream_tag = "b9334",
             artifacts = {},
@@ -4861,10 +4861,10 @@ def test_setup_scripts_unexpected_exit_branch_never_sets_source_build():
         # fetch_json raises a bare RuntimeError on rate limiting.
         RuntimeError(
             "GitHub API returned 403 for "
-            "https://api.github.com/repos/LAiMai/llama.cpp/releases?per_page=100&page=1"
+            "https://api.github.com/repos/unslothai/llama.cpp/releases?per_page=100&page=1"
             "; set GH_TOKEN or GITHUB_TOKEN to avoid GitHub API rate limits"
         ),
-        RuntimeError("unexpected releases payload for LAiMai/llama.cpp"),
+        RuntimeError("unexpected releases payload for unslothai/llama.cpp"),
         urllib.error.URLError("connection reset"),
         TimeoutError("timed out"),
     ],
@@ -4884,7 +4884,7 @@ def test_release_listing_failure_exits_fallback_not_error(tmp_path, monkeypatch,
     install_dir.mkdir()
 
     with pytest.raises(SystemExit) as caught:
-        install_prebuilt(install_dir, "latest", "LAiMai/llama.cpp", "")
+        install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
 
     assert caught.value.code == INSTALL_LLAMA_PREBUILT.EXIT_FALLBACK
 
@@ -4907,7 +4907,7 @@ def test_multiline_fallback_reason_logs_one_prefixed_line_each(tmp_path, monkeyp
     install_dir = tmp_path / "llama.cpp"
     install_dir.mkdir()
     with pytest.raises(SystemExit):
-        install_prebuilt(install_dir, "latest", "LAiMai/llama.cpp", "")
+        install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
 
     reason = [
         line
@@ -4922,7 +4922,7 @@ def test_multiline_fallback_reason_logs_one_prefixed_line_each(tmp_path, monkeyp
 def test_github_api_rate_limit_status_carries_the_token_hint(monkeypatch, status):
     """GitHub answers an exceeded rate limit with 403 or 429, and the raw
     "HTTP Error 429: Too Many Requests" says nothing a user can act on."""
-    url = "https://api.github.com/repos/LAiMai/llama.cpp/releases/tags/b10679-mix-67dfc8b"
+    url = "https://api.github.com/repos/unslothai/llama.cpp/releases/tags/b10679-mix-67dfc8b"
 
     def raise_status(_url, **_kw):
         raise urllib.error.HTTPError(_url, status, "rate limited", {}, io.BytesIO(b""))
@@ -5052,7 +5052,7 @@ def test_release_listing_failure_keeps_a_complete_existing_install(tmp_path, mon
 
     install_dir = _complete_existing_llama_install(tmp_path)
 
-    install_prebuilt(install_dir, "latest", "LAiMai/llama.cpp", "")
+    install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
 
     assert (install_dir / "llama-server").exists()
 
@@ -5072,7 +5072,7 @@ def test_an_offline_keep_repairs_a_non_executable_llama_fit_params(tmp_path, mon
     helper.write_bytes(b"probe\n")
     helper.chmod(0o644)
 
-    install_prebuilt(install_dir, "latest", "LAiMai/llama.cpp", "")
+    install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
 
     assert stat.S_IMODE(helper.stat().st_mode) == 0o755
 
@@ -5090,7 +5090,7 @@ def test_release_listing_failure_does_not_keep_a_non_executable_install(tmp_path
     install_dir = _complete_existing_llama_install(tmp_path, executable = False)
 
     with pytest.raises(SystemExit) as caught:
-        install_prebuilt(install_dir, "latest", "LAiMai/llama.cpp", "")
+        install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
 
     assert caught.value.code == INSTALL_LLAMA_PREBUILT.EXIT_FALLBACK
     assert (install_dir / "llama-server").exists()
@@ -5121,13 +5121,13 @@ def test_release_listing_failure_does_not_keep_a_gutted_runtime(
     monkeypatch.setattr(INSTALL_LLAMA_PREBUILT, "collect_system_report", lambda *a, **k: "report")
 
     kept = _complete_existing_llama_install(tmp_path / "kept", backend = backend, windows = windows)
-    install_prebuilt(kept, "latest", "LAiMai/llama.cpp", "")
+    install_prebuilt(kept, "latest", "unslothai/llama.cpp", "")
 
     gutted = _complete_existing_llama_install(
         tmp_path / "gutted", backend = backend, payload = False, windows = windows
     )
     with pytest.raises(SystemExit) as caught:
-        install_prebuilt(gutted, "latest", "LAiMai/llama.cpp", "")
+        install_prebuilt(gutted, "latest", "unslothai/llama.cpp", "")
 
     assert caught.value.code == INSTALL_LLAMA_PREBUILT.EXIT_FALLBACK
 
@@ -5164,10 +5164,10 @@ def test_a_paired_cuda_install_needs_its_cudart_trio(
     )
 
     if kept:
-        install_prebuilt(install_dir, "latest", "LAiMai/llama.cpp", "")
+        install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
     else:
         with pytest.raises(SystemExit) as caught:
-            install_prebuilt(install_dir, "latest", "LAiMai/llama.cpp", "")
+            install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
         assert caught.value.code == INSTALL_LLAMA_PREBUILT.EXIT_FALLBACK
 
 
@@ -5185,10 +5185,10 @@ def test_a_marker_that_names_no_backend_still_owes_the_shared_payload(
     install_dir = _complete_existing_llama_install(tmp_path, windows = windows, payload = payload)
 
     if payload:
-        install_prebuilt(install_dir, "latest", "LAiMai/llama.cpp", "")
+        install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
     else:
         with pytest.raises(SystemExit) as caught:
-            install_prebuilt(install_dir, "latest", "LAiMai/llama.cpp", "")
+            install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
         assert caught.value.code == INSTALL_LLAMA_PREBUILT.EXIT_FALLBACK
 
 
@@ -5197,7 +5197,7 @@ def test_a_stored_backend_choice_the_install_already_satisfies_is_kept(tmp_path,
     _listing_failure(monkeypatch, linux_host)
     install_dir = _complete_existing_llama_install(tmp_path, backend = "cpu", backend_request = "cpu")
 
-    install_prebuilt(install_dir, "latest", "LAiMai/llama.cpp", "")
+    install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
 
     assert (install_dir / "llama-server").exists()
 
@@ -5211,7 +5211,7 @@ def test_a_backend_named_on_this_run_still_refuses_to_answer_with_the_old_instal
     install_dir = _complete_existing_llama_install(tmp_path, backend = "cpu", backend_request = "cpu")
 
     with pytest.raises(SystemExit) as caught:
-        install_prebuilt(install_dir, "latest", "LAiMai/llama.cpp", "")
+        install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
 
     assert caught.value.code == INSTALL_LLAMA_PREBUILT.EXIT_BACKEND_UNAVAILABLE
 
@@ -5224,7 +5224,7 @@ def test_a_stored_backend_the_install_does_not_run_is_not_answered_with_it(tmp_p
     )
 
     with pytest.raises(SystemExit) as caught:
-        install_prebuilt(install_dir, "latest", "LAiMai/llama.cpp", "")
+        install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
 
     assert caught.value.code == INSTALL_LLAMA_PREBUILT.EXIT_BACKEND_UNAVAILABLE
 
@@ -5248,7 +5248,7 @@ def test_release_listing_failure_does_not_keep_a_corrupt_binary(
     assert os.access(runtime / f"llama-server{ext}", os.X_OK), "the mode bits must survive"
 
     with pytest.raises(SystemExit) as caught:
-        install_prebuilt(install_dir, "latest", "LAiMai/llama.cpp", "")
+        install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
 
     assert caught.value.code == INSTALL_LLAMA_PREBUILT.EXIT_FALLBACK
 
@@ -5261,7 +5261,7 @@ def test_a_rotten_root_entrypoint_is_not_saved_by_a_healthy_build_bin(tmp_path, 
     assert os.access(install_dir / "build" / "bin" / "llama-server", os.X_OK)
 
     with pytest.raises(SystemExit) as caught:
-        install_prebuilt(install_dir, "latest", "LAiMai/llama.cpp", "")
+        install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
 
     assert caught.value.code == INSTALL_LLAMA_PREBUILT.EXIT_FALLBACK
 
@@ -5278,7 +5278,7 @@ def test_a_windows_loader_status_is_not_a_successful_probe(tmp_path, monkeypatch
     install_dir = _complete_existing_llama_install(tmp_path, backend = "cuda", windows = True)
 
     with pytest.raises(SystemExit) as caught:
-        install_prebuilt(install_dir, "latest", "LAiMai/llama.cpp", "")
+        install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
 
     assert caught.value.code == INSTALL_LLAMA_PREBUILT.EXIT_FALLBACK
 
@@ -5297,7 +5297,7 @@ def test_a_selection_named_on_this_run_is_not_answered_with_the_old_install(
     install_dir = _complete_existing_llama_install(tmp_path, backend = "cpu", backend_request = "cpu")
 
     with pytest.raises(SystemExit) as caught:
-        install_prebuilt(install_dir, "latest", "LAiMai/llama.cpp", "", **kwargs)
+        install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "", **kwargs)
 
     assert caught.value.code in (
         INSTALL_LLAMA_PREBUILT.EXIT_FALLBACK,
@@ -5316,7 +5316,7 @@ def test_forwarded_gpu_detection_is_not_a_selection_change(tmp_path, monkeypatch
     _listing_failure(monkeypatch, linux_host)
     install_dir = _complete_existing_llama_install(tmp_path, backend = "cpu")
 
-    install_prebuilt(install_dir, "latest", "LAiMai/llama.cpp", "", **kwargs)
+    install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "", **kwargs)
 
     assert (install_dir / "llama-server").exists()
 
@@ -5337,7 +5337,7 @@ def test_the_probe_gets_the_runtime_line_the_marker_recorded(tmp_path, monkeypat
         tmp_path, backend = "cpu", runtime_line = "cuda-12.4"
     )
 
-    install_prebuilt(install_dir, "latest", "LAiMai/llama.cpp", "")
+    install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
 
     assert (
         "cuda-12.4" in seen
@@ -5371,7 +5371,7 @@ def test_release_listing_failure_does_not_keep_an_unloadable_install(tmp_path, m
     install_dir = _complete_existing_llama_install(tmp_path)
 
     with pytest.raises(SystemExit) as caught:
-        install_prebuilt(install_dir, "latest", "LAiMai/llama.cpp", "")
+        install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
 
     assert caught.value.code == INSTALL_LLAMA_PREBUILT.EXIT_FALLBACK
     assert (install_dir / "llama-server").exists()
@@ -5404,7 +5404,7 @@ def test_release_listing_failure_does_not_ignore_an_explicit_version(
         install_prebuilt(
             install_dir,
             llama_tag,
-            "LAiMai/llama.cpp",
+            "unslothai/llama.cpp",
             published_release_tag,
         )
 
@@ -5437,7 +5437,7 @@ def test_release_listing_code_defect_stays_exit_error(tmp_path, monkeypatch, err
     install_dir.mkdir()
 
     with pytest.raises(type(error)):
-        install_prebuilt(install_dir, "latest", "LAiMai/llama.cpp", "")
+        install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
 
 
 def test_release_listing_enospc_still_exits_no_space(tmp_path, monkeypatch):
@@ -5453,7 +5453,7 @@ def test_release_listing_enospc_still_exits_no_space(tmp_path, monkeypatch):
     install_dir.mkdir()
 
     with pytest.raises(OSError) as caught:
-        install_prebuilt(install_dir, "latest", "LAiMai/llama.cpp", "")
+        install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
 
     assert caught.value.errno == errno.ENOSPC
     assert INSTALL_LLAMA_PREBUILT._environment_fatal_reason(caught.value)
@@ -5477,7 +5477,7 @@ def test_fallback_survives_a_failing_system_report(tmp_path, monkeypatch):
     install_dir.mkdir()
 
     with pytest.raises(SystemExit) as caught:
-        install_prebuilt(install_dir, "latest", "LAiMai/llama.cpp", "")
+        install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
 
     assert caught.value.code == INSTALL_LLAMA_PREBUILT.EXIT_FALLBACK
 
@@ -5521,7 +5521,7 @@ def test_marker_sync_strands_no_temp_file_when_the_first_write_fails(tmp_path, m
 TREE_A = "8f3c6e197debb027f500df9f76e710e137f9fe68"
 
 
-def _checksums(tree, repo = "LAiMai/llama.cpp"):
+def _checksums(tree, repo = "unslothai/llama.cpp"):
     return INSTALL_LLAMA_PREBUILT.ApprovedReleaseChecksums(
         repo = repo,
         release_tag = "b10173-mix-2c8b9c1",
@@ -5539,14 +5539,14 @@ def test_recorded_ggml_tree_only_for_binaries_from_that_release():
             url = "https://x/bundle",
             repo = repo,
             tag = "b10173",
-            source_label = "fork" if repo == "LAiMai/llama.cpp" else "upstream",
+            source_label = "fork" if repo == "unslothai/llama.cpp" else "upstream",
             is_ready_bundle = True,
             bundle_profile = "cpu",
             runtime_line = "cpu",
             expected_sha256 = "0" * 64,
         )
 
-    fork = choice("LAiMai/llama.cpp")
+    fork = choice("unslothai/llama.cpp")
     upstream = choice("ggml-org/llama.cpp")
     assert INSTALL_LLAMA_PREBUILT.recorded_ggml_tree(_checksums(TREE_A), fork) == TREE_A
     assert INSTALL_LLAMA_PREBUILT.recorded_ggml_tree(_checksums(TREE_A), upstream) is None
@@ -5874,7 +5874,7 @@ def test_supported_sms_stays_out_of_the_install_fingerprint():
     supported_sms onto existing markers only works while it is not hashed: in
     the payload, every install predating the field reinstalls on upgrade."""
     base = dict(
-        repo = "LAiMai/llama.cpp",
+        repo = "unslothai/llama.cpp",
         tag = "b9001",
         name = "app-b9001-linux-x64-cuda13-older.tar.gz",
         url = "https://example.invalid/app.tar.gz",
@@ -6138,7 +6138,7 @@ def _current_install(
     monkeypatch,
     *,
     install_host: HostInfo | None = None,
-    published_repo: str = "LAiMai/llama.cpp",
+    published_repo: str = "unslothai/llama.cpp",
     **marker_overrides,
 ) -> Path:
     install_dir = tmp_path / "llama.cpp"
@@ -6186,7 +6186,7 @@ def _current_install(
 def _check(install_dir: Path, **overrides) -> bool:
     kwargs = dict(
         llama_tag = "latest",
-        published_repo = "LAiMai/llama.cpp",
+        published_repo = "unslothai/llama.cpp",
         published_release_tag = "",
         backend_request = "auto",
         force_cpu = False,
@@ -6215,7 +6215,7 @@ def test_the_latest_lookup_is_one_head_on_the_download_host(tmp_path, monkeypatc
         lambda repo: (calls.append(repo), "release-1")[1],
     )
     assert _check(install_dir) is True
-    assert calls == ["LAiMai/llama.cpp"]
+    assert calls == ["unslothai/llama.cpp"]
 
 
 def test_a_newer_release_upstream_is_not_current(tmp_path, monkeypatch):
@@ -6336,7 +6336,7 @@ def test_a_release_payload_this_run_already_has_overrides_the_latest_pointer(tmp
         {
             (
                 "json",
-                "https://api.github.com/repos/LAiMai/llama.cpp/releases?per_page=100&page=1",
+                "https://api.github.com/repos/unslothai/llama.cpp/releases?per_page=100&page=1",
             ): [
                 _release("release-1", "2026-02-01T00:00:00Z", 2),
                 _release("release-2", "2026-03-01T00:00:00Z", 3),
@@ -6350,7 +6350,7 @@ def test_a_release_payload_this_run_already_has_overrides_the_latest_pointer(tmp
         {
             (
                 "json",
-                "https://api.github.com/repos/LAiMai/llama.cpp/releases?per_page=100&page=1",
+                "https://api.github.com/repos/unslothai/llama.cpp/releases?per_page=100&page=1",
             ): [
                 _release("release-1", "2026-02-01T00:00:00Z", 2),
             ]
@@ -6501,7 +6501,7 @@ def test_the_recorded_profile_is_the_routed_host_not_the_raw_one(tmp_path, monke
     marker = json.loads((install_dir / "LAiM_PREBUILT_INFO.json").read_text(encoding = "utf-8"))
     route = INSTALL_LLAMA_PREBUILT.route_backend_request(
         backend = "auto",
-        published_repo = "LAiMai/llama.cpp",
+        published_repo = "unslothai/llama.cpp",
         published_release_tag = "",
     )
     assert marker["host_profile"] == host_profile(route.host)
@@ -6785,7 +6785,7 @@ def test_a_route_the_caller_already_made_is_not_recomputed(tmp_path, monkeypatch
     install_dir = _current_install(tmp_path, monkeypatch)
     route = INSTALL_LLAMA_PREBUILT.route_backend_request(
         backend = "auto",
-        published_repo = "LAiMai/llama.cpp",
+        published_repo = "unslothai/llama.cpp",
         published_release_tag = "",
     )
 
@@ -7086,10 +7086,10 @@ def test_the_planner_records_the_newest_release_a_mac_walked_past(monkeypatch):
     module = INSTALL_LLAMA_PREBUILT
     bundles = [
         module.PublishedReleaseBundle(
-            repo = "LAiMai/llama.cpp", release_tag = "r2", upstream_tag = "b9002"
+            repo = "unslothai/llama.cpp", release_tag = "r2", upstream_tag = "b9002"
         ),
         module.PublishedReleaseBundle(
-            repo = "LAiMai/llama.cpp", release_tag = "r1", upstream_tag = "b9001"
+            repo = "unslothai/llama.cpp", release_tag = "r1", upstream_tag = "b9001"
         ),
     ]
     monkeypatch.setattr(
@@ -7113,7 +7113,7 @@ def test_the_planner_records_the_newest_release_a_mac_walked_past(monkeypatch):
 
     monkeypatch.setattr(module, "resolve_release_asset_choice", choose)
     host = macos_host(macos_version = (14, 7))
-    _, plans = module._fork_manifest_release_plans("latest", host, "LAiMai/llama.cpp", "")
+    _, plans = module._fork_manifest_release_plans("latest", host, "unslothai/llama.cpp", "")
     assert [plan.release_tag for plan in plans] == ["r1"]
     assert plans[0].walk_back == module._core.WalkBack(release_tag = "r2", macos_version = "14.7")
 
@@ -7122,7 +7122,7 @@ def test_the_planner_records_the_newest_release_a_mac_walked_past(monkeypatch):
         "resolve_release_asset_choice",
         lambda *args, **kwargs: [types.SimpleNamespace(selection_log = [])],
     )
-    _, plans = module._fork_manifest_release_plans("latest", host, "LAiMai/llama.cpp", "")
+    _, plans = module._fork_manifest_release_plans("latest", host, "unslothai/llama.cpp", "")
     assert plans[0].release_tag == "r2"
     assert plans[0].walk_back is None
 

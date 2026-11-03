@@ -187,7 +187,7 @@ cd /workspace/host
 echo "=== fetch + convert notebook ==="
 pip install -q nbformat
 NB_REPO_REF="${NB_REPO_REF:-efe20c97a5bba3088b25fe068a4b1c98c0cf3a3a}"
-curl -fsSL "https://raw.githubusercontent.com/LAiMai/notebooks/${NB_REPO_REF}/nb/gpt-oss-(20B)-Fine-tuning.ipynb" -o nb.ipynb
+curl -fsSL "https://raw.githubusercontent.com/unslothai/notebooks/${NB_REPO_REF}/nb/gpt-oss-(20B)-Fine-tuning.ipynb" -o nb.ipynb
 test -s nb.ipynb || { echo "FAIL: nb.ipynb was not downloaded"; exit 1; }
 python - <<'PY'
 import nbformat, re

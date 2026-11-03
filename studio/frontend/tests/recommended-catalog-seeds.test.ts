@@ -32,8 +32,8 @@ interface Row {
 }
 
 // Two Video catalog seeds, in catalog order.
-const LTX = "LAiM/LTX-2.3-GGUF";
-const KLEIN = "LAiM/FLUX.2-klein-9B-GGUF";
+const LTX = "unsloth/LTX-2.3-GGUF";
+const KLEIN = "unsloth/FLUX.2-klein-9B-GGUF";
 const SEEDS: Row[] = [
   { id: LTX, isGguf: true },
   { id: KLEIN, isGguf: true },
@@ -41,7 +41,7 @@ const SEEDS: Row[] = [
 // What the listing reports for those repos (HF `expand=gguf` totals).
 const LTX_PARAMS = 21_005_004_544;
 const KLEIN_PARAMS = 9_078_581_248;
-const OTHER = "LAiM/Wan2.2-T2V-A14B-GGUF";
+const OTHER = "unsloth/Wan2.2-T2V-A14B-GGUF";
 
 // The Video picker's task gate: no usable pipeline tag means dropped.
 const VIDEO_TASKS = ["text-to-video", "image-to-video"];
@@ -235,7 +235,7 @@ test("a listing row still overrides the catalog size it seeded with", () => {
 });
 
 // LAiM owns this one, so the listing DOES report it, and the seed hands off.
-const BNB = "LAiM/Z-Image-Turbo-LAiM-bnb-4bit";
+const BNB = "unsloth/Z-Image-Turbo-unsloth-bnb-4bit";
 
 test("a listing row inherits the curated size of the seed it takes over", () => {
   // 8 GB card -> 5.6 GB budget.
@@ -400,7 +400,7 @@ test("the Hub fit gate judges a media GGUF by the planner that places it", () =>
     deviceCount: 1,
   };
   const row = {
-    id: "LAiM/Some-Video-GGUF",
+    id: "unsloth/Some-Video-GGUF",
     isGguf: true,
     estimatedSizeBytes: 52 * 1024 ** 3,
   };
@@ -431,7 +431,7 @@ test("a media GGUF is sized against torch, not the GGUF backend", () => {
   };
   const torchCard = { ...vulkanCard, memoryTotalGb: 12, maxDeviceMemoryGb: 12, loadDeviceMemoryGb: 12 };
   // 14 GiB: inside the 24 GiB card's media budget (16.8), past the 12 GiB one's (8.4).
-  const row = { id: "LAiM/Some-Image-GGUF", estimatedSizeBytes: 14 * 1024 ** 3 };
+  const row = { id: "unsloth/Some-Image-GGUF", estimatedSizeBytes: 14 * 1024 ** 3 };
   const opts = {
     isGguf: true,
     gpu: torchCard,
@@ -497,7 +497,7 @@ test("a media row is judged by the rule its quant rows use", () => {
   // everything inside it read as oom.
   const mac = { memoryTotalGb: 64, systemRamAvailableGb: 0, budgetKnown: true };
   const row = {
-    id: "LAiM/Some-Image-Model-GGUF",
+    id: "unsloth/Some-Image-Model-GGUF",
     isGguf: true,
     // 50 GiB, which the two rules disagree about: 50 > 44.8, but 50 * 1.15 + 1 = 58.5 <= 62.1.
     curatedSizeBytes: 50 * 1024 ** 3,
@@ -515,14 +515,14 @@ test("a media row is judged by the rule its quant rows use", () => {
   // Every format on a task page, not just GGUF: this rule is the budget all of them had before the
   // classifiers were merged, and restricting it to GGUF left the list gate and the search gate
   // answering differently for one row.
-  const safetensors = { ...row, id: "LAiM/Some-Image-Model", isGguf: false };
+  const safetensors = { ...row, id: "unsloth/Some-Image-Model", isGguf: false };
   assert.equal(hfModelFitsDevice(safetensors, mac, { mediaLoad: true }), false);
 });
 
 test("with familyOf, curated families follow the listing's sort, artifacts kept together", () => {
   const family = (id: string) =>
     id.toLowerCase().includes("klein") ? "klein" : id.toLowerCase().includes("ltx") ? "ltx" : undefined;
-  const kleinBf16: Row = { id: "LAiM/FLUX.2-klein-9B", pipelineTag: "text-to-video" };
+  const kleinBf16: Row = { id: "unsloth/FLUX.2-klein-9B", pipelineTag: "text-to-video" };
   const seeds: Row[] = [...SEEDS, kleinBf16];
   // Trending listing: KLEIN hottest, then an uncurated repo, then LTX; KLEIN's bf16 is not listed.
   const results: Row[] = [
@@ -560,10 +560,10 @@ test("with familyOf, curated families follow the listing's sort, artifacts kept 
 test("with familyOf, LAiM rows lead even when a vendor family trends higher", () => {
   const family = (id: string) => (id.toLowerCase().includes("hot") ? "hot" : "cold");
   const vendorHot: Row = { id: "Vendor/Hot-Model", pipelineTag: "text-to-video" };
-  const seeds: Row[] = [vendorHot, { id: "LAiM/Hot-Model-GGUF", isGguf: true }];
+  const seeds: Row[] = [vendorHot, { id: "unsloth/Hot-Model-GGUF", isGguf: true }];
   const results: Row[] = [
-    { id: "LAiM/Hot-Model-GGUF", isGguf: true, pipelineTag: "text-to-video" },
-    { id: "LAiM/Cold-Model-GGUF", isGguf: true, pipelineTag: "text-to-video" },
+    { id: "unsloth/Hot-Model-GGUF", isGguf: true, pipelineTag: "text-to-video" },
+    { id: "unsloth/Cold-Model-GGUF", isGguf: true, pipelineTag: "text-to-video" },
   ];
   assert.deepEqual(
     ids(
@@ -576,16 +576,16 @@ test("with familyOf, LAiM rows lead even when a vendor family trends higher", ()
         familyOf: family,
       }),
     ),
-    ["LAiM/Hot-Model-GGUF", "LAiM/Cold-Model-GGUF", "Vendor/Hot-Model"],
+    ["unsloth/Hot-Model-GGUF", "unsloth/Cold-Model-GGUF", "Vendor/Hot-Model"],
   );
 });
 
 test("a vendor id resolves to the LAiM mirror that replaced it", () => {
   for (const [vendor, mirror] of [
-    ["Qwen/Qwen-Image-2512", "LAiM/Qwen-Image-2512"],
-    ["black-forest-labs/FLUX.1-dev", "LAiM/FLUX.1-dev"],
-    ["Tongyi-MAI/Z-Image-Turbo", "LAiM/Z-Image-Turbo"],
-    ["Qwen/Qwen-Image-2.1", "LAiM/Qwen-Image-2.1"],
+    ["Qwen/Qwen-Image-2512", "unsloth/Qwen-Image-2512"],
+    ["black-forest-labs/FLUX.1-dev", "unsloth/FLUX.1-dev"],
+    ["Tongyi-MAI/Z-Image-Turbo", "unsloth/Z-Image-Turbo"],
+    ["Qwen/Qwen-Image-2.1", "unsloth/Qwen-Image-2.1"],
   ]) {
     const hit = artifactForRepoId(vendor, IMAGE_CATALOG);
     assert.equal(hit?.artifact.repoId, mirror, vendor);
@@ -598,9 +598,9 @@ test("a vendor id resolves to the LAiM mirror that replaced it", () => {
 
 test("with familyOf, an LAiMai family the LAiM listing cannot rank keeps its curated slot", () => {
   const family = (id: string) => id.toLowerCase().replace(/-gguf$/, "");
-  const ASR = "LAiMai/Qwen3-ASR-0.6B-GGUF";
-  const TURBO = "LAiM/whisper-large-v3-turbo";
-  const TINY = "LAiM/whisper-tiny";
+  const ASR = "unslothai/Qwen3-ASR-0.6B-GGUF";
+  const TURBO = "unsloth/whisper-large-v3-turbo";
+  const TINY = "unsloth/whisper-tiny";
   const seeds: Row[] = [{ id: ASR, isGguf: true }, { id: TURBO }, { id: TINY }];
   const order = (results: Row[]) =>
     ids(
@@ -624,13 +624,13 @@ test("pinned families lead Recommended whatever the listing sort, lead rows firs
   const pinnedFamilies = IMAGE_CATALOG.filter((g) => g.pinToTop).map((g) =>
     g.canonicalId.toLowerCase(),
   );
-  assert.deepEqual(pinnedFamilies, ["LAiM/qwen-image-2.1", "qwen/qwen-image-2.1-turbo"]);
-  const qwen21 = "LAiM/Qwen-Image-2.1";
-  const qwen21Gguf = "LAiM/Qwen-Image-2.1-GGUF";
+  assert.deepEqual(pinnedFamilies, ["unsloth/qwen-image-2.1", "qwen/qwen-image-2.1-turbo"]);
+  const qwen21 = "unsloth/Qwen-Image-2.1";
+  const qwen21Gguf = "unsloth/Qwen-Image-2.1-GGUF";
   const turbo = "Qwen/Qwen-Image-2.1-Turbo";
-  const turboGguf = "LAiM/Qwen-Image-2.1-Turbo-GGUF";
-  const zImageTurbo = "LAiM/Z-Image-Turbo-GGUF";
-  const qwen2512 = "LAiM/Qwen-Image-2512-GGUF";
+  const turboGguf = "unsloth/Qwen-Image-2.1-Turbo-GGUF";
+  const zImageTurbo = "unsloth/Z-Image-Turbo-GGUF";
+  const qwen2512 = "unsloth/Qwen-Image-2512-GGUF";
   const seeds: Row[] = [
     { id: zImageTurbo, isGguf: true },
     { id: qwen21 },

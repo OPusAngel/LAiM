@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { useHubDownloadPlan } from "../download-manager/use-hub-download-queue";
 import { HubPlanProgress } from "../download-manager/hub-plan-progress";
 import { useRequiredAssetsDownload, type AssetRuntime } from "./use-required-assets-download";
@@ -102,7 +103,7 @@ export function SafetensorsDownloadCard({
     action: () =>
       deleteCachedModel(repoId, undefined, hfToken || undefined, cachePath ?? undefined),
     resourceName: "model",
-    successMessage: () => `Deleted ${repoId}`,
+    successMessage: () => translate("uxHub.deletedpyid0", { p1: repoId }),
     onSuccess: () => {
       setDeleteRepoOpen(false);
       onChange?.();
@@ -203,14 +204,12 @@ export function SafetensorsDownloadCard({
             onOpenChange={(o) => {
               if (!o && !deleting) setDeleteRepoOpen(false);
             }}
-            title="Delete cached model?"
+            title={translate("uxHub.deleteCachedModelwm7o4")}
             deleting={deleting}
             blocked={(deleteImpact?.blocked_by.length ?? 0) > 0}
             onConfirm={() => void runDelete()}
             description={
-              <>
-                This will remove{" "}
-                <span className="font-medium text-foreground">{repoId}</span>{" "}
+              <>{translate("uxHub.thisWillRemovebmxmc", { p1: " " })}<span className="font-medium text-foreground">{repoId}</span>{" "}
                 and its downloaded files
                 {modelTotalBytes && modelTotalBytes > 0
                   ? ` (${formatBytes(modelTotalBytes)})`
@@ -224,15 +223,15 @@ export function SafetensorsDownloadCard({
       >
         <div className="relative flex h-9 min-w-0 flex-1 items-center pl-3 pr-2">
           <span className="flex items-center gap-1.5 text-ui-12 text-muted-foreground">
-            {isDownloaded && <DotTag tone="success" label="On device" />}
+            {isDownloaded && <DotTag tone="success" label={translate("settings.general.rag.onDevice")} />}
             {!isDownloaded && downloading && (
-              <DotTag tone="downloading" label="Downloading" />
+              <DotTag tone="downloading" label={translate("browser.downloads.inProgressLabel")} />
             )}
             {!isDownloaded && isPartial && !downloading && (
               <Tooltip>
                 <TooltipTrigger asChild={true}>
                   <span className="inline-flex">
-                    <DotTag tone="warning" label="Partial" />
+                    <DotTag tone="warning" label={translate("uxHub.partialxcezp")} />
                   </span>
                 </TooltipTrigger>
                 <TooltipContent side="top" sideOffset={4}>
@@ -285,10 +284,10 @@ export function SafetensorsDownloadCard({
             className={repoPeerActive ? "opacity-70" : undefined}
           />
         )}
-        {hubPlan && <span className="px-3 text-ui-12 text-muted-foreground">Downloading…</span>}
+        {hubPlan && <span className="px-3 text-ui-12 text-muted-foreground">{translate("uxHub.downloadinguamyq")}</span>}
         {showRunAction && onRun && (
           <ModelRunActionButton
-            label={`Configure and run ${repoId}`}
+            label={translate("uxHub.configureAndRunxqzjf", { p1: repoId })}
             onClick={onRun}
             loading={runPending}
           />

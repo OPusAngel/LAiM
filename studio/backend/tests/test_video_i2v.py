@@ -156,8 +156,8 @@ def test_ltx_video_09_is_refused_not_built_as_ltx2(ids):
     [
         ("Lightricks/LTX-2",),
         ("Lightricks/LTX-2.3",),
-        ("LAiM/LTX-2.3-GGUF", "distilled/ltx-2.3-22b-distilled-Q4_K_M.gguf"),
-        ("LAiM/LTX-2-FP8",),
+        ("unsloth/LTX-2.3-GGUF", "distilled/ltx-2.3-22b-distilled-Q4_K_M.gguf"),
+        ("unsloth/LTX-2-FP8",),
         ("Lightricks/LTX-Video-2",),
         # A folder named after the old model holding an LTX-2.3 file: the filename names LTX-2.
         ("/models/ltx-video", "ltx-2.3-22b-dev-Q4_K_M.gguf"),
@@ -170,7 +170,7 @@ def test_ltx2_checkpoints_are_not_refused(ids):
 @pytest.mark.parametrize(
     "ids",
     [
-        ("LAiM/LTX-2.3-GGUF", "ltx-video-2b-v0.9-Q4_K_M.gguf"),
+        ("unsloth/LTX-2.3-GGUF", "ltx-video-2b-v0.9-Q4_K_M.gguf"),
         ("/models/LTX-2.3", "ltxv-13b-0.9.7-dev-Q4_K_M.gguf"),
         ("/models/LTX-2/ltxv-2b-0.9.6-distilled",),
         ("Lightricks/LTX-2", "/models/LTX-2/LTX-Video-0.9.8-13B-distilled.safetensors"),
@@ -206,7 +206,7 @@ def test_hv15_i2v_weights_are_refused_by_the_t2v_family(repo, family):
         "hunyuanvideo-community/HunyuanVideo-1.5-Diffusers-480p_t2v",
         "hunyuanvideo-community/HunyuanVideo-1.5-Diffusers-720p_t2v",
         "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
-        "LAiM/Wan2.2-TI2V-5B-GGUF",
+        "unsloth/Wan2.2-TI2V-5B-GGUF",
         "MiniMaxAI/MiniMax-H3",
     ],
 )

@@ -21,7 +21,7 @@ import os
 from functools import partial
 import signal
 
-os.environ["LAiM_IS_PRESENT"] = "1"
+os.environ["UNSLOTH_IS_PRESENT"] = "1"
 
 import asyncio
 import queue
@@ -98,12 +98,10 @@ from core.inference.mcp_client import (
 from storage import mcp_servers_db
 from utils.account_context import account_thread, current_account_id, is_owner_context
 from utils.current_date_prompt_settings import strip_current_date_update_note
-from utils import sandbox_memory_limit, tool_result_limit
+from utils import tool_result_limit
 from core.inference.tool_confinement import ToolConfinementUnavailable, account_confinement
 from pathlib import Path
 from utils.paths.storage_roots import RetiredAccountError, ensure_dir
-
-from . import os_sandbox
 
 from loggers import get_logger
 
@@ -166,8 +164,8 @@ if sys.platform != "win32":
     except ImportError:
         pass
 
-# Raster-image allowlist for sandbox file serving, pinned equal to _SANDBOX_MEDIA_TYPES by
-# test_sandbox_files_and_storage_roots; drift means a model's photo previews on one path only. No .svg (XSS via
+# Raster-image allowlist for workdir file serving, pinned equal to _SESSION_MEDIA_TYPES by
+# test_workdir_files_and_storage_roots; drift means a model's photo previews on one path only. No .svg (XSS via
 # embedded scripts), no .html, no .pdf.
 _IMAGE_EXTS = frozenset({".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".avif"})
 
@@ -2178,12 +2176,12 @@ def _find_blocked_commands(command: str, posix: "bool | None" = None) -> set[str
     return blocked
 
 
-# Directory holding the sandbox ``sitecustomize.py`` shim (code-interpreter path remap); placed on the sandboxed
-# child's PYTHONPATH in _build_safe_env.
-_SANDBOX_SITE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sandbox_site")
+# Directory holding the workdir ``sitecustomize.py`` shim (code-interpreter path remap); placed on the workdired
+# child's PYTHONPATH in _build_bypass_env.
+_TOOL_SITE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tool_site")
 
 # "Approve for me" (permission_mode="auto") safety detection. Auto mode pauses only calls classified here as
-# potentially unsafe. The sandbox and hard blocks still apply at run time; this gate only decides prompting, and fails
+# potentially unsafe. The workdir and hard blocks still apply at run time; this gate only decides prompting, and fails
 # closed: anything not provably read-only asks.
 
 # Read-only commands allowed to run without confirmation in auto mode.
@@ -2371,7 +2369,7 @@ _AUTO_SAFE_WRAPPERS = frozenset(
     }
 )
 
-# These read-named tools launch unsandboxed Blender on a caller-selected file.
+# These read-named tools launch unrestricted Blender on a caller-selected file.
 _BLENDER_CLI_SUMMARY_TOOLS = frozenset(
     {
         "get_blendfile_summary_datablocks_for_cli",
@@ -2439,7 +2437,7 @@ _AUTO_EXEC_MCP_RUNTIME_NOUN_RE = re.compile(
     re.IGNORECASE,
 )
 # An MCP tool that runs arbitrary commands/code is as unsafe as a terminal call and runs on the server, outside the
-# terminal sandbox. Whole name segments only, so get_command and list_shells stay read.
+# terminal workdir. Whole name segments only, so get_command and list_shells stay read.
 _AUTO_EXEC_MCP_TOOL_RE = re.compile(
     r"(?:^|[_\-])(?:"
     r"exec|execute|run|eval|spawn|invoke|launch|"
@@ -2450,7 +2448,7 @@ _AUTO_EXEC_MCP_TOOL_RE = re.compile(
     r")(?:[_\-]|$)",
     re.IGNORECASE,
 )
-# A destructive verb as a whole name segment runs outside the terminal sandbox and causes data loss, so auto prompts
+# A destructive verb as a whole name segment runs outside the terminal workdir and causes data loss, so auto prompts
 # even when the arguments carry no SQL/HTTP mutation marker. Non-destructive mutations still run, and a read that
 # merely contains one as a substring (undelete) does not match on the segment boundary.
 _AUTO_DESTRUCTIVE_MCP_VERB_RE = re.compile(
@@ -3035,7 +3033,7 @@ _SENSITIVE_PATH_RE = re.compile(
     r"(?:^|[/\\])\.(?:ssh|aws|azure|gnupg|docker|kube|config/gcloud|config/gh)(?:[/\\]|$)"
     + _joined((r"|\.(?:net", r"rc|npmrc|pypirc|git-cred", r"entials|env)(?:$|[/\\.\s'\"])"))
     # User-level persistence: a write into a shell startup file or an XDG autostart/user-service dir runs on the next
-    # login, the /etc boot-hook risk without root, and the sandbox does not confine absolute paths. Rarely read in a
+    # login, the /etc boot-hook risk without root, and the workdir does not confine absolute paths. Rarely read in a
     # dev session, so gating any reference does not over-prompt.
     + r"|(?:^|[/\\\s'\"=])\.(?:bashrc|bash_profile|bash_login|bash_logout|bash_aliases"
     r"|profile|zshrc|zprofile|zshenv|zlogin|zlogout|kshrc|cshrc|tcshrc|login"
@@ -3046,7 +3044,7 @@ _SENSITIVE_PATH_RE = re.compile(
     # stored_tokens); the rest of that cache is model data, so only the credential files match.
     + r"|(?:^|[/\\])\.?huggingface[/\\](?:token|stored_tokens)(?:$|[/\\.\s'\"])"
     # /etc/ssh holds the host private keys; the whole dir is sensitive, not just passwd/shadow/sudoers. The trailing
-    # group is the system persistence set: a write there installs a boot/login/preload hook, and the sandbox keeps
+    # group is the system persistence set: a write there installs a boot/login/preload hook, and the workdir keeps
     # host-fs access. Effectively write-only in a dev session, so gating any reference does not over-prompt.
     + _joined((r"|cred", r"entials"), (r"|/etc/(?:pas", r"swd|sh", r"adow|sudoers|ssh(?:[/\\]|$)"))
     + r"|cron[^/\\]*(?:[/\\]|$)|profile\.d(?:[/\\]|$)|systemd(?:[/\\]|$)"
@@ -3116,6 +3114,22 @@ _STUDIO_CREDENTIAL_HINTS = (
 # Both survive into the tool subprocess environment, so `$STUDIO_HOME/auth` IS the path to the
 # shell, not a rewrite of it.
 _STUDIO_HOME_ENV_VARS = ("LAiM_STUDIO_HOME", "STUDIO_HOME")
+# Comparisons normalize case. The names are spelled `LAiM_STUDIO_HOME`, and uppercasing one gives
+# `LAIM_STUDIO_HOME`: a different string on POSIX, and the same key only on Windows, where
+# `os.environ` folds the case itself.
+_STUDIO_HOME_ENV_KEYS = frozenset(name.upper() for name in _STUDIO_HOME_ENV_VARS)
+
+
+def _studio_home_env_value(name: str) -> str:
+    """Value of a studio-home variable, matched case-insensitively on every platform.
+
+    `os.environ.get(name.upper())` looked up `LAIM_STUDIO_HOME` and found nothing on POSIX.
+    """
+    key = name.upper()
+    for env_name, value in os.environ.items():
+        if env_name.upper() == key:
+            return value
+    return ""
 
 
 def _same_directory(left: str, right: str) -> bool:
@@ -3148,7 +3162,7 @@ def _studio_home_variable_spellings(resolved: "str | None" = None) -> "list[str]
     """
     out: "list[str]" = []
     for var in _STUDIO_HOME_ENV_VARS:
-        value = os.environ.get(var)
+        value = _studio_home_env_value(var)
         if value and resolved:
             try:
                 points_here = _same_directory(os.path.expanduser(value), resolved)
@@ -3283,7 +3297,7 @@ _ESCAPED_WORD_CHAR_RE = re.compile(r"\\(\w)")
 # counts at the head of a path, so `file~` and `a~b` are left alone.
 _HOME_VARIABLE_RE = re.compile(r"\$\{HOME\}|\$HOME\b|%HOME%|(?<![\w~.])~(?=[/\\])", re.IGNORECASE)
 # The shell's spellings of the working directory. Bypass sets PWD to the tool workdir, so
-# `$PWD/../..` is the sandbox walked two levels up, exactly as `$HOME/../..` is.
+# `$PWD/../..` is the workdir walked two levels up, exactly as `$HOME/../..` is.
 _CWD_VARIABLE_RE = re.compile(r"\$\{PWD\}|\$PWD\b|%CD%|\$env:PWD\b", re.IGNORECASE)
 
 
@@ -3403,6 +3417,41 @@ def _assignment_inert_states(text: str) -> "list[bool]":
     return states
 
 
+def _assignment_value(text: str, value_start: int) -> str:
+    """The assignment's value, up to the first unquoted separator."""
+    index = value_start
+    quote = ""
+    escaped = False
+    while index < len(text):
+        char = text[index]
+        if escaped:
+            escaped = False
+        elif quote:
+            if char == "\\" and quote != "'":
+                escaped = True
+            elif char == quote:
+                quote = ""
+        elif char in "\"'":
+            quote = char
+        elif char in " \t;&|\n":
+            break
+        index += 1
+    return text[value_start:index]
+
+
+def _value_keeps_an_inherited_studio_home(value: str) -> bool:
+    """Whether *value* depends on the environment instead of naming a directory literally.
+
+    The shell expands the right-hand side BEFORE it assigns, so `H=$H` keeps the inherited
+    directory, `${H:-/tmp}` falls back only when the variable is unset, and
+    `LAiM_STUDIO_HOME="$HOME/.LAiM/studio"` names the install through HOME. The local expansion has
+    no value for any of those and substitutes an empty string, which left `/auth/auth.db` and hid
+    a real read of this install's directory. A literal value is the only one that can be resolved
+    here, so every reference keeps the marker instead.
+    """
+    return bool("$" in value or "`" in value or re.search(r"%[A-Za-z_]\w*%", value))
+
+
 def _rebinds_the_studio_home_first(text: str) -> bool:
     """True when *text* assigns a studio home variable BEFORE any use of it.
 
@@ -3420,13 +3469,17 @@ def _rebinds_the_studio_home_first(text: str) -> bool:
         # expansion still uses the inherited home and rewriting it hid a real credential read.
         if _assignment_is_inert(text, match.end()):
             continue
+        if _value_keeps_an_inherited_studio_home(_assignment_value(text, match.end())):
+            # The value cannot be resolved without the inherited directory, so this is no rebind
+            # and the marker scan has to see the original spelling.
+            continue
         # A PREFIX assignment (`H=/tmp cmd "$H/auth/auth.db"`) does not govern the expansion of its
         # own command's arguments: the shell expands the word list before the assignment takes
         # effect, so that read still happens under the INHERITED home. Only an assignment that
         # stands as a command of its own, terminated by a separator, rebinds what follows.
         if (
             _assignment_is_a_command_prefix(text, match.end())
-            and (os.environ.get(match.group(1).upper()) or "").strip()
+            and (_studio_home_env_value(match.group(1)) or "").strip()
         ):
             # Only when the variable is SET: that inherited value is what the expansion uses. With
             # it unset the expansion is empty, which can name no directory of this install's, so the
@@ -3534,7 +3587,7 @@ def _names_the_studio_root_itself(text: str) -> bool:
     """True when one WORD of the command is the root itself, so the walk starts there.
 
     Word by word, because the spelling appearing anywhere is not enough: the pattern in
-    `grep -rn 'cd <root>' src/` searches a project, and `<root>/projects/p/sandbox` is ordinary work
+    `grep -rn 'cd <root>' src/` searches a project, and `<root>/projects/p/workdir` is ordinary work
     inside a project. Only a bare `<root>` (with any trailing separator) is the directory whose walk
     reaches `auth/`.
     """
@@ -3785,9 +3838,9 @@ def _references_studio_credential(text: str) -> bool:
 
 # Any run of text that could be a path argument, used to read one token at a time.
 _PATH_TOKEN_RE = re.compile(r"[^\s'\"()\[\]{},;|&<>]+")
-# Only traversal is worth resolving: a relative path without `..` stays inside the sandbox.
+# Only traversal is worth resolving: a relative path without `..` stays inside the workdir.
 _TRAVERSAL_TOKEN_RE = re.compile(r"[^\s'\"()\[\]{},;|&<>]*\.\.[^\s'\"()\[\]{},;|&<>]*")
-# Used only after a `cd`, where `auth/auth.db` stops meaning "inside the sandbox".
+# Used only after a `cd`, where `auth/auth.db` stops meaning "inside the workdir".
 _RELATIVE_PATH_TOKEN_RE = re.compile(r"[^\s'\"()\[\]{},;|&<>]*[/\\][^\s'\"()\[\]{},;|&<>]*")
 # `cd DIR`, `cd /d DIR` or `pushd DIR` at a command position; `pushd` moves the cwd as `cd` does.
 # Case-insensitive because the shell is `cmd /c` on a Windows host without a trusted bash.
@@ -3809,8 +3862,8 @@ _DIRECTORY_MOVE_RE = re.compile(
     r"(?:^\s*|[;&|({\n]\s*|\b(?:then|do|else|if|elif|while|until)\s+)"
     r"(?:(?:builtin|command|exec|nohup)\s+|time\s+(?:-p\s+)?|!\s*|[A-Za-z_]\w*=[^\s;&|()]*\s+)*"
     r"(?:(?P<back>cd\s+-(?![\w/\\-])|popd\b)"
-    # A bare `cd` moves to HOME, which both sandbox envs set to the tool workdir, so the commands
-    # after it open from the sandbox again: `cd ../..; cd; cat auth/config.json` reads the
+    # A bare `cd` moves to HOME, which both workdir envs set to the tool workdir, so the commands
+    # after it open from the workdir again: `cd ../..; cd; cat auth/config.json` reads the
     # project's own file and was refused as a read of the studio root.
     r"|(?P<home>cd(?:\s+(?:-[LPe@]+|--))*\s*(?=[;&|)\n]|$))"
     r"|(?:cd|pushd)\s+(?:(?:-[LPe@]+|--|/d)\s+)*(?P<target>[^\s;&|)]+))",
@@ -3928,7 +3981,7 @@ def _uncalled_function_spans(text: str) -> "list[tuple[int, int]]":
     """Spans of function bodies *text* defines but never invokes.
 
     `helper() { cd ../..; }; cat auth/config.json` never runs the `helper`, so the `cd` in its body
-    moves nothing and the `cat` reads the project's own auth file from the unchanged sandbox.
+    moves nothing and the `cat` reads the project's own auth file from the unchanged workdir.
     Refusing that is a false positive, and it is the same rule the python walk already applies to an
     uncalled def.
     """
@@ -3993,25 +4046,25 @@ def _cwds_after_cd(workdir: str, text: str) -> "list[tuple[int, int, str]]":
     """Every working directory *text* walks into via `cd`, as `(offset, limit, directory)` in order.
 
     The offset is where that `cd` ends, because a relative path written BEFORE it opens from the
-    old directory: `cat auth/auth.db; cd ../..` reads inside the sandbox and is ordinary work.
+    old directory: `cat auth/auth.db; cd ../..` reads inside the workdir and is ordinary work.
 
-    `cd ../..` from the session sandbox lands on the Studio root, and the `auth/auth.db` that
+    `cd ../..` from the session workdir lands on the Studio root, and the `auth/auth.db` that
     follows is then the protected database under a name that matches nothing on its own.
     """
     # A set of possible directories, not one: a `cd` into a path that does not exist FAILS, and a
     # shell carries on from where it was, so `cd missing; cd ../..; cat auth/auth.db` reaches the
-    # studio root from the sandbox. Assuming every `cd` succeeds resolved the rest against a
+    # studio root from the workdir. Assuming every `cd` succeeds resolved the rest against a
     # directory the command was never in.
     # Each state carries the position it stays valid until: the end of the text for an outer `cd`,
     # the closing bracket for one inside a subshell. `(cd ../..; cd auth; sqlite3 auth.db)` needs
     # the first move to reach the second `cd`, and dropping a subshell move outright resolved that
-    # second one from the outer sandbox and missed the database.
+    # second one from the outer workdir and missed the database.
     states: "list[tuple[str, int]]" = [(workdir, len(text))]
     walked: "list[tuple[int, int, str]]" = []
     seen: "set[tuple[str, int]]" = set()
     inert = _uncalled_function_spans(text) if "(" in text or "function" in text else []
     # Where each move came FROM. `cd -` and `popd` go back there, and reading them as no move at all
-    # kept the studio root live: `cd ../..; cd -; cat auth/config.json` is back in the sandbox
+    # kept the studio root live: `cd ../..; cd -; cat auth/config.json` is back in the workdir
     # reading the project's own file, and it was refused in every mode.
     history: "list[list[tuple[str, int]]]" = []
     for match in _DIRECTORY_MOVE_RE.finditer(text):
@@ -4029,7 +4082,7 @@ def _cwds_after_cd(workdir: str, text: str) -> "list[tuple[int, int, str]]":
             # dedup that stops padding from spending the budget hid the second one.
             seen.clear()
             # Where the return LANDS is where the commands after it open from, so those directories
-            # get spans of their own: `cd ../..; cd sandbox; cd -; cat auth/auth.db` is back at the
+            # get spans of their own: `cd ../..; cd workdir; cd -; cat auth/auth.db` is back at the
             # studio root reading the real database, and restoring the state without re-opening its
             # span left nothing covering the `cat`.
             for cwd, until in states:
@@ -4039,17 +4092,16 @@ def _cwds_after_cd(workdir: str, text: str) -> "list[tuple[int, int, str]]":
                 walked.append((match.end(), until, cwd))
             continue
         if match.group("home"):
-            # A bare `cd` moves to HOME, which both sandbox envs set to the tool workdir. Unlike a
-            # `cd <path>` it cannot land anywhere else, so it RETURNS the way `cd -` does and the
-            # spans still open end here: `cd ../..; cd; cat auth/config.json` reads the project's
-            # own file. Only outside a subshell, where the move lasts to the end of the command; a
-            # bare `cd` inside `( ... )` leaves the outer directory alone.
+            # A bare `cd` moves to HOME, which both env builders keep at the operator's real
+            # profile. Commands after it open from there, so that is the state the walk resumes
+            # in. Only outside a subshell, where the move lasts to the end of the command; a bare
+            # `cd` inside `( ... )` leaves the outer directory alone.
             if any(start <= match.start() <= end for start, end in inert):
                 continue
             if _subshell_end(text, match.end()) != len(text):
                 continue
             history.append(states)
-            states = [(workdir, len(text))]
+            states = [(_host_profile_home(workdir), len(text))]
             walked = [(offset, min(limit, match.start()), cwd) for offset, limit, cwd in walked]
             seen.clear()
             continue
@@ -4106,10 +4158,10 @@ def _references_studio_credential_here(
 ) -> bool:
     """`_references_studio_credential`, plus the relative paths *text* would open from *workdir*.
 
-    The tool cwd is `<studio home>/sandbox/<session>`, a sibling of the auth directory, so
+    The tool cwd is `<studio home>/workdir/<session>`, a sibling of the auth directory, so
     `open('../../auth/auth.db')` reads the protected database while naming neither the directory
     nor a credential basename. Resolving only the `..` tokens keeps this to the one shape that can
-    leave the sandbox at all."""
+    leave the workdir at all."""
     # A command that BINDS one of these variables itself means its own directory by it, and the
     # generic `STUDIO_HOME` is registered as this install's root even when the backend does not
     # set it. Resolving the local binding first stops `STUDIO_HOME=/opt/app cat
@@ -4160,15 +4212,19 @@ def _references_studio_credential_here(
         substituted = _PROC_CWD_RE.sub(lambda _m: workdir.rstrip("/"), text)
         if substituted != text and _references_studio_credential(substituted):
             return True
-    # Bypass repoints HOME at the tool workdir, so `$HOME/../..` is the auth directory's parent.
-    # Substituted, not replaced: the raw text still carries the real-home spellings.
+    # `$PWD` is the tool workdir, whatever HOME is.
     if workdir and ("pwd" in text.lower() or "%cd%" in text.lower()):
         here = _CWD_VARIABLE_RE.sub(lambda _m: workdir.rstrip("/\\"), text)
         if here != text and _references_studio_credential_here(here, workdir):
             return True
+    # HOME is the operator's real profile in both env builders, so `$HOME/../..` climbs the real
+    # tree and the variable spelling is resolved against it. Substituted, not replaced: the raw
+    # text still carries the `~`/`$HOME` spellings the marker scan handles.
     if workdir and ("home" in text.lower() or "~" in text):
-        homed = _HOME_VARIABLE_RE.sub(lambda _m: workdir.rstrip("/\\"), text)
-        # A workdir spelling `~` would substitute to another match, so recurse only once it is gone.
+        home = _host_profile_home(workdir)
+        homed = _HOME_VARIABLE_RE.sub(lambda _m: home.rstrip("/\\"), text)
+        # A home whose own path spells `~` would substitute to another match, so recurse only once
+        # it is gone.
         if homed != text and not _HOME_VARIABLE_RE.search(homed):
             if _references_studio_credential_here(homed, workdir):
                 return True
@@ -4225,13 +4281,13 @@ def _references_studio_credential_here(
             # all, so every token below reads as an ordinary filename. Only when something actually
             # RUNS there, though: `(cd ../..; cd auth); cat config.json` enters the directory and
             # leaves without reading anything, and the `cat` outside the subshell is back in the
-            # sandbox.
+            # workdir.
             if _references_studio_credential(cwd) and text[offset:limit].strip(" \t\n;&|()"):
                 return True
             for match in _path_tokens_containing(text, "/\\"):
                 # Only what comes AFTER that `cd`: a path written before it opens from the old
                 # directory, so resolving `cat auth/auth.db; cd ../..` against the root refused a
-                # read that never left the sandbox.
+                # read that never left the workdir.
                 if match.start() < offset or match.start() >= limit:
                     continue
                 token = match.group(0)
@@ -4436,13 +4492,13 @@ def _python_builds_a_credential_path(code: str, workdir: "str | None") -> bool:
     chdir_names = _chdir_names(tree, chdir_modules)
     # A `chdir` inside a function body only moves anything if that function RUNS. An uncalled helper
     # was moving the walk for the statements after it, so a snippet that defines one and then reads
-    # its own `auth/config.json` was refused although the process never left the sandbox.
+    # its own `auth/config.json` was refused although the process never left the workdir.
     inert_moves = _calls_in_uncalled_scopes(tree)
     name_bases = _literal_name_bases(tree)
     # `root = os.open("../..", os.O_RDONLY)` names a DIRECTORY, and `os.open("auth/auth.db", ...,
     # dir_fd = root)` opens relative to it. The two calls look unrelated token by token: `../..`
     # resolves to the studio root and goes nowhere, and `auth/auth.db` is checked against the
-    # sandbox, while the kernel joins them.
+    # workdir, while the kernel joins them.
     dir_fds = _literal_directory_descriptors(tree, workdir)
     studio_env_names, foreign_env_names = _python_env_binding_names(tree)
     process_aliases, process_functions = _process_module_aliases(tree)
@@ -4466,14 +4522,14 @@ def _python_builds_a_credential_path(code: str, workdir: "str | None") -> bool:
             # `os.fchdir(fd)` names its destination by a descriptor, so there is no path to fold and
             # the move is real. The one destination that matters here is the studio root, so it is
             # added to the live states: a later `auth/auth.db` is then resolved from there as well
-            # as from the sandbox, which is the fail-closed reading the unknown target calls for.
+            # as from the workdir, which is the fail-closed reading the unknown target calls for.
             if isinstance(node.func, ast.Attribute) and node.func.attr == "fchdir":
                 root = _studio_home_for_guard()
                 if root:
                     targets = [root]
             # `os.chdir(os.environ["LAiM_STUDIO_HOME"])` names the root without spelling it, and
             # `_build_bypass_env` keeps that variable in the child, so the move is real. The fold
-            # has no value for a subscript, which left the walk sitting in the sandbox.
+            # has no value for a subscript, which left the walk sitting in the workdir.
             if not targets and _names_the_studio_home_env(argument):
                 root = _studio_home_for_guard()
                 if root:
@@ -4631,7 +4687,7 @@ def _parent_walk_targets(
     """Where a `.parent` / `.parents[n]` expression can land, resolved rather than guessed.
 
     The fold writes one marker for the whole walk, so the level count and the base come from the
-    expression itself: `Path('/tmp').parent / 'auth'` is `/auth`, not something under the sandbox.
+    expression itself: `Path('/tmp').parent / 'auth'` is `/auth`, not something under the workdir.
     """
     tail = folded.rsplit("\x02", 1)[-1].lstrip("/\\")
     left = node
@@ -4751,7 +4807,7 @@ def _launches_a_child_process(
 
     The receiver is resolved through the import aliases first. `import subprocess as sp` leaves the
     call spelled `sp.run(...)`, and reading the receiver literally missed it, so a child handed a
-    `cwd` outside the sandbox went unchecked.
+    `cwd` outside the workdir went unchecked.
     """
     func = node.func
     if isinstance(func, ast.Attribute):
@@ -4827,7 +4883,7 @@ def _call_runs_from_a_credential_directory(
     """True when a call hands a child process a directory that makes one of its paths a credential.
 
     `subprocess.run([...], cwd = "../..")` leaves this process where it is, so the walk above never
-    moves, and each literal argument was tested against the sandbox instead of against the
+    moves, and each literal argument was tested against the workdir instead of against the
     directory the child actually runs from.
 
     Restricted to the APIs that actually start a process. `cwd` is an ordinary keyword name, and
@@ -4898,7 +4954,7 @@ def _chdir_names(tree, modules: "set[str] | None" = None) -> "set[str]":
     modules = modules or {"os", "contextlib"}
     # The BARE name only counts once an import binds it. A snippet's own `def chdir(path)` is an
     # ordinary function, and treating a call to it as a move refused code that never leaves the
-    # sandbox. The qualified `os.chdir(...)` form does not go through this set.
+    # workdir. The qualified `os.chdir(...)` form does not go through this set.
     names: "set[str]" = set()
     defined_locally = any(
         isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == "chdir"
@@ -5037,7 +5093,7 @@ def _variable_points_at_this_install(name: str) -> bool:
     in the child, so `open(os.environ["STUDIO_HOME"] + "/auth/config.json")` reads the other
     application. Unset stays True: the child cannot expand it either, so nothing is granted.
     """
-    value = (os.environ.get(name.upper()) or "").strip()
+    value = (_studio_home_env_value(name) or "").strip()
     if not value:
         return True
     root = _studio_home_for_guard()
@@ -5065,7 +5121,7 @@ def _names_the_studio_home_env(node) -> bool:
             named == "environ"
             and isinstance(key, ast.Constant)
             and isinstance(key.value, str)
-            and key.value.upper() in _STUDIO_HOME_ENV_VARS
+            and key.value.upper() in _STUDIO_HOME_ENV_KEYS
             and _variable_points_at_this_install(key.value)
         )
     if isinstance(node, ast.Call) and node.args:
@@ -5075,7 +5131,7 @@ def _names_the_studio_home_env(node) -> bool:
             called in ("get", "getenv")
             and isinstance(first, ast.Constant)
             and isinstance(first.value, str)
-            and first.value.upper() in _STUDIO_HOME_ENV_VARS
+            and first.value.upper() in _STUDIO_HOME_ENV_KEYS
             and _variable_points_at_this_install(first.value)
         )
     return False
@@ -5343,7 +5399,7 @@ def _tree_nodes(tree) -> list:
 
 
 def _references_sensitive_path(text: str) -> bool:
-    """True if a command or string literal reads a credential path or escapes the sandbox workdir
+    """True if a command or string literal reads a credential path or escapes the workdir workdir
     via parent traversal."""
     if len(text) > _MAX_PATH_SCAN_CHARS:
         return True
@@ -5593,7 +5649,7 @@ def _shell_assignment_expansions(
                 continue
         if _shell_assign_value_self_references(var, val):
             # Studio home vars stay references: `H=$H; cat "$H/auth/auth.db"` must still name the install.
-            if var.upper() in _STUDIO_HOME_ENV_VARS:
+            if var.upper() in _STUDIO_HOME_ENV_KEYS:
                 env.setdefault(var, "${" + var + "}")
             val = _SHELL_PARAM_VALUE_OP_RE.sub(repl_default, val)
             env.setdefault(var, "")
@@ -5985,7 +6041,7 @@ def _dynamic_name_hits_sensitive(folded) -> bool:
 
 def _folded_is_sensitive(folded) -> bool:
     """A folded path is sensitive if it names a credential file, has a dynamic segment (NUL)
-    directly under a sensitive directory, walks out of the sandbox via a pathlib .parent escape
+    directly under a sensitive directory, walks out of the workdir via a pathlib .parent escape
     (\x02), or is a glob that could resolve to a credential path."""
     if not folded:
         return False
@@ -6006,7 +6062,7 @@ def _folded_is_sensitive(folded) -> bool:
 
 
 def _command_references_sensitive(command: str) -> bool:
-    """True if a shell command reads/writes a credential path or escapes the sandbox workdir (../),
+    """True if a shell command reads/writes a credential path or escapes the workdir workdir (../),
     after undoing the shell expansions that would hide it: quotes/backslash escapes,
     brace/parameter/ANSI-C expansion and NAME=value prefixes."""
     stripped = _SHELL_QUOTE_RE.sub("", command).replace("\\", "")
@@ -6036,32 +6092,12 @@ def _cmd_reading(command: str) -> str:
     return _CMD_CONTROL_RE.sub(" & ", text)
 
 
-# The request's sandbox level while a call is classified: Low runs the Terminal on the host shell,
-# so the classifier must not probe for (or assume) the isolated cmd profile.
-_classifying_sandbox_level: "ContextVar[str | None]" = ContextVar(
-    "LAiM_classifying_sandbox_level", default = None
-)
-
-
-@contextlib.contextmanager
-def classifying_under(sandbox_level: "str | None"):
-    token = _classifying_sandbox_level.set(sandbox_level)
-    try:
-        yield
-    finally:
-        _classifying_sandbox_level.reset(token)
-
-
-# Both run the command through cmd.exe: the isolated one inside MXC, the fallback on a host without Git Bash.
-_CMD_PROFILES = ("cmd_isolated", "cmd_fallback")
-
-
 def _reads_differently_under_cmd(command: str) -> bool:
     """True when cmd.exe will run ``command`` and would split it unlike bash."""
     return (
         sys.platform == "win32"
         and _cmd_reading(command) != command
-        and _terminal_profile(_classifying_sandbox_level.get() == "low") in _CMD_PROFILES
+        and _terminal_profile() == "cmd"
     )
 
 
@@ -6077,7 +6113,7 @@ def _terminal_is_potentially_unsafe(command: str) -> bool:
     # which is the safe direction.
     if ">" in command or "`" in command or "$(" in command or "<(" in command:
         return True
-    # Reads that escape the sandbox workdir (../) or hit credential paths are not "safe" reads; ask before running
+    # Reads that escape the workdir workdir (../) or hit credential paths are not "safe" reads; ask before running
     # them.
     if _command_references_sensitive(command):
         return True
@@ -6107,14 +6143,14 @@ def _terminal_is_potentially_unsafe(command: str) -> bool:
     if any(_token_command_base(t) in ("find", "fd") for t in scan_tokens):
         if any(t.split("=", 1)[0] in _AUTO_UNSAFE_FIND_LIKE_FLAGS for t in scan_tokens):
             return True
-    # A recursive reader rooted outside the sandbox reads host files, as do the always-recursive walkers (tree /home,
-    # du /); ask. Bash expands ~/~user to a home dir after this decision, so a tilde root is a sandbox escape too.
-    # An absolute operand outside the silent roots reaches the user's own filesystem; the sandbox workdir only
+    # A recursive reader rooted outside the workdir reads host files, as do the always-recursive walkers (tree /home,
+    # du /); ask. Bash expands ~/~user to a home dir after this decision, so a tilde root is a workdir escape too.
+    # An absolute operand outside the silent roots reaches the user's own filesystem; the workdir workdir only
     # contains RELATIVE paths. Run unconditionally, matching _terminal_is_high_risk: gating this on a leading / or ~
     # would skip every Windows spelling (C:\..., \\server\share) and every attached redirection, leaving the stricter
     # classifier weaker than the looser one.
-    if _terminal_reaches_outside_sandbox(tokens, command) or (
-        scan_tokens is not tokens and _terminal_reaches_outside_sandbox(scan_tokens, command)
+    if _terminal_reaches_outside_workdir(tokens, command) or (
+        scan_tokens is not tokens and _terminal_reaches_outside_workdir(scan_tokens, command)
     ):
         return True
     if any(t.startswith("/") or t.startswith("~") for t in scan_tokens):
@@ -6239,7 +6275,7 @@ def _python_is_potentially_unsafe(code: str) -> bool:
     """Classify python-tool code for auto mode (fail closed)."""
     if not code or not code.strip():
         return False
-    # Anything the sandbox's static analysis already objects to would be refused at execution time; surface it as a
+    # Anything the workdir's static analysis already objects to would be refused at execution time; surface it as a
     # confirmation first.
     if _check_code_safety(code) is not None:
         return True
@@ -6248,7 +6284,7 @@ def _python_is_potentially_unsafe(code: str) -> bool:
         return False  # runs into a normal traceback; nothing to guard
     # An absolute read/write outside the silent roots leaves the session workdir, which only ever holds relative
     # paths. Kept in step with the high-risk gate so the two classifiers agree on filesystem scope.
-    if _python_reaches_outside_sandbox(tree, code):
+    if _python_reaches_outside_workdir(tree, code):
         return True
     # Names bound to the builtin open (f = open; f, _ = (open, print)) so an aliased writer call is still checked
     # below. builtins_aliases tracks `import builtins [as b]` for builtins.exec/eval.
@@ -6923,7 +6959,7 @@ def _python_is_potentially_unsafe(code: str) -> bool:
                     # writes but ZipFile(name) reads.
                     if func.attr in _ARCHIVE_CTOR_NAMES and _builtin_open_writes(node):
                         return True
-                    # Enumerating a directory outside the sandbox reads host filenames (and enables reading their
+                    # Enumerating a directory outside the workdir reads host filenames (and enables reading their
                     # contents) the direct /etc/passwd checks would prompt for. Gate when the target dir folds to an
                     # absolute/tilde/sensitive path; a relative dir stays safe, and an unresolved dynamic dir is left
                     # to other checks.
@@ -6962,7 +6998,7 @@ def _python_is_potentially_unsafe(code: str) -> bool:
     return False
 
 
-# Cloud-metadata / link-local hosts (mirrors the sandbox SSRF blocklist): a read-named HTTP MCP tool pointed at one
+# Cloud-metadata / link-local hosts (mirrors the workdir SSRF blocklist): a read-named HTTP MCP tool pointed at one
 # reads instance credentials, so it asks.
 _MCP_METADATA_HOST_RE = re.compile(
     r"169\.254\.\d{1,3}\.\d{1,3}|"
@@ -6987,7 +7023,7 @@ _MCP_CREDENTIAL_KEY_RE = re.compile(
 
 def _mcp_arguments_reference_studio_credential(arguments) -> bool:
     """True if an MCP call's arguments point at Studio's auth directory. An MCP server runs outside
-    the terminal sandbox, so a filesystem server would read the credential the local tools refuse.
+    the terminal workdir, so a filesystem server would read the credential the local tools refuse.
     Prose fields are skipped for the same reason they are below: an issue body that mentions the
     filename is text to store, not a file to open."""
 
@@ -7472,7 +7508,7 @@ _HIGH_RISK_COMMANDS = frozenset(
         "sc",
         "launchctl",
         # container/VM runtimes: the daemon acts with host privileges, so `docker run -v /:/host ...` writes the real
-        # filesystem, escaping the child's workdir and rlimit sandbox. chroot/nsenter/unshare cross a privilege or
+        # filesystem, escaping the child's workdir and rlimit workdir. chroot/nsenter/unshare cross a privilege or
         # namespace boundary and then exec a nested command, so the wrapper hides the real action.
         "chroot",
         "nsenter",
@@ -7554,7 +7590,7 @@ _HIGH_RISK_ARG_EXEC_FLAGS = frozenset({"--checkpoint-action", "--rsh", "--rsync-
 # ...but only for the utilities that actually run them; otherwise a mere mention (printf '%s' --rsh, a grep for the
 # flag name) would prompt.
 _ARG_EXEC_FLAG_OWNERS = frozenset({"tar", "gtar", "bsdtar", "rsync", "scp", "sftp"})
-# An interpreter run as a network server (python -m http.server, uvicorn app:api) listens on a socket; the sandbox has
+# An interpreter run as a network server (python -m http.server, uvicorn app:api) listens on a socket; the workdir has
 # no network namespace, so the session workdir becomes reachable wherever that port is exposed. Position-scoped, since
 # a bare mention (pip install uvicorn) starts no listener.
 _LISTENER_PY_MODULES = (
@@ -7625,7 +7661,7 @@ _PROC_SUBST_EXEC_RE = re.compile(
     r"[^\n]*<\("
     r"|(?:^|[;&|\n(]|&&|\|\|)\s*\.\s+<\("
 )
-# Network clients beyond curl/wget that open a socket to a remote host: the sandbox has no network namespace, so they
+# Network clients beyond curl/wget that open a socket to a remote host: the workdir has no network namespace, so they
 # can exfil the workdir or fetch and run remote code. Command position only, so a filename argument (scp
 # ./ssh_notes.txt) is not misread as the command.
 _NETWORK_CLIENT_AT_CMD_RE = re.compile(
@@ -8260,7 +8296,7 @@ _CLIENT_WRAPPER_PREFIX = (
     r"(?:(?:env|command|timeout|nohup|nice|ionice|stdbuf|setsid|exec)\s+"
     r"(?:-\S+\s+|\d+(?:\.\d+)?[smhd]?\s+)*)*"
 )
-# The terminal sandbox shares the backend's installed environment, so removing a package (pip uninstall torch) breaks
+# The terminal workdir shares the backend's installed environment, so removing a package (pip uninstall torch) breaks
 # the running process. Installing does not, so only the removal verbs are gated.
 _PKG_REMOVE_AT_CMD_RE = re.compile(
     r"(?:^|[;&|\n(]|&&|\|\|)\s*(?:[A-Za-z_]\w*=\S*\s+)*(?:\S*/)?"
@@ -8471,7 +8507,7 @@ def _terminal_is_high_risk(command: str, _depth: int = 0) -> bool:
         and _terminal_is_high_risk(_cmd_reading(command))
     ):
         return True
-    # A credential/secret path read or write, or a sandbox escape (../), asks.
+    # A credential/secret path read or write, or a workdir escape (../), asks.
     if _command_references_sensitive(command):
         return True
     # A bare redirection with no command (`> notes.txt`, `: > notes.txt`) truncates the file to zero bytes, the same
@@ -8544,10 +8580,10 @@ def _terminal_is_high_risk(command: str, _depth: int = 0) -> bool:
             tokens = list(lexer)
         except ValueError:
             return True
-        # The sandbox directory is a working directory, not a boundary, so an absolute operand outside the silent
+        # The workdir directory is a working directory, not a boundary, so an absolute operand outside the silent
         # roots reads or rewrites the user's own files. Runs per expansion pass, so a path assembled from a variable
         # is judged on its resolved form too.
-        if _terminal_reaches_outside_sandbox(tokens, text):
+        if _terminal_reaches_outside_workdir(tokens, text):
             return True
         recursive = any(
             t in ("-R", "--recursive")
@@ -8580,7 +8616,7 @@ def _terminal_is_high_risk(command: str, _depth: int = 0) -> bool:
             t.split("=", 1)[0] in _HIGH_RISK_ARG_EXEC_FLAGS for t in tokens
         ):
             return True
-        # An interpreter serving on the network exposes the session workdir; the sandbox keeps no network namespace.
+        # An interpreter serving on the network exposes the session workdir; the workdir keeps no network namespace.
         if _LISTENER_PY_MODULE_RE.search(text) or _LISTENER_BIN_AT_CMD_RE.search(text):
             return True
         expect_command = True  # at the start of a command (after a separator)
@@ -9122,7 +9158,7 @@ def _terminal_is_high_risk(command: str, _depth: int = 0) -> bool:
 
 
 def _python_is_high_risk(code: str) -> bool:
-    """High-risk python for auto mode: code the sandbox static analysis would refuse anyway (shell
+    """High-risk python for auto mode: code the workdir static analysis would refuse anyway (shell
     escape, network egress, a sensitive read), that reads/writes a credential path, or that runs
     dynamically built code past those static checks. Ordinary in-workdir file writes and
     computation run without a prompt."""
@@ -9138,7 +9174,7 @@ def _python_is_high_risk(code: str) -> bool:
         return _references_sensitive_path(code)
     # The session workdir confines RELATIVE paths only: an absolute path outside the silent roots reads or rewrites
     # the user's own files, which is the same loss the terminal `rm` gate already asks about.
-    if _python_reaches_outside_sandbox(tree, code):
+    if _python_reaches_outside_workdir(tree, code):
         return True
     # A credential basename only names a file when it appears in a string, so match it there rather than across the
     # source: `credentials = {}` and `def load_credentials()` do no I/O and must not prompt.
@@ -9465,7 +9501,7 @@ def is_high_risk_tool_call(name: str, arguments: dict) -> bool:
         # Reduce every separator the name uses to `_`, camelCase boundaries included, so the
         # term-boundary regexes below see one vocabulary.
         tool_name = _CAMEL_CASE_RE.sub("_", _MCP_TERM_SEPARATOR_RE.sub("_", tool_name))
-        # An execution tool runs arbitrary commands on the MCP server, outside the terminal sandbox; a credential noun
+        # An execution tool runs arbitrary commands on the MCP server, outside the terminal workdir; a credential noun
         # discloses secrets; a read/write pointed at a sensitive path is a sensitive access. All prompt, while
         # ordinary create/update/delete MCP calls run.
         _reads = bool(_AUTO_READ_MCP_VERB_RE.search(tool_name))
@@ -9531,7 +9567,7 @@ def _windows_program_roots() -> list[str]:
     (SHGetKnownFolderPath). Fails closed (returns ``[]``) if the API is unavailable: env vars
     (%ProgramFiles%, even %SystemDrive%) are caller-overrideable and could relocate the trust
     boundary. On any real Windows host shell32 is present, so this only returns empty where the
-    sandbox git-PATH feature is not needed anyway (#7317)."""
+    workdir git-PATH feature is not needed anyway (#7317)."""
     roots: list[str] = []
     try:
         import ctypes
@@ -9605,12 +9641,11 @@ def _is_trusted_windows_program_dir(path: str) -> bool:
 
 # not dot-named: the walks skip dot-dirs, which would hide a model's /tmp write. not "tmp": too common in a workspace,
 # and adopting one is what broke the walks.
-# Shared with os_sandbox: a drifted name would silently disable the scan's exemption.
-_SANDBOX_TEMP_DIRNAME = os_sandbox.TOOL_TEMP_DIRNAME
+_TOOL_TEMP_DIRNAME = "LAiM-tmp"
 
 
-def _sandbox_temp_dir(workdir: str) -> str:
-    """The scratch directory for a sandboxed child, created when missing.
+def _child_temp_dir(workdir: str) -> str:
+    """The scratch directory for a tool child process, created when missing.
 
     Inside the workdir, not the workdir itself: Git for Windows mounts /tmp at %TEMP% (the msys2
     ``usertemp`` fstab entry), so pointing TEMP at the workdir made /tmp its shortest POSIX name and
@@ -9621,18 +9656,18 @@ def _sandbox_temp_dir(workdir: str) -> str:
     every tempfile call in the child. os.mkdir, never os.makedirs, so a workdir deleted mid-call is
     not silently recreated.
     """
-    temp_dir = os.path.join(workdir, _SANDBOX_TEMP_DIRNAME)
+    temp_dir = os.path.join(workdir, _TOOL_TEMP_DIRNAME)
     try:
         os.mkdir(temp_dir, 0o700)
     except FileExistsError:
-        if not _reusable_sandbox_temp_dir(temp_dir, workdir):
+        if not _reusable_child_temp_dir(temp_dir, workdir):
             return workdir
     except OSError:
         return workdir
     return temp_dir
 
 
-def _is_sandbox_temp_dir(temp_dir: str, workdir: str) -> bool:
+def _is_child_temp_dir(temp_dir: str, workdir: str) -> bool:
     """Whether *temp_dir* is the workdir's own scratch directory.
 
     Exact stored spelling, because the walks read the name off os.walk: on a case-insensitive volume
@@ -9642,11 +9677,11 @@ def _is_sandbox_temp_dir(temp_dir: str, workdir: str) -> bool:
     """
     try:
         with os.scandir(workdir) as entries:
-            if not any(entry.name == _SANDBOX_TEMP_DIRNAME for entry in entries):
+            if not any(entry.name == _TOOL_TEMP_DIRNAME for entry in entries):
                 return False
         # realpath, not islink: a Windows junction is not a link to either.
         if os.path.realpath(temp_dir) != os.path.join(
-            os.path.realpath(workdir), _SANDBOX_TEMP_DIRNAME
+            os.path.realpath(workdir), _TOOL_TEMP_DIRNAME
         ):
             return False
     except OSError:
@@ -9654,19 +9689,19 @@ def _is_sandbox_temp_dir(temp_dir: str, workdir: str) -> bool:
     return os.path.isdir(temp_dir)
 
 
-def _reusable_sandbox_temp_dir(temp_dir: str, workdir: str) -> bool:
+def _reusable_child_temp_dir(temp_dir: str, workdir: str) -> bool:
     """Whether an existing entry may serve as the scratch directory.
 
     Identity plus writability, since tempfile abandons an unwritable TMPDIR for the platform
-    default. Path accounting asks _is_sandbox_temp_dir instead: which directory a segment sits in
+    default. Path accounting asks _is_child_temp_dir instead: which directory a segment sits in
     does not depend on writability.
     """
-    return _is_sandbox_temp_dir(temp_dir, workdir) and os.access(temp_dir, os.W_OK | os.X_OK)
+    return _is_child_temp_dir(temp_dir, workdir) and os.access(temp_dir, os.W_OK | os.X_OK)
 
 
-# Git for Windows starts hooks, the pager and the editor through its MSYS sh.exe, which cannot start inside MXC, so a
-# hook turns every commit into a failure and an editor hangs the call. Compatibility defaults, not a boundary: a
-# command can override them with git -c, and MXC is what confines it. core.hooksPath=NUL names no hook at all.
+# Git for Windows starts hooks, the pager and the editor through its MSYS sh.exe, so a hook turns every
+# commit into a failure and an editor hangs the call. Compatibility defaults, not a boundary: a command can
+# override them with git -c. core.hooksPath=NUL names no hook at all.
 _ISOLATED_CMD_GIT_ENV = {
     "GIT_CONFIG_COUNT": "1",
     "GIT_CONFIG_KEY_0": "core.hooksPath",
@@ -9679,100 +9714,25 @@ _ISOLATED_CMD_GIT_ENV = {
 }
 
 
-def _build_safe_env(workdir: str, shell: "str | None" = None) -> dict[str, str]:
-    """Build a minimal, credential-free environment for sandboxed subprocesses.
+def _host_profile_home(workdir: str) -> str:
+    """The real user profile the tools run on behalf of.
 
-    Whitelist-built from scratch (parent env NOT inherited): only
-    PATH/HOME/TMPDIR/LANG/TERM/PYTHONIOENCODING/PYTHONPATH (+VIRTUAL_ENV or Windows SystemRoot and a
-    minimal PATHEXT) reach the child; all credential vars (HF_TOKEN, AWS_*, etc.) are absent. HOME
-    (and on Windows HOMEDRIVE/HOMEPATH) points at the sandbox workdir so SDKs can't read the
-    operator's cached creds, and the temp vars at _sandbox_temp_dir just inside it. PYTHONPATH
-    carries only the sandbox sitecustomize shim directory.
-
-    PATH starts with the LAiM interpreter / venv and OS system dirs so ``python``/``pip`` stay
-    pinned. On Windows only, Git-for-Windows install dirs from the host PATH are appended so bare
-    ``git`` resolves (#7317). User-writable host PATH entries are never inherited: they could shadow
-    auto-safe terminal commands.
-
-    ``shell="cmd_isolated"`` is the Windows MXC Terminal on cmd.exe: Git Bash's userland stays off
-    PATH and git gets the non-interactive settings in _ISOLATED_CMD_GIT_ENV.
+    HOME used to point at the session workdir, which made ``~/Desktop`` resolve inside
+    ``<studio home>/workdir/<chat>``: a model asked to create a folder on the desktop
+    reported success and nothing appeared where the user could see it. The workspace
+    directory stays the cwd (relative writes, file cards), but the home directory is the
+    operator's own so absolute and ``~`` paths reach the machine.
     """
-    # Start from the running interpreter's dir so 'python'/'pip' resolve to the same environment the LAiM server
-    # runs in.
-    exe_dir = os.path.dirname(sys.executable)
-    path_entries = [exe_dir] if exe_dir else []
+    home = ""
+    try:
+        home = os.path.expanduser("~")
+    except Exception:  # noqa: BLE001 - a broken HOME must not take the tool away
+        home = ""
+    if not home or home == "~":
+        home = os.environ.get("USERPROFILE") or os.environ.get("HOME") or ""
+    return home if home and os.path.isdir(home) else workdir
 
-    # If a virtualenv is active, include its bin/Scripts directory.
-    venv = os.environ.get("VIRTUAL_ENV")
-    if venv:
-        venv_bin = os.path.join(venv, "Scripts" if sys.platform == "win32" else "bin")
-        if venv_bin not in path_entries:
-            path_entries.append(venv_bin)
 
-    if sys.platform == "win32":
-        sysroot = os.environ.get("SystemRoot", r"C:\Windows")
-        # Ahead of System32 and its DOS twins (bare `find` would hit FIND.EXE, not GNU find), behind the interpreter
-        # dirs so a Git-shipped python.exe cannot shadow the environment this server runs in.
-        if shell != "cmd_isolated":
-            path_entries.extend(_windows_bash_userland_dirs())
-        path_entries.extend([os.path.join(sysroot, "System32"), sysroot])
-    else:
-        path_entries.extend(["/usr/local/bin", "/usr/bin", "/bin"])
-
-    # Windows Git installs live outside System32; inherit the dir of the git the HOST shell resolves, but ONLY when it
-    # sits under a system install root. A user-writable dir (Scoop/Choco shims) is refused: it would let an attacker
-    # drop rg.exe/jq.exe beside git and have an auto-approved bare command execute it (#7317).
-    git_ext = ""
-    if sys.platform == "win32":
-        # Append the CANONICAL (realpath) trusted git dir, scanning past any untrusted user shim that sorts first on
-        # PATH; the canonical path cannot be retargeted via a junction after the trust check.
-        _trusted_git_dir, git_ext = _resolve_trusted_windows_git()
-        if not _trusted_git_dir and shell == "cmd_isolated":
-            # Git installed for Git Bash only is not on PATH; bash found it, so use its Git\cmd.
-            _trusted_git_dir, git_ext = _windows_bash_git_cmd_dir(), ".EXE"
-        if _trusted_git_dir:
-            path_entries.append(_trusted_git_dir)
-
-    # Deduplicate, preserving order.
-    deduped = list(dict.fromkeys(p for p in path_entries if p))
-
-    temp_dir = _sandbox_temp_dir(workdir)
-    env = {
-        "PATH": os.pathsep.join(deduped),
-        "HOME": workdir,
-        "TMPDIR": temp_dir,
-        "LANG": os.environ.get("LANG", "C.UTF-8"),
-        "TERM": "dumb",
-        "PYTHONIOENCODING": "utf-8",
-        # A GUI backend opens a native window and blocks plt.show() until closed.
-        "MPLBACKEND": "Agg",
-        # sitecustomize shim: remaps ChatGPT code-interpreter paths (/mnt/data etc.) onto the sandbox CWD; see
-        # sandbox_site/sitecustomize.py.
-        "PYTHONPATH": _SANDBOX_SITE_DIR,
-    }
-    if venv:
-        env["VIRTUAL_ENV"] = venv
-    # Windows needs SystemRoot for Python/subprocess to work.
-    if sys.platform == "win32":
-        env["SystemRoot"] = os.environ.get("SystemRoot", r"C:\Windows")
-        # Windows tempfile / native SDKs honour TEMP/TMP, not TMPDIR; without these a child falls back to GetTempPath
-        # and writes outside the workdir.
-        env["TEMP"] = temp_dir
-        env["TMP"] = temp_dir
-        # Path.home() ignores HOME on Windows; a workdir USERPROFILE would instead send pip's cache to .\pip in the cwd.
-        env["HOMEDRIVE"], env["HOMEPATH"] = os.path.splitdrive(workdir)
-        # Restrict PATHEXT so cwd .BAT/.CMD cannot hijack bare names (#7317).
-        pathext = ".EXE;.COM"
-        if git_ext and git_ext not in (".EXE", ".COM"):
-            # Keep the host git launcher (e.g. a .CMD shim) resolvable.
-            pathext += ";" + git_ext
-        env["PATHEXT"] = pathext
-        # cmd/CreateProcess search cwd before PATH for bare names; disable so a workdir rg.exe/git.exe cannot shadow
-        # auto-approved commands.
-        env["NoDefaultCurrentDirectoryInExePath"] = "1"
-        if shell == "cmd_isolated":
-            env.update(_ISOLATED_CMD_GIT_ENV)
-    return env
 
 
 # Credential env vars dropped even in bypass mode so tool code cannot read the operator's keys. Over-strips on purpose
@@ -9841,8 +9801,9 @@ _URL_USERINFO_RE = re.compile(r"://[^/\s@]+@")
 # The Name fields (SharedAccessKeyName=) don't match since "=" must follow the keyword.
 _SECRET_VALUE_RE = re.compile(r"(?i)(?:password|pwd|accountkey|accesskey)\s*=\s*[^\s;]")
 
-# Names holding no secret value but pointing SDKs at the operator's real home/cache/config (cached tokens, cred
-# files), defeating the HOME repoint. Dropped in bypass mode so tools fall back to the empty repointed HOME.
+# Names holding no secret value but pointing SDKs at a cache/config (cached tokens, cred files) in the operator's
+# real home. Stripped in bypass mode: HOME itself is real so `~` works, but an explicit pointer would hand the child
+# a credential file it has no reason to read. HOMEDRIVE/HOMEPATH go too; USERPROFILE still resolves Path.home().
 _BYPASS_ENV_CRED_LOCATION_NAMES = frozenset(
     {
         # HF cache roots (token lives under $HF_HOME/token)
@@ -9886,8 +9847,6 @@ _BYPASS_ENV_CRED_LOCATION_NAMES = frozenset(
         "HOMEPATH",
     }
 )
-# Windows profile dirs SDKs read creds under; repointed (not dropped) since callers expect them present.
-_BYPASS_ENV_WINDOWS_PROFILE_VARS = ("USERPROFILE", "APPDATA", "LOCALAPPDATA")
 
 
 def _is_secret_env_name(name: str) -> bool:
@@ -9918,8 +9877,9 @@ def _is_secret_env_value(value: str) -> bool:
 
 
 def _build_bypass_env(workdir: str) -> dict[str, str]:
-    """Env for bypass exec: full host env minus credential vars, with HOME at the workdir and TMPDIR
-    just inside it so SDKs cannot read cached creds.
+    """Env for bypass exec: full host env minus credential vars, with the temp vars just inside the
+    workdir. HOME and the Windows profile vars stay the operator's real ones, so ``~/Desktop`` and
+    SDK caches resolve where the user sees them.
 
     Stripping the child env is necessary but not sufficient (a same-UID child can read the parent's
     env via procfs), so callers also harden the parent (see _harden_parent_against_proc_env_leak).
@@ -9931,100 +9891,52 @@ def _build_bypass_env(workdir: str) -> dict[str, str]:
         and not _is_secret_env_value(v)
         and not _is_cred_location_env_name(k)
     }
-    temp_dir = _sandbox_temp_dir(workdir)
-    env["HOME"] = workdir
+    temp_dir = _child_temp_dir(workdir)
+    env["HOME"] = _host_profile_home(workdir)
     env["TMPDIR"] = temp_dir
     # Windows tempfile / SDKs honour TEMP/TMP, not TMPDIR; repoint all three so the bypassed tool writes under the
-    # per-session sandbox dir on every OS.
+    # per-session workdir dir on every OS.
     env["TEMP"] = temp_dir
     env["TMP"] = temp_dir
-    # sitecustomize path shim (see _build_safe_env). Bypass inherits the operator's PYTHONPATH, so prepend rather than
+    # sitecustomize path shim (see _build_bypass_env). Bypass inherits the operator's PYTHONPATH, so prepend rather than
     # replace.
     inherited_pythonpath = env.get("PYTHONPATH", "")
     env["PYTHONPATH"] = os.pathsep.join(
-        part for part in (_SANDBOX_SITE_DIR, inherited_pythonpath) if part
+        part for part in (_TOOL_SITE_DIR, inherited_pythonpath) if part
     )
-    # Windows SDKs read creds under the profile dirs, not $HOME; repoint set ones to the workdir (HOMEDRIVE/HOMEPATH
-    # are dropped above).
-    for var in _BYPASS_ENV_WINDOWS_PROFILE_VARS:
-        if var in os.environ:
-            env[var] = workdir
     env.setdefault("MPLBACKEND", "Agg")
     return env
 
 
-# Read by _sandbox_preexec after the fork, so it is resolved here first: the settings store cannot be read in the child.
-_sandbox_as_bytes = 8 * 1024 * 1024 * 1024
 
 
-def _refresh_sandbox_memory_limit() -> None:
-    global _sandbox_as_bytes
-    _sandbox_as_bytes = sandbox_memory_limit.memory_limit_bytes()
 
 
-def _sandbox_preexec():
-    """Best-effort sandbox setup for sandboxed subprocesses (modules are resolved at import time so
-    the forked child runs no imports)."""
-    try:
-        os.setsid()
-    except OSError:
-        pass
 
-    try:
-        os.umask(0o077)
-    except OSError:
-        pass
 
-    if _libc is not None:
-        try:
-            _libc.prctl(38, 1, 0, 0, 0)  # PR_SET_NO_NEW_PRIVS
-        except (OSError, AttributeError):
-            pass
+SESSION_PACKAGES_RELPATH = ".LAiM-packages"
 
-        try:
-            _libc.prctl(1, 9, 0, 0, 0)  # PR_SET_PDEATHSIG = SIGKILL
-        except (OSError, AttributeError):
-            pass
 
-        # CLONE_NEWNET not applied: with userns enabled it blocks all egress, including allowlisted hosts. Network
-        # policy is enforced by the AST host check and the bash blocklist.
-
-    if _resource is not None:
-        # RLIMIT_NPROC is per-real-UID, so the cap is well above normal usage.
-        try:
-            nproc = int(os.environ.get("LAiM_STUDIO_SANDBOX_NPROC", "10000"))
-            _resource.setrlimit(_resource.RLIMIT_NPROC, (nproc, nproc))
-        except (ValueError, OSError, AttributeError):
-            pass
-        try:
-            _resource.setrlimit(_resource.RLIMIT_FSIZE, (100 * 1024 * 1024, 100 * 1024 * 1024))
-        except (ValueError, OSError):
-            pass
-        try:
-            as_bytes = _sandbox_as_bytes
-            if as_bytes is not None:
-                _resource.setrlimit(_resource.RLIMIT_AS, (as_bytes, as_bytes))
-        except (ValueError, OSError, AttributeError):
-            pass
-        try:
-            cpu_s = int(os.environ.get("LAiM_STUDIO_SANDBOX_CPU_S", "600"))
-            _resource.setrlimit(_resource.RLIMIT_CPU, (cpu_s, cpu_s))
-        except (ValueError, OSError, AttributeError):
-            pass
-        try:
-            # High enough for multi-shard safetensors mmaps; tunable via env. Clamp to the inherited hard limit so
-            # setrlimit doesn't ValueError when the parent's hard cap is below the request.
-            nofile = int(os.environ.get("LAiM_STUDIO_SANDBOX_NOFILE", "16384"))
-            _soft_cur, hard_cur = _resource.getrlimit(_resource.RLIMIT_NOFILE)
-            target = nofile if hard_cur == _resource.RLIM_INFINITY else min(nofile, hard_cur)
-            _resource.setrlimit(_resource.RLIMIT_NOFILE, (target, target))
-        except (ValueError, OSError, AttributeError):
-            pass
+def _with_session_packages(env: dict, workdir: str) -> dict:
+    """Add a chat's own pip --target installs to the child's import path without letting their
+    binaries shadow PATH."""
+    packages = os.path.join(workdir, SESSION_PACKAGES_RELPATH)
+    if not os.path.isdir(packages):
+        return env
+    updated = dict(env)
+    updated["PYTHONNOUSERSITE"] = "1"
+    scripts = "Scripts" if os.name == "nt" else "bin"
+    for key, value in (
+        ("PYTHONPATH", packages),
+        ("PATH", os.path.join(packages, scripts)),
+    ):
+        updated[key] = os.pathsep.join(part for part in (updated.get(key, ""), value) if part)
+    return updated
 
 
 def _account_confinement():
     """Confinement for the acting account's next child: None for owner, raises if unavailable."""
-    return account_confinement(_SANDBOX_SITE_DIR)
+    return account_confinement(_TOOL_SITE_DIR)
 
 
 def _run_preexecs(first, second):
@@ -10044,201 +9956,14 @@ def _apply_confinement(confinement, popen_kwargs: dict, argv: list) -> list:
     return confinement.wrap(argv)
 
 
-def _bypass_preexec():
-    """Minimal pre-exec for bypass exec: os.setsid() only. Required, not a restriction:
-    _kill_process_tree does killpg(getpgid(child)), so without a new session a timeout/cancel
-    would kill the LAiM server too."""
+def _child_preexec():
+    """Give the child its own process group. Required, not a restriction: every kill path is
+    _kill_process_tree, which does killpg(getpgid(child)), so without a new session a timeout or
+    cancel would kill the LAiM server too."""
     try:
         os.setsid()
     except OSError:
         pass
-
-
-# Never read back by the executors, so a concurrent call can only make this stale.
-_last_tool_execution_record: "os_sandbox.ToolExecutionRecord | None" = None
-
-
-def _note_tool_execution(record) -> None:
-    """Built from a live probe, never from model output, so it is safe to show as a badge."""
-    global _last_tool_execution_record
-    if record is None:
-        return
-    _last_tool_execution_record = record
-    logger.info("tool execution mode: %s", record.as_dict())
-
-
-def _requested_execution_mode(tool_execution_mode: str, disable_sandbox: bool) -> str:
-    """Require disable_sandbox for full access; checked here because managed accounts skip the planner."""
-    if tool_execution_mode not in os_sandbox.TOOL_EXECUTION_MODES:
-        raise os_sandbox.SandboxUnavailableError(
-            f"TOOL_EXECUTION_MODE_INVALID: {tool_execution_mode!r} is not a tool "
-            f"execution mode ({', '.join(os_sandbox.TOOL_EXECUTION_MODES)})",
-            remediation = "Use 'auto' or 'required'.",
-        )
-    if disable_sandbox:
-        return "full"
-    if tool_execution_mode == "full":
-        raise os_sandbox.SandboxUnavailableError(
-            "TOOL_EXECUTION_MODE_INVALID: full access is not requestable through "
-            "tool_execution_mode",
-            remediation = "Full access is granted with disable_sandbox (Bypass Permissions).",
-        )
-    return tool_execution_mode
-
-
-_with_session_packages = os_sandbox.with_session_packages
-
-
-def _software_safeguards_launch(plan, fault: str):
-    """Prepare an unisolated launch, retaining session packages and recording *fault*."""
-    full = plan.requested_mode == "full"
-    return os_sandbox.PreparedSandboxLaunch(
-        argv = plan.argv,
-        workdir = plan.workdir,
-        env = _with_session_packages(plan.env, plan.workdir),
-        preexec_fn = plan.preexec_fn,
-        backend = "software-safeguards",
-        timeout_seconds = plan.timeout_seconds,
-        close_fds = plan.close_fds,
-        terminate_descendants = plan.terminate_descendants,
-        execution_record = os_sandbox.ToolExecutionRecord(
-            requested_mode = plan.requested_mode,
-            # Do not claim software safeguards for a launch that skipped them.
-            effective_mode = "full" if full else "software_safeguards",
-            environment = sys.platform,
-            backend = "software-safeguards",
-            profile_id = "full-access" if full else "software-safeguards-v1",
-            probe_generation = "",
-            os_isolation = False,
-            retained_safeguards = tuple(
-                item
-                for item in (
-                    os_sandbox._FULL_SAFEGUARDS if full else os_sandbox._SOFTWARE_SAFEGUARDS
-                )
-                if item != "timeout" or plan.timeout_seconds is not None
-            ),
-            limitations = (
-                ("security_restrictions_disabled", fault)
-                if full
-                else (*os_sandbox._software_only_limitations(), fault)
-            ),
-        ),
-    )
-
-
-def _reaches_host_paths(kind: str, text: str) -> bool:
-    """Whether the call names a host path outside the silent roots: the check that put it in front of the user."""
-    try:
-        if kind == "python":
-            tree, error = _parse_python(text)
-            return error is None and _python_reaches_outside_sandbox(tree, text)
-        # Decoded like the approval classifier, or cat $'/home/u/x' prompts yet stays isolated.
-        decoded = _decode_ansi_c(text, keep_one_word = True)
-        command = decoded.replace("\r\n", ";").replace("\n", ";").replace("\r", ";")
-        for variant in {command, _expand_shell_assignments(_expand_param_defaults(command))}:
-            lexer = shlex.shlex(variant, posix = True, punctuation_chars = ";&|()")
-            lexer.whitespace_split = True
-            if _terminal_reaches_outside_sandbox(list(lexer), variant):
-                return True
-    except Exception:  # noqa: BLE001 - unclassifiable stays isolated
-        return False
-    return False
-
-
-def _prepare_tool_launch(
-    plan,
-    *,
-    host_access_approved: bool = False,
-    user_folder: bool = False,
-):
-    """Fall back only when the backend is unavailable; unsafe workdirs, build failures and (outside `full`) planner errors refuse."""
-    if host_access_approved and plan.requested_mode == "auto":
-        return _software_safeguards_launch(plan, "user_approved_host_access")
-    # A project folder the owner picked is host access they granted: the isolation's workdir scan would refuse common
-    # repositories (hard links from git clone --local, pnpm, uv) and walk large trees on every call. Decided up front,
-    # never after a scan finding, which tool code could plant to drop its own boundary.
-    if user_folder and plan.requested_mode == "auto":
-        return _software_safeguards_launch(plan, "user_working_folder")
-    try:
-        prepared = os_sandbox.prepare_tool_launch(plan)
-        if plan.preexec_fn is not None and prepared.preexec_fn is None:
-            # Preserve setsid so timeout cleanup cannot kill the server's process group.
-            logger.warning(
-                "Sandbox backend %s dropped the launch pre-exec; restoring it",
-                prepared.backend,
-            )
-            prepared.preexec_fn = plan.preexec_fn
-        if prepared.execution_record is not None and not prepared.execution_record.os_isolation:
-            # The other door: os_sandbox returns its own fallback through here.
-            prepared.env = _with_session_packages(prepared.env, plan.workdir)
-        return prepared
-    except (os_sandbox.WorkdirUnsafeError, os_sandbox.SandboxBuildError):
-        # These failures can be tool-induced; fallback would let code remove its own boundary.
-        raise
-    except os_sandbox.SandboxUnavailableError:
-        # Any other refusal means the backend stopped being available.
-        if plan.requested_mode == "required" or (
-            plan.requested_mode not in os_sandbox.TOOL_EXECUTION_MODES
-        ):
-            raise
-        logger.warning(
-            "The sandbox backend is no longer available, running with software safeguards",
-            exc_info = True,
-        )
-        return _software_safeguards_launch(plan, "sandbox_became_unavailable")
-    except Exception as exc:  # noqa: BLE001 - construction failures never buy a host replay
-        if plan.requested_mode == "full":
-            return _software_safeguards_launch(plan, "sandbox_planner_error")
-        raise os_sandbox.SandboxBuildError(
-            f"sandbox preparation failed without host fallback: {exc}"
-        ) from exc
-
-
-# Launcher stderr prefixes for refusing to build the sandbox, not payload failures.
-_LAUNCHER_FAILURE_MARKERS = {
-    "bubblewrap": "bwrap: ",
-    "macos-seatbelt": "sandbox-exec: ",
-}
-
-
-def _forget_sandbox_capability_if_the_backend_failed(prepared, output: str) -> None:
-    """Drop a stale probe verdict found at exec, so it costs one call rather than the cache's lifetime."""
-    if prepared is None or prepared.backend == "software-safeguards":
-        return
-    if not output.startswith("Exit code "):
-        return
-    # Keyed on the backend that ran: Seatbelt reports `sandbox-exec:`, not `bwrap:`.
-    marker = _LAUNCHER_FAILURE_MARKERS.get(prepared.backend)
-    if marker is None or marker not in output[:400]:
-        return
-    logger.warning("The sandbox backend failed at launch; re-probing the capability")
-    try:
-        from .sandbox_probe import reset_probe_cache
-        reset_probe_cache()
-        if sys.platform == "linux":
-            from .sandbox_linux import reset_cache_verdicts
-            reset_cache_verdicts()
-    except Exception:  # noqa: BLE001 - a cache reset never breaks a tool result
-        logger.debug("could not reset the sandbox probe cache", exc_info = True)
-
-
-def _sandbox_refusal(exc) -> str:
-    """The remediation is part of the answer: the reader can fix the host."""
-    remediation = getattr(exc, "remediation", "") or ""
-    return _truncate(f"Execution error: {exc}{(' ' + remediation) if remediation else ''}")
-
-
-def _apply_prepared_launch(prepared, popen_kwargs: dict) -> dict:
-    """The OUTER process needs its own session: every kill path is killpg based."""
-    popen_kwargs["cwd"] = prepared.workdir
-    popen_kwargs["env"] = prepared.env
-    if sys.platform != "win32":
-        popen_kwargs["preexec_fn"] = prepared.preexec_fn
-    popen_kwargs["close_fds"] = prepared.close_fds
-    if prepared.pass_fds:
-        # Empty for every fallback, so Windows never sees a kwarg it rejects.
-        popen_kwargs["pass_fds"] = tuple(prepared.pass_fds)
-    return popen_kwargs
 
 
 # Hardening the LAiM parent is done once (PR_SET_DUMPABLE is process-global and sticky); guarded so repeated bypass
@@ -10278,7 +10003,7 @@ def _harden_parent_against_proc_env_leak() -> bool:
 
 
 # System32\bash.exe and the WindowsApps shim are the WSL launcher, which runs the command inside the WSL filesystem:
-# the sandbox workdir and the blocklist's path checks would both apply to the wrong tree. Only a native Win32 bash is
+# the workdir workdir and the blocklist's path checks would both apply to the wrong tree. Only a native Win32 bash is
 # usable.
 _WSL_BASH_MARKERS = ("\\system32\\", "\\windowsapps\\")
 # os.path.join, not a literal `Git\bin\...`, so the probe uses the host separator and the resolver stays testable on
@@ -10292,10 +10017,10 @@ _WIN_BASH_RELATIVE = (
 def _is_trusted_windows_bash(path: str) -> bool:
     """True when ``path`` is a native Win32 bash under a system install root.
 
-    The shell runs every sandboxed command, so an untrusted one defeats the PATH / PATHEXT /
-    NoDefaultCurrentDirectoryInExePath hardening in _build_safe_env: a bash.exe in a user-writable
+    The shell runs every locked down command, so an untrusted one defeats the PATH / PATHEXT /
+    NoDefaultCurrentDirectoryInExePath hardening in _build_bypass_env: a bash.exe in a user-writable
     dir (Scoop, a per-user Git, a project checkout) would execute attacker-controlled code for a
-    command that already passed the blocklist. Same Program Files trust boundary as the sandbox git
+    command that already passed the blocklist. Same Program Files trust boundary as the workdir git
     PATH entry (#7317), and fails closed.
     """
     lowered = path.replace("/", "\\").lower()
@@ -10387,98 +10112,12 @@ def _get_shell_cmd(command: str) -> list[str]:
     return ["bash", "-c", command]
 
 
-def _windows_system_cmd() -> str:
-    """System32 cmd.exe, resolved the same way MXC policy resolves it; never COMSPEC or PATH."""
-    from .mxc_policy import _system_cmd
-    return _system_cmd()
-
-
-def _terminal_profile(disable_sandbox: bool = False) -> str:
-    """Which shell the Terminal runs: "bash", "cmd_isolated" or "cmd_fallback".
-
-    Git Bash cannot start inside MXC (microsoft/mxc#1061), so when bash fails the MXC probe and
-    cmd.exe qualifies instead, Auto runs the Terminal isolated on cmd rather than unsandboxed on bash.
-    Any bash failure counts, not only the MSYS verdict: on a freshly prepared host bash fails without
-    that signature while cmd passes. Only a failed bash probes cmd. Full access and
-    LAiM_MXC_TERMINAL_CMD=0 keep the host shell.
-    """
+def _terminal_profile() -> str:
+    """The shell the Terminal runs a command with: "bash", or "cmd" on a Windows host with no
+    trusted Git Bash."""
     if sys.platform != "win32":
         return "bash"
-    bash = _windows_bash()
-    host_default = "bash" if bash else "cmd_fallback"
-    if disable_sandbox or os.environ.get("LAiM_MXC_TERMINAL_CMD") == "0":
-        return host_default
-    try:
-        if bash:
-            # Either MXC tier: any bash failure tries cmd.
-            verdict = os_sandbox.capability_snapshot(
-                execution_kind = "terminal", selected_executable = bash
-            )
-            if verdict.available:
-                return "bash"
-        cmd = os_sandbox.capability_snapshot(
-            execution_kind = "terminal", selected_executable = _windows_system_cmd()
-        )
-        return "cmd_isolated" if cmd.available else host_default
-    except Exception as exc:  # noqa: BLE001 - a probe failure must never take the Terminal away
-        logger.warning(f"terminal profile check failed, keeping the host shell: {exc}")
-        return host_default
-
-
-# The last profile a request advertised, so an expired probe verdict is refreshed off the request path.
-_request_profile: list = [None, 0.0]
-_request_profile_lock = threading.Lock()
-_REQUEST_PROFILE_REFRESH_SECONDS = 240.0
-# Bumped by every reset: a refresh that started earlier must not publish the profile it computed.
-_request_profile_generation = 0
-
-
-def reset_terminal_profile_cache() -> None:
-    """Forget the advertised Terminal profile, so the next request re-checks it (isolation settings changed)."""
-    global _request_profile_generation
-    with _request_profile_lock:
-        _request_profile[:] = [None, 0.0]
-        _request_profile_generation += 1
-
-
-def _refresh_request_profile() -> str:
-    with _request_profile_lock:
-        generation = _request_profile_generation
-    profile = _terminal_profile(False)
-    with _request_profile_lock:
-        if generation == _request_profile_generation:
-            _request_profile[:] = [profile, time.monotonic()]
-    return profile
-
-
-def _profile_for_request() -> str:
-    with _request_profile_lock:
-        profile, computed = _request_profile
-        stale = (
-            profile is not None and time.monotonic() - computed > _REQUEST_PROFILE_REFRESH_SECONDS
-        )
-        if stale:
-            _request_profile[1] = time.monotonic()  # one refresh in flight at a time
-    if profile is None:
-        return _refresh_request_profile()
-    if stale:
-        threading.Thread(target = _refresh_request_profile, daemon = True).start()
-    return profile
-
-
-def apply_terminal_profile_for_request(
-    tools: list[dict], sandbox_level: "str | None" = None
-) -> list[dict]:
-    """Sandboxed requests only: advertise the shell _bash_exec will pick for this request. Only the
-    first call can block on the MXC probe, so async callers run it in a worker thread; later calls
-    reuse the last profile and refresh it in the background. A list without the Terminal never probes."""
-    if not any(
-        isinstance(t, dict) and (t.get("function") or {}).get("name") == "terminal"
-        for t in tools or ()
-    ):
-        return tools
-    profile = _terminal_profile(True) if sandbox_level == "low" else _profile_for_request()
-    return apply_terminal_profile_description(tools, profile)
+    return "bash" if _windows_bash() else "cmd"
 
 
 def _shell_argv(command: str, workdir: str, confinement) -> "tuple[list[str], str | None]":
@@ -10494,8 +10133,8 @@ def _shell_argv(command: str, workdir: str, confinement) -> "tuple[list[str], st
     return [argv[0], name], name
 
 
-# Per-session working directories so each chat thread gets its own sandbox.
-# Falls back to ~/studio_sandbox/_default for callers without a session_id.
+# Per-session working directories so each chat thread gets its own workdir.
+# Falls back to ~/studio_workdir/_default for callers without a session_id.
 _workdirs: dict[tuple[str, str], str] = {}
 # Sessions with a tool call in flight. Deleting a chat unlinks its workdir, and
 # a process whose cwd has been removed fails every relative write with ENOENT.
@@ -10505,7 +10144,7 @@ _active_sessions: "dict[tuple[str, str], int]" = {}
 # id that folded onto the key, since each can be its own directory.
 _pending_removals: "dict[tuple[str, str], dict[str, bool]]" = {}
 _active_sessions_lock = threading.Lock()
-# Sessions whose sandbox is being removed right now. A start for one of these
+# Sessions whose workdir is being removed right now. A start for one of these
 # waits on the condition rather than on the lock, so only that chat is held up.
 _removing_sessions: "set[tuple[str, str]]" = set()
 _sessions_free = threading.Condition(_active_sessions_lock)
@@ -10557,7 +10196,7 @@ def _session_in_flight(session_id: "str | None"):
                         # Recreated while that call ran: this delete belongs to the chat that went, the folder is the
                         # new one's now.
                         continue
-                    _remove_session_sandbox_locked(pending_id, pending_files)
+                    _remove_session_workdir_locked(pending_id, pending_files)
             finally:
                 with _sessions_free:
                     _removing_sessions.discard(key)
@@ -10590,10 +10229,10 @@ def _orphan_records_dir() -> str:
         from utils.paths.storage_roots import account_path
         return str(account_path("orphaned-projects"))
     except Exception:
-        # Only if the studio home cannot be resolved at all: beside the sandbox root, whose parent an administrator
+        # Only if the studio home cannot be resolved at all: beside the workdir root, whose parent an administrator
         # may have made read-only.
         return os.path.join(
-            os.path.dirname(os.path.realpath(sandbox_root())),
+            os.path.dirname(os.path.realpath(session_workdir_root())),
             "orphaned-projects",
         )
 
@@ -10643,7 +10282,7 @@ def record_orphaned_project(
         project_id,
         {
             "path": os.path.realpath(workspace),
-            # The whole workspace is what the delete dialog offers, and the sandbox is one directory inside it.
+            # The whole workspace is what the delete dialog offers, and the workdir is one directory inside it.
             "rootPath": os.path.realpath(root_path) if root_path else None,
             "pendingDelete": bool(pending_delete),
         },
@@ -10664,14 +10303,14 @@ def _write_orphan_record(kind: str, record_id: str, record: dict) -> None:
         logger.warning("Could not record kept folder for %s", record_id)
 
 
-def record_kept_sandbox(session_id: str) -> None:
-    """Remember a chat sandbox kept because a fork still shows its files. The user asked for those
+def record_kept_workdir(session_id: str) -> None:
+    """Remember a chat workdir kept because a fork still shows its files. The user asked for those
     files and the chat is gone, so nothing would come back to that folder: the fork's own delete
     finishes the job instead."""
     if not session_id:
         return
     try:
-        workdir = os.path.realpath(resolve_sandbox_workdir(session_id))
+        workdir = os.path.realpath(resolve_session_workdir(session_id))
     except OSError:
         return
     if not os.path.isdir(workdir):
@@ -10730,8 +10369,8 @@ def list_orphaned_projects() -> "list[tuple[str, str, str | None, bool, bool]]":
 
 
 def _recorded_workspace_remains(workspace: str, root: "str | None") -> bool:
-    """Whether anything a record names is still on disk. The project root as well as its sandbox: a
-    delete that removed the sandbox and stopped at a locked file elsewhere leaves the rest of the
+    """Whether anything a record names is still on disk. The project root as well as its workdir: a
+    delete that removed the workdir and stopped at a locked file elsewhere leaves the rest of the
     workspace, and dropping the record here loses both the path and the user's request."""
     for path in (workspace, root):
         if path and os.path.isdir(path) and not os.path.islink(path):
@@ -10758,7 +10397,7 @@ def _delete_recorded_workspace(project_id: str, workspace: str, root: "str | Non
     Always through the storage helper, whose folder-name and denied-path checks decide what may go:
     a record is a file on disk, and a stale or edited one naming an unrelated directory must not
     become an rmtree of it. Without a recorded root the workspace's own parent is offered, which is
-    what the default layout puts the sandbox in; anything else it refuses, and the record stays
+    what the default layout puts the workdir in; anything else it refuses, and the record stays
     pending rather than being deleted on our own authority.
     """
     from storage.studio_db import delete_project_workspace
@@ -10771,7 +10410,7 @@ def collect_orphaned_project_workspaces() -> None:
     """Finish the workspace deletes the user asked for. Only records marked pending: one kept merely
     so a fork's cards resolve is not something anybody asked to remove. Skipped while a tool call
     is still running in there, or while a chat still shows its files."""
-    from storage.studio_db import sandbox_is_referenced_elsewhere
+    from storage.studio_db import workdir_is_referenced_elsewhere
     for record_id, workspace, root, pending, is_chat in list_orphaned_projects():
         if not pending:
             continue
@@ -10789,12 +10428,12 @@ def collect_orphaned_project_workspaces() -> None:
                 continue
             if not wait_for_sessions_idle([session], timeout = 0.0):
                 continue
-            if sandbox_is_referenced_elsewhere(session):
+            if workdir_is_referenced_elsewhere(session):
                 continue
             if is_chat:
                 # Its own ownership checks decide whether that directory is ours to take, exactly as the chat's own
                 # delete would.
-                remove_session_sandbox(session, delete_files = True)
+                remove_session_workdir(session, delete_files = True)
             else:
                 _delete_recorded_workspace(record_id, workspace, root)
             # A locked file on Windows, or a network volume having a bad moment: the record stays so the next launch
@@ -10833,7 +10472,7 @@ def _recorded_project_workdir(project_id: str) -> "str | None":
     if not record:
         return None
     path = record["path"]
-    # Only a sandbox still there: a record kept alive by the rest of its workspace names a directory nothing can be
+    # Only a workdir still there: a record kept alive by the rest of its workspace names a directory nothing can be
     # served from.
     return path if os.path.isdir(path) else None
 
@@ -10857,7 +10496,7 @@ def _orphaned_project_workdir(project_id: str) -> "str | None":
     for entry in names:
         if not entry.endswith(f"-{suffix}"):
             continue
-        candidate = os.path.join(root, entry, "sandbox")
+        candidate = os.path.join(root, entry)
         if os.path.isdir(candidate) and not os.path.islink(candidate):
             return os.path.realpath(candidate)
     return None
@@ -10890,7 +10529,7 @@ def live_project_owns(
         return True
     if not project:
         return False
-    live = [project.get("rootPath"), project.get("sandboxPath")]
+    live = [project.get("rootPath"), project.get("workdirPath")]
     theirs = {os.path.realpath(path) for path in live if path}
     for path in (workspace, root):
         if not path:
@@ -10911,21 +10550,21 @@ def _project_exists(project_id: str) -> bool:
 
 
 def _is_managed_project_workdir(session_id: "str | None", workdir: str) -> bool:
-    """Compares with the sandbox path, not the working-folder setting, which can change before the chmod."""
+    """Compares with the workdir path, not the working-folder setting, which can change before the chmod."""
     if not session_id or not session_id.startswith(_PROJECT_SESSION_PREFIX):
         return False
     try:
         from storage.studio_db import get_chat_project
 
         project = get_chat_project(session_id[len(_PROJECT_SESSION_PREFIX) :])
-        sandbox = (project or {}).get("sandboxPath")
-        return bool(sandbox) and os.path.realpath(sandbox) == workdir
+        workdir = (project or {}).get("workdirPath")
+        return bool(workdir) and os.path.realpath(workdir) == workdir
     except Exception:
         return False
 
 
 def _is_user_project_folder(session_id: "str | None", workdir: str) -> bool:
-    """Whether *workdir* is the owner's chosen folder for this project; False when unsure, which keeps isolation."""
+    """Whether *workdir* is the owner's chosen folder for this project; False when unsure, which keeps the managed-account folder."""
     if not session_id or not session_id.startswith(_PROJECT_SESSION_PREFIX):
         return False
     try:
@@ -10948,7 +10587,7 @@ def _project_workdir_for(session_id: "str | None") -> "str | None":
 
 
 def _get_project_workdir(session_id: str) -> str | None:
-    # Host project paths are single-user only; managed accounts use their sandbox.
+    # Host project paths are single-user only; managed accounts use their workdir.
     if not is_owner_context():
         return None
     if not session_id.startswith(_PROJECT_SESSION_PREFIX):
@@ -10964,28 +10603,28 @@ def _get_project_workdir(session_id: str) -> str | None:
         from storage.studio_db import ensure_chat_project_workspace
         project = ensure_chat_project_workspace(project_id)
     except Exception:
-        logger.warning("Failed to resolve project sandbox for %s", session_id, exc_info = True)
+        logger.warning("Failed to resolve project folder for %s", session_id, exc_info = True)
         return None
     if not project:
-        # The project is gone but a chat forked out of it still shows cards for this sandbox, and the workspace was
+        # The project is gone but a chat forked out of it still shows cards for this workdir, and the workspace was
         # kept for exactly that: the record answers for any id, and the folder-name guess needs a usable one.
         return _orphaned_project_workdir(project_id)
     root_path = project.get("rootPath")
-    sandbox_path = project.get("sandboxPath")
-    if not root_path or not sandbox_path:
+    session_dir_path = project.get("workdirPath")
+    if not root_path or not session_dir_path:
         return None
     root_real = os.path.realpath(root_path)
-    sandbox_real = os.path.realpath(sandbox_path)
-    if sandbox_real != root_real and not sandbox_real.startswith(root_real + os.sep):
+    session_dir_real = os.path.realpath(session_dir_path)
+    if session_dir_real != root_real and not session_dir_real.startswith(root_real + os.sep):
         return None
     from storage.studio_db import available_project_working_folder
 
-    return available_project_working_folder(project) or sandbox_real
+    return available_project_working_folder(project) or session_dir_real
 
 
 # Dropped in every session directory we create. The root can be an existing shared folder the user pointed us at, and
 # a chat id can name something already in there; this is the only evidence the directory is ours to delete.
-_SANDBOX_MARKER = ".LAiM_sandbox"
+_WORKDIR_MARKER = ".LAiM_workdir"
 
 # Reserved: a directory named this way belongs to the id that hashes to it, and never to a chat that happens to be
 # called the same thing.
@@ -10996,11 +10635,11 @@ _DERIVED_PREFIX = "_id-"
 _FALLBACK_NAMES = frozenset({"_default", "_invalid"})
 
 # The cache and lifecycle key for a call with no session id. Holds a character the id charset forbids, so a chat
-# cannot key onto the same entry and be handed the session-less sandbox out of the cache.
+# cannot key onto the same entry and be handed the session-less workdir out of the cache.
 _ANON_KEY = "\x00_default"
 
 
-def _sandbox_name(session_id: str) -> str:
+def _workdir_name(session_id: str) -> str:
     """The directory name for an id. An id the filesystem cannot hold gets a name derived from it
     rather than a shared bucket: those ids come from API clients, and one bucket meant every such
     chat could read and delete every other one's files."""
@@ -11018,13 +10657,13 @@ def _sandbox_name(session_id: str) -> str:
 
 def _preserve_foreign_marker(workdir: str, name: "str | None" = None) -> None:
     """Move aside a marker-named entry that this migration did not write. This name was not reserved
-    before the change, so a chat that wrote its own .LAiM_sandbox has a real file there, and a
+    before the change, so a chat that wrote its own .LAiM_workdir has a real file there, and a
     short note like notes reads as a perfectly good session name. Only the exact marker this move
     is about to write is left alone; everything else is renamed, not removed."""
-    marker = os.path.join(workdir, _SANDBOX_MARKER)
+    marker = os.path.join(workdir, _WORKDIR_MARKER)
     if not os.path.lexists(marker):
         return
-    if name is not None and _marker_owner(workdir) == _sandbox_name(name):
+    if name is not None and _marker_owner(workdir) == _workdir_name(name):
         return  # already ours, from a move that ran before
     for n in range(1, 100):
         kept = f"{marker}.saved" if n == 1 else f"{marker}.saved-{n}"
@@ -11036,17 +10675,17 @@ def _preserve_foreign_marker(workdir: str, name: "str | None" = None) -> None:
             return
 
 
-def _mark_sandbox(workdir: str, session_id: str) -> None:
+def _mark_workdir(workdir: str, session_id: str) -> None:
     """(Re)write the marker. Never through a link: the file sits where tool code runs, so one
     replaced by a symlink would send this write to whatever it points at and truncate it."""
-    marker = os.path.join(workdir, _SANDBOX_MARKER)
+    marker = os.path.join(workdir, _WORKDIR_MARKER)
     try:
         if os.path.islink(marker):
             os.unlink(marker)
         flags = os.O_CREAT | os.O_WRONLY | os.O_TRUNC | getattr(os, "O_NOFOLLOW", 0)
         fd = os.open(marker, flags, 0o600)
         try:
-            os.write(fd, _sandbox_name(session_id).encode("utf-8"))
+            os.write(fd, _workdir_name(session_id).encode("utf-8"))
         finally:
             os.close(fd)
     except OSError:
@@ -11057,7 +10696,7 @@ def _marker_owner(workdir: str) -> "str | None":
     """The id this directory was created for, when it says. Anything that is not an id reads as no
     owner rather than as somebody else's: a tool writing over this file would otherwise send its
     own chat to a fresh directory on the next launch, leaving its files behind."""
-    marker = os.path.join(workdir, _SANDBOX_MARKER)
+    marker = os.path.join(workdir, _WORKDIR_MARKER)
     if os.path.islink(marker):
         return None  # not a marker we wrote, and not one to follow
     try:
@@ -11074,10 +10713,10 @@ def _session_dir(root: str, session_id: str) -> str:
     Two ids differing only in case are one name on Windows and on a default macOS volume. The marker
     says which id made the directory, and anyone else gets one of their own rather than sharing
     files that either chat's deletion would then remove. A directory already sitting in a root the
-    user pointed us at is nobody's sandbox: it is stepped around rather than run in, so no tool can
+    user pointed us at is nobody's workdir: it is stepped around rather than run in, so no tool can
     write a marker into it and make it look like ours.
     """
-    name = _sandbox_name(session_id)
+    name = _workdir_name(session_id)
     plain = os.path.join(root, name)
     # A link is never ours, whatever it points at: claiming through one writes the marker into a directory somebody
     # else made, inside the root or not.
@@ -11093,7 +10732,7 @@ def _session_dir(root: str, session_id: str) -> str:
 
 def _name_suffix(session_id: str) -> str:
     """A short stable tail, so the same chat lands in the same directory. surrogatepass for the same
-    reason _sandbox_name uses it: an id with a lone surrogate reaches here on the collision path,
+    reason _workdir_name uses it: an id with a lone surrogate reaches here on the collision path,
     and a strict encode would raise rather than step aside."""
     encoded = session_id.encode("utf-8", "surrogatepass")
     return hashlib.sha256(encoded).hexdigest()[:8]
@@ -11109,12 +10748,12 @@ _assign_lock = threading.Lock()
 _claimed_here: "set[str]" = set()
 
 
-def _claim_sandbox(workdir: str, session_id: str) -> bool:
+def _claim_workdir(workdir: str, session_id: str) -> bool:
     """Write the marker if nobody has, and report whether this id owns it. O_EXCL, so of two
     processes creating the same directory exactly one claims it and the other is told to go
     elsewhere."""
-    marker = os.path.join(workdir, _SANDBOX_MARKER)
-    name = _sandbox_name(session_id)
+    marker = os.path.join(workdir, _WORKDIR_MARKER)
+    name = _workdir_name(session_id)
     try:
         fd = os.open(marker, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
     except FileExistsError:
@@ -11130,69 +10769,57 @@ def _claim_sandbox(workdir: str, session_id: str) -> bool:
 
 
 def _ensure_session_dir(root: str, session_id: str) -> str:
-    """Create this id's sandbox and claim it, stepping aside on a collision."""
+    """Create this id's workdir and claim it, stepping aside on a collision."""
     with _assign_lock:
         workdir = _session_dir(root, session_id)
         if not _contained_in_root(workdir, root):
-            return _sandbox_fallback(root, "_invalid")
+            return _workdir_fallback(root, "_invalid")
         # Before creating anything: _session_dir can hand back the fallback name, which in a root the user pointed us
         # at can be a directory of theirs, and claiming it would run this chat inside their files.
         if not os.path.exists(workdir):
             # A tree an interrupted migration left marked but not moved in is this chat's, at any root: starting fresh
             # beside it would leave those files unreachable for good.
-            stranded = _marked_sandbox_in(root, session_id)
+            stranded = _marked_workdir_in(root, session_id)
             if stranded:
                 try:
                     os.rename(stranded, workdir)
                 except OSError:
                     return stranded
                 return workdir
-        if not _free_for(workdir, _sandbox_name(session_id)) and not _root_is_ours():
+        if not _free_for(workdir, _workdir_name(session_id)) and not _root_is_ours():
             workdir = _free_fallback_dir(root, session_id)
             if workdir is None or not _contained_in_root(workdir, root):
-                return _sandbox_fallback(root, "_invalid")
+                return _workdir_fallback(root, "_invalid")
         os.makedirs(workdir, exist_ok = True)
-        if _claim_sandbox(workdir, session_id):
+        if _claim_workdir(workdir, session_id):
             return workdir
         # A marker naming nobody is one a tool wrote over, and at our own root nothing else could have put this
         # directory here.
         if _root_is_ours() and _marker_owner(workdir) is None:
-            _mark_sandbox(workdir, session_id)
+            _mark_workdir(workdir, session_id)
             return workdir
         # Somebody else's, so take a name of our own rather than run inside it. The fallback is in the same
         # user-controlled root, so it gets the same test: an unowned directory already sitting there is theirs too.
         workdir = _free_fallback_dir(root, session_id)
         if workdir is None or not _contained_in_root(workdir, root):
-            return _sandbox_fallback(root, "_invalid")
+            return _workdir_fallback(root, "_invalid")
         os.makedirs(workdir, exist_ok = True)
-        _claim_sandbox(workdir, session_id)
+        _claim_workdir(workdir, session_id)
         return workdir
 
 
-def _marked_sandbox_in(root: str, session_id: str) -> "str | None":
+def _marked_workdir_in(root: str, session_id: str) -> "str | None":
     """A directory in *root* whose marker names this chat, if there is one. A fresh fallback has a
     name nothing can recompute, so this is what finds it again on a later launch, on a read and
     on a delete. Bounded: a root the user pointed us at can hold a lot of their own folders."""
-    name = _sandbox_name(session_id)
-    # Only names derived from this id, the plain name a half-finished migration staged beside, and their staging
-    # names: tool code can write any owner into the marker, so whoever claims to be me would hand over another's
-    # files.
-    candidates = [os.path.join(root, name), *_fallback_candidates(root, session_id)]
-    # Listed once: there are 33 candidate names, and a scan each would be 33 walks of a root that can hold a folder
-    # per chat, on a first call.
-    try:
-        entries = sorted(os.listdir(root))
-    except OSError:
-        entries = []
-    for candidate in candidates:
-        base = os.path.basename(candidate)
-        prefix = f"{base}{_STAGING_SUFFIX}"
-        staged = [os.path.join(root, e) for e in entries if e.startswith(prefix)]
-        for path in [candidate, *staged]:
-            if os.path.islink(path) or not os.path.isdir(path):
-                continue
-            if _marker_owner(path) == name:
-                return path
+    name = _workdir_name(session_id)
+    # Only names derived from this id: tool code can write any owner into the marker, so whoever
+    # claims to be me would hand over another chat's files.
+    for path in [os.path.join(root, name), *_fallback_candidates(root, session_id)]:
+        if os.path.islink(path) or not os.path.isdir(path):
+            continue
+        if _marker_owner(path) == name:
+            return path
     return None
 
 
@@ -11201,11 +10828,11 @@ def _free_fallback_dir(root: str, session_id: str) -> "str | None":
     one first, so the same chat comes back to the same folder, then a fresh one rather than
     running inside anything already there."""
     # One we already made wins, wherever it is: a fresh name every launch would scatter this chat's files.
-    ours = _marked_sandbox_in(root, session_id)
+    ours = _marked_workdir_in(root, session_id)
     if ours:
         return ours
     for candidate in _fallback_candidates(root, session_id):
-        if _free_for(candidate, _sandbox_name(session_id)):
+        if _free_for(candidate, _workdir_name(session_id)):
             return candidate
     return None
 
@@ -11217,7 +10844,7 @@ _MAX_FALLBACK_NAMES = 32
 
 def _fallback_candidates(root: str, session_id: str) -> "list[str]":
     """The names this chat may take, in the order it takes them."""
-    name = _sandbox_name(session_id)
+    name = _workdir_name(session_id)
     stem = f"{name}-{_name_suffix(session_id)}"
     return [os.path.join(root, stem)] + [
         os.path.join(root, f"{stem}-{n}") for n in range(2, _MAX_FALLBACK_NAMES + 1)
@@ -11235,400 +10862,66 @@ def _free_for(path: str, name: str) -> bool:
 
 def _root_is_ours() -> bool:
     """True unless the root is a directory the user pointed us at. A link is theirs as well:
-    `<studio home>/sandbox` pointing somewhere else means the directories under it are the
+    `<studio home>/workdir` pointing somewhere else means the directories under it are the
     user's, and ours by construction is what lets a delete rename and remove one of them."""
-    if (os.environ.get("LAiM_STUDIO_SANDBOX_HOME") or "").strip():
+    if (os.environ.get("LAiM_STUDIO_WORKDIR_HOME") or "").strip():
         return False
     try:
-        return not os.path.islink(sandbox_root())
+        return not os.path.islink(session_workdir_root())
     except OSError:
         return False
 
 
-def _sandbox_is_ours(target: str) -> bool:
+def _workdir_is_ours(target: str) -> bool:
     """Ours by construction at our own root, otherwise only with the marker. A real file: isfile()
     follows a link, so a marker symlinked at any existing file would make an unrelated directory
     in a shared root deletable."""
     if _root_is_ours():
         return True
-    marker = os.path.join(target, _SANDBOX_MARKER)
+    marker = os.path.join(target, _WORKDIR_MARKER)
     return os.path.isfile(marker) and not os.path.islink(marker)
 
 
-def _legacy_sandbox_root() -> str:
-    """Where the sandbox used to live: a third folder in the user's home."""
-    return os.path.join(os.path.expanduser("~"), "studio_sandbox")
-
-
-def shared_sandbox_root() -> str:
-    """The base every account's ``sandbox_root`` lives under; confinement hides it first."""
-    override = (os.environ.get("LAiM_STUDIO_SANDBOX_HOME") or "").strip()
+def shared_workdir_root() -> str:
+    """The base every account's ``session_workdir_root`` lives under; confinement hides it first."""
+    override = (os.environ.get("LAiM_STUDIO_WORKDIR_HOME") or "").strip()
     if override:
         return os.path.expanduser(override)
     try:
         from utils.paths.storage_roots import studio_root
         return str(studio_root())
     except Exception:
-        return _legacy_sandbox_root()
+        return os.path.join(os.path.expanduser("~"), ".LAiM", "studio")
 
 
-def sandbox_root() -> str:
-    """Root of the per-session tool sandboxes. Under the studio home, so LAiM_STUDIO_HOME keeps
-    everything in one place instead of leaving a stray ~/studio_sandbox. Falls back to the legacy
+def session_workdir_root() -> str:
+    """Root of the per-session tool workdires. Under the studio home, so LAiM_STUDIO_HOME keeps
+    everything in one place instead of leaving a stray ~/studio_workdir. Falls back to the legacy
     path only if the studio root cannot be resolved."""
-    override = (os.environ.get("LAiM_STUDIO_SANDBOX_HOME") or "").strip()
+    override = (os.environ.get("LAiM_STUDIO_WORKDIR_HOME") or "").strip()
     if override:
         if not is_owner_context():
-            from utils.paths.storage_roots import external_account_sandbox_root
-            return str(external_account_sandbox_root())
+            from utils.paths.storage_roots import external_account_workdir_root
+            return str(external_account_workdir_root())
         return os.path.expanduser(override)
     try:
         from utils.paths.storage_roots import account_path
-        return str(account_path("sandbox"))
+        return str(account_path("workdir"))
     except Exception:
-        if not is_owner_context():
-            raise
-        return _legacy_sandbox_root()
+        return os.path.join(shared_workdir_root(), "workdir")
 
 
-_legacy_sandbox_migrated = False
-_legacy_sandbox_lock = threading.Lock()
-
-
-# Where a cross-filesystem move is assembled. Not a session name, so nothing resolves to it while it is being filled.
-_STAGING_SUFFIX = ".arriving-"
-
-
-def _free_move_target(root: str, name: str) -> "str | None":
-    """A name in *root* nothing occupies, for a legacy move to land on. The resolver's own answer
-    first, so an untouched root keeps the plain name. Both derived names can be the user's in a
-    root they pointed us at, and returning nothing there stranded the files at the legacy root
-    for good: the marker the move writes is what finds this one again."""
-    candidate = _session_dir(root, name)
-    if not os.path.exists(candidate):
-        return candidate
-    if _marker_owner(candidate) == _sandbox_name(name):
-        # This session's folder is already at the destination from an earlier move. A duplicate legacy copy is left
-        # alone rather than overwritten, or moved somewhere the user could no longer find it.
-        return None
-    if _root_is_ours():
-        return None  # ours and occupied is a real collision, not a borrowed name
-    # The same derived names the request path takes, so whichever runs first the other one resolves to the folder that
-    # ended up holding the files.
-    for candidate in _fallback_candidates(root, name):
-        if not os.path.exists(candidate):
-            return candidate
-    return None
-
-
-def _staged_move(source: str, target: str, name: str) -> None:
-    """Move one session in, so an interruption cannot look like a collision. Across filesystems
-    shutil.move copies as it goes, and a run killed part way leaves a partial destination with
-    the original still in place; the next launch would read that as a session the new root
-    already has and strand the files. Filled under a name nothing resolves to, then renamed,
-    which on one filesystem is atomic."""
-    global _legacy_sandbox_migrated
-    staging = f"{target}{_STAGING_SUFFIX}{uuid.uuid4().hex[:8]}"
-    # Announced for exactly as long as neither end of the move is where a reader looks. Anything
-    # deciding there is nothing to migrate has to consult this first, or it decides it during the
-    # one moment the evidence is missing.
-    with _legacy_locks_guard:
-        _legacy_moves_in_flight.add(name)
-    try:
-        try:
-            shutil.move(source, staging)
-        except OSError:
-            # Half filled and ours, and the source is still where it was.
-            shutil.rmtree(staging, ignore_errors = True)
-            raise
-        # Marked here, not after the rename: across filesystems the move has already removed the legacy copy, so from
-        # this instant the staging tree is the only one there is and a kill before the marker would leave it unfindable.
-        _preserve_foreign_marker(staging, name)
-        _mark_sandbox(staging, name)
-        try:
-            os.rename(staging, target)
-        except OSError:
-            # The move already took the legacy copy, so this tree is the only one and deleting it would lose the files.
-            # It is marked, so _marked_sandbox_in finds it; put it back and let the next pass retry.
-            try:
-                os.rename(staging, source)
-            except OSError:
-                logger.warning("Sandbox %s left at %s: could not be moved in", name, staging)
-            else:
-                # There is something to migrate again, so say so. A whole-tree pass that ran while this sat in staging
-                # saw an empty legacy root and can already have called the migration finished; left standing, that
-                # retires the very retry this rollback exists to allow and the chat keeps an empty sandbox until the
-                # process restarts.
-                _legacy_sandbox_migrated = False
-            raise
-        _mark_sandbox(target, name)
-    finally:
-        global _legacy_moves_done
-        with _legacy_locks_guard:
-            _legacy_moves_in_flight.discard(name)
-            _legacy_moves_done += 1
-
-
-# Bookkeeping only, never held across a move: starting the background pass and the sweep. Anything that copies a tree
-# takes that session's own lock below.
-_legacy_one_lock = threading.Lock()
-
-# One lock per session being moved: a single lock made a first tool call wait out another chat's multi-gigabyte copy,
-# which is what the background pass exists to avoid. Bounded by the chats that had a legacy folder.
-_legacy_session_locks: "dict[str, threading.Lock]" = {}
-_legacy_locks_guard = threading.Lock()
-
-
-def _legacy_lock_for(name: str) -> threading.Lock:
-    """The lock covering this one session's move."""
-    with _legacy_locks_guard:
-        return _legacy_session_locks.setdefault(name, threading.Lock())
-
-
-# Sessions whose move is running right this instant, held by _staged_move across the whole of
-# it. Neither root shows the tree while that runs, so this is the only thing that separates
-# "the legacy copy is gone because it arrived" from "it is gone because it is in staging".
-_legacy_moves_in_flight: "set[str]" = set()
-# Every move that has finished, succeeded or rolled back. The set above only answers "right
-# now", which cannot see a move that both started and ended inside a whole-tree pass: by the
-# end it is empty again although the pass listed the legacy root mid-staging and, if that move
-# rolled back, the source is now sitting there unlisted.
-_legacy_moves_done = 0
-
-
-def _legacy_lock_peek(name: str) -> "threading.Lock | None":
-    """The lock covering this session's move, if one was ever started. Never creates the entry: a
-    name with nothing at the legacy root must not leave one behind."""
-    with _legacy_locks_guard:
-        return _legacy_session_locks.get(name)
-
-
-# Where every id the old code could not use as a directory name went. One bucket for all of them, which is what this
-# change stops doing, so it is never moved up as though it were a chat: several chats' files are in there.
-_LEGACY_SHARED_BUCKET = "_invalid"
-
-
-def _legacy_names(session_id: str) -> "list[str]":
-    """Every name this session's folder can have at the legacy root, which is also the key its move
-    is locked under."""
-    names = [_sandbox_name(session_id)]
-    if not _usable_session_id(session_id):
-        # Before this change an id the filesystem could not hold shared one bucket with every other such chat: read
-        # where they are, never moved or deleted, and only for such an id, or a chat reads somebody else's.
-        names.append(_LEGACY_SHARED_BUCKET)
-    elif session_id not in names and session_id not in _FALLBACK_NAMES:
-        # Only the derived-prefix case: an id the old code could hold kept its folder under the literal name while
-        # _sandbox_name now hashes it. A fallback name is nobody's chat: every session-less call ran in there.
-        names.append(session_id)
-    return names
-
-
-def _marked_sandbox_after_moves(root: str, session_id: str) -> "str | None | bool":
-    """_marked_sandbox_in with every legacy move of this session held off, or False when no move of
-    it ever started. Under whichever name it was moved from: a chat whose id starts with the
-    derived prefix moves under the literal id, and its staging tree is marked with the derived one."""
-    locks = [_legacy_lock_peek(name) for name in _legacy_names(session_id)]
-    locks = [lock for lock in locks if lock is not None]
-    if not locks:
-        return False
-    # All at once, so no move can start between the wait and the look. A mover only ever holds one of these, so taking
-    # several in a fixed order cannot deadlock against it.
-    with contextlib.ExitStack() as held:
-        for lock in locks:
-            held.enter_context(lock)
-        return _marked_sandbox_in(root, session_id)
-
-
-def _legacy_session_dir(session_id: str) -> "str | None":
-    """This session's directory at the legacy root, while one is still there.
-
-    Both names, like the migration itself: a chat from before the upgrade whose
-    id starts with the derived prefix kept its folder under the literal id.
-    """
-    if not is_owner_context():
-        return None
-    legacy_root = _legacy_sandbox_root()
-    for name in _legacy_names(session_id):
-        candidate = os.path.join(legacy_root, name)
-        if os.path.islink(candidate):
-            continue
-        if os.path.isdir(candidate):
-            lock = _legacy_lock_for(name)
-        else:
-            # Gone from the legacy root can mean sitting in staging, where neither root holds it and the caller would
-            # fall through to a destination that does not exist yet. The same durable trace
-            # _migrate_one_legacy_session waits on: an entry means a move began, so waiting on it lets the move land.
-            lock = _legacy_lock_peek(name)
-            if lock is None:
-                continue
-        # Under this session's move lock, and checked again inside it: the move is a rename, so a path handed back
-        # mid-move lists nothing and 404s every card. One that already ran sends the caller to the destination.
-        with lock:
-            if os.path.isdir(candidate) and not os.path.islink(candidate):
-                return candidate
-    return None
-
-
-def _migrate_one_legacy_session(root: str, name: str) -> None:
-    """Bring one session up from the legacy root, without waiting for the rest."""
-    if not is_owner_context():
-        return
-    # The legacy root, not the done flag and not the session directory. _staged_move renames the
-    # tree aside into staging before renaming it into place, and through that window neither root
-    # holds it; a failing rename then rolls it back. Anything read on one side of that and used on
-    # the other describes an instant that has passed, and the caller leaves without files that are
-    # sitting at the legacy root again. The flag is no safer than the directory, since a pass can
-    # look during the same window, find the root empty, and call the migration finished over a
-    # move it never saw. The root is the stable question: removed once the migration is genuinely
-    # done, present for the whole of any move, and still there when one failed, which is exactly
-    # when this should try rather than skip.
-    legacy_root = _legacy_sandbox_root()
-    if not os.path.isdir(legacy_root):
-        return
-    source = os.path.join(legacy_root, name)
-    if os.path.islink(source):
-        return
-    if os.path.isdir(source):
-        lock = _legacy_lock_for(name)
-    else:
-        # Staged away, or never there at all? Only a mover takes the tree, and it takes this lock
-        # before it does, so an entry is the durable trace of that. Durable is the point: entries
-        # are never removed, so unlike the in-flight set this reading cannot go stale between here
-        # and the wait below. No entry means no move ever began for this name, and none can begin
-        # without the source appearing, which only a rollback does, and only after a move. Looking
-        # without inserting is also what keeps the table bounded by the chats that had a legacy
-        # folder, rather than growing one entry per chat for as long as a failed migration leaves
-        # the root in place.
-        lock = _legacy_lock_peek(name)
-        if lock is None:
-            return
-    with lock:
-        if not os.path.isdir(source):
-            return  # the background pass got there first
-        # Through the resolver, like the whole-tree pass: at a shared root the plain name can be the user's own, and
-        # stopping here would leave this chat with an empty sandbox and its files stranded at the old root.
-        target = _free_move_target(root, name)
-        if target is None or not _contained_in_root(target, root):
-            return  # nowhere free to land, left for the whole-tree pass
-        try:
-            os.makedirs(root, exist_ok = True)
-            _staged_move(source, target, name)
-        except OSError as error:
-            logger.warning("Could not move sandbox %s: %s", name, error)
-
-
-_legacy_background: "threading.Thread | None" = None
-
-
-def _start_legacy_migration() -> "threading.Thread | None":
-    """Carry the rest of the tree up, one pass at a time, off this request."""
-    global _legacy_background
-    if not is_owner_context() or _legacy_sandbox_migrated:
-        return None
-    with _legacy_one_lock:
-        if _legacy_background is not None and _legacy_background.is_alive():
-            return _legacy_background
-        _legacy_background = migrate_legacy_sandbox_in_background()
-        return _legacy_background
-
-
-def _migrate_legacy_sandbox(root: str) -> None:
-    """Move sessions from ~/studio_sandbox into the studio home, once. Those files are the user's,
-    so they move rather than being dropped. A session already present at the new root wins and
-    its legacy copy is left alone, so nothing is silently overwritten."""
-    global _legacy_sandbox_migrated
-    if not is_owner_context() or _legacy_sandbox_migrated:
-        return
-    # Flagged only once the move is done: setting it first let a concurrent call create the destination, which then
-    # read as a collision.
-    with _legacy_sandbox_lock:
-        if _legacy_sandbox_migrated:
-            return
-        # Only when nothing movable is left: a file locked on Windows is retryable, and one attempt strands it once
-        # the destination exists. The flag is committed inside, in the same guarded moment as the check that earns
-        # it, so a rollback cannot be decided against and then overwritten by a verdict formed before it happened.
-        _migrate_legacy_sandbox_locked(root)
-
-
-def _migrate_legacy_sandbox_locked(root: str) -> bool:
-    """True when the legacy root holds nothing that could still be moved. A collision is not a
-    failure: the new root already has that session, and the legacy copy is deliberately left for
-    the user to find."""
-    global _legacy_sandbox_migrated
-    legacy = _legacy_sandbox_root()
-    try:
-        # Read before the tree is looked at, so any move that runs from here on is counted.
-        with _legacy_locks_guard:
-            moves_before = _legacy_moves_done
-        if os.path.realpath(legacy) == os.path.realpath(root) or not os.path.isdir(legacy):
-            _legacy_sandbox_migrated = True
-            return True
-        os.makedirs(root, exist_ok = True)
-        moved = 0
-        own_moves = 0
-        complete = True
-        for name in os.listdir(legacy):
-            source = os.path.join(legacy, name)
-            # A link is not a sandbox of ours: the move preserves it, and the marker would then be written inside
-            # whatever it points at, which is a directory outside both roots.
-            if os.path.islink(source) or not os.path.isdir(source):
-                continue
-            if name == _LEGACY_SHARED_BUCKET:
-                continue  # several chats' files, not one chat's
-            # The same choice the request path makes: at a shared root both derived names can be the user's, and
-            # skipping here while still reporting the pass complete stranded that chat's files for good.
-            target = _free_move_target(root, name)
-            if target is None or not _contained_in_root(target, root):
-                continue
-            try:
-                with _legacy_lock_for(name):
-                    if not os.path.isdir(source) or os.path.exists(target):
-                        continue  # a request path moved it while we waited
-                    own_moves += 1  # before the call: one that raises still advances the count
-                    _staged_move(source, target, name)
-                moved += 1
-            except OSError as error:
-                # A file locked on Windows is retryable, so this run reports itself unfinished and the next launch
-                # tries again.
-                complete = False
-                logger.warning("Could not move sandbox %s: %s", name, error)
-        if moved:
-            logger.info("Moved %d chat sandbox folder(s) from %s to %s", moved, legacy, root)
-        # Any move but this pass's own, overlapping any part of it. Such a session was in neither root while the
-        # listing above ran, so that listing is not evidence about it: it may have arrived, or rolled back and be
-        # sitting at the legacy root right now, unlisted. Counting rather than asking what is in flight is the point,
-        # since one that started and ended inside the pass leaves nothing in flight to find. The legacy root has to
-        # stay too, as that is where a rollback renames back into. Reporting unfinished is what brings the next pass.
-        with _legacy_locks_guard:
-            overlapped = (
-                bool(_legacy_moves_in_flight) or _legacy_moves_done - moves_before != own_moves
-            )
-            if not overlapped and complete:
-                _legacy_sandbox_migrated = True
-        if overlapped:
-            return False
-        # Empty only: a leftover is a collision the user should still find.
-        try:
-            os.rmdir(legacy)
-        except OSError:
-            pass
-        return complete
-    except Exception as error:  # noqa: BLE001 - startup must survive this
-        logger.warning("Sandbox migration skipped: %s", error)
-        return False
-
-
-def _sandbox_fallback(
+def _workdir_fallback(
     root: str,
     name: str,
     create: bool = False,
 ) -> str:
     """``_default`` / ``_invalid`` under the root, contained like any session. They are ordinary
-    directories in a writable sandbox, so one replaced by a symlink would otherwise become the
+    directories in a writable workdir, so one replaced by a symlink would otherwise become the
     root every unchecked request reads from. Dropping that link is only ours to do at our own
     root; in a directory the user pointed us at, the entry is theirs and a fresh one is used
     instead."""
-    owner = _sandbox_name(name)  # reserved, so it is never a chat's own name
+    owner = _workdir_name(name)  # reserved, so it is never a chat's own name
     path = os.path.join(root, name)
     if os.path.islink(path):
         if _root_is_ours():
@@ -11659,12 +10952,12 @@ def _sandbox_fallback(
             os.makedirs(made, exist_ok = True)
         except OSError:
             continue
-        if _claim_sandbox(made, name):
+        if _claim_workdir(made, name):
             return made
     return _nothing_to_serve(name)
 
 
-# Where a read is sent when the chat owns nothing. Outside every sandbox root and inside a directory this process
+# Where a read is sent when the chat owns nothing. Outside every workdir root and inside a directory this process
 # makes and empties, so a listing is empty and a download is a 404 rather than whatever the user keeps at that name.
 _NOTHING_ROOT = None
 _nothing_lock = threading.Lock()
@@ -11675,7 +10968,7 @@ def _nothing_to_serve(name: str) -> str:
     id straight from the request, and an absolute one like ``/etc`` would make os.path.join drop
     the root it was given and hand back a directory of the system's."""
     global _NOTHING_ROOT
-    leaf = _sandbox_name(name)
+    leaf = _workdir_name(name)
     with _nothing_lock:
         if _NOTHING_ROOT is None or not os.path.isdir(_NOTHING_ROOT):
             try:
@@ -11689,7 +10982,7 @@ def _nothing_to_serve(name: str) -> str:
 
 
 def _contained_in_root(workdir: str, root: str) -> bool:
-    """Whether a resolved session path is still inside the sandbox root. Applied to cached paths
+    """Whether a resolved session path is still inside the workdir root. Applied to cached paths
     too: a directory replaced by a symlink after it was cached would otherwise keep serving from
     wherever it now points."""
     try:
@@ -11707,16 +11000,34 @@ def _owned_by_session(workdir: str, session_id: str) -> bool:
     and the name it was given can be somebody else's too."""
     owner = _marker_owner(workdir)
     if owner is not None:
-        return owner == _sandbox_name(session_id)
+        return owner == _workdir_name(session_id)
     # No marker, so the name is the only evidence, and `Foo` and `foo` are one directory on Windows and on a default
     # macOS volume. The delete path has always asked this; a read that did not let the other chat's files through.
-    return _root_is_ours() and os.path.basename(workdir) == _sandbox_name(session_id)
+    return _root_is_ours() and os.path.basename(workdir) == _workdir_name(session_id)
+
+
+def real_os_workdir(session_id: str | None = None) -> "str | None":
+    """LAiM has no tool workdir: the owner's chats work in his own Windows home, and a chat of a
+    project works in the folder that project points at. A path the model names therefore lands
+    where the user looks for it -- ``Desktop\\Отчёт`` is the real desktop, not a copy of one under
+    the studio home. Returns None for a managed account, whose per-account root is the boundary
+    that keeps its files away from the owner's."""
+    if not is_owner_context():
+        return None
+    project = _project_workdir_for(session_id)
+    if project:
+        return project
+    return os.path.realpath(os.path.expanduser("~"))
 
 
 def _get_workdir(session_id: str | None = None) -> str:
-    """Return a per-session sandbox dir at mode 0o700."""
+    """Return a per-session workdir dir at mode 0o700."""
     global _workdirs
     key = _workdir_key(session_id)
+    real = real_os_workdir(session_id)
+    if real is not None:
+        _workdirs[key] = real
+        return real
     cached = _workdirs.get(key)
     if cached is not None and not os.path.isdir(cached):
         cached = None
@@ -11726,7 +11037,7 @@ def _get_workdir(session_id: str | None = None) -> str:
     if cached is not None and not project_now:
         # The same checks a fresh resolve makes: the entry can have been renamed and replaced with a link to another
         # chat's directory since, and containment alone accepts that.
-        root_now = sandbox_root()
+        root_now = session_workdir_root()
         # Tool code runs in here and can delete the marker. For a directory this run claimed it is written again,
         # rather than read as somebody else's, which would strand the files in it and start the chat anew.
         if (
@@ -11735,12 +11046,12 @@ def _get_workdir(session_id: str | None = None) -> str:
             and not os.path.islink(cached)
             and _contained_in_root(cached, root_now)
             and os.path.isdir(cached)
-            and _marker_owner(cached) != _sandbox_name(session_id)
+            and _marker_owner(cached) != _workdir_name(session_id)
         ):
             # Whatever it says now, this process made this directory for this chat. A tool writing another id into the
             # marker would otherwise send the chat to a new folder and strand what it just wrote.
             _preserve_foreign_marker(cached, session_id)
-            _mark_sandbox(cached, session_id)
+            _mark_workdir(cached, session_id)
         if (
             os.path.islink(cached)
             or not _contained_in_root(cached, root_now)
@@ -11749,49 +11060,34 @@ def _get_workdir(session_id: str | None = None) -> str:
             cached = None
     if cached is None:
         _workdirs.pop(key, None)
-        sandbox_root_path = sandbox_root()
-        root_existed = os.path.isdir(sandbox_root_path)
+        workdir_root_path = session_workdir_root()
+        root_existed = os.path.isdir(workdir_root_path)
         # Before anything below creates a directory: a call after deletion must refuse.
-        ensure_dir(Path(sandbox_root_path))
-        # The folder may still be at the legacy root right after an upgrade.
-        # Only this chat's, so a first tool call never waits on the whole tree:
-        # across filesystems that is a copy of every session.
-        if session_id:
-            # A pre-upgrade chat whose id already starts with the derived prefix kept its folder under the literal id,
-            # so that name is tried too. Only a usable one: the rest never named a directory.
-            derived = _sandbox_name(session_id)
-            if (
-                derived != session_id
-                and _usable_session_id(session_id)
-                and session_id not in _FALLBACK_NAMES
-            ):
-                _migrate_one_legacy_session(sandbox_root_path, session_id)
-            _migrate_one_legacy_session(sandbox_root_path, derived)
-        _start_legacy_migration()
+        ensure_dir(Path(workdir_root_path))
         _start_detached_sweep()
         project_workdir = _project_workdir_for(session_id)
         if project_workdir:
             workdir = project_workdir
         elif session_id:
-            workdir = _ensure_session_dir(sandbox_root_path, session_id)
+            workdir = _ensure_session_dir(workdir_root_path, session_id)
         else:
-            workdir = _sandbox_fallback(sandbox_root_path, "_default", create = True)
+            workdir = _workdir_fallback(workdir_root_path, "_default", create = True)
         created = not os.path.isdir(workdir)
         os.makedirs(workdir, exist_ok = True)
         if not project_workdir and not session_id:
             # The fallbacks are directories like any other: claimed, so the next run knows this one is the one we
             # made.
-            _claim_sandbox(workdir, "_default")
+            _claim_workdir(workdir, "_default")
         # Only a root we just created: the override can name a shared directory, and locking that down would cut off
         # everything else.
-        if not root_existed or not (os.environ.get("LAiM_STUDIO_SANDBOX_HOME") or "").strip():
+        if not root_existed or not (os.environ.get("LAiM_STUDIO_WORKDIR_HOME") or "").strip():
             try:
-                os.chmod(sandbox_root_path, 0o700)
+                os.chmod(workdir_root_path, 0o700)
             except OSError:
                 pass
         # Only ours: a shared root can already hold a directory with this name, and tightening it would cut off
         # whoever else uses it. Never the user's project folder.
-        if (created or _sandbox_is_ours(workdir)) and (
+        if (created or _workdir_is_ours(workdir)) and (
             not project_workdir or _is_managed_project_workdir(session_id, project_workdir)
         ):
             try:
@@ -11802,18 +11098,21 @@ def _get_workdir(session_id: str | None = None) -> str:
     return _workdirs[key]
 
 
-def get_sandbox_workdir(session_id: str | None = None) -> str:
+def get_session_workdir(session_id: str | None = None) -> str:
     return _get_workdir(session_id)
 
 
-def resolve_sandbox_workdir(session_id: str | None = None) -> str:
-    """Where a session's sandbox would be, without creating it. For read-only callers: serving a
+def resolve_session_workdir(session_id: str | None = None) -> str:
+    """Where a session's workdir would be, without creating it. For read-only callers: serving a
     file must not materialise a directory for every id someone asks about."""
+    real = real_os_workdir(session_id)
+    if real is not None:
+        return real
     if session_id:
         project = _project_workdir_for(session_id)
         if project:
             return project
-    root = sandbox_root()
+    root = session_workdir_root()
     cached = _workdirs.get(_workdir_key(session_id))
     if (
         cached
@@ -11823,7 +11122,7 @@ def resolve_sandbox_workdir(session_id: str | None = None) -> str:
     ):
         return cached
     if not session_id:
-        return _sandbox_fallback(root, "_default")
+        return _workdir_fallback(root, "_default")
     # A directory this process made for this chat is this chat's, whatever a tool wrote into the marker since: the
     # check above trusts that file, and without this the files it holds are served from nowhere.
     claimed = _claimed_by_this_run(session_id, os.path.realpath(root))
@@ -11833,59 +11132,22 @@ def resolve_sandbox_workdir(session_id: str | None = None) -> str:
     # Same containment _get_workdir applies: a session entry symlinked out of the root would otherwise serve whatever
     # it points at.
     if not _contained_in_root(workdir, root):
-        return _sandbox_fallback(root, "_invalid")
+        return _workdir_fallback(root, "_invalid")
     if not os.path.isdir(workdir):
-        # A migration that moved the tree but could not rename it into place leaves the only copy under a marked name,
-        # at any root.
-        ours = _marked_sandbox_in(root, session_id)
-        if ours and _STAGING_SUFFIX in os.path.basename(ours):
-            # A live move marks its staging tree before renaming it into place, so this can also be one still moving,
-            # which the rename is about to take away. Movers hold the session's lock for the whole move, so once it is
-            # free a staging tree that is still there is a stranded one, and one that landed or rolled back is found
-            # where it went.
-            settled = _marked_sandbox_after_moves(root, session_id)
-            if settled is not False:
-                ours = settled
+        # The files can sit under a marked fallback name nothing recomputes.
+        ours = _marked_workdir_in(root, session_id)
         if ours:
             return ours
-        # Right after an upgrade the files can still be at the legacy root: the move runs in the background and can
-        # take minutes. Read where they are rather than 404 every card in the transcript until it finishes.
-        legacy = _legacy_session_dir(session_id)
-        if legacy:
-            return legacy
-        if not os.path.isdir(workdir):
-            # The lookup above can have waited out a move the first scan ran ahead of. One whose rename and rollback
-            # both failed leaves the only copy in a marked staging tree, which that scan never saw. Only a session a
-            # move has touched pays for the second listing.
-            ours = _marked_sandbox_after_moves(root, session_id)
-            if ours:
-                return ours
     if not _root_is_ours() and not _owned_by_session(workdir, session_id):
         # In a root the user pointed us at this chat can be in a fallback whose name nothing recomputes, and a read
-        # that stops here shows an empty sandbox and 404s the file cards already in the transcript.
-        ours = _marked_sandbox_in(root, session_id)
+        # that stops here shows an empty workdir and 404s the file cards already in the transcript.
+        ours = _marked_workdir_in(root, session_id)
         if ours:
             return ours
     if os.path.isdir(workdir) and not _owned_by_session(workdir, session_id):
         # Somebody else's, so this session has nothing here to serve.
         return _nothing_to_serve(session_id)
     return workdir
-
-
-def migrate_legacy_sandbox_in_background() -> "threading.Thread":
-    """Move the legacy sandbox up at startup, off every request. Across filesystems this copies
-    every session, which is not something a listing or a download can wait on: those run on the
-    event loop."""
-
-    def _run() -> None:
-        try:
-            _migrate_legacy_sandbox(sandbox_root())
-        except Exception:  # noqa: BLE001 - best effort, like the rest of this
-            logger.debug("legacy sandbox migration failed", exc_info = True)
-
-    thread = account_thread(target = _run, name = "sandbox-migrate", daemon = True)
-    thread.start()
-    return thread
 
 
 # A name no session resolves to, so a detached tree is inert until it is gone.
@@ -11943,7 +11205,7 @@ def _queue_detached_delete(target: str) -> None:
             try:
                 _delete_worker = threading.Thread(
                     target = _drain_detached_deletes,
-                    name = "sandbox-delete",
+                    name = "workdir-delete",
                     daemon = True,
                 )
                 _delete_worker.start()
@@ -11956,7 +11218,7 @@ def _queue_detached_delete(target: str) -> None:
     _delete_queue.put((target, 0))
 
 
-def sweep_detached_sandboxes(root: "str | None" = None) -> None:
+def sweep_detached_workdirs(root: "str | None" = None) -> None:
     """Finish deletes a previous run was killed part way through.
 
     The rename is what puts the tree out of reach, so a kill between it and the rmtree leaves a full
@@ -11967,7 +11229,7 @@ def sweep_detached_sandboxes(root: "str | None" = None) -> None:
     unreachable for good. In a root the user pointed us at, the marker is still required, since a
     folder of theirs can carry any name.
     """
-    base = os.path.realpath(root or sandbox_root())
+    base = os.path.realpath(root or session_workdir_root())
     try:
         names = [name for name in os.listdir(base) if _DETACHED_RE.match(name)]
     except OSError:
@@ -11984,8 +11246,11 @@ def sweep_detached_sandboxes(root: "str | None" = None) -> None:
 _swept_detached = False
 _swept_detached_accounts: set[str] = set()
 
+# One lock for the once-per-process sweeps: the detached tree sweep and the recovery start that joins it.
+_sweep_one_lock = threading.Lock()
 
-def start_sandbox_recovery() -> "threading.Thread | None":
+
+def start_workdir_recovery() -> "threading.Thread | None":
     """Finish what an interrupted run left: renamed trees and pending deletes."""
     return _start_detached_sweep()
 
@@ -11993,7 +11258,7 @@ def start_sandbox_recovery() -> "threading.Thread | None":
 def _start_detached_sweep() -> "threading.Thread | None":
     """Run the sweep once per process, off the call that noticed."""
     global _swept_detached
-    with _legacy_one_lock:
+    with _sweep_one_lock:
         if is_owner_context():
             if _swept_detached:
                 return None
@@ -12005,18 +11270,18 @@ def _start_detached_sweep() -> "threading.Thread | None":
             _swept_detached_accounts.add(account_id)
 
     def _sweep() -> None:
-        sweep_detached_sandboxes()
+        sweep_detached_workdirs()
         # A workspace the user asked to delete, left pending because a tool was still running in it when the app went
         # away.
         collect_orphaned_project_workspaces()
 
-    thread = account_thread(target = _sweep, name = "sandbox-sweep", daemon = True)
+    thread = account_thread(target = _sweep, name = "workdir-sweep", daemon = True)
     thread.start()
     return thread
 
 
-def remove_session_sandbox(session_id: str, delete_files: bool = False) -> bool:
-    """Drop a deleted chat's sandbox. True when something was removed.
+def remove_session_workdir(session_id: str, delete_files: bool = False) -> bool:
+    """Drop a deleted chat's workdir. True when something was removed.
 
     The chat was the only handle on that directory, so leaving it behind means one unreachable
     folder per chat forever. Empty folders always go; files need ``delete_files``, since they are
@@ -12025,24 +11290,23 @@ def remove_session_sandbox(session_id: str, delete_files: bool = False) -> bool:
     """
     if not session_id:
         return False
+    # LAiM's owner runs tools in his own home or in the project folder he pointed at, so such a
+    # chat owns no directory of its own: removing "its" folder would delete real files the user
+    # kept on purpose. A confined account gets no path back here, and its per-chat folders are
+    # exactly what this function exists to clean up.
+    if real_os_workdir(session_id) is not None:
+        return False
     # Only a session that really resolves to a project workspace: an imported chat whose id merely starts with the
     # prefix gets an ordinary directory from _get_workdir, and would otherwise never be cleaned up.
     if session_id.startswith(_PROJECT_SESSION_PREFIX) and _get_project_workdir(session_id):
-        # Unless this id has a sandbox of its own: a chat named like a project session had one while its row existed,
+        # Unless this id has a workdir of its own: a chat named like a project session had one while its row existed,
         # and the row goes first, so the project would inherit the question and those files stay behind.
-        root_here = os.path.realpath(sandbox_root())
-        if not _claimed_by_this_run(session_id, root_here) and not _marked_sandbox_in(
+        root_here = os.path.realpath(session_workdir_root())
+        if not _claimed_by_this_run(session_id, root_here) and not _marked_workdir_in(
             root_here,
             session_id,
         ):
             return False
-    # The folder may still be at the legacy root right after an upgrade. This session only, or a delete would sit
-    # behind a copy of every chat, and outside the lock below, since it moves a tree and takes its own.
-    root_now = sandbox_root()
-    _migrate_one_legacy_session(root_now, _sandbox_name(session_id))
-    if _usable_session_id(session_id) and _sandbox_name(session_id) != session_id:
-        _migrate_one_legacy_session(root_now, session_id)
-    _start_legacy_migration()
     # Held across the decision AND the unlink: otherwise a tool can start in between and run in a directory this call
     # then removes.
     key = _session_key(session_id)
@@ -12054,71 +11318,71 @@ def remove_session_sandbox(session_id: str, delete_files: bool = False) -> bool:
             # ever name this session again.
             queued = _pending_removals.setdefault(key, {})
             queued[session_id] = delete_files or queued.get(session_id, False)
-            return False  # see sandbox_removal_deferred
-        # Closed for this chat, then released: deciding whether the sandbox is empty walks the tree, and holding the
+            return False  # see workdir_removal_deferred
+        # Closed for this chat, then released: deciding whether the workdir is empty walks the tree, and holding the
         # global lock for that stops tool calls starting in every unrelated chat.
         _removing_sessions.add(key)
     try:
-        return _remove_session_sandbox_locked(session_id, delete_files)
+        return _remove_session_workdir_locked(session_id, delete_files)
     finally:
         with _sessions_free:
             _removing_sessions.discard(key)
             _sessions_free.notify_all()
 
 
-def session_sandbox_has_files(session_id: str) -> bool:
-    """Whether this chat's sandbox still holds files of the user's. For a delete that was not
+def session_workdir_has_files(session_id: str) -> bool:
+    """Whether this chat's workdir still holds files of the user's. For a delete that was not
     offered the choice: the chat was the only way to those files, so the caller can offer it
     afterwards rather than leave a folder nothing can reach."""
     if not session_id:
         return False
     try:
-        target = os.path.realpath(resolve_sandbox_workdir(session_id))
-        if not os.path.isdir(target) or not _sandbox_is_ours(target):
-            claimed = _claimed_by_this_run(session_id, os.path.realpath(sandbox_root()))
+        target = os.path.realpath(resolve_session_workdir(session_id))
+        if not os.path.isdir(target) or not _workdir_is_ours(target):
+            claimed = _claimed_by_this_run(session_id, os.path.realpath(session_workdir_root()))
             if not claimed:
                 return False
             target = os.path.realpath(claimed)
-        return not _holds_no_user_files(target, _sandbox_name(session_id))
+        return not _holds_no_user_files(target, _workdir_name(session_id))
     except OSError:
         return False
 
 
-def _is_spill_artifact(sandbox: str, parent: str, name: str) -> bool:
+def _is_spill_artifact(workdir: str, parent: str, name: str) -> bool:
     """Whether ``parent/name`` is a spill this process wrote, rather than anything else. Both halves
     are checked: the name has to be one `_spill_full_output` generates, and it has to sit at the
     spill root or one scope below it. A link is never one, whatever it is called."""
-    root = os.path.join(sandbox, _SPILL_DIR)
+    root = os.path.join(workdir, _SPILL_DIR)
     if parent != root and os.path.dirname(parent) != root:
         return False
     identity, owned = _spill_record(root)
     if identity is None or identity != _spill_identity(root):
-        # No record of this directory: it came with the sandbox or was replaced, so everything in it is the user's,
+        # No record of this directory: it came with the workdir or was replaced, so everything in it is the user's,
         # however the files are named.
         return False
     return _is_recorded_spill(root, os.path.join(parent, name), owned)
 
 
 def _holds_no_user_files(target: str, owner: "str | None" = None) -> bool:
-    """Whether a sandbox holds nothing but (possibly empty) directories. Our own marker does not
+    """Whether a workdir holds nothing but (possibly empty) directories. Our own marker does not
     count, and only while it is still ours: tool code runs in there and can write its own content
     over that file, which is then the only copy of it. Bounded like every other walk here, and a
     tree too big to check is not one to remove without being asked."""
     budget = _MAX_SNAPSHOT_DIRS
     for parent, dirs, files in os.walk(target):
-        # A link to a directory is listed here, not in files, and a tool made it: a sandbox holding one is not empty.
+        # A link to a directory is listed here, not in files, and a tool made it: a workdir holding one is not empty.
         if any(os.path.islink(os.path.join(parent, name)) for name in dirs):
             return False
         for name in files:
-            if parent == target and name in _INTERNAL_SANDBOX_FILES:
-                if name != _SANDBOX_MARKER:
+            if parent == target and name in _INTERNAL_WORKDIR_FILES:
+                if name != _WORKDIR_MARKER:
                     continue
                 marker = _marker_owner(target)
                 if marker is not None and owner in (None, marker):
                     continue
             # LAiM's own, like the marker above: a spill is truncated tool output this process wrote and
             # deliberately kept off the file cards, so counting one as the user's content leaves an unreachable
-            # sandbox behind, reported as holding files the user never created. Only the artifacts themselves, by the
+            # workdir behind, reported as holding files the user never created. Only the artifacts themselves, by the
             # name `_spill_full_output` generates: the directory is writable, tool code can create anything in it, and
             # a real file there is the user's like any other.
             if _is_spill_artifact(target, parent, name):
@@ -12148,14 +11412,14 @@ def _claimed_by_this_run(session_id: str, root: str) -> "str | None":
         return None
     if not _contained_in_root(cached, root):
         return None
-    if _marker_owner(cached) != _sandbox_name(session_id):
+    if _marker_owner(cached) != _workdir_name(session_id):
         _preserve_foreign_marker(cached, session_id)
-        _mark_sandbox(cached, session_id)
+        _mark_workdir(cached, session_id)
     return cached
 
 
 def project_session_id(project_id: str) -> str:
-    """The sandbox session a project's chats share."""
+    """The workdir session a project's chats share."""
     return f"{_PROJECT_SESSION_PREFIX}{project_id}"
 
 
@@ -12177,28 +11441,28 @@ def wait_for_sessions_idle(session_ids, timeout: float = 10.0) -> bool:
         time.sleep(0.05)
 
 
-def sandbox_removal_deferred(session_id: str) -> bool:
+def workdir_removal_deferred(session_id: str) -> bool:
     """Whether this session's removal is queued behind a running tool call. The caller reports what
     it kept, and the answer is not known yet: the call still in flight can write a file after the
-    sandbox looked empty, and the deferred removal would then keep it with nobody left to say so."""
+    workdir looked empty, and the deferred removal would then keep it with nobody left to say so."""
     if not session_id:
         return False
     with _active_sessions_lock:
         return session_id in _pending_removals.get(_session_key(session_id), {})
 
 
-def _remove_session_sandbox_locked(session_id: str, delete_files: bool) -> bool:
-    root = os.path.realpath(sandbox_root())
+def _remove_session_workdir_locked(session_id: str, delete_files: bool) -> bool:
+    root = os.path.realpath(session_workdir_root())
     claimed = _claimed_by_this_run(session_id, root)
-    entry = os.path.join(root, _sandbox_name(session_id))
+    entry = os.path.join(root, _workdir_name(session_id))
     if not os.path.islink(entry):
         entry = _session_dir(root, session_id)
         # Neither computed name is ours, so this chat may be in a fallback, or in a directory whose marker a tool
         # removed since we made it.
         if not _owned_by_session(entry, session_id):
-            entry = _marked_sandbox_in(root, session_id) or claimed or entry
+            entry = _marked_workdir_in(root, session_id) or claimed or entry
     # The entry itself, not what it resolves to: a symlink to a sibling passes the check below and would take that
-    # chat's files. Drop the link, but only at our own root: in a shared one it is the user's entry, not a sandbox.
+    # chat's files. Drop the link, but only at our own root: in a shared one it is the user's entry, not a workdir.
     if os.path.islink(entry):
         if not _root_is_ours():
             return False
@@ -12212,13 +11476,13 @@ def _remove_session_sandbox_locked(session_id: str, delete_files: bool) -> bool:
         return False
     # Ours by the marker, or because this process is the one that made it.
     ours_here = bool(claimed) and target == os.path.realpath(claimed)
-    if not ours_here and not _sandbox_is_ours(target):
+    if not ours_here and not _workdir_is_ours(target):
         return False
     # Made for a different id: the same directory on a case-insensitive volume, and those files are the other chat's.
     owner = _marker_owner(target)
-    if owner is not None and owner != _sandbox_name(session_id):
+    if owner is not None and owner != _workdir_name(session_id):
         return False
-    if owner is None and not ours_here and os.path.basename(target) != _sandbox_name(session_id):
+    if owner is None and not ours_here and os.path.basename(target) != _workdir_name(session_id):
         # Nothing says whose this is, and on a case-insensitive volume `foo` and `Foo` are one directory: without the
         # marker the name is the only evidence, and it names the other chat.
         return False
@@ -12245,7 +11509,7 @@ def _remove_session_sandbox_locked(session_id: str, delete_files: bool) -> bool:
             return True
         # Empty means no files of the user's: a tool that only ran mkdir, or deleted what it wrote, leaves directories
         # behind, and the chat record is already gone by the time this runs.
-        if not _holds_no_user_files(target, _sandbox_name(session_id)):
+        if not _holds_no_user_files(target, _workdir_name(session_id)):
             return False
         shutil.rmtree(target, ignore_errors = True)
         gone = not os.path.isdir(target)
@@ -12275,9 +11539,7 @@ _EDIT_FILE_DIFF_CHARS = 4000
 _EDIT_FILE_DIFF_WINDOW_LINES = 120
 
 
-def _edit_file_resolve(
-    raw_path: str, session_id: "str | None", disable_sandbox: bool
-) -> "tuple[str | None, str]":
+def _edit_file_resolve(raw_path: str, session_id: "str | None") -> "tuple[str | None, str]":
     """Resolve the model's path the way python/terminal resolve theirs.
 
     Same rules as the sitecustomize shim: a code-interpreter habit prefix
@@ -12285,9 +11547,6 @@ def _edit_file_resolve(
     else is relative to it. Containment is checked on the realpath, so a symlink
     planted inside cannot reach out.
     """
-    from state.tool_policy import require_tool_access
-
-    require_tool_access(disable_sandbox = disable_sandbox)
     raw = (raw_path or "").strip()
     if not raw:
         return None, "Error: 'path' is required."
@@ -12296,7 +11555,7 @@ def _edit_file_resolve(
     # An absolute path already inside the workdir is a real path, not a habit one: a project rooted at /workspace/repo
     # would otherwise have its own prefix stripped and be rejoined onto itself.
     already_inside = os.path.isabs(raw) and not _is_outside_workdir(raw, workdir)
-    if not disable_sandbox and not already_inside:
+    if not already_inside:
         for prefix in _MISSING_PATH_PREFIXES:
             if candidate == prefix or candidate.startswith(prefix + "/"):
                 candidate = candidate[len(prefix) :].lstrip("/")
@@ -12308,9 +11567,10 @@ def _edit_file_resolve(
         target = os.path.realpath(target)
     except (OSError, ValueError):
         return None, f"Error: cannot resolve path '{raw}'."
-    # Full access runs python/terminal unsandboxed already; holding this one tool to the workdir would just push the
-    # model back to cat.
-    if not disable_sandbox and _is_outside_workdir(target, workdir):
+    # The installation owner's chats run on his own machine, wherever he points them. Another
+    # account's chat is one user among several on the same host, and its folder is the boundary that
+    # keeps its files away from the next account's.
+    if not is_owner_context() and _is_outside_workdir(target, workdir):
         return None, (
             f"Error: '{raw}' is outside this conversation's working directory, "
             "which is the only place edit_file can write. Use a relative path "
@@ -12356,8 +11616,9 @@ def _edit_file_write(
     The mode is carried over so an edit keeps the executable bit.
 
     ``expect`` are the bytes the edit was computed from, compared again here so a file another chat
-    rewrote meanwhile is not reverted to this call's stale copy. ``workdir`` re-checks containment
-    just before the rename, so a parent swapped for a symlink after the path was resolved is caught.
+    rewrote it meanwhile is not reverted to this call's stale copy. ``workdir`` re-checks containment
+    just before the rename, for the accounts whose folder is a boundary: a parent swapped for a
+    symlink after the path was resolved is caught here.
     """
     payload = (bom + text.replace("\n", newline)).encode("utf-8")
     directory = os.path.dirname(path) or "."
@@ -12374,7 +11635,7 @@ def _edit_file_write(
             shutil.copymode(path, tmp)
         except OSError:
             pass  # new file, or a mode we cannot read; the default is fine
-        if workdir is not None and _is_outside_workdir(path, workdir):
+        if workdir is not None and not is_owner_context() and _is_outside_workdir(path, workdir):
             return (
                 f"Error: '{os.path.basename(path)}' moved outside the working "
                 "directory while the edit was being prepared; nothing was written."
@@ -12535,7 +11796,7 @@ def _edit_file_created_sentinel(target: str, workdir: str) -> str:
     if (
         parts[0] == os.pardir
         or os.path.isabs(relative)
-        or len(_user_path_parts(parts, root)) > _MAX_SANDBOX_PATH_SEGMENTS
+        or len(_user_path_parts(parts, root)) > _MAX_SESSION_PATH_SEGMENTS
         or not all(_servable_segment(part) for part in parts)
     ):
         return ""
@@ -12793,18 +12054,14 @@ def _edit_file_apply_all(
     return after, len(spans), before[first_start:first_end], first_new, first_start, ""
 
 
-def _edit_file(
-    arguments: dict,
-    session_id: "str | None" = None,
-    disable_sandbox: bool = False,
-) -> str:
+def _edit_file(arguments: dict, session_id: "str | None" = None) -> str:
     """Replace exact strings in a file. See the notes above. The receipt can echo a model-chosen name, so it is
     defused before the files row of a created file is appended."""
     created: "list[str]" = []
     history: dict = {}
     try:
         text = _defuse_sentinels(
-            _edit_file_apply(arguments, session_id, disable_sandbox, created, history)
+            _edit_file_apply(arguments, session_id, created, history)
         )
     finally:
         _history_end_file(history)
@@ -12816,23 +12073,19 @@ def _edit_file(
 def _edit_file_apply(
     arguments: dict,
     session_id: "str | None",
-    disable_sandbox: bool,
     created: "list[str]",
     history: "dict | None" = None,
 ) -> str:
-    # The receipt echoes a window of the file back, so an edit is a read, and Bypass Permissions
-    # lifts the containment that would otherwise keep it out.
+    # The receipt echoes a window of the file back, so an edit is a read.
     if _references_studio_credential(str(arguments.get("path") or "")):
         return _STUDIO_CREDENTIAL_BLOCKED
     edits, error = _edit_file_parse_edits(arguments.get("edits"))
     if error:
         return error
-    target, error = _edit_file_resolve(
-        str(arguments.get("path") or ""), session_id, disable_sandbox
-    )
+    target, error = _edit_file_resolve(str(arguments.get("path") or ""), session_id)
     if error:
         return error
-    # Again on the RESOLVED path: the sandbox is a sibling of the auth directory, so
+    # Again on the RESOLVED path: the workdir is a sibling of the auth directory, so
     # `../../auth/agents/...` only names it once the resolve has joined the two.
     if _references_studio_credential(target) or _references_studio_credential(
         os.path.realpath(target)
@@ -12855,7 +12108,6 @@ def _edit_file_apply(
             edits[0][1],
             name,
             "\n",
-            workdir = None if disable_sandbox else _get_workdir(session_id),
         )
         if result.startswith("Created "):
             created.append(target)
@@ -12905,7 +12157,7 @@ def _edit_file_apply(
         newline,
         bom,
         expect = data,
-        workdir = None if disable_sandbox else _get_workdir(session_id),
+        workdir = _get_workdir(session_id),
     )
     if error:
         return error
@@ -13000,13 +12252,17 @@ def web_search_tool_with_images() -> dict:
     return tool
 
 
-def _build_sandbox_paths_note() -> str:
+def _build_paths_note(path_clause: str) -> str:
     """Platform and working-directory note, on BOTH tool descriptions. Models habitually write to
     /mnt/data, a ChatGPT code-interpreter path that does not exist here, so the POSIX text names
     it. Naming only POSIX paths on Windows reads as you are on Linux and models then refuse to
     invoke Windows programs that are in fact available, so that text says where the code runs
     instead: without it a model assumes the pipe is its only output and declines to open a window
-    it believes nobody can see."""
+    it believes nobody can see.
+
+    ``path_clause`` is the per-tool note on how a path the model names is resolved; it is the only
+    difference between the two descriptions.
+    """
     # Without this a model assumes its output vanished into a scratch dir and says so, which reads as the file was not
     # really created.
     created = (
@@ -13017,73 +12273,51 @@ def _build_sandbox_paths_note() -> str:
     if sys.platform != "win32":
         return (
             " Read and write files using relative paths in the current working "
-            "directory, which persists for this conversation; absolute paths like "
-            "/mnt/data or /tmp/outputs do not exist." + created
+            "directory, which persists for this conversation. This runs on the "
+            "user's own computer, in the account LAiM Studio runs under, with that "
+            "account's full rights to his files."
+            + path_clause
+            + created
         )
+    # The user's own profile, so a request to put something on the desktop picks that path
+    # instead of a folder under the working directory.
+    home = os.path.expanduser("~")
+    desktop = os.path.join(home, "Desktop")
     return (
-        " You are on Windows, and this runs on the user's own machine. Read and "
-        "write files using relative paths in the current working directory, which "
-        "persists for this conversation." + created
+        " You are on Windows, and this runs on the user's own machine, with full "
+        "access to his files and folders."
+        + path_clause
+        + " Read and write files using relative paths in the current working "
+        "directory, which persists for this conversation. The user's profile is "
+        f"{home}, so their desktop is {desktop}: use those absolute paths when the "
+        "user asks for something on the desktop or in their account."
+        + created
     )
 
 
-# Full access (permission_mode='full') edits, applied to the sandboxed text rather than writing a second copy of it.
-# Everything the two modes share (the relative-path advice, the persisted workdir, the download-link note) is prose
-# that gets tuned over time, and a parallel copy would drift out of sync in silence. Only the claims the sandbox makes
-# true are touched. A rewording that stops one of these matching is caught by test_full_access_tool_prompt.py, which
-# asserts the sandboxed markers are gone from the result on both platforms.
-_FULL_ACCESS_SUBSTITUTIONS = (
-    # The only sentence in the python description that names the sandbox. Just dropped, not reworded: where the code
-    # runs is said once, by the paths note below, which both tools carry.
-    ("Execute Python code in a sandbox and", "Execute Python code and"),
-    # POSIX: a blanket denial is wrong with the sandbox off, and so is a blanket promise. POSIX has no sentence saying
-    # where the code runs, so it is added here; Windows already has one.
-    (
-        "; absolute paths like /mnt/data or /tmp/outputs do not exist.",
-        ". This runs wherever LAiM Studio is running, which may be a remote host "
-        "or a container with only some paths mounted.{clause}",
-    ),
-    # Windows already says where the code runs and never denies absolute paths, so there is nothing false to remove;
-    # state the capability instead. the user's own machine is narrowed at the same time: --secure and -H 0.0.0.0 are
-    # documented remote modes (README), and the tools run on the host serving LAiM, which is then not the device
-    # the user is looking at.
-    # _TERMINAL_SHELL_NOTE is carried through unchanged except here: its Git Bash branch promises a detached program's
-    # window appears on the user's desktop, which only holds while LAiM is local.
-    (
-        "opens a window on the user's desktop.",
-        "opens a window on that machine's desktop, which the user sees only if "
-        "they are sitting at it.",
-    ),
-    (
-        " You are on Windows, and this runs on the user's own machine.",
-        " You are on Windows, and this runs wherever LAiM Studio is running, "
-        "which may be a remote host or a container with only some paths "
-        "mounted.{clause}",
-    ),
-)
-
-
-# What the sandbox is off actually means for paths, per tool. Shared by both platform substitutions: the split is the
-# shim, not the OS. _build_bypass_env keeps _SANDBOX_SITE_DIR on PYTHONPATH for BOTH tools, so sitecustomize.py still
-# loads, and being a CPython startup hook is what separates them. Measured:
+# How the tool subprocess really resolves a path the model names, per tool. The split is the
+# sitecustomize shim, not the OS: _build_bypass_env keeps _TOOL_SITE_DIR on PYTHONPATH for BOTH
+# tools, so it loads either way, and being a CPython startup hook is what separates them. Measured:
 # python, parent exists -> writes the real absolute path.
-# python, absent prefix -> _remap keeps the SUFFIX under the workdir (/mnt/data/reports/out.csv -> ./reports/out.csv)
-# and returns before the generic fallback, so no basename collapse and no anti-clobber.
+# python, absent convention prefix -> _remap keeps the SUFFIX under the workdir
+#   (/mnt/data/reports/out.csv -> ./reports/out.csv) and returns before the generic fallback, so no
+#   basename collapse and no anti-clobber.
 # python, other missing parent -> the fallback keeps only the base name, and raises when an UNRELATED file holds it;
-# the .LAiM_sandbox_remap.json sidecar lets a rewrite of the same invented path re-serve its own target.
+#   the .LAiM_remap.json sidecar lets a rewrite of the same invented path re-serve its own target.
 # python, prefix present -> a real /mnt/data mount is never shadowed, so a prefix is special only while absent, which
-# is why the clause names one inside a conditional and never categorically.
+#   is why the clause names one inside a conditional and never categorically.
 # API coverage differs per rewrite -> _makedirs calls _remap only, so the generic fallback is open/io.open/os.open
-# alone and os.makedirs under a missing parent OUTSIDE the convention prefixes targets the REAL host path. Inside them
-# _remap still rewrites: makedirs("/mnt/data/reports") created ./reports and raised nothing, so the clause has to name
-# the prefixes rather than say not rewritten at all. An attempt, not an outcome: makedirs into a mode-500 directory
-# raised PermissionError and created nothing, neither on the host nor in the workdir, so the clause must not promise
-# creation any more than it promises a prefix is absent. os.rename and os.symlink raise, while shutil.copy writes the
-# rewritten file through open and then raises in copymode.
+#   alone and os.makedirs under a missing parent OUTSIDE the convention prefixes targets the REAL host path. Inside them
+#   _remap still rewrites: makedirs("/mnt/data/reports") created ./reports and raised nothing, so the clause has to name
+#   the prefixes rather than say not rewritten at all. An attempt, not an outcome: makedirs into a mode-500 directory
+#   raised PermissionError and created nothing, neither on the host nor in the workdir, so the clause must not promise
+#   creation any more than it promises a prefix is absent. os.rename and os.symlink raise, while shutil.copy writes the
+#   rewritten file through open and then raises in copymode.
 # terminal -> the shell's own rules, except for Python it launches, which is patched like the python tool.
-_FULL_ACCESS_CLAUSE = {
+_PATH_CLAUSE = {
     "python": (
-        " The code sandbox is disabled, so absolute paths under a directory that "
+        " Nothing here is isolated from the user's computer, so absolute paths "
+        "under a directory that "
         "exists do resolve. Two different rewrites apply when the directory does "
         "not exist: under a code-interpreter convention prefix (/mnt/data, "
         "/mnt/outputs, /tmp/outputs, /home/sandbox, /workspace) the rest of the "
@@ -13102,29 +12336,13 @@ _FULL_ACCESS_CLAUSE = {
         "asked for."
     ),
     "terminal": (
-        " The code sandbox is disabled, so absolute paths do resolve as the shell "
+        " Nothing here is isolated from the user's computer, so absolute paths do "
+        "resolve as the shell "
         "resolves them. Python you launch from here is the exception: it loads the "
         "same shim as the python tool and gets the same rewrites, so a create "
         "under a directory that does not exist lands in the working directory."
     ),
 }
-
-
-def _to_full_access(description: str, tool_name: str) -> str:
-    """Rewrite a sandboxed tool description for Full access.
-
-    Under bypass_permissions the loops pass disable_sandbox=True: _build_bypass_env /
-    _bypass_preexec skip the static analysis, the command blocklist and the rlimits, so the host
-    filesystem really is reachable. Handing a model the sandboxed text in that mode makes it answer
-    I am sandboxed and cannot see your files to a question one tool call would have answered.
-    Untouched clauses are the ones still true in both modes: the workdir is the per-session dir
-    either way (_build_bypass_env repoints HOME at it and TMPDIR / TEMP / TMP just inside it), and
-    so is the download-link note.
-    """
-    clause = _FULL_ACCESS_CLAUSE[tool_name]
-    for sandboxed, full_access in _FULL_ACCESS_SUBSTITUTIONS:
-        description = description.replace(sandboxed, full_access.format(clause = clause))
-    return description
 
 
 def _build_terminal_shell_note() -> str:
@@ -13133,7 +12351,7 @@ def _build_terminal_shell_note() -> str:
     Which shell runs is read from the resolver, not assumed: telling a model it has bash on a host
     where _get_shell_cmd fell back to cmd reintroduces the multi-line half-execution this note
     exists to prevent. It stays off the python description because none of it applies to the python
-    sandbox, and naming a shell there invites subprocess/os.system as a way past the terminal
+    workdir, and naming a shell there invites subprocess/os.system as a way past the terminal
     blocklist. No program is named either: powershell/pwsh are on that blocklist and `cmd /c start`
     is not, so recommending one hands back a hard block and recommending the other advertises the
     gap.
@@ -13152,15 +12370,16 @@ def _build_terminal_shell_note() -> str:
     )
 
 
-_SANDBOX_PATHS_NOTE = _build_sandbox_paths_note()
+_PYTHON_PATHS_NOTE = _build_paths_note(_PATH_CLAUSE["python"])
+_TERMINAL_PATHS_NOTE = _build_paths_note(_PATH_CLAUSE["terminal"])
 _TERMINAL_SHELL_NOTE = _build_terminal_shell_note()
 
 PYTHON_TOOL = {
     "type": "function",
     "function": {
         "name": "python",
-        "description": "Execute Python code in a sandbox and return stdout/stderr."
-        + _SANDBOX_PATHS_NOTE,
+        "description": "Execute Python code and return stdout/stderr."
+        + _PYTHON_PATHS_NOTE,
         "parameters": {
             "type": "object",
             "properties": {
@@ -13179,7 +12398,7 @@ TERMINAL_TOOL = {
     "function": {
         "name": "terminal",
         "description": "Execute a terminal command and return stdout/stderr."
-        + _SANDBOX_PATHS_NOTE
+        + _TERMINAL_PATHS_NOTE
         + _TERMINAL_SHELL_NOTE,
         "parameters": {
             "type": "object",
@@ -13194,89 +12413,13 @@ TERMINAL_TOOL = {
     },
 }
 
-# Full access runs these two without the sandbox, so it gets its own pair of schemas rather than a per-request
-# rebuild: the descriptions are platform-derived constants either way. The sandboxed pair stays the module default, so
-# every existing importer keeps the safe wording. The shell note is unaffected by the substitutions and carries
-# through as-is.
-PYTHON_TOOL_FULL_ACCESS = {
-    "type": "function",
-    "function": {
-        **PYTHON_TOOL["function"],
-        "description": _to_full_access(PYTHON_TOOL["function"]["description"], "python"),
-    },
-}
-
-TERMINAL_TOOL_FULL_ACCESS = {
-    "type": "function",
-    "function": {
-        **TERMINAL_TOOL["function"],
-        "description": _to_full_access(TERMINAL_TOOL["function"]["description"], "terminal"),
-    },
-}
-
-# The isolated Windows Terminal (see _terminal_profile) is cmd.exe inside MXC whatever the host shell is, so it gets
-# its own schema, chosen per request; the module default keeps describing the host shell.
-_ISOLATED_CMD_SHELL_NOTE = (
-    " The shell is cmd, running isolated, not bash: send one command per call, chain with &&, use "
-    "double quotes only, and use relative paths. git, when installed, runs without hooks, a pager or "
-    "an editor, so pass -m to git commit."
+# Appended, not substituted: the base text never claims absolute paths fail, so there is nothing false to
+# rewrite, only a capability to add. A model that thinks it cannot reach a real checkout falls back to the whole-file
+# rewrite.
+_EDIT_FILE_PATH_CLAUSE = (
+    " An absolute path resolves as written and edits the real file there, anywhere "
+    "the LAiM Studio process can reach."
 )
-
-TERMINAL_TOOL_CMD_ISOLATED = {
-    "type": "function",
-    "function": {
-        **TERMINAL_TOOL["function"],
-        "description": "Execute a terminal command and return stdout/stderr."
-        + _SANDBOX_PATHS_NOTE
-        + _ISOLATED_CMD_SHELL_NOTE,
-    },
-}
-
-
-def apply_terminal_profile_description(tools: list[dict], profile: str) -> list[dict]:
-    """Swap the terminal schema for the one matching ``profile``. Like
-    apply_full_access_tool_descriptions, the input list is never mutated and a list with nothing to
-    swap is returned as-is; only "cmd_isolated" changes anything."""
-    if not tools or profile != "cmd_isolated":
-        return tools
-    swapped = False
-    out: list[dict] = []
-    for tool in tools:
-        name = (tool.get("function") or {}).get("name") if isinstance(tool, dict) else None
-        if name == "terminal":
-            out.append(TERMINAL_TOOL_CMD_ISOLATED)
-            swapped = True
-        else:
-            out.append(tool)
-    return out if swapped else tools
-
-
-# edit_file is registered below, once its schema exists.
-_FULL_ACCESS_TOOL_BY_NAME = {
-    "python": PYTHON_TOOL_FULL_ACCESS,
-    "terminal": TERMINAL_TOOL_FULL_ACCESS,
-}
-
-
-def apply_full_access_tool_descriptions(tools: list[dict]) -> list[dict]:
-    """Swap python/terminal/edit_file for their Full access schemas. Only the sandboxed built-ins
-    are touched; web_search, render_html, search_knowledge_base and MCP tools are passed through
-    untouched, and a list without any of them is returned as-is so callers can apply this
-    unconditionally. The input list is never mutated: ALL_TOOLS entries are module globals shared
-    across requests."""
-    if not tools:
-        return tools
-    swapped = False
-    out: list[dict] = []
-    for tool in tools:
-        name = (tool.get("function") or {}).get("name") if isinstance(tool, dict) else None
-        replacement = _FULL_ACCESS_TOOL_BY_NAME.get(name)
-        if replacement is None:
-            out.append(tool)
-        else:
-            out.append(replacement)
-            swapped = True
-    return out if swapped else tools
 
 
 EDIT_FILE_TOOL = {
@@ -13295,7 +12438,7 @@ EDIT_FILE_TOOL = {
             "Each must match exactly one place unless it sets replace_all; if any matches "
             "none or several, nothing is written. Paths are relative to the working "
             "directory. A successful call means the file holds what you sent, so do not "
-            "read it back."
+            "read it back." + _EDIT_FILE_PATH_CLAUSE
         ),
         "parameters": {
             "type": "object",
@@ -13341,24 +12484,6 @@ EDIT_FILE_TOOL = {
         },
     },
 }
-
-# Appended, not substituted: the sandboxed text never claims absolute paths fail, so there is nothing false to
-# rewrite, only a capability to add. A model that thinks it cannot reach a real checkout falls back to the whole-file
-# rewrite.
-_EDIT_FILE_FULL_ACCESS_CLAUSE = (
-    " The code sandbox is disabled, so an absolute path resolves as written and "
-    "edits the real file there, anywhere the LAiM Studio process can reach."
-)
-
-EDIT_FILE_TOOL_FULL_ACCESS = {
-    "type": "function",
-    "function": {
-        **EDIT_FILE_TOOL["function"],
-        "description": EDIT_FILE_TOOL["function"]["description"] + _EDIT_FILE_FULL_ACCESS_CLAUSE,
-    },
-}
-
-_FULL_ACCESS_TOOL_BY_NAME["edit_file"] = EDIT_FILE_TOOL_FULL_ACCESS
 
 RENDER_HTML_TOOL = {
     "type": "function",
@@ -14366,7 +13491,7 @@ def mcp_tool_definition(server_id: str, tool_name: str) -> "dict | None":
 
 
 def mcp_session_scope(session_id: "str | None", thread_id: "str | None") -> "str | None":
-    """Persist a stateful stdio session only per conversation (thread_id). session_id is the project-wide sandbox
+    """Persist a stateful stdio session only per conversation (thread_id). session_id is the project-wide workdir
     id, so scoping by it alone leaks browser/DB/REPL state across conversations; fall back to one-shot. Tag +
     percent-quote the parts so ids can't collide or ":" merge conversations."""
     if not thread_id:
@@ -14405,7 +13530,6 @@ def execute_tool(
     session_id: str | None = None,
     thread_id: str | None = None,
     rag_scope: dict | None = None,
-    disable_sandbox: bool = False,
     output_callback = None,
     website_policy: dict | None = None,
     conversation_branch: list[dict] | None = None,
@@ -14415,30 +13539,22 @@ def execute_tool(
     search_images: bool = False,
     result_budget_tokens: int | None = None,
     *,
-    tool_execution_mode: str = "auto",
-    host_access_approved: bool = False,
     mcp_image = None,
 ) -> str:
     """Execute a tool by name with the given arguments; returns a string.
 
     ``timeout``: int seconds, ``None`` = no limit, unset = ``_EXEC_TIMEOUT``. ``session_id``:
-    optional ID for per-conversation sandbox isolation. ``thread_id``: optional conversation ID;
+    optional ID for the conversation's working directory. ``thread_id``: optional conversation ID;
     scopes stateful MCP stdio sessions per thread (session_id alone can be shared project-wide).
     ``rag_scope``: hidden per-request RAG context the model never sees; consumed by
-    ``search_knowledge_base``. ``disable_sandbox``: Bypass Permissions; run python/terminal without
-    the safety checks, blocklist, or resource caps (secrets still stripped). Only affects local code
-    tools; web_search / MCP are unchanged. ``output_callback``: optional ``callable(str)`` invoked
+    ``search_knowledge_base``. ``output_callback``: optional ``callable(str)`` invoked
     with incremental stdout/stderr chunks while python/terminal executions run. Purely
     observational: the returned result string is identical with or without it. ``website_policy``:
-    hidden server-validated domain limits for web_search. ``tool_execution_mode`` controls OS
-    isolation for python/terminal: ``"auto"`` isolates when available and otherwise preserves
-    existing behavior, while ``"required"`` refuses unisolated execution. Full access remains
-    controlled by ``disable_sandbox``; ``"full"`` here is refused. ``host_access_approved``: the user approved this
-    call at the confirmation prompt (see ``_prepare_tool_launch``).
+    hidden server-validated domain limits for web_search.
     """
     from state.tool_policy import require_tool_access
 
-    require_tool_access(disable_sandbox = disable_sandbox)
+    require_tool_access()
     logger.info(f"execute_tool: name={name}, session_id={session_id}, timeout={timeout}")
     # Set unconditionally, so a value from an earlier call on this thread can never be read by a later one. That is
     # what makes a try/finally reset unnecessary here.
@@ -14573,7 +13689,7 @@ def execute_tool(
     if name == MCP_TOOL_SEARCH_NAME:
         return _fit_result_to_room(_mcp_tool_search(arguments), name)
     if name.startswith(MCP_TOOL_PREFIX):
-        # An MCP server is not inside the terminal sandbox, so the local refusal has to hold here too.
+        # An MCP server is not inside the terminal workdir, so the local refusal has to hold here too.
         if _mcp_arguments_reference_studio_credential(arguments):
             return _STUDIO_CREDENTIAL_BLOCKED
         try:
@@ -14690,7 +13806,7 @@ def execute_tool(
             ),
             name,
         )
-    # Both run with the session's sandbox as cwd, so a chat deleted mid-call must not unlink it from under them.
+    # Both run with the session's workdir as cwd, so a chat deleted mid-call must not unlink it from under them.
     if name == "python":
         with _session_in_flight(session_id):
             return _python_exec(
@@ -14698,11 +13814,8 @@ def execute_tool(
                 cancel_event,
                 effective_timeout,
                 session_id,
-                disable_sandbox = disable_sandbox,
                 output_callback = output_callback,
                 thread_id = thread_id,
-                tool_execution_mode = tool_execution_mode,
-                host_access_approved = host_access_approved,
             )
     if name == "terminal":
         with _session_in_flight(session_id):
@@ -14711,11 +13824,8 @@ def execute_tool(
                 cancel_event,
                 effective_timeout,
                 session_id,
-                disable_sandbox = disable_sandbox,
                 output_callback = output_callback,
                 thread_id = thread_id,
-                tool_execution_mode = tool_execution_mode,
-                host_access_approved = host_access_approved,
             )
     if name == "view_image":
         from .view_image import view_image
@@ -14727,11 +13837,7 @@ def execute_tool(
     if name == "edit_file":
         with _session_in_flight(session_id):
             return _fit_result_to_room(
-                _edit_file(
-                    arguments,
-                    session_id = session_id,
-                    disable_sandbox = disable_sandbox,
-                ),
+                _edit_file(arguments, session_id = session_id),
                 name,
             )
     return f"Unknown tool: {name}"
@@ -18043,7 +17149,7 @@ def _wikipedia_search(query, max_results, timeout, deadline, cancel_event, websi
         cancel_event = cancel_event,
         website_policy = website_policy,
         raw_bytes_max = 1024 * 1024,
-        extra_headers = {"User-Agent": "LAiMStudio/1.0 (https://github.com/LAiMai/LAiM)"},
+        extra_headers = {"User-Agent": "LAiMStudio/1.0 (https://github.com/OPusAngel/LAiM)"},
     )
     if error:
         raise RuntimeError(error)
@@ -19333,7 +18439,7 @@ def _check_signal_escape_patterns(code: str):
             return f.id
         return None
 
-    # Kwargs that ship a credential over the wire. The sandbox env strips credentials up front, so any value here is
+    # Kwargs that ship a credential over the wire. The workdir env strips credentials up front, so any value here is
     # hard-coded or lifted from parent.
     _HF_SENSITIVE_KWARGS = frozenset(
         {
@@ -19349,7 +18455,7 @@ def _check_signal_escape_patterns(code: str):
     )
 
     _HF_UPLOAD_PATH_VIOLATION = (
-        "HF upload path must be a sandbox-local relative-path literal "
+        "HF upload path must be a workdir-local relative-path literal "
         "(no absolute paths, no '..' segments, no dynamic expressions)"
     )
 
@@ -19414,8 +18520,8 @@ def _check_signal_escape_patterns(code: str):
             return False
         return ".." not in path.replace("\\", "/").split("/")
 
-    def _path_arg_is_sandbox_local(node: ast.AST | None) -> bool:
-        """Whether the path argument resolves to a sandbox-local literal."""
+    def _path_arg_is_workdir_local(node: ast.AST | None) -> bool:
+        """Whether the path argument resolves to a workdir-local literal."""
         if node is None:
             return False
         if isinstance(node, ast.Constant) and isinstance(node.value, (bytes, bytearray)):
@@ -19439,15 +18545,15 @@ def _check_signal_escape_patterns(code: str):
     def _hf_upload_violation(node: ast.Call, method_name: str) -> str | None:
         """Inspect an HF upload call; return a violation reason or None. Policy: HF uploads are
         allowed only when (a) no sensitive kwarg is set, (b) no positional / keyword value reads
-        `os.environ` or related env readers, and (c) the path arg is a sandbox-local literal: a
+        `os.environ` or related env readers, and (c) the path arg is a workdir-local literal: a
         relative string with no `..`, an `open(<literal>)`, or inline bytes. Dynamic / variable
         paths are rejected since safety can't be proven statically and a wrong-allow means
         credential exfiltration."""
         for kw in node.keywords or []:
             if kw.arg in _HF_SENSITIVE_KWARGS:
                 return (
-                    f"HF upload {kw.arg}= cannot be set from sandboxed code; "
-                    "uploads run with the sandbox identity only"
+                    f"HF upload {kw.arg}= cannot be set from locked down code; "
+                    "uploads run with the workdir identity only"
                 )
         all_values = list(node.args or []) + [kw.value for kw in (node.keywords or [])]
         for v in all_values:
@@ -19483,7 +18589,7 @@ def _check_signal_escape_patterns(code: str):
             return None
         if method_name == "commit_operation":
             # A CommitOperation* constructor from the list above. Delete and copy get no exemption: a by-name one
-            # would trust a name sandboxed code can rebind. Add is (path_in_repo, path_or_fileobj) so both positionals
+            # would trust a name locked down code can rebind. Add is (path_in_repo, path_or_fileobj) so both positionals
             # are checked, and other keywords must be literals: a computed one reads the file.
             path_nodes = list(node.args or [])
             for kw in node.keywords or []:
@@ -19496,7 +18602,7 @@ def _check_signal_escape_patterns(code: str):
             if not path_nodes:
                 return _HF_UPLOAD_PATH_VIOLATION
             for p in path_nodes:
-                if not _path_arg_is_sandbox_local(p):
+                if not _path_arg_is_workdir_local(p):
                     return _HF_UPLOAD_PATH_VIOLATION
             return None
         path_node: ast.AST | None = node.args[0] if node.args else None
@@ -19504,7 +18610,7 @@ def _check_signal_escape_patterns(code: str):
             if kw.arg in ("path_or_fileobj", "folder_path"):
                 path_node = kw.value
                 break
-        if not _path_arg_is_sandbox_local(path_node):
+        if not _path_arg_is_workdir_local(path_node):
             return _HF_UPLOAD_PATH_VIOLATION
         return None
 
@@ -21052,7 +20158,7 @@ def _check_signal_escape_patterns(code: str):
                                 "type": "untrusted_host_blocked",
                                 "line": getattr(node, "lineno", -1),
                                 "description": (
-                                    "Blocked: host not in sandbox allowlist; "
+                                    "Blocked: host not in workdir allowlist; "
                                     "use an allowed informational source"
                                 ),
                             }
@@ -21069,7 +20175,7 @@ def _check_signal_escape_patterns(code: str):
                         {
                             "type": "upload_blocked",
                             "line": getattr(node, "lineno", -1),
-                            "description": ("Blocked: file upload disallowed in sandbox"),
+                            "description": ("Blocked: file upload disallowed in workdir"),
                         }
                     )
 
@@ -21239,7 +20345,7 @@ def _check_signal_escape_patterns(code: str):
                             "type": "unreadable_host_blocked",
                             "line": getattr(node, "lineno", -1),
                             "description": (
-                                "Blocked: network destination is not a literal the sandbox "
+                                "Blocked: network destination is not a literal the workdir "
                                 "can check; write the allowed host out in full"
                             ),
                         }
@@ -21258,7 +20364,7 @@ def _check_signal_escape_patterns(code: str):
                             "type": "untrusted_host_blocked",
                             "line": getattr(node, "lineno", -1),
                             "description": (
-                                "Blocked: host not in sandbox allowlist; "
+                                "Blocked: host not in workdir allowlist; "
                                 "use an allowed informational source"
                             ),
                         }
@@ -21287,7 +20393,7 @@ def _check_signal_escape_patterns(code: str):
                                 "line": getattr(node, "lineno", -1),
                                 "description": (
                                     f"open({path_lit!r}) targets a host identity / "
-                                    "credential file; sandboxed code may not read it"
+                                    "credential file; locked down code may not read it"
                                 ),
                             }
                         )
@@ -21683,7 +20789,7 @@ def _truncate(
             )
             + hint
         )
-    # The rest is not advice, it is reachable: the sandbox persists between calls and the model already has the
+    # The rest is not advice, it is reachable: the workdir persists between calls and the model already has the
     # terminal, so naming the exact next command turns a dead end into paging. Truncating without one is what makes a
     # model re-run the same command and truncate identically.
     if on_boundary:
@@ -21732,7 +20838,7 @@ def _fit_result_to_room(text, name = None):
     full local thread and then be protected as its newest exchange, which is the failure the budget
     exists to prevent.
 
-    No spill file: these tools have no sandbox of their own, and `edit_file` must not have a workdir
+    No spill file: these tools have no workdir of their own, and `edit_file` must not have a workdir
     created underneath a caller running with code execution off. So the cap comes with the plain
     notice and no paging hint.
 
@@ -21820,7 +20926,7 @@ def cap_tool_text(
     if readers and session_id and _spill_scope(session_id, thread_id) is not None:
         try:
             workdir = _get_workdir(session_id)
-        except Exception:  # noqa: BLE001 -- no sandbox means the plain notice
+        except Exception:  # noqa: BLE001 -- no workdir means the plain notice
             logger.debug("tool text spill: no workdir", exc_info = True)
             workdir = None
         from .tool_loop_controller import redact_studio_credentials  # noqa: PLC0415
@@ -21874,7 +20980,7 @@ _SPILL_DIR = ".LAiM_tool_output"
 _SPILL_KEEP = 20
 # A result reaches here whole, so one `cat` of a multi-gigabyte file would be retained in full and twenty of them
 # would fill the host's disk. The subprocess file-size limit does not apply: this output came through a pipe, not a
-# file the sandbox wrote. A spill exists so the model can page through what it was shown, and 8 MB is already far more
+# file the workdir wrote. A spill exists so the model can page through what it was shown, and 8 MB is already far more
 # of that than any window can consume.
 _SPILL_MAX_BYTES = 8 * 1024 * 1024
 
@@ -21904,15 +21010,15 @@ def _digest_and_head(text: str, max_bytes: int) -> "tuple[str, int, bytes]":
 
 _SPILL_MAX_TOTAL_BYTES = 64 * 1024 * 1024
 # Exactly the names `_spill_full_output` generates: twelve hex characters of a content digest. The prune below deletes
-# what it matches, and the sandbox is the user's own directory: a session may open on one that already holds a folder
+# what it matches, and the workdir is the user's own directory: a session may open on one that already holds a folder
 # of this name, and anything in it that LAiM did not write is not LAiM's to remove.
 _SPILL_NAME_RE = re.compile(r"[0-9a-f]{12}\.txt")
 # Written once, when this process creates the spill directory. Ownership is RECORDED rather than inferred from the
-# names inside: a sandbox can be a project the user opened, a directory of this name in it may be theirs, and a file
+# names inside: a workdir can be a project the user opened, a directory of this name in it may be theirs, and a file
 # name proves nothing about who wrote it. Without the marker nothing here writes, prunes or discounts anything there.
 _SPILL_RECORD_HEADER = "LAiM-studio tool output "
 # One lock per spill root. Appending a spill and rewriting the manifest after a prune are a read-modify-write over one
-# shared file, and a project's chats share a sandbox: two calls spilling at once could otherwise have the pruner drop
+# shared file, and a project's chats share a workdir: two calls spilling at once could otherwise have the pruner drop
 # the entry the other just appended, leaving a file nothing counts, prunes, or recognises as LAiM's.
 _SPILL_LOCKS: "dict[str, threading.Lock]" = {}
 _SPILL_LOCKS_GUARD = threading.Lock()
@@ -21925,18 +21031,18 @@ def _spill_lock(root: str) -> "threading.Lock":
 
 
 def _spill_records_dir() -> str:
-    """Where the spill manifests live: LAiM's own storage, NOT the sandbox. The sandbox is a
-    directory tool code writes to, so nothing kept inside it can be evidence about the sandbox. A
+    """Where the spill manifests live: LAiM's own storage, NOT the workdir. The workdir is a
+    directory tool code writes to, so nothing kept inside it can be evidence about the workdir. A
     marker file there was replaceable by a link, and once it is a plain file the model can
     rewrite its contents and name the user's own files as LAiM's, which turns the cleanup into
     a delete and the prune into an unlink. Held beside the other records this file already keeps
-    outside the sandboxes."""
+    outside the workdires."""
     try:
         from utils.paths.storage_roots import account_path  # noqa: PLC0415
         return str(account_path("tool-output-records"))
     except Exception:
         return os.path.join(
-            os.path.dirname(os.path.realpath(sandbox_root())), "tool-output-records"
+            os.path.dirname(os.path.realpath(session_workdir_root())), "tool-output-records"
         )
 
 
@@ -21962,14 +21068,14 @@ def _spill_identity(root: str) -> "str | None":
 
 def _own_spill_root(root: str) -> bool:
     """Whether the spill directory is one this process made, creating it if it is absent. Ownership
-    is recorded outside the sandbox (`_spill_records_dir`) and is of a specific directory, not of
-    a path: a `.LAiM_tool_output` that came with the sandbox, or one tool code deleted and
+    is recorded outside the workdir (`_spill_records_dir`) and is of a specific directory, not of
+    a path: a `.LAiM_tool_output` that came with the workdir, or one tool code deleted and
     recreated, has no matching record and is left alone entirely."""
     if os.path.islink(root):
         return False
     try:
         # The existence check, the creation and the first record are ONE locked step. Two first-time spills in a
-        # shared project sandbox can both see the directory absent, and the slower one would otherwise write an empty
+        # shared project folder can both see the directory absent, and the slower one would otherwise write an empty
         # record over the winner's, which leaves the winner's spill owned by nobody: never pruned, counted as the
         # user's content on cleanup, and outside the byte budget for good.
         with _spill_lock(root):
@@ -21984,7 +21090,7 @@ def _own_spill_root(root: str) -> bool:
             recorded = _spill_record(root)[0]
             if recorded is None:
                 if existed and os.listdir(root):
-                    # Not ours and not empty, so it came with the sandbox.
+                    # Not ours and not empty, so it came with the workdir.
                     return False
                 os.makedirs(_spill_records_dir(), exist_ok = True)
                 _write_spill_manifest(root, {}, identity = identity)
@@ -22006,7 +21112,7 @@ _DIR_FD_WRITES = (
 
 
 # A tool sharing the directory can swap an in-flight temp name for a symlink. Linking must not follow it, or the
-# backend hard-links the symlink's target (any host file it can read) into the sandbox. Windows hard links never
+# backend hard-links the symlink's target (any host file it can read) into the workdir. Windows hard links never
 # follow a symlink source, and os.link there takes no such flag.
 _LINK_NOFOLLOW = (
     {"follow_symlinks": False} if os.link in getattr(os, "supports_follow_symlinks", set()) else {}
@@ -22017,9 +21123,9 @@ def _write_spill_file(target_dir: str, name: str, body: str) -> "str | None":
     """Write one spill into ``target_dir``, without following a link at any point.
 
     The directory is opened ONCE, O_NOFOLLOW, and every step after that is relative to that
-    descriptor. Checking the path and then writing to it by name is a race a shared project sandbox
+    descriptor. Checking the path and then writing to it by name is a race a shared project folder
     can lose: another call can replace the directory with a symlink in between, and both the create
-    and the rename would follow it, putting this output outside the sandbox with the backend's own
+    and the rename would follow it, putting this output outside the workdir with the backend's own
     permissions.
 
     Still written to a fresh O_EXCL file and installed under the real name rather than opened over
@@ -22099,8 +21205,8 @@ _UNSAFE_NAME_CHARS = re.compile(r'[\x00-\x1f\x7f/\\:*?"<>|]')
 _RESERVED_NAME = re.compile(r"(?:CON|PRN|AUX|NUL|COM\d|LPT\d)", re.IGNORECASE)
 
 
-def sandbox_attachment_path(sha256: str, name: str) -> str:
-    """Mirrored by sandboxAttachmentPath in the frontend's sandbox-attachments.ts."""
+def session_attachment_path(sha256: str, name: str) -> str:
+    """Mirrored by workdirAttachmentPath in the frontend's workdir-attachments.ts."""
     base = _UNSAFE_NAME_CHARS.sub("_", name or "").strip(" .") or "attachment"
     # In bytes: filesystems cap a name at 255, and macOS stores decomposed text that can triple it.
     if len(base.encode()) > _ATTACHMENT_NAME_BYTES:
@@ -22114,17 +21220,17 @@ def sandbox_attachment_path(sha256: str, name: str) -> str:
     return f"{_ATTACHMENTS_DIR}/{sha256[:_ATTACHMENT_PREFIX_LEN]}/{base}"
 
 
-def materialize_sandbox_attachments(
+def materialize_session_attachments(
     session_id: "str | None", attachments: "list[tuple[str, str]]"
 ) -> None:
-    """copy chat attachment originals into the sandbox, preserving existing copies so edits survive."""
+    """copy chat attachment originals into the workdir, preserving existing copies so edits survive."""
     from core import chat_originals
     with _session_in_flight(session_id):
         workdir = _get_workdir(session_id)
         missing = [
             (sha256, name, chat_originals.originals_dir() / sha256)
             for sha256, name in attachments
-            if not os.path.lexists(os.path.join(workdir, sandbox_attachment_path(sha256, name)))
+            if not os.path.lexists(os.path.join(workdir, session_attachment_path(sha256, name)))
         ]
         missing = [entry for entry in missing if entry[2].is_file()]
         if not missing:
@@ -22134,10 +21240,10 @@ def materialize_sandbox_attachments(
         try:
             for sha256, name, source in missing:
                 try:
-                    _install_attachment_copy(workdir, sandbox_attachment_path(sha256, name), source)
+                    _install_attachment_copy(workdir, session_attachment_path(sha256, name), source)
                 except (OSError, ValueError):
                     logger.warning(
-                        "could not copy attachment %s into the sandbox", sha256, exc_info = True
+                        "could not copy attachment %s into the workdir", sha256, exc_info = True
                     )
             if _is_user_project_folder(session_id, workdir):
                 _git_ignore_dir(os.path.join(workdir, _ATTACHMENTS_DIR))
@@ -22218,12 +21324,12 @@ def _install_attachment_copy(workdir: str, relative: str, source: Path) -> None:
             os.close(fd)
 
 
-class SandboxUploadExists(Exception):
+class SessionUploadExists(Exception):
     """The upload's name is taken and the caller did not ask to replace it."""
 
 
-def sandbox_upload_name(name: "str | None") -> str:
-    """The name an uploaded file is saved under at the sandbox root, one the download route serves back."""
+def session_upload_name(name: "str | None") -> str:
+    """The name an uploaded file is saved under at the workdir root, one the download route serves back."""
     base = _UNSAFE_NAME_CHARS.sub("_", re.split(r"[\\/]", name or "")[-1]).strip(" .") or "upload"
     if _RESERVED_NAME.fullmatch(base.split(".", 1)[0].rstrip(" ")):
         base = "_" + base
@@ -22234,15 +21340,15 @@ def sandbox_upload_name(name: "str | None") -> str:
     return base if _servable_segment(base) else "upload"
 
 
-def save_sandbox_upload(
+def save_session_upload(
     session_id: "str | None",
     name: "str | None",
     chunks: "Iterable[bytes]",
     overwrite: bool = False,
 ) -> dict:
-    """Write an uploaded file into the root of a chat's sandbox. Raises SandboxUploadExists when the
+    """Write an uploaded file into the root of a chat's workdir. Raises SessionUploadExists when the
     name is taken, unless ``overwrite``."""
-    name = sandbox_upload_name(name)
+    name = session_upload_name(name)
     with _session_in_flight(session_id):
         workdir = _get_workdir(session_id)
         # Registered as a call, so a tool call running meanwhile does not offer the upload as its own file.
@@ -22282,7 +21388,7 @@ def _install_upload(workdir: str, name: str, chunks: "Iterable[bytes]", overwrit
         except FileNotFoundError:
             existed = False
         if existed and not overwrite:
-            raise SandboxUploadExists(name)
+            raise SessionUploadExists(name)
         if not existed:
             try:
                 # link, not rename: it fails when a tool took the name since the check.
@@ -22290,19 +21396,19 @@ def _install_upload(workdir: str, name: str, chunks: "Iterable[bytes]", overwrit
                 return False
             except FileExistsError:
                 if not overwrite:
-                    raise SandboxUploadExists(name) from None
+                    raise SessionUploadExists(name) from None
             except OSError:
                 # A volume without hard links: claim the name exclusively, then rename onto the claim.
                 try:
                     os.close(os.open(dest, flags, 0o600, **at))
                 except FileExistsError:
                     if not overwrite:
-                        raise SandboxUploadExists(name) from None
+                        raise SessionUploadExists(name) from None
         try:
             os.replace(tmp, dest, **pair)
         except (IsADirectoryError, NotADirectoryError, PermissionError) as exc:
             # A folder holds the name (Windows reports that as access denied).
-            raise SandboxUploadExists(name) from exc
+            raise SessionUploadExists(name) from exc
         return existed
     finally:
         _quiet_unlink(tmp, dir_fd = dir_fd)
@@ -22310,11 +21416,11 @@ def _install_upload(workdir: str, name: str, chunks: "Iterable[bytes]", overwrit
             os.close(dir_fd)
 
 
-def _is_attachment_copy(sandbox: str, parent: str, name: str) -> bool:
+def _is_attachment_copy(workdir: str, parent: str, name: str) -> bool:
     prefix = os.path.basename(parent)
     path = os.path.join(parent, name)
     if (
-        os.path.dirname(parent) != os.path.join(sandbox, _ATTACHMENTS_DIR)
+        os.path.dirname(parent) != os.path.join(workdir, _ATTACHMENTS_DIR)
         or not re.fullmatch(r"[0-9a-f]{12}", prefix)
         or os.path.islink(path)
     ):
@@ -22324,7 +21430,7 @@ def _is_attachment_copy(sandbox: str, parent: str, name: str) -> bool:
 
 
 def _forget_spill_record(path: str) -> None:
-    """Drop the record for a sandbox that has been removed. See `_spill_records_dir`."""
+    """Drop the record for a workdir that has been removed. See `_spill_records_dir`."""
     try:
         os.remove(path)
     except OSError:
@@ -22362,7 +21468,7 @@ def _file_digest(path: str, expected_size: "int | None" = None) -> "str | None":
     """The digest of what is on disk now, or None when it is not a file this may read.
 
     Opened O_NOFOLLOW and O_NONBLOCK and checked through the DESCRIPTOR, not the path. The stamp was
-    taken a moment ago and this runs in the sandbox's own directory: between the two, tool code can
+    taken a moment ago and this runs in the workdir's own directory: between the two, tool code can
     put a symlink at the name, or a FIFO, or a device. A plain open would follow the first and block
     forever on the others, and this is called synchronously by the prune and by chat deletion,
     neither of which has a timeout.
@@ -22464,7 +21570,7 @@ def _write_spill_manifest(
 
 def _record_spill(root: str, relative: str, stamp: str, digest: str) -> None:
     """Append one written spill, with the stamp and digest of what was INSTALLED. Not re-read from
-    the path: between the install and this, another call sharing the sandbox can replace the
+    the path: between the install and this, another call sharing the workdir can replace the
     file, and stating the path then records that call's content as LAiM's, which a later prune
     or cleanup would delete. The writer knows what it put there, so it says so."""
     try:
@@ -22478,15 +21584,15 @@ def _record_spill(root: str, relative: str, stamp: str, digest: str) -> None:
 def _spill_scope(session_id: "str | None", thread_id: "str | None") -> "str | None":
     """Where this call's spills belong, or None for retain nothing.
 
-    Nothing is retained in a sandbox that more than one chat runs in. A project's chats share one
+    Nothing is retained in a workdir that more than one chat runs in. A project's chats share one
     session by design (`project_session_id`) and a call with no session lands in the shared
-    `_default` one, and in both the sandbox is a directory every sibling chat's model has a terminal
+    `_default` one, and in both the workdir is a directory every sibling chat's model has a terminal
     in: a sub-directory is not access control, it is a name. Writing a result there puts output that
     existed only in one chat's response on disk where the next chat can read it, and lets that chat
     prune the files this one was told to page through.
 
     So the trade is stated rather than hidden: in a project, a large result is truncated with a
-    notice and no continuation. Only a chat with a sandbox of its own gets paging. ``thread_id`` is
+    notice and no continuation. Only a chat with a workdir of its own gets paging. ``thread_id`` is
     taken and unused for that reason: it identifies the chat, which is not the thing that has to be
     separate.
     """
@@ -22520,7 +21626,7 @@ def _spill_full_output(
     workdir: str | None,
     scope: "str | None" = "",
 ) -> "tuple[str | None, bool]":
-    """Write the result into the sandbox; return its relative path and whether it is whole. ``(None,
+    """Write the result into the workdir; return its relative path and whether it is whole. ``(None,
     True)`` whenever it cannot be done: no workdir, a read-only mount, a full disk, a path that
     is not what it claims to be. The caller then falls back to the plain notice, because a hint
     naming a file that is not there is worse than admitting the output is gone."""
@@ -22531,9 +21637,9 @@ def _spill_full_output(
             return None, True
         relative = f"{_SPILL_DIR}/{scope}" if scope else _SPILL_DIR
         target_dir = os.path.join(workdir, *relative.split("/"))
-        # The sandbox is a directory the model runs commands in, so `.LAiM_tool_output` may already be a symlink it
+        # The workdir is a directory the model runs commands in, so `.LAiM_tool_output` may already be a symlink it
         # made, or one that came with a project opened as the workdir. makedirs(exist_ok=True) and a plain open() both
-        # follow it, which writes this result outside the sandbox with the backend's own permissions and then lets the
+        # follow it, which writes this result outside the workdir with the backend's own permissions and then lets the
         # prune delete files there. Refuse instead: no spill means a notice without a continuation hint, which is a
         # great deal better than a write out of bounds.
         if any(
@@ -22549,7 +21655,7 @@ def _spill_full_output(
         # output_callback (the streaming invariant asserted by
         # test_truncated_result_identical_and_notice_neutral_with_streaming), and a random name puts a different path
         # in the notice on each of the two runs. Content addressing also means asking for the same file twice reuses
-        # one spill instead of filling the sandbox with copies.
+        # one spill instead of filling the workdir with copies.
         # Bounded before it is written rather than after: pruning by count alone still lets one enormous result
         # through, and by then it is already on the disk.
         digest, spilled_bytes, head = _digest_and_head(text, _SPILL_MAX_BYTES)
@@ -22564,7 +21670,7 @@ def _spill_full_output(
         # Written to a fresh O_EXCL file and moved into place, never opened O_TRUNC over whatever is already at that
         # path. The spill name is derived from content the model produced, so it can predict it and pre-create it: as
         # a symlink (refused by O_NOFOLLOW and the check above) or as a HARD link, which reports islink() false and
-        # shares the inode of some file outside the sandbox. Truncating that writes through to it with the backend's
+        # shares the inode of some file outside the workdir. Truncating that writes through to it with the backend's
         # privileges; replacing a directory entry does not touch the linked file at all.
         # The name comes from the content, so re-running a command lands on the same path, and the file there may no
         # longer be the spill this wrote: a later call can have put the user's own data at it. `_is_recorded_spill` is
@@ -22592,7 +21698,7 @@ def _spill_full_output(
             hashlib.sha256(body.encode("utf-8", "surrogatepass")).hexdigest(),
         )
         _prune_spills(target_dir, os.path.join(workdir, _SPILL_DIR))
-        # Relative, so the command works from the cwd the tools already run in, and so the absolute sandbox path never
+        # Relative, so the command works from the cwd the tools already run in, and so the absolute workdir path never
         # reaches the model.
         return f"{relative}/{name}", complete
     except Exception:
@@ -22618,9 +21724,9 @@ def _unlink_verified_spill(root: str, path: str, owned: "dict[str, tuple[str, st
     """Delete a spill, and only ever the file that was checked.
 
     Moved to a private name first. A rename is atomic, so from that point the inode this verifies is
-    the inode this deletes: a sandbox writer that replaces the original name afterwards replaces
+    the inode this deletes: a workdir writer that replaces the original name afterwards replaces
     nothing that is on its way out. Verifying and then unlinking by name cannot promise that,
-    because the manifest lock orders LAiM's own threads and the thing racing here is the sandbox.
+    because the manifest lock orders LAiM's own threads and the thing racing here is the workdir.
 
     Checked again under the private name, and put back if it no longer matches, since at that point
     it is not the file this recorded and is not this to delete. The rename itself moves ctime, which
@@ -22628,7 +21734,7 @@ def _unlink_verified_spill(root: str, path: str, owned: "dict[str, tuple[str, st
     content.
 
     Nothing but a regular file with the recorded identity is moved at all: a directory or a FIFO
-    left at the name by the sandbox is rejected through its own descriptor before the rename, so the
+    left at the name by the workdir is rejected through its own descriptor before the rename, so the
     restore below is never asked to put back a kind of thing `os.link` cannot. That leaves only the
     vanishing window between the check and the rename, and the restore handles it by falling back to
     a rename when the name is free again.
@@ -22681,7 +21787,7 @@ def _is_stamped_regular(path: str, stamp: str) -> bool:
 
 def _restore_pruned_path(private: str, path: str) -> None:
     """Put back something the prune moved but must not delete. `os.link` first, because it refuses
-    to overwrite: if the sandbox has taken the name again in the meantime, the file it put there
+    to overwrite: if the workdir has taken the name again in the meantime, the file it put there
     is not this to replace. A hard link cannot be made to a directory, so when it fails and the
     name is in fact free, the rename that moved this here is reversed instead, which works
     whatever was moved. Neither can promise the name is still free at the instant it runs, so the
@@ -22707,11 +21813,11 @@ def _restore_pruned_path(private: str, path: str) -> None:
 def _prune_spills(target_dir: str, root: "str | None" = None) -> None:
     """Bound this scope by count and the whole spill tree by bytes.
 
-    A long session prints many large results and each one is retained; without this the sandbox
+    A long session prints many large results and each one is retained; without this the workdir
     grows without bound for output the model has almost certainly finished paging through.
 
     The byte budget is enforced across ``root`` rather than per directory. A project's chats each
-    get their own scope under one shared sandbox, so a per-directory limit is really a per-chat
+    get their own scope under one shared workdir, so a per-directory limit is really a per-chat
     limit and a project with many tool-using chats multiplies it by however many there are.
     """
     root = root or target_dir
@@ -22728,7 +21834,7 @@ def _prune_spills_locked(target_dir: str, root: str) -> None:
     try:
         identity, owned = _spill_record(root)
         if identity is None or identity != _spill_identity(root):
-            # No record of this directory, so it came with the sandbox or was replaced.
+            # No record of this directory, so it came with the workdir or was replaced.
             return
         removed = set()
         # Newest first within this scope, so the count keeps the ones still being paged.
@@ -22766,7 +21872,7 @@ def _prune_spills_locked(target_dir: str, root: str) -> None:
                 if os.path.join(root, *name.split("/")) not in removed
             },
         )
-        # An emptied scope is a chat that stopped spilling, and leaving its directory behind is what makes the sandbox
+        # An emptied scope is a chat that stopped spilling, and leaving its directory behind is what makes the workdir
         # look non-empty to the cleanup.
         for name in sorted(os.listdir(root)):
             scope = os.path.join(root, name)
@@ -22779,7 +21885,7 @@ def _prune_spills_locked(target_dir: str, root: str) -> None:
         logger.debug("tool result spill prune failed", exc_info = True)
 
 
-# ChatGPT code-interpreter path conventions models write out of habit; none exist in the LAiM sandbox, so a failure
+# ChatGPT code-interpreter path conventions models write out of habit; none exist in the LAiM workdir, so a failure
 # on one earns the retry hint.
 _MISSING_PATH_PREFIXES = (
     "/mnt/data",
@@ -22794,8 +21900,8 @@ _MISSING_PATH_PREFIXES = (
 _QUOTED_ABS_PATH_RE = re.compile(r"""['"](/[^'"\n]+)['"]""")
 _BASH_ABS_PATH_RE = re.compile(r"(/[^\s:'\"]+):\s*No such file or directory")
 
-# The sandbox CWD is a per-session dir under the studio home; an absolute path under it is a genuine local miss, not a
-# hallucinated out-of-sandbox write. Resolved through the same helper as _get_workdir so the two cannot drift.
+# The workdir CWD is a per-session dir under the studio home; an absolute path under it is a genuine local miss, not a
+# hallucinated outside the workdir write. Resolved through the same helper as _get_workdir so the two cannot drift.
 
 
 def _missing_error_lines(output: str) -> list[str]:
@@ -22823,12 +21929,12 @@ def _extract_missing_abs_path(output: str) -> str | None:
 
 def _is_outside_workdir(abs_path: str, workdir: str | None = None) -> bool:
     """True when ``abs_path`` is not the working directory or under it. ``workdir`` is the
-    executor's actual working directory (defaults to the sandbox root). Project-backed sessions
-    run under a root OUTSIDE ``~/studio_sandbox`` (see ``_get_workdir``), so a legitimate miss
-    inside a project must be judged against the real workdir, not a static sandbox root, or it is
+    executor's actual working directory (defaults to the workdir root). Project-backed sessions
+    run under a root OUTSIDE ``~/studio_workdir`` (see ``_get_workdir``), so a legitimate miss
+    inside a project must be judged against the real workdir, not a static workdir root, or it is
     wrongly classed as an external habit path."""
     try:
-        root = os.path.realpath(workdir or sandbox_root())
+        root = os.path.realpath(workdir or session_workdir_root())
         rp = os.path.realpath(abs_path)
     except (OSError, ValueError):
         return True
@@ -22836,7 +21942,7 @@ def _is_outside_workdir(abs_path: str, workdir: str | None = None) -> bool:
 
 
 def _missing_path_hint(output: str, workdir: str | None = None) -> str:
-    """Model-visible healing when an execution fails on an absolute path missing in the sandbox (a
+    """Model-visible healing when an execution fails on an absolute path missing in the workdir (a
     code-interpreter habit path, or one invented from the CWD). Detected on the full
     pre-truncation output; the hint echoes the failing path so the model retries with the right
     relative name."""
@@ -22844,7 +21950,7 @@ def _missing_path_hint(output: str, workdir: str | None = None) -> str:
     if not error_lines:
         return ""
     abs_path = _extract_missing_abs_path(output)
-    # A convention prefix is an out-of-sandbox signal only when the exact failing path could not be isolated; scoped
+    # A convention prefix is an outside the workdir signal only when the exact failing path could not be isolated; scoped
     # to the failing-path error line(s) so a prefix mentioned elsewhere doesn't trigger a misleading hint.
     convention = any(prefix in line for line in error_lines for prefix in _MISSING_PATH_PREFIXES)
     if abs_path is not None:
@@ -22853,14 +21959,14 @@ def _missing_path_hint(output: str, workdir: str | None = None) -> str:
         if not _is_outside_workdir(abs_path, workdir):
             return ""
     elif not convention:
-        # Nothing marks this as an out-of-sandbox miss; stay silent.
+        # Nothing marks this as an outside the workdir miss; stay silent.
         return ""
     if abs_path:
         example = f"'{os.path.basename(abs_path)}', not '{abs_path}'"
     else:
         example = "'output.html', not '/mnt/data/output.html'"
     return (
-        "\nHint: that absolute path does not exist in this sandbox. The current "
+        "\nHint: that absolute path does not exist in this workdir. The current "
         "working directory is writable and persists for this conversation; retry "
         f"with a relative path (for example {example})."
     )
@@ -22975,13 +22081,13 @@ def _drain_process_output(
 _MAX_REPORTED_FILES = 25
 # Bounded so an unpacked archive cannot turn a tool call into a filesystem crawl. In path segments, the unit the
 # download route enforces, so a card can never advertise a file that route would refuse.
-_MAX_SANDBOX_PATH_SEGMENTS = 4
+_MAX_SESSION_PATH_SEGMENTS = 4
 _MAX_SNAPSHOT_FILES = 2000  # a shard-writing script must not blow up the result
 _MAX_SNAPSHOT_DIRS = 2000  # nor a directory-writing one stall the next call
 
 
 def _user_path_parts(parts: "list[str]", root: "str | None" = None) -> "list[str]":
-    """The segments _MAX_SANDBOX_PATH_SEGMENTS applies to.
+    """The segments _MAX_SESSION_PATH_SEGMENTS applies to.
 
     The scratch container is LAiM's, not a name the model chose, and on Windows it is what /tmp
     resolves to, so charging it a segment would drop one level of the /tmp artifacts served before
@@ -22992,10 +22098,10 @@ def _user_path_parts(parts: "list[str]", root: "str | None" = None) -> "list[str
     LAiM-tmp (or a wrong-case entry on NTFS or APFS) would take the discount for a tree neither
     walk lists.
     """
-    if not parts or parts[0] != _SANDBOX_TEMP_DIRNAME:
+    if not parts or parts[0] != _TOOL_TEMP_DIRNAME:
         return parts
-    if root is not None and not _is_sandbox_temp_dir(
-        os.path.join(root, _SANDBOX_TEMP_DIRNAME), root
+    if root is not None and not _is_child_temp_dir(
+        os.path.join(root, _TOOL_TEMP_DIRNAME), root
     ):
         return parts
     return parts[1:]
@@ -23014,9 +22120,9 @@ def _servable_segment(name: str) -> bool:
     return not any("\ud800" <= ch <= "\udfff" for ch in name)
 
 
-# LAiM's own bookkeeping, written by the sandbox sitecustomize. One exact name we write ourselves, not a pattern
+# LAiM's own bookkeeping, written by the workdir sitecustomize. One exact name we write ourselves, not a pattern
 # reserved over names a tool may pick.
-_INTERNAL_SANDBOX_FILES = frozenset({".LAiM_sandbox_remap.json", _SANDBOX_MARKER})
+_INTERNAL_WORKDIR_FILES = frozenset({".LAiM_remap.json", _WORKDIR_MARKER})
 
 
 # Above this a file is identified by mtime and size alone. Rewriting a large artifact byte for byte inside one
@@ -23122,7 +22228,7 @@ def _snapshot_workdir_files(workdir: str | None) -> "dict[str, tuple]":
         # skip noisy dot directories except attachments; dot files like .gitignore remain valid artifacts.
         dirs[:] = (
             []
-            if depth >= _MAX_SANDBOX_PATH_SEGMENTS - 1
+            if depth >= _MAX_SESSION_PATH_SEGMENTS - 1
             else [
                 d
                 for d in dirs
@@ -23133,7 +22239,7 @@ def _snapshot_workdir_files(workdir: str | None) -> "dict[str, tuple]":
         )
         for name in names:
             # ignore internal markers only at the root; nested files with these names remain valid artifacts.
-            if base == workdir and name in _INTERNAL_SANDBOX_FILES:
+            if base == workdir and name in _INTERNAL_WORKDIR_FILES:
                 continue
             if not _servable_segment(name):
                 continue
@@ -23238,7 +22344,7 @@ def _walk_lists(workdir: str, rel: str) -> bool:
     """Whether `_snapshot_workdir_files` would list *rel*, so a file edit_file records is never
     taken for a deletion by the next python or terminal walk."""
     parts = rel.split("/")
-    if len(_user_path_parts(parts)) > _MAX_SANDBOX_PATH_SEGMENTS or not all(
+    if len(_user_path_parts(parts)) > _MAX_SESSION_PATH_SEGMENTS or not all(
         map(_servable_segment, parts)
     ):
         return False
@@ -23247,7 +22353,7 @@ def _walk_lists(workdir: str, rel: str) -> bool:
         if part.startswith(".") or _snapshot_skips_dir(base, part):
             return False
         base = os.path.join(base, part)
-    return not (len(parts) == 1 and parts[0] in _INTERNAL_SANDBOX_FILES)
+    return not (len(parts) == 1 and parts[0] in _INTERNAL_WORKDIR_FILES)
 
 
 def _history_begin_file(session_id: "str | None", target: str) -> dict:
@@ -23402,58 +22508,40 @@ def _python_exec(
     cancel_event = None,
     timeout: int = _EXEC_TIMEOUT,
     session_id: str | None = None,
-    disable_sandbox: bool = False,
     output_callback = None,
     thread_id: str | None = None,
-    *,
-    tool_execution_mode: str = "auto",
-    host_access_approved: bool = False,
 ) -> str:
-    """Execute Python code in a subprocess sandbox. disable_sandbox (Bypass Permissions): skip the
-    safety analysis and rlimit pre-exec, and use the host env minus secrets. output_callback:
-    optional callable(str) streamed stdout as it is produced; the returned result is
-    unchanged. tool_execution_mode selects automatic or required OS isolation; disable_sandbox
-    keeps full access as a separate explicit choice."""
+    """Run Python code as a child process on this computer, in the chat's working folder.
+    output_callback: optional callable(str) streamed stdout as it is produced; the returned result
+    is unchanged."""
     if not code or not code.strip():
         return "No code provided."
 
-    # Refused in every mode, as in _bash_exec. Relative too: the cwd is a sibling of the auth dir.
+    # Refused whatever the caller: the cwd is a sibling of the auth dir, so a credential path here
+    # would hand this install's live bearer to the model.
     _guard_workdir = _tool_workdir_for_guard(session_id) if _needs_a_workdir(code) else None
     if _references_studio_credential_here(code, _guard_workdir) or _python_builds_a_credential_path(
         code, _guard_workdir
     ):
         return _STUDIO_CREDENTIAL_BLOCKED
 
-    # Validate imports and code safety (skipped when the sandbox is disabled)
-    if not disable_sandbox:
-        error = _check_code_safety(code)
-        if error:
-            # Capped like any other result: the analyzer names every occurrence it found, so code that repeats a
-            # forbidden construct enough times reports back something larger than the room that is left, which is the
-            # overflow this budget exists to prevent. See `_fit_result_to_room`.
-            return _truncate(error)
-        # Stripping the child env is not enough: a same-UID child can read /proc/<getppid()>/environ to recover the
-        # unfiltered secrets, so close that read here too, not only in bypass mode. Best-effort: the child env is
-        # already scrubbed, so a system where prctl is denied still runs.
-        _harden_parent_against_proc_env_leak()
-    elif not _harden_parent_against_proc_env_leak():
-        # Close the /proc/<parent>/environ secret-recovery path first; if it cannot be applied, fail closed rather
-        # than leak the parent environ.
+    # The child env carries no credentials, and a same-UID child can read /proc/<getppid()>/environ
+    # to recover the unfiltered ones: close that door before the child starts, and fail closed if
+    # it cannot be closed.
+    if not _harden_parent_against_proc_env_leak():
         return (
             "Execution error: could not harden the LAiM process against "
-            "/proc environment reads; refusing bypass execution."
+            "/proc environment reads; refusing to run the code."
         )
 
     tmp_path = None
     _scratch_name = None
-    # Bound before the try so the finally can release even when prepare raised.
-    prepared = None
     try:
         workdir = _get_workdir(session_id)
         confinement = _account_confinement()
     except (ToolConfinementUnavailable, RetiredAccountError) as exc:
         return _truncate(f"Execution error: {exc}")
-    # `_get_workdir(None)` is the shared `_default` sandbox, and a project's chats share
+    # `_get_workdir(None)` is the shared `_default` workdir, and a project's chats share
     # one session by design. Retaining a result in either, under a path the next chat can
     # list, would leave behind output that existed only in this call's own response. See
     # `_spill_scope`, which returns None for exactly those cases.
@@ -23465,7 +22553,7 @@ def _python_exec(
     _history_begin(call_token, session_id, _before)
     try:
         # In the workdir: Python puts it on sys.path[0], so an earlier call's helper.py stays importable and __file__
-        # resolves inside the sandbox.
+        # resolves inside the workdir.
         fd, tmp_path = tempfile.mkstemp(suffix = ".py", prefix = "studio_exec_", dir = workdir)
         # utf-8 so non-ASCII in model-written code survives the OS default codec (Windows cp1252 would otherwise raise
         # UnicodeEncodeError).
@@ -23475,11 +22563,7 @@ def _python_exec(
         with os.fdopen(fd, "w", encoding = "utf-8") as f:
             f.write(code)
 
-        safe_env = _build_bypass_env(workdir) if disable_sandbox else _build_safe_env(workdir)
-        if disable_sandbox:
-            # Match the sandboxed Python path without changing bypass shell I/O.
-            safe_env = dict(safe_env)
-            safe_env["PYTHONIOENCODING"] = "utf-8"
+        safe_env = _with_session_packages(_build_bypass_env(workdir), workdir)
         popen_kwargs = dict(
             stdout = subprocess.PIPE,
             stderr = subprocess.STDOUT,
@@ -23498,40 +22582,11 @@ def _python_exec(
         # instead of sitting in the pipe's block buffer until exit. Applied
         # unconditionally to stay byte-identical with and without streaming;
         # unlike PYTHONUNBUFFERED=1 it never pollutes the child's os.environ.
-        requested_mode = _requested_execution_mode(tool_execution_mode, disable_sandbox)
-        base_preexec = (
-            None
-            if sys.platform == "win32"
-            else (_bypass_preexec if disable_sandbox else _sandbox_preexec)
-        )
-        if base_preexec is _sandbox_preexec:
-            _refresh_sandbox_memory_limit()
-        # Managed accounts keep their own boundary as the outer contract; `confines`, not `is not None` (placeholder).
-        if confinement is None or not confinement.confines:
-            prepared = _prepare_tool_launch(
-                os_sandbox.ToolLaunchPlan(
-                    argv = (sys.executable, "-u", tmp_path),
-                    workdir = workdir,
-                    env = safe_env,
-                    preexec_fn = base_preexec,
-                    requested_mode = requested_mode,
-                    timeout_seconds = timeout,
-                    execution_kind = "python",
-                    cancel_event = cancel_event,
-                ),
-                host_access_approved = host_access_approved and _reaches_host_paths("python", code),
-                user_folder = _is_user_project_folder(session_id, workdir),
-            )
-            proc = os_sandbox.spawn_prepared_launch(
-                prepared, **_apply_prepared_launch(prepared, popen_kwargs)
-            )
-            _note_tool_execution(prepared.execution_record)
-        else:
-            popen_kwargs.update(cwd = workdir, env = safe_env)
-            if sys.platform != "win32":
-                popen_kwargs["preexec_fn"] = base_preexec
-            argv = _apply_confinement(confinement, popen_kwargs, [sys.executable, "-u", tmp_path])
-            proc = subprocess.Popen(argv, **popen_kwargs)
+        popen_kwargs.update(cwd = workdir, env = safe_env)
+        if sys.platform != "win32":
+            popen_kwargs["preexec_fn"] = _child_preexec
+        argv = _apply_confinement(confinement, popen_kwargs, [sys.executable, "-u", tmp_path])
+        proc = subprocess.Popen(argv, **popen_kwargs)
 
         # Capture the group before any watcher can reap the leader (see _capture_process_group); None on Windows.
         pgid = _capture_process_group(proc)
@@ -23551,21 +22606,6 @@ def _python_exec(
         output, timed_out, omitted = _drain_process_output(
             proc, timeout, output_callback, cancel_event, pgid = pgid
         )
-        if prepared is not None:
-            proc._LAiM_completion_reason = (
-                "timed_out"
-                if timed_out
-                else (
-                    "cancelled"
-                    if cancel_event is not None and cancel_event.is_set()
-                    else "finished"
-                )
-            )
-        if prepared is not None:
-            completion = os_sandbox.verify_prepared_completion(prepared, proc)
-            if completion is not None and completion.get("timedOut"):
-                timed_out = True
-            _note_tool_execution(prepared.execution_record)
         # A run that wrote its file and then hung still produced that file, so report it: `printf data > report.csv;
         # sleep 999` is downloadable.
         if timed_out:
@@ -23588,7 +22628,7 @@ def _python_exec(
             result = f"Exit code {proc.returncode}:\n{result}"
         # Detect the missing-path pattern on the full output (truncation could hide the trailing traceback); append
         # the hint after truncation. External paths are judged against the real workdir (project sessions live outside
-        # the default sandbox root).
+        # the default workdir root).
         hint = _missing_path_hint(result, workdir)
         # Before the fit, not after it. Defusing inserts a space into every line that opens with a marker, so a result
         # full of them grows after it has been measured and the text replayed to the model is larger than the prefix
@@ -23606,30 +22646,17 @@ def _python_exec(
         if session_id:
             result += _created_file_sentinels(workdir, _before, _scratch_name, call_token)
 
-        _forget_sandbox_capability_if_the_backend_failed(prepared, result)
         return result
 
-    except os_sandbox.SandboxUnavailableError as e:
-        if cancel_event is not None and cancel_event.is_set():
-            # A stop during the (on Windows DACL, multi-second) probe is a cancel, not a sandbox error.
-            return "Execution cancelled."
-        return _sandbox_refusal(e)
     except Exception as e:
         # An exception message carries whatever the failure put in it, so it is capped like the result would have
         # been.
-        if prepared is not None and prepared.backend == "mxc-processcontainer":
-            _note_tool_execution(prepared.execution_record)
         return _truncate(f"Execution error: {e}")
     finally:
         _call_finished(call_token)
         if _scratch_name:
             with _scratch_lock:
                 _active_scratch.discard(_scratch_name)
-        # Private mounts and descriptors, released on every exit path.
-        if prepared is not None:
-            prepared.cleanup()
-            os_sandbox.finalize_prepared_cleanup(prepared)
-            _note_tool_execution(prepared.execution_record)
         _forget_tool_pid(locals().get("proc"))
         if tmp_path and os.path.exists(tmp_path):
             try:
@@ -23638,83 +22665,40 @@ def _python_exec(
                 pass
 
 
-_CMD_MULTILINE_REFUSED = (
-    "Execution error: the Terminal runs cmd, which runs only the first line of a multi-line "
-    "command. Send one line per call and chain dependent commands with &&."
-)
-
-
 def _bash_exec(
     command: str,
     cancel_event = None,
     timeout: int = _EXEC_TIMEOUT,
     session_id: str | None = None,
-    disable_sandbox: bool = False,
     output_callback = None,
     thread_id: str | None = None,
-    *,
-    tool_execution_mode: str = "auto",
-    host_access_approved: bool = False,
 ) -> str:
-    """Execute a bash command in a subprocess sandbox. disable_sandbox (Bypass Permissions): skip
-    the command blocklist and rlimit pre-exec, and use the host env minus secrets.
+    """Run one Terminal command as a child process on this computer, in the chat's working folder.
     output_callback: optional callable(str) streamed stdout as it is produced; the returned
-    result is unchanged. tool_execution_mode follows _python_exec."""
+    result is unchanged."""
     if not command or not command.strip():
         return "No command provided."
 
-    # Refused in every mode, unlike the blocklist below, which Bypass Permissions opts out of: this
-    # install's live bearer would be replayed to whatever provider is serving the turn.
+    # Refused in every mode: this install's live bearer would be replayed to whatever provider is
+    # serving the turn.
     if _references_studio_credential_here(
         command, _tool_workdir_for_guard(session_id) if _needs_a_workdir(command) else None
     ):
         return _STUDIO_CREDENTIAL_BLOCKED
 
-    # Chosen once, so the blocklist, env and argv all agree on the shell that will run this call.
-    # Sandbox Low runs on the host shell: cmd is only picked to stay inside MXC.
-    profile = _terminal_profile(disable_sandbox or tool_execution_mode == "software")
-    if profile == "cmd_isolated":
-        # Models often end a command with a newline; cmd /s /c cannot carry one.
-        command = command.strip()
-        if "\n" in command or "\r" in command:
-            return _CMD_MULTILINE_REFUSED
-
-    # Block dangerous commands (skipped when the sandbox is disabled)
-    if not disable_sandbox:
-        if profile in _CMD_PROFILES:
-            # The cmd lexer misses separators glued to a word (a&powershell), cmd drops ^ escapes and
-            # ' does not quote, so screen every reading.
-            unescaped = command.replace("^", "")
-            blocked = set().union(
-                *(
-                    _find_blocked_commands(text, posix = posix)
-                    for text in (command, unescaped, _cmd_reading(command))
-                    for posix in (False, True)
-                )
-            )
-        else:
-            blocked = _find_blocked_commands(command)
-        if blocked:
-            # Capped for the same reason the Python analyzer's error is: it lists what it found in the command it was
-            # handed.
-            return _truncate(f"Blocked command(s) for safety: {', '.join(sorted(blocked))}")
-        # Stripping the child env is not enough: a same-UID child can read /proc/<getppid()>/environ to recover the
-        # unfiltered secrets, so close that read here too, not only in bypass mode. Best-effort: the child env is
-        # already scrubbed, so a system where prctl is denied still runs.
-        _harden_parent_against_proc_env_leak()
-    elif not _harden_parent_against_proc_env_leak():
-        # Close the /proc/<parent>/environ secret-recovery path first; if it cannot be applied, fail closed rather
-        # than leak the parent environ.
+    # The child env carries no credentials, and a same-UID child can read
+    # /proc/<getppid()>/environ to recover the unfiltered ones: close that door before the child
+    # starts, and fail closed if it cannot be closed.
+    if not _harden_parent_against_proc_env_leak():
         return (
             "Execution error: could not harden the LAiM process against "
-            "/proc environment reads; refusing bypass execution."
+            "/proc environment reads; refusing to run the command."
         )
 
     workdir = None
     spill_dir = None
     spill_scope = None
     call_token = None
-    prepared = None
     _scratch_name = None
     try:
         try:
@@ -23722,7 +22706,7 @@ def _bash_exec(
             confinement = _account_confinement()
         except (ToolConfinementUnavailable, RetiredAccountError) as exc:
             return _truncate(f"Execution error: {exc}")
-        # Same scoping as _python_exec: nothing is retained in a sandbox that is shared.
+        # Same scoping as _python_exec: nothing is retained in a folder shared between chats.
         spill_scope = _spill_scope(session_id, thread_id)
         spill_dir = workdir if session_id else None
         call_token = _call_started(workdir)
@@ -23730,11 +22714,7 @@ def _bash_exec(
         # other trace anywhere in the product.
         _before = _snapshot_workdir_files(workdir)
         _history_begin(call_token, session_id, _before)
-        safe_env = (
-            _build_bypass_env(workdir)
-            if disable_sandbox
-            else _build_safe_env(workdir, shell = profile if profile == "cmd_isolated" else None)
-        )
+        safe_env = _with_session_packages(_build_bypass_env(workdir), workdir)
         popen_kwargs = dict(
             stdout = subprocess.PIPE,
             stderr = subprocess.STDOUT,
@@ -23749,59 +22729,15 @@ def _bash_exec(
         if sys.platform == "win32":
             popen_kwargs["creationflags"] = subprocess.CREATE_NO_WINDOW
 
-        if profile == "cmd_isolated":
-            shell_argv, _scratch_name = [_windows_system_cmd(), "/c", command], None
-        else:
-            shell_argv, _scratch_name = _shell_argv(command, workdir, confinement)
+        shell_argv, _scratch_name = _shell_argv(command, workdir, confinement)
         if _scratch_name:
             with _scratch_lock:
                 _active_scratch.add(_scratch_name)
-        requested_mode = _requested_execution_mode(tool_execution_mode, disable_sandbox)
-        host_reach_approved = host_access_approved and _reaches_host_paths("terminal", command)
-        # From the resolved workdir: a chosen project folder in Auto keeps this cmd (the syntax the request
-        # advertised) but runs it with software safeguards (_prepare_tool_launch).
-        chosen_folder = _is_user_project_folder(session_id, workdir)
-        if (
-            profile == "cmd_isolated"
-            and requested_mode == "auto"
-            and not host_reach_approved
-            and not chosen_folder
-        ):
-            # Written for the isolated cmd Terminal and screened only by its lexer: never replayed on the host if
-            # isolation drops out between the profile check and the launch.
-            requested_mode = "required"
-        base_preexec = (
-            None
-            if sys.platform == "win32"
-            else (_bypass_preexec if disable_sandbox else _sandbox_preexec)
-        )
-        if base_preexec is _sandbox_preexec:
-            _refresh_sandbox_memory_limit()
-        if confinement is None or not confinement.confines:
-            prepared = _prepare_tool_launch(
-                os_sandbox.ToolLaunchPlan(
-                    argv = tuple(shell_argv),
-                    workdir = workdir,
-                    env = safe_env,
-                    preexec_fn = base_preexec,
-                    requested_mode = requested_mode,
-                    timeout_seconds = timeout,
-                    execution_kind = "terminal",
-                    cancel_event = cancel_event,
-                ),
-                host_access_approved = host_reach_approved,
-                user_folder = chosen_folder,
-            )
-            proc = os_sandbox.spawn_prepared_launch(
-                prepared, **_apply_prepared_launch(prepared, popen_kwargs)
-            )
-            _note_tool_execution(prepared.execution_record)
-        else:
-            popen_kwargs.update(cwd = workdir, env = safe_env)
-            if sys.platform != "win32":
-                popen_kwargs["preexec_fn"] = base_preexec
-            argv = _apply_confinement(confinement, popen_kwargs, shell_argv)
-            proc = subprocess.Popen(argv, **popen_kwargs)
+        popen_kwargs.update(cwd = workdir, env = safe_env)
+        if sys.platform != "win32":
+            popen_kwargs["preexec_fn"] = _child_preexec
+        argv = _apply_confinement(confinement, popen_kwargs, shell_argv)
+        proc = subprocess.Popen(argv, **popen_kwargs)
 
         # Capture the group before any watcher can poll/reap the leader (see _python_exec); None on Windows.
         pgid = _capture_process_group(proc)
@@ -23820,21 +22756,6 @@ def _bash_exec(
         output, timed_out, omitted = _drain_process_output(
             proc, timeout, output_callback, cancel_event, pgid = pgid
         )
-        if prepared is not None:
-            proc._LAiM_completion_reason = (
-                "timed_out"
-                if timed_out
-                else (
-                    "cancelled"
-                    if cancel_event is not None and cancel_event.is_set()
-                    else "finished"
-                )
-            )
-        if prepared is not None:
-            completion = os_sandbox.verify_prepared_completion(prepared, proc)
-            if completion is not None and completion.get("timedOut"):
-                timed_out = True
-            _note_tool_execution(prepared.execution_record)
         # A run that wrote its file and then hung still produced that file, so report it: `printf data > report.csv;
         # sleep 999` is downloadable.
         if timed_out:
@@ -23866,27 +22787,14 @@ def _bash_exec(
         # Only for a chat that has an id (see _python_exec).
         if session_id:
             result += _created_file_sentinels(workdir, _before, _scratch_name, call_token)
-        _forget_sandbox_capability_if_the_backend_failed(prepared, result)
         return result
 
-    except os_sandbox.SandboxUnavailableError as e:
-        if cancel_event is not None and cancel_event.is_set():
-            # A stop during the (on Windows DACL, multi-second) probe is a cancel, not a sandbox error.
-            return "Execution cancelled."
-        return _sandbox_refusal(e)
     except Exception as e:
         # An exception message carries whatever the failure put in it, so it is capped like the result would have
         # been.
-        if prepared is not None and prepared.backend == "mxc-processcontainer":
-            _note_tool_execution(prepared.execution_record)
         return _truncate(f"Execution error: {e}")
     finally:
         _call_finished(call_token)
-        # Private mounts and descriptors, released on every exit path.
-        if prepared is not None:
-            prepared.cleanup()
-            os_sandbox.finalize_prepared_cleanup(prepared)
-            _note_tool_execution(prepared.execution_record)
         _forget_tool_pid(locals().get("proc"))
         if _scratch_name:
             with _scratch_lock:
@@ -23897,12 +22805,12 @@ def _bash_exec(
                 pass
 
 
-# The out-of-sandbox approval subsystem lives in its own module: the silent roots, the shared
+# The outside the workdir approval subsystem lives in its own module: the silent roots, the shared
 # `_path_needs_approval` predicate and the two operand scanners. Imported at the END because the two
 # modules reference each other, and bound by name here so the call sites below read unchanged.
 from . import tool_path_approval as _path_gate  # noqa: E402
 
 _path_gate._bind(globals())
 _PATH_FLAG_SPECS = _path_gate._PATH_FLAG_SPECS
-_python_reaches_outside_sandbox = _path_gate._python_reaches_outside_sandbox
-_terminal_reaches_outside_sandbox = _path_gate._terminal_reaches_outside_sandbox
+_python_reaches_outside_workdir = _path_gate._python_reaches_outside_workdir
+_terminal_reaches_outside_workdir = _path_gate._terminal_reaches_outside_workdir

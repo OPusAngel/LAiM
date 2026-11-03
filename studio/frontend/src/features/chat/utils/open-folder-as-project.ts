@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { pickNativeDocumentFolder } from "@/features/native-intents";
 import {
   announceProjectSourcesUpdated,
@@ -60,7 +61,7 @@ export async function openFolderAsProject(): Promise<ProjectRecord | null> {
     } catch (error) {
       // Kept, not deleted: chats may have joined it meanwhile, and deleting a project deletes
       // them. Its Sources has Link folder to retry.
-      toast.error("Could not link folder", {
+      toast.error(translate("uxChat.couldNotLinkFolder6kvby"), {
         description: error instanceof Error ? error.message : String(error),
       });
     } finally {
@@ -71,7 +72,7 @@ export async function openFolderAsProject(): Promise<ProjectRecord | null> {
     if (!isProjectLandingMounted(project.id)) markProjectSourcesPending(project.id);
     return project;
   } catch (error) {
-    toast.error("Could not open folder", {
+    toast.error(translate("uxChat.couldNotOpenFolder1831p"), {
       description: error instanceof Error ? error.message : String(error),
     });
     return null;

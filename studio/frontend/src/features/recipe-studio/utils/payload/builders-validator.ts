@@ -3,6 +3,8 @@
 
 import type { NodeConfig, ValidatorConfig } from "../../types";
 import { isValidatorCodeLang } from "../validators/code-lang";
+import { translate } from "@/i18n";
+
 
 const OXC_VALIDATION_FN_MARKER = "LAiM_oxc_validator";
 const JSON_VALIDATION_FN_MARKER = "LAiM_json_validator";
@@ -25,7 +27,7 @@ export function buildValidatorColumn(
     .map((value) => value.trim())
     .filter(Boolean);
   if (targetColumns.length === 0) {
-    errors.push(`Validator ${config.name}: target column required.`);
+    errors.push(translate("uxRecipestudio.validatorTargetColumnRequiredzruf8", { p1: config.name }));
   }
   if (
     config.validator_type === "json" ||

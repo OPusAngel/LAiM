@@ -6,6 +6,8 @@ import test from "node:test";
 import { runInNewContext } from "node:vm";
 import ts from "@typescript/typescript6";
 
+import { enTranslate } from "./helpers/module-stubs.ts";
+
 import { readSrc } from "./helpers/kit.ts";
 
 // Exercise production event handlers with a deterministic state seam.
@@ -38,6 +40,7 @@ function renderer() {
   const slots: unknown[] = [];
   let cursor = 0;
   const context = {
+    translate: enTranslate,
     exports: {} as { render: (props: Record<string, unknown>) => any },
     memo: (fn: unknown) => fn,
     React: {

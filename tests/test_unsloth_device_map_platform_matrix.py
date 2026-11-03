@@ -173,7 +173,7 @@ def test_an_existing_device_map_is_identical_on_every_host(
     planner = _Recorder(plan = _Plan())
     ns = _build(device_type = device_type, devices = devices, distributed = False, planner = planner)
     resolved = ns["resolve_LAiM_device_map"](
-        ns["requested_device_map"](device_map), "LAiM/Qwen3-0.6B"
+        ns["requested_device_map"](device_map), "unsloth/Qwen3-0.6B"
     )
     assert resolved is device_map
     assert planner.calls == []
@@ -209,7 +209,7 @@ def test_the_sentinel_never_reaches_transformers(
     )
     resolved = ns["resolve_LAiM_device_map"](
         "LAiM",
-        "LAiM/Qwen3-0.6B",
+        "unsloth/Qwen3-0.6B",
         fast_inference = fast_inference,
         full_finetuning = full_finetuning,
     )
@@ -233,7 +233,7 @@ def test_the_planner_runs_exactly_where_a_plan_can_apply(
         distributed = distributed,
         planner = planner,
     )
-    resolved = ns["resolve_LAiM_device_map"]("LAiM", "LAiM/Qwen3-0.6B")
+    resolved = ns["resolve_LAiM_device_map"]("LAiM", "unsloth/Qwen3-0.6B")
 
     should_plan = device_type == "cuda" and devices >= 2 and not distributed
     assert bool(planner.calls) is should_plan
@@ -258,7 +258,7 @@ def test_the_env_var_opts_in_on_1_and_nothing_else(
     ns = _build(device_type = device_type, devices = devices, distributed = False, planner = planner)
     requested = ns["requested_device_map"](ns["DEFAULT_DEVICE_MAP"])
     assert requested == ("LAiM" if value == "1" else "sequential")
-    assert ns["resolve_LAiM_device_map"](requested, "LAiM/Qwen3-0.6B") != "LAiM"
+    assert ns["resolve_LAiM_device_map"](requested, "unsloth/Qwen3-0.6B") != "LAiM"
     assert ns["requested_device_map"]("sequential") == "sequential"
 
 
@@ -270,7 +270,7 @@ def test_an_old_LAiM_zoo_without_a_planner_still_loads(host, monkeypatch):
     ns = _build(
         device_type = "cuda", devices = 4, distributed = False, planner = None, planner_available = False
     )
-    assert ns["resolve_LAiM_device_map"]("LAiM", "LAiM/Qwen3-0.6B") == "sequential"
+    assert ns["resolve_LAiM_device_map"]("LAiM", "unsloth/Qwen3-0.6B") == "sequential"
 
     # Block the import; deleting from sys.modules would just reimport a real planner.
     class _Blocked:
@@ -296,7 +296,7 @@ def test_an_old_LAiM_zoo_without_a_planner_still_loads(host, monkeypatch):
     blocker = _Blocked()
     sys.meta_path.insert(0, blocker)
     try:
-        assert ns["resolve_LAiM_device_map"]("LAiM", "LAiM/Qwen3-0.6B") == "sequential"
+        assert ns["resolve_LAiM_device_map"]("LAiM", "unsloth/Qwen3-0.6B") == "sequential"
     finally:
         sys.meta_path.remove(blocker)
         sys.modules.pop("LAiM_zoo.device_map_planner", None)
@@ -318,7 +318,7 @@ def test_a_planner_that_raises_anything_but_infeasible_falls_back(host, error, m
     monkeypatch.delenv("LAiM_AUTO_DEVICE_MAP", raising = False)
     planner = _Recorder(raises = error)
     ns = _build(device_type = "cuda", devices = 2, distributed = False, planner = planner)
-    assert ns["resolve_LAiM_device_map"]("LAiM", "LAiM/Qwen3-0.6B") == "sequential"
+    assert ns["resolve_LAiM_device_map"]("LAiM", "unsloth/Qwen3-0.6B") == "sequential"
 
 
 @pytest.mark.parametrize("host", HOSTS, ids = _HOST_IDS, indirect = True)
@@ -334,7 +334,7 @@ def test_the_deliberate_refusal_is_not_swallowed(host, monkeypatch):
     planner = _Recorder(raises = DeviceMapInfeasible("2 x 8 GiB is not enough"))
     ns = _build(device_type = "cuda", devices = 2, distributed = False, planner = planner)
     with pytest.raises(DeviceMapInfeasible):
-        ns["resolve_LAiM_device_map"]("LAiM", "LAiM/Qwen3-0.6B")
+        ns["resolve_LAiM_device_map"]("LAiM", "unsloth/Qwen3-0.6B")
 
 
 @pytest.mark.parametrize("host", HOSTS, ids = _HOST_IDS, indirect = True)
@@ -358,7 +358,7 @@ def test_a_card_that_refuses_to_report_memory_does_not_fail_the_load(host, error
         planner = planner,
         mem_raises = error,
     )
-    assert ns["resolve_LAiM_device_map"]("LAiM", "LAiM/Qwen3-0.6B") == "sequential"
+    assert ns["resolve_LAiM_device_map"]("LAiM", "unsloth/Qwen3-0.6B") == "sequential"
     assert planner.calls == []
 
 
@@ -376,7 +376,7 @@ def test_a_device_count_that_raises_does_not_fail_the_load(host, monkeypatch):
         planner = planner,
         count_raises = RuntimeError("CUDA unknown error"),
     )
-    assert ns["resolve_LAiM_device_map"]("LAiM", "LAiM/Qwen3-0.6B") == "sequential"
+    assert ns["resolve_LAiM_device_map"]("LAiM", "unsloth/Qwen3-0.6B") == "sequential"
     assert planner.calls == []
 
 

@@ -98,7 +98,7 @@ def _matches_mtp(
     gguf_path = None,
     hf_variant = "Q4_K_M",
     is_vision = False,
-    model_identifier = "LAiM/Qwen3.6-27B-MTP-GGUF",
+    model_identifier = "unsloth/Qwen3.6-27B-MTP-GGUF",
     n_ctx = 8192,
     speculative_type = None,
     **kwargs,
@@ -169,11 +169,11 @@ def _write_minimal_gguf(
 @pytest.mark.parametrize(
     "identifier",
     [
-        "LAiM/Qwen3.6-27B-MTP-GGUF",
-        "LAiM/Qwen3.6-35B-A3B-MTP-GGUF",
-        "LAiM/qwen3.6-27b-mtp-gguf",
-        "LAiM/Qwen3.6-27B-Mtp-GGUF",
-        "LAiM/Qwen3.6-27B-MTP-GGUF:UD-Q4_K_XL",
+        "unsloth/Qwen3.6-27B-MTP-GGUF",
+        "unsloth/Qwen3.6-35B-A3B-MTP-GGUF",
+        "unsloth/qwen3.6-27b-mtp-gguf",
+        "unsloth/Qwen3.6-27B-Mtp-GGUF",
+        "unsloth/Qwen3.6-27B-MTP-GGUF:UD-Q4_K_XL",
     ],
 )
 def test_is_mtp_model_name_detects_marker_in_identifier(identifier):
@@ -183,8 +183,8 @@ def test_is_mtp_model_name_detects_marker_in_identifier(identifier):
 @pytest.mark.parametrize(
     "identifier",
     [
-        "LAiM/Qwen3-27B-GGUF",
-        "LAiM/Llama-3.1-8B-Instruct-GGUF",
+        "unsloth/Qwen3-27B-GGUF",
+        "unsloth/Llama-3.1-8B-Instruct-GGUF",
         "google/gemma-3-4b-it",
         # mtp inside an org name should not match.
         "mtp-research/foo",
@@ -278,7 +278,7 @@ def _mtp_backend(**overrides):
     backend = LlamaCppBackend()
     backend._process = _FakeProcess()
     backend._healthy = True
-    backend._model_identifier = "LAiM/Qwen3.6-27B-MTP-GGUF"
+    backend._model_identifier = "unsloth/Qwen3.6-27B-MTP-GGUF"
     backend._hf_variant = "Q4_K_M"
     backend._requested_n_ctx = 8192
     backend._cache_type_kv = None
@@ -334,8 +334,8 @@ def test_already_in_target_state_auto_request_matches_auto_backend_for_non_mtp_m
     # of model name. The resolved emission (--spec-default vs draft-mtp) is
     # handled by the load path and reflected in _speculative_type; the
     # short-circuit only cares whether the *intent* changed.
-    backend = _mtp_backend_default(_model_identifier = "LAiM/Qwen3.6-27B-GGUF")
-    assert _matches_mtp(backend, model_identifier = "LAiM/Qwen3.6-27B-GGUF") is True
+    backend = _mtp_backend_default(_model_identifier = "unsloth/Qwen3.6-27B-GGUF")
+    assert _matches_mtp(backend, model_identifier = "unsloth/Qwen3.6-27B-GGUF") is True
 
 
 def test_forced_dspark_without_a_sidecar_stops_reloading():
@@ -343,7 +343,7 @@ def test_forced_dspark_without_a_sidecar_stops_reloading():
     none". The second is the permanent state of every repo but one, so retrying
     it relaunched an identical server on every Apply."""
     backend = _mtp_backend_default(
-        _model_identifier = "LAiM/Qwen3-7B-GGUF",
+        _model_identifier = "unsloth/Qwen3-7B-GGUF",
         _requested_spec_mode = "dspark",
         _spec_fallback_reason = "drafter_not_found",
         _spec_drafter_kind = "dspark",
@@ -352,7 +352,7 @@ def test_forced_dspark_without_a_sidecar_stops_reloading():
     assert (
         _matches_mtp(
             backend,
-            model_identifier = "LAiM/Qwen3-7B-GGUF",
+            model_identifier = "unsloth/Qwen3-7B-GGUF",
             speculative_type = "dspark",
         )
         is True
@@ -363,7 +363,7 @@ def test_forced_dspark_retries_when_the_fetch_failed_rather_than_the_repo():
     """The other half: the repo does publish a sidecar and the download failed, so
     the next Apply should reload and re-run _download_dspark."""
     backend = _mtp_backend_default(
-        _model_identifier = "LAiM/DeepSeek-V4-Flash-0731-GGUF",
+        _model_identifier = "unsloth/DeepSeek-V4-Flash-0731-GGUF",
         _requested_spec_mode = "dspark",
         _spec_fallback_reason = "drafter_not_found",
         _spec_drafter_kind = "dspark",
@@ -372,7 +372,7 @@ def test_forced_dspark_retries_when_the_fetch_failed_rather_than_the_repo():
     assert (
         _matches_mtp(
             backend,
-            model_identifier = "LAiM/DeepSeek-V4-Flash-0731-GGUF",
+            model_identifier = "unsloth/DeepSeek-V4-Flash-0731-GGUF",
             speculative_type = "dspark",
         )
         is False
@@ -382,7 +382,7 @@ def test_forced_dspark_retries_when_the_fetch_failed_rather_than_the_repo():
 def test_mtp_without_a_drafter_still_reloads_to_retry_the_fetch():
     """Negative control for the above: the MTP retry must survive."""
     backend = _mtp_backend_default(
-        _model_identifier = "LAiM/gemma-4-12b-it-GGUF",
+        _model_identifier = "unsloth/gemma-4-12b-it-GGUF",
         _requested_spec_mode = "mtp",
         _spec_fallback_reason = "drafter_not_found",
         _spec_drafter_kind = "mtp",
@@ -390,7 +390,7 @@ def test_mtp_without_a_drafter_still_reloads_to_retry_the_fetch():
     assert (
         _matches_mtp(
             backend,
-            model_identifier = "LAiM/gemma-4-12b-it-GGUF",
+            model_identifier = "unsloth/gemma-4-12b-it-GGUF",
             speculative_type = "mtp",
         )
         is False
@@ -404,14 +404,14 @@ def test_auto_resolved_dspark_reuses_its_server_instead_of_reloading(tmp_path):
     sidecar = tmp_path / "dspark-DeepSeek-V4-Flash-0731-Q8_0.gguf"
     sidecar.write_bytes(b"draft")
     backend = _mtp_backend(
-        _model_identifier = "LAiM/DeepSeek-V4-Flash-0731-GGUF",
+        _model_identifier = "unsloth/DeepSeek-V4-Flash-0731-GGUF",
         _speculative_type = "draft-dspark",
         _mtp_draft_path = str(sidecar),
     )
     assert (
         _matches_mtp(
             backend,
-            model_identifier = "LAiM/DeepSeek-V4-Flash-0731-GGUF",
+            model_identifier = "unsloth/DeepSeek-V4-Flash-0731-GGUF",
             dspark_draft_path = str(sidecar),
             compare_mtp_draft = True,
         )
@@ -597,7 +597,7 @@ def test_already_in_target_state_vision_off_matches_vision_backend():
     # _already_in_target_state compares canonical requested modes; a vision
     # backend with _requested_spec_mode="off" matches req "off" or None+vision.
     backend = _mtp_backend(
-        _model_identifier = "LAiM/Qwen3-VL-4B-Instruct-GGUF",
+        _model_identifier = "unsloth/Qwen3-VL-4B-Instruct-GGUF",
         _is_vision = True,
         _speculative_type = None,
         _requested_spec_mode = "off",
@@ -605,7 +605,7 @@ def test_already_in_target_state_vision_off_matches_vision_backend():
     assert (
         _matches_mtp(
             backend,
-            model_identifier = "LAiM/Qwen3-VL-4B-Instruct-GGUF",
+            model_identifier = "unsloth/Qwen3-VL-4B-Instruct-GGUF",
             speculative_type = "off",
             is_vision = True,
         )
@@ -1628,7 +1628,7 @@ def test_mtp_draft_n_max_compares_saved_runtime_fallback_intent(saved_draft_n_ma
         _spec_draft_n_max = None,
         _spec_fallback_reason = "runtime_error",
         _last_load_intent = GgufLoadIntent(
-            model_identifier = "LAiM/Qwen3.6-27B-MTP-GGUF",
+            model_identifier = "unsloth/Qwen3.6-27B-MTP-GGUF",
             spec_draft_n_max = saved_draft_n_max,
         ),
     )
@@ -1703,36 +1703,36 @@ def test_already_in_target_state_sub_3b_falls_back_to_ngram_mod_when_supported(m
     # 0.8B MTP request -- load_model would have promoted to ngram-mod (no MTP
     # head); reload check must match a ngram-mod backend.
     _patch_probe(monkeypatch, ngram_supported = True)
-    backend = _ngram_mod_backend(_model_identifier = "LAiM/Qwen3.5-0.8B-MTP-GGUF")
-    assert _matches_mtp(backend, model_identifier = "LAiM/Qwen3.5-0.8B-MTP-GGUF") is True
+    backend = _ngram_mod_backend(_model_identifier = "unsloth/Qwen3.5-0.8B-MTP-GGUF")
+    assert _matches_mtp(backend, model_identifier = "unsloth/Qwen3.5-0.8B-MTP-GGUF") is True
 
 
 def test_already_in_target_state_sub_3b_falls_back_to_off_when_no_ngram(monkeypatch):
     # 0.8B + binary lacks ngram-mod -> fall back to off.
     _patch_probe(monkeypatch, ngram_supported = False)
     backend = _ngram_mod_backend(
-        _model_identifier = "LAiM/Qwen3.5-0.8B-MTP-GGUF",
+        _model_identifier = "unsloth/Qwen3.5-0.8B-MTP-GGUF",
         _speculative_type = None,
     )
-    assert _matches_mtp(backend, model_identifier = "LAiM/Qwen3.5-0.8B-MTP-GGUF") is True
+    assert _matches_mtp(backend, model_identifier = "unsloth/Qwen3.5-0.8B-MTP-GGUF") is True
 
 
 def test_already_in_target_state_4b_mtp_request_promotes_as_before(monkeypatch):
     # 4B is above the 3B threshold -> auto-promote still applies.
     _patch_probe(monkeypatch, ngram_supported = True)
     backend = _ngram_mod_backend(
-        _model_identifier = "LAiM/Qwen3.5-4B-MTP-GGUF",
+        _model_identifier = "unsloth/Qwen3.5-4B-MTP-GGUF",
         _speculative_type = "draft-mtp",
     )
-    assert _matches_mtp(backend, model_identifier = "LAiM/Qwen3.5-4B-MTP-GGUF") is True
+    assert _matches_mtp(backend, model_identifier = "unsloth/Qwen3.5-4B-MTP-GGUF") is True
 
 
 def test_already_in_target_state_2b_falls_back_to_ngram_below_threshold(monkeypatch):
     # 2.0B is below the 3B threshold -> ngram-mod fallback, not draft-mtp.
     # Clean-bench shows 2B regresses with draft-mtp.
     _patch_probe(monkeypatch, ngram_supported = True)
-    backend = _ngram_mod_backend(_model_identifier = "LAiM/Qwen3.5-2B-MTP-GGUF")
-    assert _matches_mtp(backend, model_identifier = "LAiM/Qwen3.5-2B-MTP-GGUF") is True
+    backend = _ngram_mod_backend(_model_identifier = "unsloth/Qwen3.5-2B-MTP-GGUF")
+    assert _matches_mtp(backend, model_identifier = "unsloth/Qwen3.5-2B-MTP-GGUF") is True
 
 
 # usage backfill from timings (LAiM UI t/s widget fix).
@@ -1870,9 +1870,9 @@ def _flags_dict(flags):
     return out
 
 
-_MTP_MODEL = "LAiM/Qwen3.6-27B-MTP-GGUF"
-_NON_MTP_MODEL = "LAiM/Qwen3-7B-Instruct-GGUF"
-_SUB_3B_MTP_MODEL = "LAiM/Qwen3.5-0.8B-MTP-GGUF"
+_MTP_MODEL = "unsloth/Qwen3.6-27B-MTP-GGUF"
+_NON_MTP_MODEL = "unsloth/Qwen3-7B-Instruct-GGUF"
+_SUB_3B_MTP_MODEL = "unsloth/Qwen3.5-0.8B-MTP-GGUF"
 
 
 @pytest.mark.parametrize(
@@ -2063,7 +2063,7 @@ def test_build_speculative_flags_dspark_requires_sidecar_and_leaves_fit_to_place
         speculative_type = "dspark",
         spec_draft_n_max = None,
         extra_args = None,
-        model_identifier = "LAiM/DeepSeek-V4-Flash-0731-GGUF",
+        model_identifier = "unsloth/DeepSeek-V4-Flash-0731-GGUF",
         model_path = None,
         gpus = True,
         binary = "/fake/llama-server",
@@ -2082,7 +2082,7 @@ def test_build_speculative_flags_dspark_missing_sidecar_falls_back(monkeypatch):
         speculative_type = "dspark",
         spec_draft_n_max = None,
         extra_args = None,
-        model_identifier = "LAiM/DeepSeek-V4-Flash-0731-GGUF",
+        model_identifier = "unsloth/DeepSeek-V4-Flash-0731-GGUF",
         model_path = None,
         gpus = True,
         binary = "/fake/llama-server",
@@ -2103,7 +2103,7 @@ def test_build_speculative_flags_dspark_blames_the_binary_not_the_missing_sideca
         speculative_type = "dspark",
         spec_draft_n_max = None,
         extra_args = None,
-        model_identifier = "LAiM/DeepSeek-V4-Flash-0731-GGUF",
+        model_identifier = "unsloth/DeepSeek-V4-Flash-0731-GGUF",
         model_path = None,
         gpus = True,
         binary = "/fake/llama-server",
@@ -2116,9 +2116,9 @@ def test_build_speculative_flags_dspark_blames_the_binary_not_the_missing_sideca
 # ── Auto defaults to DSpark, and only where a sidecar actually exists ──
 #
 # The three shapes are the real published repos, checked against the Hub:
-#   LAiM/DeepSeek-V4-Flash-0731-GGUF  -> dspark-*.gguf at the root and in dspark/
-#   LAiM/gemma-4-12b-it-GGUF          -> MTP/mtp-gemma-4-12b-it-*.gguf, no dspark
-#   LAiM/Qwen3.5-4B-MTP-GGUF          -> head baked into the main GGUF, neither file
+#   unsloth/DeepSeek-V4-Flash-0731-GGUF  -> dspark-*.gguf at the root and in dspark/
+#   unsloth/gemma-4-12b-it-GGUF          -> MTP/mtp-gemma-4-12b-it-*.gguf, no dspark
+#   unsloth/Qwen3.5-4B-MTP-GGUF          -> head baked into the main GGUF, neither file
 
 
 def test_auto_defaults_to_dspark_when_a_sidecar_is_available(monkeypatch, tmp_path):
@@ -2131,7 +2131,7 @@ def test_auto_defaults_to_dspark_when_a_sidecar_is_available(monkeypatch, tmp_pa
         speculative_type = "auto",
         spec_draft_n_max = None,
         extra_args = None,
-        model_identifier = "LAiM/DeepSeek-V4-Flash-0731-GGUF",
+        model_identifier = "unsloth/DeepSeek-V4-Flash-0731-GGUF",
         model_path = None,
         gpus = True,
         binary = "/fake/llama-server",
@@ -2157,7 +2157,7 @@ def test_auto_keeps_mtp_for_a_separate_drafter_model(monkeypatch, tmp_path):
         speculative_type = "auto",
         spec_draft_n_max = None,
         extra_args = None,
-        model_identifier = "LAiM/gemma-4-12b-it-GGUF",
+        model_identifier = "unsloth/gemma-4-12b-it-GGUF",
         model_path = None,
         gpus = True,
         binary = "/fake/llama-server",
@@ -2179,7 +2179,7 @@ def test_auto_keeps_embedded_mtp(monkeypatch):
         speculative_type = "auto",
         spec_draft_n_max = None,
         extra_args = None,
-        model_identifier = "LAiM/Qwen3.5-4B-MTP-GGUF",
+        model_identifier = "unsloth/Qwen3.5-4B-MTP-GGUF",
         model_path = None,
         gpus = True,
         binary = "/fake/llama-server",
@@ -2251,7 +2251,7 @@ def test_auto_does_not_promote_dspark_on_a_binary_that_cannot_run_it(monkeypatch
         speculative_type = "auto",
         spec_draft_n_max = None,
         extra_args = None,
-        model_identifier = "LAiM/DeepSeek-V4-Flash-0731-GGUF",
+        model_identifier = "unsloth/DeepSeek-V4-Flash-0731-GGUF",
         model_path = None,
         gpus = True,
         binary = "/fake/llama-server",
@@ -2272,7 +2272,7 @@ def test_build_speculative_flags_dspark_engages_under_auto_fit(monkeypatch, tmp_
         speculative_type = "dspark",
         spec_draft_n_max = None,
         extra_args = None,
-        model_identifier = "LAiM/DeepSeek-V4-Flash-0731-GGUF",
+        model_identifier = "unsloth/DeepSeek-V4-Flash-0731-GGUF",
         model_path = None,
         gpus = True,
         binary = "/fake/llama-server",
@@ -2389,7 +2389,7 @@ def test_forced_mtp_ngram_on_non_mtp_model_keeps_ngram(monkeypatch):
 
 # GLM-5.2's repo name has no "MTP" marker, so its MTP signal is metadata-only
 # (nextn_predict_layers) -- exactly the embedded-MLA case we gate.
-_GLM_MLA_MODEL = "LAiM/GLM-5.2-GGUF"
+_GLM_MLA_MODEL = "unsloth/GLM-5.2-GGUF"
 
 
 def _mla_resolver_backend(
@@ -2497,7 +2497,7 @@ def test_auto_non_mtp_mla_model_unaffected(monkeypatch):
         speculative_type = "auto",
         spec_draft_n_max = None,
         extra_args = None,
-        model_identifier = "LAiM/GLM-4.7-Flash-GGUF",
+        model_identifier = "unsloth/GLM-4.7-Flash-GGUF",
         model_path = None,
         gpus = True,
         binary = "/fake/llama-server",
@@ -2629,7 +2629,7 @@ def test_reload_forced_mtp_bounces_auto_mla():
 
 
 # glm5next matches the MLA gate on metadata, but its MTP is 1.31x faster, not slower.
-_GLM5NEXT_MODEL = "LAiM/GLM-5.3-Flash-GGUF"
+_GLM5NEXT_MODEL = "unsloth/GLM-5.3-Flash-GGUF"
 
 
 def test_auto_glm5next_keeps_draft_mtp(monkeypatch):
@@ -2720,29 +2720,29 @@ _GEMMA_DRAFTER = "/snap/mtp-gemma-4-it.gguf"  # stand-in separate drafter
 
 _REAL_REPO_MATRIX = [
     # repo, drafter, auto_spec, auto_ngram_knobs
-    ("LAiM/Qwen3.5-0.8B-MTP-GGUF", None, "ngram-mod", True),
-    ("LAiM/Qwen3.5-2B-MTP-GGUF", None, "ngram-mod", True),
-    ("LAiM/Qwen3.5-4B-MTP-GGUF", None, "draft-mtp", False),
-    ("LAiM/Qwen3.5-9B-MTP-GGUF", None, "draft-mtp", False),
-    ("LAiM/Qwen3.5-27B-MTP-GGUF", None, "draft-mtp", False),
-    ("LAiM/Qwen3.5-35B-A3B-MTP-GGUF", None, "draft-mtp", False),
-    ("LAiM/Qwen3.5-122B-A10B-MTP-GGUF", None, "draft-mtp", False),
-    ("LAiM/Qwen3.5-397B-A17B-MTP-GGUF", None, "draft-mtp", False),
-    ("LAiM/Qwen3.5-0.8B-GGUF", None, None, False),
-    ("LAiM/Qwen3.5-2B-GGUF", None, None, False),
-    ("LAiM/Qwen3.5-4B-GGUF", None, None, False),
-    ("LAiM/Qwen3.5-9B-GGUF", None, None, False),
+    ("unsloth/Qwen3.5-0.8B-MTP-GGUF", None, "ngram-mod", True),
+    ("unsloth/Qwen3.5-2B-MTP-GGUF", None, "ngram-mod", True),
+    ("unsloth/Qwen3.5-4B-MTP-GGUF", None, "draft-mtp", False),
+    ("unsloth/Qwen3.5-9B-MTP-GGUF", None, "draft-mtp", False),
+    ("unsloth/Qwen3.5-27B-MTP-GGUF", None, "draft-mtp", False),
+    ("unsloth/Qwen3.5-35B-A3B-MTP-GGUF", None, "draft-mtp", False),
+    ("unsloth/Qwen3.5-122B-A10B-MTP-GGUF", None, "draft-mtp", False),
+    ("unsloth/Qwen3.5-397B-A17B-MTP-GGUF", None, "draft-mtp", False),
+    ("unsloth/Qwen3.5-0.8B-GGUF", None, None, False),
+    ("unsloth/Qwen3.5-2B-GGUF", None, None, False),
+    ("unsloth/Qwen3.5-4B-GGUF", None, None, False),
+    ("unsloth/Qwen3.5-9B-GGUF", None, None, False),
     # E2B is 2B but ships a separate drafter -> exempt from the sub-3B drop.
-    ("LAiM/gemma-4-E2B-it-GGUF", _GEMMA_DRAFTER, "draft-mtp", False),
-    ("LAiM/gemma-4-E4B-it-GGUF", _GEMMA_DRAFTER, "draft-mtp", False),
-    ("LAiM/gemma-4-12b-it-GGUF", _GEMMA_DRAFTER, "draft-mtp", False),
-    ("LAiM/gemma-4-26B-A4B-it-GGUF", _GEMMA_DRAFTER, "draft-mtp", False),
-    ("LAiM/gemma-4-31B-it-GGUF", _GEMMA_DRAFTER, "draft-mtp", False),
-    ("LAiM/gemma-4-E2B-it-qat-GGUF", _GEMMA_DRAFTER, "draft-mtp", False),
-    ("LAiM/gemma-4-E4B-it-qat-GGUF", _GEMMA_DRAFTER, "draft-mtp", False),
-    ("LAiM/gemma-4-12b-it-qat-GGUF", _GEMMA_DRAFTER, "draft-mtp", False),
-    ("LAiM/gemma-4-26B-A4B-it-qat-GGUF", _GEMMA_DRAFTER, "draft-mtp", False),
-    ("LAiM/gemma-4-31B-it-qat-GGUF", _GEMMA_DRAFTER, "draft-mtp", False),
+    ("unsloth/gemma-4-E2B-it-GGUF", _GEMMA_DRAFTER, "draft-mtp", False),
+    ("unsloth/gemma-4-E4B-it-GGUF", _GEMMA_DRAFTER, "draft-mtp", False),
+    ("unsloth/gemma-4-12b-it-GGUF", _GEMMA_DRAFTER, "draft-mtp", False),
+    ("unsloth/gemma-4-26B-A4B-it-GGUF", _GEMMA_DRAFTER, "draft-mtp", False),
+    ("unsloth/gemma-4-31B-it-GGUF", _GEMMA_DRAFTER, "draft-mtp", False),
+    ("unsloth/gemma-4-E2B-it-qat-GGUF", _GEMMA_DRAFTER, "draft-mtp", False),
+    ("unsloth/gemma-4-E4B-it-qat-GGUF", _GEMMA_DRAFTER, "draft-mtp", False),
+    ("unsloth/gemma-4-12b-it-qat-GGUF", _GEMMA_DRAFTER, "draft-mtp", False),
+    ("unsloth/gemma-4-26B-A4B-it-qat-GGUF", _GEMMA_DRAFTER, "draft-mtp", False),
+    ("unsloth/gemma-4-31B-it-qat-GGUF", _GEMMA_DRAFTER, "draft-mtp", False),
 ]
 
 
@@ -2843,7 +2843,7 @@ def test_sub3b_gemma_separate_drafter_engages_mtp(monkeypatch):
         speculative_type = "auto",
         spec_draft_n_max = None,
         extra_args = None,
-        model_identifier = "LAiM/gemma-4-E2B-it-GGUF",  # 2B
+        model_identifier = "unsloth/gemma-4-E2B-it-GGUF",  # 2B
         model_path = None,
         gpus = True,
         binary = "/fake/llama-server",
@@ -2862,7 +2862,7 @@ def test_sub3b_qwen_embedded_head_still_drops_to_ngram(monkeypatch):
         speculative_type = "auto",
         spec_draft_n_max = None,
         extra_args = None,
-        model_identifier = "LAiM/Qwen3.5-2B-MTP-GGUF",  # 2B, embedded head
+        model_identifier = "unsloth/Qwen3.5-2B-MTP-GGUF",  # 2B, embedded head
         model_path = None,
         gpus = True,
         binary = "/fake/llama-server",
@@ -2963,12 +2963,12 @@ def test_spec_fallback_reason_reset_on_off(monkeypatch):
 def test_is_gemma_mtp_family():
     from core.inference.llama_cpp import _is_gemma_mtp_family
 
-    assert _is_gemma_mtp_family("LAiM/gemma-4-E4B-it-GGUF") is True
-    assert _is_gemma_mtp_family("LAiM/gemma-4-12b-it-GGUF") is True
+    assert _is_gemma_mtp_family("unsloth/gemma-4-E4B-it-GGUF") is True
+    assert _is_gemma_mtp_family("unsloth/gemma-4-12b-it-GGUF") is True
     # gemma-3n ships no separate drafter, so it is not a drafter family.
-    assert _is_gemma_mtp_family("LAiM/gemma-3n-E2B-it-GGUF") is False
-    assert _is_gemma_mtp_family("LAiM/Qwen3.5-35B-A3B-MTP-GGUF") is False
-    assert _is_gemma_mtp_family("LAiM/llama-3-8b") is False
+    assert _is_gemma_mtp_family("unsloth/gemma-3n-E2B-it-GGUF") is False
+    assert _is_gemma_mtp_family("unsloth/Qwen3.5-35B-A3B-MTP-GGUF") is False
+    assert _is_gemma_mtp_family("unsloth/llama-3-8b") is False
 
 
 def test_gemma_3n_without_drafter_is_not_mtp(monkeypatch):
@@ -2979,7 +2979,7 @@ def test_gemma_3n_without_drafter_is_not_mtp(monkeypatch):
         speculative_type = "auto",
         spec_draft_n_max = None,
         extra_args = None,
-        model_identifier = "LAiM/gemma-3n-E4B-it-GGUF",
+        model_identifier = "unsloth/gemma-3n-E4B-it-GGUF",
         model_path = None,
         gpus = True,
         binary = "/fake/llama-server",
@@ -2995,7 +2995,7 @@ def test_spec_fallback_reason_drafter_not_found(monkeypatch):
         speculative_type = "auto",
         spec_draft_n_max = None,
         extra_args = None,
-        model_identifier = "LAiM/gemma-4-E4B-it-GGUF",
+        model_identifier = "unsloth/gemma-4-E4B-it-GGUF",
         model_path = None,
         gpus = True,
         binary = "/fake/llama-server",
@@ -3013,7 +3013,7 @@ def test_is_gemma_mtp_name_none_safe():
 
     assert _is_gemma_mtp_family(None) is False
     assert _is_gemma_mtp_name(None, "/models/gemma-4-E4B-it-Q4_K_M.gguf") is True
-    assert _is_gemma_mtp_name("LAiM/Qwen3.5-4B-MTP-GGUF", None) is False
+    assert _is_gemma_mtp_name("unsloth/Qwen3.5-4B-MTP-GGUF", None) is False
 
 
 @pytest.mark.parametrize("mode", ["mtp", "mtp+ngram"])
@@ -3024,7 +3024,7 @@ def test_forced_mtp_gemma_without_drafter_falls_back(monkeypatch, mode):
         speculative_type = mode,
         spec_draft_n_max = None,
         extra_args = None,
-        model_identifier = "LAiM/gemma-4-E4B-it-GGUF",
+        model_identifier = "unsloth/gemma-4-E4B-it-GGUF",
         model_path = None,
         gpus = True,
         binary = "/fake/llama-server",
@@ -3056,7 +3056,7 @@ def test_local_gemma_gguf_without_identifier_falls_back(monkeypatch):
 
 def _drafter_not_found_kwargs():
     return dict(
-        model_identifier = "LAiM/gemma-4-E4B-it-GGUF",
+        model_identifier = "unsloth/gemma-4-E4B-it-GGUF",
         hf_variant = "Q4_K_M",
         n_ctx = 8192,
         cache_type_kv = None,
@@ -3071,7 +3071,7 @@ def _drafter_not_found_kwargs():
 def test_already_in_target_state_retries_after_hf_drafter_not_found():
     # Recoverable drafter_not_found must not dedupe; reload re-attempts download.
     backend = _mtp_backend(
-        _model_identifier = "LAiM/gemma-4-E4B-it-GGUF",
+        _model_identifier = "unsloth/gemma-4-E4B-it-GGUF",
         _speculative_type = "ngram-mod",
         _spec_fallback_reason = "drafter_not_found",
         _mtp_draft_path = None,
@@ -3079,7 +3079,7 @@ def test_already_in_target_state_retries_after_hf_drafter_not_found():
     )
     assert _matches(backend, **_drafter_not_found_kwargs()) is False
     # Sanity: with no fallback reason the same request still dedupes (matches).
-    ok = _mtp_backend(_model_identifier = "LAiM/gemma-4-E4B-it-GGUF", _gguf_path = None)
+    ok = _mtp_backend(_model_identifier = "unsloth/gemma-4-E4B-it-GGUF", _gguf_path = None)
     assert _matches(ok, **_drafter_not_found_kwargs()) is True
 
 
@@ -3094,7 +3094,7 @@ def test_already_in_target_state_retries_after_hf_drafter_not_found():
 def _binary_fallback_kwargs():
     """An Auto request for the model the fallen-back server is already running."""
     return dict(
-        model_identifier = "LAiM/Muse-Glimmer-30B-GGUF",
+        model_identifier = "unsloth/Muse-Glimmer-30B-GGUF",
         hf_variant = "Q4_K_M",
         n_ctx = 8192,
         cache_type_kv = None,
@@ -3109,7 +3109,7 @@ def _binary_fallback_kwargs():
 def _stood_down_backend(**overrides):
     """Live server that dropped its drafter because the binary could not run it."""
     state = dict(
-        _model_identifier = "LAiM/Muse-Glimmer-30B-GGUF",
+        _model_identifier = "unsloth/Muse-Glimmer-30B-GGUF",
         _speculative_type = "default",
         _spec_fallback_reason = "binary_no_mtp",
         _gguf_path = None,
@@ -3257,7 +3257,7 @@ def test_already_in_target_state_settles_a_dflash_listing_that_never_answered():
     another go" and relaunched a healthy drafter-free server on every Apply. DFlash
     asks through _dflash_retry_needed instead, which a permanent error never sets."""
     backend = _mtp_backend_default(
-        _model_identifier = "LAiM/Muse-Glimmer-30B-GGUF",
+        _model_identifier = "unsloth/Muse-Glimmer-30B-GGUF",
         _gguf_path = None,
         _spec_fallback_reason = "drafter_not_found",
         _spec_drafter_kind = "dflash",
@@ -3271,7 +3271,7 @@ def test_already_in_target_state_reloads_after_a_dflash_fetch_that_dropped():
     """Under Auto a lost sidecar leaves no fallback reason at all -- the promotion
     never ran -- so the flag is the only thing that can ask for one more attempt."""
     backend = _mtp_backend_default(
-        _model_identifier = "LAiM/Muse-Glimmer-30B-GGUF",
+        _model_identifier = "unsloth/Muse-Glimmer-30B-GGUF",
         _gguf_path = None,
     )
     assert _matches(backend, **_binary_fallback_kwargs()) is True
@@ -3557,7 +3557,7 @@ def _same_settings_apply():
     has to be the fixture's own, or the reuse check refuses on identity and every assertion
     below passes without ever reaching the speculative branch."""
     return dict(
-        model_identifier = "LAiM/Qwen3.6-27B-MTP-GGUF",
+        model_identifier = "unsloth/Qwen3.6-27B-MTP-GGUF",
         hf_variant = "Q4_K_M",
         n_ctx = 8192,
         cache_type_kv = None,
@@ -3956,7 +3956,7 @@ def test_the_dspark_gate_uses_the_probe_it_is_given():
     server = LlamaCppBackend.__new__(LlamaCppBackend)
     result = LlamaCppBackend._download_dspark(
         server,
-        hf_repo = "LAiM/does-not-matter",
+        hf_repo = "unsloth/does-not-matter",
         near_path = None,
         binary = "/nonexistent/llama-server",
         caps_probe = probe,
@@ -4034,7 +4034,7 @@ def test_a_drafter_dropped_as_unloadable_does_not_reload_to_refetch_it():
     """Refetching returns the same file, so the retry rule must stand down."""
     sidecar = "/cache/snapshots/abc/mtp-gemma-4-12b-it.gguf"
     backend = _mtp_backend(
-        _model_identifier = "LAiM/gemma-4-12b-it-GGUF",
+        _model_identifier = "unsloth/gemma-4-12b-it-GGUF",
         _speculative_type = "ngram-mod",
         _requested_spec_mode = "auto",
         _spec_fallback_reason = "drafter_not_found",
@@ -4046,7 +4046,7 @@ def test_a_drafter_dropped_as_unloadable_does_not_reload_to_refetch_it():
         _matches(
             backend,
             gguf_path = None,
-            model_identifier = "LAiM/gemma-4-12b-it-GGUF",
+            model_identifier = "unsloth/gemma-4-12b-it-GGUF",
             hf_variant = "Q4_K_M",
             n_ctx = 8192,
             cache_type_kv = None,

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import type { ModelSelectorChangeMeta } from "@/features/model-picker/components/model-selector/types";
 import { nativeAudioCheckpointIsLoadable } from "../model-picker/components/model-selector/audio-picker-policy.ts";
 import {
@@ -27,7 +28,7 @@ export function audioCppRuntimeProblem(
   const model = audioCppModelFor(id);
   if (!model || model.task === "asr" || !runtime) return null;
   if (!runtime.available) {
-    return "The audio runtime is not installed. Run `LAiM studio update` to install it.";
+    return translate("uxAudio.theAudioRuntimeIsj6m96");
   }
   if (model.needsEspeak && !runtime.espeak) {
     return (
@@ -92,32 +93,32 @@ export function audioGenerationPresentation(
   switch (phase) {
     case "preparing":
       return {
-        status: "Preparing audio…",
-        actionLabel: "Preparing…",
+        get status() { return translate("uxAudio.preparingAudio81jqk"); },
+        actionLabel: translate("uxAudio.preparing1h0c0"),
         canStop: false,
       };
     case "switching":
       return {
-        status: detail || "Switching model…",
-        actionLabel: "Stop",
+        status: detail || translate("uxAudio.switchingModely8xeu"),
+        actionLabel: translate("browser.agent.stop"),
         canStop: true,
       };
     case "generating":
       return {
-        status: "Generating audio…",
-        actionLabel: "Stop",
+        get status() { return translate("uxAudio.generatingAudio2m6dg"); },
+        actionLabel: translate("browser.agent.stop"),
         canStop: true,
       };
     case "stopping":
       return {
-        status: "Stopping audio…",
-        actionLabel: "Stopping…",
+        get status() { return translate("uxAudio.stoppingAudioywf10"); },
+        actionLabel: translate("uxAudio.stopping132zm"),
         canStop: false,
       };
     case "finishing":
       return {
-        status: "Finishing audio…",
-        actionLabel: "Finishing…",
+        get status() { return translate("uxAudio.finishingAudiokzuuq"); },
+        actionLabel: translate("uxAudio.finishing7pz3y"),
         canStop: false,
       };
     case null:

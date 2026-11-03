@@ -8,7 +8,7 @@ backend suite found only one of them was detectable: reverting the subdir expans
 ``core/training/provenance.py`` or in ``core/training/worker.py`` left all 17,204 passing
 tests green, with a byte-identical failure set. Both were shipped unguarded.
 
-They are not decorative. For ``LAiM/Spark-TTS-0.5B`` -- snapshot root holds only
+They are not decorative. For ``unsloth/Spark-TTS-0.5B`` -- snapshot root holds only
 ``README.md`` and ``config.yaml``, everything trainable under ``LLM/`` -- the provenance
 site turns a snapshot sitting on disk into "The exact model snapshot for this run is no
 longer available." and refuses the resume, and the worker site either errors with "The
@@ -21,8 +21,8 @@ import json
 import pytest
 
 
-_BICODEC = "LAiM/Spark-TTS-0.5B"
-_PLAIN = "LAiM/Llama-3.2-1B-Instruct"
+_BICODEC = "unsloth/Spark-TTS-0.5B"
+_PLAIN = "unsloth/Llama-3.2-1B-Instruct"
 _REVISION = "d" * 40
 
 

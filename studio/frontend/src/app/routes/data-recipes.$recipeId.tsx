@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { createRoute } from "@tanstack/react-router";
 import type { ReactElement } from "react";
 import { lazy } from "react";
@@ -16,7 +17,7 @@ const EditRecipePage = lazy(() =>
 export const Route = createRoute({
   getParentRoute: () => rootRoute,
   path: "/data-recipes/$recipeId",
-  staticData: { title: "Data Recipes" },
+  staticData: { title: translate("uxDatarecipes.dataRecipeswnh7v") },
   beforeLoad: () => requireAuth(),
   component: DataRecipeEditorRoute,
 });

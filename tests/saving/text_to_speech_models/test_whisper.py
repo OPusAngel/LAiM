@@ -48,7 +48,7 @@ print(f"{'=' * 80}")
 
 
 model, tokenizer = FastModel.from_pretrained(
-    model_name = "LAiM/whisper-large-v3",
+    model_name = "unsloth/whisper-large-v3",
     dtype = None,
     load_in_4bit = False,
     auto_model = WhisperForConditionalGeneration,
@@ -70,7 +70,7 @@ model = FastModel.get_peft_model(
     lora_alpha = 64,
     lora_dropout = 0,
     bias = "none",
-    use_gradient_checkpointing = "LAiM",
+    use_gradient_checkpointing = "unsloth",
     random_state = 3407,
     use_rslora = False,
     loftq_config = None,

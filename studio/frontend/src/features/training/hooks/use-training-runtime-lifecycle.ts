@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { hasAuthToken } from "@/features/auth";
 import { useHfTokenStore } from "@/features/hub";
 import {
@@ -88,8 +89,8 @@ function maybeNotifyTrainingTerminalTransition(
     );
     notifyNative({
       key: `training-completed:${after.jobId}`,
-      title: "Training finished",
-      body: `${model} is complete.`,
+      title: translate("uxFeatures.trainingFinished1yhvt"),
+      get body() { return translate("uxFeatures.isCompleterqkl1", { p1: model }); },
       requestPermission: false,
     }).catch(() => undefined);
   }
@@ -97,7 +98,7 @@ function maybeNotifyTrainingTerminalTransition(
   if (shouldNotifyTrainingError(before, after)) {
     notifyNative({
       key: `training-error:${after.jobId}`,
-      title: "Training failed",
+      title: translate("uxFeatures.trainingFailed17pwi"),
       body: getTrainingErrorBody(after),
       requestPermission: false,
     }).catch(() => undefined);

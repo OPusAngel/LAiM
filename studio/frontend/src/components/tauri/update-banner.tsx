@@ -12,7 +12,7 @@ import type {
 } from "@/hooks/use-tauri-update";
 import type { CopySupportDiagnosticsResult } from "@/lib/tauri-diagnostics";
 import { cn } from "@/lib/utils";
-import { useT } from "@/i18n";
+import { translate, useT } from "@/i18n";
 import { CircleAlert, Download } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
@@ -128,7 +128,7 @@ export function UpdateBanner({
               type="button"
               onClick={onDismiss}
               className="absolute top-2.5 right-3 flex size-6 items-center justify-center rounded-full text-muted-foreground/60 transition-colors hover:bg-muted hover:text-foreground"
-              aria-label="Dismiss app update notification"
+              aria-label={translate("uxComponents.dismissAppUpdateNotification1v63b")}
             >
               <svg
                 aria-hidden="true"
@@ -252,7 +252,7 @@ export function UpdateBanner({
                     className="h-auto whitespace-nowrap rounded-full px-2.5 py-2 text-ui-13 font-medium text-foreground"
                     onClick={onDismiss}
                   >
-                    Remind me later
+                    {translate("uxCopy.remindMeLateracf87")}
                   </Button>
                   <Button
                     size="sm"

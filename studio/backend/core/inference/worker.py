@@ -313,15 +313,15 @@ def _needs_nemotron_trust(model_name: str, hf_token: str | None = None) -> bool:
     """Whether *model_name* is a NemotronH/Nano model that needs trust_remote_code.
 
     NemotronH/Nano have config-parsing bugs that require it. Must NOT match
-    Llama-Nemotron (standard Llama arch), so also require the LAiM/ or nvidia/
+    Llama-Nemotron (standard Llama arch), so also require the unsloth/ or nvidia/
     namespace, and a genuine first-party Hub repo (not a local path or a spoof
-    name starting with "LAiM/"). The repo check is authenticated so private
+    name starting with "unsloth/"). The repo check is authenticated so private
     first-party repos still resolve, and runs only after the cheap checks pass.
     """
     mn = model_name.lower()
     if not (
         any(sub in mn for sub in _NEMOTRON_TRUST_SUBSTRINGS)
-        and (mn.startswith("LAiM/") or mn.startswith("nvidia/"))
+        and (mn.startswith("unsloth/") or mn.startswith("nvidia/"))
     ):
         return False
 

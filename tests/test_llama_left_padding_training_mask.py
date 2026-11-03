@@ -58,7 +58,7 @@ def test_left_padded_label_less_training_forward_matches_unpadded():
         r = 8,
         lora_alpha = 16,
         target_modules = ["q_proj", "v_proj"],
-        use_gradient_checkpointing = "LAiM",
+        use_gradient_checkpointing = "unsloth",
     )
     model.train()
     torch.manual_seed(0)

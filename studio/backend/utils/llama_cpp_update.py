@@ -43,7 +43,10 @@ from utils.update_status import update_checks_disabled
 
 logger = structlog.get_logger(__name__)
 
-DEFAULT_PUBLISHED_REPO = "LAiMai/llama.cpp"
+# The fallback when an install marker names no repo. LAiM ships llama.cpp from the upstream
+# project (the slug is GitHub's own spelling and must stay exact); see
+# utils.llama_cpp_freshness.LLAMA_RELEASE_REPO, which also rewrites a fork marker.
+DEFAULT_PUBLISHED_REPO = os.environ.get("LAiM_LLAMA_RELEASE_REPO", "ggml-org/llama.cpp")
 _INSTALL_TIMEOUT_SECONDS = 1800  # 30 min ceiling for download + build/validate
 # install_llama_prebuilt.py EXIT_NO_SPACE: out of disk, retrying will not help.
 _EXIT_NO_SPACE = 4
@@ -227,7 +230,7 @@ def _llama_install_root(binary: Optional[str]) -> Optional[Path]:
         binary,
         marker_root = _install_dir_for(binary),
         server_path_var = "LLAMA_SERVER_PATH",
-        cpp_path_var = "LAiM_LLAMA_CPP_PATH",
+        cpp_path_var = "UNSLOTH_LLAMA_CPP_PATH",
         dir_name = "llama.cpp",
     )
 

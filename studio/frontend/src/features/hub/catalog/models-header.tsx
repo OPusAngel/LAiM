@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { useSettingsDialogStore } from "@/features/settings";
 import {
   ChipIcon,
@@ -60,12 +61,12 @@ export function ModelsHeader({
   return (
     <header className="font-heading flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
       <PageHeading
-        title={isDataset ? "Datasets" : "Model hub"}
+        title={isDataset ? "Datasets" : translate("uxHub.modelHubtdpem")}
         onTitleClick={onTitleClick}
         subtitle={
           isDataset
-            ? "Discover and download datasets locally."
-            : "Discover and download models locally."
+            ? translate("uxHub.discoverAndDownloadDatasetspzfz1")
+            : translate("uxHub.discoverAndDownloadModelsexe8w")
         }
       />
 
@@ -78,12 +79,12 @@ export function ModelsHeader({
         {isDataset ? null : <DownloadLocationPicker />}
         <StatPill
           icon={PackageIcon}
-          label="Cache"
+          label={translate("uxHub.cache1kmog")}
           value={String(cachedCount)}
         />
         <StatPill
           icon={Database02Icon}
-          label="Local"
+          label={translate("studio.datasetPicker.sourceLocal")}
           value={String(localCount)}
         />
         <StatPill

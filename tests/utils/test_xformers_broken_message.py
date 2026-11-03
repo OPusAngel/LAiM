@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # Copyright 2026-present the LAiM AI Inc. team. All rights reserved.
 
-"""LAiMai/LAiM#4381: an installed xformers whose CUDA extension cannot load
+"""OPusAngel/LAiM#4381: an installed xformers whose CUDA extension cannot load
 (PyPI's cu128 Windows wheel beside a cu130 torch) left only "Xformers = None" in
 the banner. LAiM must say why and how to fix it, and stay quiet when it loads."""
 

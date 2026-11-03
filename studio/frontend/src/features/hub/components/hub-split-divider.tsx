@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   type CSSProperties,
   type KeyboardEvent,
@@ -206,11 +207,11 @@ export function HubSplitDivider({
         data-slot="hub-split-divider"
         role="separator"
         aria-orientation="vertical"
-        aria-label="Resize model list"
+        aria-label={translate("uxHub.resizeModelList1t47h")}
         aria-valuenow={Math.round(bounds.now)}
         aria-valuemin={SPLIT_LIST_MIN_PX}
         aria-valuemax={Math.round(bounds.max)}
-        title="Drag to resize, double-click to reset"
+        title={translate("uxHub.dragToResizeDouble1f6bs")}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={finishDrag}

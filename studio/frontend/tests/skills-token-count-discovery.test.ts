@@ -67,7 +67,13 @@ test("request building waits for skills and preserves the launcher tool catalog"
   );
   assert.match(
     payloadBuilder,
-    /supportsTools &&\s*\([\s\S]*skillTools\.length > 0[\s\S]*\)\s*\? \{\s*enable_tools: true/,
+    /supportsTools \|\|\s*\(!isExternalRequest && Boolean\(params\.checkpoint\)\)\) &&\s*\(toolsEnabled \|\|[\s\S]*skillTools\.length > 0[\s\S]*\)\s*\? \{\s*enable_tools: true/,
+  );
+  // A turn with nothing selected says so twice: `false` for the loop, and an empty catalogue for
+  // the `--enable-tools` override, which would otherwise answer the omitted list with ALL_TOOLS.
+  assert.match(
+    payloadBuilder,
+    /enable_tools: false,\s*enabled_tools: \[\]/,
   );
   const localToolCatalog = payloadBuilder.slice(
     payloadBuilder.indexOf("// Sent for every local chat"),

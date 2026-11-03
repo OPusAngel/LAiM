@@ -141,8 +141,8 @@ def _manifest_bytes():
             "schema_version": 1,
             "component": "llama.cpp",
             "upstream_tag": UPSTREAM_TAG,
-            "source_repo": "LAiMai/llama.cpp",
-            "source_repo_url": "https://github.com/LAiMai/llama.cpp",
+            "source_repo": "unslothai/llama.cpp",
+            "source_repo_url": "https://github.com/unslothai/llama.cpp",
             "artifacts": [
                 {
                     "asset_name": BINARY_ASSET,

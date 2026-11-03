@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,7 +39,7 @@ export function HfTokenWarningDialog() {
               <AlertTriangle className="size-5" />
             </div>
             <div className="space-y-1 text-left">
-              <AlertDialogTitle>Hugging Face token is invalid</AlertDialogTitle>
+              <AlertDialogTitle>{translate("uxCopy.huggingFaceTokenIsqvqi2")}</AlertDialogTitle>
               <AlertDialogDescription>
                 {allowAnonymous
                   ? "Hugging Face rejected the saved token. Replace it to access private or gated repositories, or continue without it for public and fully downloaded models."
@@ -49,16 +50,16 @@ export function HfTokenWarningDialog() {
         </AlertDialogHeader>
         <AlertDialogFooter className="sm:justify-between">
           <AlertDialogCancel onClick={() => resolve("cancel")}>
-            Cancel
+            {translate("browser.agentSettings.cancel")}
           </AlertDialogCancel>
           <div className="flex flex-col-reverse gap-2 sm:flex-row">
             {allowAnonymous ? (
               <Button variant="outline" onClick={() => resolve("anonymous")}>
-                Continue without token
+                {translate("uxFeatures.continueWithoutTokenxqivl")}
               </Button>
             ) : null}
             <AlertDialogAction onClick={() => resolve("replace")}>
-              Replace token
+              {translate("uxFeatures.replaceToken1oprh")}
             </AlertDialogAction>
           </div>
         </AlertDialogFooter>

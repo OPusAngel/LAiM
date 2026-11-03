@@ -16,7 +16,7 @@ import type { HfTaskFilter } from "@/features/hub/hooks/use-hub-model-search";
 // eslint-disable-next-line no-restricted-imports -- The settings barrel imports this feature back.
 import { useSettingsDialogStore } from "@/features/settings/stores/settings-dialog-store";
 import { isNpuModelId, NPU_MODEL_PREFIX, useNpuStatus } from "@/features/npu";
-import { useT } from "@/i18n";
+import { translate, useT } from "@/i18n";
 import { ChevronDownStandardIcon } from "@/lib/chevron-icons";
 import { cn } from "@/lib/utils";
 import {
@@ -172,7 +172,7 @@ function ModelSelectorTrigger({
   onEject,
   loadedCount = 0,
   // Task pages name what they pick ("Select image model"), so the choice reads as separate from the chat model.
-  placeholder = "Select model",
+  placeholder = translate("uxModelpicker.selectModelu24cr"),
 }: {
   loadedCount?: number;
   currentModel?: ModelOption;
@@ -222,7 +222,7 @@ function ModelSelectorTrigger({
             // pointer-events-none disables it so taps open the picker instead.
             <span
               aria-hidden={true}
-              title="Eject model"
+              title={translate("settings.general.rag.ejectModel")}
               data-eject-hit={true}
               onPointerDown={(event) => event.stopPropagation()}
               onClick={(event) => {
@@ -341,12 +341,16 @@ function defaultHubSection(hasAdditionalOnDeviceModels = false): HubSection {
 const HUB_SECTION_TABS: { value: string; label: string; icon?: ReactNode }[] = [
   {
     value: "recommended",
-    label: "Recommended",
+    get label() {
+      return translate("settings.voice.dictation.sttRecommended");
+    },
     icon: <HugeiconsIcon icon={StarIcon} className="size-3.5 shrink-0" />,
   },
   {
     value: "downloaded",
-    label: "On Device",
+    get label() {
+      return translate("picker.onDevice");
+    },
     icon: <HugeiconsIcon icon={Download01Icon} className="size-3.5 shrink-0" />,
   },
 ];
@@ -440,7 +444,9 @@ function ModelSelectorContent({
             ...HUB_SECTION_TABS,
             {
               value: "connected",
-              label: "Connected",
+              get label() {
+                return translate("uxModelpicker.connectedye8ew");
+              },
               icon: (
                 <HugeiconsIcon icon={CloudIcon} className="size-3.5 shrink-0" />
               ),
@@ -599,7 +605,7 @@ function ModelSelectorContent({
       data-external={hasExternal || undefined}
       aria-label={
         visibleConfigTarget
-          ? `Run settings for ${visibleConfigTarget.displayName}`
+          ? translate("uxModelpicker.runSettingsFor0isu1", { p1: visibleConfigTarget.displayName })
           : undefined
       }
       data-tour={dataTour}
@@ -799,11 +805,11 @@ export function ModelSelector({
           ? "GGUF"
           : "Local"
         : isTraining && isMerged
-          ? "Full finetune"
+          ? translate("uxModelpicker.fullFinetuneic0cl")
           : isExported
             ? isMerged
-              ? "Merged · Exported"
-              : "LoRA · Exported"
+              ? translate("uxModelpicker.mergedExportedeujrx")
+              : translate("uxModelpicker.loRAExported2msbx")
             : "LoRA";
       all.set(lora.id, {
         ...lora,

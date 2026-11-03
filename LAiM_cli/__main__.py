@@ -7,7 +7,7 @@ Windows materialises the `LAiM` entry point as a generated, unsigned
 `LAiM.exe`. AppLocker, WDAC and Smart App Control deny that executable while
 the signed interpreter beside it keeps running, so `LAiM ...` is unusable on
 a locked-down machine even though the install is perfectly healthy (issue
-https://github.com/LAiMai/LAiM/issues/8490). This module is the supported
+https://github.com/OPusAngel/LAiM/issues/8490). This module is the supported
 way in for those users, and for anyone who would rather not depend on a
 generated launcher:
 

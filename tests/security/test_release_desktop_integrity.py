@@ -132,7 +132,7 @@ def _run_step(
         {
             "COMMAND_LOG": str(log),
             "DESKTOP_RELEASE_TAG": RELEASE_TAG,
-            "GH_REPO": "LAiMai/LAiM",
+            "GH_REPO": "OPusAngel/LAiM",
             "GITHUB_OUTPUT": str(tmp_path / "github-output"),
             "GH_TOKEN": "masked-token",
             "PATH": f"{fake_bin}:{env['PATH']}",
@@ -205,7 +205,7 @@ def _run_create_release(
         "DESKTOP_RELEASE_NOTES": workflow["env"]["DESKTOP_RELEASE_NOTES"],
         "APP_VERSION": "0.1.50",
         "GITHUB_SHA": SOURCE_SHA,
-        "GITHUB_REPOSITORY": "LAiMai/LAiM",
+        "GITHUB_REPOSITORY": "OPusAngel/LAiM",
         "PYPI_VERSION": "2026.8.7",
         "RELEASE_DRAFT": "true",
         "STUDIO_VERSION": "v0.1.50-beta",
@@ -882,7 +882,7 @@ def test_linux_clean_machine_downloads_only_the_runner_architecture(tmp_path):
             "Download the shipped bundle",
             tmp_path,
             target_has_desktop_assets = True,
-            extra_env = {"REL_TAG": RELEASE_TAG, "REL_REPO": "LAiMai/LAiM"},
+            extra_env = {"REL_TAG": RELEASE_TAG, "REL_REPO": "OPusAngel/LAiM"},
         )
         assert result.returncode == 0, result.stderr
         expected = (

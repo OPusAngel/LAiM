@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 
@@ -45,8 +46,8 @@ function currentRoute(): string {
 export function NewProjectDialog({
   open,
   onOpenChange,
-  title = "Create project",
-  submitLabel = "Create project",
+  title = translate("uxChat.createProject5pges"),
+  submitLabel = translate("uxChat.createProjectcycot"),
   onCreated,
 }: {
   open: boolean;
@@ -132,7 +133,7 @@ export function NewProjectDialog({
       runtime.setActiveProjectId(project.id);
       navigate({ to: "/chat", search: { project: project.id } });
     } catch (err) {
-      toast.error("Failed to create project", {
+      toast.error(translate("uxChat.failedToCreateProject1mage"), {
         description: err instanceof Error ? err.message : undefined,
       });
     } finally {
@@ -184,8 +185,8 @@ export function NewProjectDialog({
             autoFocus={true}
             disabled={busy}
             maxLength={120}
-            placeholder="Project name"
-            aria-label="Project name"
+            placeholder={translate("uxChat.projectName39ba3")}
+            aria-label={translate("uxChat.projectName39ba3")}
             className="min-w-0 flex-1 bg-transparent py-4 pr-4 pl-2.5 text-base outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed"
           />
         </div>
@@ -203,7 +204,7 @@ export function NewProjectDialog({
         />
         <DialogFooter className="flex-wrap gap-2 sm:justify-end">
           <Button type="button" variant="ghost" disabled={busy} onClick={close}>
-            Cancel
+            {translate("browser.agentSettings.cancel")}
           </Button>
           <Button
             type="button"
@@ -213,7 +214,7 @@ export function NewProjectDialog({
             {busy
               ? "Creating…"
               : stagingDrop || pickingFolder
-                ? "Adding sources…"
+                ? translate("uxChat.addingSourcesxw99x")
                 : submitLabel}
           </Button>
         </DialogFooter>

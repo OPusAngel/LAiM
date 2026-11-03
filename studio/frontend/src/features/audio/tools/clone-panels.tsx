@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   Select,
   SelectContent,
@@ -65,9 +66,7 @@ const qwen3TimbrePanel: AudioToolPanel<TimbreOnlyValue> = {
       <label
         htmlFor="clone-timbre-only"
         className="flex items-center justify-between gap-3 text-ui-13 font-medium text-foreground"
-      >
-        Timbre only
-        <Switch
+      >{translate("uxAudio.timbreOnly6txnl")}<Switch
           id="clone-timbre-only"
           checked={value.timbreOnly}
           disabled={disabled}
@@ -75,8 +74,7 @@ const qwen3TimbrePanel: AudioToolPanel<TimbreOnlyValue> = {
         />
       </label>
       <p className="text-ui-11p5 leading-snug text-muted-foreground">
-        Copies the sound of the voice without the clip's words, so no transcript
-        is needed. Usually a little less close to the original.
+        {translate("uxCopy.copiesTheSoundOfz9cow")}
       </p>
     </div>
   ),
@@ -86,11 +84,11 @@ const indexTts2EmotionPanel: AudioToolPanel<EmotionValue> = {
   ...indexTts2EmotionLogic,
   Component: ({ value, onChange, disabled }) => (
     <PanelSection
-      title="Emotion"
-      hint="Optional. Leave it empty for the reference's own delivery."
+      title={translate("uxAudio.emotionru67m")}
+      hint={translate("uxAudio.optionalLeaveItEmpty1bhga")}
     >
       <PillTabs
-        ariaLabel="Emotion source"
+        ariaLabel={translate("uxAudio.emotionSourceer2xk")}
         value={value.mode}
         onValueChange={(mode) =>
           onChange({ ...value, mode: mode as EmotionMode })
@@ -100,16 +98,16 @@ const indexTts2EmotionPanel: AudioToolPanel<EmotionValue> = {
         compact={true}
         className="[&>button]:px-3"
         tabs={[
-          { value: "text", label: "From text" },
-          { value: "audio", label: "From audio" },
-          { value: "mixer", label: "Mixer" },
+          { value: "text", label: translate("uxAudio.fromText1qsrk") },
+          { value: "audio", label: translate("uxAudio.fromAudioiu4wx") },
+          { value: "mixer", label: translate("uxAudio.mixer1lm9f") },
         ]}
       />
       {value.mode === "text" ? (
         <Field
-          label="Describe the emotion"
+          label={translate("uxAudio.describeTheEmotionz6eyk")}
           htmlFor="clone-emotion-text"
-          hint="A few words, such as “excited and a little nervous”."
+          hint={translate("uxFeatures.aFewWordsSuch1qlhd")}
         >
           <Textarea
             id="clone-emotion-text"
@@ -124,8 +122,8 @@ const indexTts2EmotionPanel: AudioToolPanel<EmotionValue> = {
       ) : value.mode === "audio" ? (
         <AudioSourceInput
           id="clone-emotion-audio"
-          label="Emotion clip"
-          hint="Its mood is copied, not its voice."
+          label={translate("uxAudio.emotionClip1gi97")}
+          hint={translate("uxAudio.itsMoodIsCopied1xnqn")}
           value={value.source}
           onChange={(source) => onChange({ ...value, source })}
           onStatusChange={(status) => {
@@ -160,13 +158,13 @@ const indexTts2EmotionPanel: AudioToolPanel<EmotionValue> = {
         </div>
       )}
       <ParamSlider
-        label="Strength"
+        label={translate("uxImages.strength1okjn")}
         value={value.alpha}
         min={0}
         max={1}
         step={0.05}
         disabled={disabled}
-        info="How strongly the emotion colours the voice."
+        info={translate("uxAudio.howStronglyTheEmotionbfl6t")}
         onChange={(alpha) => onChange({ ...value, alpha })}
       />
     </PanelSection>
@@ -177,27 +175,27 @@ const chatterboxExpressivenessPanel: AudioToolPanel<ExpressivenessValue> = {
   ...chatterboxExpressivenessLogic,
   Component: ({ value, onChange, disabled }) => (
     <PanelSection
-      title="Expressiveness"
-      hint="The first run with a new voice or setting takes 5 to 15 s while the model studies it."
+      title={translate("uxAudio.expressiveness1f34j")}
+      hint={translate("uxAudio.theFirstRunWith1vja8")}
     >
       <ParamSlider
-        label="Intensity"
+        label={translate("uxAudio.intensityn84ia")}
         value={value.exaggeration}
         min={0}
         max={2}
         step={0.05}
         disabled={disabled}
-        info="Higher is more dramatic; 0.5 is natural."
+        info={translate("uxAudio.higherIsMoreDramaticmbltn")}
         onChange={(exaggeration) => onChange({ ...value, exaggeration })}
       />
       <ParamSlider
-        label="Guidance"
+        label={translate("uxVideo.guidancew7efa")}
         value={value.guidance}
         min={0}
         max={5}
         step={0.05}
         disabled={disabled}
-        info="How closely the delivery follows the reference. Lower suits fast speakers."
+        info={translate("uxAudio.howCloselyTheDeliveryk71mn")}
         onChange={(guidance) => onChange({ ...value, guidance })}
       />
     </PanelSection>
@@ -208,13 +206,13 @@ const cosyVoiceModePanel: AudioToolPanel<CosyVoiceModeValue> = {
   ...cosyVoiceModeLogic,
   Component: ({ value, onChange, disabled }) => (
     <PanelSection
-      title="Mode"
+      title={translate("settings.debugging.mode")}
       hint={
         value.mode === "zero_shot"
-          ? "Same language: speaks in the clip's language, using what's said in it."
+          ? translate("uxAudio.sameLanguageSpeaksInjjnxg")
           : value.mode === "cross_lingual"
-            ? "Cross-lingual: speaks another language in the same voice. No transcript needed."
-            : "Instruct: the same voice, delivered the way you describe."
+            ? translate("uxAudio.crossLingualSpeaksAnotherwnpv5")
+            : translate("uxAudio.instructSameVoice92p38")
       }
     >
       <PillTabs
@@ -228,18 +226,18 @@ const cosyVoiceModePanel: AudioToolPanel<CosyVoiceModeValue> = {
         compact={true}
         className="[&>button]:px-3"
         tabs={[
-          { value: "zero_shot", label: "Same language" },
-          { value: "cross_lingual", label: "Cross-lingual" },
-          { value: "instruct", label: "Instruct" },
+          { value: "zero_shot", label: translate("uxAudio.sameLanguage1cimd") },
+          { value: "cross_lingual", label: translate("uxAudio.crossLingualxunyj") },
+          { value: "instruct", label: translate("uxAudio.instruct8edmz") },
         ]}
       />
       {value.mode === "instruct" ? (
-        <Field label="Instruction" htmlFor="clone-instruction">
+        <Field label={translate("uxAudio.instructionusqry")} htmlFor="clone-instruction">
           <Textarea
             id="clone-instruction"
             value={value.instruction}
             disabled={disabled}
-            placeholder="Speak slowly, in a calm and warm tone."
+            placeholder={translate("uxAudio.speakSlowlyInA7pwd2")}
             onChange={(event) =>
               onChange({ ...value, instruction: event.target.value })
             }
@@ -254,9 +252,9 @@ const cosyVoiceModePanel: AudioToolPanel<CosyVoiceModeValue> = {
 const f5SpeedDialectPanel: AudioToolPanel<SpeedDialectValue> = {
   ...f5SpeedDialectLogic,
   Component: ({ value, onChange, disabled, specs }) => (
-    <PanelSection title="Speed and dialect">
+    <PanelSection title={translate("uxAudio.speedAndDialect1bemh")}>
       <ParamSlider
-        label="Speed"
+        label={translate("settings.voice.readAloud.speedLabel")}
         value={value.speed}
         min={0.5}
         max={2}

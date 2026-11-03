@@ -163,7 +163,7 @@ def _converter_harness(monkeypatch, tmp_path, with_converter):
     zoo = types.ModuleType("LAiM_zoo")
     zoo.llama_cpp = types.SimpleNamespace(
         LLAMA_CPP_DEFAULT_DIR = str(llama),
-        _resolve_converter_revision = lambda d: ("LAiMai/llama.cpp", "b9000-mix-abc"),
+        _resolve_converter_revision = lambda d: ("unslothai/llama.cpp", "b9000-mix-abc"),
     )
     monkeypatch.setitem(sys.modules, "LAiM_zoo", zoo)
     monkeypatch.setitem(sys.modules, "LAiM_zoo.llama_cpp", zoo.llama_cpp)
@@ -236,7 +236,7 @@ def _serve_fork_release(
         "release_tag": tag,
         "upstream_tag": tag.split("-mix-")[0],
         "artifacts": {
-            f"llama.cpp-source-{tag}.tar.gz": {"sha256": sha, "repo": "LAiMai/llama.cpp"}
+            f"llama.cpp-source-{tag}.tar.gz": {"sha256": sha, "repo": "unslothai/llama.cpp"}
         },
     }
     urls = []
@@ -263,8 +263,8 @@ def test_gguf_converter_downloaded_from_fork_release_without_git(monkeypatch, tm
     backend._convert_peft_dir_to_gguf(adapter, "q8_0", None)
     assert not any(c[0][0] == "git" for c in calls)
     assert urls == [
-        f"https://github.com/LAiMai/llama.cpp/releases/download/{tag}/llama-prebuilt-sha256.json",
-        f"https://github.com/LAiMai/llama.cpp/releases/download/{tag}/llama.cpp-source-{tag}.tar.gz",
+        f"https://github.com/unslothai/llama.cpp/releases/download/{tag}/llama-prebuilt-sha256.json",
+        f"https://github.com/unslothai/llama.cpp/releases/download/{tag}/llama.cpp-source-{tag}.tar.gz",
     ]
     source = tmp_path / "home" / f"llama.cpp-source-{tag}"
     assert [c[0][1] for c in calls] == [str(source / "convert_lora_to_gguf.py")]
@@ -424,9 +424,9 @@ def test_gguf_converter_honors_scripts_dir(monkeypatch, tmp_path):
     backend, adapter, calls = _converter_harness(monkeypatch, tmp_path, False)
     pinned = tmp_path / "pinned"
     pinned.mkdir()
-    monkeypatch.setenv("LAiM_LLAMA_CPP_SCRIPTS_DIR", str(pinned))
+    monkeypatch.setenv("UNSLOTH_LLAMA_CPP_SCRIPTS_DIR", str(pinned))
     sys.modules["LAiM_zoo.llama_cpp"]._resolve_converter_revision = None  # must not be called
-    with pytest.raises(RuntimeError, match = "LAiM_LLAMA_CPP_SCRIPTS_DIR"):
+    with pytest.raises(RuntimeError, match = "UNSLOTH_LLAMA_CPP_SCRIPTS_DIR"):
         backend._convert_peft_dir_to_gguf(adapter, "q8_0", None)
     (pinned / "convert_lora_to_gguf.py").write_text("")
     (pinned / "gguf-py").mkdir()
@@ -500,7 +500,7 @@ def test_gguf_converter_bare_fork_tag_maps_to_mix_release_across_pages(monkeypat
 
     backend, adapter, calls = _converter_harness(monkeypatch, tmp_path, False)
     sys.modules["LAiM_zoo.llama_cpp"]._resolve_converter_revision = lambda d: (
-        "LAiMai/llama.cpp",
+        "unslothai/llama.cpp",
         "b9000",
     )
     tag = "b9000-mix-def"
@@ -532,7 +532,7 @@ def test_gguf_converter_bare_fork_tag_maps_to_mix_release_across_pages(monkeypat
 @pytest.mark.parametrize(
     "revision,legacy",
     [
-        (("LAiMai/llama.cpp", "b9000-mix-abc"), "llama.cpp-source-b9000"),
+        (("unslothai/llama.cpp", "b9000-mix-abc"), "llama.cpp-source-b9000"),
         ((None, None), "llama.cpp-source"),
     ],
 )

@@ -15,7 +15,7 @@ The bundle is extracted into a staging directory beside the managed tree, starte
 with ``--help`` so a bundle this host cannot load is refused, and swapped in only then,
 so an interrupted or unusable install never replaces a working tree.
 
-The newest LAiMai/audio.cpp release is installed unless ``LAiM_AUDIO_CPP_TAG`` (or
+The newest unslothai/audio.cpp release is installed unless ``LAiM_AUDIO_CPP_TAG`` (or
 ``--published-release-tag``) names one. The release is resolved like whisper.cpp's, through
 prebuilt_core: the download host first, then the GitHub API. Every bundle and CUDA runtime
 archive must match the sha256 in the release's own ``audio-cpp-prebuilt-sha256.json``, which
@@ -78,9 +78,9 @@ else:
     )
 
 # The LAiM fork publishes the bundles Studio installs (CI: .github/workflows/LAiM-prebuilt.yml
-# there, like LAiMai/whisper.cpp); LAiM_AUDIO_CPP_REPO overrides it. Its tags carry the LAiM
+# there, like unslothai/whisper.cpp); LAiM_AUDIO_CPP_REPO overrides it. Its tags carry the LAiM
 # packaging (static eSpeak-ng, lean multi-arch Linux CUDA) and a manifest + sha256 index per release.
-DEFAULT_REPO = "LAiMai/audio.cpp"
+DEFAULT_REPO = "unslothai/audio.cpp"
 
 # What prebuilt_core's release lookup and index parsers read through _OPS.
 COMPONENT = "audio.cpp"
@@ -128,7 +128,7 @@ _ARCH_TOKENS = {
     "arm64": "arm64",
     "aarch64": "arm64",
 }
-# "-cuda12.8" (upstream) or "-cuda12" (LAiMai/audio.cpp: one lean bundle per CUDA major line).
+# "-cuda12.8" (upstream) or "-cuda12" (unslothai/audio.cpp: one lean bundle per CUDA major line).
 _CUDA_LINE = re.compile(r"-cuda(\d+)(?:\.(\d+))?(?=[-.]|$)")
 
 

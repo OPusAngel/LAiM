@@ -152,394 +152,394 @@ def extract_model_size_b(model_id: str) -> float | None:
 # "canonical.yaml": [equivalent names]; the filename derives from the first name.
 MODEL_NAME_MAPPING = {
     # ── Embedding models ──
-    "LAiM_all-MiniLM-L6-v2.yaml": [
-        "LAiM/all-MiniLM-L6-v2",
+    "unsloth_all-MiniLM-L6-v2.yaml": [
+        "unsloth/all-MiniLM-L6-v2",
         "sentence-transformers/all-MiniLM-L6-v2",
     ],
-    "LAiM_bge-m3.yaml": [
-        "LAiM/bge-m3",
+    "unsloth_bge-m3.yaml": [
+        "unsloth/bge-m3",
         "BAAI/bge-m3",
     ],
-    "LAiM_embeddinggemma-300m.yaml": [
-        "LAiM/embeddinggemma-300m",
+    "unsloth_embeddinggemma-300m.yaml": [
+        "unsloth/embeddinggemma-300m",
         "google/embeddinggemma-300m",
     ],
-    "LAiM_gte-modernbert-base.yaml": [
-        "LAiM/gte-modernbert-base",
+    "unsloth_gte-modernbert-base.yaml": [
+        "unsloth/gte-modernbert-base",
         "Alibaba-NLP/gte-modernbert-base",
     ],
-    "LAiM_Qwen3-Embedding-0.6B.yaml": [
-        "LAiM/Qwen3-Embedding-0.6B",
+    "unsloth_Qwen3-Embedding-0.6B.yaml": [
+        "unsloth/Qwen3-Embedding-0.6B",
         "Qwen/Qwen3-Embedding-0.6B",
-        "LAiM/Qwen3-Embedding-4B",
+        "unsloth/Qwen3-Embedding-4B",
         "Qwen/Qwen3-Embedding-4B",
     ],
     # ── Other models ──
-    "LAiM_answerdotai_ModernBERT-large.yaml": [
+    "unsloth_answerdotai_ModernBERT-large.yaml": [
         "answerdotai/ModernBERT-large",
     ],
-    "LAiM_Qwen2.5-Coder-7B-Instruct-bnb-4bit.yaml": [
-        "LAiM/Qwen2.5-Coder-7B-Instruct-bnb-4bit",
-        "LAiM/Qwen2.5-Coder-7B-Instruct",
+    "unsloth_Qwen2.5-Coder-7B-Instruct-bnb-4bit.yaml": [
+        "unsloth/Qwen2.5-Coder-7B-Instruct-bnb-4bit",
+        "unsloth/Qwen2.5-Coder-7B-Instruct",
         "Qwen/Qwen2.5-Coder-7B-Instruct",
     ],
-    "LAiM_codegemma-7b-bnb-4bit.yaml": [
-        "LAiM/codegemma-7b-bnb-4bit",
-        "LAiM/codegemma-7b",
+    "unsloth_codegemma-7b-bnb-4bit.yaml": [
+        "unsloth/codegemma-7b-bnb-4bit",
+        "unsloth/codegemma-7b",
         "google/codegemma-7b",
     ],
-    "LAiM_ERNIE-4.5-21B-A3B-PT.yaml": [
-        "LAiM/ERNIE-4.5-21B-A3B-PT",
+    "unsloth_ERNIE-4.5-21B-A3B-PT.yaml": [
+        "unsloth/ERNIE-4.5-21B-A3B-PT",
     ],
-    "LAiM_ERNIE-4.5-VL-28B-A3B-PT.yaml": [
-        "LAiM/ERNIE-4.5-VL-28B-A3B-PT",
+    "unsloth_ERNIE-4.5-VL-28B-A3B-PT.yaml": [
+        "unsloth/ERNIE-4.5-VL-28B-A3B-PT",
     ],
     "tiiuae_Falcon-H1-0.5B-Instruct.yaml": [
         "tiiuae/Falcon-H1-0.5B-Instruct",
-        "LAiM/Falcon-H1-0.5B-Instruct",
+        "unsloth/Falcon-H1-0.5B-Instruct",
     ],
-    "LAiM_functiongemma-270m-it.yaml": [
-        "LAiM/functiongemma-270m-it-LAiM-bnb-4bit",
+    "unsloth_functiongemma-270m-it.yaml": [
+        "unsloth/functiongemma-270m-it-unsloth-bnb-4bit",
         "google/functiongemma-270m-it",
-        "LAiM/functiongemma-270m-it-LAiM-bnb-4bit",
+        "unsloth/functiongemma-270m-it-unsloth-bnb-4bit",
     ],
-    "LAiM_gemma-2-2b.yaml": [
-        "LAiM/gemma-2-2b-bnb-4bit",
+    "unsloth_gemma-2-2b.yaml": [
+        "unsloth/gemma-2-2b-bnb-4bit",
         "google/gemma-2-2b",
     ],
-    "LAiM_gemma-2-27b-bnb-4bit.yaml": [
-        "LAiM/gemma-2-9b-bnb-4bit",
-        "LAiM/gemma-2-9b",
+    "unsloth_gemma-2-27b-bnb-4bit.yaml": [
+        "unsloth/gemma-2-9b-bnb-4bit",
+        "unsloth/gemma-2-9b",
         "google/gemma-2-9b",
-        "LAiM/gemma-2-27b",
+        "unsloth/gemma-2-27b",
         "google/gemma-2-27b",
     ],
-    "LAiM_gemma-3-4b-pt.yaml": [
-        "LAiM/gemma-3-4b-pt-LAiM-bnb-4bit",
+    "unsloth_gemma-3-4b-pt.yaml": [
+        "unsloth/gemma-3-4b-pt-unsloth-bnb-4bit",
         "google/gemma-3-4b-pt",
-        "LAiM/gemma-3-4b-pt-bnb-4bit",
+        "unsloth/gemma-3-4b-pt-bnb-4bit",
     ],
-    "LAiM_gemma-3-4b-it.yaml": [
-        "LAiM/gemma-3-4b-it-LAiM-bnb-4bit",
+    "unsloth_gemma-3-4b-it.yaml": [
+        "unsloth/gemma-3-4b-it-unsloth-bnb-4bit",
         "google/gemma-3-4b-it",
-        "LAiM/gemma-3-4b-it-bnb-4bit",
+        "unsloth/gemma-3-4b-it-bnb-4bit",
     ],
-    "LAiM_gemma-3-27b-it.yaml": [
-        "LAiM/gemma-3-27b-it-LAiM-bnb-4bit",
+    "unsloth_gemma-3-27b-it.yaml": [
+        "unsloth/gemma-3-27b-it-unsloth-bnb-4bit",
         "google/gemma-3-27b-it",
-        "LAiM/gemma-3-27b-it-bnb-4bit",
+        "unsloth/gemma-3-27b-it-bnb-4bit",
     ],
-    "LAiM_gemma-3-270m-it.yaml": [
-        "LAiM/gemma-3-270m-it-LAiM-bnb-4bit",
+    "unsloth_gemma-3-270m-it.yaml": [
+        "unsloth/gemma-3-270m-it-unsloth-bnb-4bit",
         "google/gemma-3-270m-it",
-        "LAiM/gemma-3-270m-it-bnb-4bit",
+        "unsloth/gemma-3-270m-it-bnb-4bit",
     ],
-    "LAiM_gemma-3n-E4B-it.yaml": [
-        "LAiM/gemma-3n-E4B-it-LAiM-bnb-4bit",
+    "unsloth_gemma-3n-E4B-it.yaml": [
+        "unsloth/gemma-3n-E4B-it-unsloth-bnb-4bit",
         "google/gemma-3n-E4B-it",
-        "LAiM/gemma-3n-E4B-it-LAiM-bnb-4bit",
+        "unsloth/gemma-3n-E4B-it-unsloth-bnb-4bit",
     ],
-    "LAiM_gemma-3n-E4B.yaml": [
-        "LAiM/gemma-3n-E4B-LAiM-bnb-4bit",
+    "unsloth_gemma-3n-E4B.yaml": [
+        "unsloth/gemma-3n-E4B-unsloth-bnb-4bit",
         "google/gemma-3n-E4B",
     ],
-    "LAiM_gemma-4-31B-it.yaml": [
-        "LAiM/gemma-4-31B-it",
+    "unsloth_gemma-4-31B-it.yaml": [
+        "unsloth/gemma-4-31B-it",
         "google/gemma-4-31B-it",
-        "LAiM/gemma-4-31B-it-GGUF",
+        "unsloth/gemma-4-31B-it-GGUF",
     ],
-    "LAiM_gemma-4-26B-A4B-it.yaml": [
-        "LAiM/gemma-4-26B-A4B-it",
+    "unsloth_gemma-4-26B-A4B-it.yaml": [
+        "unsloth/gemma-4-26B-A4B-it",
         "google/gemma-4-26B-A4B-it",
-        "LAiM/gemma-4-26B-A4B-it-GGUF",
+        "unsloth/gemma-4-26B-A4B-it-GGUF",
     ],
-    "LAiM_gemma-4-E2B-it.yaml": [
-        "LAiM/gemma-4-E2B-it",
+    "unsloth_gemma-4-E2B-it.yaml": [
+        "unsloth/gemma-4-E2B-it",
         "google/gemma-4-E2B-it",
-        "LAiM/gemma-4-E2B-it-GGUF",
+        "unsloth/gemma-4-E2B-it-GGUF",
     ],
-    "LAiM_gemma-4-E4B-it.yaml": [
-        "LAiM/gemma-4-E4B-it",
+    "unsloth_gemma-4-E4B-it.yaml": [
+        "unsloth/gemma-4-E4B-it",
         "google/gemma-4-E4B-it",
-        "LAiM/gemma-4-E4B-it-GGUF",
+        "unsloth/gemma-4-E4B-it-GGUF",
     ],
-    "LAiM_gemma-4-31B.yaml": [
-        "LAiM/gemma-4-31B",
+    "unsloth_gemma-4-31B.yaml": [
+        "unsloth/gemma-4-31B",
         "google/gemma-4-31B",
     ],
-    "LAiM_gemma-4-26B-A4B.yaml": [
-        "LAiM/gemma-4-26B-A4B",
+    "unsloth_gemma-4-26B-A4B.yaml": [
+        "unsloth/gemma-4-26B-A4B",
         "google/gemma-4-26B-A4B",
     ],
-    "LAiM_gemma-4-E2B.yaml": [
-        "LAiM/gemma-4-E2B",
+    "unsloth_gemma-4-E2B.yaml": [
+        "unsloth/gemma-4-E2B",
         "google/gemma-4-E2B",
     ],
-    "LAiM_gemma-4-E4B.yaml": [
-        "LAiM/gemma-4-E4B",
+    "unsloth_gemma-4-E4B.yaml": [
+        "unsloth/gemma-4-E4B",
         "google/gemma-4-E4B",
     ],
-    "LAiM_gpt-oss-20b.yaml": [
+    "unsloth_gpt-oss-20b.yaml": [
         "openai/gpt-oss-20b",
-        "LAiM/gpt-oss-20b-LAiM-bnb-4bit",
-        "LAiM/gpt-oss-20b-BF16",
+        "unsloth/gpt-oss-20b-unsloth-bnb-4bit",
+        "unsloth/gpt-oss-20b-BF16",
     ],
-    "LAiM_gpt-oss-120b.yaml": [
+    "unsloth_gpt-oss-120b.yaml": [
         "openai/gpt-oss-120b",
-        "LAiM/gpt-oss-120b-LAiM-bnb-4bit",
+        "unsloth/gpt-oss-120b-unsloth-bnb-4bit",
     ],
-    "LAiM_granite-4.0-350m-LAiM-bnb-4bit.yaml": [
-        "LAiM/granite-4.0-350m",
+    "unsloth_granite-4.0-350m-unsloth-bnb-4bit.yaml": [
+        "unsloth/granite-4.0-350m",
         "ibm-granite/granite-4.0-350m",
-        "LAiM/granite-4.0-350m-bnb-4bit",
+        "unsloth/granite-4.0-350m-bnb-4bit",
     ],
-    "LAiM_granite-4.0-h-micro.yaml": [
+    "unsloth_granite-4.0-h-micro.yaml": [
         "ibm-granite/granite-4.0-h-micro",
-        "LAiM/granite-4.0-h-micro-bnb-4bit",
-        "LAiM/granite-4.0-h-micro-LAiM-bnb-4bit",
+        "unsloth/granite-4.0-h-micro-bnb-4bit",
+        "unsloth/granite-4.0-h-micro-unsloth-bnb-4bit",
     ],
-    "LAiM_LFM2-1.2B.yaml": [
-        "LAiM/LFM2-1.2B",
+    "unsloth_LFM2-1.2B.yaml": [
+        "unsloth/LFM2-1.2B",
         "LiquidAI/LFM2-1.2B",
-        "LAiM/LFM2-1.2B-LAiM-bnb-4bit",
+        "unsloth/LFM2-1.2B-unsloth-bnb-4bit",
     ],
-    "LAiM_llama-3-8b-bnb-4bit.yaml": [
-        "LAiM/llama-3-8b",
+    "unsloth_llama-3-8b-bnb-4bit.yaml": [
+        "unsloth/llama-3-8b",
         "meta-llama/Meta-Llama-3-8B",
     ],
-    "LAiM_llama-3-8b-Instruct-bnb-4bit.yaml": [
-        "LAiM/llama-3-8b-Instruct",
+    "unsloth_llama-3-8b-Instruct-bnb-4bit.yaml": [
+        "unsloth/llama-3-8b-Instruct",
         "meta-llama/Meta-Llama-3-8B-Instruct",
     ],
-    "LAiM_Meta-Llama-3.1-70B-bnb-4bit.yaml": [
-        "LAiM/Meta-Llama-3.1-8B-bnb-4bit",
-        "LAiM/Meta-Llama-3.1-8B-LAiM-bnb-4bit",
+    "unsloth_Meta-Llama-3.1-70B-bnb-4bit.yaml": [
+        "unsloth/Meta-Llama-3.1-8B-bnb-4bit",
+        "unsloth/Meta-Llama-3.1-8B-unsloth-bnb-4bit",
         "meta-llama/Meta-Llama-3.1-8B",
-        "LAiM/Meta-Llama-3.1-70B-bnb-4bit",
-        "LAiM/Meta-Llama-3.1-8B",
-        "LAiM/Meta-Llama-3.1-70B",
+        "unsloth/Meta-Llama-3.1-70B-bnb-4bit",
+        "unsloth/Meta-Llama-3.1-8B",
+        "unsloth/Meta-Llama-3.1-70B",
         "meta-llama/Meta-Llama-3.1-70B",
-        "LAiM/Meta-Llama-3.1-405B-bnb-4bit",
+        "unsloth/Meta-Llama-3.1-405B-bnb-4bit",
         "meta-llama/Meta-Llama-3.1-405B",
     ],
-    "LAiM_Meta-Llama-3.1-8B-Instruct-bnb-4bit.yaml": [
-        "LAiM/Meta-Llama-3.1-8B-Instruct-LAiM-bnb-4bit",
-        "LAiM/Meta-Llama-3.1-8B-Instruct-bnb-4bit",
+    "unsloth_Meta-Llama-3.1-8B-Instruct-bnb-4bit.yaml": [
+        "unsloth/Meta-Llama-3.1-8B-Instruct-unsloth-bnb-4bit",
+        "unsloth/Meta-Llama-3.1-8B-Instruct-bnb-4bit",
         "meta-llama/Meta-Llama-3.1-8B-Instruct",
-        "LAiM/Meta-Llama-3.1-8B-Instruct",
+        "unsloth/Meta-Llama-3.1-8B-Instruct",
         "RedHatAI/Llama-3.1-8B-Instruct-FP8",
-        "LAiM/Llama-3.1-8B-Instruct-FP8-Block",
-        "LAiM/Llama-3.1-8B-Instruct-FP8-Dynamic",
+        "unsloth/Llama-3.1-8B-Instruct-FP8-Block",
+        "unsloth/Llama-3.1-8B-Instruct-FP8-Dynamic",
     ],
-    "LAiM_Llama-3.2-3B-Instruct.yaml": [
-        "LAiM/Llama-3.2-3B-Instruct-LAiM-bnb-4bit",
+    "unsloth_Llama-3.2-3B-Instruct.yaml": [
+        "unsloth/Llama-3.2-3B-Instruct-unsloth-bnb-4bit",
         "meta-llama/Llama-3.2-3B-Instruct",
-        "LAiM/Llama-3.2-3B-Instruct-bnb-4bit",
+        "unsloth/Llama-3.2-3B-Instruct-bnb-4bit",
         "RedHatAI/Llama-3.2-3B-Instruct-FP8",
-        "LAiM/Llama-3.2-3B-Instruct-FP8-Block",
-        "LAiM/Llama-3.2-3B-Instruct-FP8-Dynamic",
+        "unsloth/Llama-3.2-3B-Instruct-FP8-Block",
+        "unsloth/Llama-3.2-3B-Instruct-FP8-Dynamic",
     ],
-    "LAiM_Llama-3.2-1B-Instruct.yaml": [
-        "LAiM/Llama-3.2-1B-Instruct-LAiM-bnb-4bit",
+    "unsloth_Llama-3.2-1B-Instruct.yaml": [
+        "unsloth/Llama-3.2-1B-Instruct-unsloth-bnb-4bit",
         "meta-llama/Llama-3.2-1B-Instruct",
-        "LAiM/Llama-3.2-1B-Instruct-bnb-4bit",
+        "unsloth/Llama-3.2-1B-Instruct-bnb-4bit",
         "RedHatAI/Llama-3.2-1B-Instruct-FP8",
-        "LAiM/Llama-3.2-1B-Instruct-FP8-Block",
-        "LAiM/Llama-3.2-1B-Instruct-FP8-Dynamic",
+        "unsloth/Llama-3.2-1B-Instruct-FP8-Block",
+        "unsloth/Llama-3.2-1B-Instruct-FP8-Dynamic",
     ],
-    "LAiM_Llama-3.2-11B-Vision-Instruct.yaml": [
-        "LAiM/Llama-3.2-11B-Vision-Instruct-LAiM-bnb-4bit",
+    "unsloth_Llama-3.2-11B-Vision-Instruct.yaml": [
+        "unsloth/Llama-3.2-11B-Vision-Instruct-unsloth-bnb-4bit",
         "meta-llama/Llama-3.2-11B-Vision-Instruct",
-        "LAiM/Llama-3.2-11B-Vision-Instruct-bnb-4bit",
+        "unsloth/Llama-3.2-11B-Vision-Instruct-bnb-4bit",
     ],
-    "LAiM_Llama-3.3-70B-Instruct.yaml": [
-        "LAiM/Llama-3.3-70B-Instruct-LAiM-bnb-4bit",
+    "unsloth_Llama-3.3-70B-Instruct.yaml": [
+        "unsloth/Llama-3.3-70B-Instruct-unsloth-bnb-4bit",
         "meta-llama/Llama-3.3-70B-Instruct",
-        "LAiM/Llama-3.3-70B-Instruct-bnb-4bit",
+        "unsloth/Llama-3.3-70B-Instruct-bnb-4bit",
         "RedHatAI/Llama-3.3-70B-Instruct-FP8",
-        "LAiM/Llama-3.3-70B-Instruct-FP8-Block",
-        "LAiM/Llama-3.3-70B-Instruct-FP8-Dynamic",
+        "unsloth/Llama-3.3-70B-Instruct-FP8-Block",
+        "unsloth/Llama-3.3-70B-Instruct-FP8-Dynamic",
     ],
-    "LAiM_Llasa-3B.yaml": [
+    "unsloth_Llasa-3B.yaml": [
         "HKUSTAudio/Llasa-1B",
-        "LAiM/Llasa-3B",
+        "unsloth/Llasa-3B",
     ],
-    "LAiM_Magistral-Small-2509-LAiM-bnb-4bit.yaml": [
-        "LAiM/Magistral-Small-2509",
+    "unsloth_Magistral-Small-2509-unsloth-bnb-4bit.yaml": [
+        "unsloth/Magistral-Small-2509",
         "mistralai/Magistral-Small-2509",
-        "LAiM/Magistral-Small-2509-bnb-4bit",
+        "unsloth/Magistral-Small-2509-bnb-4bit",
     ],
-    "LAiM_Ministral-3-3B-Instruct-2512.yaml": [
-        "LAiM/Ministral-3-3B-Instruct-2512",
+    "unsloth_Ministral-3-3B-Instruct-2512.yaml": [
+        "unsloth/Ministral-3-3B-Instruct-2512",
     ],
-    "LAiM_mistral-7b-v0.3-bnb-4bit.yaml": [
-        "LAiM/mistral-7b-v0.3-bnb-4bit",
-        "LAiM/mistral-7b-v0.3",
+    "unsloth_mistral-7b-v0.3-bnb-4bit.yaml": [
+        "unsloth/mistral-7b-v0.3-bnb-4bit",
+        "unsloth/mistral-7b-v0.3",
         "mistralai/Mistral-7B-v0.3",
     ],
-    "LAiM_Mistral-Nemo-Base-2407-bnb-4bit.yaml": [
-        "LAiM/Mistral-Nemo-Base-2407-bnb-4bit",
-        "LAiM/Mistral-Nemo-Base-2407",
+    "unsloth_Mistral-Nemo-Base-2407-bnb-4bit.yaml": [
+        "unsloth/Mistral-Nemo-Base-2407-bnb-4bit",
+        "unsloth/Mistral-Nemo-Base-2407",
         "mistralai/Mistral-Nemo-Base-2407",
-        "LAiM/Mistral-Nemo-Instruct-2407-bnb-4bit",
-        "LAiM/Mistral-Nemo-Instruct-2407",
+        "unsloth/Mistral-Nemo-Instruct-2407-bnb-4bit",
+        "unsloth/Mistral-Nemo-Instruct-2407",
         "mistralai/Mistral-Nemo-Instruct-2407",
     ],
-    "LAiM_Mistral-Small-Instruct-2409.yaml": [
-        "LAiM/Mistral-Small-Instruct-2409-bnb-4bit",
+    "unsloth_Mistral-Small-Instruct-2409.yaml": [
+        "unsloth/Mistral-Small-Instruct-2409-bnb-4bit",
         "mistralai/Mistral-Small-Instruct-2409",
     ],
-    "LAiM_mistral-7b-instruct-v0.3-bnb-4bit.yaml": [
-        "LAiM/mistral-7b-instruct-v0.3-bnb-4bit",
-        "LAiM/mistral-7b-instruct-v0.3",
+    "unsloth_mistral-7b-instruct-v0.3-bnb-4bit.yaml": [
+        "unsloth/mistral-7b-instruct-v0.3-bnb-4bit",
+        "unsloth/mistral-7b-instruct-v0.3",
         "mistralai/Mistral-7B-Instruct-v0.3",
     ],
-    "LAiM_Qwen2.5-1.5B-Instruct.yaml": [
-        "LAiM/Qwen2.5-1.5B-Instruct-LAiM-bnb-4bit",
+    "unsloth_Qwen2.5-1.5B-Instruct.yaml": [
+        "unsloth/Qwen2.5-1.5B-Instruct-unsloth-bnb-4bit",
         "Qwen/Qwen2.5-1.5B-Instruct",
-        "LAiM/Qwen2.5-1.5B-Instruct-bnb-4bit",
+        "unsloth/Qwen2.5-1.5B-Instruct-bnb-4bit",
     ],
-    "LAiM_Nemotron-3-Nano-30B-A3B.yaml": [
-        "LAiM/Nemotron-3-Nano-30B-A3B",
+    "unsloth_Nemotron-3-Nano-30B-A3B.yaml": [
+        "unsloth/Nemotron-3-Nano-30B-A3B",
     ],
-    "LAiM_orpheus-3b-0.1-ft.yaml": [
-        "LAiM/orpheus-3b-0.1-ft",
-        "LAiM/orpheus-3b-0.1-ft-LAiM-bnb-4bit",
+    "unsloth_orpheus-3b-0.1-ft.yaml": [
+        "unsloth/orpheus-3b-0.1-ft",
+        "unsloth/orpheus-3b-0.1-ft-unsloth-bnb-4bit",
         "canopylabs/orpheus-3b-0.1-ft",
-        "LAiM/orpheus-3b-0.1-ft-bnb-4bit",
+        "unsloth/orpheus-3b-0.1-ft-bnb-4bit",
     ],
     "OuteAI_Llama-OuteTTS-1.0-1B.yaml": [
         "OuteAI/Llama-OuteTTS-1.0-1B",
-        "LAiM/Llama-OuteTTS-1.0-1B",
-        "LAiM/llama-outetts-1.0-1b",
+        "unsloth/Llama-OuteTTS-1.0-1B",
+        "unsloth/llama-outetts-1.0-1b",
         "OuteAI/OuteTTS-1.0-0.6B",
-        "LAiM/OuteTTS-1.0-0.6B",
-        "LAiM/outetts-1.0-0.6b",
+        "unsloth/OuteTTS-1.0-0.6B",
+        "unsloth/outetts-1.0-0.6b",
     ],
-    "LAiM_PaddleOCR-VL.yaml": [
-        "LAiM/PaddleOCR-VL",
+    "unsloth_PaddleOCR-VL.yaml": [
+        "unsloth/PaddleOCR-VL",
     ],
-    "LAiM_Phi-3-medium-4k-instruct.yaml": [
-        "LAiM/Phi-3-medium-4k-instruct-bnb-4bit",
+    "unsloth_Phi-3-medium-4k-instruct.yaml": [
+        "unsloth/Phi-3-medium-4k-instruct-bnb-4bit",
         "microsoft/Phi-3-medium-4k-instruct",
     ],
-    "LAiM_Phi-3.5-mini-instruct.yaml": [
-        "LAiM/Phi-3.5-mini-instruct-bnb-4bit",
+    "unsloth_Phi-3.5-mini-instruct.yaml": [
+        "unsloth/Phi-3.5-mini-instruct-bnb-4bit",
         "microsoft/Phi-3.5-mini-instruct",
     ],
-    "LAiM_Phi-4.yaml": [
-        "LAiM/phi-4-LAiM-bnb-4bit",
+    "unsloth_Phi-4.yaml": [
+        "unsloth/phi-4-unsloth-bnb-4bit",
         "microsoft/phi-4",
-        "LAiM/phi-4-bnb-4bit",
+        "unsloth/phi-4-bnb-4bit",
     ],
-    "LAiM_Pixtral-12B-2409.yaml": [
-        "LAiM/Pixtral-12B-2409-LAiM-bnb-4bit",
+    "unsloth_Pixtral-12B-2409.yaml": [
+        "unsloth/Pixtral-12B-2409-unsloth-bnb-4bit",
         "mistralai/Pixtral-12B-2409",
-        "LAiM/Pixtral-12B-2409-bnb-4bit",
+        "unsloth/Pixtral-12B-2409-bnb-4bit",
     ],
-    "LAiM_Qwen2-7B.yaml": [
-        "LAiM/Qwen2-7B-bnb-4bit",
+    "unsloth_Qwen2-7B.yaml": [
+        "unsloth/Qwen2-7B-bnb-4bit",
         "Qwen/Qwen2-7B",
     ],
-    "LAiM_Qwen2-VL-7B-Instruct.yaml": [
-        "LAiM/Qwen2-VL-7B-Instruct-LAiM-bnb-4bit",
+    "unsloth_Qwen2-VL-7B-Instruct.yaml": [
+        "unsloth/Qwen2-VL-7B-Instruct-unsloth-bnb-4bit",
         "Qwen/Qwen2-VL-7B-Instruct",
-        "LAiM/Qwen2-VL-7B-Instruct-bnb-4bit",
+        "unsloth/Qwen2-VL-7B-Instruct-bnb-4bit",
     ],
-    "LAiM_Qwen2.5-7B.yaml": [
-        "LAiM/Qwen2.5-7B-LAiM-bnb-4bit",
+    "unsloth_Qwen2.5-7B.yaml": [
+        "unsloth/Qwen2.5-7B-unsloth-bnb-4bit",
         "Qwen/Qwen2.5-7B",
-        "LAiM/Qwen2.5-7B-bnb-4bit",
+        "unsloth/Qwen2.5-7B-bnb-4bit",
     ],
-    "LAiM_Qwen2.5-Coder-1.5B-Instruct.yaml": [
-        "LAiM/Qwen2.5-Coder-1.5B-Instruct-bnb-4bit",
+    "unsloth_Qwen2.5-Coder-1.5B-Instruct.yaml": [
+        "unsloth/Qwen2.5-Coder-1.5B-Instruct-bnb-4bit",
         "Qwen/Qwen2.5-Coder-1.5B-Instruct",
     ],
-    "LAiM_Qwen2.5-Coder-14B-Instruct.yaml": [
-        "LAiM/Qwen2.5-Coder-14B-Instruct-bnb-4bit",
+    "unsloth_Qwen2.5-Coder-14B-Instruct.yaml": [
+        "unsloth/Qwen2.5-Coder-14B-Instruct-bnb-4bit",
         "Qwen/Qwen2.5-Coder-14B-Instruct",
     ],
-    "LAiM_Qwen2.5-VL-7B-Instruct-bnb-4bit.yaml": [
-        "LAiM/Qwen2.5-VL-7B-Instruct",
+    "unsloth_Qwen2.5-VL-7B-Instruct-bnb-4bit.yaml": [
+        "unsloth/Qwen2.5-VL-7B-Instruct",
         "Qwen/Qwen2.5-VL-7B-Instruct",
-        "LAiM/Qwen2.5-VL-7B-Instruct-LAiM-bnb-4bit",
+        "unsloth/Qwen2.5-VL-7B-Instruct-unsloth-bnb-4bit",
     ],
-    "LAiM_Qwen3-0.6B.yaml": [
-        "LAiM/Qwen3-0.6B-LAiM-bnb-4bit",
+    "unsloth_Qwen3-0.6B.yaml": [
+        "unsloth/Qwen3-0.6B-unsloth-bnb-4bit",
         "Qwen/Qwen3-0.6B",
-        "LAiM/Qwen3-0.6B-bnb-4bit",
+        "unsloth/Qwen3-0.6B-bnb-4bit",
         "Qwen/Qwen3-0.6B-FP8",
-        "LAiM/Qwen3-0.6B-FP8",
+        "unsloth/Qwen3-0.6B-FP8",
     ],
-    "LAiM_Qwen3-4B-Instruct-2507.yaml": [
-        "LAiM/Qwen3-4B-Instruct-2507-LAiM-bnb-4bit",
+    "unsloth_Qwen3-4B-Instruct-2507.yaml": [
+        "unsloth/Qwen3-4B-Instruct-2507-unsloth-bnb-4bit",
         "Qwen/Qwen3-4B-Instruct-2507",
-        "LAiM/Qwen3-4B-Instruct-2507-bnb-4bit",
+        "unsloth/Qwen3-4B-Instruct-2507-bnb-4bit",
         "Qwen/Qwen3-4B-Instruct-2507-FP8",
-        "LAiM/Qwen3-4B-Instruct-2507-FP8",
+        "unsloth/Qwen3-4B-Instruct-2507-FP8",
     ],
-    "LAiM_Qwen3-30B-A3B-Instruct-2507.yaml": [
+    "unsloth_Qwen3-30B-A3B-Instruct-2507.yaml": [
         "Qwen/Qwen3-30B-A3B-Instruct-2507",
-        "LAiM/Qwen3-30B-A3B-Instruct-2507-bnb-4bit",
+        "unsloth/Qwen3-30B-A3B-Instruct-2507-bnb-4bit",
     ],
-    "LAiM_Qwen3-4B-Thinking-2507.yaml": [
-        "LAiM/Qwen3-4B-Thinking-2507-LAiM-bnb-4bit",
+    "unsloth_Qwen3-4B-Thinking-2507.yaml": [
+        "unsloth/Qwen3-4B-Thinking-2507-unsloth-bnb-4bit",
         "Qwen/Qwen3-4B-Thinking-2507",
-        "LAiM/Qwen3-4B-Thinking-2507-bnb-4bit",
+        "unsloth/Qwen3-4B-Thinking-2507-bnb-4bit",
         "Qwen/Qwen3-4B-Thinking-2507-FP8",
-        "LAiM/Qwen3-4B-Thinking-2507-FP8",
+        "unsloth/Qwen3-4B-Thinking-2507-FP8",
     ],
-    "LAiM_Qwen3-14B-Base-LAiM-bnb-4bit.yaml": [
-        "LAiM/Qwen3-14B-Base",
+    "unsloth_Qwen3-14B-Base-unsloth-bnb-4bit.yaml": [
+        "unsloth/Qwen3-14B-Base",
         "Qwen/Qwen3-14B-Base",
-        "LAiM/Qwen3-14B-Base-bnb-4bit",
+        "unsloth/Qwen3-14B-Base-bnb-4bit",
     ],
-    "LAiM_Qwen3-14B.yaml": [
-        "LAiM/Qwen3-14B-LAiM-bnb-4bit",
+    "unsloth_Qwen3-14B.yaml": [
+        "unsloth/Qwen3-14B-unsloth-bnb-4bit",
         "Qwen/Qwen3-14B",
-        "LAiM/Qwen3-14B-bnb-4bit",
+        "unsloth/Qwen3-14B-bnb-4bit",
         "Qwen/Qwen3-14B-FP8",
-        "LAiM/Qwen3-14B-FP8",
+        "unsloth/Qwen3-14B-FP8",
     ],
-    "LAiM_Qwen3-32B.yaml": [
-        "LAiM/Qwen3-32B-LAiM-bnb-4bit",
+    "unsloth_Qwen3-32B.yaml": [
+        "unsloth/Qwen3-32B-unsloth-bnb-4bit",
         "Qwen/Qwen3-32B",
-        "LAiM/Qwen3-32B-bnb-4bit",
+        "unsloth/Qwen3-32B-bnb-4bit",
         "Qwen/Qwen3-32B-FP8",
-        "LAiM/Qwen3-32B-FP8",
+        "unsloth/Qwen3-32B-FP8",
     ],
-    "LAiM_Qwen3-VL-8B-Instruct-LAiM-bnb-4bit.yaml": [
+    "unsloth_Qwen3-VL-8B-Instruct-unsloth-bnb-4bit.yaml": [
         "Qwen/Qwen3-VL-8B-Instruct-FP8",
-        "LAiM/Qwen3-VL-8B-Instruct-FP8",
-        "LAiM/Qwen3-VL-8B-Instruct",
+        "unsloth/Qwen3-VL-8B-Instruct-FP8",
+        "unsloth/Qwen3-VL-8B-Instruct",
         "Qwen/Qwen3-VL-8B-Instruct",
-        "LAiM/Qwen3-VL-8B-Instruct-bnb-4bit",
+        "unsloth/Qwen3-VL-8B-Instruct-bnb-4bit",
     ],
-    "LAiM_Qwen3.5.yaml": [
+    "unsloth_Qwen3.5.yaml": [
         f"{org}/Qwen3.5-{size}{suffix}"
         for size in ("0.8B", "2B", "4B", "9B", "27B", "35B-A3B")
-        for org in ("LAiM", "Qwen")
+        for org in ("unsloth", "Qwen")
         for suffix in (("",) if size == "27B" else ("", "-Base"))
     ],
     "sesame_csm-1b.yaml": [
         "sesame/csm-1b",
-        "LAiM/csm-1b",
+        "unsloth/csm-1b",
     ],
     "Spark-TTS-0.5B_LLM.yaml": [
         "Spark-TTS-0.5B/LLM",
-        "LAiM/Spark-TTS-0.5B",
+        "unsloth/Spark-TTS-0.5B",
     ],
-    "LAiM_tinyllama-bnb-4bit.yaml": [
-        "LAiM/tinyllama",
+    "unsloth_tinyllama-bnb-4bit.yaml": [
+        "unsloth/tinyllama",
         "TinyLlama/TinyLlama-1.1B-intermediate-step-1431k-3T",
     ],
-    "LAiM_GLM-4.7-Flash.yaml": [
-        "LAiM/GLM-4.7-Flash-LAiM-bnb-4bit",
-        "LAiM/GLM-4.7-Flash-bnb-4bit",
+    "unsloth_GLM-4.7-Flash.yaml": [
+        "unsloth/GLM-4.7-Flash-unsloth-bnb-4bit",
+        "unsloth/GLM-4.7-Flash-bnb-4bit",
         "THUDM/GLM-4.7-Flash",
     ],
-    "LAiM_whisper-large-v3.yaml": [
-        "LAiM/whisper-large-v3",
+    "unsloth_whisper-large-v3.yaml": [
+        "unsloth/whisper-large-v3",
         "openai/whisper-large-v3",
     ],
 }
@@ -3190,7 +3190,7 @@ def list_gguf_variants(
         if _is_mtp_drafter(fname):
             continue
         # An imatrix is calibration data, not a quant: listed, it becomes an
-        # unlabelled ~13 MB row (LAiM/Qwen3.8-27B-GGUF ships imatrix_LAiM.gguf).
+        # unlabelled ~13 MB row (unsloth/Qwen3.8-27B-GGUF ships imatrix_LAiM.gguf).
         if _is_imatrix_path(fname):
             continue
 
@@ -4481,7 +4481,7 @@ class ModelConfig:
     gguf_dspark_file: Optional[str] = None  # Full path to a DSpark sidecar (local mode)
     gguf_dflash_file: Optional[str] = None  # Full path to a DFlash sidecar (local mode)
     gguf_hf_repo: Optional[str] = (
-        None  # HF repo ID for -hf mode (e.g. "LAiM/gemma-3-4b-it-GGUF")
+        None  # HF repo ID for -hf mode (e.g. "unsloth/gemma-3-4b-it-GGUF")
     )
     # Repo a refused-Hub cached GGUF came from, for the download interlock.
     gguf_cache_repo: Optional[str] = None
@@ -4592,9 +4592,9 @@ class ModelConfig:
         is_local = is_local_path(identifier)
         path = normalize_path(identifier) if is_local else identifier
 
-        # Add LAiM/ prefix for shorthand HF models
+        # Add unsloth/ prefix for shorthand HF models
         if not is_local and "/" not in identifier:
-            identifier = f"LAiM/{identifier}"
+            identifier = f"unsloth/{identifier}"
             path = identifier
 
         # Reuse a cached case-variant's exact repo_id spelling to avoid re-downloads (#2592).
@@ -5113,9 +5113,9 @@ class ModelConfig:
         is_local = is_local_path(identifier)
         path = normalize_path(identifier) if is_local else identifier
 
-        # Add LAiM/ prefix for shorthand HF models
+        # Add unsloth/ prefix for shorthand HF models
         if not is_local and "/" not in identifier:
-            identifier = f"LAiM/{identifier}"
+            identifier = f"unsloth/{identifier}"
             path = identifier
 
         if not is_local:

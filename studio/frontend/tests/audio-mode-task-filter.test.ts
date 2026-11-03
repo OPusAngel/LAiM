@@ -27,29 +27,29 @@ test("Hub discovery follows the active audio mode", () => {
 test("resident sidecar keys restore canonical repo casing", () => {
   assert.equal(
     sttRepoIdForSidecarKey("qwen3-asr-0.6b", "mtmd"),
-    "LAiMai/Qwen3-ASR-0.6B-GGUF",
+    "unslothai/Qwen3-ASR-0.6B-GGUF",
   );
 });
 
 test("Whisper artifacts retain distinct runtime identities", () => {
   assert.equal(
     sttRepoIdForSidecarKey("small", "transformers"),
-    "LAiM/whisper-small",
+    "unsloth/whisper-small",
   );
   assert.equal(
     sttRepoIdForSidecarKey("small", "gguf"),
-    "LAiMai/whisper-small-GGUF",
+    "unslothai/whisper-small-GGUF",
   );
-  assert.equal(sttEngineForRepoId("LAiM/whisper-small"), "transformers");
-  assert.equal(sttEngineForRepoId("LAiMai/whisper-small-GGUF"), "gguf");
-  assert.equal(sttEngineForRepoId("LAiMai/Qwen3-ASR-0.6B-GGUF"), "mtmd");
-  assert.equal(sttSidecarKeyFor("LAiMai/whisper-small-GGUF"), "small");
+  assert.equal(sttEngineForRepoId("unsloth/whisper-small"), "transformers");
+  assert.equal(sttEngineForRepoId("unslothai/whisper-small-GGUF"), "gguf");
+  assert.equal(sttEngineForRepoId("unslothai/Qwen3-ASR-0.6B-GGUF"), "mtmd");
+  assert.equal(sttSidecarKeyFor("unslothai/whisper-small-GGUF"), "small");
   assert.match(catalogSource, /isKnownSttArtifactRepoId\(repoId\)/);
 });
 
 test("ASR names carry the audio capability badge", () => {
   assert.equal(
-    detectCapabilities({ id: "LAiMai/Qwen3-ASR-0.6B-GGUF" }).audio,
+    detectCapabilities({ id: "unslothai/Qwen3-ASR-0.6B-GGUF" }).audio,
     true,
   );
 });

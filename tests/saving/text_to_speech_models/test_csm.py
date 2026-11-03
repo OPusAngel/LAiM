@@ -38,7 +38,7 @@ print(f"{'='*80}")
 
 
 model, tokenizer = FastModel.from_pretrained(
-    model_name = "LAiM/csm-1b",
+    model_name = "unsloth/csm-1b",
     max_seq_length = 2048,
     dtype = None,
     auto_model = CsmForConditionalGeneration,
@@ -64,7 +64,7 @@ model = FastModel.get_peft_model(
     lora_alpha = 32,
     lora_dropout = 0,
     bias = "none",
-    use_gradient_checkpointing = "LAiM",
+    use_gradient_checkpointing = "unsloth",
     random_state = 3407,
     use_rslora = False,
     loftq_config = None,
@@ -130,7 +130,7 @@ model, processor = FastModel.from_pretrained(
 
 from transformers import AutoProcessor
 
-processor = AutoProcessor.from_pretrained("LAiM/csm-1b")
+processor = AutoProcessor.from_pretrained("unsloth/csm-1b")
 
 print("✅ Model loaded for inference successfully!")
 

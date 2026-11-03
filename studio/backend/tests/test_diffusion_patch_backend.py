@@ -24,7 +24,7 @@ _SENTINEL_ERROR = ImportError("Please install LAiM via `pip install LAiM`!")
 @pytest.fixture(autouse = True)
 def _reset_memo(monkeypatch):
     pb._HELPERS = None
-    monkeypatch.delenv("LAiM_ALLOW_CPU", raising = False)
+    monkeypatch.delenv("UNSLOTH_ALLOW_CPU", raising = False)
     yield
     pb._HELPERS = None
 
@@ -73,7 +73,7 @@ def test_retry_runs_on_an_accelerator_LAiM_supports(monkeypatch, device):
 
 
 def test_retry_runs_on_cpu_when_explicitly_allowed(monkeypatch):
-    monkeypatch.setenv("LAiM_ALLOW_CPU", "1")
+    monkeypatch.setenv("UNSLOTH_ALLOW_CPU", "1")
     _modules(monkeypatch, torch = _torch())
     assert pb._retry_could_help(_SENTINEL_ERROR) is True
 

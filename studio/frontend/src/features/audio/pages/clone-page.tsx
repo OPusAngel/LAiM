@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import type { ModelOption } from "@/features/model-picker/components/model-selector/types";
@@ -94,8 +95,8 @@ function CloneInputs({
       <div data-tour="audio-clone-reference">
         <AudioSourceInput
           id="clone-reference"
-          label="Reference"
-          hint="5 to 15 s of one clear voice works best."
+          label={translate("uxAudio.reference1c7vr")}
+          hint={translate("uxAudio.5To15S1tv36")}
           value={reference}
           onChange={adoptReference}
           disabled={disabled}
@@ -111,7 +112,7 @@ function CloneInputs({
               htmlFor={CLONE_REFERENCE_TEXT_FIELD_ID}
               className="text-ui-13 font-medium text-foreground"
             >
-              What's said in the clip
+              {translate("uxAudio.whatSSaidInin5xk")}
               <span className="ml-1.5 font-normal text-muted-foreground">
                 {transcriptField === "required" ? "Required" : "Optional"}
               </span>
@@ -127,7 +128,7 @@ function CloneInputs({
               onClick={() => void transcriber.transcribe(reference)}
             >
               <HugeiconsIcon icon={SpeechToTextIcon} className="size-3.5" />
-              {transcriber.transcribing ? "Transcribing…" : "Transcribe"}
+              {transcriber.transcribing ? translate("uxAudio.transcribingEllipsislwgf7") : translate("uxAudio.transcribeActionm87c0")}
             </Button>
           </div>
           <Textarea
@@ -136,7 +137,7 @@ function CloneInputs({
             disabled={transcriber.transcribing}
             aria-busy={transcriber.transcribing}
             onChange={(event) => setReferenceText(event.target.value)}
-            placeholder="Type the words in the clip exactly, or press Transcribe."
+            placeholder={translate("uxAudio.typeTheWordsIni8vbo")}
             className="min-h-16"
           />
           {transcriber.error ? (
@@ -150,15 +151,13 @@ function CloneInputs({
                 variant="link"
                 className="h-auto p-0 text-ui-11p5 font-medium text-foreground"
                 onClick={() => void transcriber.transcribe(reference)}
-              >
-                Try again
-              </Button>
+              >{translate("uxAudio.tryAgainqnlxc")}</Button>
             </p>
           ) : (
             <p className="text-ui-11p5 leading-snug text-muted-foreground">
               {transcriptField === "required"
-                ? "This model matches the voice using the clip's words."
-                : "Helps the model match the voice."}
+                ? translate("uxAudio.thisModelMatchesThe3y3tx")
+                : translate("uxAudio.helpsTheModelMatch4l1zh")}
             </p>
           )}
         </div>
@@ -172,20 +171,20 @@ function CloneInputs({
           htmlFor={CLONE_TEXT_FIELD_ID}
           className="text-ui-13 font-medium text-foreground"
         >
-          Text to speak
+          {translate("uxAudio.textToSpeak6wm8b")}
         </label>
         <Textarea
           data-type-to-activate="prompt"
           id={CLONE_TEXT_FIELD_ID}
           value={clone.text}
           onChange={(event) => setText(event.target.value)}
-          placeholder="Type what the voice should say…"
+          placeholder={translate("uxAudio.typeWhatTheVoicei838o")}
           className="min-h-28"
         />
         {clone.text.trim() ? null : (
           <div
             className="flex flex-wrap gap-1.5"
-            aria-label="Example sentences"
+            aria-label={translate("uxAudio.exampleSentencessveec")}
           >
             {CLONE_TEXT_EXAMPLES.map((example) => (
               <Button
@@ -205,10 +204,10 @@ function CloneInputs({
       </div>
       <LanguageSelect
         id="clone-language"
-        label="Language"
+        label={translate("settings.appearance.language.title")}
         value={clone.language}
         onChange={setLanguage}
-        hint="The language of the text to speak. Auto lets the model tell."
+        hint={translate("uxAudio.theLanguageOfThejbndh")}
       />
     </AudioHistoryProvider>
   );
@@ -297,9 +296,7 @@ export function CloneFooter({
               disabled={!canSave}
               onClick={() => setSaving(true)}
             >
-              <HugeiconsIcon icon={FloppyDiskIcon} className="size-4" />
-              Save voice…
-            </Button>
+              <HugeiconsIcon icon={FloppyDiskIcon} className="size-4" />{translate("uxAudio.saveVoiceahdo9")}</Button>
           )
         }
       />
@@ -324,7 +321,7 @@ export function CloneFooter({
             language: details.language || null,
           });
           toast.success(
-            `Saved ${voice.name}. Pick it under Saved voice next time.`,
+            translate("uxAudio.savedPickItUnderxwm4g", { p1: voice.name }),
           );
         }}
       />
@@ -354,7 +351,7 @@ export function CloneOutput({
         picks.length > 0 ? (
           <div
             className="flex flex-wrap justify-center gap-2"
-            aria-label="Recommended models"
+            aria-label={translate("uxAudio.recommendedModelsu5i1l")}
           >
             {picks.map((model) => (
               <Button
@@ -363,17 +360,15 @@ export function CloneOutput({
                 variant="outline"
                 size="sm"
                 onClick={() => onPickModel?.(model.id)}
-              >
-                Use {model.name}
-              </Button>
+              >{translate("uxAudio.usejk2qp", { p1: model.name })}</Button>
             ))}
           </div>
         ) : null
       }
       emptyText={
         modelReady
-          ? "Cloned speech lands here. Add a reference, type the text, and press Generate."
-          : "Cloned speech lands here. Load a model that can clone, add a reference, and press Generate."
+          ? translate("uxAudio.clonedSpeechLandsHeretwhxl")
+          : translate("uxAudio.clonedSpeechLandsHerecejx9")
       }
     />
   );

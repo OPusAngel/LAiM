@@ -2968,7 +2968,7 @@ class SdCppDiffusionBackend:
         )
         # Same link the diffusers resolver records, so the delete guard protects a native pick's companions too -- and
         # here that means the repos _asset_specs actually FETCHES. The native engine does not read the diffusers base:
-        # FLUX.2 takes its VAE from LAiM/FLUX.2-VAE and its encoders from another repo again, so recording only the
+        # FLUX.2 takes its VAE from unsloth/FLUX.2-VAE and its encoders from another repo again, so recording only the
         # base left every repo the pick really depends on outside the guard, and an unloaded model's encoder could be
         # deleted while its GGUF stayed installed. Best-effort bookkeeping; never fails a load.
         try:

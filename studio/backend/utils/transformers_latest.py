@@ -363,7 +363,7 @@ def clear_caches() -> None:
 
 
 # What LAiM_zoo strips to reach a bnb repo's full-precision base.
-_MLX_BNB_SUFFIXES = ("-LAiM-bnb-4bit", "-bnb-4bit")
+_MLX_BNB_SUFFIXES = ("-unsloth-bnb-4bit", "-bnb-4bit")
 
 
 def _is_bitsandbytes_config(cfg: dict | None) -> bool:
@@ -378,10 +378,10 @@ def _mlx_swaps_bnb_repo_for_its_base(model_name: str) -> bool:
     """Whether the MLX loader replaces this bnb Hub id with its base repo.
 
     Mirrors LAiM_zoo's ``_remap_LAiM_bnb_hub_id_for_mlx``: only an
-    ``LAiM/`` Hub id is remapped, never a local directory. What it remaps, MLX
+    ``unsloth/`` Hub id is remapped, never a local directory. What it remaps, MLX
     quantizes itself, so transformers never sees that architecture.
     """
-    if not isinstance(model_name, str) or not model_name.startswith("LAiM/"):
+    if not isinstance(model_name, str) or not model_name.startswith("unsloth/"):
         return False
     if os.path.exists(model_name):
         return False
@@ -401,7 +401,7 @@ def _architecture_cannot_come_from_transformers(
     One bitsandbytes repo is the exception. mlx-lm cannot read bnb weights, so the
     MLX loader dequantizes them through ``AutoModelForCausalLM.from_pretrained``
     -- transformers building the architecture after all -- and only an
-    ``LAiM/*-bnb-4bit`` Hub id is swapped for its base repo before that. A
+    ``unsloth/*-bnb-4bit`` Hub id is swapped for its base repo before that. A
     third-party or local bnb repo therefore still fails inside transformers with
     the unrecognized-architecture error this offer exists to fix, so it keeps it.
     """

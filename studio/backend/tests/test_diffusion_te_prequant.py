@@ -47,7 +47,7 @@ def _fam(
 # ── resolution ───────────────────────────────────────────────────────────────
 def test_repo_filename_convention():
     # safetensors first, the historical pickle second: both are live and the reader takes either.
-    assert te_prequant_repo_filenames("LAiM/LTX-2-FP8", "text_encoder", "fp8") == (
+    assert te_prequant_repo_filenames("unsloth/LTX-2-FP8", "text_encoder", "fp8") == (
         "LTX-2-text_encoder-FP8.safetensors",
         "LTX-2-text_encoder-FP8.pt",
     )
@@ -532,54 +532,54 @@ def test_hosted_te_prequant_entries():
     from core.inference.video_families import detect_video_family
 
     assert detect_family("Qwen/Qwen-Image").te_prequant_repos == (
-        ("fp8", "text_encoder", "LAiM/Qwen-Image-FP8"),
+        ("fp8", "text_encoder", "unsloth/Qwen-Image-FP8"),
     )
     assert detect_family("black-forest-labs/FLUX.2-dev").te_prequant_repos == (
-        ("fp8", "text_encoder", "LAiM/FLUX.2-dev-FP8"),
+        ("fp8", "text_encoder", "unsloth/FLUX.2-dev-FP8"),
     )
     assert detect_video_family("Lightricks/LTX-2").te_prequant_repos == (
-        ("fp8", "text_encoder", "LAiM/LTX-2-FP8"),
+        ("fp8", "text_encoder", "unsloth/LTX-2-FP8"),
     )
     # The hosted filenames follow the repo naming convention the resolver derives.
-    assert te_prequant_repo_filenames("LAiM/Qwen-Image-FP8", "text_encoder", "fp8") == (
+    assert te_prequant_repo_filenames("unsloth/Qwen-Image-FP8", "text_encoder", "fp8") == (
         "Qwen-Image-text_encoder-FP8.safetensors",
         "Qwen-Image-text_encoder-FP8.pt",
     )
-    assert te_prequant_repo_filenames("LAiM/FLUX.2-dev-FP8", "text_encoder", "fp8") == (
+    assert te_prequant_repo_filenames("unsloth/FLUX.2-dev-FP8", "text_encoder", "fp8") == (
         "FLUX.2-dev-text_encoder-FP8.safetensors",
         "FLUX.2-dev-text_encoder-FP8.pt",
     )
-    assert te_prequant_repo_filenames("LAiM/LTX-2-FP8", "text_encoder", "fp8") == (
+    assert te_prequant_repo_filenames("unsloth/LTX-2-FP8", "text_encoder", "fp8") == (
         "LTX-2-text_encoder-FP8.safetensors",
         "LTX-2-text_encoder-FP8.pt",
     )
     # HiDream's heavyweight is TE4 (Llama-3.1-8B), engaged via hidream_te4_kwargs since the generic pass only covers text_encoder.._3.
     assert detect_family("HiDream-ai/HiDream-I1-Full").te_prequant_repos == (
-        ("fp8", "text_encoder_4", "LAiM/HiDream-I1-Full-FP8"),
+        ("fp8", "text_encoder_4", "unsloth/HiDream-I1-Full-FP8"),
     )
-    assert te_prequant_repo_filenames("LAiM/HiDream-I1-Full-FP8", "text_encoder_4", "fp8") == (
+    assert te_prequant_repo_filenames("unsloth/HiDream-I1-Full-FP8", "text_encoder_4", "fp8") == (
         "HiDream-I1-Full-text_encoder_4-FP8.safetensors",
         "HiDream-I1-Full-text_encoder_4-FP8.pt",
     )
     # Round 2: T5-XXL for every flux.1 base (byte-identical, one artifact), Gemma2-2B, Qwen3-4B, Qwen3-VL-4B, and hunyuanimage reusing the Qwen-Image artifact.
     assert detect_family("black-forest-labs/FLUX.1-schnell").te_prequant_repos == (
-        ("fp8", "text_encoder_2", "LAiM/FLUX.1-schnell-FP8"),
+        ("fp8", "text_encoder_2", "unsloth/FLUX.1-schnell-FP8"),
     )
-    assert te_prequant_repo_filenames("LAiM/FLUX.1-schnell-FP8", "text_encoder_2", "fp8") == (
+    assert te_prequant_repo_filenames("unsloth/FLUX.1-schnell-FP8", "text_encoder_2", "fp8") == (
         "FLUX.1-schnell-text_encoder_2-FP8.safetensors",
         "FLUX.1-schnell-text_encoder_2-FP8.pt",
     )
     assert detect_family("Alpha-VLLM/Lumina-Image-2.0").te_prequant_repos == (
-        ("fp8", "text_encoder", "LAiM/Lumina-Image-2.0-FP8"),
+        ("fp8", "text_encoder", "unsloth/Lumina-Image-2.0-FP8"),
     )
     assert detect_family("Tongyi-MAI/Z-Image-Turbo").te_prequant_repos == (
-        ("fp8", "text_encoder", "LAiM/Z-Image-Turbo-FP8"),
+        ("fp8", "text_encoder", "unsloth/Z-Image-Turbo-FP8"),
     )
     assert detect_family("krea/Krea-2-Turbo").te_prequant_repos == (
-        ("fp8", "text_encoder", "LAiM/Krea-2-Turbo-FP8"),
+        ("fp8", "text_encoder", "unsloth/Krea-2-Turbo-FP8"),
     )
     assert detect_family("hunyuanvideo-community/HunyuanImage-2.1-Diffusers").te_prequant_repos == (
-        ("fp8", "text_encoder", "LAiM/Qwen-Image-FP8"),
+        ("fp8", "text_encoder", "unsloth/Qwen-Image-FP8"),
     )
     # flux.2-klein-4B hosts NO TE entry: its Qwen3-4B retrained layer 35's MLP, so the z-image artifact must not serve it (maxdiff 0.86).
     assert detect_family("black-forest-labs/FLUX.2-klein-4B").te_prequant_repos == ()
@@ -623,7 +623,7 @@ def test_hidream_te4_stays_dense_without_fp8(monkeypatch):
     assert out["tokenizer_4"] == "tok4"
     assert getattr(out["text_encoder_4"], "tag", "").startswith("dense")
     # No cast attempted: mode None normalises to no TE quant.
-    assert ("llama_from_pretrained", "LAiM/Meta-Llama-3.1-8B-Instruct") in recorder
+    assert ("llama_from_pretrained", "unsloth/Meta-Llama-3.1-8B-Instruct") in recorder
 
 
 def test_hidream_te4_prefers_precast_checkpoint(monkeypatch):
@@ -646,7 +646,7 @@ def test_hidream_te4_prefers_precast_checkpoint(monkeypatch):
 
     monkeypatch.setattr(tpq, "load_prequant_text_encoder", _fake_load)
     fam = _fam(
-        te_prequant_repos = (("fp8", "text_encoder_4", "LAiM/HiDream-I1-Full-FP8"),),
+        te_prequant_repos = (("fp8", "text_encoder_4", "unsloth/HiDream-I1-Full-FP8"),),
         name = "hidream-i1",
     )
     out = dh.hidream_te4_kwargs(
@@ -658,14 +658,14 @@ def test_hidream_te4_prefers_precast_checkpoint(monkeypatch):
         local_files_only = True,
     )
     assert out["text_encoder_4"] is precast
-    assert calls["base"] == "LAiM/Meta-Llama-3.1-8B-Instruct"
+    assert calls["base"] == "unsloth/Meta-Llama-3.1-8B-Instruct"
     assert calls["component"] == "text_encoder_4"
     # Standalone repo: config at the root, forward flags the pipeline needs applied.
     assert calls["config_subfolder"] == ""
     assert calls["config_overrides"] == {"output_hidden_states": True, "output_attentions": True}
     assert calls["local_files_only"] is True
     # The dense Llama download never ran.
-    assert ("llama_from_pretrained", "LAiM/Meta-Llama-3.1-8B-Instruct") not in recorder
+    assert ("llama_from_pretrained", "unsloth/Meta-Llama-3.1-8B-Instruct") not in recorder
 
 
 def test_hidream_te4_falls_back_to_dense_cast(monkeypatch):
@@ -679,12 +679,12 @@ def test_hidream_te4_falls_back_to_dense_cast(monkeypatch):
     cast: list = []
     monkeypatch.setattr(precision, "_cast_fp8", lambda enc, tgt: cast.append(enc))
     fam = _fam(
-        te_prequant_repos = (("fp8", "text_encoder_4", "LAiM/HiDream-I1-Full-FP8"),),
+        te_prequant_repos = (("fp8", "text_encoder_4", "unsloth/HiDream-I1-Full-FP8"),),
         name = "hidream-i1",
     )
     out = dh.hidream_te4_kwargs(None, None, fam = fam, te_quant_mode = "fp8", target = _target())
     assert cast == [out["text_encoder_4"]]
-    assert ("llama_from_pretrained", "LAiM/Meta-Llama-3.1-8B-Instruct") in recorder
+    assert ("llama_from_pretrained", "unsloth/Meta-Llama-3.1-8B-Instruct") in recorder
 
 
 def test_hidream_te4_partial_cast_reloads_dense(monkeypatch):
@@ -908,7 +908,7 @@ def test_a_sibling_release_keeps_the_pre_cast_encoder(monkeypatch):
     for base in (
         "Qwen/Qwen-Image",
         "Qwen/Qwen-Image-2512",
-        "LAiM/Qwen-Image-2512",
+        "unsloth/Qwen-Image-2512",
         "krea/Krea-2-Turbo",
         "krea/Krea-2-Raw",
     ):
@@ -945,7 +945,7 @@ def test_the_plan_recognises_the_pt_repos_that_already_exist(monkeypatch):
     """
     src = TePrequantSource(
         kind = "repo",
-        location = "LAiM/LTX-2-FP8",
+        location = "unsloth/LTX-2-FP8",
         filename = "LTX-2-text_encoder-FP8.safetensors",
         fallback_filenames = ("LTX-2-text_encoder-FP8.pt",),
     )
@@ -1131,10 +1131,10 @@ def test_qwen_image_2_1_defaults_to_a_hosted_encoder():
     assert fam.te_quant_auto == "int8"
     source = resolve_te_prequant_source(fam, "text_encoder", "int8")
     assert source is not None and source.kind == "repo"
-    assert source.location == "LAiM/Qwen-Image-2.1-FP8"
+    assert source.location == "unsloth/Qwen-Image-2.1-FP8"
     assert source.filename == "Qwen-Image-2.1-text_encoder-INT8-ConvRot.safetensors"
     assert source.fallback_filenames[0] == "Qwen-Image-2.1-text_encoder-FP8.safetensors"
     source = resolve_te_prequant_source(fam, "text_encoder", "fp8")
     assert source is not None and source.kind == "repo"
-    assert source.location == "LAiM/Qwen-Image-2.1-FP8"
+    assert source.location == "unsloth/Qwen-Image-2.1-FP8"
     assert source.filename == "Qwen-Image-2.1-text_encoder-FP8.safetensors"

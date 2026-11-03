@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useHubName } from "@/lib/hf-endpoint";
 import { toast } from "@/lib/toast";
@@ -86,13 +87,13 @@ function classifyDiscoverError(
 function discoverErrorTitle(kind: DiscoverErrorKind, hub: string): string {
   switch (kind) {
     case "offline":
-      return `Can't reach ${hub}`;
+      return translate("uxHub.canTReachee42h", { p1: hub });
     case "auth":
       return `${hub} auth failed`;
     case "rate-limited":
       return `${hub} rate limit`;
     default:
-      return `Couldn't reach ${hub}`;
+      return translate("uxHub.couldnTReach1cnj7", { p1: hub });
   }
 }
 
@@ -199,8 +200,8 @@ export function useDiscoverSearch({
     // firewall, DNS or certificate change without waiting out the timer.
     clearRemoteBackoff();
     retrySearch();
-    toast.message("Retrying…", {
-      description: "Reaching Hugging Face for the latest models.",
+    toast.message(translate("uxHub.retrying3urbq"), {
+      description: translate("uxHub.reachingHuggingFaceFor1yg6u"),
     });
   }, [retrySearch]);
 
@@ -221,7 +222,7 @@ export function useDiscoverSearch({
       // The classified failure names the cause; the raw message covers HTTP
       // errors that never reach the network layer.
       description: searchFailure?.message ?? searchError,
-      action: { label: "Retry", onClick: handleRetrySearch },
+      action: { label: translate("common.retry"), onClick: handleRetrySearch },
     });
   }, [isDiscoverTab, searchError, searchFailure, online, handleRetrySearch, hub]);
 
@@ -247,8 +248,8 @@ export function useDiscoverSearch({
         lastReconnectAtRef.current = now;
         const selfProbed = selfProbedRef.current;
         selfProbedRef.current = false;
-        toast.success("Back online", {
-          description: "Refreshing the discovery feed.",
+        toast.success(translate("uxHub.backOnline19xi2"), {
+          description: translate("uxHub.refreshingTheDiscoveryFeedwbiq1"),
         });
         // Only when something else proved the Hub reachable. Our own successful
         // request is what usually clears the window, and its results are already

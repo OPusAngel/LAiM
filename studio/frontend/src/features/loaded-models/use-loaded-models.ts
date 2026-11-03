@@ -14,6 +14,8 @@ import {
   shortModelLabel,
   withPendingLoads,
 } from "./loaded-models-sources";
+import { translate } from "@/i18n";
+
 
 // Free next to chat's own status poll, still current on a tab switch.
 const POLL_INTERVAL_MS = 5000;
@@ -218,18 +220,18 @@ export function useLoadedModels(
         const outcome = await ejectLoadedModel(entry);
         if (outcome.status === "stillResident") {
           toast.warning(
-            `"${shortModelLabel(outcome.model)}" was loaded while ejecting, so it is still using memory. Eject again to release it.`,
+            translate("uxLoadedmodels.wasLoadedWhileEjecting7izrv", { p1: shortModelLabel(outcome.model) }),
           );
         } else if (outcome.status === "unverified") {
           // Neither success nor failure: say so, and leave the row for the poll
           // to settle rather than claiming work that was not confirmed.
           toast.warning(
-            `${label} was asked to unload, but its runtime did not confirm. Check the card in a moment.`,
+            translate("uxLoadedmodels.wasAskedToUnloadigeu9", { p1: label }),
           );
         } else if (outcome.status === "alreadyFree") {
           // The row was stale and nothing was unloaded, so say that rather than
           // report an eject. The row still goes: its memory is free either way.
-          toast.info(`${label} was no longer loaded.`);
+          toast.info(translate("uxLoadedmodels.wasNoLongerLoadedxbo82", { p1: label }));
           generationRef.current += 1;
           if (mountedRef.current) {
             setEntries((prev) => prev.filter((row) => row.id !== entry.id));
@@ -238,10 +240,10 @@ export function useLoadedModels(
           // Nothing was unloaded: this runtime holds something else now, and
           // releasing that is not what the click asked for.
           toast.info(
-            `${label} is no longer loaded. "${shortModelLabel(outcome.resident)}" took its place and was left alone.`,
+            translate("uxLoadedmodels.isNoLongerLoadedoc84k", { p1: label, p2: shortModelLabel(outcome.resident) }),
           );
         } else {
-          toast.success(`Ejected ${label}`);
+          toast.success(translate("uxLoadedmodels.ejectedgz9dh", { p1: label }));
           // Drop the row now, rather than offering to eject it again until the next poll. Any read
           // already in flight predates this and would put the row back, so retire it.
           generationRef.current += 1;

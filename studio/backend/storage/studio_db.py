@@ -147,7 +147,9 @@ connect_studio_db = sqlite_gate.connect
 
 
 _SQLITE_IN_CHUNK_SIZE = 900
-_PROJECT_WORKSPACE_SUBDIRS = ("sandbox",)
+# LAiM creates no workspace subfolder: a project's chats work directly in the folder the user
+# picked.
+_PROJECT_WORKSPACE_SUBDIRS: tuple[str, ...] = ()
 _CHAT_ATTACHMENT_INVENTORY_VERSION = 5
 
 
@@ -186,10 +188,10 @@ def _ensure_project_workspace(root_path: str) -> str:
     return str(root_resolved)
 
 
-def sandbox_is_referenced_elsewhere(
+def workdir_is_referenced_elsewhere(
     session_id: str, exclude_thread_id: "str | None" = None
 ) -> bool:
-    """Whether a surviving chat still shows file cards for this sandbox. Forking clones the message
+    """Whether a surviving chat still shows file cards for this workdir. Forking clones the message
     content verbatim, so the fork's cards keep the source chat's session id, and deleting the
     source's files would leave those cards downloading nothing."""
     if not session_id:
@@ -215,7 +217,7 @@ def sandbox_is_referenced_elsewhere(
         # A locked database is not an answer, and every caller reads False as
         # "nothing shows these files any more" before deleting them. Kept, so
         # the worst case is a folder collected on the next delete.
-        logger.warning("Could not check references for sandbox %s; keeping it", session_id)
+        logger.warning("Could not check references for workdir %s; keeping it", session_id)
         return True
     finally:
         conn.close()
@@ -300,7 +302,7 @@ def _delete_project_workspace(project: dict) -> None:
 
 
 def delete_chat_project_workspace(project: dict) -> None:
-    """Backward-compatible name for callers predating sandbox-aware cleanup."""
+    """Backward-compatible name for callers predating workdir-aware cleanup."""
     delete_project_workspace(project)
 
 
@@ -566,7 +568,7 @@ def _ensure_schema(conn: sqlite3.Connection) -> None:
         conn.execute(
             "ALTER TABLE chat_clear_operations ADD COLUMN deleted_thread_ids_json TEXT NOT NULL DEFAULT '[]'"
         )
-    # The thumbnail reap happens AFTER this transaction commits, behind seconds of archive and sandbox
+    # The thumbnail reap happens AFTER this transaction commits, behind seconds of archive and workdir
     # cleanup, so a crash in that window leaves the operation recorded and the cache unreaped and the
     # retry replays, skipping the one cleanup that had not run. These two columns let the replay finish
     # it: the ids the original clear was responsible for, and whether the reap has since completed.
@@ -2112,7 +2114,9 @@ def _chat_project_from_row(row: sqlite3.Row) -> dict:
         "name": data["name"],
         "instructions": data.get("instructions") or "",
         "rootPath": root_path or None,
-        "sandboxPath": os.path.join(root_path, "sandbox") if root_path else None,
+        # The project's own folder is the tool working directory; the key keeps its historical name
+        # because the frontend and the media gallery read it under it.
+        "workdirPath": root_path or None,
         "workingFolder": data.get("working_folder") or None,
         "workingFolderIdentity": data.get("working_folder_identity") or None,
         "archived": bool(data["archived"]),
@@ -2922,7 +2926,7 @@ def unreaped_clear_operation_image_ids(operation_id: Optional[str]) -> Optional[
     nothing for a replay to finish: no such operation, a row from a build that did not record the
     snapshot, or a reap that already completed. A replay must never reap on a guess, since the
     images of chats created since the original clear are NOT its to take. Exists because the reap
-    runs after the clear's transaction commits, behind seconds of archive and sandbox cleanup.
+    runs after the clear's transaction commits, behind seconds of archive and workdir cleanup.
     Killed in that window, the operation is recorded and the thumbnails of every deleted chat are
     still on disk, and the retry that follows would skip the one cleanup that had not run. Those
     files say what was searched for, so leaving them is the worse failure."""
@@ -3027,7 +3031,7 @@ def clear_chat_history_with_replay_status(
     """`clear_chat_history`, plus whether this call replayed a recorded outcome. Returns (thread ids
     removed, research runs cascaded, replayed), optionally including active chat generation run ids
     before the replay flag. The first two are taken inside the same transaction: another process can
-    add a thread between a listing and this call, its sandbox has to be cleaned up too, and after
+    add a thread between a listing and this call, its workdir has to be cleaned up too, and after
     the cascade nothing can tell the supervisor which runs to stop. `replayed` comes from that same
     transaction because it cannot be established outside one. Two requests carrying the same
     operation id can both read an unrecorded ledger before either commits, so both would conclude

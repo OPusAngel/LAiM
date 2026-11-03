@@ -20,7 +20,7 @@ from core.inference.tools import execute_tool
 
 @pytest.fixture
 def chat(tmp_path, monkeypatch):
-    workdir = tmp_path / "sandbox"
+    workdir = tmp_path / "workdir"
     workdir.mkdir()
     history = file_history.FileHistory(str(tmp_path / "file_history"))
     monkeypatch.setattr(tools, "_get_workdir", lambda session_id = None: str(workdir))
@@ -384,7 +384,7 @@ def test_an_upload_during_a_call_is_never_undone_with_it(chat):
     )
     worker.start()
     time.sleep(0.8)
-    tools.save_sandbox_upload("s", "upload.txt", [b"mine\n"])
+    tools.save_session_upload("s", "upload.txt", [b"mine\n"])
     worker.join()
     report = _rewind(history, ["u1"])
     assert "upload.txt" in report.conflicts

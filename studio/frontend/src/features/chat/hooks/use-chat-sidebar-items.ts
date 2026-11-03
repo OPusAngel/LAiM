@@ -17,7 +17,7 @@ import {
 } from "../utils/chat-history-storage";
 import { clearBranchHead } from "../utils/branch-head";
 import { clearComposerDraft } from "../utils/composer-draft";
-import { offerToDeleteKeptSandboxes } from "../utils/offer-kept-sandbox-files";
+import { offerToDeleteKeptWorkdirs } from "../utils/offer-kept-workdir-files";
 import { stopChatThread } from "../utils/stop-chat-thread";
 import {
   markChatThreadsDeleted,
@@ -366,8 +366,8 @@ export async function deleteChatItems(
     );
     // retain the head until deletion succeeds so a restored chat reopens on the same branch.
     for (const id of threadIds) clearBranchHead(id);
-    // offer recovery for sandbox files that outlive a deleted chat and lose their sidebar entry.
-    offerToDeleteKeptSandboxes(kept);
+    // offer recovery for workdir files that outlive a deleted chat and lose their sidebar entry.
+    offerToDeleteKeptWorkdirs(kept);
   } catch (error) {
     removeChatThreadTombstones(threadIds);
     notifyChatHistoryUpdated();

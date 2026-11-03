@@ -199,7 +199,7 @@ class TestResolveRequestedLlamaTag:
         self, monkeypatch: pytest.MonkeyPatch
     ):
         invalid = PublishedReleaseBundle(
-            repo = "LAiMai/llama.cpp",
+            repo = "unslothai/llama.cpp",
             release_tag = "v2.0",
             upstream_tag = "b9000",
             assets = {},
@@ -208,7 +208,7 @@ class TestResolveRequestedLlamaTag:
             selection_log = [],
         )
         valid = PublishedReleaseBundle(
-            repo = "LAiMai/llama.cpp",
+            repo = "unslothai/llama.cpp",
             release_tag = "v1.0",
             upstream_tag = "b8999",
             assets = {},
@@ -244,7 +244,7 @@ class TestResolveRequestedLlamaTag:
         monkeypatch.setattr(MOD, "load_approved_release_checksums", fake_load)
         monkeypatch.setattr(MOD, "latest_upstream_release_tag", lambda: "b7777")
 
-        assert resolve_requested_llama_tag("latest", "LAiMai/llama.cpp") == "b8999"
+        assert resolve_requested_llama_tag("latest", "unslothai/llama.cpp") == "b8999"
 
     def test_latest_with_published_release_tag_passes_pin_through(
         self, monkeypatch: pytest.MonkeyPatch
@@ -289,14 +289,14 @@ class TestResolveRequestedLlamaTag:
         assert (
             resolve_requested_llama_tag(
                 "latest",
-                "LAiMai/llama.cpp",
+                "unslothai/llama.cpp",
                 "llama-prebuilt-main",
             )
             == "b9001"
         )
         assert captured == {
             "requested_tag": "latest",
-            "published_repo": "LAiMai/llama.cpp",
+            "published_repo": "unslothai/llama.cpp",
             "published_release_tag": "llama-prebuilt-main",
         }
 
@@ -636,10 +636,10 @@ class TestSourceCodePatterns:
         assert "ggml-org/llama.cpp/releases/latest" not in content
 
     def test_setup_sh_routes_every_host_to_fork(self):
-        """Every host routes to the LAiMai/llama.cpp fork, so no ggml-org CPU routing branch may
+        """Every host routes to the unslothai/llama.cpp fork, so no ggml-org CPU routing branch may
         return."""
         content = SETUP_SH.read_text(encoding = "utf-8")
-        assert '_HELPER_RELEASE_REPO="LAiMai/llama.cpp"' in content
+        assert '_HELPER_RELEASE_REPO="unslothai/llama.cpp"' in content
         assert '_HELPER_RELEASE_REPO="ggml-org/llama.cpp"' not in content
         # Usability gating (not routing) still distinguishes a hidden GPU.
         assert '[ "$_setup_nvidia_usable" = true ]' in content

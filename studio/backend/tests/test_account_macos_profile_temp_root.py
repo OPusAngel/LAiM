@@ -10,7 +10,7 @@ among the writable roots. The macOS profile granted ``file-read*`` on the whole
 shared ``/private/tmp``, so a managed tool could read every same-UID temp file
 the owner or any other application on the host had left there; the hidden-root
 deny only covers ``<tempdir>/LAiM-studio``. The child's TMPDIR already points
-inside its own sandbox dir, so the shared tree is not needed for startup.
+inside its own workdir dir, so the shared tree is not needed for startup.
 """
 
 import re

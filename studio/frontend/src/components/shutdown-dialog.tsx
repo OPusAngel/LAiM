@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { authFetch } from "@/features/auth";
 import { toastError } from "@/shared/toast";
 import { useState } from "react";
@@ -53,7 +54,7 @@ export function ShutdownDialog({
     document.body.innerHTML = `
       <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;gap:12px">
         <p style="font-size:calc(1.1rem * var(--ui-font-scale, 1));font-weight:600;margin:0">LAiM has stopped.</p>
-        <p style="font-size:calc(0.9rem * var(--ui-font-scale, 1));color:#888;margin:0">You can now close this tab.</p>
+        <p style="font-size:calc(0.9rem * var(--ui-font-scale, 1));color:#888;margin:0">{translate("uxCopy.youCanNowClose2ce3k")}</p>
       </div>`;
   };
 
@@ -61,11 +62,9 @@ export function ShutdownDialog({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Stop LAiM?</AlertDialogTitle>
+          <AlertDialogTitle>{translate("uxComponents.stopLAiM3724s")}</AlertDialogTitle>
           <AlertDialogDescription>
-            This will shut down the server. Any active training or inference
-            jobs will be terminated. You can restart it any time from the
-            desktop shortcut.
+            {translate("uxCopy.thisWillShutDown19o2n")}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

@@ -164,9 +164,9 @@ def test_normalization_does_not_bypass_ssrf_guard(url):
 
 def test_schemeless_github_repo_still_routes_to_readme_api():
     # Must run before _github_repo_readme_api_url, else a bare repo URL scrapes HTML.
-    normalized = tools._normalize_url_scheme("github.com/LAiMai/LAiM")
+    normalized = tools._normalize_url_scheme("github.com/OPusAngel/LAiM")
     assert tools._github_repo_readme_api_url(normalized) == (
-        "https://api.github.com/repos/LAiMai/LAiM/readme"
+        "https://api.github.com/repos/OPusAngel/LAiM/readme"
     )
 
 

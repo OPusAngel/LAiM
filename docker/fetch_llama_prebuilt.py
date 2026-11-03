@@ -30,7 +30,7 @@ import tarfile
 import tempfile
 import urllib.request
 
-RELEASE_REPO = "LAiMai/llama.cpp"
+RELEASE_REPO = "unslothai/llama.cpp"
 
 
 def base_build_tag(tag: str) -> str:

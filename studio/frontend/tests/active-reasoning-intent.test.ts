@@ -9,7 +9,7 @@ import { loadWithStubs } from "./helpers/module-stubs.ts";
 
 function activeConfig(patch: Record<string, unknown> = {}) {
   const state = {
-    params: { checkpoint: "LAiM/Qwen3-0.6B-GGUF", maxSeqLength: 2048 },
+    params: { checkpoint: "unsloth/Qwen3-0.6B-GGUF", maxSeqLength: 2048 },
     reasoningBudget: 32,
     reasoningBudgetMessage: "Conclude now.",
     loadedReasoningBudget: 32,
@@ -102,7 +102,7 @@ test("explicit and legacy reasoning values remain available", () => {
 for (const engine of ["vllm", "sglang"]) {
   test(`${engine} resident precision survives editor hydration`, () => {
     const config = activeConfig({
-      params: { checkpoint: "LAiM/Qwen2.5-0.5B-Instruct", maxSeqLength: 2048, engine, enginePrecision: "int4", engineParallelism: "pipeline" },
+      params: { checkpoint: "unsloth/Qwen2.5-0.5B-Instruct", maxSeqLength: 2048, engine, enginePrecision: "int4", engineParallelism: "pipeline" },
       selectedGpuIds: [0, 1],
       selectedGpuIndexKind: "physical",
     });

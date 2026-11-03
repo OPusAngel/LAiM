@@ -245,7 +245,7 @@ def test_chat_thread_payload_carries_gguf_variant():
         id = "thread-1",
         title = "GGUF chat",
         modelType = "base",
-        modelId = "LAiM/Qwen3-GGUF",
+        modelId = "unsloth/Qwen3-GGUF",
         modelGgufVariant = "Q6_K",
         createdAt = 1,
     )
@@ -269,11 +269,11 @@ def test_clear_history_fences_pending_thread_ids(monkeypatch):
         result = (list(thread_ids), [])
         return (*result, [], False) if include_chat_generation_runs else (*result, False)
 
-    async def remove_sandboxes(_thread_ids, _delete_files):
+    async def remove_workdirs(_thread_ids, _delete_files):
         return 0, []
 
     monkeypatch.setattr(chat_history, "clear_chat_history_with_replay_status", clear_with_ids)
-    monkeypatch.setattr(chat_history, "_remove_sandboxes", remove_sandboxes)
+    monkeypatch.setattr(chat_history, "_remove_workdirs", remove_workdirs)
     monkeypatch.setattr(chat_history, "_cancel_active_generations", lambda _ids: None)
     monkeypatch.setattr(chat_history, "_cancel_research_runs", lambda _request, _ids: None)
     request = SimpleNamespace(app = SimpleNamespace(state = SimpleNamespace()))
@@ -289,8 +289,8 @@ def test_clear_history_fences_pending_thread_ids(monkeypatch):
     assert response == {
         "status": "deleted",
         "deletedThreadIds": ["pending-thread"],
-        "sandboxes_removed": 0,
-        "sandboxes_kept": [],
+        "workdirs_removed": 0,
+        "workdirs_kept": [],
     }
     assert captured == ["pending-thread"]
     assert captured_operation_ids == ["clear-operation-1"]
@@ -307,7 +307,7 @@ def test_clear_history_reaps_search_thumbnails_with_a_body(monkeypatch):
     reaped: list[bool] = []
     monkeypatch.setattr(search_images, "clear_cache", lambda only_ids = None: reaped.append(True))
 
-    async def remove_sandboxes(_thread_ids, _delete_files):
+    async def remove_workdirs(_thread_ids, _delete_files):
         return 0, []
 
     monkeypatch.setattr(
@@ -317,7 +317,7 @@ def test_clear_history_reaps_search_thumbnails_with_a_body(monkeypatch):
             ([], [], [], False) if include_chat_generation_runs else ([], [], False)
         ),
     )
-    monkeypatch.setattr(chat_history, "_remove_sandboxes", remove_sandboxes)
+    monkeypatch.setattr(chat_history, "_remove_workdirs", remove_workdirs)
     monkeypatch.setattr(chat_history, "_cancel_active_generations", lambda _ids: None)
     monkeypatch.setattr(chat_history, "_cancel_research_runs", lambda _request, _ids: None)
     monkeypatch.setattr(chat_history, "_remove_thread_rag_data", lambda _ids, cutoff = None: None)
@@ -359,7 +359,7 @@ def test_project_delete_cancels_research_before_workspace_cleanup(monkeypatch):
     async def fail_workspace_cleanup(_ids, _delete_files):
         raise OSError("workspace is busy")
 
-    monkeypatch.setattr(chat_history, "_remove_sandboxes", fail_workspace_cleanup)
+    monkeypatch.setattr(chat_history, "_remove_workdirs", fail_workspace_cleanup)
 
     with pytest.raises(OSError, match = "workspace is busy"):
         asyncio.run(
@@ -416,7 +416,7 @@ def test_chat_settings_payload_carries_per_model_params():
         {
             "rememberParamsPerModel": True,
             "inferenceParamsByModel": {
-                "LAiM/Qwen3.5-9B-GGUF": {"temperature": 0.2, "maxTokens": 4096},
+                "unsloth/Qwen3.5-9B-GGUF": {"temperature": 0.2, "maxTokens": 4096},
             },
         }
     )
@@ -424,7 +424,7 @@ def test_chat_settings_payload_carries_per_model_params():
     dumped = payload.model_dump(exclude_unset = True)
     assert dumped["rememberParamsPerModel"] is True
     assert dumped["inferenceParamsByModel"] == {
-        "LAiM/Qwen3.5-9B-GGUF": {"temperature": 0.2, "maxTokens": 4096},
+        "unsloth/Qwen3.5-9B-GGUF": {"temperature": 0.2, "maxTokens": 4096},
     }
     # Nothing else is implied by the patch, so the merge cannot clobber it.
     assert "inferenceParams" not in dumped
@@ -1036,7 +1036,7 @@ def _clear_thread_row(thread_id: str) -> dict:
 def test_a_clear_does_not_reap_an_image_registered_while_it_was_running(tmp_path, monkeypatch):
     """The reap is global; the delete it accompanies is not.
 
-    Between the transaction committing and the reap there is archive and sandbox cleanup
+    Between the transaction committing and the reap there is archive and workdir cleanup
     that can run for seconds. A chat created in that window survives the delete, so
     wiping the whole registry afterwards took ITS thumbnails and left its cards 404ing
     out of thumbnail_bytes. Independent of the replay case: this one is a first clear.
@@ -1071,7 +1071,7 @@ def test_a_clear_does_not_reap_an_image_registered_while_it_was_running(tmp_path
 
     late: dict[str, str] = {}
 
-    async def remove_sandboxes(_thread_ids, _delete_files):
+    async def remove_workdirs(_thread_ids, _delete_files):
         # Stands in for the concurrent client: another tab registers an image for a chat
         # created after the transaction, while this slow cleanup is still running.
         entries = search_images.register_images(
@@ -1088,7 +1088,7 @@ def test_a_clear_does_not_reap_an_image_registered_while_it_was_running(tmp_path
         late["id"] = entries[0]["id"]
         return 0, []
 
-    monkeypatch.setattr(chat_history, "_remove_sandboxes", remove_sandboxes)
+    monkeypatch.setattr(chat_history, "_remove_workdirs", remove_workdirs)
     monkeypatch.setattr(chat_history, "_cancel_active_generations", lambda _ids: None)
     monkeypatch.setattr(chat_history, "_cancel_research_runs", lambda _request, _ids: None)
     monkeypatch.setattr(chat_history, "_remove_thread_rag_data", lambda _ids, cutoff = None: None)
@@ -1133,10 +1133,10 @@ def test_replayed_clear_keeps_the_thumbnails_of_a_chat_it_did_not_delete(tmp_pat
     reaped: list[str] = []
     monkeypatch.setattr(search_images, "clear_cache", lambda only_ids = None: reaped.append("reaped"))
 
-    async def remove_sandboxes(_thread_ids, _delete_files):
+    async def remove_workdirs(_thread_ids, _delete_files):
         return 0, []
 
-    monkeypatch.setattr(chat_history, "_remove_sandboxes", remove_sandboxes)
+    monkeypatch.setattr(chat_history, "_remove_workdirs", remove_workdirs)
     monkeypatch.setattr(chat_history, "_cancel_active_generations", lambda _ids: None)
     monkeypatch.setattr(chat_history, "_cancel_research_runs", lambda _request, _ids: None)
     monkeypatch.setattr(chat_history, "_remove_thread_rag_data", lambda _ids, cutoff = None: None)
@@ -1193,10 +1193,10 @@ def test_the_replay_bit_comes_from_the_clear_transaction(monkeypatch, tmp_path):
 
     monkeypatch.setattr(search_images, "clear_cache", record_reap)
 
-    async def remove_sandboxes(_thread_ids, _delete_files):
+    async def remove_workdirs(_thread_ids, _delete_files):
         return 0, []
 
-    monkeypatch.setattr(chat_history, "_remove_sandboxes", remove_sandboxes)
+    monkeypatch.setattr(chat_history, "_remove_workdirs", remove_workdirs)
     monkeypatch.setattr(chat_history, "_cancel_active_generations", lambda _ids: None)
     monkeypatch.setattr(chat_history, "_cancel_research_runs", lambda _request, _ids: None)
     monkeypatch.setattr(chat_history, "_remove_thread_rag_data", lambda _ids, cutoff = None: None)
@@ -1281,10 +1281,10 @@ def test_a_chat_created_in_the_gap_after_the_clear_keeps_its_images(monkeypatch,
     reaped: list = []
     monkeypatch.setattr(search_images, "clear_cache", lambda only_ids = None: reaped.append(only_ids))
 
-    async def remove_sandboxes(_thread_ids, _delete_files):
+    async def remove_workdirs(_thread_ids, _delete_files):
         return 0, []
 
-    monkeypatch.setattr(chat_history, "_remove_sandboxes", remove_sandboxes)
+    monkeypatch.setattr(chat_history, "_remove_workdirs", remove_workdirs)
     monkeypatch.setattr(chat_history, "_cancel_active_generations", lambda _ids: None)
     monkeypatch.setattr(chat_history, "_cancel_research_runs", lambda _request, _ids: None)
     monkeypatch.setattr(chat_history, "_remove_thread_rag_data", lambda _ids, cutoff = None: None)
@@ -1351,7 +1351,7 @@ def test_the_clear_and_its_image_snapshot_share_one_threadpool_hop():
 def test_a_replay_finishes_a_reap_the_original_clear_died_before_running(monkeypatch, tmp_path):
     """A crash between the clear's commit and its thumbnail reap must not lose the reap.
 
-    The reap runs after the transaction, behind seconds of archive and sandbox cleanup. Killed
+    The reap runs after the transaction, behind seconds of archive and workdir cleanup. Killed
     in that window the operation is already recorded, so the retry the frontend sends replays
     -- and a replay deliberately reaps nothing, because the chats created since the original
     clear are not its to take. The thumbnails of every deleted chat then stay on disk for good,
@@ -1388,10 +1388,10 @@ def test_a_replay_finishes_a_reap_the_original_clear_died_before_running(monkeyp
 
     monkeypatch.setattr(search_images, "clear_cache", reap)
 
-    async def remove_sandboxes(_thread_ids, _delete_files):
+    async def remove_workdirs(_thread_ids, _delete_files):
         return 0, []
 
-    monkeypatch.setattr(chat_history, "_remove_sandboxes", remove_sandboxes)
+    monkeypatch.setattr(chat_history, "_remove_workdirs", remove_workdirs)
     monkeypatch.setattr(chat_history, "_cancel_active_generations", lambda _ids: None)
     monkeypatch.setattr(chat_history, "_cancel_research_runs", lambda _request, _ids: None)
     monkeypatch.setattr(chat_history, "_remove_thread_rag_data", lambda _ids, cutoff = None: None)
@@ -1450,10 +1450,10 @@ def test_a_plain_replay_with_nothing_outstanding_still_reaps_nothing(monkeypatch
     reaps: list = []
     monkeypatch.setattr(search_images, "clear_cache", lambda only_ids = None: reaps.append(only_ids))
 
-    async def remove_sandboxes(_thread_ids, _delete_files):
+    async def remove_workdirs(_thread_ids, _delete_files):
         return 0, []
 
-    monkeypatch.setattr(chat_history, "_remove_sandboxes", remove_sandboxes)
+    monkeypatch.setattr(chat_history, "_remove_workdirs", remove_workdirs)
     monkeypatch.setattr(chat_history, "_cancel_active_generations", lambda _ids: None)
     monkeypatch.setattr(chat_history, "_cancel_research_runs", lambda _request, _ids: None)
     monkeypatch.setattr(chat_history, "_remove_thread_rag_data", lambda _ids, cutoff = None: None)

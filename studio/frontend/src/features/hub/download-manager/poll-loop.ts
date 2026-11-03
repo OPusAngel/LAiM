@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   carriesOverSeed,
   idleProbeVerdict,
@@ -298,7 +299,7 @@ export function finalize(
     const rawError =
       typeof opts.error === "string" && opts.error
         ? opts.error
-        : "Download failed";
+        : translate("uxHub.downloadFailedfnldi");
     patchJob(key, {
       state: "error",
       error:
@@ -968,7 +969,7 @@ function applyCancelResult(
     );
   } else if (live?.pollingStarted) {
     patchJob(key, { state: "running" });
-    toast.error("Couldn't cancel the download. It's still running.");
+    toast.error(translate("uxHub.couldnTCancelThe67s6e"));
   } else {
     finalize(key, "cancelled");
   }
@@ -1078,7 +1079,7 @@ export async function cancelJob(key: string): Promise<void> {
       live.cancelRequested = false;
     }
     patchJob(key, { state: "running" });
-    toast.error("Couldn't cancel the download. It's still running.");
+    toast.error(translate("uxHub.couldnTCancelThe67s6e"));
     console.warn("Failed to cancel download", err);
   }
 }

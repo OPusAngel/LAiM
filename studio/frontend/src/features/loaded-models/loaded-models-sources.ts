@@ -6,6 +6,7 @@
 // common row shape. Pure and React-free so node --test can import them; the types
 // come from each feature's own module because the indexes re-export their pages.
 
+import { translate } from "@/i18n";
 import {
   AUDIO_CPP_AUDIO_TYPES,
   audioCppDictationModelFor,
@@ -100,24 +101,24 @@ export function loadedModelTarget(
     // An Audio page already on a workflow this model runs stays there: switching it would
     // also stop a generation running on that workflow.
     if (currentAudioWorkflow && workflows.includes(currentAudioWorkflow)) {
-      return { open: "route", to: "/audio", label: "Audio" };
+      return { open: "route", to: "/audio", label: translate("shell.navigation.audio") };
     }
     return {
       open: "route",
       to: "/audio",
       search: { workflow: workflows[0] },
-      label: "Audio",
+      label: translate("shell.navigation.audio"),
     };
   }
   switch (source) {
     case "image":
-      return { open: "route", to: "/images", label: "Images" };
+      return { open: "route", to: "/images", label: translate("composer.pill.images") };
     case "video":
-      return { open: "route", to: "/video", label: "Video" };
+      return { open: "route", to: "/video", label: translate("shell.navigation.video") };
     case "stt":
-      return { open: "settings", tab: "voice", label: "Voice settings" };
+      return { open: "settings", tab: "voice", label: translate("uxLoadedmodels.voiceSettingsc7p59") };
     default:
-      return { open: "route", to: "/chat", label: "Chat" };
+      return { open: "route", to: "/chat", label: translate("shell.commandPalette.chat") };
   }
 }
 
@@ -132,7 +133,7 @@ export const LOADED_MODEL_KIND_LABELS: Record<LoadedModelKind, string> = {
 const AUDIO_WORKFLOW_KIND_LABELS: Partial<Record<AudioWorkflowId, string>> = {
   music: "Music",
   separate: "Separation",
-  convert: "Voice conversion",
+  get convert() { return translate("uxLoadedmodels.voiceConversionq3ss5"); },
 };
 
 export function loadedModelKindLabel(
@@ -248,7 +249,7 @@ export function describeInferenceStatus(
       kind: "text",
       source: "chat",
       name,
-      detail: "Still in memory",
+      get detail() { return translate("uxLoadedmodels.stillInMemory4oqnh"); },
       inactive: true,
     });
   }

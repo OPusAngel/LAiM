@@ -234,7 +234,7 @@ export function AboutTab() {
         </SettingsRow>
         <SettingsRow label={t("settings.about.feedback")}>
           <a
-            href="https://github.com/LAiMai/LAiM/issues"
+            href="https://github.com/OPusAngel/LAiM/issues"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"
@@ -255,7 +255,7 @@ export function AboutTab() {
           description={t("settings.about.license.studioDescription")}
         >
           <a
-            href="https://github.com/LAiMai/LAiM/blob/main/studio/LICENSE.AGPL-3.0"
+            href="https://github.com/OPusAngel/LAiM/blob/main/studio/LICENSE.AGPL-3.0"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1 font-mono text-xs font-medium text-muted-foreground hover:text-foreground"
@@ -269,7 +269,7 @@ export function AboutTab() {
           description={t("settings.about.license.libraryDescription")}
         >
           <a
-            href="https://github.com/LAiMai/LAiM/blob/main/LICENSE"
+            href="https://github.com/OPusAngel/LAiM/blob/main/LICENSE"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1 font-mono text-xs font-medium text-muted-foreground hover:text-foreground"

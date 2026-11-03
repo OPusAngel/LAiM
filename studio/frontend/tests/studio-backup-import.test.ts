@@ -191,7 +191,7 @@ function backup() {
       id: "t1",
       title: "Trip plan",
       modelType: "base",
-      modelId: "LAiM/gemma",
+      modelId: "unsloth/gemma",
       projectId: "p1",
       archived: false,
       createdAt: 1000,
@@ -242,7 +242,7 @@ test("a Studio backup restores one chat per thread, with titles, branches, archi
   assert.notEqual(trip.id, "t1");
   assert.equal(trip.archived, false);
   assert.equal(trip.projectId, "p1");
-  assert.equal(trip.modelId, "LAiM/gemma");
+  assert.equal(trip.modelId, "unsloth/gemma");
   assert.equal(trip.createdAt, 1000);
   assert.equal(trip.updatedAt, 1500);
   assert.equal(trip.openaiCodeExecContainerId, undefined);

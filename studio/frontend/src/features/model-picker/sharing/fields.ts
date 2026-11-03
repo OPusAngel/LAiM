@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { formatExtraArgs } from "../model-config/llama-extra-args";
 import {
   type PerModelConfig,
@@ -61,79 +62,101 @@ type Field = { label: string; valid: Validator; error?: string };
 
 export const SHARED_CONFIG_FIELDS: Record<SharedConfigKey, Field> = {
   customContextLength: {
-    label: "Context length",
+    get label() {
+      return translate("studio.progress.contextLength");
+    },
     valid: nullable((value) =>
       integer(value, CONTEXT_LENGTH_MIN, 2_147_483_647),
     ),
   },
-  kvCacheDtype: { label: "KV cache type", valid: cacheType },
+  kvCacheDtype: { get label() { return translate("uxModelpicker.kVCacheTypet1r3j"); }, valid: cacheType },
   speculativeType: {
-    label: "Speculative decoding",
+    get label() {
+      return translate("uxModelpicker.speculativeDecoding1o3kv");
+    },
     valid: nullable((value) => choice(value, SPECULATIVE_TYPES)),
   },
   specDraftNMax: {
-    label: "Draft tokens",
+    get label() {
+      return translate("studio.params.drafterDraftSteps");
+    },
     valid: nullable((value) => integer(value, 1, 16)),
   },
-  specDraftCacheDtype: { label: "Draft KV cache type", valid: cacheType },
+  specDraftCacheDtype: { get label() { return translate("uxModelpicker.draftKVCacheType1g3ej"); }, valid: cacheType },
   nParallel: {
-    label: "Parallel slots",
+    get label() {
+      return translate("uxModelpicker.parallelSlots1g55r");
+    },
     valid: nullable((value) => integer(value, N_PARALLEL_MIN, N_PARALLEL_MAX)),
   },
   reasoningBudget: {
-    label: "Reasoning budget",
+    get label() {
+      return translate("uxModelpicker.reasoningBudget1c693");
+    },
     valid: (value) => integer(value, -1, 2_147_483_647),
   },
   reasoningBudgetMessage: {
-    label: "Reasoning budget message",
+    get label() {
+      return translate("uxModelpicker.reasoningBudgetMessage1jphg");
+    },
     valid: (value) => value === "",
-    error:
-      "Custom reasoning messages cannot be shared through links. Configure them locally instead.",
+    get error() { return translate("uxModelpicker.customReasoningMessagesCannotmtvdd"); },
   },
   nBatch: {
-    label: "Batch size",
+    get label() {
+      return translate("studio.progress.batchSize");
+    },
     valid: nullable((value) => integer(value, N_BATCH_MIN, N_BATCH_MAX)),
   },
   nUbatch: {
-    label: "Micro-batch size",
+    get label() {
+      return translate("uxModelpicker.microBatchSizem7jqp");
+    },
     valid: nullable((value) => integer(value, N_BATCH_MIN, N_BATCH_MAX)),
   },
   loadMode: {
-    label: "Load mode",
+    get label() {
+      return translate("uxModelpicker.loadModejsb1k");
+    },
     valid: nullable((value) => choice(value, LOAD_MODES)),
   },
   ctxCheckpoints: {
-    label: "Context checkpoints",
+    get label() {
+      return translate("uxModelpicker.contextCheckpoints1lpyy");
+    },
     valid: nullable((value) =>
       integer(value, CTX_CHECKPOINTS_MIN, CTX_CHECKPOINTS_MAX),
     ),
   },
   cacheRam: {
-    label: "Prompt cache RAM",
+    get label() {
+      return translate("uxModelpicker.promptCacheRAM9nwrz");
+    },
     valid: nullable((value) => integer(value, CACHE_RAM_MIN, CACHE_RAM_MAX)),
   },
-  tensorParallel: { label: "Tensor parallel", valid: boolean },
-  disableVision: { label: "Disable vision", valid: boolean },
+  tensorParallel: { get label() { return translate("uxModelpicker.tensorParallel1alwm"); }, valid: boolean },
+  disableVision: { get label() { return translate("uxModelpicker.disableVision2tk57"); }, valid: boolean },
   llamaExtraArgs: {
-    label: "Extra arguments",
+    get label() {
+      return translate("uxModelpicker.extraArguments1b2m7");
+    },
     valid: nullable(validSharedExtraArgs),
-    error:
-      "Shared extra arguments require supported inference options and valid values. File, network, tool and template options cannot be shared.",
+    get error() { return translate("uxModelpicker.sharedExtraArgumentsRequirev0hgf"); },
   },
   gpuMemoryMode: {
-    label: "GPU memory mode",
+    get label() { return translate("uxModelpicker.gPUMemoryModelntia"); },
     valid: (value) => value === "auto" || value === "manual",
   },
   gpuLayers: {
-    label: "GPU layers",
+    get label() { return translate("uxModelpicker.gPULayers5k5qy"); },
     valid: (value) => integer(value, -1, 2_147_483_647),
   },
   nCpuMoe: {
-    label: "CPU MoE layers",
+    get label() { return translate("uxModelpicker.cPUMoELayers9hxml"); },
     valid: (value) => integer(value, 0, 2_147_483_647),
   },
   selectedGpuIds: {
-    label: "GPU devices",
+    get label() { return translate("uxModelpicker.gPUDevicesmrcra"); },
     valid: nullable(
       (value) =>
         Array.isArray(value) &&
@@ -144,7 +167,7 @@ export const SHARED_CONFIG_FIELDS: Record<SharedConfigKey, Field> = {
     ),
   },
   selectedGpuIndexKind: {
-    label: "GPU device index type",
+    get label() { return translate("uxModelpicker.gPUDeviceIndexTypeiiu3c"); },
     valid: nullable((value) => value === "physical" || value === "vulkan"),
   },
 };
@@ -162,7 +185,7 @@ export function formatSharedConfigValue(
   config: Partial<PerModelConfig>,
 ): string {
   if (key === "llamaExtraArgs") {
-    return formatExtraArgs(config.llamaExtraArgs) || "No extra arguments";
+    return formatExtraArgs(config.llamaExtraArgs) || translate("uxModelpicker.noExtraArguments1dzfd");
   }
   const value = config[key];
   return value == null

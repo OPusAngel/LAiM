@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { useId, useState } from "react";
 import { Checkbox as CheckboxPrimitive } from "radix-ui";
 import {
@@ -69,24 +70,24 @@ function DownloadChoice({
   const assets = additionalAssetDownloads(entries);
   const checkpoints = entries.filter((e) => e.checkpoint !== false);
   const modelSize = checkpoints.some((e) => e.bytes <= 0)
-    ? "Size unknown"
+    ? translate("uxHub.sizeUnknown1c2w0")
     : formatDownloadBytes(downloadBytes(checkpoints));
   const fullSize = entries.some((e) => e.bytes <= 0)
-    ? "Size unknown"
+    ? translate("uxHub.sizeUnknown1c2w0")
     : formatDownloadBytes(downloadBytes(entries));
   const displayName = modelLabel
     ?.replace(/^[^/]+\//, "")
     .replace(/-GGUF(?=\s|$)/i, "");
   const assetSize = assets.some((e) => e.bytes <= 0)
-    ? "Size unknown"
+    ? translate("uxHub.sizeUnknown1c2w0")
     : formatDownloadBytes(downloadBytes(assets));
   const total = includeAssets ? fullSize : modelSize;
   return (
     <AlertDialogContent className="sm:max-w-[calc(490px*var(--ui-space-scale,1))]">
       <AlertDialogHeader className="flex flex-row flex-wrap items-center justify-between gap-x-4 gap-y-2 text-left sm:group-data-[size=default]/alert-dialog-content:place-items-center">
-        <AlertDialogTitle className="shrink-0">Download model</AlertDialogTitle>
+        <AlertDialogTitle className="shrink-0">{translate("uxHub.downloadModelv28l0")}</AlertDialogTitle>
         <AlertDialogDescription className="min-w-0 text-xs break-words sm:ml-auto sm:text-right">
-          {displayName ?? "Choose which files to download."}
+          {displayName ?? translate("uxHub.chooseWhichFilesToc2umj")}
         </AlertDialogDescription>
       </AlertDialogHeader>
       <div
@@ -98,9 +99,7 @@ function DownloadChoice({
             role="status"
             className="absolute inset-0 flex items-center justify-center gap-3 text-muted-foreground"
           >
-            <span className="size-4 animate-spin rounded-full border-2 border-current border-r-transparent" />
-            Checking required files…
-          </div>
+            <span className="size-4 animate-spin rounded-full border-2 border-current border-r-transparent" />{translate("uxHub.checkingRequiredFileshtdza")}</div>
         )}
         <div
           className="space-y-4"
@@ -108,7 +107,7 @@ function DownloadChoice({
         >
           {(checkpoints.length > 0 || checking) && (
             <div className="flex justify-between gap-4">
-              <span>Model files</span>
+              <span>{translate("uxHub.modelFilescrf8w")}</span>
               <span className="tabular-nums">
                 {formatDownloadBytes(downloadBytes(checkpoints))}
               </span>
@@ -142,7 +141,7 @@ function DownloadChoice({
               </svg>
             </CheckboxPrimitive.Root>
             <label htmlFor={choiceId} className="cursor-pointer">
-              Include required files
+              {translate("uxHub.includeRequiredFileszk90d")}
             </label>
             <span className="ml-auto shrink-0 tabular-nums">{assetSize}</span>
           </div>
@@ -159,15 +158,13 @@ function DownloadChoice({
               </li>
             ))}
           </ul>
-          <p className="text-xs leading-relaxed text-muted-foreground">
-            Required to run · Shared across compatible variants
-          </p>
+          <p className="text-xs leading-relaxed text-muted-foreground">{translate("uxHub.requiredToRunSharedixkau")}</p>
           <div className="flex justify-between border-t pt-4 font-medium">
-            <span>Total download</span>
+            <span>{translate("uxHub.totalDownload2av56")}</span>
             <span className="tabular-nums">{total}</span>
           </div>
           <p className="text-xs text-muted-foreground">
-            Downloading will not load this model or switch your current model.
+            {translate("uxHub.downloadingWillNotLoad1q8kl")}
           </p>
         </div>
       </div>

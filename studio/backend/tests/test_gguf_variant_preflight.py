@@ -12,7 +12,7 @@ import utils.hf_cache_settings as hf_cache_settings
 import utils.models.model_config as mc
 from utils.models.model_config import GgufVariantInfo, ModelConfig
 
-REPO = "LAiM/Llama-3.2-1B-Instruct-GGUF"
+REPO = "unsloth/Llama-3.2-1B-Instruct-GGUF"
 
 REPO_FILES = [
     "Llama-3.2-1B-Instruct-Q4_K_M.gguf",

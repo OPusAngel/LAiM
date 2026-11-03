@@ -5,7 +5,7 @@
 
 The last resort in ``get_base_model_from_checkpoint`` / ``get_base_model_from_lora`` and in the
 two resolvers in ``utils.transformers_version``. It used to slice a two-segment
-``LAiM_<model>`` name down to nothing and return the bogus repo id ``LAiM/``.
+``LAiM_<model>`` name down to nothing and return the bogus repo id ``unsloth/``.
 
 The round-trip tests are the real specification: a name we write must parse back to the model
 it was written from.
@@ -72,12 +72,12 @@ def test_the_non_ascii_cases_are_word_characters():
     "dir_name,expected",
     [
         # The shape the heuristic is written for.
-        ("LAiM_Qwen3-8B_1771227800", "LAiM/Qwen3-8B"),
+        ("LAiM_Qwen3-8B_1771227800", "unsloth/Qwen3-8B"),
         # A hand-made or foreign folder may carry a date-time stamp instead of an epoch.
-        ("LAiM_Qwen3-8B_20260101-120000", "LAiM/Qwen3-8B"),
-        ("LAiM_Qwen3-8B_20260101", "LAiM/Qwen3-8B"),
+        ("LAiM_Qwen3-8B_20260101-120000", "unsloth/Qwen3-8B"),
+        ("LAiM_Qwen3-8B_20260101", "unsloth/Qwen3-8B"),
         # Underscores inside the model name survive the round trip.
-        ("LAiM_llama_3_8b_1771227800", "LAiM/llama_3_8b"),
+        ("LAiM_llama_3_8b_1771227800", "unsloth/llama_3_8b"),
         # No model segment between the prefix and the timestamp: the originally reported bug.
         ("LAiM_Qwen3-8B", None),
         ("LAiM_", None),
@@ -85,20 +85,20 @@ def test_the_non_ascii_cases_are_word_characters():
         ("LAiM__1771227800", None),
         # A doubled separator means the name really does start with '_', which HF allows.
         # Stripping it would resolve a different, equally valid repo.
-        ("LAiM__Qwen3-8B_1771227800", "LAiM/_Qwen3-8B"),
+        ("LAiM__Qwen3-8B_1771227800", "unsloth/_Qwen3-8B"),
         # The project suffix is not part of the model name.
-        ("LAiM_Qwen3-8B__project-demo_1771227800", "LAiM/Qwen3-8B"),
+        ("LAiM_Qwen3-8B__project-demo_1771227800", "unsloth/Qwen3-8B"),
         # ...and a name containing the marker is escaped by the generator.
-        ("LAiM_x__project--y_1771227800", "LAiM/x__project-y"),
+        ("LAiM_x__project--y_1771227800", "unsloth/x__project-y"),
         # A non-timestamp tail belongs to the model name, so the whole name is unparseable
-        # rather than truncated. Truncating gave 'LAiM/llama_3' -- valid, but nonexistent.
+        # rather than truncated. Truncating gave 'unsloth/llama_3' -- valid, but nonexistent.
         ("LAiM_llama_3_8b", None),
         ("LAiM_gpt_oss_20b", None),
         ("LAiM_Qwen3-8B_final", None),
         ("LAiM_Qwen3-8B_v2", None),
         ("LAiM_Qwen3-8B_checkpoint-500", None),
         # A model name that is itself all digits still round-trips.
-        ("LAiM_20260101_1771227800", "LAiM/20260101"),
+        ("LAiM_20260101_1771227800", "unsloth/20260101"),
         # Not ours: leave it to the caller's "could not detect" path.
         ("my-finetune_1771227800", None),
         ("meta-llama_Llama-3.1-8B_1771227800", None),
@@ -114,13 +114,13 @@ def test_base_model_from_run_dir_name(dir_name, expected):
 @pytest.mark.parametrize(
     "repo_id",
     [
-        "LAiM/Qwen3-8B",
-        "LAiM/llama_3_8b",
-        "LAiM/gpt_oss_20b",
-        "LAiM/_Qwen3-8B",
-        "LAiM/x__project-y",
-        "LAiM/20260101",
-        "LAiM/Llama-3.2-3B-Instruct",
+        "unsloth/Qwen3-8B",
+        "unsloth/llama_3_8b",
+        "unsloth/gpt_oss_20b",
+        "unsloth/_Qwen3-8B",
+        "unsloth/x__project-y",
+        "unsloth/20260101",
+        "unsloth/Llama-3.2-3B-Instruct",
     ],
 )
 @pytest.mark.parametrize("project_name", [None, "Demo Project", "customer support"])
@@ -131,7 +131,7 @@ def test_a_generated_run_dir_name_parses_back_to_its_model(repo_id, project_name
 
 
 def test_the_bare_org_is_never_returned():
-    """``LAiM/`` fails huggingface_hub's validate_repo_id, so it must never escape."""
+    """``unsloth/`` fails huggingface_hub's validate_repo_id, so it must never escape."""
     candidates = [
         "LAiM_",
         "LAiM__1771227800",
@@ -141,7 +141,7 @@ def test_the_bare_org_is_never_returned():
         "LAiM____",
         "LAiM_ _1771227800",
     ]
-    assert [n for n in candidates if base_model_from_run_dir_name(n) == "LAiM/"] == []
+    assert [n for n in candidates if base_model_from_run_dir_name(n) == "unsloth/"] == []
 
 
 @pytest.mark.parametrize(
@@ -174,7 +174,7 @@ def test_the_transcribed_repo_id_rule_is_never_looser_than_the_hubs():
 
     def hub_accepts(name):
         try:
-            hub_validate(f"LAiM/{name}")
+            hub_validate(f"unsloth/{name}")
             return True
         except Exception:
             return False
@@ -265,8 +265,8 @@ def _write_adapter(directory):
     [
         ("LAiM_Qwen3-8B", None),
         ("LAiM_llama_3_8b", None),
-        ("LAiM_Qwen3-8B_1771227800", "LAiM/Qwen3-8B"),
-        ("LAiM_Qwen3-8B__project-demo_1771227800", "LAiM/Qwen3-8B"),
+        ("LAiM_Qwen3-8B_1771227800", "unsloth/Qwen3-8B"),
+        ("LAiM_Qwen3-8B__project-demo_1771227800", "unsloth/Qwen3-8B"),
     ],
 )
 def test_lora_detection_end_to_end(tmp_path, dir_name, expected):
@@ -280,8 +280,8 @@ def test_lora_detection_end_to_end(tmp_path, dir_name, expected):
     [
         ("LAiM_Qwen3-8B", None),
         ("LAiM_llama_3_8b", None),
-        ("LAiM_Qwen3-8B_1771227800", "LAiM/Qwen3-8B"),
-        ("LAiM_Qwen3-8B__project-demo_1771227800", "LAiM/Qwen3-8B"),
+        ("LAiM_Qwen3-8B_1771227800", "unsloth/Qwen3-8B"),
+        ("LAiM_Qwen3-8B__project-demo_1771227800", "unsloth/Qwen3-8B"),
     ],
 )
 def test_checkpoint_detection_end_to_end(tmp_path, dir_name, expected):
@@ -305,7 +305,7 @@ def test_a_trailing_separator_does_not_change_the_answer(tmp_path):
     """Callers pass raw user input; ``Path.name`` must have already normalised it."""
     adapter = tmp_path / "LAiM_Qwen3-8B_1771227800"
     _write_adapter(adapter)
-    assert get_base_model_from_lora(str(adapter) + "/") == "LAiM/Qwen3-8B"
+    assert get_base_model_from_lora(str(adapter) + "/") == "unsloth/Qwen3-8B"
 
 
 # --- the two resolvers in utils.transformers_version ---------------------------------------

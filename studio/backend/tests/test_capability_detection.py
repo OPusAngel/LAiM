@@ -256,7 +256,7 @@ def test_gpu_estimate_probe_is_code_free():
             side_effect = AssertionError("AutoConfig must not be called"),
         ),
     ):
-        out = hardware._load_config_for_gpu_estimate("LAiM/GLM-4.7-Flash")
+        out = hardware._load_config_for_gpu_estimate("unsloth/GLM-4.7-Flash")
     assert out.max_position_embeddings == 8192
     assert out.hidden_size == 4096
 

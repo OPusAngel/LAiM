@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   Combobox,
   ComboboxContent,
@@ -73,7 +74,7 @@ export function InlineLlm({ config, onUpdate }: InlineLlmProps): ReactElement {
 
   return (
     <div className="space-y-3">
-      <InlineField label="Model alias">
+      <InlineField label={translate("uxRecipestudio.modelAlias1lkgr")}>
         <div ref={anchorRef}>
           <Combobox
             items={modelConfigAliases}
@@ -94,7 +95,7 @@ export function InlineLlm({ config, onUpdate }: InlineLlmProps): ReactElement {
           >
             <ComboboxInput
               className="nodrag h-8 w-full text-xs"
-              placeholder="Model alias"
+              placeholder={translate("uxRecipestudio.modelAlias1lkgr")}
               onBlur={() => {
                 const next = aliasInputRef.current;
                 if (next !== config.model_alias) {
@@ -106,7 +107,7 @@ export function InlineLlm({ config, onUpdate }: InlineLlmProps): ReactElement {
               }}
             />
             <ComboboxContent anchor={anchorRef}>
-              <ComboboxEmpty>No model configs found</ComboboxEmpty>
+              <ComboboxEmpty>{translate("uxCopy.noModelConfigsFound1edqo")}</ComboboxEmpty>
               <ComboboxList>
                 {(alias: string) => (
                   <ComboboxItem key={alias} value={alias}>
@@ -118,7 +119,7 @@ export function InlineLlm({ config, onUpdate }: InlineLlmProps): ReactElement {
           </Combobox>
         </div>
       </InlineField>
-      <InlineField label="Tool profile">
+      <InlineField label={translate("uxRecipestudio.toolProfile15y33")}>
         <div ref={toolAnchorRef}>
           <Combobox
             items={toolProfileAliases}
@@ -136,7 +137,7 @@ export function InlineLlm({ config, onUpdate }: InlineLlmProps): ReactElement {
           >
             <ComboboxInput
               className="nodrag h-8 w-full text-xs"
-              placeholder="Tool profile"
+              placeholder={translate("uxRecipestudio.toolProfile15y33")}
               onBlur={(event) => {
                 const next = event.target.value;
                 if (next !== (config.tool_alias ?? "")) {
@@ -148,7 +149,7 @@ export function InlineLlm({ config, onUpdate }: InlineLlmProps): ReactElement {
               }}
             />
             <ComboboxContent anchor={toolAnchorRef}>
-              <ComboboxEmpty>No tool profiles found</ComboboxEmpty>
+              <ComboboxEmpty>{translate("uxCopy.noToolProfilesFound7psgy")}</ComboboxEmpty>
               <ComboboxList>
                 {(alias: string) => (
                   <ComboboxItem key={alias} value={alias}>
@@ -161,7 +162,7 @@ export function InlineLlm({ config, onUpdate }: InlineLlmProps): ReactElement {
         </div>
       </InlineField>
       {isCode && (
-        <InlineField label="Code language">
+        <InlineField label={translate("uxRecipestudio.codeLanguage1nmd0")}>
           <Select
             value={config.code_lang?.trim() || "python"}
             onValueChange={(value) =>
@@ -172,7 +173,7 @@ export function InlineLlm({ config, onUpdate }: InlineLlmProps): ReactElement {
             }
           >
             <SelectTrigger className="nodrag h-8 w-full text-xs">
-              <SelectValue placeholder="Language" />
+              <SelectValue placeholder={translate("settings.appearance.language.title")} />
             </SelectTrigger>
             <SelectContent>
               {CODE_LANG_OPTIONS.map((lang) => (
@@ -185,7 +186,7 @@ export function InlineLlm({ config, onUpdate }: InlineLlmProps): ReactElement {
         </InlineField>
       )}
       <p className="text-ui-11 text-muted-foreground">
-        Prompt/system edited on aux nodes.
+        {translate("uxRecipestudio.promptSystemEditedOn1bks6")}
       </p>
     </div>
   );

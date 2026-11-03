@@ -105,7 +105,7 @@ def test_hint_diagnoses_and_links_rather_than_printing_a_command(helper, monkeyp
         helper(NotImplementedError(_NO_ACCELERATOR))
 
     message = str(excinfo.value)
-    assert "https://github.com/LAiMai/LAiM#-install" in message
+    assert "https://github.com/OPusAngel/LAiM#-install" in message
     assert sys.executable in message
     assert not re.search(
         r"pip install|--index-url|download\.pytorch\.org|--torch-backend|torch[<>=]", message

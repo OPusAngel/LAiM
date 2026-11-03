@@ -386,7 +386,7 @@ class FastQwen3Model(FastLlamaModel):
         fix_prepare_inputs_for_generation(Qwen3ForCausalLM)
 
         # Retain the old rotary embeddings: the static KV cache (transformers 4.38.0) slowed training.
-        # See LAiMai/LAiM#168 and huggingface/transformers#27931.
+        # See OPusAngel/LAiM#168 and huggingface/transformers#27931.
         import transformers.models.qwen3.modeling_qwen3
 
         transformers.models.qwen3.modeling_qwen3.Qwen3RotaryEmbedding = LlamaRotaryEmbedding

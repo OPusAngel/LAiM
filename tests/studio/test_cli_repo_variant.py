@@ -46,11 +46,11 @@ _split = _load_split_repo_variant()
     "model_arg, expected",
     [
         (
-            "LAiM/gpt-oss-20b-GGUF:UD-Q4_K_XL",
-            ("LAiM/gpt-oss-20b-GGUF", "UD-Q4_K_XL"),
+            "unsloth/gpt-oss-20b-GGUF:UD-Q4_K_XL",
+            ("unsloth/gpt-oss-20b-GGUF", "UD-Q4_K_XL"),
         ),
-        ("LAiM/gpt-oss-120b-GGUF:Q4_K_XL", ("LAiM/gpt-oss-120b-GGUF", "Q4_K_XL")),
-        ("LAiM/Qwen3-0.6B-GGUF:Q4_K_M", ("LAiM/Qwen3-0.6B-GGUF", "Q4_K_M")),
+        ("unsloth/gpt-oss-120b-GGUF:Q4_K_XL", ("unsloth/gpt-oss-120b-GGUF", "Q4_K_XL")),
+        ("unsloth/Qwen3-0.6B-GGUF:Q4_K_M", ("unsloth/Qwen3-0.6B-GGUF", "Q4_K_M")),
         ("org/repo:UD-Q5_K_M", ("org/repo", "UD-Q5_K_M")),
         ("org/repo:F16", ("org/repo", "F16")),
     ],
@@ -62,8 +62,8 @@ def test_repo_variant_split(model_arg, expected):
 @pytest.mark.parametrize(
     "model_arg",
     [
-        "LAiM/gpt-oss-20b-GGUF",
-        "LAiM/Qwen3-0.6B-GGUF",
+        "unsloth/gpt-oss-20b-GGUF",
+        "unsloth/Qwen3-0.6B-GGUF",
         "shorthand-no-org-no-colon",
     ],
 )

@@ -88,7 +88,7 @@ test("recalling a quantized model carries the selected adapters into its load", 
   };
   for (const quant of ["int8", "fp8"]) {
     const model = {
-      repoId: "LAiM/model-GGUF",
+      repoId: "unsloth/model-GGUF",
       kind: "gguf",
       filename: "model-Q8_0.gguf",
     };
@@ -235,7 +235,7 @@ test("recall keeps an explicit family and drops Auto", () => {
 
 test("recall keeps the exact GGUF artifact", () => {
   const model = {
-    repoId: "LAiM/model-GGUF",
+    repoId: "unsloth/model-GGUF",
     kind: "gguf" as const,
     filename: "model-Q4.gguf",
   };

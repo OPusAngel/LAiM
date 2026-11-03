@@ -127,12 +127,12 @@ test("an XET fallback does not price the retry against the dead run's bytes", ()
   // The reclaim recomputes completed_baseline_bytes from disk, so the retry
   // reports a 0.5 GB total with 0.1 GB moved and completed_bytes 0. Taking the
   // max against the held 3 GB read "0 B left" with 0.4 GB still to fetch.
-  const select = createLiveGgufVariantStatesSelector("LAiM/model-GGUF");
+  const select = createLiveGgufVariantStatesSelector("unsloth/model-GGUF");
   const states = select({
     jobs: {
       "model:LAiM/model-GGUF:Q4_K_M": {
         kind: "model",
-        repoId: "LAiM/model-GGUF",
+        repoId: "unsloth/model-GGUF",
         variant: "Q4_K_M",
         state: "running",
         expectedBytes: 0.5 * GB,
@@ -163,12 +163,12 @@ test("a retry that has not measured a byte yet keeps the backend remainder", () 
   // real downloaded_bytes 0 against a 0.5 GB total, behind which
   // resolveProgressUpdate holds the dead run's 3 GB. Pricing the remainder off
   // that held figure read "0 B left" with all 0.5 GB still to fetch.
-  const select = createLiveGgufVariantStatesSelector("LAiM/model-GGUF");
+  const select = createLiveGgufVariantStatesSelector("unsloth/model-GGUF");
   const states = select({
     jobs: {
       "model:LAiM/model-GGUF:Q4_K_M": {
         kind: "model",
-        repoId: "LAiM/model-GGUF",
+        repoId: "unsloth/model-GGUF",
         variant: "Q4_K_M",
         state: "running",
         expectedBytes: 0.5 * GB,
@@ -197,12 +197,12 @@ test("a retry that has not measured a byte yet keeps the backend remainder", () 
 });
 
 test("the retry prices itself off the first reading that does measure", () => {
-  const select = createLiveGgufVariantStatesSelector("LAiM/model-GGUF");
+  const select = createLiveGgufVariantStatesSelector("unsloth/model-GGUF");
   const states = select({
     jobs: {
       "model:LAiM/model-GGUF:Q4_K_M": {
         kind: "model",
-        repoId: "LAiM/model-GGUF",
+        repoId: "unsloth/model-GGUF",
         variant: "Q4_K_M",
         state: "running",
         expectedBytes: 0.5 * GB,

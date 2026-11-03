@@ -23,15 +23,15 @@ COPYRIGHT = "Copyright 2026-Present the LAiM team"
 AGPL_NOTICE = "Licensed under Apache 2.0 and the GNU AGPLv3"
 WEBSITE_URL = "https://LAiM.ai"
 DOCS_URL = "https://LAiM.ai/docs"
-SOURCE_URL = "https://github.com/LAiMai/LAiM"
-LICENSE_URL = "https://github.com/LAiMai/LAiM#license"
+SOURCE_URL = "https://github.com/OPusAngel/LAiM"
+LICENSE_URL = "https://github.com/OPusAngel/LAiM#license"
 AGPL_URL = "https://www.gnu.org/licenses/agpl-3.0.html"
 APACHE_URL = "https://www.apache.org/licenses/LICENSE-2.0"
 # ONE literal, byte-identical to PHRASE in LAiM_labext/src/branding.ts
 PHRASE = (
     "LAiM Docker Studio and JupyterLab image. Built by the LAiM team. "
     "Licensed under Apache 2.0 and the GNU AGPLv3. "
-    "Source: https://github.com/LAiMai/LAiM Website: https://LAiM.ai"
+    "Source: https://github.com/OPusAngel/LAiM Website: https://LAiM.ai"
 )
 
 THEME_NAME = "LAiM Dark"

@@ -250,7 +250,7 @@ def test_it_chains_the_original():
 def test_no_kaggle_disk_message_is_left_ungated():
     """The outer gate cannot undo a disk explanation already baked into the
     inner RuntimeError's message, so save_to_gguf's own missing-output and
-    quantize handlers have to make the same check. LAiMai/LAiM#835."""
+    quantize handlers have to make the same check. OPusAngel/LAiM#835."""
     import ast
 
     src = Path(save.__file__).read_text(encoding = "utf-8")

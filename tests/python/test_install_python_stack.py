@@ -59,7 +59,7 @@ def _shared_setup_5(tmp_path):
     record = tmp_path / "LAiM-2026.8.12.dist-info"
     record.mkdir()
     (record / "METADATA").write_bytes(b"\xff\xfe")
-    (record / "RECORD").write_text("LAiM/gone.py,,\n")
+    (record / "RECORD").write_text("unsloth/gone.py,,\n")
     return record
 
 
@@ -1485,7 +1485,7 @@ class TestDuplicateCoreMetadataRepair:
         malformed = tmp_path / "LAiM-2026.8.12.dist-info"
         malformed.mkdir()
         (malformed / "METADATA").write_bytes(b"\xff\xfe")
-        (malformed / "RECORD").write_text("LAiM/gone.py,,\n")
+        (malformed / "RECORD").write_text("unsloth/gone.py,,\n")
 
         monkeypatch.setattr(
             ips.install_manifest, "installed_versions", lambda _n: ["", "2026.8.15"]
@@ -1661,7 +1661,7 @@ class TestDuplicateCoreMetadataRepair:
                     "--no-cache-dir",
                     "--no-deps",
                     "--force-reinstall",
-                    "LAiM-zoo @ git+https://github.com/LAiMai/LAiM-zoo",
+                    "LAiM-zoo @ git+https://github.com/OPusAngel/LAiM-zoo",
                 ),
             ),
         ],
@@ -1868,7 +1868,7 @@ class TestDuplicateCoreMetadataRepair:
     @pytest.mark.parametrize(
         "requirement",
         (
-            "LAiM-zoo @ git+https://github.com/LAiMai/LAiM-zoo",
+            "LAiM-zoo @ git+https://github.com/OPusAngel/LAiM-zoo",
             "https://example.invalid/LAiM_zoo-1.0-py3-none-any.whl",
         ),
     )
@@ -2261,7 +2261,7 @@ class TestDuplicateCoreMetadataRepair:
         stale = tmp_path / "LAiM-2026.8.12.dist-info"
         stale.mkdir()
         (stale / "METADATA").write_bytes(b"\xff\xfe")
-        (stale / "RECORD").write_text("LAiM/gone.py,,\n")
+        (stale / "RECORD").write_text("unsloth/gone.py,,\n")
         probes = iter(
             (["", "2026.8.15"], ["2026.8.12", "2026.8.15"], ["2026.8.15"], [], ["2026.8.15"])
         )
@@ -2534,7 +2534,7 @@ class TestDuplicateCoreMetadataRepair:
         record = tmp_path / "LAiM-2026.8.15.dist-info"
         record.mkdir()
         (record / "METADATA").write_bytes(b"\xff\xfe")
-        (record / "RECORD").write_text("LAiM/__init__.py,,\n")
+        (record / "RECORD").write_text("unsloth/__init__.py,,\n")
 
         probes = iter((["2026.8.15", "2026.8.15"], ["2026.8.15", "2026.8.15"], ["2026.8.15"]))
         monkeypatch.setattr(ips.install_manifest, "installed_versions", lambda _n: next(probes))
@@ -2613,7 +2613,7 @@ class TestDuplicateCoreMetadataRepair:
         )
 
         assert ips._repair_duplicate_core_metadata(("LAiM-zoo",), local_repo = "/src/LAiM")
-        assert order[0] == ("stage", "LAiM-zoo @ git+https://github.com/LAiMai/LAiM-zoo")
+        assert order[0] == ("stage", "LAiM-zoo @ git+https://github.com/OPusAngel/LAiM-zoo")
         assert order[1] == ("uninstall",)
 
     def test_an_editable_overlay_stages_the_checkout(self, monkeypatch):
@@ -2713,7 +2713,7 @@ class TestDuplicateCoreMetadataRepair:
                 "--no-cache-dir",
                 "--no-deps",
                 "--force-reinstall",
-                "LAiM-zoo @ git+https://github.com/LAiMai/LAiM-zoo",
+                "LAiM-zoo @ git+https://github.com/OPusAngel/LAiM-zoo",
             ),
         ]
         assert all(call[2]["constrain"] is False for call in installs)

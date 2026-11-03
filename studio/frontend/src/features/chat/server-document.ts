@@ -5,6 +5,8 @@ import { getAuthSessionEpoch } from "@/features/auth";
 import { extractDocumentText } from "@/features/rag/api/rag-api";
 import { MAX_SERVER_DOCUMENT_BYTES } from "./open-document-accept";
 import { MAX_TEXT_ATTACHMENT_BYTES } from "./text-attachment-accept";
+import { translate } from "@/i18n";
+
 
 export class NoDocumentTextError extends Error {
   // Matched by name: runtime-provider loads this module lazily, so it cannot use instanceof.
@@ -22,7 +24,7 @@ async function extract(file: File): Promise<string> {
   const epoch = getAuthSessionEpoch();
   const sameAccount = () => {
     if (getAuthSessionEpoch() !== epoch) {
-      throw new Error("The account changed while reading the file.");
+      throw new Error(translate("uxChat.theAccountChangedWhileypv20"));
     }
   };
   let result: { text: string; truncated: boolean };

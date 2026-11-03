@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -99,7 +100,7 @@ export function MediaGenerationPresetControl({
           variant="outline"
           size="sm"
           disabled={!ready || saving}
-          aria-label={`Manage ${kind} generation presets`}
+          aria-label={translate("uxGenerationpresets.manageGenerationPresetstxoib", { p1: kind })}
           className={cn(
             "relative size-8 shrink-0 gap-1.5 rounded-full border-border/60 bg-background/70 p-0 text-xs font-medium shadow-none backdrop-blur-sm hover:bg-muted/70 sm:h-8 sm:w-auto sm:max-w-40 sm:px-2.5",
             open && "border-border bg-muted/70",
@@ -113,7 +114,7 @@ export function MediaGenerationPresetControl({
           {hasUnsavedChanges ? (
             <span
               className="absolute right-1 top-1 size-1.5 shrink-0 rounded-full bg-amber-500 ring-2 ring-background sm:static sm:ring-0"
-              aria-label="Modified"
+              aria-label={translate("library.toolbar.sortModified")}
             />
           ) : null}
           <ChevronDown
@@ -136,11 +137,11 @@ export function MediaGenerationPresetControl({
         <div className="shrink-0 border-b border-border/60 px-4 py-3.5">
           <div className="flex items-center justify-between gap-3">
             <p className="font-heading text-sm font-medium">
-              Generation presets
+              {translate("uxGenerationpresets.generationPresets150wu")}
             </p>
             {hasUnsavedChanges ? (
               <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-ui-10 font-medium text-amber-700 dark:text-amber-300">
-                Modified
+                {translate("library.toolbar.sortModified")}
               </span>
             ) : null}
           </div>
@@ -170,7 +171,7 @@ export function MediaGenerationPresetControl({
                   <span className="min-w-0 flex-1 truncate">{preset.name}</span>
                   {preset.name === DEFAULT_PRESET_NAME ? (
                     <span className="text-ui-10 font-normal text-muted-foreground">
-                      Built-in
+                      {translate("settings.appearance.custom.fontBundledGroup")}
                     </span>
                   ) : null}
                   {isActive ? (
@@ -187,7 +188,7 @@ export function MediaGenerationPresetControl({
             htmlFor={`${kind}-generation-preset-name`}
             className="mb-2 block text-xs font-medium"
           >
-            Save current settings
+            {translate("uxCopy.saveCurrentSettings1ylqq")}
           </label>
           <div className="flex gap-2">
             <Input
@@ -201,7 +202,7 @@ export function MediaGenerationPresetControl({
                   save().catch(() => undefined);
                 }
               }}
-              placeholder="Preset name"
+              placeholder={translate("uxGenerationpresets.presetNameo0iip")}
               maxLength={80}
               autoComplete="off"
               className="h-9 min-w-0 rounded-lg bg-background"
@@ -227,7 +228,7 @@ export function MediaGenerationPresetControl({
               className="mt-3 flex h-8 w-full items-center justify-center gap-1.5 rounded-lg text-xs text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
             >
               <ImageUp className="size-3.5" />
-              Load settings from an image
+              {translate("uxGenerationpresets.loadSettingsFromAnv6qwh")}
             </button>
           ) : null}
           {activeIsCustom ? (
@@ -238,7 +239,7 @@ export function MediaGenerationPresetControl({
               className="mt-3 flex h-8 w-full items-center justify-center gap-1.5 rounded-lg text-xs text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
             >
               <Trash2 className="size-3.5" />
-              Delete preset
+              {translate("uxGenerationpresets.deletePreset1i6mw")}
             </button>
           ) : null}
         </div>

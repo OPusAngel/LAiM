@@ -55,7 +55,7 @@ CATALOG = [
     },
     {
         "id": "Qwen3-0.6B-GGUF",
-        "checkpoint": "LAiM/Qwen3-0.6B-GGUF:Q4_0",
+        "checkpoint": "unsloth/Qwen3-0.6B-GGUF:Q4_0",
         "labels": ["chat"],
         "recipe": "llamacpp",
     },

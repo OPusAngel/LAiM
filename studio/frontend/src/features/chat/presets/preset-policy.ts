@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   DEFAULT_INFERENCE_PARAMS,
   type InferenceParams,
@@ -53,7 +54,7 @@ export function getUniquePresetName(
   baseName: string,
   usedNames: Set<string>,
 ): string {
-  const normalizedBase = baseName.trim() || "Imported Prompt";
+  const normalizedBase = baseName.trim() || translate("uxChat.importedPromptbz04e");
   let nextName = normalizedBase;
   let suffix = 2;
   while (usedNames.has(nextName)) {
@@ -68,7 +69,7 @@ export function getBuiltinVariantName(
   baseName: string,
   usedNames: Set<string>,
 ): string {
-  const normalizedBase = baseName.trim() || "Imported Prompt";
+  const normalizedBase = baseName.trim() || translate("uxChat.importedPromptbz04e");
   let suffix = 1;
   let nextName = `${normalizedBase} ${suffix}`;
   while (usedNames.has(nextName)) {
@@ -212,7 +213,7 @@ export function getPresetSaveState({
       canSubmit: false,
       isSaveReady: false,
       buttonLabel: "Save",
-      title: "Enter a preset name",
+      title: translate("uxChat.enterAPresetName5ddgj"),
     };
   }
 
@@ -231,8 +232,8 @@ export function getPresetSaveState({
           : "Save",
       title:
         activePreset === trimmedName && !hasUnsavedPresetChanges
-          ? "No unsaved changes"
-          : `Save current settings as "${variantName}"`,
+          ? translate("uxChat.noUnsavedChangeswl67z")
+          : translate("uxChat.saveCurrentSettingsAs2n5yv", { p1: variantName }),
     };
   }
 
@@ -246,9 +247,9 @@ export function getPresetSaveState({
       buttonLabel: isActiveMatch && !hasUnsavedPresetChanges ? "Saved" : "Save",
       title: isActiveMatch
         ? hasUnsavedPresetChanges
-          ? "Save current settings to this preset"
-          : "No unsaved changes"
-        : `Overwrite preset "${trimmedName}"`,
+          ? translate("uxChat.saveCurrentSettingsTo5laqj")
+          : translate("uxChat.noUnsavedChangeswl67z")
+        : translate("uxChat.overwritePresetxih0o", { p1: trimmedName }),
     };
   }
 
@@ -257,7 +258,7 @@ export function getPresetSaveState({
     canSubmit: true,
     isSaveReady: true,
     buttonLabel: "Save",
-    title: `Save current settings as "${trimmedName}"`,
+    get title() { return translate("uxChat.saveCurrentSettingsAsegnjd", { p1: trimmedName }); },
   };
 }
 

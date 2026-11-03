@@ -28,7 +28,7 @@ import { refreshContextUsage } from "@/features/chat/utils/refresh-context-usage
 import { formatBindingLabel, isMacPlatform } from "../lib/keyboard-shortcuts";
 import { useIsAccountOwner } from "@/features/auth";
 import { useUserProfileStore } from "@/features/profile";
-import { type TranslationKey, useT } from "@/i18n";
+import { translate, type TranslationKey, useT } from "@/i18n";
 import { toast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 import {
@@ -42,7 +42,6 @@ import {
   Telescope02Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { CursorInWindowIcon } from "@/lib/browser-use-icon";
 import { useNavigate } from "@tanstack/react-router";
 import { Columns2Icon } from "lucide-react";
 import { useEffect, useId, useState } from "react";
@@ -79,17 +78,6 @@ const PLUS_MENU_SETTINGS: {
     icon: (
       <HugeiconsIcon
         icon={Telescope02Icon}
-        strokeWidth={2}
-        className={PLUS_MENU_ICON_CLASS}
-      />
-    ),
-  },
-  {
-    id: "browserUse",
-    labelKey: "settings.chat.menu.browserUse",
-    icon: (
-      <HugeiconsIcon
-        icon={CursorInWindowIcon}
         strokeWidth={2}
         className={PLUS_MENU_ICON_CLASS}
       />
@@ -311,6 +299,16 @@ export function ChatTab() {
   );
   const searchImages = useChatRuntimeStore((state) => state.searchImages);
   const setSearchImages = useChatRuntimeStore((state) => state.setSearchImages);
+  const toolsEnabled = useChatRuntimeStore((state) => state.toolsEnabled);
+  const setToolsEnabled = useChatRuntimeStore(
+    (state) => state.setToolsEnabled,
+  );
+  const codeToolsEnabled = useChatRuntimeStore(
+    (state) => state.codeToolsEnabled,
+  );
+  const setCodeToolsEnabled = useChatRuntimeStore(
+    (state) => state.setCodeToolsEnabled,
+  );
   const hydratePersistedSettings = useChatRuntimeStore(
     (state) => state.hydratePersistedSettings,
   );
@@ -656,6 +654,26 @@ export function ChatTab() {
 
       <SettingsSection title={t("settings.chat.groups.display.title")}>
         <SettingsRow
+          label={t("settings.chat.webSearch.switch")}
+          description={t("settings.chat.webSearch.switchDescription")}
+        >
+          <Switch
+            aria-label={t("settings.chat.webSearch.switch")}
+            checked={toolsEnabled}
+            onCheckedChange={setToolsEnabled}
+          />
+        </SettingsRow>
+        <SettingsRow
+          label={t("settings.chat.codeTools.switch")}
+          description={t("settings.chat.codeTools.switchDescription")}
+        >
+          <Switch
+            aria-label={t("settings.chat.codeTools.switch")}
+            checked={codeToolsEnabled}
+            onCheckedChange={setCodeToolsEnabled}
+          />
+        </SettingsRow>
+        <SettingsRow
           label={t("settings.chat.webSearch.images")}
           description={t("settings.chat.webSearch.imagesDescription")}
         >
@@ -768,7 +786,7 @@ export function ChatTab() {
             checked={showModelDisclaimer}
             onCheckedChange={(checked) => {
               return saveModelDisclaimerPreference(checked).catch(() => {
-                toast.error("Could not save the model disclaimer setting.");
+                toast.error(translate("uxSettings.couldNotSaveThe1k72j"));
               });
             }}
           />

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { GithubIcon, PlayCircleIcon } from "@hugeicons/core-free-icons";
@@ -106,17 +107,13 @@ export function GithubCrawlerEasyView({
   if (!seedConfig) {
     return (
       <div className="flex h-full items-center justify-center px-6">
-        <p className="text-sm text-muted-foreground">
-          This recipe has no seed node. Switch to{" "}
-          <button
+        <p className="text-sm text-muted-foreground">{translate("uxRecipestudio.thisRecipeHasNoovi6i", { p1: " " })}<button
             type="button"
             className="underline hover:text-foreground"
             onClick={onSwitchToAdvanced}
           >
             Advanced
-          </button>{" "}
-          to configure it.
-        </p>
+          </button>{translate("uxRecipestudio.toConfigureItjqi15", { p1: " " })}</p>
       </div>
     );
   }
@@ -131,11 +128,8 @@ export function GithubCrawlerEasyView({
           <HugeiconsIcon icon={GithubIcon} className="size-5" />
         </div>
         <div className="flex-1 min-w-0">
-          <h2 className="text-base font-semibold">GitHub Crawler</h2>
-          <p className="text-xs text-muted-foreground">
-            Crawl real GitHub issues and PRs and turn each thread into a{" "}
-            <code>{"{User, Assistant}"}</code> training pair. Defaults use the
-            server's <code>GH_TOKEN</code> env var and the bundled local model.
+          <h2 className="text-base font-semibold">{translate("uxRecipestudio.gitHubCrawlers3mm0")}</h2>
+          <p className="text-xs text-muted-foreground">{translate("uxRecipestudio.crawlRealGitHubIssuespbzr1", { p1: " " })}<code>{"{User, Assistant}"}</code>{translate("uxRecipestudio.trainingPairDefaultsUsem07rd")}<code>GH_TOKEN</code> env var and the bundled local model.
           </p>
         </div>
       </div>
@@ -144,13 +138,13 @@ export function GithubCrawlerEasyView({
 
       <section className="space-y-3 border-t border-border/60 pt-4">
         <h3 className="text-xs font-semibold uppercase text-muted-foreground">
-          Run settings
+          {translate("uxModelpicker.runSettingsmw4kg")}
         </h3>
         <div className="grid gap-3 sm:grid-cols-[minmax(0,10rem)_minmax(0,1fr)]">
           <div className="grid gap-1.5">
             <FieldLabel
-              label="Rows to generate"
-              hint="How many training pairs the LLM should produce."
+              label={translate("uxRecipestudio.rowsToGenerateio7mr")}
+              hint={translate("uxRecipestudio.howManyTrainingPairsp2jef")}
             />
             <Input
               type="text"
@@ -185,11 +179,11 @@ export function GithubCrawlerEasyView({
           </div>
           <div className="grid gap-1.5">
             <FieldLabel
-              label="Model"
+              label={translate("settings.voice.dictation.customModelLabel")}
               hint={
                 isModelLinkedToLocal
-                  ? "Choose the local model this recipe should load."
-                  : "OpenAI-compatible model id."
+                  ? translate("uxRecipestudio.chooseTheLocalModel3p2h4")
+                  : translate("uxRecipestudio.openAICompatibleModelIdppth4")
               }
             />
             {isModelLinkedToLocal ? (
@@ -204,7 +198,7 @@ export function GithubCrawlerEasyView({
                 className="nodrag font-mono text-xs"
                 value={modelValue}
                 onChange={(event) => handleModelChange(event.target.value)}
-                placeholder="LAiM/gemma-4-E2B-it-GGUF"
+                placeholder={translate("uxRecipestudio.unslothGemma4E2Bjo31m")}
                 disabled={!modelConfig}
               />
             )}
@@ -214,7 +208,7 @@ export function GithubCrawlerEasyView({
 
       {runErrors.length > 0 && (
         <div className="rounded-lg border border-destructive/40 bg-destructive/5 px-3 py-2 text-xs text-destructive">
-          <p className="font-semibold">Cannot run:</p>
+          <p className="font-semibold">{translate("uxRecipestudio.cannotRunf5zme")}</p>
           <ul className="mt-1 list-disc space-y-0.5 pl-4">
             {runErrors.slice(0, 4).map((err) => (
               <li key={err}>{err}</li>
@@ -229,7 +223,7 @@ export function GithubCrawlerEasyView({
           className="text-xs text-muted-foreground underline hover:text-foreground"
           onClick={onSwitchToAdvanced}
         >
-          Advanced (drag and drop canvas)
+          {translate("uxCopy.advancedDragAndDrop29csh")}
         </button>
         <Button type="button" size="lg" onClick={onRun} disabled={runLoading}>
           <HugeiconsIcon icon={PlayCircleIcon} className="size-4" />

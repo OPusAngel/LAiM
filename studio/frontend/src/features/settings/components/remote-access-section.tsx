@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { useLoginMode } from "@/features/auth/account-session";
 import { Button } from "@/components/ui/button";
 import {
@@ -56,9 +57,9 @@ const OWNER_LABEL: Record<
   Exclude<RemoteAccessStatus["managedBy"], null>,
   string
 > = {
-  launch: "Launch managed",
-  settings: "Settings managed",
-  colab: "Colab managed",
+  get launch() { return translate("uxSettings.launchManagedhql43"); },
+  get settings() { return translate("uxSettings.settingsManageds3gwx"); },
+  get colab() { return translate("uxSettings.colabManaged6dmvt"); },
 };
 
 function stateDotClass(state?: RemoteAccessStatus["state"]): string {
@@ -134,9 +135,9 @@ function RemoteUrlQrButton({ url }: { url: string }) {
       </DialogTrigger>
       <DialogContent className="sm:max-w-xs">
         <DialogHeader>
-          <DialogTitle>Open on your phone</DialogTitle>
+          <DialogTitle>{translate("uxCopy.openOnYourPhone1hw3v")}</DialogTitle>
           <DialogDescription>
-            Scan to open the remote URL in your phone’s browser.
+            {translate("uxSettings.scanToOpenThe1v4g3")}
           </DialogDescription>
         </DialogHeader>
         <div className="mx-auto mt-2 rounded-md bg-[#f9e2de] p-3">
@@ -179,7 +180,7 @@ function RemoteUrlPanel({ url }: { url: string | null }) {
   return (
     <div className="flex flex-col gap-1.5 border-t border-border/60 p-4">
       <div className="flex items-center justify-between gap-3">
-        <span className="text-sm font-medium text-foreground">Remote URL</span>
+        <span className="text-sm font-medium text-foreground">{translate("uxSettings.remoteURLkh582")}</span>
         <div className="flex items-center gap-2">
           <RemoteUrlQrButton url={url} />
           <CopyRemoteUrlButton url={url} />
@@ -189,7 +190,7 @@ function RemoteUrlPanel({ url }: { url: string | null }) {
         {url}
       </code>
       <span className="text-xs text-muted-foreground leading-snug">
-        Anyone with this URL and the remote password can sign in.
+        {translate("uxSettings.anyoneWithThisURL1trw4")}
       </span>
     </div>
   );
@@ -209,7 +210,7 @@ function RemotePasswordRow({
   }
   return (
     <SettingsRow
-      label="Remote password"
+      label={translate("uxSettings.remotePassword3zr7e")}
       description={
         multi
           ? "This changes the installation owner's password. Every other account signs in with its own."
@@ -358,7 +359,7 @@ export function RemoteAccessSection() {
 
   return (
     <section
-      data-settings-label="Remote access"
+      data-settings-label={translate("uxSettings.remoteAccesspi2nc")}
       className="overflow-hidden rounded-lg border border-border/70"
     >
       <div className="flex items-center justify-between gap-4 bg-muted/30 p-4">
@@ -372,13 +373,12 @@ export function RemoteAccessSection() {
           <div className="flex min-w-0 flex-col gap-0.5">
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="settings-heading text-base font-semibold font-heading">
-                Remote access
+                {translate("uxSettings.remoteAccesspi2nc")}
               </h2>
               <AccessStatus status={status} />
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Use LAiM and its APIs from other devices through a secure,
-              temporary Cloudflare URL.
+              {translate("uxCopy.useLAiMAndIts1y0mz")}
             </p>
           </div>
         </div>
@@ -404,14 +404,14 @@ export function RemoteAccessSection() {
         <RemotePasswordRow status={status} onDone={refreshStatus} />
 
         <SettingsRow
-          label="Start automatically"
-          description="Create a new remote URL each time LAiM starts. Stopping remote access now won’t turn this off."
+          label={translate("uxSettings.startAutomaticallyc1rqr")}
+          description={translate("uxSettings.createANewRemote12pbr")}
         >
           <Switch
             checked={status?.autoStart ?? false}
             disabled={busy !== null || remoteAccessAutoStartReadOnly(status)}
             onCheckedChange={setAutoStart}
-            aria-label="Start automatically"
+            aria-label={translate("uxSettings.startAutomaticallyc1rqr")}
           />
         </SettingsRow>
       </div>

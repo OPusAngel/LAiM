@@ -10,7 +10,7 @@ of failing at load with "unsupported model family hint". It holds only for the t
 
 from __future__ import annotations
 
-# The LAiMai/audio.cpp releases whose model_specs/*.json stems equal the set below. Add a release
+# The unslothai/audio.cpp releases whose model_specs/*.json stems equal the set below. Add a release
 # here once its stems are checked equal; on any change, regenerate the set and keep only matching tags.
 AUDIO_CPP_SPEC_FAMILIES_TAGS = frozenset({"v0.9.0-LAiM.1", "v0.9.1-LAiM.1"})
 

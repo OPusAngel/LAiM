@@ -49,7 +49,7 @@ _ENV_KEYS = (
 
 RELEASE_TAG = "release-1"
 UPSTREAM_TAG = "b9001"
-PUBLISHED_REPO = "LAiMai/llama.cpp"
+PUBLISHED_REPO = "unslothai/llama.cpp"
 
 
 def make_host(**overrides) -> HostInfo:

@@ -509,7 +509,7 @@ def test_the_reported_regression_is_still_fixed(tmp_path):
     IS a verdict here and the stand-down must fire. If a tightening of the fit arm
     ever breaks this, LAiM is back to 3.11 token/s.
 
-    See https://huggingface.co/LAiM/Qwen3.8-27B-GGUF/discussions/18.
+    See https://huggingface.co/unsloth/Qwen3.8-27B-GGUF/discussions/18.
     """
     backend, gguf = _hybrid_mtp_backend(tmp_path, partial_offload = True)
 

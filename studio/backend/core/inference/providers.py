@@ -585,7 +585,7 @@ HOSTED_TOOL_NAMES: frozenset[str] = frozenset(
 # assume. web_search is unambiguous -- the hosted name and LAiM's own tool are
 # spelled the same, so naming it while the loop runs can only mean LAiM's.
 # code_execution is a different name from python/terminal precisely because it
-# is a different thing: it runs in the provider's sandbox, and LAiM has no
+# is a different thing: it runs in the provider's own hosted environment, and LAiM has no
 # implementation of it at all (see ALL_TOOLS). Treating it as "already replaced"
 # therefore substitutes nothing, it just drops the tool while its pill stays lit.
 LOCAL_STANDINS_FOR_HOSTED_TOOLS: dict[str, frozenset[str]] = {

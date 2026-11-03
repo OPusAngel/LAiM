@@ -55,7 +55,7 @@ def test_the_host_floor_tracks_the_components_the_load_holds():
 @pytest.mark.parametrize(
     "repo_id",
     [
-        "LAiM/LTX-2.3-GGUF",
+        "unsloth/LTX-2.3-GGUF",
         "Lightricks/LTX-2",
         "Lightricks/LTX-2.3-fp8",
         "lightricks/ltx-2.3",
@@ -82,7 +82,7 @@ def test_detect_override_and_unknown():
     [
         "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
         "wan-ai/wan2.2-ti2v-5b-diffusers",
-        "LAiM/Wan2.2-TI2V-5B-GGUF",
+        "unsloth/Wan2.2-TI2V-5B-GGUF",
         # The old curated repack: anyone who downloaded it still has it cached, so keep detecting it.
         "QuantStack/Wan2.2-TI2V-5B-GGUF",
         "some/dir/wan2.2-ti2v-5b-Q4_K_M.gguf",
@@ -132,7 +132,7 @@ def test_detect_wan_overrides():
 def test_wan_and_ltx_do_not_cross_route():
     # LTX ids must never resolve to a Wan family and vice versa (separate engines).
     assert detect_video_family("Lightricks/LTX-2").name == "ltx-2"
-    assert detect_video_family("LAiM/LTX-2.3-GGUF").name == "ltx-2"
+    assert detect_video_family("unsloth/LTX-2.3-GGUF").name == "ltx-2"
     assert detect_video_family("Wan-AI/Wan2.2-TI2V-5B-Diffusers").name == "wan2.2-ti2v-5b"
 
 
@@ -143,14 +143,14 @@ def test_sentinels_are_video_specific():
 
 
 def test_resolve_base_repo():
-    fam = detect_video_family("LAiM/LTX-2.3-GGUF")
+    fam = detect_video_family("unsloth/LTX-2.3-GGUF")
     assert resolve_video_base_repo(fam, None) == "Lightricks/LTX-2"
     assert resolve_video_base_repo(fam, "  ") == "Lightricks/LTX-2"
     assert resolve_video_base_repo(fam, "other/base") == "other/base"
 
 
 def test_snap_num_frames_lattice():
-    fam = detect_video_family("LAiM/LTX-2.3-GGUF")
+    fam = detect_video_family("unsloth/LTX-2.3-GGUF")
     # Valid counts are k * 8 + 1: on-lattice values pass through, everything else floors to the previous point, never below 1.
     assert snap_num_frames(fam, 121) == 121
     assert snap_num_frames(fam, 120) == 113
@@ -161,7 +161,7 @@ def test_snap_num_frames_lattice():
 
 
 def test_snap_video_size_multiple():
-    fam = detect_video_family("LAiM/LTX-2.3-GGUF")
+    fam = detect_video_family("unsloth/LTX-2.3-GGUF")
     assert snap_video_size(fam, 768, 512) == (768, 512)
     assert snap_video_size(fam, 1000, 700) == (992, 672)
     # Never snaps to zero: the floor is one multiple.
@@ -308,11 +308,11 @@ def test_wan_families_force_vae_fp32():
     # back to fp32 for these families to avoid banding / black frames. LTX-2's VAE is bf16-native.
     assert detect_video_family("Wan-AI/Wan2.2-TI2V-5B-Diffusers").vae_force_fp32 is True
     assert detect_video_family("Wan-AI/Wan2.2-T2V-A14B-Diffusers").vae_force_fp32 is True
-    assert detect_video_family("LAiM/LTX-2.3-GGUF").vae_force_fp32 is False
+    assert detect_video_family("unsloth/LTX-2.3-GGUF").vae_force_fp32 is False
 
 
 def test_family_size_table_present():
-    fam = detect_video_family("LAiM/LTX-2.3-GGUF")
+    fam = detect_video_family("unsloth/LTX-2.3-GGUF")
     assert fam.bf16_components_gb is not None
     transformer_gb, text_encoder_gb, companions_gb = fam.bf16_components_gb
     # RESIDENT bf16 figures: a 37.8 GB DiT and the Gemma3-12B TE at ~24.4 GB once cast (the ~49 GB fp32 hub store never sits on
@@ -405,8 +405,8 @@ def test_curated_gguf_repos_are_LAiM_mirrors():
     from core.inference.video_families import _FAMILIES
 
     curated = {fam.name: fam.gguf_repo for fam in _FAMILIES if fam.gguf_repo}
-    assert curated["wan2.2-ti2v-5b"] == "LAiM/Wan2.2-TI2V-5B-GGUF"
-    assert all(repo.startswith("LAiM/") for repo in curated.values()), curated
+    assert curated["wan2.2-ti2v-5b"] == "unsloth/Wan2.2-TI2V-5B-GGUF"
+    assert all(repo.startswith("unsloth/") for repo in curated.values()), curated
 
 
 def test_minimax_h3_offers_every_advertised_aspect_ratio():

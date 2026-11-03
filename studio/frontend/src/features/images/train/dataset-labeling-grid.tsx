@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
@@ -95,7 +96,7 @@ function LabelTile({
       setSavedTick(true);
       window.setTimeout(() => setSavedTick(false), 1500);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to save caption");
+      toast.error(e instanceof Error ? e.message : translate("uxImages.failedToSaveCaptionc3ges"));
     } finally {
       setSaving(false);
     }
@@ -107,7 +108,7 @@ function LabelTile({
       await deleteDiffusionDatasetImage(dataset, record.filename);
       onDeleted(record.filename);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to delete image");
+      toast.error(e instanceof Error ? e.message : translate("uxImages.failedToDeleteImageko49i"));
       setDeleting(false);
     }
   }, [dataset, record.filename, onDeleted]);
@@ -131,7 +132,7 @@ function LabelTile({
               type="button"
               onClick={remove}
               disabled={deleting}
-              aria-label="Remove image"
+              aria-label={translate("uxImages.removeImage1kp2n")}
               className="absolute right-1.5 top-1.5 flex size-6 items-center justify-center rounded-full bg-background/85 text-muted-foreground opacity-0 any-pointer-coarse:opacity-100 shadow-sm backdrop-blur-sm transition-opacity hover:bg-background hover:text-destructive focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring group-hover/tile:opacity-100"
             >
               {deleting ? (
@@ -141,7 +142,7 @@ function LabelTile({
               )}
             </button>
           </TooltipTrigger>
-          <TooltipContent>Remove this image from the dataset</TooltipContent>
+          <TooltipContent>{translate("uxCopy.removeThisImageFrom80imv")}</TooltipContent>
         </Tooltip>
       </div>
       <div className="flex min-w-0 flex-col gap-1.5 p-2">
@@ -152,9 +153,9 @@ function LabelTile({
           onBlur={() => void save()}
           rows={2}
           spellCheck={false}
-          placeholder="Describe this image..."
+          placeholder={translate("uxImages.describeThisImage1wma0")}
           className="min-h-[calc(2.75rem*var(--ui-space-scale,1))] rounded-sm px-2 py-1.5 text-ui-11! leading-snug md:text-ui-11!"
-          aria-label={`Caption for ${record.filename}`}
+          aria-label={translate("uxImages.captionFor59noo", { p1: record.filename })}
         />
         {/* No leading-none: truncate's overflow would crop the descenders. */}
         <div className="flex min-w-0 items-center gap-1.5 text-ui-10 text-muted-foreground">
@@ -169,7 +170,7 @@ function LabelTile({
           ) : savedTick ? (
             <span className="shrink-0 whitespace-nowrap text-emerald-600">Saved</span>
           ) : uncaptioned ? (
-            <span className="shrink-0 whitespace-nowrap text-amber-600">No caption</span>
+            <span className="shrink-0 whitespace-nowrap text-amber-600">{translate("uxImages.noCaptionvreyx")}</span>
           ) : null}
         </div>
       </div>
@@ -204,7 +205,7 @@ export function DatasetLabelingGrid({
         if (!cancelled) setRecords(imageRecordsOnly(r.images));
       })
       .catch((e) => {
-        if (!cancelled) setError(e instanceof Error ? e.message : "Failed to list images");
+        if (!cancelled) setError(e instanceof Error ? e.message : translate("uxImages.failedToListImagesurtis"));
       });
     return () => {
       cancelled = true;
@@ -235,12 +236,11 @@ export function DatasetLabelingGrid({
   if (records === null) {
     return (
       <div className="flex items-center gap-2 py-4 text-ui-11 text-muted-foreground">
-        <Spinner className="size-3.5" /> Loading images...
-      </div>
+        <Spinner className="size-3.5" />{translate("uxImages.loadingImages5i63e")}</div>
     );
   }
   if (records.length === 0) {
-    return <p className="text-ui-11 text-muted-foreground">This dataset has no images yet.</p>;
+    return <p className="text-ui-11 text-muted-foreground">{translate("uxCopy.thisDatasetHasNoamofp")}</p>;
   }
 
   const uncaptioned = records.filter((r) => !r.caption || r.caption.trim() === "").length;
@@ -259,9 +259,7 @@ export function DatasetLabelingGrid({
         </span>
         {pageCount > 1 && (
           <div className="flex shrink-0 items-center gap-1">
-            <span className="tabular-nums">
-              {start + 1}-{Math.min(start + PAGE_SIZE, total)} of {total}
-            </span>
+            <span className="tabular-nums">{translate("uxImages.ofmiqzt", { p1: start + 1, p2: Math.min(start + PAGE_SIZE, total), p3: total })}</span>
             <Button
               type="button"
               variant="ghost"
@@ -269,7 +267,7 @@ export function DatasetLabelingGrid({
               className="size-6"
               disabled={clampedPage === 0}
               onClick={() => setPage((p) => Math.max(0, p - 1))}
-              aria-label="Previous images"
+              aria-label={translate("uxImages.previousImagesligjk")}
             >
               <ChevronLeftIcon className="size-3.5" />
             </Button>
@@ -280,7 +278,7 @@ export function DatasetLabelingGrid({
               className="size-6"
               disabled={clampedPage >= pageCount - 1}
               onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
-              aria-label="Next images"
+              aria-label={translate("uxImages.nextImages9psnz")}
             >
               <ChevronRightIcon className="size-3.5" />
             </Button>
@@ -325,7 +323,7 @@ export function LabelingGridToggle({
       onClick={onToggle}
       aria-expanded={open}
     >
-      {open ? "Hide captions" : `Review captions (${count} image${count === 1 ? "" : "s"})`}
+      {open ? translate("uxImages.hideCaptionsuhrcq") : translate("uxImages.reviewCaptionsImagesy90bc", { p1: count, p2: count === 1 ? "" : "s" })}
       <ChevronDown className={cn("size-3.5 transition-transform", open && "rotate-180")} />
     </Button>
   );

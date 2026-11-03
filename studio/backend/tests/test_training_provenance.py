@@ -1358,7 +1358,7 @@ def test_stop_and_save_before_attestation_allows_resume(monkeypatch):
 
     monkeypatch.setattr(resume, "has_resume_state", lambda _path: True)
     config = {
-        "model_name": "LAiM/Qwen3.5-0.8B",
+        "model_name": "unsloth/Qwen3.5-0.8B",
         "hf_dataset": "org/dataset",
         RESOURCE_PROVENANCE_KEY: {"version": 1, "status": "pending"},
     }

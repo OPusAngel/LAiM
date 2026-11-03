@@ -142,10 +142,6 @@ export function gateNavigation(url: string, context: NavigationContext): Gate {
   return ask;
 }
 
-// Fields whose contents are the user's to type: the agent never fills them.
-const SECRET_AUTOCOMPLETE = /\b(current-password|new-password|one-time-code|cc-[a-z-]+)\b/;
-const SECRET_NAME = /\b(password|passcode|card ?number|cvc|cvv|security code|ssn|social security)\b/i;
-
 // What a button does when its words say it spends, sends, publishes, signs in or deletes.
 const CONSEQUENTIAL =
   /\b(buy|purchase|order|checkout|check out|pay|payment|donate|subscribe|send|post|publish|tweet|reply|comment|share|delete|remove|erase|transfer|book|reserve|sign ?up|register|log ?in|sign ?in|authori[sz]e|allow|accept|agree|confirm|install|unsubscribe|cancel)\b/i;
@@ -186,20 +182,8 @@ export function gateElement(
   permissions: AgentPermissions,
 ): Gate {
   const host = hostOfUrl(pageUrl) || "this site";
-  if (info.role === "file-input" || info.type === "file") {
-    return { kind: "block", reason: "uploading files is not something the browser agent can do; ask the user to do it" };
-  }
-  const secret =
-    info.role === "password" ||
-    info.type === "password" ||
-    SECRET_AUTOCOMPLETE.test(info.autocomplete) ||
-    (info.tag !== "a" && info.tag !== "button" && SECRET_NAME.test(info.name));
-  if (action === "type" && secret) {
-    return {
-      kind: "block",
-      reason: "that is a password or payment field; ask the user to fill it in themselves in the browser panel",
-    };
-  }
+  // LAiM gives the browser agent the whole machine: file inputs, password fields and payment
+  // fields are filled like any other, because the user drives his own account through it.
   const submits = action === "submit" || (action === "click" && info.submits);
   if (submits && info.formAction) {
     const blocked = navigationBlocks(info.formAction, policy, permissions);

@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse, Response
 
 from .mcp_harness import JPEG, PNG, PNG_URL, bodies, call_to, data_url, run_tool
 
-LLM = "LAiM/Llama-3.2-1B-Instruct-GGUF"
+LLM = "unsloth/Llama-3.2-1B-Instruct-GGUF"
 COMPLETION = {
     "id": "chatcmpl-1",
     "object": "chat.completion",
@@ -165,9 +165,9 @@ def test_chat_images_ride_the_last_user_turn(monkeypatch):
 
 
 def test_a_different_answering_model_is_noted(monkeypatch):
-    result, _studio = _chat(monkeypatch, {"prompt": "hi", "model": "LAiM/Qwen3-0.6B"})
+    result, _studio = _chat(monkeypatch, {"prompt": "hi", "model": "unsloth/Qwen3-0.6B"})
     note = result["structuredContent"]["note"]
-    assert LLM in note and "LAiM/Qwen3-0.6B" in note
+    assert LLM in note and "unsloth/Qwen3-0.6B" in note
 
     pinned = {**COMPLETION, "model": f"{LLM}:Q4_K_M"}
     result, _studio = _chat(monkeypatch, {"prompt": "hi", "model": LLM}, pinned)

@@ -2,163 +2,6 @@
   "_comment": "Findings that predate scripts/lint_av_shapes.py. New ones fail; an error group needs a reason. See the lint's docstring.",
   "groups": [
     {
-      "file": ".github/ci/clean-machine-matrix.yml",
-      "rule": "AV015",
-      "severity": "warn",
-      "reason": "pre-existing warning",
-      "digests": {
-        "e9aec9781db240c7": 1
-      }
-    },
-    {
-      "file": ".github/scripts/Probe-AmsiParse.ps1",
-      "rule": "AV015",
-      "severity": "warn",
-      "reason": "pre-existing warning",
-      "digests": {
-        "6c9562e9b61e642a": 1
-      }
-    },
-    {
-      "file": ".github/scripts/Probe-VirtualTerminal.ps1",
-      "rule": "AV003",
-      "severity": "error",
-      "reason": "CI-only probe run on hosted runners to measure the console-mode path; never shipped or run on a user machine.",
-      "digests": {
-        "2c55dddcfeb76fa0": 1,
-        "2ee6606877b69cfc": 1,
-        "8b6eab4b550f89b0": 1,
-        "b9777fec081d96ad": 1,
-        "c6745ba48257bd2d": 1,
-        "fed2f59e307d0743": 1
-      }
-    },
-    {
-      "file": ".github/scripts/agent-guides-install.sh",
-      "rule": "AV015",
-      "severity": "warn",
-      "reason": "pre-existing warning",
-      "digests": {
-        "26d63a8de8b3d88a": 1,
-        "4d51b090ccb1babf": 1,
-        "7bb5fa16f714a6ca": 1,
-        "aa4e2c2aba0b4d1c": 1,
-        "d00e0be7c48e1114": 1
-      }
-    },
-    {
-      "file": ".github/scripts/compare_installer_evidence.py",
-      "rule": "AV007",
-      "severity": "error",
-      "reason": "A fixture string the evidence comparer classifies; it is data, never executed.",
-      "digests": {
-        "ef0e52af4244dffa": 1
-      }
-    },
-    {
-      "file": ".github/scripts/interrupt-install.ps1",
-      "rule": "AV007",
-      "severity": "error",
-      "reason": "CI-only: interrupts an install on a hosted runner to test recovery; never shipped.",
-      "digests": {
-        "392e83ba05e2da16": 1
-      }
-    },
-    {
-      "file": ".github/workflows/clean-machine-install-ci.yml",
-      "rule": "AV015",
-      "severity": "warn",
-      "reason": "pre-existing warning",
-      "digests": {
-        "4c0553e5acdfe41e": 1,
-        "b3c22279dd142bc1": 1,
-        "f0ecb9345f76d63b": 1
-      }
-    },
-    {
-      "file": ".github/workflows/interrupted-install-ci.yml",
-      "rule": "AV007",
-      "severity": "error",
-      "reason": "CI-only workflow step on a hosted runner; never shipped.",
-      "digests": {
-        "a4c6f56972c67e39": 1
-      }
-    },
-    {
-      "file": ".github/workflows/release-desktop.yml",
-      "rule": "AV006",
-      "severity": "error",
-      "reason": "Release runner re-enables real-time protection and verifies it before signing; it turns protection on, not off.",
-      "digests": {
-        "b71c6cab34cf5f0a": 1
-      }
-    },
-    {
-      "file": ".github/workflows/studio-windows-api-smoke.yml",
-      "rule": "AV006",
-      "severity": "error",
-      "reason": "Hosted runner excludes its own throwaway workspace to keep smoke timings stable; never on a user machine.",
-      "digests": {
-        "f4108753aa3288a5": 1
-      }
-    },
-    {
-      "file": ".github/workflows/studio-windows-inference-smoke.yml",
-      "rule": "AV006",
-      "severity": "error",
-      "reason": "Hosted runner excludes its own throwaway workspace to keep smoke timings stable; never on a user machine.",
-      "digests": {
-        "5bd7fdc61ce28c49": 1,
-        "f4108753aa3288a5": 1
-      }
-    },
-    {
-      "file": ".github/workflows/studio-windows-inference-smoke.yml",
-      "rule": "AV015",
-      "severity": "warn",
-      "reason": "pre-existing warning",
-      "digests": {
-        "5713a6ca35ae670f": 2,
-        "cd9e19e6cca8085a": 1
-      }
-    },
-    {
-      "file": ".github/workflows/studio-windows-ui-smoke.yml",
-      "rule": "AV006",
-      "severity": "error",
-      "reason": "Hosted runner excludes its own throwaway workspace to keep smoke timings stable; never on a user machine.",
-      "digests": {
-        "f4108753aa3288a5": 1
-      }
-    },
-    {
-      "file": ".github/workflows/studio-windows-update-smoke.yml",
-      "rule": "AV006",
-      "severity": "error",
-      "reason": "Hosted runner excludes its own throwaway workspace to keep smoke timings stable; never on a user machine.",
-      "digests": {
-        "f4108753aa3288a5": 1
-      }
-    },
-    {
-      "file": ".github/workflows/windows-amsi-defender-differential-ci.yml",
-      "rule": "AV006",
-      "severity": "error",
-      "reason": "The differential scan job isolates its sample root on a hosted runner so only the files under test are scored.",
-      "digests": {
-        "2cfb74adc1e8a344": 1
-      }
-    },
-    {
-      "file": ".github/workflows/windows-arm64-ci.yml",
-      "rule": "AV009",
-      "severity": "error",
-      "reason": "CI-only: puts Windows PowerShell 5.1 on PATH as pwsh on a hosted runner so the suites exercise 5.1; never on a user machine.",
-      "digests": {
-        "ae2e8afbceeae8ce": 1
-      }
-    },
-    {
       "file": "docker/install_nvidia_toolkit.sh",
       "rule": "AV015",
       "severity": "warn",
@@ -281,17 +124,6 @@
       }
     },
     {
-      "file": "studio/backend/core/inference/mxc_probe.py",
-      "rule": "AV010",
-      "severity": "warn",
-      "reason": "pre-existing warning",
-      "digests": {
-        "22c445d040520d6e": 1,
-        "c2eabb5e25c9c8eb": 1,
-        "ec86aad4b375881c": 1
-      }
-    },
-    {
       "file": "studio/backend/core/inference/tools.py",
       "rule": "AV004",
       "severity": "error",
@@ -329,16 +161,6 @@
       }
     },
     {
-      "file": "studio/backend/tests/test_install_mxc_prebuilt.py",
-      "rule": "AV010",
-      "severity": "warn",
-      "reason": "pre-existing warning",
-      "digests": {
-        "8a6f788a0d401150": 1,
-        "c0bacb854907ad71": 1
-      }
-    },
-    {
       "file": "studio/backend/tests/test_llama_cpp_vulkan_probe.py",
       "rule": "AV010",
       "severity": "warn",
@@ -356,26 +178,6 @@
       "digests": {
         "4c853e12b4ab748d": 1,
         "b76978b306fef98e": 1
-      }
-    },
-    {
-      "file": "studio/backend/tests/test_mxc_runtime_integrity.py",
-      "rule": "AV010",
-      "severity": "warn",
-      "reason": "pre-existing warning",
-      "digests": {
-        "6e2bb4ff667665ed": 1,
-        "98a342f372a9bbea": 1,
-        "b390d350b849b6b4": 1
-      }
-    },
-    {
-      "file": "studio/backend/tests/test_mxc_windows_backend.py",
-      "rule": "AV010",
-      "severity": "warn",
-      "reason": "pre-existing warning",
-      "digests": {
-        "39dad80a9a976c8c": 1
       }
     },
     {
@@ -437,41 +239,6 @@
         "2e4390737d2788c0": 1,
         "9d108a516d44c606": 1,
         "f2ad34f9d3f0fea3": 1
-      }
-    },
-    {
-      "file": "studio/backend/tests/test_sandbox_linux.py",
-      "rule": "AV008",
-      "severity": "error",
-      "reason": "Test inputs: the Linux sandbox must refuse reads of these credential paths.",
-      "digests": {
-        "026c56f9a7162c34": 1,
-        "3fe813193837f351": 1,
-        "62746b5fb7612c07": 1,
-        "924a42269482702d": 1,
-        "ebb56bbf6fce3dcd": 1,
-        "feb70d0825caf2a6": 2
-      }
-    },
-    {
-      "file": "studio/backend/tests/test_sandbox_tools.py",
-      "rule": "AV008",
-      "severity": "error",
-      "reason": "Test inputs: the sandbox must refuse reads of these credential paths.",
-      "digests": {
-        "02628dd4a975589a": 1,
-        "19295b9ce366ad70": 1,
-        "5edbd494bf856336": 1
-      }
-    },
-    {
-      "file": "studio/backend/tests/test_sandbox_tools.py",
-      "rule": "AV010",
-      "severity": "warn",
-      "reason": "pre-existing warning",
-      "digests": {
-        "6b2e6cca1e96c74d": 1,
-        "cb2a2dc3fbf44c1e": 1
       }
     },
     {

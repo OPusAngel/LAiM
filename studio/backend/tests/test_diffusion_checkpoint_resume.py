@@ -2393,7 +2393,7 @@ def test_a_mirror_backed_run_pairs_the_revision_with_the_repo_it_came_from(monke
     from core.training import diffusion_train_extras as dte
 
     source = "black-forest-labs/FLUX.2-klein-base-9B"
-    mirror = "LAiM/FLUX.2-klein-base-9B"
+    mirror = "unsloth/FLUX.2-klein-base-9B"
     base = dataclasses.replace(_Run(run_dir).cfg, base_model = source, resolved_family = "flux.2-klein")
     seen = []
 

@@ -7,24 +7,25 @@ import type {
   MusicEditDraft,
   MusicModeRule,
 } from "./music-types";
+import { translate } from "@/i18n";
+
 
 export const MUSIC_EDIT_ACTION_LABEL: Record<MusicEditAction, string> = {
   repaint: "Repaint",
   extend: "Extend",
   cover: "Cover",
-  continue: "Add parts",
+  get continue() { return translate("uxAudio.addPartsdblzz"); },
   inpaint: "Inpaint",
   restyle: "Restyle",
 };
 
 export const MUSIC_EDIT_ACTION_HINT: Record<MusicEditAction, string> = {
-  repaint:
-    "Regenerate the selected part, keep the rest. Drag past the end to make it longer.",
-  extend: "Add new music after the end.",
-  cover: "Same structure, new style.",
-  continue: "Adds new parts across the whole track.",
-  inpaint: "Regenerate the selected parts.",
-  restyle: "Re-render the whole clip in a new style.",
+  get repaint() { return translate("uxAudio.regenerateTheSelectedPartohhqr"); },
+  get extend() { return translate("uxAudio.addNewMusicAfterm4r6r"); },
+  get cover() { return translate("uxAudio.sameStructureNewStylek3vzl"); },
+  get continue() { return translate("uxAudio.addsNewPartsAcrossfhk2q"); },
+  get inpaint() { return translate("uxAudio.regenerateTheSelectedPartsyh4oj"); },
+  get restyle() { return translate("uxAudio.reRenderTheWholeoi0h7"); },
 };
 
 export const REPAINT_BEYOND_END_S = 30;
@@ -78,7 +79,7 @@ export function editSourceTooLong(
 ): string | null {
   if (rule.max_source_s === undefined || sourceDurationS === null) return null;
   return sourceDurationS > rule.max_source_s
-    ? `Edit clips up to ${formatEditLimit(rule.max_source_s)}. Trim it first.`
+    ? translate("uxAudio.editClipsUpTo5bz68", { p1: formatEditLimit(rule.max_source_s) })
     : null;
 }
 
@@ -94,14 +95,14 @@ export function editRangeProblem(
   if (!editUsesRanges(action)) return null;
   if (ranges.length === 0) {
     return action === "inpaint"
-      ? "Select the parts to change on the waveform."
-      : "Select the part to change on the waveform.";
+      ? translate("uxAudio.selectThePartsTo7c6jk")
+      : translate("uxAudio.selectThePartToj1b7l");
   }
   const max = editMaxRanges(rule, action);
   if (ranges.length > max) {
     return max === 1
-      ? "Select one part to change."
-      : `Select up to ${max} parts.`;
+      ? translate("uxAudio.selectOnePartTon9l69")
+      : translate("uxAudio.selectUpToParts9jv9o", { p1: max });
   }
   for (const range of ranges) {
     if (
@@ -109,16 +110,16 @@ export function editRangeProblem(
       range.start_s < 0 ||
       range.end_s - range.start_s < MIN_RANGE_S - EPSILON
     ) {
-      return `Make each selected part at least ${MIN_RANGE_S} s long.`;
+      return translate("uxAudio.makeEachSelectedPartohzeq", { p1: MIN_RANGE_S });
     }
     if (sourceDurationS === null) continue;
     if (range.start_s >= sourceDurationS) {
-      return "A selected part starts after the clip ends. Move it inside the clip.";
+      return translate("uxAudio.aSelectedPartStartsukefd");
     }
     if (range.end_s > sourceDurationS + editBeyondEndS(action) + EPSILON) {
       return action === "repaint"
-        ? `A repaint can reach at most ${REPAINT_BEYOND_END_S} s past the end.`
-        : "A selected part runs past the end of the clip.";
+        ? translate("uxAudio.aRepaintCanReacheu8rc", { p1: REPAINT_BEYOND_END_S })
+        : translate("uxAudio.aSelectedPartRunsr5w3k");
     }
   }
   return null;
@@ -129,11 +130,11 @@ export function musicEditProblem(
   draft: MusicEditDraft,
   sourceDurationS: number | null,
 ): string | null {
-  if (!draft.source) return "Pick a clip to edit.";
+  if (!draft.source) return translate("uxAudio.pickAClipTo7dfb2");
   const actions = editActions(rule);
-  if (actions.length === 0) return "This model cannot edit clips.";
+  if (actions.length === 0) return translate("uxAudio.thisModelCannotEdit10xpk");
   if (!(draft.action && actions.includes(draft.action))) {
-    return "Pick what to do with the clip.";
+    return translate("uxAudio.pickWhatToDov6dz1");
   }
   const tooLong = editSourceTooLong(rule, sourceDurationS);
   if (tooLong) return tooLong;
@@ -143,12 +144,12 @@ export function musicEditProblem(
     draft.action === "extend" &&
     !(draft.extendS >= EXTEND_MIN_S && draft.extendS <= EXTEND_MAX_S)
   ) {
-    return `Add between ${EXTEND_MIN_S} and ${EXTEND_MAX_S} seconds.`;
+    return translate("uxAudio.addBetweenAndSecondsak106", { p1: EXTEND_MIN_S, p2: EXTEND_MAX_S });
   }
   if (!draft.prompt.trim()) {
     return editUsesStrength(draft.action)
-      ? "Describe the new style."
-      : "Describe what the new part should sound like.";
+      ? translate("uxAudio.describeTheNewStyle05v8c")
+      : translate("uxAudio.describeWhatTheNew62sa9");
   }
   return null;
 }

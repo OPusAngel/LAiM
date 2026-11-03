@@ -41,7 +41,7 @@ def _shared_setup_1(b, fake, monkeypatch):
 
 def _shared_setup_2(b, fam):
     b._run_load(
-        repo_id = "LAiM/Z-Image-Turbo-GGUF",
+        repo_id = "unsloth/Z-Image-Turbo-GGUF",
         gguf_filename = "z.gguf",
         base = fam.base_repo,
         fam = fam,
@@ -113,7 +113,7 @@ def _loaded_backend(fam_name = "z-image", engine = None):
     b = SdCppDiffusionBackend(engine = engine or _FakeEngine())
     fam = detect_family(fam_name)
     b._state = bk._SdState(
-        repo_id = "LAiM/Z-Image-Turbo-GGUF",
+        repo_id = "unsloth/Z-Image-Turbo-GGUF",
         base_repo = fam.base_repo,
         family = fam,
         device = "cpu",
@@ -134,11 +134,11 @@ def test_loaded_repo_ids_includes_native_companions():
     b = _loaded_backend("flux.1")
     ids = set(b.loaded_repo_ids())
     fam = detect_family("flux.1")
-    assert "LAiM/Z-Image-Turbo-GGUF" in ids  # the main GGUF repo
+    assert "unsloth/Z-Image-Turbo-GGUF" in ids  # the main GGUF repo
     assert fam.base_repo in ids
     assert fam.sd_cpp_vae[0] in ids  # black-forest-labs/FLUX.1-schnell (VAE)
     for terepo, _f, _k in fam.sd_cpp_text_encoders:
-        assert terepo in ids  # LAiM/flux-text-encoders
+        assert terepo in ids  # unsloth/flux-text-encoders
     b._state = None
     assert b.loaded_repo_ids() == ()
 
@@ -150,13 +150,13 @@ def test_native_status_preserves_the_logical_picker_identity():
     b._state = dataclasses.replace(
         b._state,
         repo_id = "/cache/models--LAiM--Z-Image-Turbo-GGUF/snapshots/abc",
-        display_repo_id = "LAiM/Z-Image-Turbo-GGUF",
+        display_repo_id = "unsloth/Z-Image-Turbo-GGUF",
     )
     status = b.status()
     assert status["repo_id"].endswith("/snapshots/abc")
-    assert status["display_repo_id"] == "LAiM/Z-Image-Turbo-GGUF"
+    assert status["display_repo_id"] == "unsloth/Z-Image-Turbo-GGUF"
     result = b.generate(prompt = "logical identity", steps = 1, seed = 1)
-    assert result["repo_id"] == "LAiM/Z-Image-Turbo-GGUF"
+    assert result["repo_id"] == "unsloth/Z-Image-Turbo-GGUF"
 
 
 def test_loaded_repo_ids_tracks_variant_encoder_by_gguf_filename():
@@ -176,9 +176,9 @@ def test_loaded_repo_ids_tracks_variant_encoder_by_gguf_filename():
         gguf_filename = "FLUX.2-klein-9B-Q4_K_M.gguf",
     )
     ids = set(b.loaded_repo_ids())
-    assert "LAiM/FLUX.2-klein-9B-ComfyUI" in ids  # the 8B encoder this load pulled
+    assert "unsloth/FLUX.2-klein-9B-ComfyUI" in ids  # the 8B encoder this load pulled
     # The 4B default must not be protected instead.
-    assert "LAiM/Z-Image-Turbo-ComfyUI" not in ids
+    assert "unsloth/Z-Image-Turbo-ComfyUI" not in ids
 
 
 class _FakeServer:
@@ -265,14 +265,14 @@ class _FakeServer:
 def test_asset_specs_cover_required_files(fam_name, expect_kinds):
     b = SdCppDiffusionBackend(engine = _FakeEngine())
     fam = detect_family(fam_name)
-    specs = b._asset_specs("LAiM/x-GGUF", "x-Q4_K_M.gguf", fam)
+    specs = b._asset_specs("unsloth/x-GGUF", "x-Q4_K_M.gguf", fam)
     kinds = {kind for _, _, kind in specs}
     assert kinds == expect_kinds
     # Every spec has a non-empty repo + filename.
     assert all(repo and fn for repo, fn, _ in specs)
     # The transformer reuses the requested GGUF, not a registry file.
     tr = [s for s in specs if s[2] == "diffusion_model"][0]
-    assert tr[0] == "LAiM/x-GGUF" and tr[1] == "x-Q4_K_M.gguf"
+    assert tr[0] == "unsloth/x-GGUF" and tr[1] == "x-Q4_K_M.gguf"
 
 
 @pytest.fixture(autouse = True)
@@ -297,10 +297,10 @@ def test_download_plan_skips_assets_already_in_the_cache(monkeypatch):
         "_plan_file_sizes",
         staticmethod(
             lambda by_repo, token: {
-                ("LAiM/Z-Image-Turbo-GGUF", "z-image-turbo-Q4_K_M.gguf"): 4_000,
-                ("LAiM/Z-Image-Turbo-ComfyUI", "split_files/vae/ae.safetensors"): 300,
+                ("unsloth/Z-Image-Turbo-GGUF", "z-image-turbo-Q4_K_M.gguf"): 4_000,
+                ("unsloth/Z-Image-Turbo-ComfyUI", "split_files/vae/ae.safetensors"): 300,
                 (
-                    "LAiM/Z-Image-Turbo-ComfyUI",
+                    "unsloth/Z-Image-Turbo-ComfyUI",
                     "split_files/text_encoders/qwen_3_4b.safetensors",
                 ): 8_000,
             }
@@ -319,18 +319,18 @@ def test_download_plan_skips_assets_already_in_the_cache(monkeypatch):
     )
 
     plan = b.download_plan(
-        "LAiM/Z-Image-Turbo-GGUF",
+        "unsloth/Z-Image-Turbo-GGUF",
         gguf_filename = "z-image-turbo-Q4_K_M.gguf",
         model_kind = "gguf",
     )
     cached.add("split_files/vae/ae.safetensors")
     warming = b.download_plan(
-        "LAiM/Z-Image-Turbo-GGUF",
+        "unsloth/Z-Image-Turbo-GGUF",
         gguf_filename = "z-image-turbo-Q4_K_M.gguf",
         model_kind = "gguf",
     )
 
-    assert [e["repo_id"] for e in plan["entries"]] == ["LAiM/Z-Image-Turbo-ComfyUI"]
+    assert [e["repo_id"] for e in plan["entries"]] == ["unsloth/Z-Image-Turbo-ComfyUI"]
     assert plan["entries"][0]["files"] == warming["entries"][0]["files"]
     assert plan["total_bytes"] == 8_300
     assert warming["total_bytes"] == 8_000
@@ -342,7 +342,7 @@ def test_download_plan_does_not_label_same_repo_companions_as_checkpoint(monkeyp
     import core.inference.sd_cpp_backend as module
     from core.inference.diffusion import DiffusionBackend
 
-    repo = "LAiM/Z-Image-Turbo-GGUF"
+    repo = "unsloth/Z-Image-Turbo-GGUF"
     checkpoint = "model-Q4_K_M.gguf"
     companion = "vae/ae.safetensors"
     backend = SdCppDiffusionBackend(engine = _FakeEngine())
@@ -415,10 +415,10 @@ def test_download_plan_restages_a_native_asset_that_changed_size(monkeypatch):
         "_plan_file_sizes",
         staticmethod(
             lambda by_repo, token: {
-                ("LAiM/Z-Image-Turbo-GGUF", "z-image-turbo-Q4_K_M.gguf"): 4_000,
-                ("LAiM/Z-Image-Turbo-ComfyUI", "split_files/vae/ae.safetensors"): 300,
+                ("unsloth/Z-Image-Turbo-GGUF", "z-image-turbo-Q4_K_M.gguf"): 4_000,
+                ("unsloth/Z-Image-Turbo-ComfyUI", "split_files/vae/ae.safetensors"): 300,
                 (
-                    "LAiM/Z-Image-Turbo-ComfyUI",
+                    "unsloth/Z-Image-Turbo-ComfyUI",
                     "split_files/text_encoders/qwen_3_4b.safetensors",
                 ): 8_000,
             }
@@ -438,7 +438,7 @@ def test_download_plan_restages_a_native_asset_that_changed_size(monkeypatch):
     monkeypatch.setattr(DiffusionBackend, "_hub_file_is_cached", staticmethod(probe))
 
     b.download_plan(
-        "LAiM/Z-Image-Turbo-GGUF",
+        "unsloth/Z-Image-Turbo-GGUF",
         gguf_filename = "z-image-turbo-Q4_K_M.gguf",
         model_kind = "gguf",
     )
@@ -459,7 +459,7 @@ def test_download_plan_is_empty_when_every_native_asset_is_cached(monkeypatch):
     )
 
     plan = b.download_plan(
-        "LAiM/Z-Image-Turbo-GGUF",
+        "unsloth/Z-Image-Turbo-GGUF",
         gguf_filename = "z-image-turbo-Q4_K_M.gguf",
         model_kind = "gguf",
     )
@@ -471,9 +471,9 @@ def test_download_plan_stages_exactly_what_sd_cli_opens(monkeypatch):
     # The plan feeds the Hub download manager. Native reads single-file assets, so a native-routed pick must be staged from the asset specs.
     b = SdCppDiffusionBackend(engine = _FakeEngine())
     sizes = {
-        ("LAiM/Z-Image-Turbo-GGUF", "z-image-turbo-Q4_K_M.gguf"): 4_000,
-        ("LAiM/Z-Image-Turbo-ComfyUI", "split_files/vae/ae.safetensors"): 300,
-        ("LAiM/Z-Image-Turbo-ComfyUI", "split_files/text_encoders/qwen_3_4b.safetensors"): 8_000,
+        ("unsloth/Z-Image-Turbo-GGUF", "z-image-turbo-Q4_K_M.gguf"): 4_000,
+        ("unsloth/Z-Image-Turbo-ComfyUI", "split_files/vae/ae.safetensors"): 300,
+        ("unsloth/Z-Image-Turbo-ComfyUI", "split_files/text_encoders/qwen_3_4b.safetensors"): 8_000,
     }
     monkeypatch.setattr(
         SdCppDiffusionBackend,
@@ -482,7 +482,7 @@ def test_download_plan_stages_exactly_what_sd_cli_opens(monkeypatch):
     )
 
     plan = b.download_plan(
-        "LAiM/Z-Image-Turbo-GGUF",
+        "unsloth/Z-Image-Turbo-GGUF",
         gguf_filename = "z-image-turbo-Q4_K_M.gguf",
         model_kind = "gguf",
         # diffusers-only knobs are accepted and ignored, exactly as begin_load accepts them.
@@ -494,7 +494,7 @@ def test_download_plan_stages_exactly_what_sd_cli_opens(monkeypatch):
     expected = {
         (r, f)
         for r, f, _k in b._asset_specs(
-            "LAiM/Z-Image-Turbo-GGUF", "z-image-turbo-Q4_K_M.gguf", fam
+            "unsloth/Z-Image-Turbo-GGUF", "z-image-turbo-Q4_K_M.gguf", fam
         )
     }
     listed = {(e["repo_id"], f) for e in plan["entries"] for f in e["files"]}
@@ -504,36 +504,36 @@ def test_download_plan_stages_exactly_what_sd_cli_opens(monkeypatch):
     assert plan["checkpoint_bytes"] == 4_000
     # The transformer entry is the only one carrying the GGUF filename; the VAE + encoder share one repo entry.
     tr = [e for e in plan["entries"] if e["gguf_filename"]]
-    assert len(tr) == 1 and tr[0]["repo_id"] == "LAiM/Z-Image-Turbo-GGUF"
-    assert len([e for e in plan["entries"] if e["repo_id"] == "LAiM/Z-Image-Turbo-ComfyUI"]) == 1
+    assert len(tr) == 1 and tr[0]["repo_id"] == "unsloth/Z-Image-Turbo-GGUF"
+    assert len([e for e in plan["entries"] if e["repo_id"] == "unsloth/Z-Image-Turbo-ComfyUI"]) == 1
 
 
 def test_download_plan_merges_asset_repos_that_share_one_fetch_repo(monkeypatch):
     # Two upstream repos can resolve to ONE fetch repo: on an install that already holds the
-    # Comfy-Org/flux2-dev repack, both LAiM/FLUX.2-VAE and LAiM/FLUX.2-dev-ComfyUI are
+    # Comfy-Org/flux2-dev repack, both unsloth/FLUX.2-VAE and unsloth/FLUX.2-dev-ComfyUI are
     # served from it. Keying the swapped map by fetch repo therefore drops whichever landed
     # first, taking its files out of the staged entry AND out of the footprint.
     import core.inference.sd_cpp_backend as S
 
     b = SdCppDiffusionBackend(engine = _FakeEngine())
     specs = [
-        ("LAiM/FLUX.2-dev-GGUF", "flux2-dev-Q4_K_M.gguf", "transformer"),
-        ("LAiM/FLUX.2-VAE", "vae/ae.safetensors", "vae"),
-        ("LAiM/FLUX.2-dev-ComfyUI", "text_encoders/mistral.safetensors", "text_encoder"),
+        ("unsloth/FLUX.2-dev-GGUF", "flux2-dev-Q4_K_M.gguf", "transformer"),
+        ("unsloth/FLUX.2-VAE", "vae/ae.safetensors", "vae"),
+        ("unsloth/FLUX.2-dev-ComfyUI", "text_encoders/mistral.safetensors", "text_encoder"),
     ]
     monkeypatch.setattr(SdCppDiffusionBackend, "_asset_specs", lambda *a, **k: specs)
     monkeypatch.setattr(
         S,
         "_fetch_repo_map",
         lambda assets, token: {
-            "LAiM/FLUX.2-dev-GGUF": "LAiM/FLUX.2-dev-GGUF",
-            "LAiM/FLUX.2-VAE": "Comfy-Org/flux2-dev",
-            "LAiM/FLUX.2-dev-ComfyUI": "Comfy-Org/flux2-dev",
+            "unsloth/FLUX.2-dev-GGUF": "unsloth/FLUX.2-dev-GGUF",
+            "unsloth/FLUX.2-VAE": "Comfy-Org/flux2-dev",
+            "unsloth/FLUX.2-dev-ComfyUI": "Comfy-Org/flux2-dev",
         },
     )
     monkeypatch.setattr(SdCppDiffusionBackend, "_preflight_companion_repos", lambda *a, **k: None)
     sizes = {
-        ("LAiM/FLUX.2-dev-GGUF", "flux2-dev-Q4_K_M.gguf"): 4_000,
+        ("unsloth/FLUX.2-dev-GGUF", "flux2-dev-Q4_K_M.gguf"): 4_000,
         ("Comfy-Org/flux2-dev", "vae/ae.safetensors"): 300,
         ("Comfy-Org/flux2-dev", "text_encoders/mistral.safetensors"): 8_000,
     }
@@ -549,7 +549,7 @@ def test_download_plan_merges_asset_repos_that_share_one_fetch_repo(monkeypatch)
     )
 
     plan = b.download_plan(
-        "LAiM/FLUX.2-dev-GGUF", gguf_filename = "flux2-dev-Q4_K_M.gguf", model_kind = "gguf"
+        "unsloth/FLUX.2-dev-GGUF", gguf_filename = "flux2-dev-Q4_K_M.gguf", model_kind = "gguf"
     )
 
     shared = next(e for e in plan["entries"] if e["repo_id"] == "Comfy-Org/flux2-dev")
@@ -573,7 +573,7 @@ def test_download_plan_skips_a_local_transformer_but_still_stages_the_assets(mon
     )
 
     assert str(tmp_path) not in {e["repo_id"] for e in plan["entries"]}
-    assert {e["repo_id"] for e in plan["entries"]} == {"LAiM/Z-Image-Turbo-ComfyUI"}
+    assert {e["repo_id"] for e in plan["entries"]} == {"unsloth/Z-Image-Turbo-ComfyUI"}
     # An unreadable size understates the total; it must never fail the plan.
     assert plan["total_bytes"] == 0
 
@@ -594,15 +594,15 @@ def test_download_plan_stages_the_mirrored_asset_repo(monkeypatch):
     b = _shared_setup_4(monkeypatch)
 
     plan = b.download_plan(
-        "LAiM/FLUX.1-dev-GGUF", gguf_filename = "flux1-dev-Q4_K_M.gguf", model_kind = "gguf"
+        "unsloth/FLUX.1-dev-GGUF", gguf_filename = "flux1-dev-Q4_K_M.gguf", model_kind = "gguf"
     )
 
     staged = {e["repo_id"] for e in plan["entries"]}
-    assert "LAiM/FLUX.1-schnell" in staged
+    assert "unsloth/FLUX.1-schnell" in staged
     assert "black-forest-labs/FLUX.1-schnell" not in staged
     # The GGUF entry is untouched and still the only one carrying the filename.
     tr = [e for e in plan["entries"] if e["gguf_filename"]]
-    assert len(tr) == 1 and tr[0]["repo_id"] == "LAiM/FLUX.1-dev-GGUF"
+    assert len(tr) == 1 and tr[0]["repo_id"] == "unsloth/FLUX.1-dev-GGUF"
 
 
 def test_download_plan_and_fetch_assets_pick_the_same_repo(monkeypatch):
@@ -617,10 +617,10 @@ def test_download_plan_and_fetch_assets_pick_the_same_repo(monkeypatch):
     )
 
     fam = detect_family("flux.1")
-    specs = b._asset_specs("LAiM/FLUX.1-dev-GGUF", "flux1-dev-Q4_K_M.gguf", fam)
+    specs = b._asset_specs("unsloth/FLUX.1-dev-GGUF", "flux1-dev-Q4_K_M.gguf", fam)
     b._fetch_assets(specs, None)
     plan = b.download_plan(
-        "LAiM/FLUX.1-dev-GGUF", gguf_filename = "flux1-dev-Q4_K_M.gguf", model_kind = "gguf"
+        "unsloth/FLUX.1-dev-GGUF", gguf_filename = "flux1-dev-Q4_K_M.gguf", model_kind = "gguf"
     )
 
     assert {(e["repo_id"], f) for e in plan["entries"] for f in e["files"]} == set(pulled)
@@ -632,23 +632,23 @@ def test_delete_guard_covers_the_mirrored_asset_repos(monkeypatch):
     b = _loaded_backend("flux.1")
     ids = set(b.loaded_repo_ids())
     assert "black-forest-labs/FLUX.1-schnell" in ids
-    assert "LAiM/FLUX.1-schnell" in ids
+    assert "unsloth/FLUX.1-schnell" in ids
 
     b._state = None
     b._loading = bk._SdLoading(
-        repo_id = "LAiM/FLUX.1-dev-GGUF",
+        repo_id = "unsloth/FLUX.1-dev-GGUF",
         base_repo = "black-forest-labs/FLUX.1-dev",
         asset_repos = ("black-forest-labs/FLUX.1-schnell",),
     )
     loading = set(b.loading_repo_ids())
-    assert {"black-forest-labs/FLUX.1-schnell", "LAiM/FLUX.1-schnell"} <= loading
-    assert {"black-forest-labs/FLUX.1-dev", "LAiM/FLUX.1-dev"} <= loading
+    assert {"black-forest-labs/FLUX.1-schnell", "unsloth/FLUX.1-schnell"} <= loading
+    assert {"black-forest-labs/FLUX.1-dev", "unsloth/FLUX.1-dev"} <= loading
 
 
 def test_download_plan_refuses_a_pick_native_cannot_serve():
     b = SdCppDiffusionBackend(engine = _FakeEngine())
     with pytest.raises(ValueError, match = "gguf_filename is required"):
-        b.download_plan("LAiM/Z-Image-Turbo-GGUF", model_kind = "gguf")
+        b.download_plan("unsloth/Z-Image-Turbo-GGUF", model_kind = "gguf")
     with pytest.raises(ValueError, match = "native sd.cpp asset mapping"):
         b.download_plan(
             "stabilityai/sdxl-turbo", gguf_filename = "sdxl-Q4_K_M.gguf", model_kind = "gguf"
@@ -660,17 +660,17 @@ def test_asset_specs_flux2_klein_selects_encoder_by_variant():
     b = SdCppDiffusionBackend(engine = _FakeEngine())
     fam = detect_family("flux.2-klein")
 
-    specs_4b = b._asset_specs("LAiM/FLUX.2-klein-4B-GGUF", "FLUX.2-klein-4B-Q4_K_M.gguf", fam)
+    specs_4b = b._asset_specs("unsloth/FLUX.2-klein-4B-GGUF", "FLUX.2-klein-4B-Q4_K_M.gguf", fam)
     te_4b = [(r, f) for r, f, k in specs_4b if k == "llm"]
     assert te_4b == [
-        ("LAiM/Z-Image-Turbo-ComfyUI", "split_files/text_encoders/qwen_3_4b.safetensors")
+        ("unsloth/Z-Image-Turbo-ComfyUI", "split_files/text_encoders/qwen_3_4b.safetensors")
     ]
 
-    specs_9b = b._asset_specs("LAiM/FLUX.2-klein-9B-GGUF", "FLUX.2-klein-9B-Q4_K_M.gguf", fam)
+    specs_9b = b._asset_specs("unsloth/FLUX.2-klein-9B-GGUF", "FLUX.2-klein-9B-Q4_K_M.gguf", fam)
     te_9b = [(r, f) for r, f, k in specs_9b if k == "llm"]
     assert te_9b == [
         (
-            "LAiM/FLUX.2-klein-9B-ComfyUI",
+            "unsloth/FLUX.2-klein-9B-ComfyUI",
             "split_files/text_encoders/qwen_3_8b.safetensors",
         )
     ]
@@ -704,38 +704,38 @@ def test_the_moved_sd_cpp_assets_keep_their_upstream_relative_paths():
     # would 404 sd-cli at load time.
     want = {
         "flux.1": [
-            ("LAiM/flux-text-encoders", "clip_l.safetensors"),
-            ("LAiM/flux-text-encoders", "t5xxl_fp16.safetensors"),
+            ("unsloth/flux-text-encoders", "clip_l.safetensors"),
+            ("unsloth/flux-text-encoders", "t5xxl_fp16.safetensors"),
         ],
         "flux.2-klein": [
-            ("LAiM/Z-Image-Turbo-ComfyUI", "split_files/text_encoders/qwen_3_4b.safetensors"),
+            ("unsloth/Z-Image-Turbo-ComfyUI", "split_files/text_encoders/qwen_3_4b.safetensors"),
         ],
         "flux.2-dev": [
             (
-                "LAiM/FLUX.2-dev-ComfyUI",
+                "unsloth/FLUX.2-dev-ComfyUI",
                 "split_files/text_encoders/mistral_3_small_flux2_bf16.safetensors",
             ),
         ],
         "z-image": [
-            ("LAiM/Z-Image-Turbo-ComfyUI", "split_files/text_encoders/qwen_3_4b.safetensors"),
+            ("unsloth/Z-Image-Turbo-ComfyUI", "split_files/text_encoders/qwen_3_4b.safetensors"),
         ],
     }
     for name, encoders in want.items():
         fam = detect_family(name)
         assert [(r, f) for r, f, _k in fam.sd_cpp_text_encoders] == encoders, name
     assert detect_family("qwen-image").sd_cpp_vae == (
-        "LAiM/Qwen-Image-ComfyUI",
+        "unsloth/Qwen-Image-ComfyUI",
         "split_files/vae/qwen_image_vae.safetensors",
     )
     assert detect_family("z-image").sd_cpp_vae == (
-        "LAiM/Z-Image-Turbo-ComfyUI",
+        "unsloth/Z-Image-Turbo-ComfyUI",
         "split_files/vae/ae.safetensors",
     )
     # The FLUX.2 autoencoder is Apache-2.0 while the conditioner beside it in the source repack is
     # not, so it is mirrored on its own.
     for name in ("flux.2-klein", "flux.2-dev"):
         assert detect_family(name).sd_cpp_vae == (
-            "LAiM/FLUX.2-VAE",
+            "unsloth/FLUX.2-VAE",
             "split_files/vae/flux2-vae.safetensors",
         ), name
 
@@ -760,14 +760,14 @@ def test_map_guidance_flux2_klein_distilled_off_base_real_cfg():
 
 # (repo, family, cfg, embedded guidance) at Studio's per-model default guidance.
 _FLUX_DEFAULT_GUIDANCE_CASES = [
-    ("LAiM/FLUX.1-dev-GGUF", "flux.1", 1.0, 3.5),
-    ("LAiM/FLUX.1-schnell-GGUF", "flux.1", 1.0, 0.0),
-    ("LAiM/FLUX.1-Kontext-dev-GGUF", "flux.1-kontext", 1.0, 2.5),
-    ("LAiM/FLUX.2-dev-GGUF", "flux.2-dev", 1.0, 4.0),
-    ("LAiM/FLUX.2-klein-4B-GGUF", "flux.2-klein", 1.0, None),
-    ("LAiM/FLUX.2-klein-9B-GGUF", "flux.2-klein", 1.0, None),
-    ("LAiM/FLUX.2-klein-base-4B-GGUF", "flux.2-klein", 5.0, None),
-    ("LAiM/FLUX.2-klein-base-9B-GGUF", "flux.2-klein", 5.0, None),
+    ("unsloth/FLUX.1-dev-GGUF", "flux.1", 1.0, 3.5),
+    ("unsloth/FLUX.1-schnell-GGUF", "flux.1", 1.0, 0.0),
+    ("unsloth/FLUX.1-Kontext-dev-GGUF", "flux.1-kontext", 1.0, 2.5),
+    ("unsloth/FLUX.2-dev-GGUF", "flux.2-dev", 1.0, 4.0),
+    ("unsloth/FLUX.2-klein-4B-GGUF", "flux.2-klein", 1.0, None),
+    ("unsloth/FLUX.2-klein-9B-GGUF", "flux.2-klein", 1.0, None),
+    ("unsloth/FLUX.2-klein-base-4B-GGUF", "flux.2-klein", 5.0, None),
+    ("unsloth/FLUX.2-klein-base-9B-GGUF", "flux.2-klein", 5.0, None),
 ]
 
 
@@ -859,7 +859,7 @@ def test_generate_returns_images_and_seed():
     b = _loaded_backend(engine = eng)
     out = b.generate(prompt = "a fox", width = 256, height = 256, steps = 8, seed = 123, batch_size = 2)
     assert out["seed"] == 123
-    assert out["repo_id"] == "LAiM/Z-Image-Turbo-GGUF"
+    assert out["repo_id"] == "unsloth/Z-Image-Turbo-GGUF"
     assert len(out["images"]) == 2
     assert all(isinstance(im, Image.Image) for im in out["images"])
     # One sd-cli run per batch image, each a distinct seed from the base.
@@ -1045,13 +1045,13 @@ def test_begin_load_rejects_unsupported_family(monkeypatch):
     # A family with no native asset mapping must be rejected (router falls back).
     monkeypatch.setattr(bk, "family_sd_cpp_supported", lambda fam: False)
     with pytest.raises(ValueError, match = "no native sd.cpp asset mapping"):
-        b.begin_load("LAiM/Z-Image-Turbo-GGUF", gguf_filename = "z.gguf")
+        b.begin_load("unsloth/Z-Image-Turbo-GGUF", gguf_filename = "z.gguf")
 
 
 def test_begin_load_requires_gguf_filename():
     b = SdCppDiffusionBackend(engine = _FakeEngine())
     with pytest.raises(ValueError, match = "gguf_filename is required"):
-        b.begin_load("LAiM/Z-Image-Turbo-GGUF")
+        b.begin_load("unsloth/Z-Image-Turbo-GGUF")
 
 
 def test_begin_load_resolves_family_from_filename_only(monkeypatch):
@@ -1076,14 +1076,14 @@ def test_each_load_owns_its_cancel_event(monkeypatch):
 
     monkeypatch.setattr(b, "_run_load", _capture)  # skip the download thread's work
 
-    b.begin_load("LAiM/Z-Image-Turbo-GGUF", gguf_filename = "z.gguf")
+    b.begin_load("unsloth/Z-Image-Turbo-GGUF", gguf_filename = "z.gguf")
     assert started.wait(5)
     first = seen[0]
     b.unload()
     assert first.is_set()
 
     started.clear()
-    b.begin_load("LAiM/Z-Image-Turbo-GGUF", gguf_filename = "z.gguf")
+    b.begin_load("unsloth/Z-Image-Turbo-GGUF", gguf_filename = "z.gguf")
     assert started.wait(5)
     second = seen[1]
     assert second is not first, "each load needs its own event, not a clear() of the shared one"
@@ -1092,7 +1092,7 @@ def test_each_load_owns_its_cancel_event(monkeypatch):
     # The superseded worker's fetch bails on ITS event, not on the live one.
     with pytest.raises(SdCppCancelled):
         b._fetch_assets(
-            [("LAiM/Z-Image-Turbo-GGUF", "z.gguf", "diffusion_model")],
+            [("unsloth/Z-Image-Turbo-GGUF", "z.gguf", "diffusion_model")],
             None,
             cancel_event = first,
         )
@@ -1455,7 +1455,7 @@ def test_run_load_cancels_and_waits_for_inflight_generation(monkeypatch):
 
     def _load():
         b._run_load(
-            repo_id = "LAiM/Z-Image-Turbo-GGUF",
+            repo_id = "unsloth/Z-Image-Turbo-GGUF",
             gguf_filename = "z.gguf",
             base = fam.base_repo,
             fam = fam,
@@ -1474,7 +1474,7 @@ def test_run_load_cancels_and_waits_for_inflight_generation(monkeypatch):
     finally:
         b._generate_lock.release()
     assert committed.wait(5)  # only now does the commit run
-    assert b._state is not None and b._state.repo_id == "LAiM/Z-Image-Turbo-GGUF"
+    assert b._state is not None and b._state.repo_id == "unsloth/Z-Image-Turbo-GGUF"
 
 
 # ── persistent sd-server mode ──────────────────────────────────────────────────
@@ -1543,7 +1543,7 @@ def _run_server_load(
     )
     b._load_token = 1
     b._run_load(
-        repo_id = "LAiM/Z-Image-Turbo-GGUF",
+        repo_id = "unsloth/Z-Image-Turbo-GGUF",
         gguf_filename = gguf_filename,
         base = fam.base_repo,
         fam = fam,
@@ -1845,7 +1845,7 @@ def test_server_reload_stops_old_server_before_new(monkeypatch):
     b._load_token = 2
     fam = detect_family("z-image")
     b._run_load(
-        repo_id = "LAiM/Z-Image-Turbo-GGUF",
+        repo_id = "unsloth/Z-Image-Turbo-GGUF",
         gguf_filename = "z.gguf",
         base = fam.base_repo,
         fam = fam,
@@ -1892,7 +1892,7 @@ def test_a_cancel_during_server_revalidation_stops_before_the_process_spawns(mon
     fam = detect_family("z-image")
     b._load_token = 1
     b._run_load(
-        repo_id = "LAiM/Z-Image-Turbo-GGUF",
+        repo_id = "unsloth/Z-Image-Turbo-GGUF",
         gguf_filename = "z.gguf",
         base = fam.base_repo,
         fam = fam,
@@ -2008,7 +2008,7 @@ def test_server_unusable_after_the_download_keeps_the_engine_the_fallback_resolv
     monkeypatch.setattr(bk, "_installed_accelerator_of", lambda binary: "cuda" if binary else None)
     fam = detect_family("z-image")
     b._load_token = 1
-    b._loading = bk._SdLoading(repo_id = "LAiM/Z-Image-Turbo-GGUF", base_repo = fam.base_repo)
+    b._loading = bk._SdLoading(repo_id = "unsloth/Z-Image-Turbo-GGUF", base_repo = fam.base_repo)
     _shared_setup_2(b, fam)
     assert b._state is not None, f"the fallback was refused: {b.load_progress().get('error')}"
     assert b._state.mode == "oneshot" and b._state.server is None
@@ -2047,7 +2047,7 @@ def test_a_oneshot_load_refuses_a_cli_swapped_during_the_asset_download(monkeypa
     monkeypatch.setattr(b, "_fetch_assets", _fetch)
     fam = detect_family("z-image")
     b._load_token = 1
-    b._loading = bk._SdLoading(repo_id = "LAiM/Z-Image-Turbo-GGUF", base_repo = fam.base_repo)
+    b._loading = bk._SdLoading(repo_id = "unsloth/Z-Image-Turbo-GGUF", base_repo = fam.base_repo)
     _shared_setup_2(b, fam)
 
     assert b._state is None
@@ -2072,9 +2072,9 @@ def test_run_load_redacts_paths_in_progress_error(monkeypatch):
         monkeypatch.setattr(b, "_fetch_assets", _boom)
 
         b._load_token = 1
-        b._loading = bk._SdLoading(repo_id = "LAiM/Z-Image-Turbo-GGUF", base_repo = fam.base_repo)
+        b._loading = bk._SdLoading(repo_id = "unsloth/Z-Image-Turbo-GGUF", base_repo = fam.base_repo)
         b._run_load(
-            repo_id = "LAiM/Z-Image-Turbo-GGUF",
+            repo_id = "unsloth/Z-Image-Turbo-GGUF",
             gguf_filename = "z.gguf",
             base = fam.base_repo,
             fam = fam,
@@ -2245,8 +2245,8 @@ def test_a_cached_community_repack_is_reused_instead_of_re_downloading_the_mirro
         "utils.hf_cache_settings.active_hf_hub_cache", lambda: str(tmp_path), raising = False
     )
 
-    assets = [("LAiM/Z-Image-Turbo-ComfyUI", "split_files/vae/ae.safetensors", "vae")]
-    assert _fetch_repo_map(assets, None)["LAiM/Z-Image-Turbo-ComfyUI"] == repack
+    assets = [("unsloth/Z-Image-Turbo-ComfyUI", "split_files/vae/ae.safetensors", "vae")]
+    assert _fetch_repo_map(assets, None)["unsloth/Z-Image-Turbo-ComfyUI"] == repack
 
     # A fresh install has no repack, so the mirror stays the source.
     monkeypatch.setattr(
@@ -2254,11 +2254,11 @@ def test_a_cached_community_repack_is_reused_instead_of_re_downloading_the_mirro
         lambda: str(tmp_path / "empty"),
         raising = False,
     )
-    assert _fetch_repo_map(assets, None)["LAiM/Z-Image-Turbo-ComfyUI"] == (
-        "LAiM/Z-Image-Turbo-ComfyUI"
+    assert _fetch_repo_map(assets, None)["unsloth/Z-Image-Turbo-ComfyUI"] == (
+        "unsloth/Z-Image-Turbo-ComfyUI"
     )
     # And a repo that mirrors nothing is returned unchanged.
-    assert prefer_cached_legacy_source("LAiM/Qwen-Image", ["x"]) == "LAiM/Qwen-Image"
+    assert prefer_cached_legacy_source("unsloth/Qwen-Image", ["x"]) == "unsloth/Qwen-Image"
 
 
 def test_a_repack_left_in_the_pre_change_cache_root_still_wins_over_the_mirror(
@@ -2288,8 +2288,8 @@ def test_a_repack_left_in_the_pre_change_cache_root_still_wins_over_the_mirror(
     )
     monkeypatch.setattr("huggingface_hub.constants.HF_HUB_CACHE", str(other))
 
-    assets = [("LAiM/Z-Image-Turbo-ComfyUI", "split_files/vae/ae.safetensors", "vae")]
-    assert _fetch_repo_map(assets, None)["LAiM/Z-Image-Turbo-ComfyUI"] == repack
+    assets = [("unsloth/Z-Image-Turbo-ComfyUI", "split_files/vae/ae.safetensors", "vae")]
+    assert _fetch_repo_map(assets, None)["unsloth/Z-Image-Turbo-ComfyUI"] == repack
 
 
 def test_the_delete_guard_names_the_repack_as_well_as_the_mirror(monkeypatch):
@@ -2297,8 +2297,8 @@ def test_the_delete_guard_names_the_repack_as_well_as_the_mirror(monkeypatch):
     a guard naming only one of them can delete a repo the next load needs."""
     from core.inference.sd_cpp_backend import _with_mirrors
 
-    protected = _with_mirrors(["LAiM/Z-Image-Turbo-ComfyUI"])
-    assert "LAiM/Z-Image-Turbo-ComfyUI" in protected
+    protected = _with_mirrors(["unsloth/Z-Image-Turbo-ComfyUI"])
+    assert "unsloth/Z-Image-Turbo-ComfyUI" in protected
     assert "Comfy-Org/z_image_turbo" in protected
 
 
@@ -2337,7 +2337,7 @@ def test_begin_load_answers_without_waiting_on_the_header_probe(monkeypatch):
     monkeypatch.setattr(b, "_run_load", lambda **kwargs: None)  # skip the download thread
 
     started = _time.monotonic()
-    b.begin_load("LAiM/FLUX.2-klein-4B-GGUF", gguf_filename = "flux-2-klein-4b-Q4_K_M.gguf")
+    b.begin_load("unsloth/FLUX.2-klein-4B-GGUF", gguf_filename = "flux-2-klein-4b-Q4_K_M.gguf")
     elapsed = _time.monotonic() - started
 
     assert probed == [], "begin_load must not range-read the header on the route thread"
@@ -2355,7 +2355,7 @@ def test_the_worker_publishes_the_real_encoder_repos_before_fetching(monkeypatch
     # The discriminating pick: a repo and filename that name no size, so the string fallback the
     # offline probe leaves in place answers 4B, while the header says 9B. A hand-renamed file or a
     # local On Device directory lands exactly here.
-    repo, filename = "LAiM/FLUX.2-klein-GGUF", "flux-2-klein-Q4_K_M.gguf"
+    repo, filename = "unsloth/FLUX.2-klein-GGUF", "flux-2-klein-Q4_K_M.gguf"
     monkeypatch.setattr(
         bk.SdCppDiffusionBackend,
         "_flux2_inner_dim",
@@ -2575,7 +2575,7 @@ def test_the_native_engine_resolves_a_bare_gpu_selection_itself(monkeypatch):
 
     monkeypatch.setattr(backend_module.threading, "Thread", _fake_thread)
     b.begin_load(
-        "LAiM/Z-Image-Turbo-GGUF",
+        "unsloth/Z-Image-Turbo-GGUF",
         gguf_filename = "z-image-turbo-Q4_K_M.gguf",
         gpu_ids = [3],
     )
@@ -2816,7 +2816,7 @@ def test_a_deferred_cuda_upgrade_keeps_the_selected_card(monkeypatch):
     fam = detect_family("z-image")
     b._load_token = 1
     b._run_load(
-        repo_id = "LAiM/Z-Image-Turbo-GGUF",
+        repo_id = "unsloth/Z-Image-Turbo-GGUF",
         gguf_filename = "z.gguf",
         base = fam.base_repo,
         fam = fam,

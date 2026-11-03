@@ -39,8 +39,8 @@ test("engine choices round trip and returning to Default clears a stale local ch
 test("an exact key wins", () => {
   assert.deepEqual(
     resolveStoredExtraArgs(
-      { "LAiM/Model-GGUF:q4_k_m": { llama_extra_args: ARGS } },
-      ["LAiM/Model-GGUF:q4_k_m"],
+      { "unsloth/Model-GGUF:q4_k_m": { llama_extra_args: ARGS } },
+      ["unsloth/Model-GGUF:q4_k_m"],
     ),
     { tokens: ARGS, explicit: true },
   );
@@ -51,8 +51,8 @@ test("a repo id and its quant fold by case", () => {
   // upstream spelling still has to be found.
   assert.deepEqual(
     resolveStoredExtraArgs(
-      { "LAiM/Model-GGUF:Q4_K_M": { llama_extra_args: ARGS } },
-      ["LAiM/model-gguf:q4_k_m"],
+      { "unsloth/Model-GGUF:Q4_K_M": { llama_extra_args: ARGS } },
+      ["unsloth/model-gguf:q4_k_m"],
     ),
     { tokens: ARGS, explicit: true },
   );
@@ -146,10 +146,10 @@ test("two keys that fold together resolve to nothing", () => {
   assert.deepEqual(
     resolveStoredExtraArgs(
       {
-        "LAiM/Model-GGUF": { llama_extra_args: ARGS },
-        "LAiM/model-gguf": { llama_extra_args: ["--top-k", "20"] },
+        "unsloth/Model-GGUF": { llama_extra_args: ARGS },
+        "unsloth/model-gguf": { llama_extra_args: ["--top-k", "20"] },
       },
-      ["LAiM/MODEL-gguf"],
+      ["unsloth/MODEL-gguf"],
     ),
     { tokens: [], explicit: false },
   );
@@ -163,10 +163,10 @@ test("the first entry that exists is the one read, fields and all", () => {
   assert.deepEqual(
     resolveStoredExtraArgs(
       {
-        "LAiM/model-gguf:q4_k_m": { max_seq_length: 4096 },
-        "LAiM/model-gguf": { llama_extra_args: ARGS },
+        "unsloth/model-gguf:q4_k_m": { max_seq_length: 4096 },
+        "unsloth/model-gguf": { llama_extra_args: ARGS },
       },
-      ["LAiM/model-gguf:q4_k_m", "LAiM/model-gguf"],
+      ["unsloth/model-gguf:q4_k_m", "unsloth/model-gguf"],
     ),
     { tokens: [], explicit: false },
   );
@@ -177,17 +177,17 @@ test("an empty entry is skipped rather than stopping the search", () => {
   assert.deepEqual(
     resolveStoredExtraArgs(
       {
-        "LAiM/model-gguf:q4_k_m": {},
-        "LAiM/model-gguf": { llama_extra_args: ARGS },
+        "unsloth/model-gguf:q4_k_m": {},
+        "unsloth/model-gguf": { llama_extra_args: ARGS },
       },
-      ["LAiM/model-gguf:q4_k_m", "LAiM/model-gguf"],
+      ["unsloth/model-gguf:q4_k_m", "unsloth/model-gguf"],
     ),
     { tokens: ARGS, explicit: true },
   );
 });
 
 test("no row at all is no arguments, not an error", () => {
-  assert.deepEqual(resolveStoredExtraArgs({}, ["LAiM/model-gguf"]), {
+  assert.deepEqual(resolveStoredExtraArgs({}, ["unsloth/model-gguf"]), {
     tokens: [],
     explicit: false,
   });
@@ -201,10 +201,10 @@ test("a row that carries an empty list is explicit, not absent", () => {
   assert.deepEqual(
     resolveStoredExtraArgs(
       {
-        "LAiM/model-gguf:q4_k_m": { llama_extra_args: [] },
-        "LAiM/model-gguf": { llama_extra_args: ARGS },
+        "unsloth/model-gguf:q4_k_m": { llama_extra_args: [] },
+        "unsloth/model-gguf": { llama_extra_args: ARGS },
       },
-      ["LAiM/model-gguf:q4_k_m", "LAiM/model-gguf"],
+      ["unsloth/model-gguf:q4_k_m", "unsloth/model-gguf"],
     ),
     { tokens: [], explicit: true },
   );
@@ -214,8 +214,8 @@ test("a matched row with other fields but no arguments is not explicit", () => {
   // It stopped the search, as the server's `if override: break` does, but it said
   // nothing about arguments, so there is no clear to honour.
   assert.deepEqual(
-    resolveStoredExtraArgs({ "LAiM/model-gguf": { max_seq_length: 4096 } }, [
-      "LAiM/model-gguf",
+    resolveStoredExtraArgs({ "unsloth/model-gguf": { max_seq_length: 4096 } }, [
+      "unsloth/model-gguf",
     ]),
     { tokens: [], explicit: false },
   );
@@ -227,8 +227,8 @@ test("the full resolved row uses the same identity rules as extra arguments", ()
     kv_cache_dtype: "q8_0",
   };
   assert.equal(
-    resolveStoredOverride({ "LAiM/Model-GGUF:Q4_K_M": row }, [
-      "LAiM/model-gguf:q4_k_m",
+    resolveStoredOverride({ "unsloth/Model-GGUF:Q4_K_M": row }, [
+      "unsloth/model-gguf:q4_k_m",
     ]),
     row,
   );

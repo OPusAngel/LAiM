@@ -64,7 +64,7 @@ from huggingface_hub import constants as hf_constants
 from core.inference.llama_cpp import LlamaCppBackend
 from utils.hf_xet_fallback import DownloadStallError
 
-REPO = "LAiM/vision-GGUF"
+REPO = "unsloth/vision-GGUF"
 
 
 @pytest.fixture

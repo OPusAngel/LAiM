@@ -5,6 +5,8 @@ import { AUTH_SESSION_CLEARED_EVENT } from "../../auth/session-events.ts";
 import { reconcileLegacyHfToken } from "../../credentials/reconciliation.ts";
 
 import { create } from "zustand";
+import { translate } from "@/i18n";
+
 type HfTokenApi = typeof import("../api/hf-token-api");
 
 async function loadHfTokenApi(): Promise<HfTokenApi> {
@@ -100,7 +102,7 @@ function announcePersistedTokenChange(): void {
 function persistenceErrorMessage(error: unknown): string {
   return error instanceof Error
     ? error.message
-    : "Could not save the Hugging Face token.";
+    : translate("uxHub.couldNotSaveTheowipz");
 }
 
 function persistTokenToBackend(token: string): void {
@@ -241,7 +243,7 @@ export function hydrateHfTokenFromBackend(): Promise<void> {
     !persistenceWasPending && persistenceRevisionAtStart === persistenceRevision;
   const assertCurrentSession = () => {
     if (sessionRevision !== authSessionRevision) {
-      throw new Error("Authentication session changed during credential hydration.");
+      throw new Error(translate("uxHub.authenticationSessionChangedDurilqlma"));
     }
   };
 

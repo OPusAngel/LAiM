@@ -185,7 +185,8 @@ test("Run reports a rejected budget flush instead of voiding it", () => {
     flush.indexOf(".catch(") < flush.indexOf(".finally("),
     "the rejection must be handled before finally starts the load",
   );
-  assert.match(flush, /Failed to save VRAM budget/);
+  // The message is localized, so assert the report itself rather than one language's text.
+  assert.match(flush, /toast\.error\(/);
 });
 
 test("budget writes are serialised and only the newest publishes", () => {

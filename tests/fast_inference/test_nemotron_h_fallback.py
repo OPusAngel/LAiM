@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # Copyright 2026-present the LAiM AI Inc. team. All rights reserved.
 
-"""Nemotron-H with fast_inference = True falls back to LAiM inference when the installed LAiM_zoo cannot rebuild it from vLLM (LAiMai/LAiM-zoo#565)."""
+"""Nemotron-H with fast_inference = True falls back to LAiM inference when the installed LAiM_zoo cannot rebuild it from vLLM (OPusAngel/LAiM-zoo#565)."""
 
 import importlib.util
 

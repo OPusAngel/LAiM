@@ -19,9 +19,9 @@ function parseErrorText(status: number, body: unknown): string {
     if (typeof message === "string" && message) return message;
   }
   if (status === 405) {
-    return "Method Not Allowed - the LAiM backend did not accept this API method. Restart LAiM so the frontend and backend are on the same build.";
+    return translate("uxHub.methodNotAllowedThek18m5");
   }
-  return `Request failed (${status})`;
+  return translate("uxHub.requestFailedb9a7f", { p1: status });
 }
 
 async function parseJsonOrThrow<T>(response: Response): Promise<T> {
@@ -161,6 +161,8 @@ import {
   normalizeDownloadTransportCapabilities,
 } from "./transport-capabilities";
 import type { DownloadTransportCapabilities } from "./transport-capabilities";
+import { translate } from "@/i18n";
+
 
 // The Auto verdict is dynamic: a stalled transfer demotes this machine mid-session, so an
 // indefinite cache would keep serving the pre-stall answer until the page reloads. Refreshing is

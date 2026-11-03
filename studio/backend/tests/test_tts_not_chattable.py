@@ -145,16 +145,16 @@ def test_the_tts_set_is_a_subset_of_the_classifier():
 
 def test_curated_tts_repo_ids_cover_the_gguf_companion():
     """A GGUF repo carries no tokenizer_config, so only the ids can answer."""
-    assert is_curated_tts_repo_id("LAiM/orpheus-3b-0.1-ft-GGUF")
-    assert is_curated_tts_repo_id("LAiM/Orpheus-3B-0.1-FT-GGUF")
-    assert is_curated_tts_repo_id("LAiM/csm-1b")
-    assert is_curated_tts_repo_id("LAiM/Spark-TTS-0.5B")
-    assert is_curated_tts_repo_id("LAiM/Llama-OuteTTS-1.0-1B")
-    assert not is_curated_tts_repo_id("LAiM/gemma-4-E2B-it")
+    assert is_curated_tts_repo_id("unsloth/orpheus-3b-0.1-ft-GGUF")
+    assert is_curated_tts_repo_id("unsloth/Orpheus-3B-0.1-FT-GGUF")
+    assert is_curated_tts_repo_id("unsloth/csm-1b")
+    assert is_curated_tts_repo_id("unsloth/Spark-TTS-0.5B")
+    assert is_curated_tts_repo_id("unsloth/Llama-OuteTTS-1.0-1B")
+    assert not is_curated_tts_repo_id("unsloth/gemma-4-E2B-it")
     assert not is_curated_tts_repo_id(None)
     # The two curated sets describe different halves of the Audio page.
-    assert not is_curated_tts_repo_id("LAiM/whisper-large-v3")
-    assert not is_curated_stt_repo_id("LAiM/orpheus-3b-0.1-ft")
+    assert not is_curated_tts_repo_id("unsloth/whisper-large-v3")
+    assert not is_curated_stt_repo_id("unsloth/orpheus-3b-0.1-ft")
 
 
 def test_a_curated_tts_repo_row_is_not_chat_loadable(tmp_path):
@@ -163,7 +163,7 @@ def test_a_curated_tts_repo_row_is_not_chat_loadable(tmp_path):
     from hub.services.models.cache_inventory import _cache_inventory_fields
 
     fields = _cache_inventory_fields(
-        "LAiM/orpheus-3b-0.1-ft-GGUF",
+        "unsloth/orpheus-3b-0.1-ft-GGUF",
         "gguf",
         snapshot_path = tmp_path,
     )
@@ -173,7 +173,7 @@ def test_a_curated_tts_repo_row_is_not_chat_loadable(tmp_path):
 def test_an_ordinary_gguf_repo_row_still_chats(tmp_path):
     from hub.services.models.cache_inventory import _cache_inventory_fields
     fields = _cache_inventory_fields(
-        "LAiM/gemma-4-E2B-it-GGUF",
+        "unsloth/gemma-4-E2B-it-GGUF",
         "gguf",
         snapshot_path = tmp_path,
     )

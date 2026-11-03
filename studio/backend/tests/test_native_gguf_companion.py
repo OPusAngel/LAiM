@@ -479,7 +479,7 @@ def test_status_provenance_survives_deleted_model_directory(tmp_path, monkeypatc
     assert _loaded_is_local_model(backend, False, "outputs/gemma")
 
     stale = LlamaCppBackend()
-    assert not _loaded_is_local_model(stale, False, "LAiM/gemma-4-12b")
+    assert not _loaded_is_local_model(stale, False, "unsloth/gemma-4-12b")
     assert _loaded_is_local_model(stale, True, None)
 
 

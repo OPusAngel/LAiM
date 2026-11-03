@@ -59,7 +59,7 @@ def main():
             "down_proj",
         ],
         random_state = 3407,
-        use_gradient_checkpointing = "LAiM",
+        use_gradient_checkpointing = "unsloth",
     )
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token

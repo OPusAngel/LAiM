@@ -429,8 +429,8 @@ def run(page, state: Runtime) -> None:
 
     step("two runtimes, and the card across routes")
     state.chat = chat(
-        active_model = "LAiM/Qwen3-4B-GGUF",
-        loaded = ["LAiM/Qwen3-4B-GGUF"],
+        active_model = "unsloth/Qwen3-4B-GGUF",
+        loaded = ["unsloth/Qwen3-4B-GGUF"],
         is_gguf = True,
         gguf_variant = "Q4_K_M",
     )
@@ -504,7 +504,7 @@ def run(page, state: Runtime) -> None:
             "the sd.cpp engine on a CPU-only host",
             dict(
                 loaded = True,
-                repo_id = "LAiM/FLUX.1-dev-GGUF",
+                repo_id = "unsloth/FLUX.1-dev-GGUF",
                 family = "flux",
                 device = "cpu",
                 dtype = "gguf",
@@ -522,7 +522,7 @@ def run(page, state: Runtime) -> None:
 
     # An audio VLM is a chat model, neither Speech nor Dictation.
     state.diffusion = dict(NOTHING_DIFFUSION)
-    state.chat = chat(active_model = "LAiM/gemma-3n-E4B-it", is_audio = True, audio_type = "audio_vlm")
+    state.chat = chat(active_model = "unsloth/gemma-3n-E4B-it", is_audio = True, audio_type = "audio_vlm")
     boot(page, state)
     page.wait_for_selector(CARD, timeout = 30_000)
     text = card_text(page)
@@ -532,7 +532,7 @@ def run(page, state: Runtime) -> None:
         text.replace("\n", " | "),
     )
 
-    state.chat = chat(active_model = "LAiM/Qwen3-4B", loaded = ["LAiM/Qwen3-4B"])
+    state.chat = chat(active_model = "unsloth/Qwen3-4B", loaded = ["unsloth/Qwen3-4B"])
     page.context.route(
         "**/api/inference/video/status",
         lambda route: route.fulfill(
@@ -552,7 +552,7 @@ def run(page, state: Runtime) -> None:
 
     # A failed read is not evidence the runtime is empty; the row must survive it.
     step("a failed status read keeps the row, a readable empty one retires it")
-    state.chat = chat(active_model = "LAiM/Qwen3-4B", loaded = ["LAiM/Qwen3-4B"])
+    state.chat = chat(active_model = "unsloth/Qwen3-4B", loaded = ["unsloth/Qwen3-4B"])
     boot(page, state)
     page.wait_for_selector(CARD, timeout = 30_000)
     check("the chat row is up before the blip", len(rows(page)) == 1, str(rows(page)))
@@ -585,12 +585,12 @@ def run(page, state: Runtime) -> None:
         len(rows(page)) == 0,
         str(rows(page)),
     )
-    state.chat = chat(active_model = "LAiM/Qwen3-4B", loaded = ["LAiM/Qwen3-4B"])
+    state.chat = chat(active_model = "unsloth/Qwen3-4B", loaded = ["unsloth/Qwen3-4B"])
     state.hang = set()
 
     # The position restore: the bug this suite exists for.
     step("position restore, drag, released pointer")
-    state.chat = chat(active_model = "LAiM/Qwen3-4B-GGUF", is_gguf = True, gguf_variant = "Q4_K_M")
+    state.chat = chat(active_model = "unsloth/Qwen3-4B-GGUF", is_gguf = True, gguf_variant = "Q4_K_M")
     boot(page, state, seed = {POSITION_KEY: json.dumps({"left": 2300, "top": 1300})})
     page.wait_for_selector(CARD, timeout = 30_000)
     box = page.locator(HANDLE).first.bounding_box()
@@ -666,7 +666,7 @@ def run(page, state: Runtime) -> None:
     )
 
     # A load via the OpenAI API or auto-switch raises no lifecycle event; the poll is the only witness.
-    state.chat = chat(active_model = "LAiM/Qwen3-4B", loaded = ["LAiM/Qwen3-4B"])
+    state.chat = chat(active_model = "unsloth/Qwen3-4B", loaded = ["unsloth/Qwen3-4B"])
     boot(page, state)
     page.wait_for_selector(CARD, timeout = 30_000)
     page.locator('[aria-label="Close loaded models"]').first.click()
@@ -729,7 +729,7 @@ def run(page, state: Runtime) -> None:
     )
 
     step("eject, replaced and stale rows")
-    state.chat = chat(active_model = "LAiM/Qwen3-4B-GGUF", is_gguf = True, gguf_variant = "Q4_K_M")
+    state.chat = chat(active_model = "unsloth/Qwen3-4B-GGUF", is_gguf = True, gguf_variant = "Q4_K_M")
     state.diffusion = dict(
         NOTHING_DIFFUSION,
         loaded = True,
@@ -816,7 +816,7 @@ def run(page, state: Runtime) -> None:
 
     step("the preference: off by default, and off stops the poll")
     state.reset()
-    state.chat = chat(active_model = "LAiM/Qwen3-4B", loaded = ["LAiM/Qwen3-4B"])
+    state.chat = chat(active_model = "unsloth/Qwen3-4B", loaded = ["unsloth/Qwen3-4B"])
     # A fresh install shows no card even with a model resident.
     boot(page, state, show = False)
     check("the card is off by default", not appears_within(page, CARD, SETTLE_MS // 2))

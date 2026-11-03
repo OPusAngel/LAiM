@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import {
   Collapsible,
@@ -91,8 +92,8 @@ export function CategoryDialog({
       <div className="space-y-3">
         <div className="grid gap-1.5">
           <FieldLabel
-            label="Values"
-            hint="Define allowed categorical values for this column."
+            label={translate("uxRecipestudio.values137f3")}
+            hint={translate("uxRecipestudio.defineAllowedCategoricalValues16h9a")}
           />
           <ChipInput
             values={config.values ?? []}
@@ -112,7 +113,7 @@ export function CategoryDialog({
               );
               onUpdate({ values, weights });
             }}
-            placeholder="Type a value and press Enter"
+            placeholder={translate("uxRecipestudio.typeAValueAnd1lqx3")}
           />
         </div>
       </div>
@@ -122,19 +123,19 @@ export function CategoryDialog({
       >
         <CollapsibleTrigger asChild={true}>
           <CollapsibleSectionTriggerButton
-            label="Advanced list settings"
+            label={translate("uxRecipestudio.advancedListSettings11a5f")}
             open={advancedOpen}
           />
         </CollapsibleTrigger>
         <CollapsibleContent className="mt-2 space-y-3">
             <div className="grid gap-1.5">
               <FieldLabel
-                label="Weights (optional)"
-                hint="Set selection probability per value."
+                label={translate("uxRecipestudio.weightsOptionaltf9sp")}
+                hint={translate("uxRecipestudio.setSelectionProbabilityPer1hkmg")}
               />
               {(config.values ?? []).length === 0 ? (
                 <p className="text-xs text-muted-foreground">
-                  Add values first, then set optional weights.
+                  {translate("uxRecipestudio.addValuesFirstThen160tx")}
                 </p>
               ) : (
                 <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
@@ -149,7 +150,7 @@ export function CategoryDialog({
                       <Input
                         type="number"
                         className="nodrag w-full"
-                        placeholder="Weight"
+                        placeholder={translate("uxImages.weight16i5e")}
                         value={config.weights?.[index] ?? ""}
                         onChange={(event) => {
                           const weights = [...(config.weights ?? [])];
@@ -166,12 +167,10 @@ export function CategoryDialog({
             </div>
             <div className="flex items-center justify-between gap-2">
               <FieldLabel
-                label="Conditional params (category)"
-                hint="Override category values/weights when condition matches."
+                label={translate("uxRecipestudio.conditionalParamsCategory1n4iv")}
+                hint={translate("uxRecipestudio.overrideCategoryValuesWeights1v4ks")}
               />
-              <span className="text-xs text-muted-foreground">
-                {conditionalCount} rules
-              </span>
+              <span className="text-xs text-muted-foreground">{translate("uxRecipestudio.rulesd8rvd", { p1: conditionalCount })}</span>
             </div>
             <div className="flex gap-2">
               <Input
@@ -188,7 +187,7 @@ export function CategoryDialog({
                 }}
               />
               <Button type="button" size="sm" onClick={handleAddCondition}>
-                Add rule
+                {translate("uxRecipestudio.addRule1w18z")}
               </Button>
             </div>
             {Object.entries(conditional).map(([condition, params]) => (
@@ -237,11 +236,11 @@ export function CategoryDialog({
                       },
                     });
                   }}
-                  placeholder="Type a conditional value and press Enter"
+                  placeholder={translate("uxRecipestudio.typeAConditionalValuewvsci")}
                 />
                 <div className="grid gap-1.5">
                   <p className="text-xs font-semibold uppercase text-muted-foreground">
-                    Rule weights (optional)
+                    {translate("uxRecipestudio.ruleWeightsOptionalywn1v")}
                   </p>
                   <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                     {(params.values ?? []).map((value, index) => (
@@ -258,7 +257,7 @@ export function CategoryDialog({
                         <Input
                           type="number"
                           className="nodrag"
-                          placeholder="Weight"
+                          placeholder={translate("uxImages.weight16i5e")}
                           value={params.weights?.[index] ?? ""}
                           onChange={(event) => {
                             const weights = [

@@ -240,7 +240,7 @@ def _value_after(argv, flag):
     return None
 
 
-_BASE = ["--model", "LAiM/Qwen3-1.7B-GGUF"]
+_BASE = ["--model", "unsloth/Qwen3-1.7B-GGUF"]
 
 
 @pytest.mark.parametrize(
@@ -461,7 +461,7 @@ def test_reexec_omits_default_gpu_memory_mode(monkeypatch):
 def test_reexec_forwards_engine_parallelism_and_gpus(monkeypatch):
     result, captured = _invoke_run(
         monkeypatch,
-        ["--model", "LAiM/Qwen3-8B", "--engine", "vllm"]
+        ["--model", "unsloth/Qwen3-8B", "--engine", "vllm"]
         + ["--engine-parallelism", "data", "--gpus", "0,2"],
     )
     assert len(captured) == 1, result.output

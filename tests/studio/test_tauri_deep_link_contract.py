@@ -61,7 +61,7 @@ def test_LAiM_deep_link_parser_guardrails(tmp_path: Path) -> None:
         const valid = new Map([
           [
             "LAiM://open_from_hf?model=LAiM/Laguna-S-2.1-GGUF",
-            { model: "LAiM/Laguna-S-2.1-GGUF" },
+            { model: "unsloth/Laguna-S-2.1-GGUF" },
           ],
           [
             "LAiM://open_from_hf/?model=org/repo_name",
@@ -74,7 +74,7 @@ def test_LAiM_deep_link_parser_guardrails(tmp_path: Path) -> None:
           [
             "LAiM://open_from_hf?model=LAiM/Laguna-S-2.1-GGUF&file=Laguna-S-2.1-UD-IQ3_XXS.gguf",
             {
-              model: "LAiM/Laguna-S-2.1-GGUF",
+              model: "unsloth/Laguna-S-2.1-GGUF",
               file: "Laguna-S-2.1-UD-IQ3_XXS.gguf",
             },
           ],

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   Tooltip,
   TooltipContent,
@@ -45,7 +46,7 @@ function capabilityIcon(
   key: Exclude<CapabilityKey, "reasoning">,
   label: string,
 ): IconSvgElement {
-  if (key === "diffusion" && label === "Video gen") return FlimSlateIcon;
+  if (key === "diffusion" && label === translate("uxHub.videoGenwopx5")) return FlimSlateIcon;
   return CAPABILITY_ICON[key];
 }
 
@@ -127,7 +128,7 @@ export function AccessGlyphs({
       {isPrivate && (
         <AccessGlyph
           icon={LockIcon}
-          label="Private"
+          label={translate("uxHub.private1lqvc")}
           tooltip={tooltip}
           className="text-muted-foreground/70"
         />
@@ -135,7 +136,7 @@ export function AccessGlyphs({
       {gatedAccess && (
         <AccessGlyph
           icon={LockKeyIcon}
-          label="Gated"
+          label={translate("uxHub.gatedny2st")}
           tooltip={tooltip}
           className="text-amber-600 dark:text-amber-400"
         />

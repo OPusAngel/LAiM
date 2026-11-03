@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # Copyright 2026-present the LAiM AI Inc. team. All rights reserved.
 
-"""save_pretrained_torchao on QAT models (LAiMai/LAiM#4980), CPU only."""
+"""save_pretrained_torchao on QAT models (OPusAngel/LAiM#4980), CPU only."""
 
 from __future__ import annotations
 

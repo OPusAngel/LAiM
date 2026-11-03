@@ -928,8 +928,8 @@ _EMPTY_TOOL_RESULT = '{"result":""}'
 # legitimately be called `web_search`, so the marker or a Gemini native part has to be there too, as the frontend also
 # requires.
 _SERVER_BUILTIN_NAMES = frozenset({"web_search", "web_fetch", "code_execution", "image_generation"})
-# `SANDBOX_FILE_TOOLS`, and `tool_loop_controller._FILE_SENTINEL_TOOLS`. Only these wrap.
-_SANDBOX_TOOL_NAMES = frozenset({"python", "terminal", "edit_file"})
+# `LOCAL_CODE_FILE_TOOLS`, and `tool_loop_controller._FILE_SENTINEL_TOOLS`. Only these wrap.
+_LOCAL_CODE_TOOL_NAMES = frozenset({"python", "terminal", "edit_file"})
 
 # `search-images.ts`. `re.ASCII` on the scheme because Python's IGNORECASE folds Unicode, so `http\u017f://` would
 # match where JavaScript's `/i` does not.
@@ -1003,12 +1003,12 @@ def _search_images_result(result) -> bool:
     )
 
 
-def _sandbox_wrapper(result, tool_name: str) -> bool:
+def _local_tool_wrapper(result, tool_name: str) -> bool:
     # The name gates it as well as the shape: another tool answering with `{text, sessionId, images}` is someone
     # else's, and unwrapping it drops its rest.
     if not isinstance(result, dict) or not isinstance(result.get("text"), str):
         return False
-    if tool_name not in _SANDBOX_TOOL_NAMES or not isinstance(result.get("sessionId"), str):
+    if tool_name not in _LOCAL_CODE_TOOL_NAMES or not isinstance(result.get("sessionId"), str):
         return False
     if not isinstance(result.get("images"), list):
         return False
@@ -1066,7 +1066,7 @@ def _unwrapped(result, tool_name: str):
     if not (
         _mcp_image_result(result)
         or _search_images_result(result)
-        or _sandbox_wrapper(result, tool_name)
+        or _local_tool_wrapper(result, tool_name)
     ):
         return None
     text = result["text"]

@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
-import { ChevronDown, Hand } from "lucide-react";
-import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui";
+import { ChevronDown } from "lucide-react";
 import type { ComponentType } from "react";
-import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFullAccessAllowed } from "@/features/auth/account-session";
 import { useSettingsDialogStore } from "@/features/settings";
-import { useT } from "@/i18n";
+import { translate, useT } from "@/i18n";
 
 import {
   AlertDialog,
@@ -25,10 +24,10 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSubContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDownStandardIcon, ChevronRightStandardIcon } from "@/lib/chevron-icons";
+import { ChevronDownStandardIcon } from "@/lib/chevron-icons";
+import { PlanetCoreGlyph, SaturnCoreGlyph } from "@/lib/agent-core-icons";
 import { ShieldAlertGlyph } from "@/lib/shield-alert-icon";
 import { MenuTickIcon } from "@/lib/tick-icon";
 import { cn } from "@/lib/utils";
@@ -39,26 +38,14 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
-  type SandboxCapability,
-  loadSandboxCapability,
-  onSandboxCapabilityChange,
-} from "./api/sandbox-capability";
-import { sandboxSwitchState } from "./sandbox-level";
-import {
-  pickSandboxLevel,
-} from "./sandbox-pick";
-import {
-  SandboxSetupDialog,
-  useSandboxSetupDialogStore,
-} from "./sandbox-setup-dialog";
-import {
   type PermissionMode,
   useChatRuntimeStore,
 } from "./stores/chat-runtime-store";
 
-/** Permission levels for tool calls. Full access stays last because it disables both approval
- *  prompts and the code sandbox. LAiM ships two agent modes: Agent Core (asks before actions,
- *  keeps code in the sandbox) and Agent Full Core (full access, runs everything without asking). */
+/** Permission levels for tool calls. Full access stays last because it also disables approval
+ *  prompts. LAiM ships two agent modes: Agent Core (asks before every action, runs on the host)
+ *  and Full Agent Core (asks nothing, runs on the host). Both are the same planet; the ring is
+ *  what says "full". */
 export const PERMISSION_MODE_OPTIONS: readonly {
   value: PermissionMode;
   label: string;
@@ -67,15 +54,19 @@ export const PERMISSION_MODE_OPTIONS: readonly {
 }[] = [
   {
     value: "ask",
-    label: "Agent Core",
-    description: "AI выполняет действия и код, но спрашивает разрешение и держит код в песочнице",
-    icon: Hand,
+    get label() {
+      return translate("uxChat.agentCore1np17");
+    },
+    get description() { return translate("uxChat.theAITakesActions39693"); },
+    icon: PlanetCoreGlyph,
   },
   {
     value: "full",
-    label: "Agent Full Core",
-    description: "Полный доступ: AI сам выполняет и запускает код без вопросов",
-    icon: ShieldAlertGlyph,
+    get label() {
+      return translate("uxChat.agentFullCore104ii");
+    },
+    get description() { return translate("uxChat.fullAccessTheAIlrx31"); },
+    icon: SaturnCoreGlyph,
   },
 ] as const;
 
@@ -83,19 +74,31 @@ export const PERMISSION_MODE_OPTIONS: readonly {
 const FULL_ACCESS_SCOPES = [
   {
     icon: Folder01Icon,
-    title: "Files",
-    description: "Read, change or delete any file you can access",
+    get title() {
+      return translate("shell.search.tabs.files");
+    },
+    get description() {
+      return translate("uxChat.readChangeOrDeletetcntr");
+    },
   },
   {
     icon: ComputerTerminal01Icon,
-    title: "Commands",
-    description: "Run terminal and Python code, install packages",
+    get title() {
+      return translate("uxChat.commands15x4m");
+    },
+    get description() {
+      return translate("uxChat.runTerminalAndPythonpor8s");
+    },
   },
   {
     // The app's own internet glyph, as on Web search.
     icon: InternetIcon,
-    title: "Internet",
-    description: "Browse, send data and use MCP tools",
+    get title() {
+      return translate("uxChat.internet1cm29");
+    },
+    get description() {
+      return translate("uxChat.browseSendDataAndccs0l");
+    },
   },
 ] as const;
 
@@ -108,177 +111,14 @@ export function permissionModeOption(mode: PermissionMode) {
   );
 }
 
-/** Menu heading. `sandboxControls` adds the Sandbox Low/High picker; Settings shows its own row.
- *  `onOsSandboxMissing` opens the install popup; by default the one at the chat-page root. */
-export function PermissionMenuLabel({
-  sandboxControls,
-  onOsSandboxMissing,
-}: {
-  sandboxControls: boolean;
-  onOsSandboxMissing?: () => void;
-}) {
+/** Menu heading. LAiM runs every tool on the host with full rights, so there is nothing else to
+ *  pick here. */
+export function PermissionMenuLabel() {
   const t = useT();
   return (
     <DropdownMenuLabel className="flex items-center justify-between gap-3">
       <span>{t("settings.general.permissions.sectionTitle")}</span>
-      {sandboxControls ? <SandboxLevelMenuPicker onOsSandboxMissing={onOsSandboxMissing} /> : null}
     </DropdownMenuLabel>
-  );
-}
-
-/** Space between the permission menu and the sandbox picker beside it. */
-const SANDBOX_PICKER_GAP = 8;
-
-/** Sandbox levels, weakest first. Disabled only shows under Full access and is never picked. */
-const SANDBOX_LEVEL_OPTIONS = [
-  { value: "off", labelKey: "settings.sandbox.levelOff", descriptionKey: "settings.sandbox.levelOffShort" },
-  { value: "low", labelKey: "settings.sandbox.levelLow", descriptionKey: "settings.sandbox.levelLowShort" },
-  { value: "high", labelKey: "settings.sandbox.levelHigh", descriptionKey: "settings.sandbox.levelHighShort" },
-] as const;
-
-/** "Sandbox High ›" chip that opens the level picker. High without an OS sandbox reads Low and
- *  picking it opens the setup popup. Full access shows Disabled and locks Low and High. */
-function SandboxLevelMenuPicker({ onOsSandboxMissing }: { onOsSandboxMissing?: () => void }) {
-  const t = useT();
-  const sandboxLevel = useChatRuntimeStore((s) => s.sandboxLevel);
-  const setSandboxLevel = useChatRuntimeStore((s) => s.setSandboxLevel);
-  const setSandboxSetupOpen = useSandboxSetupDialogStore((s) => s.setOpen);
-  const openSettings = useSettingsDialogStore((s) => s.openDialog);
-  const { permissionMode } = useAccountPermissionMode();
-  const capability = useSandboxCapability(sandboxLevel === "high");
-  const { checked, disabled } = sandboxSwitchState(sandboxLevel, permissionMode, capability);
-  const active = disabled ? "off" : checked ? "high" : "low";
-  const options = SANDBOX_LEVEL_OPTIONS.filter((option) => disabled || option.value !== "off");
-  const activeOption = SANDBOX_LEVEL_OPTIONS.find((option) => option.value === active)!;
-  const descriptionId = useId();
-  const chipRef = useRef<HTMLDivElement | null>(null);
-  const [offsets, setOffsets] = useState({ side: SANDBOX_PICKER_GAP, align: 0 });
-  // State, not a ref: the portal mounts the picker a render after `open` flips.
-  const [picker, setPicker] = useState<HTMLDivElement | null>(null);
-  // Ours, not Radix's: it closes a submenu once the pointer or focus leaves it.
-  const [open, setOpen] = useState(false);
-
-  // Stays open until a click outside the picker. The chip toggles it itself.
-  useEffect(() => {
-    if (!open) return;
-    const onPointerDown = (event: PointerEvent) => {
-      const target = event.target as Node;
-      if (picker?.contains(target) || chipRef.current?.contains(target)) return;
-      setOpen(false);
-    };
-    document.addEventListener("pointerdown", onPointerDown, true);
-    return () => document.removeEventListener("pointerdown", onPointerDown, true);
-  }, [open, picker]);
-
-  // Places the picker a gap clear of the menu, tops aligned. Radix applies one sideOffset to
-  // whichever side it lands on, so pick the side here: right if it fits, else left.
-  useLayoutEffect(() => {
-    const chip = chipRef.current;
-    const menu = chip?.closest<HTMLElement>('[role="menu"]');
-    if (!open || !chip || !menu || !picker) return;
-    const chipBox = chip.getBoundingClientRect();
-    const menuBox = menu.getBoundingClientRect();
-    const width = picker.offsetWidth;
-    const fitsRight = menuBox.right + SANDBOX_PICKER_GAP + width <= window.innerWidth;
-    const fitsLeft = menuBox.left - SANDBOX_PICKER_GAP - width >= 0;
-    setOffsets({
-      side:
-        !fitsRight && fitsLeft
-          ? chipBox.left - menuBox.left + SANDBOX_PICKER_GAP
-          : menuBox.right - chipBox.right + SANDBOX_PICKER_GAP,
-      align: menuBox.top - chipBox.top,
-    });
-  }, [open, picker]);
-
-  return (
-    <DropdownMenuPrimitive.Sub
-      open={open}
-      // Close requests are ignored; see the pointerdown effect.
-      onOpenChange={(next) => {
-        if (next) setOpen(true);
-      }}
-    >
-      <DropdownMenuPrimitive.SubTrigger
-        ref={chipRef}
-        aria-describedby={descriptionId}
-        // Opens on click or arrow key, not hover.
-        onPointerMove={(event) => event.preventDefault()}
-        onClick={(event) => {
-          if (!open) return;
-          event.preventDefault();
-          setOpen(false);
-        }}
-        // Negative margins cancel the hover pill's padding so nothing shifts.
-        className="menu-heading-chip -my-1 -mr-1.5 flex shrink-0 cursor-pointer items-center gap-1 rounded-full border-0 py-1 pr-1.5 pl-2.5 text-ui-12 font-medium outline-none transition-colors"
-      >
-        <span className="text-foreground">{t("settings.sandbox.levelLabel")}</span>
-        <span className={active === "off" ? "text-muted-foreground" : "text-primary"}>
-          {t(activeOption.labelKey)}
-        </span>
-        <HugeiconsIcon
-          icon={ChevronRightStandardIcon}
-          strokeWidth={1.75}
-          className="-ml-0.5 size-[calc(13px*var(--ui-space-scale,1))] text-foreground"
-        />
-        <span id={descriptionId} className="sr-only">
-          {t(activeOption.descriptionKey)}
-        </span>
-      </DropdownMenuPrimitive.SubTrigger>
-      <DropdownMenuSubContent
-        ref={setPicker}
-        sideOffset={offsets.side}
-        alignOffset={offsets.align}
-        onKeyDown={(event) => {
-          if (event.key === "ArrowLeft") setOpen(false);
-        }}
-        className="LAiM-plus-menu w-[calc(312px*var(--ui-space-scale,1))]"
-      >
-        <DropdownMenuLabel className="flex items-start justify-between gap-3">
-          <span className="min-w-0">{t("settings.sandbox.levelPickerTitle")}</span>
-          <DropdownMenuPrimitive.Item
-            // my-0!: drops the menu item margin so it lines up with the question.
-            className="my-0! shrink-0 cursor-pointer rounded-sm font-normal text-muted-foreground underline decoration-muted-foreground/50 underline-offset-[3px] outline-hidden transition-colors hover:text-foreground hover:decoration-foreground/60 data-[highlighted]:text-foreground data-[highlighted]:decoration-foreground/60"
-            // Deferred past the menu's focus restore.
-            onSelect={() =>
-              setTimeout(
-                () => openSettings("sandbox", { scrollTarget: "sandbox-permissions" }),
-                0,
-              )
-            }
-          >
-            {t("settings.sandbox.learnMore")}
-          </DropdownMenuPrimitive.Item>
-        </DropdownMenuLabel>
-        {options.map((option) => (
-          <DropdownMenuItem
-            key={option.value}
-            disabled={disabled && option.value !== "off"}
-            onSelect={() => {
-              if (option.value === active || option.value === "off") return;
-              void pickSandboxLevel(option.value, setSandboxLevel, () =>
-                // Deferred past the menu's focus restore.
-                setTimeout(onOsSandboxMissing ?? (() => setSandboxSetupOpen(true)), 0),
-              );
-            }}
-            className={cn("items-start gap-2 py-2", active === option.value && "font-medium")}
-          >
-            <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-              <span className="text-ui-13 leading-tight">{t(option.labelKey)}</span>
-              <span className="text-xs font-normal leading-snug text-muted-foreground">
-                {t(option.descriptionKey)}
-              </span>
-            </span>
-            {active === option.value ? (
-              <HugeiconsIcon
-                icon={MenuTickIcon}
-                strokeWidth={2}
-                className="permission-mode-tick ml-auto size-4 shrink-0 self-center"
-              />
-            ) : null}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuSubContent>
-    </DropdownMenuPrimitive.Sub>
   );
 }
 
@@ -297,31 +137,6 @@ function useAccountPermissionMode() {
   };
 }
 
-/** Null while unknown, when the server is too old to say, or when `enabled` is false (Low needs no
- *  OS sandbox answer, and the read probes it); follows later reads and resets. */
-export function useSandboxCapability(enabled: boolean): SandboxCapability | null {
-  const [capability, setCapability] = useState<SandboxCapability | null>(null);
-  useEffect(() => {
-    if (!enabled) return;
-    let live = true;
-    // Only the newest read applies: an older answer resolving last must not undo a newer one.
-    let reads = 0;
-    const read = () => {
-      const id = ++reads;
-      void loadSandboxCapability().then((next) => {
-        if (live && id === reads) setCapability(next);
-      });
-    };
-    read();
-    const stop = onSandboxCapabilityChange(read);
-    return () => {
-      live = false;
-      stop();
-    };
-  }, [enabled]);
-  return enabled ? capability : null;
-}
-
 export function PermissionModeMenuItems({
   onRequestFullAccess,
 }: {
@@ -337,8 +152,6 @@ export function PermissionModeMenuItems({
           key={option.value}
           onSelect={() => {
             if (option.value === permissionMode) return;
-            // Run automatically applies at once: without an OS sandbox the switch reads Low and
-            // risky Python and Terminal calls still ask.
             if (option.value === "full") {
               onRequestFullAccess();
             } else {
@@ -416,11 +229,11 @@ export function FullAccessConfirmContent({
       <AlertDialogHeader className="gap-2">
         <AlertDialogTitle className="flex items-center gap-2.5">
           <ShieldAlertGlyph className="size-5 shrink-0" strokeWidth={2} />
-          Turn on Full access?
+          {translate("uxChat.turnOnFullAccesszhszm")}
         </AlertDialogTitle>
         {/* text-pretty: balance splits this sentence into two short lines. */}
         <AlertDialogDescription className="text-pretty leading-relaxed">
-          Tools will run without asking and outside the sandbox, including:
+          {translate("uxChat.toolsWillRunWithout1r1rl")}
         </AlertDialogDescription>
       </AlertDialogHeader>
       <ul className="flex flex-col rounded-2xl bg-muted/50 px-5 py-1.5">
@@ -441,27 +254,15 @@ export function FullAccessConfirmContent({
         ))}
       </ul>
       <p className="text-pretty text-xs leading-relaxed text-muted-foreground">
-        Risks include data loss or exposure and prompt injection. You can turn this off
-        anytime.{" "}
-        <button
-          type="button"
-          className="cursor-pointer text-foreground underline underline-offset-2"
-          onClick={() => {
-            onClose();
-            openSettings("sandbox", {
-              scrollTarget: "sandbox-permissions",
-              opener: returnFocusRef.current,
-            });
-          }}
-        >
-          Learn more
-        </button>
+        {translate("uxChat.risksIncludeDataLossq4bx7", { p1: " " })}
       </p>
       <AlertDialogFooter className="mt-1">
         {/* Muted, not outline: outline keeps a border in light mode. */}
-        <AlertDialogCancel variant="muted">Cancel</AlertDialogCancel>
+        <AlertDialogCancel variant="muted">
+          {translate("common.cancel")}
+        </AlertDialogCancel>
         <AlertDialogAction variant="destructive" onClick={onConfirm}>
-          Turn on
+          {translate("uxChat.turnOns74tk")}
         </AlertDialogAction>
       </AlertDialogFooter>
     </AlertDialogContent>
@@ -494,23 +295,19 @@ export function FullAccessConfirmDialog({
   );
 }
 
-/** Select-style dropdown (like the MCP composer menu) for picking the permission level. Used in
- *  Settings > Sandbox and the chat settings sheet. */
+/** Select-style dropdown (like the MCP composer menu) for picking the permission level. Used in the
+ *  chat settings sheet. */
 export function PermissionModeDropdown({
   side = "bottom",
   align = "end",
   triggerClassName,
-  sandboxControls = true,
 }: {
   side?: "top" | "bottom";
   align?: "start" | "end";
   triggerClassName?: string;
-  /** Off in Settings, which shows the level and the setup in their own rows. */
-  sandboxControls?: boolean;
 } = {}) {
-  const { permissionMode, fullAccessAllowed } = useAccountPermissionMode();
+  const { permissionMode } = useAccountPermissionMode();
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [sandboxSetupOpen, setSandboxSetupOpen] = useState(false);
   const active = permissionModeOption(permissionMode);
   const ActiveIcon = active.icon;
 
@@ -522,7 +319,7 @@ export function PermissionModeDropdown({
             variant="outline"
             size="sm"
             className={cn("gap-1.5", triggerClassName)}
-            aria-label="Permission level for tool calls"
+            aria-label={translate("uxChat.permissionLevelForTool18e61")}
           >
             <ActiveIcon className="size-3.5 shrink-0" strokeWidth={2} />
             <span className="min-w-0 flex-1 truncate text-left">
@@ -537,10 +334,7 @@ export function PermissionModeDropdown({
           className="w-[calc(330px*var(--ui-space-scale,1))]"
           avoidCollisions={true}
         >
-          <PermissionMenuLabel
-            sandboxControls={sandboxControls}
-            onOsSandboxMissing={() => setSandboxSetupOpen(true)}
-          />
+          <PermissionMenuLabel />
           <PermissionModeMenuItems
             // Defer past the menu-close focus restoration so the dialog's focus trap is not broken by the
             // dropdown grabbing focus back.
@@ -553,10 +347,6 @@ export function PermissionModeDropdown({
       <FullAccessConfirmDialog
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
-      />
-      <SandboxSetupDialog
-        open={sandboxSetupOpen}
-        onOpenChange={setSandboxSetupOpen}
       />
     </>
   );
@@ -584,7 +374,7 @@ export function PermissionModeComposerPill({
           type="button"
           className="composer-pill-btn composer-pill-permissions"
           data-pill-label={active.label}
-          aria-label="Permission level for tool calls"
+          aria-label={translate("uxChat.permissionLevelForTool18e61")}
           title={`${active.label}: ${active.description}`}
         >
           <span className="composer-pill-glyph">
@@ -605,7 +395,7 @@ export function PermissionModeComposerPill({
         avoidCollisions={true}
         className="LAiM-plus-menu w-[calc(330px*var(--ui-space-scale,1))]"
       >
-        <PermissionMenuLabel sandboxControls={true} />
+        <PermissionMenuLabel />
         <PermissionModeMenuItems
           // Defer past the menu-close focus restoration (see PermissionModeDropdown).
           onRequestFullAccess={() =>

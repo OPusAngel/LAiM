@@ -1125,7 +1125,7 @@ def test_a_tool_subprocess_is_recorded_while_it_runs(tmp_path, monkeypatch):
     from utils import process_lifetime as pl
 
     monkeypatch.setenv("LAiM_STUDIO_CHILD_RECORD", str(tmp_path / "children"))
-    monkeypatch.setenv("LAiM_STUDIO_SANDBOX_HOME", str(tmp_path / "sb"))
+    monkeypatch.setenv("LAiM_STUDIO_WORKDIR_HOME", str(tmp_path / "sb"))
 
     pl._tracked_pids.clear()
     pl._tracked_pgids.clear()

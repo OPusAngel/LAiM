@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { LazyImportBoundary } from "@/components/lazy-import-boundary";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/lib/toast";
@@ -44,8 +45,7 @@ export function SharedRunConfigReview({
         <LazyImportBoundary
           fallback={
             <p role="alert" className="mb-5 text-ui-12 text-muted-foreground">
-              The link settings summary could not load. Reload LAiM and
-              reopen the link to review it.
+              {translate("uxCopy.theLinkSettingsSummary1b8em")}
             </p>
           }
         >
@@ -59,10 +59,7 @@ export function SharedRunConfigReview({
           role="status"
           className="mb-5 border-b border-border pb-5 text-pretty text-ui-12 leading-relaxed text-muted-foreground"
         >
-          The GGUF variant could not be resolved. You can edit and share these
-          settings offline. Reopen the link when the Hugging Face model is
-          accessible before loading. To keep any edits, copy a new link with
-          Share first.
+          {translate("uxCopy.theGGUFVariantCouldw4r6a")}
         </p>
       )}
     </>
@@ -86,10 +83,10 @@ export function SharedRunConfigControls({
   useLayoutEffect(() => {
     if (canImport) {
       return runConfigInbox.retainEditor(key, (request) => {
-        toast.info("Run settings import cancelled", {
+        toast.info(translate("uxModelpicker.runSettingsImportCancelledcrgwm"), {
           id: request.id,
           description:
-            "The editor closed before the settings were imported. Reopen the link to try again.",
+            translate("uxModelpicker.theEditorClosedBeforeesvt8"),
         });
       });
     }

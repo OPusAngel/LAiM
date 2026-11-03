@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   nativeFileName,
   registerNativeAttachmentPath,
@@ -167,21 +168,21 @@ export function useSourceDrop({
           );
           if (!hadFolder) reportUnsupported(unsupported);
           if (hadFolder && supported.length === 0) {
-            toast.info("No supported files in that folder", {
+            toast.info(translate("uxRag.noSupportedFilesIn1kqn7"), {
               description: SUPPORTED_SOURCES_HINT,
             });
           }
           if (truncated > 0) {
-            toast.info(`Added the first ${MAX_FOLDER_FILES} files`, {
+            toast.info(translate("uxRag.addedTheFirstFilesuwwy1", { p1: MAX_FOLDER_FILES }), {
               description:
-                "The rest were left out. Drop a smaller folder for them.",
+                translate("uxRag.theRestWereLeftgo3dz"),
             });
           }
           if (supported.length > 0) {
             onItems(supported.map((file) => ({ kind: "file" as const, file })));
           }
         },
-        () => toast.error("Couldn't read the dropped folder"),
+        () => toast.error(translate("uxRag.couldnTReadThe1janc")),
       );
     },
   };

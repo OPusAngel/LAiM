@@ -5,6 +5,8 @@ import { validateHfToken } from "@/features/hf-auth";
 import { isCompleteHfTokenShape } from "@/lib/hf-token-shape";
 import { useEffect, useRef, useState } from "react";
 import { useDebouncedValue } from "./use-debounced-value";
+import { translate } from "@/i18n";
+
 
 export interface HfTokenValidationState {
   isValid: boolean | null;
@@ -58,7 +60,7 @@ export function useHfTokenValidation(token: string): HfTokenValidationState {
           setCompleted({
             token: debouncedToken,
             isValid: false,
-            error: "invalid or expired token",
+            get error() { return translate("uxFeatures.invalidOrExpiredTokenqppk6"); },
             isChecking: false,
           });
         } else if (result.status === "rate_limited") {
@@ -68,15 +70,14 @@ export function useHfTokenValidation(token: string): HfTokenValidationState {
           setCompleted({
             token: debouncedToken,
             isValid: null,
-            error: `Token verification is rate limited.${wait}`,
+            get error() { return translate("uxFeatures.tokenVerificationIsRate38ujh", { p1: wait }); },
             isChecking: false,
           });
         } else {
           setCompleted({
             token: debouncedToken,
             isValid: null,
-            error:
-              "Could not verify the token. Check your connection and try again.",
+            get error() { return translate("uxFeatures.couldNotVerifyThem1s83"); },
             isChecking: false,
           });
         }
@@ -86,8 +87,7 @@ export function useHfTokenValidation(token: string): HfTokenValidationState {
         setCompleted({
           token: debouncedToken,
           isValid: null,
-          error:
-            "Could not verify the token. Check your connection and try again.",
+          get error() { return translate("uxFeatures.couldNotVerifyThem1s83"); },
           isChecking: false,
         });
       },
@@ -97,7 +97,7 @@ export function useHfTokenValidation(token: string): HfTokenValidationState {
   if (normalizedToken && !normalizedToken.startsWith("hf_")) {
     return {
       isValid: false,
-      error: "Token must start with hf_.",
+      get error() { return translate("uxFeatures.tokenMustStartWithd5ifq"); },
       isChecking: false,
     };
   }

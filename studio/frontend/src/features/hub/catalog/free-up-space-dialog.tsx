@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -104,7 +105,7 @@ export function FreeUpSpaceDialog({
           removed += 1;
           freed += companion.size_bytes;
         } catch (e) {
-          toast.error(`Could not remove ${companion.repo_id}`, {
+          toast.error(translate("uxHub.couldNotRemovesm2qx", { p1: companion.repo_id }), {
             description: e instanceof Error ? e.message : String(e),
           });
         }
@@ -114,7 +115,10 @@ export function FreeUpSpaceDialog({
     }
     if (removed > 0) {
       toast.success(
-        `Removed ${removed} unused asset${removed === 1 ? "" : "s"}, freeing ${formatBytes(freed)}`,
+        translate("uxHub.removedUnusedAssetsM63tc", {
+          p1: removed,
+          p2: formatBytes(freed),
+        }),
       );
       onChange?.();
     }
@@ -125,23 +129,19 @@ export function FreeUpSpaceDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[calc(520px*var(--ui-space-scale,1))]">
         <DialogHeader>
-          <DialogTitle>Free up space</DialogTitle>
+          <DialogTitle>{translate("uxHub.freeUpSpace4ucny")}</DialogTitle>
           <DialogDescription>
-            Shared model assets, such as text encoders, VAE and tokenizers, that no installed
-            model needs any more. Anything still in use by a model on this device is not listed
-            and cannot be removed here.
+            {translate("uxCopy.sharedModelAssetsSuch1o001")}
           </DialogDescription>
         </DialogHeader>
         {loading ? (
           <div className="flex items-center gap-2 py-6 text-ui-13 text-muted-foreground">
-            <Spinner /> Checking what is still in use…
-          </div>
+            <Spinner />{translate("uxHub.checkingWhatIsStilll9cqi")}</div>
         ) : error ? (
           <p className="py-6 text-ui-13 text-destructive">{error}</p>
         ) : companions.length === 0 ? (
           <p className="py-6 text-ui-13 text-muted-foreground" data-testid="free-up-space-empty">
-            Nothing to clean up. Every cached asset is still needed by a model you have
-            installed.
+            {translate("uxCopy.nothingToCleanUp172yu")}
           </p>
         ) : (
           <ul className="flex max-h-[calc(260px*var(--ui-space-scale,1))] flex-col gap-1 overflow-y-auto py-1">
@@ -191,7 +191,7 @@ export function FreeUpSpaceDialog({
           >
             {deleting
               ? "Removing…"
-              : `Remove ${formatBytes(selectedBytes)}`}
+              : translate("uxHub.remove0n85e", { p1: formatBytes(selectedBytes) })}
           </Button>
         </DialogFooter>
       </DialogContent>

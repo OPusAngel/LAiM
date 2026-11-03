@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -118,7 +119,7 @@ export function ExampleDatasetCards({
   return (
     <div className={cn("grid gap-2", className)}>
       <span className="text-ui-11 font-medium text-muted-foreground">
-        Or start from an example dataset
+        {translate("uxImages.orStartFromAn3ng4s")}
       </span>
       <div className="grid gap-2">
         {examples.map((ex) => (
@@ -177,8 +178,8 @@ export async function runExampleImport(
   const res = await importDiffusionDatasetExample(ex.id);
   toast.success(
     res.imported > 0
-      ? `Imported ${res.image_count} images into "${res.name}"`
-      : `"${res.name}" already imported (${res.image_count} images)`,
+      ? translate("uxImages.importedImagesInto3jlor", { p1: res.image_count, p2: res.name })
+      : translate("uxImages.alreadyImportedImagespp9oe", { p1: res.name, p2: res.image_count }),
   );
   return res;
 }

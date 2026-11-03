@@ -3,6 +3,8 @@
 
 // Only a trailing `;base64` marks the payload as base64. A segment named `base64` anywhere else is
 // an ordinary parameter, so `data:text/plain;base64;charset=utf-8,SGVsbG8=` stays literal text.
+import { translate } from "@/i18n";
+
 const DATA_URI_BASE64_RE = /;[ \t]*base64[ \t]*$/i;
 const PERCENT_ESCAPE_RE = /%([0-9a-f]{2})/gi;
 const DEFAULT_MIME_TYPE = "text/plain;charset=US-ASCII";
@@ -173,7 +175,7 @@ export function decodeDataUri(rawDataUri: string): DecodedDataUri {
   const dataUri = normalizeUrl(rawDataUri);
   const separator = dataUri.indexOf(",");
   if (!isDataUri(dataUri) || separator < 0) {
-    throw new Error("Invalid data URI.");
+    throw new Error(translate("uxFeatures.invalidDataURIur6po"));
   }
   const metadata = dataUri.slice(5, separator);
   // A fragment belongs to the URL, not to the payload.

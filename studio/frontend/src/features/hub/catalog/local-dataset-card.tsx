@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import type { LocalSource } from "../types";
 import { DotTag } from "./dot-tag";
 import { PathInfoButton } from "./path-info-button";
@@ -21,7 +22,7 @@ export function LocalDatasetCard({
       <div className="group/dl flex items-center">
         <div className="relative flex h-9 min-w-0 flex-1 items-center pl-3 pr-2">
           <span className="flex min-w-0 items-center gap-1.5 text-ui-12 text-muted-foreground">
-            <DotTag tone="success" label="On device" />
+            <DotTag tone="success" label={translate("settings.general.rag.onDevice")} />
             {source !== "hf_cache" && (
               <span className="truncate text-muted-foreground/85">
                 {sourceLabel}

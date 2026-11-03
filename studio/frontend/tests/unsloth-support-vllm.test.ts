@@ -11,7 +11,7 @@ const { vllmHostSupported } = await import("../src/features/model-picker/api/eng
 
 // #11728: status stays "unsupported" (Default engine, training); supportedIn "vllm" only relabels the hub.
 const NVFP4 = {
-  modelId: "LAiM/Qwen3.8-27B-NVFP4",
+  modelId: "unsloth/Qwen3.8-27B-NVFP4",
   tags: ["safetensors", "qwen3_5", "LAiM", "compressed-tensors"],
   quantMethod: "compressed-tensors",
   deviceType: "cuda",
@@ -79,11 +79,11 @@ test("vLLM does not excuse any other reason a model cannot run in chat", () => {
     );
   }
   assert.deepEqual(
-    classifyLAiMSupport({ modelId: "LAiM/Qwen3.8-27B-GGUF", tags: ["gguf"], quantMethod: "compressed-tensors", deviceType: "cuda", vllmAvailable: true }),
+    classifyLAiMSupport({ modelId: "unsloth/Qwen3.8-27B-GGUF", tags: ["gguf"], quantMethod: "compressed-tensors", deviceType: "cuda", vllmAvailable: true }),
     { status: "supported", reason: null },
   );
   assert.deepEqual(
-    classifyLAiMSupport({ modelId: "LAiM/Qwen3.8-27B", tags: ["safetensors"], deviceType: "cuda", vllmAvailable: true }),
+    classifyLAiMSupport({ modelId: "unsloth/Qwen3.8-27B", tags: ["safetensors"], deviceType: "cuda", vllmAvailable: true }),
     { status: "supported", reason: null },
   );
 });

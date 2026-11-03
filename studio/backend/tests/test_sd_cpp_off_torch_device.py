@@ -206,7 +206,7 @@ def test_prediction_agrees_with_selection(monkeypatch):
 
 def _state(**overrides):
     fields = dict(
-        repo_id = "LAiM/Z-Image-Turbo-GGUF",
+        repo_id = "unsloth/Z-Image-Turbo-GGUF",
         base_repo = "Tongyi-MAI/Z-Image-Turbo",
         family = detect_family("z-image"),
         device = "cuda",
@@ -533,7 +533,7 @@ def test_a_refused_fallback_keeps_the_resident_engine(monkeypatch):
 
 
 @pytest.mark.parametrize(
-    "repos, evicted", [(("LAiM/MiniMax-H3-GGUF",), True), (("org/ltx",), False)]
+    "repos, evicted", [(("unsloth/MiniMax-H3-GGUF",), True), (("org/ltx",), False)]
 )
 def test_an_in_flight_native_video_load_is_cancelled_too(monkeypatch, repos, evicted):
     from core.inference import video_minimax_h3

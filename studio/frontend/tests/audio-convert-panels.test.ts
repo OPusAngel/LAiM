@@ -5,7 +5,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import type { AudioModelContext } from "../src/features/audio/tools/types.ts";
-import { readSrc, registerBundlerResolver } from "./helpers/kit.ts";
+import { readSrc, readSrcExpanded, registerBundlerResolver } from "./helpers/kit.ts";
 
 registerBundlerResolver();
 const { audioModelContextFor, collectToolRequest, panelApplies, panelValue } =
@@ -62,7 +62,7 @@ test("each converting family gets its one titled panel, only on Convert", () => 
     CONVERT_PANEL_LOGIC.map((panel) => panel.title),
     ["Seed-VC", "RVC", "Chatterbox", "Vevo2"],
   );
-  const jsx = readSrc("features/audio/tools/convert-panels.tsx");
+  const jsx = readSrcExpanded("features/audio/tools/convert-panels.tsx");
   for (const label of [
     "Sound like the target",
     "Keep words clear",
@@ -266,7 +266,7 @@ test("the tool context reads the Convert caps from the status", () => {
 });
 
 test("the registry lists the Convert panels after Clone's", () => {
-  const registry = readSrc("features/audio/tools/registry.tsx");
+  const registry = readSrcExpanded("features/audio/tools/registry.tsx");
   assert.match(
     registry,
     /\.\.\.CLONE_TOOL_PANELS,[\s\S]*?\.\.\.CONVERT_TOOL_PANELS,/,

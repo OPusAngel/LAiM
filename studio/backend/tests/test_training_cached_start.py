@@ -147,7 +147,7 @@ def _load_route_module(name: str):
 
 def _request(**overrides) -> TrainingStartRequest:
     payload = {
-        "model_name": "LAiM/test",
+        "model_name": "unsloth/test",
         "training_type": "LoRA/QLoRA",
         "format_type": "alpaca",
         "hf_dataset": "org/dataset",
@@ -1160,7 +1160,7 @@ def test_client_error_probe_uses_unadvertised_cached_model(tmp_path, status_code
     ):
         result = route._reject_untrainable_model_request(_request())
 
-    assert result.cached_model_pin == ("LAiM/test", str(snapshot.resolve()))
+    assert result.cached_model_pin == ("unsloth/test", str(snapshot.resolve()))
 
 
 @pytest.mark.parametrize("status_code", [400, 401, 403, 404, 429])
@@ -1237,7 +1237,7 @@ def test_client_error_probe_uses_complete_sharded_cache(tmp_path):
     ):
         result = route._reject_untrainable_model_request(_request())
 
-    assert result.cached_model_pin == ("LAiM/test", str(snapshot.resolve()))
+    assert result.cached_model_pin == ("unsloth/test", str(snapshot.resolve()))
 
 
 @pytest.mark.parametrize(
@@ -1275,7 +1275,7 @@ def test_zero_based_shard_numbering_uses_complete_cache(tmp_path, shards, comple
     ):
         result = route._reject_untrainable_model_request(_request())
 
-    assert result.cached_model_pin == ("LAiM/test", str(snapshot.resolve()))
+    assert result.cached_model_pin == ("unsloth/test", str(snapshot.resolve()))
 
 
 @pytest.mark.parametrize("persisted", ["repo", "snapshot"])
@@ -1292,7 +1292,7 @@ def test_persisted_cache_path_starts_again_with_zero_based_shards(tmp_path, shar
     """From run two on Studio sends a modelLocalPath, so the preflight takes the local branch:
     the persisted cache repo dir and a resolved snapshot must agree, and 1-based names must not move."""
     route = _load_route_module(f"training_route_persisted_{len(shards)}_{shards[0]}_{persisted}")
-    snapshot = _model_repo_with_ref(tmp_path, "LAiM/test")
+    snapshot = _model_repo_with_ref(tmp_path, "unsloth/test")
     for shard in shards:
         (snapshot / shard).write_bytes(b"x")
     (snapshot / "model.safetensors.index.json").write_text(
@@ -1311,7 +1311,7 @@ def test_persisted_cache_path_starts_again_with_zero_based_shards(tmp_path, shar
             _request(model_known_cached = True, model_local_path = str(target)),
         )
 
-    assert result.model_name == "LAiM/test"
+    assert result.model_name == "unsloth/test"
     # The route posix-normalizes this field, so compare against the same shape.
     assert result.model_local_path == target.as_posix()
 
@@ -1418,7 +1418,7 @@ def test_selected_cached_model_tokenizer_failure_allows_hub_fallback(tmp_path):
     _apply_cache_pins(config)
 
     assert config["model_snapshot_path"] == str(snapshot.resolve())
-    assert config["actual_model_repo_id"] == "LAiM/test"
+    assert config["actual_model_repo_id"] == "unsloth/test"
     assert config["model_revision"] == "rev"
     assert config.get("require_validated_model_snapshot", False) is False
     error = ValueError("Either model_file or model_proto must be specified.")
@@ -1428,9 +1428,9 @@ def test_selected_cached_model_tokenizer_failure_allows_hub_fallback(tmp_path):
         "utils.transformers_version.get_transformers_activation_tier",
         side_effect = AssertionError("an exact-revision retry must not probe mutable HEAD"),
     ):
-        assert worker._drop_model_pin_for_fallback(config, None) == "LAiM/test"
+        assert worker._drop_model_pin_for_fallback(config, None) == "unsloth/test"
     assert config["model_snapshot_path"] is None
-    assert config["actual_model_repo_id"] == "LAiM/test"
+    assert config["actual_model_repo_id"] == "unsloth/test"
     assert config["model_revision"] == "rev"
 
 
@@ -1482,7 +1482,7 @@ def test_mlx_pinned_fallback_rejects_cross_repository_bnb_remap():
 
     error = worker._mlx_revision_fallback_error(
         {
-            "model_name": "LAiM/test-bnb-4bit",
+            "model_name": "unsloth/test-bnb-4bit",
             "model_revision": "deadbeef",
         }
     )
@@ -1620,7 +1620,7 @@ def test_remote_format_probe_resolves_the_bicodec_alias():
     with _patch_model_info(return_value = info) as model_info:
         assert route._remote_untrainable_model_format("Spark-TTS-0.5B/LLM", None) is None
 
-    assert model_info.call_args_list[0].args[0] == "LAiM/Spark-TTS-0.5B"
+    assert model_info.call_args_list[0].args[0] == "unsloth/Spark-TTS-0.5B"
 
 
 def test_remote_format_probe_retries_transient_failure():
@@ -2094,7 +2094,7 @@ def test_4bit_resume_reaches_worker_with_source_resource_pins(
         (snapshot / "train.parquet").write_bytes(b"x")
 
     source_config = {
-        "model_name": "LAiM/test",
+        "model_name": "unsloth/test",
         "training_type": "LoRA/QLoRA",
         "hf_dataset": "org/dataset",
         "format_type": "alpaca",
@@ -2117,7 +2117,7 @@ def test_4bit_resume_reaches_worker_with_source_resource_pins(
     }
     resume_run = {
         "id": "source-run",
-        "model_name": "LAiM/test",
+        "model_name": "unsloth/test",
         "config_json": json.dumps(source_config),
     }
     request = _request(
@@ -2218,7 +2218,7 @@ def test_resume_resource_provenance_restores_model_structure():
         "lora_alpha": 16,
         "lora_dropout": 0.05,
         "target_modules": ["q_proj", "v_proj"],
-        "gradient_checkpointing": "LAiM",
+        "gradient_checkpointing": "unsloth",
         "use_rslora": True,
         "use_loftq": False,
         "use_dora": False,
@@ -2231,9 +2231,9 @@ def test_resume_resource_provenance_restores_model_structure():
         "finetune_mlp_modules": False,
     }
     resume_run = {
-        "model_name": "LAiM/test",
+        "model_name": "unsloth/test",
         "config_json": {
-            "model_name": "LAiM/test",
+            "model_name": "unsloth/test",
             "training_type": "LoRA/QLoRA",
             "hf_dataset": "org/dataset",
             **source_structure,
@@ -2258,9 +2258,9 @@ def test_resume_resource_provenance_rejects_invalid_stored_structure(invalid_str
     route = _load_route_module("training_route_resume_invalid_structure")
     request = _request()
     resume_run = {
-        "model_name": "LAiM/test",
+        "model_name": "unsloth/test",
         "config_json": {
-            "model_name": "LAiM/test",
+            "model_name": "unsloth/test",
             "training_type": "LoRA/QLoRA",
             "hf_dataset": "org/dataset",
             **invalid_structure,
@@ -2282,9 +2282,9 @@ def test_exact_resume_rejects_latest_tier_load_mode_change(tmp_path):
     (dataset / "train.parquet").write_bytes(b"x")
     resume_run = {
         "id": "source-run",
-        "model_name": "LAiM/test",
+        "model_name": "unsloth/test",
         "config_json": {
-            "model_name": "LAiM/test",
+            "model_name": "unsloth/test",
             "training_type": "LoRA/QLoRA",
             "hf_dataset": "org/dataset",
             "format_type": "alpaca",
@@ -2337,9 +2337,9 @@ def test_resume_resource_provenance_rejects_identity_changes(request_overrides, 
     route = _load_route_module(f"training_route_resume_identity_{detail.replace(' ', '_')}")
     request = _request(**request_overrides)
     resume_run = {
-        "model_name": "LAiM/test",
+        "model_name": "unsloth/test",
         "config_json": {
-            "model_name": "LAiM/test",
+            "model_name": "unsloth/test",
             "training_type": "LoRA/QLoRA",
             "hf_dataset": "org/dataset",
         },
@@ -2368,13 +2368,13 @@ def test_legacy_resume_config_cannot_inject_cache_pins():
         },
     )
     source_config = {
-        "model_name": "LAiM/test",
+        "model_name": "unsloth/test",
         "training_type": "LoRA/QLoRA",
         "hf_dataset": "",
         "require_exact_resume_resources": True,
     }
     resume_run = {
-        "model_name": "LAiM/test",
+        "model_name": "unsloth/test",
         "config_json": source_config,
     }
 
@@ -2400,9 +2400,9 @@ def test_unattested_current_hub_model_resume_is_rejected(status):
     route = _load_route_module(f"training_route_unattested_hub_model_{status}")
     request = _request(hf_dataset = None)
     resume_run = {
-        "model_name": "LAiM/test",
+        "model_name": "unsloth/test",
         "config_json": {
-            "model_name": "LAiM/test",
+            "model_name": "unsloth/test",
             "training_type": "LoRA/QLoRA",
             "hf_dataset": "",
             "resource_provenance": {"version": 1, "status": status},
@@ -2416,9 +2416,9 @@ def test_pending_hub_model_resume_before_attestation_is_allowed():
     route = _load_route_module("training_route_pending_hub_model_resume")
     request = _request(hf_dataset = None)
     resume_run = {
-        "model_name": "LAiM/test",
+        "model_name": "unsloth/test",
         "config_json": {
-            "model_name": "LAiM/test",
+            "model_name": "unsloth/test",
             "training_type": "LoRA/QLoRA",
             "hf_dataset": "",
             "resource_provenance": {"version": 1, "status": "pending"},
@@ -2508,7 +2508,7 @@ def test_training_backend_forwards_cache_reference_config():
     ):
         backend.start_training(
             job_id = "test-cache-refs",
-            model_name = "LAiM/test",
+            model_name = "unsloth/test",
             training_type = "LoRA/QLoRA",
             format_type = "alpaca",
             model_known_cached = True,
@@ -2564,11 +2564,11 @@ def _model_repo_with_ref(
 def test_apply_cache_pins_fresh_start_resolves_snapshots(tmp_path):
     from core.training.training import _apply_cache_pins
 
-    model_snap = _model_repo_with_ref(tmp_path, "LAiM/test")
+    model_snap = _model_repo_with_ref(tmp_path, "unsloth/test")
     dataset_snap = _dataset_repo_with_ref(tmp_path, "org/dataset")
 
     config = {
-        "model_name": "LAiM/test",
+        "model_name": "unsloth/test",
         "model_known_cached": True,
         "model_local_path": str(model_snap.parent.parent),
         "hf_dataset": "org/dataset",
@@ -2604,11 +2604,11 @@ def test_resolve_model_snapshot_keeps_selected_cache_path_strict(monkeypatch):
     )
 
     # Each path is probed once per metadata set, so assert which paths were consulted, not how many.
-    assert _resolve_model_snapshot("LAiM/test", selected_path) is None
+    assert _resolve_model_snapshot("unsloth/test", selected_path) is None
     assert set(resolved_paths) == {selected_path}
 
     resolved_paths.clear()
-    assert _resolve_model_snapshot("LAiM/test", None) == fallback_snapshot
+    assert _resolve_model_snapshot("unsloth/test", None) == fallback_snapshot
     assert set(resolved_paths) == {str(fallback_path)}
 
 
@@ -2654,7 +2654,7 @@ def test_legacy_cached_dataset_loads_offline_without_completion_manifest(monkeyp
         "dataset-commit",
     )
     config = {
-        "model_name": "LAiM/test",
+        "model_name": "unsloth/test",
         "hf_dataset": "org/dataset",
         "dataset_known_cached": True,
         "dataset_local_path": str(snapshot.parent.parent),
@@ -2699,11 +2699,11 @@ def test_legacy_cached_dataset_loads_offline_without_completion_manifest(monkeyp
 @pytest.mark.parametrize("load_in_4bit", [False, True])
 def test_training_model_load_target_uses_verified_inactive_snapshot(tmp_path, load_in_4bit):
     from core.training.training import resolve_training_model_load_target
-    model_snap = _model_repo_with_ref(tmp_path, "LAiM/test", "commit-old")
+    model_snap = _model_repo_with_ref(tmp_path, "unsloth/test", "commit-old")
 
     assert resolve_training_model_load_target(
         {
-            "model_name": "LAiM/test",
+            "model_name": "unsloth/test",
             "model_known_cached": True,
             "model_local_path": str(model_snap),
             "load_in_4bit": load_in_4bit,
@@ -2717,7 +2717,7 @@ def test_training_model_load_target_rejects_evicted_strict_resume_pin(tmp_path):
     with pytest.raises(ExactResumeResourcesUnavailable, match = "model snapshot"):
         resolve_training_model_load_target(
             {
-                "model_name": "LAiM/test",
+                "model_name": "unsloth/test",
                 "model_snapshot_path": str(tmp_path / "evicted"),
                 "resume_from_checkpoint": "/outputs/run/checkpoint-5",
                 "require_exact_resume_resources": True,
@@ -2756,7 +2756,7 @@ def test_backend_rechecks_exact_4bit_resume_after_sidecar_reservation(tmp_path):
             backend.start_training(
                 job_id = "exact-resume",
                 before_spawn = before_spawn,
-                model_name = "LAiM/test",
+                model_name = "unsloth/test",
                 training_type = "LoRA/QLoRA",
                 hf_dataset = "org/dataset",
                 model_snapshot_path = str(model),
@@ -2774,7 +2774,7 @@ def test_apply_cache_pins_fresh_ignores_client_pins(tmp_path):
     from core.training.training import _apply_cache_pins
 
     config = {
-        "model_name": "LAiM/test",
+        "model_name": "unsloth/test",
         "model_snapshot_path": str(tmp_path / "client-supplied"),
         "hf_dataset": "",
         "dataset_snapshot_path": str(tmp_path / "client-dataset"),
@@ -2803,7 +2803,7 @@ def test_apply_cache_pins_resume_prefers_recorded_pin(tmp_path):
     (repo_root / "refs" / "main").write_text("commit-new")
 
     config = {
-        "model_name": "LAiM/test",
+        "model_name": "unsloth/test",
         "resume_from_checkpoint": "/outputs/run/checkpoint-5",
         "model_snapshot_path": str(old),
         "hf_dataset": "",
@@ -2823,7 +2823,7 @@ def test_apply_cache_pins_resume_evicted_pin_warns(tmp_path):
     (present / "config.json").write_text("{}")
 
     config = {
-        "model_name": "LAiM/test",
+        "model_name": "unsloth/test",
         "resume_from_checkpoint": "/outputs/run/checkpoint-5",
         "model_snapshot_path": str(repo_root / "snapshots" / "commit-gone"),
         "hf_dataset": "",
@@ -2846,7 +2846,7 @@ def test_apply_cache_pins_attested_resume_rejects_evicted_dataset(tmp_path):
     dataset.mkdir(parents = True)
 
     config = {
-        "model_name": "LAiM/test",
+        "model_name": "unsloth/test",
         "model_snapshot_path": str(model),
         "hf_dataset": "org/dataset",
         "dataset_snapshot_path": str(dataset),
@@ -2867,7 +2867,7 @@ def test_apply_cache_pins_resume_pin_rejects_foreign(tmp_path):
     (foreign / "config.json").write_text("{}")
 
     config = {
-        "model_name": "LAiM/test",
+        "model_name": "unsloth/test",
         "resume_from_checkpoint": "/outputs/run/checkpoint-5",
         "model_snapshot_path": str(foreign),
         "hf_dataset": "",
@@ -3094,16 +3094,16 @@ def test_worker_resolves_cached_model_snapshot():
 
     assert (
         worker._resolve_cached_model_load_name(
-            {"model_name": "LAiM/test", "model_snapshot_path": "/snap/dir"}
+            {"model_name": "unsloth/test", "model_snapshot_path": "/snap/dir"}
         )
         == "/snap/dir"
     )
-    assert worker._resolve_cached_model_load_name({"model_name": "LAiM/test"}) == "LAiM/test"
+    assert worker._resolve_cached_model_load_name({"model_name": "unsloth/test"}) == "unsloth/test"
     assert (
         worker._resolve_cached_model_load_name(
-            {"model_name": "LAiM/test", "model_snapshot_path": None}
+            {"model_name": "unsloth/test", "model_snapshot_path": None}
         )
-        == "LAiM/test"
+        == "unsloth/test"
     )
 
 
@@ -3591,7 +3591,7 @@ def test_worker_bootstrap_drops_vanished_pins_and_emits_warnings(tmp_path):
     events: list[dict] = []
     queue = SimpleNamespace(put = events.append)
     config = {
-        "model_name": "LAiM/test",
+        "model_name": "unsloth/test",
         "hf_dataset": "org/dataset",
         "model_snapshot_path": str(tmp_path / "gone-model"),
         "dataset_snapshot_path": str(tmp_path / "gone-dataset"),
@@ -3615,7 +3615,7 @@ def test_worker_bootstrap_rejects_vanished_strict_resume_pins(tmp_path):
     events: list[dict] = []
     queue = SimpleNamespace(put = events.append)
     config = {
-        "model_name": "LAiM/test",
+        "model_name": "unsloth/test",
         "hf_dataset": "org/dataset",
         "model_snapshot_path": str(tmp_path / "gone-model"),
         "dataset_snapshot_path": str(tmp_path / "gone-dataset"),
@@ -3926,7 +3926,7 @@ def test_a_non_finite_cadence_is_stored_as_disabled(literal):
     """json writes inf/NaN as the non-standard `Infinity` / `NaN` literals but Starlette renders
     with `allow_nan = False`, so a config_json carrying one 500s the run's detail view."""
     request = TrainingStartRequest.model_validate_json(
-        '{"model_name": "LAiM/test", "training_type": "LoRA/QLoRA", '
+        '{"model_name": "unsloth/test", "training_type": "LoRA/QLoRA", '
         '"format_type": "alpaca", "hf_dataset": "org/dataset", '
         f'"eval_steps": {literal}}}'
     )
@@ -3958,10 +3958,10 @@ def test_a_run_stored_by_an_older_install_still_renders():
     """An older install can already hold `Infinity` in config_json; the request model cannot."""
     from utils.training_runs import drop_non_finite
 
-    stored = json.dumps({"eval_steps": float("inf"), "model_name": "LAiM/test"})
+    stored = json.dumps({"eval_steps": float("inf"), "model_name": "unsloth/test"})
     config = drop_non_finite(json.loads(stored))
 
-    assert config == {"eval_steps": None, "model_name": "LAiM/test"}
+    assert config == {"eval_steps": None, "model_name": "unsloth/test"}
     JSONResponse(content = config).render(config)
 
 
@@ -3974,7 +3974,7 @@ def test_a_json_integer_too_large_for_a_float_is_disabled_not_a_500():
         float(json.loads(huge))
 
     request = TrainingStartRequest.model_validate_json(
-        '{"model_name": "LAiM/test", "training_type": "LoRA/QLoRA", '
+        '{"model_name": "unsloth/test", "training_type": "LoRA/QLoRA", '
         '"format_type": "alpaca", "hf_dataset": "org/dataset", '
         f'"eval_steps": {huge}}}'
     )

@@ -4,6 +4,8 @@
 import { RUNTIME_REPAIR_KEY } from "../hooks/runtime-repair-history.ts";
 import { USER_STOPPED_KEY } from "../hooks/server-stop-intent.ts";
 import { clearNativeBrowsingData } from "./native-browser-clear.ts";
+import { translate } from "@/i18n";
+
 
 export const BROWSER_ACCOUNT_KEY = "LAiM.browser-account.v1";
 /** Written before a switch publishes new tokens, so peer tabs stop sending requests until the
@@ -66,7 +68,7 @@ export function browserAccountMarker(account: BrowserAccount | string): string {
   const identity: BrowserAccount =
     typeof account === "string" ? { username: account } : account;
   const username = normalizeAccountUsername(identity.username);
-  if (!username) throw new Error("Missing account username.");
+  if (!username) throw new Error(translate("uxFeatures.missingAccountUsernamef1bfn"));
   return identity.accountId
     ? `${ACCOUNT_ID_MARKER_PREFIX}${identity.accountId}:${username}`
     : username;
@@ -175,11 +177,11 @@ function deleteAccountDatabase(
     const request = indexedDB.deleteDatabase(name);
     request.onsuccess = () => resolve();
     request.onerror = () =>
-      reject(request.error ?? new Error("Could not clear account data."));
+      reject(request.error ?? new Error(translate("uxFeatures.couldNotClearAccountyk9fu")));
     request.onblocked = () =>
       reject(
         new Error(
-          "Close other LAiM tabs and retry signing in to clear the previous account's data.",
+          translate("uxFeatures.closeOtherLAiMTabsnwwev"),
         ),
       );
   });

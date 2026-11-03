@@ -32,7 +32,7 @@ for _p in (_backend_root, _tests_dir):
         sys.path.insert(0, str(_p))
 
 
-SUPER_REPO = "LAiM/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-GGUF"
+SUPER_REPO = "unsloth/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-GGUF"
 SUPER = "NVIDIA-Nemotron-3.5-Super-VL-120B-A12B"
 _SUPER_SPLITS = {
     "NVFP4": 3,
@@ -58,7 +58,7 @@ SUPER_FILES = [
     for i in range(1, n + 1)
 ]
 
-BOLT_REPO = "LAiM/NVIDIA-Nemotron-3.5-Bolt-74B-A9B-GGUF"
+BOLT_REPO = "unsloth/NVIDIA-Nemotron-3.5-Bolt-74B-A9B-GGUF"
 BOLT = "NVIDIA-Nemotron-3.5-Bolt-74B-A9B"
 # NVIDIA's QAD IQ2_XXS, its LiLiCorr drafter (GGUF arch dflash, named for llama.cpp's dflash- sibling lookup) and mmproj.
 BOLT_FILES = [
@@ -169,7 +169,7 @@ NEMOTRON35_IDS = [
     BOLT_REPO,
     f"{BOLT_REPO}:IQ2_XXS",
     "nvidia/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-BF16",
-    "LAiM/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-NVFP4",
+    "unsloth/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-NVFP4",
     "/home/u/.cache/huggingface/hub/models--LAiM--NVIDIA-Nemotron-3.5-Bolt-74B-A9B-GGUF/snapshots/deadbeef",
     f"/data/models/{BOLT}-GGUF/{BOLT}-IQ2_XXS.gguf",
 ]
@@ -185,4 +185,4 @@ def test_nemotron35_sampling_defaults(model_id):
 
 def test_older_nemotrons_keep_their_sampling():
     from utils.inference.inference_config import load_inference_config
-    assert load_inference_config("LAiM/Nemotron-3-Nano-30B-A3B-GGUF")["top_p"] == 1.0
+    assert load_inference_config("unsloth/Nemotron-3-Nano-30B-A3B-GGUF")["top_p"] == 1.0

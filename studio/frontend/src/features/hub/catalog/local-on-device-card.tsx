@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { useHfEndpoint } from "@/lib/hf-endpoint";
 import { revealCachedModel } from "@/features/chat";
 import { useRevealLabel } from "@/features/library/reveal";
@@ -115,16 +116,16 @@ function formatAdapterLabel(
   trainingMethod?: string | null,
 ): string {
   const method = trainingMethod?.trim().toLowerCase();
-  if (method === "qlora") return "QLoRA adapter";
-  if (method === "lora") return "LoRA adapter";
+  if (method === "qlora") return translate("uxHub.qLoRAAdapter2or5n");
+  if (method === "lora") return translate("uxHub.loRAAdapterdqk7x");
   const type = adapterType?.trim();
   return type ? `${type.toUpperCase()} adapter` : "Adapter";
 }
 
 function baseModelSourceLabel(source?: BaseModelSource | null): string {
-  if (source === "huggingface") return "Hugging Face base model";
-  if (source === "local") return "Local base model";
-  return "Base model";
+  if (source === "huggingface") return translate("uxHub.huggingFaceBaseModeluspsk");
+  if (source === "local") return translate("uxHub.localBaseModelu5z0d");
+  return translate("uxHub.baseModelin9ss");
 }
 
 function BaseModelReference({
@@ -172,7 +173,7 @@ function BaseModelReference({
               href={hubUrl}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label={`Open ${baseModelHubId} on Hugging Face`}
+              aria-label={translate("uxHub.openOnHuggingFace5w3tt", { p1: baseModelHubId })}
               className="inline-flex size-7 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-background hover:text-foreground"
               onClick={(event) => {
                 event.stopPropagation();
@@ -189,7 +190,7 @@ function BaseModelReference({
             </a>
           </TooltipTrigger>
           <TooltipContent side="top" sideOffset={4}>
-            Open base model
+            {translate("uxHub.openBaseModely21sw")}
           </TooltipContent>
         </Tooltip>
       )}
@@ -211,7 +212,7 @@ function CardRevealButton({ onReveal }: { onReveal: () => Promise<unknown> }) {
             e.stopPropagation();
             onReveal().catch((err) => {
               toast.error(
-                err instanceof Error ? err.message : "Failed to open file manager",
+                err instanceof Error ? err.message : translate("uxHub.failedToOpenFilev8yun"),
               );
             });
           }}
@@ -305,7 +306,7 @@ export function LocalOnDeviceCard({
       await deleteCachedModel(repoId, undefined, hfToken || undefined, path);
     },
     resourceName: "model",
-    successMessage: () => `Deleted ${isCacheRow ? repoId : displayName}`,
+    successMessage: () => translate("uxHub.deletedpyid0", { p1: isCacheRow ? repoId : displayName }),
     onSuccess: () => {
       setDeleteOpen(false);
       onChange?.();
@@ -320,14 +321,14 @@ export function LocalOnDeviceCard({
     preferLocalCache: true,
     localPath: localGgufPath,
     enabled: needsVariantSelection,
-    errorFallback: "Failed to load quantizations",
+    get errorFallback() { return translate("uxHub.failedToLoadQuantizationshwv1w"); },
   });
   const remoteVariantState = useGgufVariantFetchState({
     repoId: repoId ?? modelId,
     hfToken,
     enabled:
       online && source === "hf_cache" && needsVariantSelection && !!repoId,
-    errorFallback: "Failed to check for updates",
+    get errorFallback() { return translate("uxHub.failedToCheckFor8jy6k"); },
   });
   const variantKey = currentVariantState.key;
   const [selectedVariantState, setSelectedVariantState] = useState<{
@@ -491,17 +492,14 @@ export function LocalOnDeviceCard({
             className="mt-[1px] size-3.5 shrink-0"
           />
           <span>
-            This looks like an older Hub cache. It may use a format that LAiM
-            no longer loads (missing config or unsupported quantization). You
-            can still keep it on disk, or delete it to free space.
-          </span>
+            {translate("uxHub.thisLooksLikeAnb1jpx")}</span>
         </div>
       )}
       <div className="hub-download-card">
         <div className="group/dl flex items-center">
           <div className="relative flex h-9 min-w-0 flex-1 items-center pl-3 pr-2">
             <span className="flex min-w-0 items-center gap-1.5 text-ui-12 text-muted-foreground">
-              <DotTag tone="success" label="On device" />
+              <DotTag tone="success" label={translate("settings.general.rag.onDevice")} />
               <DotTag tone={formatTone} label={formatLabel} />
               {needsVariantSelection && (
                 <Popover
@@ -586,7 +584,7 @@ export function LocalOnDeviceCard({
                         !currentVariantState.error &&
                         sortedVariants?.length === 0 && (
                           <div className="px-4 py-2 text-xs text-muted-foreground">
-                            No quantizations found.
+                            {translate("uxHub.noQuantizationsFoundk4fcx")}
                           </div>
                         )}
                       {currentVariantState.error && (
@@ -607,14 +605,14 @@ export function LocalOnDeviceCard({
             <div className="ml-auto flex items-center gap-0.5">
               {canUpdate && (
                 <CardUpdateButton
-                  label={`Update ${repoId}`}
+                  label={translate("uxHub.update04kez", { p1: repoId })}
                   emphasized={true}
                   onClick={() => setUpdateOpen(true)}
                 />
               )}
               {canDelete && (
                 <CardDeleteButton
-                  label={`Delete ${isCacheRow ? repoId : displayName}`}
+                  label={translate("uxHub.deletevau21", { p1: isCacheRow ? repoId : displayName })}
                   onClick={() => setDeleteOpen(true)}
                 />
               )}
@@ -634,7 +632,7 @@ export function LocalOnDeviceCard({
             <>
               <CardDivider />
               <ModelRunActionButton
-                label={`Configure and run ${displayName.trim() || "this model"}`}
+                label={translate("uxHub.configureAndRunxqzjf", { p1: displayName.trim() || "this model" })}
                 loading={runPending}
                 onClick={() =>
                   onRun(
@@ -688,7 +686,7 @@ export function LocalOnDeviceCard({
         onOpenChange={(o) => {
           if (!o && !deleting) setDeleteOpen(false);
         }}
-        title={isCacheRow ? "Delete cached model?" : "Delete local model?"}
+        title={isCacheRow ? translate("uxHub.deleteCachedModelihx4a") : translate("uxHub.deleteLocalModeld9zpv")}
         deleting={deleting}
         // Same gate the model row menu applies: when an installed image model still needs these
         // assets the summary says so, and leaving Delete enabled only bought the user a 400.
@@ -696,18 +694,10 @@ export function LocalOnDeviceCard({
         onConfirm={() => void runDelete()}
         description={
           isCacheRow ? (
-            <>
-              This will remove{" "}
-              <span className="font-medium text-foreground">{repoId}</span> and
-              its downloaded files from disk. You can re-download it later.
-              <DeleteImpactSummary impact={deleteImpact} />
+            <>{translate("uxHub.thisWillRemovebmxmc", { p1: " " })}<span className="font-medium text-foreground">{repoId}</span>{translate("uxHub.andItsDownloadedFiles20tpr")}<DeleteImpactSummary impact={deleteImpact} />
             </>
           ) : (
-            <>
-              This will permanently remove{" "}
-              <span className="font-medium text-foreground">{displayName}</span>{" "}
-              from{" "}
-              <span className="break-all font-mono text-xs">{path}</span>.
+            <>{translate("uxHub.thisWillPermanentlyRemovenzn11", { p1: " " })}<span className="font-medium text-foreground">{displayName}</span>{translate("uxHub.fromldt4a", { p1: " ", p2: " " })}<span className="break-all font-mono text-xs">{path}</span>.
             </>
           )
         }
@@ -717,10 +707,10 @@ export function LocalOnDeviceCard({
         onOpenChange={(o) => {
           if (!o) setUpdateOpen(false);
         }}
-        title={`Update ${repoId}?`}
+        title={translate("uxHub.update1d5w3", { p1: repoId })}
         updating={false}
         onConfirm={handleConfirmUpdate}
-        description="Re-download the latest version of this model from Hugging Face. Progress shows in the Downloads panel."
+        description={translate("uxHub.reDownloadTheLatests09x3")}
       />
       <TransportConflictDialog
         conflict={updateTransportConflict}

@@ -326,7 +326,7 @@ test("the on-device dot follows the resolved repo, not the displayed id", () => 
 });
 
 test("an unquantized re-upload's GGUF companion counts as on device", () => {
-  // The backend strips the quant suffix, so LAiM/embeddinggemma-300m-qat-q8_0-unquantized resolves under LAiM/embeddinggemma-300m-GGUF.
+  // The backend strips the quant suffix, so unsloth/embeddinggemma-300m-qat-q8_0-unquantized resolves under LAiM/embeddinggemma-300m-GGUF.
   assert.match(PICKER, /\(\?:-qat\)\?\(\?:-q\\d\+_\\d\+\[a-z\]\*\)\?-unquantized\$/i);
   assert.match(PICKER, /if \(base !== name\) candidates\.push\(`\$\{owner\}\$\{base\}-GGUF`\)/);
   // No lookbehind: this build target ships regex verbatim, so anything Safari 16 cannot parse breaks the bundle rather than failing a test.

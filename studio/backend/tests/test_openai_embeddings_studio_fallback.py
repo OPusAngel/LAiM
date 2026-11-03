@@ -20,7 +20,7 @@ inference_route = pytest.importorskip("routes.inference", reason = "inference st
 rag_embeddings = pytest.importorskip("core.rag.embeddings", reason = "rag stack not installed")
 rag_config = pytest.importorskip("core.rag.config", reason = "rag stack not installed")
 
-MODEL = "LAiM/bge-small-en-v1.5"
+MODEL = "unsloth/bge-small-en-v1.5"
 IDENTITY = f"sentence-transformers:{MODEL}"
 
 
@@ -336,7 +336,7 @@ def test_a_non_string_model_is_not_a_server_error(studio_embedder, named):
     [
         (
             rag_embeddings.EmbeddingModelDownloadRequiredError(
-                "Embedding model 'LAiM/bge-small-en-v1.5' is not downloaded yet. "
+                "Embedding model 'unsloth/bge-small-en-v1.5' is not downloaded yet. "
                 "Finish its Settings download before indexing documents."
             ),
             "not downloaded yet",
@@ -386,7 +386,7 @@ def test_pending_gguf_download_is_classified_like_the_st_one(tmp_path, monkeypat
     monkeypatch.setattr(
         embed_llama_server.config,
         "effective_gguf_repo_for_embedding_model",
-        lambda model: "LAiM/bge-small-en-v1.5-GGUF",
+        lambda model: "unsloth/bge-small-en-v1.5-GGUF",
     )
     monkeypatch.setattr(backend, "_resolve_local_gguf", lambda model: None)
     monkeypatch.setattr(backend, "_planned_family_path", lambda model, repo: None)
@@ -396,7 +396,7 @@ def test_pending_gguf_download_is_classified_like_the_st_one(tmp_path, monkeypat
     monkeypatch.setattr(ems, "get_stored_download_pending", lambda model: True)
 
     with pytest.raises(rag_embeddings.EmbeddingModelDownloadRequiredError) as excinfo:
-        backend._resolve_model_path("LAiM/bge-small-en-v1.5")
+        backend._resolve_model_path("unsloth/bge-small-en-v1.5")
     assert "not downloaded yet" in str(excinfo.value)
 
 
@@ -620,7 +620,7 @@ def test_cancelled_requests_do_not_leak_admission_permits(studio_embedder):
 def test_reported_model_follows_the_backend_that_made_the_vectors(studio_embedder):
     # An ST failure swaps the process to llama-server, a different space: the response has to
     # name the space the vectors are in, or a client files two under one label.
-    llama_identity = f"llama-server:{MODEL}:LAiM/bge-small-en-v1.5-GGUF"
+    llama_identity = f"llama-server:{MODEL}:unsloth/bge-small-en-v1.5-GGUF"
     studio_embedder.setattr(
         inference_route, "get_llama_cpp_backend", lambda: SimpleNamespace(is_loaded = False)
     )
@@ -849,7 +849,7 @@ def test_llama_max_tokens_comes_from_the_gguf_minus_its_special_tokens(tmp_path,
     assert backend.max_tokens() == 510
     assert backend.max_tokens() == 510
     assert posts == [("/tokenize", {"content": "", "add_special": True})]
-    backend._adopt_model_path(backend._model_path, "LAiM/other-GGUF")
+    backend._adopt_model_path(backend._model_path, "unsloth/other-GGUF")
     assert backend._max_tokens is None
 
 
@@ -867,7 +867,7 @@ def test_llama_max_tokens_is_dropped_when_the_binary_is_swapped(tmp_path, monkey
     backend._model_path = _gguf(
         tmp_path, [("general.architecture", 8, "bert"), ("bert.context_length", 4, 512)]
     )
-    backend._model_repo = "LAiM/bge-small-en-v1.5-GGUF"
+    backend._model_repo = "unsloth/bge-small-en-v1.5-GGUF"
     backend._max_tokens = 510
     backend._binary = "/opt/old/llama-server"
     backend._binary_path_revision = 1
@@ -877,12 +877,12 @@ def test_llama_max_tokens_is_dropped_when_the_binary_is_swapped(tmp_path, monkey
     monkeypatch.setattr(
         embed_llama_server.config,
         "effective_gguf_repo_for_embedding_model",
-        lambda model: "LAiM/bge-small-en-v1.5-GGUF",
+        lambda model: "unsloth/bge-small-en-v1.5-GGUF",
     )
     monkeypatch.setattr(
         embed_llama_server.config,
         "effective_embedding_model",
-        lambda: "LAiM/bge-small-en-v1.5",
+        lambda: "unsloth/bge-small-en-v1.5",
     )
     import utils.llama_cpp_path_settings as path_settings
 
@@ -1077,7 +1077,7 @@ def test_public_embedding_name_hides_any_local_path_shape():
     assert "models" not in windows and "private" not in windows
     assert public("/tmp/models/bge/").startswith("bge-")
     assert public("/checkpoints/run-a/model") != public("/checkpoints/run-b/model")
-    assert public("LAiM/bge-small-en-v1.5") == "LAiM/bge-small-en-v1.5"
+    assert public("unsloth/bge-small-en-v1.5") == "unsloth/bge-small-en-v1.5"
 
 
 def test_flat_token_array_passes_the_pre_switch_check(studio_embedder):
@@ -1187,7 +1187,7 @@ def test_a_decisively_named_model_is_refused_when_nothing_is_loaded(studio_embed
         inference_route, "get_llama_cpp_backend", lambda: SimpleNamespace(is_loaded = False)
     )
     studio_embedder.setattr(inference_route, "_reference_is_decisive", lambda name: True)
-    error = _http_error({"input": "alpha", "model": "LAiM/embeddinggemma-300m-GGUF:Q8_0"})
+    error = _http_error({"input": "alpha", "model": "unsloth/embeddinggemma-300m-GGUF:Q8_0"})
     assert error.status_code in (404, 503)
 
 
@@ -1205,7 +1205,7 @@ def test_reference_is_decisive_only_on_positive_evidence(monkeypatch):
 
     monkeypatch.setattr(_resolver, "resolve_local_gguf", lambda ref, allow_scan = False: None)
     # An explicit quant label is evidence no foreign id carries.
-    assert inference_route._reference_is_decisive("LAiM/gemma-3-270m-it-GGUF:Q8_0") is True
+    assert inference_route._reference_is_decisive("unsloth/gemma-3-270m-it-GGUF:Q8_0") is True
     # A vendor id is not, so LiteLLM/OpenRouter style names keep working.
     assert inference_route._reference_is_decisive("text-embedding-3-small") is False
     assert inference_route._reference_is_decisive("openai/text-embedding-3-large") is False
@@ -1256,7 +1256,7 @@ def test_disconnected_client_is_dropped_even_with_a_free_permit(studio_embedder)
 
 
 def test_alias_match_pins_the_model_for_the_request(studio_embedder):
-    settings = iter([MODEL, "LAiM/other-model", "LAiM/other-model"])
+    settings = iter([MODEL, "unsloth/other-model", "unsloth/other-model"])
     seen = []
 
     def _encode_with_identity(

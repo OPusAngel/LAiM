@@ -29,7 +29,7 @@ from hub.utils.hf_tokens import (
 )
 
 BAD = "hf_oauth_" + "x" * 40
-REPO = "LAiM/Qwen3-0.6B-GGUF"
+REPO = "unsloth/Qwen3-0.6B-GGUF"
 VARIANT = "UD-Q4_K_XL"
 MAIN = f"{VARIANT}/Qwen3-0.6B-{VARIANT}-00001-of-00002.gguf"
 SHARD = f"{VARIANT}/Qwen3-0.6B-{VARIANT}-00002-of-00002.gguf"
@@ -373,7 +373,7 @@ def test_worker_dataset_metadata_retries(worker):
         raise _rejected()
 
     with patch("huggingface_hub.HfApi.dataset_info", dataset_info):
-        info = worker._dataset_info_with_retry("LAiM/data", BAD)
+        info = worker._dataset_info_with_retry("unsloth/data", BAD)
     assert info.sha == "b" * 40
     assert seen == [BAD, False]
     assert worker._hf_token_arg(BAD) is False

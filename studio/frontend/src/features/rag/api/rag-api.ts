@@ -21,6 +21,8 @@ import type {
   UploadedDocument,
 } from "../types/rag";
 import { noteRagAvailability, noteRagResponse } from "./rag-availability";
+import { translate } from "@/i18n";
+
 
 const RAG_BASE = "/api/rag";
 
@@ -786,7 +788,7 @@ async function openEventStream(
     noteRagResponse(response.status, body);
     throw ragError(response.status, body);
   }
-  if (!response.body) throw new Error("Stream response missing body");
+  if (!response.body) throw new Error(translate("uxRag.streamResponseMissingBodycuavg"));
   return response.body;
 }
 
@@ -802,7 +804,7 @@ async function* boundedEventStream<T>(
   stallMs?: number,
 ): AsyncGenerator<T> {
   if (activeRagStreams >= MAX_RAG_STREAMS) {
-    throw new Error("RAG stream capacity reached");
+    throw new Error(translate("uxRag.rAGStreamCapacityReachedn7qsm"));
   }
   activeRagStreams += 1;
   try {

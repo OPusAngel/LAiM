@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
+
 /** `/api/inference/load` and `/unload` pad their body so a proxy cannot time the request out,
  *  committing the 200 before the work finishes (`_tunnel_safe_json` in routes/inference.py). A
  *  proxy giving up mid-pad leaves a 200 with an empty or truncated body, and accepting that
@@ -18,7 +20,7 @@ export function assertCompletedPaddedBody(body: unknown, label: string): void {
   // Tagged like a failed fetch: the connection closed, so the backend's outcome is unknown.
   throw Object.assign(
     new Error(
-      `${label} did not report completion: the connection closed before the server's reply arrived. Check the model's status before retrying.`,
+      translate("uxChat.didNotReportCompletionvocls", { p1: label }),
     ),
     { LAiMTransportFailure: true },
   );

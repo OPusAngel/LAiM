@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   Delete02Icon,
   Edit03Icon,
@@ -105,7 +106,7 @@ export function KnowledgeBaseDialog({
       setKbs(rows);
       return rows;
     } catch (err) {
-      toast.error("Failed to load knowledge bases", {
+      toast.error(translate("uxRag.failedToLoadKnowledge15zaa"), {
         description: err instanceof Error ? err.message : String(err),
       });
       return null;
@@ -151,8 +152,8 @@ export function KnowledgeBaseDialog({
       if (!kb) {
         // A failed load already said so.
         if (uploads.length && rows) {
-          toast.error("Knowledge base not found", {
-            description: "Open or create one below and the files go there.",
+          toast.error(translate("uxRag.knowledgeBaseNotFoundubhc1"), {
+            description: translate("uxRag.openOrCreateOne13gol"),
           });
         }
         return;
@@ -207,14 +208,14 @@ export function KnowledgeBaseDialog({
     // The button is disabled for this, but the form is also reachable by keyboard and
     // the verdict can land while it is open. A 503 toast is not an explanation.
     if (ragUnavailable) {
-      toast.error("Knowledge bases are unavailable", {
+      toast.error(translate("uxRag.knowledgeBasesAreUnavailable19zh5"), {
         description: ragUnavailableReason ?? undefined,
       });
       return;
     }
     const trimmed = name.trim();
     if (!trimmed) {
-      toast.error("Name is required");
+      toast.error(translate("uxRag.nameIsRequiredizdgz"));
       return;
     }
     setSaving(true);
@@ -225,7 +226,7 @@ export function KnowledgeBaseDialog({
           name: trimmed,
           description: description.trim(),
         });
-        toast.success("Knowledge base updated");
+        toast.success(translate("uxRag.knowledgeBaseUpdated1z060"));
       } else {
         createdId = (
           await createKnowledgeBase({
@@ -233,13 +234,13 @@ export function KnowledgeBaseDialog({
             description: description.trim() || undefined,
           })
         ).id;
-        toast.success("Knowledge base created");
+        toast.success(translate("uxRag.knowledgeBaseCreated17mj9"));
       }
       const created = (await refresh())?.find((row) => row.id === createdId);
       if (created) openDocuments(created);
       else setView({ kind: "list" });
     } catch (err) {
-      toast.error("Save failed", {
+      toast.error(translate("uxRag.saveFailed1t4oz"), {
         description: err instanceof Error ? err.message : String(err),
       });
     } finally {
@@ -252,7 +253,7 @@ export function KnowledgeBaseDialog({
       await deleteKnowledgeBase(kb.id);
       await refresh();
     } catch (err) {
-      toast.error("Delete failed", {
+      toast.error(translate("uxRag.deleteFailed10vm5"), {
         description: err instanceof Error ? err.message : String(err),
       });
     }
@@ -289,7 +290,7 @@ export function KnowledgeBaseDialog({
                 id="kb-name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Product docs"
+                placeholder={translate("uxRag.eGProductDocshzb33")}
               />
             </div>
             <div className="grid gap-2">
@@ -298,13 +299,13 @@ export function KnowledgeBaseDialog({
                 id="kb-description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Optional. What this knowledge base contains."
+                placeholder={translate("uxRag.optionalWhatThisKnowledgemnv39")}
                 rows={3}
               />
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <Button variant="ghost" onClick={backToList} disabled={saving}>
-                Cancel
+                {translate("browser.agentSettings.cancel")}
               </Button>
               <Button onClick={submitForm} disabled={saving || ragUnavailable}>
                 {saving ? <Spinner /> : null}
@@ -322,7 +323,7 @@ export function KnowledgeBaseDialog({
                 title={ragUnavailableHint}
               >
                 <HugeiconsIcon icon={PlusSignIcon} className="size-3.5" />
-                New knowledge base
+                {translate("uxRag.newKnowledgeBase1mt4l")}
               </Button>
             </div>
             {loading ? (
@@ -336,7 +337,7 @@ export function KnowledgeBaseDialog({
               </div>
             ) : kbs.length === 0 ? (
               <div className="rounded-md border border-dashed py-6 text-center text-sm text-muted-foreground">
-                No knowledge bases yet.
+                {translate("uxRag.noKnowledgeBasesYet8sbbe")}
               </div>
             ) : (
               <ul className="flex max-h-[60dvh] flex-col divide-y overflow-y-auto scroll-rounded rounded-md border">
@@ -348,18 +349,14 @@ export function KnowledgeBaseDialog({
                     <button
                       type="button"
                       onClick={() => openDocuments(kb)}
-                      title="Open to add or remove documents"
+                      title={translate("uxRag.openToAddOr1qe6s")}
                       className="-my-1 -ml-2 flex min-w-0 flex-1 items-center gap-2 rounded-md px-2 py-1 text-left transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                     >
                       <span className="block min-w-0 flex-1">
                         <span className="block truncate font-medium">
                           {kb.name}
                         </span>
-                        <span className="block truncate text-xs text-muted-foreground">
-                          {kb.documentCount ?? 0} document
-                          {(kb.documentCount ?? 0) === 1 ? "" : "s"}
-                          {kb.description ? ` · ${kb.description}` : ""}
-                        </span>
+                        <span className="block truncate text-xs text-muted-foreground">{translate("uxRag.document2lyof", { p1: kb.documentCount ?? 0, p2: (kb.documentCount ?? 0) === 1 ? "" : "s", p3: kb.description ? ` · ${kb.description}` : "" })}</span>
                       </span>
                       <ChevronRightIcon
                         strokeWidth={1.5}
@@ -372,7 +369,7 @@ export function KnowledgeBaseDialog({
                         variant="ghost"
                         size="icon"
                         onClick={() => startEdit(kb)}
-                        aria-label="Rename knowledge base"
+                        aria-label={translate("uxRag.renameKnowledgeBaseu4q4m")}
                       >
                         <HugeiconsIcon icon={Edit03Icon} className="size-3.5" />
                       </Button>
@@ -381,7 +378,7 @@ export function KnowledgeBaseDialog({
                         variant="ghost"
                         size="icon"
                         onClick={() => setConfirmingDelete(kb)}
-                        aria-label="Delete knowledge base"
+                        aria-label={translate("uxRag.deleteKnowledgeBase1d8o0")}
                       >
                         <HugeiconsIcon icon={Delete02Icon} className="size-3.5" />
                       </Button>
@@ -401,14 +398,12 @@ export function KnowledgeBaseDialog({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete knowledge base</AlertDialogTitle>
+            <AlertDialogTitle>{translate("uxRag.deleteKnowledgeBase1d8o0")}</AlertDialogTitle>
             <AlertDialogDescription>
               Delete{" "}
               <span className="font-medium text-foreground">
                 &quot;{confirmingDelete?.name}&quot;
-              </span>{" "}
-              and all its documents? This cannot be undone.
-            </AlertDialogDescription>
+              </span>{translate("uxRag.andAllItsDocumentsv7vzr", { p1: " " })}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -477,7 +472,7 @@ function KnowledgeBaseDocuments({
       <div className="flex items-center justify-between">
         <Button variant="ghost" size="sm" onClick={onBack}>
           <ChevronLeftIcon className="size-4" />
-          All knowledge bases
+          {translate("uxRag.allKnowledgeBases19wg7")}
         </Button>
         <Button size="sm" onClick={() => fileInputRef.current?.click()}>
           {uploading ? <Spinner /> : <UploadIcon className="size-3.5" />}
@@ -507,8 +502,7 @@ function KnowledgeBaseDocuments({
             dragging && "border-primary/60 bg-primary/5 text-foreground",
           )}
         >
-          No documents yet. Upload or drop documents, spreadsheets, slides,
-          e-books, email, text or code.
+          {translate("uxCopy.noDocumentsYetUpload1iw0d")}
         </div>
       ) : (
         <div

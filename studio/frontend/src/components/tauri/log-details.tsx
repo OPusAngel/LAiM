@@ -6,6 +6,8 @@ import { ChevronDownStandardIcon } from "@/lib/chevron-icons";
 
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useLayoutEffect, useRef } from "react";
+import { translate } from "@/i18n";
+
 
 /**
  * The collapsed log tail every long-running full-window screen shows under its status
@@ -79,8 +81,8 @@ export function LogDetails({
       className="group mt-2 w-full max-w-sm text-left"
     >
       <summary className="mx-auto flex w-fit cursor-pointer list-none items-center gap-1 rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
-        <span className="group-open:hidden">Show {label}</span>
-        <span className="hidden group-open:inline">Hide {label}</span>
+        <span className="group-open:hidden">{translate("uxComponents.showz03qd", { p1: label })}</span>
+        <span className="hidden group-open:inline">{translate("uxComponents.hidezbbp4", { p1: label })}</span>
         <HugeiconsIcon
           icon={ChevronDownStandardIcon}
           aria-hidden="true"

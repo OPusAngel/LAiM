@@ -115,7 +115,7 @@ def asset_server():
 
 
 @pytest.fixture
-def sandbox(tmp_path):
+def sim_env(tmp_path):
     install = write_step_script(tmp_path, "Install trusted-signing-cli", "install.ps1")
     verify = write_step_script(tmp_path, "Verify trusted-signing-cli", "verify.ps1")
     runner_temp = tmp_path / "runner_temp"
@@ -138,16 +138,16 @@ def good_digest(handler):
     return hashlib.sha256(handler.payload).hexdigest()
 
 
-def install_env(sandbox, url, digest):
+def install_env(sim_env, url, digest):
     return {
-        **sandbox["env"],
+        **sim_env["env"],
         "TRUSTED_SIGNING_CLI_URL": url,
         "TRUSTED_SIGNING_CLI_SHA256": digest,
     }
 
 
-def installed_binary(sandbox):
-    return sandbox["runner_temp"] / "trusted-signing-cli" / "trusted-signing-cli.exe"
+def installed_binary(sim_env):
+    return sim_env["runner_temp"] / "trusted-signing-cli" / "trusted-signing-cli.exe"
 
 
 def test_pin_is_a_full_sha256_and_a_versioned_url():
@@ -187,35 +187,35 @@ def test_the_install_step_never_interpolates_workflow_expressions():
     assert "${{" not in body
 
 
-def test_a_matching_digest_installs_and_publishes_the_path(sandbox, asset_server):
+def test_a_matching_digest_installs_and_publishes_the_path(sim_env, asset_server):
     url, handler = asset_server
-    code, out = run_step(sandbox["install"], install_env(sandbox, url, good_digest(handler)))
+    code, out = run_step(sim_env["install"], install_env(sim_env, url, good_digest(handler)))
 
     assert code == 0, out
-    assert installed_binary(sandbox).is_file()
-    assert installed_binary(sandbox).read_bytes() == handler.payload
-    assert sandbox["github_path"].read_text().strip().endswith("trusted-signing-cli")
+    assert installed_binary(sim_env).is_file()
+    assert installed_binary(sim_env).read_bytes() == handler.payload
+    assert sim_env["github_path"].read_text().strip().endswith("trusted-signing-cli")
     assert "verified trusted-signing-cli sha256=" in out
 
 
-def test_the_digest_check_is_case_insensitive(sandbox, asset_server):
+def test_the_digest_check_is_case_insensitive(sim_env, asset_server):
     url, handler = asset_server
     code, out = run_step(
-        sandbox["install"],
-        install_env(sandbox, url, good_digest(handler).upper()),
+        sim_env["install"],
+        install_env(sim_env, url, good_digest(handler).upper()),
     )
     assert code == 0, out
 
 
-def test_installing_twice_is_idempotent(sandbox, asset_server):
+def test_installing_twice_is_idempotent(sim_env, asset_server):
     url, handler = asset_server
-    env = install_env(sandbox, url, good_digest(handler))
-    first = run_step(sandbox["install"], env)
-    second = run_step(sandbox["install"], env)
+    env = install_env(sim_env, url, good_digest(handler))
+    first = run_step(sim_env["install"], env)
+    second = run_step(sim_env["install"], env)
 
     assert first[0] == 0, first[1]
     assert second[0] == 0, second[1]
-    assert sandbox["github_path"].read_text().count("trusted-signing-cli") == 2
+    assert sim_env["github_path"].read_text().count("trusted-signing-cli") == 2
 
 
 def test_a_path_containing_spaces_still_works(tmp_path, asset_server):
@@ -240,56 +240,56 @@ def test_a_path_containing_spaces_still_works(tmp_path, asset_server):
     assert (spaced / "trusted-signing-cli" / "trusted-signing-cli.exe").is_file()
 
 
-def test_a_tampered_asset_fails_the_release(sandbox, asset_server):
+def test_a_tampered_asset_fails_the_release(sim_env, asset_server):
     url, _ = asset_server
-    code, out = run_step(sandbox["install"], install_env(sandbox, url, "0" * 64))
+    code, out = run_step(sim_env["install"], install_env(sim_env, url, "0" * 64))
 
     assert code != 0
     assert "digest mismatch" in out
-    assert not installed_binary(sandbox).exists(), "a rejected binary was left on disk"
-    assert sandbox["github_path"].read_text().strip() == "", "PATH was published anyway"
+    assert not installed_binary(sim_env).exists(), "a rejected binary was left on disk"
+    assert sim_env["github_path"].read_text().strip() == "", "PATH was published anyway"
 
 
-def test_a_truncated_download_fails_the_release(sandbox, asset_server):
+def test_a_truncated_download_fails_the_release(sim_env, asset_server):
     url, handler = asset_server
     handler.truncate = True
     try:
-        code, out = run_step(sandbox["install"], install_env(sandbox, url, good_digest(handler)))
+        code, out = run_step(sim_env["install"], install_env(sim_env, url, good_digest(handler)))
     finally:
         handler.truncate = False
 
     assert code != 0
     assert "digest mismatch" in out
-    assert not installed_binary(sandbox).exists()
+    assert not installed_binary(sim_env).exists()
 
 
-def test_an_unreachable_asset_fails_the_release(sandbox, asset_server):
+def test_an_unreachable_asset_fails_the_release(sim_env, asset_server):
     url, handler = asset_server
     handler.status = 404
     try:
-        code, out = run_step(sandbox["install"], install_env(sandbox, url, good_digest(handler)))
+        code, out = run_step(sim_env["install"], install_env(sim_env, url, good_digest(handler)))
     finally:
         handler.status = 200
 
     assert code != 0
-    assert sandbox["github_path"].read_text().strip() == ""
+    assert sim_env["github_path"].read_text().strip() == ""
 
 
-def test_a_dead_host_fails_the_release(sandbox):
+def test_a_dead_host_fails_the_release(sim_env):
     code, out = run_step(
-        sandbox["install"],
-        install_env(sandbox, "http://127.0.0.1:9/nope.exe", "0" * 64),
+        sim_env["install"],
+        install_env(sim_env, "http://127.0.0.1:9/nope.exe", "0" * 64),
     )
     assert code != 0
-    assert sandbox["github_path"].read_text().strip() == ""
+    assert sim_env["github_path"].read_text().strip() == ""
 
 
-def test_an_empty_digest_pin_cannot_pass(sandbox, asset_server):
+def test_an_empty_digest_pin_cannot_pass(sim_env, asset_server):
     # A cleared or mistyped pin must not degrade into "accept anything".
     url, _ = asset_server
-    code, out = run_step(sandbox["install"], install_env(sandbox, url, ""))
+    code, out = run_step(sim_env["install"], install_env(sim_env, url, ""))
     assert code != 0
-    assert not installed_binary(sandbox).exists()
+    assert not installed_binary(sim_env).exists()
 
 
 def _fake_on_path(directory, name, script):
@@ -312,7 +312,7 @@ def _path_with(*directories):
     return os.pathsep.join([*(str(d) for d in directories), os.environ["PATH"]])
 
 
-def test_verify_rejects_a_binary_that_was_never_digest_checked(sandbox, tmp_path):
+def test_verify_rejects_a_binary_that_was_never_digest_checked(sim_env, tmp_path):
     # The rust-cache scenario: an identically named copy earlier on PATH that no digest gate saw.
     decoy_dir = tmp_path / "cargo_bin"
     _fake_on_path(
@@ -320,9 +320,9 @@ def test_verify_rejects_a_binary_that_was_never_digest_checked(sandbox, tmp_path
     )
 
     code, out = run_step(
-        sandbox["verify"],
+        sim_env["verify"],
         {
-            **sandbox["env"],
+            **sim_env["env"],
             "PATH": _path_with(decoy_dir),
         },
     )
@@ -331,54 +331,54 @@ def test_verify_rejects_a_binary_that_was_never_digest_checked(sandbox, tmp_path
     assert "not the verified" in out
 
 
-def test_verify_fails_when_nothing_is_on_path(sandbox):
-    code, out = run_step(sandbox["verify"], sandbox["env"])
+def test_verify_fails_when_nothing_is_on_path(sim_env):
+    code, out = run_step(sim_env["verify"], sim_env["env"])
     assert code != 0
     assert "not on PATH" in out
 
 
 @needs_pathext
-def test_verify_fails_when_the_binary_cannot_start(sandbox):
-    directory = sandbox["runner_temp"] / "trusted-signing-cli"
+def test_verify_fails_when_the_binary_cannot_start(sim_env):
+    directory = sim_env["runner_temp"] / "trusted-signing-cli"
     directory.mkdir(parents = True)
     (directory / "trusted-signing-cli.exe").write_bytes(b"\x00\x01not an executable")
 
-    code, out = run_step(sandbox["verify"], {**sandbox["env"], "PATH": _path_with(directory)})
+    code, out = run_step(sim_env["verify"], {**sim_env["env"], "PATH": _path_with(directory)})
 
     assert code != 0
     assert "could not be started" in out, out
 
 
 @needs_pathext
-def test_verify_fails_when_the_binary_exits_non_zero(sandbox):
+def test_verify_fails_when_the_binary_exits_non_zero(sim_env):
     # A pip-style launcher that starts and exits 3, not a renamed System32 tool: a Microsoft
     # binary at trusted-signing-cli.exe is an AV heuristic.
     stub = console_stub_bytes(3)
     if stub is None:
         pytest.skip("no distlib console launcher to build a runnable stub from")
-    directory = sandbox["runner_temp"] / "trusted-signing-cli"
+    directory = sim_env["runner_temp"] / "trusted-signing-cli"
     directory.mkdir(parents = True)
     (directory / "trusted-signing-cli.exe").write_bytes(stub)
 
-    code, out = run_step(sandbox["verify"], {**sandbox["env"], "PATH": _path_with(directory)})
+    code, out = run_step(sim_env["verify"], {**sim_env["env"], "PATH": _path_with(directory)})
 
     assert code != 0
     assert "is on PATH but exited" in out, out
 
 
 @needs_pathext
-def test_verify_accepts_the_binary_it_installed(sandbox):
-    directory = sandbox["runner_temp"] / "trusted-signing-cli"
+def test_verify_accepts_the_binary_it_installed(sim_env):
+    directory = sim_env["runner_temp"] / "trusted-signing-cli"
     verified = _real_exe_on_path(directory, sys.executable)
 
-    code, out = run_step(sandbox["verify"], {**sandbox["env"], "PATH": _path_with(directory)})
+    code, out = run_step(sim_env["verify"], {**sim_env["env"], "PATH": _path_with(directory)})
 
     assert code == 0, out
     assert str(verified) in out, out
 
 
-def test_an_unverified_copy_ahead_on_path_is_rejected(sandbox, tmp_path):
-    verified_dir = sandbox["runner_temp"] / "trusted-signing-cli"
+def test_an_unverified_copy_ahead_on_path_is_rejected(sim_env, tmp_path):
+    verified_dir = sim_env["runner_temp"] / "trusted-signing-cli"
     _fake_on_path(
         verified_dir, "trusted-signing-cli.exe", '#!/bin/sh\necho "trusted-signing-cli 0.10.0"\n'
     )
@@ -388,9 +388,9 @@ def test_an_unverified_copy_ahead_on_path_is_rejected(sandbox, tmp_path):
     )
 
     code, out = run_step(
-        sandbox["verify"],
+        sim_env["verify"],
         {
-            **sandbox["env"],
+            **sim_env["env"],
             "PATH": _path_with(decoy_dir, verified_dir),
         },
     )
@@ -399,40 +399,40 @@ def test_an_unverified_copy_ahead_on_path_is_rejected(sandbox, tmp_path):
     assert "not the verified" in out
 
 
-def test_the_install_step_publishes_its_directory_for_path_prepending(sandbox, asset_server):
+def test_the_install_step_publishes_its_directory_for_path_prepending(sim_env, asset_server):
     # $GITHUB_PATH prepends, so publishing the install dir is what puts the verified copy ahead of ~/.cargo/bin.
     url, handler = asset_server
-    assert run_step(sandbox["install"], install_env(sandbox, url, good_digest(handler)))[0] == 0
-    published = sandbox["github_path"].read_text().strip()
-    assert published == str(sandbox["runner_temp"] / "trusted-signing-cli")
+    assert run_step(sim_env["install"], install_env(sim_env, url, good_digest(handler)))[0] == 0
+    published = sim_env["github_path"].read_text().strip()
+    assert published == str(sim_env["runner_temp"] / "trusted-signing-cli")
 
 
 @needs_network
-def test_the_real_pinned_asset_matches_its_digest(sandbox):
+def test_the_real_pinned_asset_matches_its_digest(sim_env):
     url, digest = pinned()
-    code, out = run_step(sandbox["install"], install_env(sandbox, url, digest))
+    code, out = run_step(sim_env["install"], install_env(sim_env, url, digest))
 
     assert code == 0, out
-    downloaded = installed_binary(sandbox)
+    downloaded = installed_binary(sim_env)
     assert hashlib.sha256(downloaded.read_bytes()).hexdigest() == digest
     assert downloaded.read_bytes()[:2] == b"MZ", "not a Windows executable"
 
 
 @needs_network
-def test_the_real_asset_is_a_64_bit_windows_console_binary(sandbox):
+def test_the_real_asset_is_a_64_bit_windows_console_binary(sim_env):
     url, digest = pinned()
-    assert run_step(sandbox["install"], install_env(sandbox, url, digest))[0] == 0
-    data = installed_binary(sandbox).read_bytes()
+    assert run_step(sim_env["install"], install_env(sim_env, url, digest))[0] == 0
+    data = installed_binary(sim_env).read_bytes()
     offset = int.from_bytes(data[0x3C:0x40], "little")
     assert data[offset : offset + 4] == b"PE\x00\x00"
     assert int.from_bytes(data[offset + 4 : offset + 6], "little") == 0x8664, "not x86-64"
 
 
 @needs_network
-def test_the_real_asset_declares_the_arguments_the_signing_script_passes(sandbox):
+def test_the_real_asset_declares_the_arguments_the_signing_script_passes(sim_env):
     url, digest = pinned()
-    assert run_step(sandbox["install"], install_env(sandbox, url, digest))[0] == 0
-    blob = installed_binary(sandbox).read_bytes()
+    assert run_step(sim_env["install"], install_env(sim_env, url, digest))[0] == 0
+    blob = installed_binary(sim_env).read_bytes()
     for token in (
         b"endpoint",
         b"description",

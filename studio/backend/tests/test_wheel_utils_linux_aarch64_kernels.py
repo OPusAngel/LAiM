@@ -16,7 +16,7 @@ if str(_BACKEND) not in sys.path:
 
 from utils import kernel_install, wheel_utils  # noqa: E402
 
-OURS = "https://github.com/LAiMai/LAiM/releases/download/prebuilt-wheels-cu13/"
+OURS = "https://github.com/unslothai/unsloth/releases/download/prebuilt-wheels-cu13/"
 
 
 def env(**overrides):

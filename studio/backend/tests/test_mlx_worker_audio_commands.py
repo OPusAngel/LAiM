@@ -76,7 +76,7 @@ def _run_mlx_loop(
         cmd_queue = command_queue or _CmdQueue([*cmds, {"type": "shutdown"}]),
         resp_queue = resp,
         cancel_event = SimpleNamespace(is_set = lambda: False, clear = lambda: None, set = lambda: None),
-        config = {"model_name": "LAiM/orpheus-3b-0.1-ft"},
+        config = {"model_name": "unsloth/orpheus-3b-0.1-ft"},
         **kwargs,
     )
     return resp.sent

@@ -77,7 +77,7 @@ class TestDiffusionArchitectures:
 
         monkeypatch.setattr(router, "family_buildable_here", lambda fam, *, model_kind: False)
         out = "error loading model: unknown model architecture: 'qwen_image21'"
-        msg = _classify(out, "/models/qwen-image-2.1-Q4_K_M.gguf", "LAiM/Qwen-Image-2.1-GGUF")
+        msg = _classify(out, "/models/qwen-image-2.1-Q4_K_M.gguf", "unsloth/Qwen-Image-2.1-GGUF")
         assert "qwen_image21" in msg
         assert "Use LAiM's Images page to generate" not in msg
         assert "does not list it either" in msg
@@ -211,7 +211,7 @@ class TestOllamaAndFallback:
             "llama_model_load_from_file_impl: failed to load model\n"
         )
         msg = _classify(
-            out, "/models/MiniMax-M3-UD-Q6_K_XL-00001-of-00009.gguf", "LAiM/MiniMax-M3-GGUF", 1
+            out, "/models/MiniMax-M3-UD-Q6_K_XL-00001-of-00009.gguf", "unsloth/MiniMax-M3-GGUF", 1
         )
         assert "'minimax-m3.attention.indexer.head_count'" in msg
         assert "not a memory problem" in msg
@@ -564,7 +564,7 @@ class TestMissingSharedLibrary:
         binary = tmp_path / "llama.cpp" / "build" / "bin" / "llama-server"
         binary.parent.mkdir(parents = True)
         binary.write_text("")
-        monkeypatch.setenv("LAiM_LLAMA_CPP_PATH", str(tmp_path / "llama.cpp"))
+        monkeypatch.setenv("UNSLOTH_LLAMA_CPP_PATH", str(tmp_path / "llama.cpp"))
         out = (
             f"{binary}: error while loading shared libraries: libggml.so: "
             "cannot open shared object file: No such file or directory"

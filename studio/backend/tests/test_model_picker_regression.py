@@ -48,7 +48,7 @@ from utils.hidden_models import is_hidden_model
 def _pin_default_embedder(monkeypatch):
     """Pin the effective embedder to LAiM's static default so hiding is
     deterministic and cannot depend on ambient RAG config / env."""
-    default = "LAiM/bge-small-en-v1.5"
+    default = "unsloth/bge-small-en-v1.5"
     monkeypatch.setattr(rag_config, "EMBEDDING_MODEL", default, raising = False)
     monkeypatch.setattr(rag_config, "effective_embedding_model", lambda: default)
     monkeypatch.setattr(rag_config, "effective_gguf_repo", lambda: default)
@@ -64,8 +64,8 @@ def _pin_default_embedder(monkeypatch):
     "value",
     [
         "ggml-org/models",  # the probe repo id
-        "LAiM/bge-small-en-v1.5",  # the RAG embedder repo
-        "LAiM/bge-small-en-v1.5-GGUF",  # its GGUF companion
+        "unsloth/bge-small-en-v1.5",  # the RAG embedder repo
+        "unsloth/bge-small-en-v1.5-GGUF",  # its GGUF companion
         "/root/.cache/huggingface/hub/x/stories260K.gguf",  # probe on disk
         "/root/.cache/x/Stories260K.GGUF",  # case-insensitive
         r"C:\\models\\stories260K.gguf",  # windows-style path
@@ -80,8 +80,8 @@ def test_infra_models_are_hidden(value):
 @pytest.mark.parametrize(
     "value",
     [
-        "LAiM/gemma-3-270m-it-GGUF",  # a normal small chat GGUF
-        "LAiM/Qwen3-0.6B",  # a normal non-GGUF chat model
+        "unsloth/gemma-3-270m-it-GGUF",  # a normal small chat GGUF
+        "unsloth/Qwen3-0.6B",  # a normal non-GGUF chat model
         "user/stories260K-finetune-GGUF",  # repo id merely contains "stories260k"
         "user/model-chat",  # generic repo must not be hidden
         "meta-llama/Llama-3.1-8B-Instruct",
@@ -94,7 +94,7 @@ def test_normal_models_are_not_hidden(value):
 def test_is_hidden_model_ignores_empty_values():
     assert is_hidden_model(None) is False
     assert is_hidden_model("") is False
-    assert is_hidden_model(None, "", "LAiM/gemma-3-270m-it-GGUF") is False
+    assert is_hidden_model(None, "", "unsloth/gemma-3-270m-it-GGUF") is False
 
 
 def test_hidden_model_matchers_expose_probe_needles():
@@ -105,7 +105,7 @@ def test_hidden_model_matchers_expose_probe_needles():
     # The configured embedder is exposed as an exact repo id, never as a
     # basename needle that would substring-hide unrelated chat models.
     assert "bge-small-en-v1.5" not in lowered
-    assert "LAiM/bge-small-en-v1.5" in exact_ids
+    assert "unsloth/bge-small-en-v1.5" in exact_ids
 
 
 def test_hidden_model_matchers_custom_repo_publishes_exact_ids(monkeypatch):
@@ -173,7 +173,7 @@ def test_query_token_is_fallback_when_header_absent():
 
 
 def _load_request(**overrides):
-    data = {"model_path": "LAiM/test-model-GGUF", "gguf_variant": "Q4_K_M"}
+    data = {"model_path": "unsloth/test-model-GGUF", "gguf_variant": "Q4_K_M"}
     data.update(overrides)
     return LoadRequest.model_validate(data)
 

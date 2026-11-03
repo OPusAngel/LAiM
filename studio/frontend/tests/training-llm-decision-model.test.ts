@@ -24,7 +24,7 @@ const { buildTrainingStartPayload } = await import(
 
 type TrainingState = ReturnType<typeof useTrainingConfigStore.getState>;
 
-const LLM = "LAiM/Qwen3.5-4B";
+const LLM = "unsloth/Qwen3.5-4B";
 const LAYA = "convaiinnovations/laya";
 
 const LLM_DECISION_YAML = yaml.load(

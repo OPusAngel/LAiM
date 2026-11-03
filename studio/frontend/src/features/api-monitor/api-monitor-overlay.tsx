@@ -4,6 +4,7 @@
 // Floating API monitor: opens itself when API traffic arrives, summarises it
 // without taking over the window, and links through to the full page.
 
+import { translate } from "@/i18n";
 import { getApiMonitor } from "@/features/chat/api/chat-api";
 import type { ApiMonitorEntry } from "@/features/chat/types/api";
 import { FIND_PORTAL_ATTRIBUTE } from "@/features/find-in-page/lib/find-attributes";
@@ -362,9 +363,7 @@ function ApiMonitorPanel({
               strokeWidth={1.75}
               className="size-icon shrink-0 text-nav-fg"
             />
-            <span className="truncate text-ui-13p5 font-semibold tracking-[0.025em] text-nav-fg dark:tracking-[0.04em]">
-              API monitor
-            </span>
+            <span className="truncate text-ui-13p5 font-semibold tracking-[0.025em] text-nav-fg dark:tracking-[0.04em]">{translate("uxApimonitor.aPIMonitor2e65v")}</span>
             <span
               className={cn(
                 "size-1.5 shrink-0 rounded-full",
@@ -396,8 +395,8 @@ function ApiMonitorPanel({
             <button
               type="button"
               onClick={close}
-              title="Close"
-              aria-label="Close API monitor"
+              title={translate("imageViewer.close")}
+              aria-label={translate("uxApimonitor.closeAPIMonitor1wfe3")}
               className="flex size-7 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-nav-surface-hover hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             >
               <XIcon className="size-3.5" strokeWidth={1.75} />
@@ -408,24 +407,24 @@ function ApiMonitorPanel({
         <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
           <div ref={contentRef}>
             <p className="truncate px-1.5 pb-2.5 text-ui-11p5 tracking-nav text-muted-foreground">
-              {data?.active_model ?? "No model loaded"}
+              {data?.active_model ?? translate("uxChat.noModelLoadedbb8lt")}
             </p>
 
             {/* Soft tile, as the Hub and Train pages group readouts. */}
             <div className="grid grid-cols-4 rounded-[14px] bg-muted/45 py-2.5 dark:bg-background/45">
               <StatCell
-                label="Live"
+                label={translate("settings.debugging.statusLive")}
                 value={stats.active.toLocaleString()}
                 tone={stats.active > 0 ? "active" : undefined}
               />
-              <StatCell label="Requests" value={stats.total.toLocaleString()} />
+              <StatCell label={translate("uxApimonitor.requestsefmne")} value={stats.total.toLocaleString()} />
               <StatCell
-                label="Errors"
+                label={translate("uxApimonitor.errors1swmt")}
                 value={stats.errors.toLocaleString()}
                 tone={stats.errors > 0 ? "error" : undefined}
               />
               <StatCell
-                label="Avg"
+                label={translate("uxApimonitor.avgzry03")}
                 value={
                   stats.avgDurationMs == null
                     ? "--"
@@ -438,7 +437,7 @@ function ApiMonitorPanel({
             <div className="flex flex-col pb-1 pt-1.5">
               {entries.length === 0 ? (
                 <p className="px-1.5 py-4 text-center text-ui-11p5 tracking-nav text-muted-foreground">
-                  No requests yet.
+                  {translate("uxApimonitor.noRequestsYetlocv5")}
                 </p>
               ) : (
                 entries.slice(0, VISIBLE_ENTRIES).map((entry) => (
@@ -491,7 +490,7 @@ function ApiMonitorPanel({
             strokeWidth={1.75}
             className="size-icon shrink-0"
           />
-          Expand to full monitor
+          {translate("uxApimonitor.expandToFullMonitor1e71l")}
         </button>
 
         {/* Closing silences this burst; this is the permanent off. */}
@@ -503,7 +502,7 @@ function ApiMonitorPanel({
           }}
           className="mt-1.5 shrink-0 w-full rounded-[12px] py-1 text-ui-11 tracking-nav text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         >
-          Stop opening this automatically
+          {translate("uxCopy.stopOpeningThisAutomatically1e6mo")}
         </button>
       </motion.div>
     </div>

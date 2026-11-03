@@ -34,7 +34,7 @@ def test_pinned_spark_tts_llm_subfolder_keeps_its_path():
     )
 
     restored = restore_hf_cache_repo_identity(
-        model, _SNAPSHOT, expected_repo_id = "LAiM/Spark-TTS-0.5B"
+        model, _SNAPSHOT, expected_repo_id = "unsloth/Spark-TTS-0.5B"
     )
 
     assert restored is None
@@ -46,10 +46,10 @@ def test_pinned_spark_tts_llm_subfolder_keeps_its_path():
 def test_snapshot_root_with_trailing_separator_is_still_restored():
     config = SimpleNamespace(_name_or_path = _SNAPSHOT + "/")
     restored = restore_hf_cache_repo_identity(
-        SimpleNamespace(config = config), _SNAPSHOT, expected_repo_id = "LAiM/Spark-TTS-0.5B"
+        SimpleNamespace(config = config), _SNAPSHOT, expected_repo_id = "unsloth/Spark-TTS-0.5B"
     )
-    assert restored == "LAiM/Spark-TTS-0.5B"
-    assert config._name_or_path == "LAiM/Spark-TTS-0.5B"
+    assert restored == "unsloth/Spark-TTS-0.5B"
+    assert config._name_or_path == "unsloth/Spark-TTS-0.5B"
 
 
 def _spark_repo(root: Path) -> Path:
@@ -90,7 +90,7 @@ def test_legacy_adapter_naming_repo_root_loads_through_llm_subfolder(tmp_path):
 
 def test_legacy_adapter_naming_hub_repo_id_uses_cached_snapshot(tmp_path, monkeypatch):
     snapshot = _spark_repo(tmp_path / "snapshot")
-    ckpt = _checkpoint(tmp_path / "checkpoint-30", "LAiM/Spark-TTS-0.5B")
+    ckpt = _checkpoint(tmp_path / "checkpoint-30", "unsloth/Spark-TTS-0.5B")
     calls = []
 
     def fake_snapshot_download(repo_id, **kwargs):
@@ -103,7 +103,7 @@ def test_legacy_adapter_naming_hub_repo_id_uses_cached_snapshot(tmp_path, monkey
         config = json.loads((Path(target) / "adapter_config.json").read_text(encoding = "utf-8"))
         assert config["base_model_name_or_path"] == str(snapshot / "LLM")
 
-    assert calls[0][0] == "LAiM/Spark-TTS-0.5B"
+    assert calls[0][0] == "unsloth/Spark-TTS-0.5B"
     assert calls[0][1]["token"] is False
     assert calls[0][1]["local_files_only"] is True
 
@@ -124,7 +124,7 @@ def test_loadable_bases_and_non_adapters_are_unchanged(tmp_path, monkeypatch):
         raise OSError("offline")
 
     monkeypatch.setattr(huggingface_hub, "snapshot_download", offline_failure)
-    unresolvable = _checkpoint(tmp_path / "unresolvable", "LAiM/Spark-TTS-0.5B")
+    unresolvable = _checkpoint(tmp_path / "unresolvable", "unsloth/Spark-TTS-0.5B")
 
     for path in (llm_ckpt, plain_ckpt, merged, unresolvable):
         with spark_tts_adapter_load_target(str(path)) as target:

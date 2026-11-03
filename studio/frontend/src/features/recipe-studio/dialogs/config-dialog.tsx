@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogFooter } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
@@ -58,19 +59,19 @@ export function ConfigDialog({
           description={
             blockDefinition
               ? blockDefinition.description
-              : "Choose a step to edit."
+              : translate("uxRecipestudio.chooseAStepTog3aui")
           }
         />
         {!config && (
           <div className="text-sm text-muted-foreground">
-            Select a step to edit.
+            {translate("uxRecipestudio.selectAStepTo4029e")}
           </div>
         )}
         {config && (
           <div className="min-w-0 space-y-4">
             {readOnly && (
               <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-300">
-                This recipe is locked while a run is in progress.
+                {translate("uxRecipestudio.thisRecipeIsLocked18tds")}
               </div>
             )}
             <ValidationBanner config={config} />
@@ -80,9 +81,9 @@ export function ConfigDialog({
               {showDropToggle && (
                 <div className="mb-2 flex items-center corner-squircle justify-between gap-3 rounded-2xl border border-border/60 px-3 pt-2 pb-4">
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold">Keep out of final dataset</p>
+                    <p className="text-sm font-semibold">{translate("uxCopy.keepOutOfFinal6wwt")}</p>
                     <p className="break-words text-xs text-muted-foreground">
-                      Use this step while generating, but leave it out of exported rows.
+                      {translate("uxRecipestudio.useThisStepWhilecsfwc")}
                     </p>
                   </div>
                   <Switch

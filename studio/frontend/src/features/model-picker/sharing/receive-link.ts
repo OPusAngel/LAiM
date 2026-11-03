@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   AUTH_SESSION_CLEARED_EVENT,
   AUTH_SESSION_STORED_EVENT,
@@ -57,9 +58,9 @@ export function subscribeRunConfigSession(onChange: () => void): () => void {
       const pending = runConfigInbox.getSnapshot();
       clearPendingImport();
       if (pending) {
-        toast.info("Run settings import cancelled", {
+        toast.info(translate("uxModelpicker.runSettingsImportCancelledcrgwm"), {
           description:
-            "Your session ended before the settings were imported. Reopen the link to try again.",
+            translate("uxModelpicker.yourSessionEndedBeforemlube"),
         });
       }
     }
@@ -113,9 +114,9 @@ export function cancelEditedRunConfigImport(draftKey: string): void {
   clearPendingImport();
   if (Object.keys(pending.value.config).length > 0) {
     markModelConfigDraftEdited(draftKey);
-    toast.info("Run settings import cancelled", {
+    toast.info(translate("uxModelpicker.runSettingsImportCancelledcrgwm"), {
       description:
-        "Your newer edits were kept. Reopen the link to import its settings.",
+        translate("uxModelpicker.yourNewerEditsWereytd45"),
     });
   }
 }
@@ -142,7 +143,7 @@ async function receiveRunConfigUrl(
     }
     clearPendingImport();
     if (parsed.kind === "invalid") {
-      toast.error("Could not open shared run settings", {
+      toast.error(translate("uxModelpicker.couldNotOpenShared123ey"), {
         description: parsed.error,
       });
     }
@@ -152,8 +153,8 @@ async function receiveRunConfigUrl(
     }
     clearPendingImport();
     acceptNativeIntent.clear();
-    toast.error("Could not open shared run settings", {
-      description: "Reopen the link to try again.",
+    toast.error(translate("uxModelpicker.couldNotOpenShared123ey"), {
+      description: translate("uxModelpicker.reopenTheLinkToh9wjy"),
     });
   }
 }

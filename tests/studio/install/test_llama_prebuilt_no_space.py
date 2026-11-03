@@ -51,7 +51,7 @@ def linux_host() -> "M.HostInfo":
 
 def choice(name: str, tag: str = "release-2") -> "M.AssetChoice":
     return AssetChoice(
-        repo = "LAiMai/llama.cpp",
+        repo = "unslothai/llama.cpp",
         tag = tag,
         name = name,
         url = f"https://example.com/{name}",
@@ -62,7 +62,7 @@ def choice(name: str, tag: str = "release-2") -> "M.AssetChoice":
 
 def checksums(release_tag: str, llama_tag: str) -> "M.ApprovedReleaseChecksums":
     return ApprovedReleaseChecksums(
-        repo = "LAiMai/llama.cpp",
+        repo = "unslothai/llama.cpp",
         release_tag = release_tag,
         upstream_tag = llama_tag,
         source_commit = None,
@@ -140,7 +140,7 @@ def test_low_disk_does_not_block_an_install_that_fits(tmp_path, monkeypatch, cap
     only = plan("b10079", "release-2", [choice("app-b10079-linux-x64-cpu.tar.gz")])
     reached = install_harness(monkeypatch, [only], free_bytes = 3 * GB)
 
-    M.install_prebuilt(install_dir, "latest", "LAiMai/llama.cpp", "")
+    M.install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
 
     assert reached == ["app-b10079-linux-x64-cpu.tar.gz"]
     captured = capsys.readouterr()
@@ -335,7 +335,7 @@ def test_source_tree_enospc_is_not_masked_by_a_later_mirror_error(tmp_path, monk
             "deadbeef",
             tmp_path / "install",
             tmp_path,
-            source_repo = "LAiMai/llama.cpp",
+            source_repo = "unslothai/llama.cpp",
             expected_sha256 = None,
             exact_source = True,
             asset_url = "https://example.com/llama.cpp-source.tar.gz",
@@ -359,7 +359,7 @@ def test_enospc_exits_no_space_without_trying_older_releases(tmp_path, monkeypat
     monkeypatch.setattr(M, "validate_prebuilt_choice", enospc)
 
     with pytest.raises(SystemExit) as caught:
-        M.install_prebuilt(install_dir, "latest", "LAiMai/llama.cpp", "")
+        M.install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
 
     assert caught.value.code == M.EXIT_NO_SPACE
     assert reached == ["app-b9002-linux-x64-cpu.tar.gz"]
@@ -377,6 +377,6 @@ def test_ordinary_failure_still_exits_fallback(tmp_path, monkeypatch):
     )
 
     with pytest.raises(SystemExit) as caught:
-        M.install_prebuilt(install_dir, "latest", "LAiMai/llama.cpp", "")
+        M.install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
 
     assert caught.value.code == M.EXIT_FALLBACK

@@ -26,7 +26,7 @@ DEFAULT_SECRET = "not-a-secret"
 def test_the_hub_readme_describes_the_shipped_images():
     text = HUB_README.read_text(encoding = "utf-8")
     for needle in (
-        "LAiM/LAiM:core",
+        "unsloth/LAiM:core",
         "`latest`",
         "linux/arm64",
         "jupyter lab --ip 0.0.0.0 --port 8888 --allow-root",
@@ -123,8 +123,8 @@ def test_the_repo_readme_run_command_matches_the_image():
     section = running[0]
     # The run command starts `latest` (Studio). Notebook-only users need `core`, and this
     # section is the only place the README tells them it exists.
-    assert "LAiM/LAiM:core" in section, (
-        "the README Docker section that runs the image no longer names the `LAiM/LAiM:core` "
+    assert "unsloth/LAiM:core" in section, (
+        "the README Docker section that runs the image no longer names the `unsloth/LAiM:core` "
         "tag; keep a pointer to it for notebook-only users"
     )
     assert "/workspace/host" in section
@@ -193,7 +193,7 @@ def _run_sync(
     env = dict(os.environ)
     env["PATH"] = f"{bin_dir}{os.pathsep}" + env["PATH"]
     env["REGISTRY_USERNAME"] = "LAiM"
-    env["IMAGE_NAME"] = "LAiM/LAiM"
+    env["IMAGE_NAME"] = "unsloth/LAiM"
     # Bind the step's env: too; expand only the expected secret so a wrong name fails.
     for name, value in (step.get("env") or {}).items():
         env[name] = re.sub(r"\$\{\{\s*secrets\.DOCKER_API_KEY\s*\}\}", secret, str(value))

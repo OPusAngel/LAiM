@@ -130,7 +130,7 @@ def test_an_install_with_no_image_models_pays_nothing(warm, monkeypatch):
 
 
 def test_it_prewarms_when_an_image_model_is_present(warm, monkeypatch):
-    _stub_gate(monkeypatch, {"text-to-image": ["LAiM/Z-Image-GGUF"], "text-to-video": []})
+    _stub_gate(monkeypatch, {"text-to-image": ["unsloth/Z-Image-GGUF"], "text-to-video": []})
     seen = _stub_diffusers(monkeypatch)
 
     assert warm.prewarm_diffusers_if_image_models_exist() is True
@@ -151,7 +151,7 @@ def test_a_video_only_install_of_an_h3_gguf_pays_nothing(warm, monkeypatch):
     ``VideoBackend.load_pipeline`` returns through ``_run_load_h3_native`` before its own
     ``import diffusers``, and ``detected_image_family`` cannot place a ``VideoFamily``.
     """
-    _stub_gate(monkeypatch, {"text-to-image": [], "text-to-video": ["LAiM/MiniMax-H3-GGUF"]})
+    _stub_gate(monkeypatch, {"text-to-image": [], "text-to-video": ["unsloth/MiniMax-H3-GGUF"]})
     seen = _stub_diffusers(monkeypatch)
     seen["imported"] = False
 
@@ -188,7 +188,7 @@ def test_a_video_family_we_cannot_identify_still_prewarms(warm, monkeypatch):
 def test_the_torch_warm_opt_out_also_disables_the_prewarm(warm, monkeypatch):
     """join_background_warm() reports True when no worker ran, so this needs its own check."""
     monkeypatch.setenv(warm.DISABLE_ENV_VAR, "1")
-    _stub_gate(monkeypatch, {"text-to-image": ["LAiM/Z-Image-GGUF"]})
+    _stub_gate(monkeypatch, {"text-to-image": ["unsloth/Z-Image-GGUF"]})
     monkeypatch.delitem(sys.modules, "diffusers", raising = False)
 
     assert warm.prewarm_diffusers_if_image_models_exist() is False
@@ -197,7 +197,7 @@ def test_the_torch_warm_opt_out_also_disables_the_prewarm(warm, monkeypatch):
 
 def test_the_kill_switch_is_honoured(warm, monkeypatch):
     monkeypatch.setenv(warm.DIFFUSERS_PREWARM_DISABLE_ENV_VAR, "1")
-    _stub_gate(monkeypatch, {"text-to-image": ["LAiM/Z-Image-GGUF"]})
+    _stub_gate(monkeypatch, {"text-to-image": ["unsloth/Z-Image-GGUF"]})
     monkeypatch.delitem(sys.modules, "diffusers", raising = False)
 
     assert warm.prewarm_diffusers_if_image_models_exist() is False
@@ -581,7 +581,7 @@ def test_the_lock_is_never_released_between_a_failed_import_and_its_purge(
 def test_a_host_that_routes_to_sd_cpp_pays_nothing(warm, monkeypatch):
     """What presence alone gets wrong: a native binary or LAiM_DIFFUSION_ENGINE=sd_cpp
     serves a supported GGUF through sd.cpp, importing no diffusers."""
-    _stub_gate(monkeypatch, {"text-to-image": ["LAiM/Z-Image-GGUF"]}, engine = "sd_cpp")
+    _stub_gate(monkeypatch, {"text-to-image": ["unsloth/Z-Image-GGUF"]}, engine = "sd_cpp")
     monkeypatch.delitem(sys.modules, "diffusers", raising = False)
 
     assert warm.prewarm_diffusers_if_image_models_exist() is False
@@ -661,8 +661,8 @@ def test_the_real_index_answers_our_task_strings_and_not_the_friendly_ones(monke
     from utils import torch_warmup
 
     fake = types.SimpleNamespace(
-        id = "LAiM/Z-Image-GGUF",
-        model_id = "LAiM/Z-Image-GGUF",
+        id = "unsloth/Z-Image-GGUF",
+        model_id = "unsloth/Z-Image-GGUF",
         display_name = "Z-Image-GGUF",
         path = "/nonexistent/z-image",
         model_format = None,

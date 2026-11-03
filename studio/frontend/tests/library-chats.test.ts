@@ -44,8 +44,8 @@ const context = {
     ["p2", "Evals"],
   ]),
   models: new Map([
-    ["a", ["LAiM/Qwen3-4B-GGUF"]],
-    ["c", ["LAiM/Qwen3-4B-GGUF", "openai/gpt-5"]],
+    ["a", ["unsloth/Qwen3-4B-GGUF"]],
+    ["c", ["unsloth/Qwen3-4B-GGUF", "openai/gpt-5"]],
   ]),
   sectionOf: new Map([
     ["b", "s1"],
@@ -77,7 +77,7 @@ test("flags narrow, projects, sections and models widen within themselves", () =
   const sections = { ...EMPTY_CHAT_FILTERS, sections: new Set([NO_SECTION]) };
   assert.deepEqual(ids(filterChats(chats, "", sections, context)), ["a", "c"]);
   assert.equal(chatFiltersActive(sections), true);
-  const models = { ...EMPTY_CHAT_FILTERS, models: new Set(["LAiM/Qwen3-4B-GGUF"]) };
+  const models = { ...EMPTY_CHAT_FILTERS, models: new Set(["unsloth/Qwen3-4B-GGUF"]) };
   assert.deepEqual(ids(filterChats(chats, "", models, context)), ["a", "c"]);
   assert.equal(chatFiltersActive(EMPTY_CHAT_FILTERS), false);
   assert.equal(chatFiltersActive(models), true);

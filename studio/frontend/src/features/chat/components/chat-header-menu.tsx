@@ -22,7 +22,7 @@ import { useChatFavoritesStore } from "@/features/library/chats/favorites-store"
 import { resumesThought } from "@/features/model-picker";
 import { useShortcutLabel } from "@/features/settings";
 import type { ShortcutId } from "@/features/settings";
-import { useT } from "@/i18n";
+import { translate, useLocale, useT } from "@/i18n";
 import { StarPointedIcon } from "@/lib/hugeicons-derived";
 import { isDownloadCancelled } from "@/lib/native-files";
 import { toast } from "@/lib/toast";
@@ -132,8 +132,8 @@ function TemporaryChatButton({
   onToggle: () => void;
 }) {
   const label = temporary
-    ? "Turn off temporary chat"
-    : "Turn on temporary chat";
+    ? translate("uxChat.turnOffTemporaryChat1j3m8")
+    : translate("uxChat.turnOnTemporaryChatwt1xd");
   return (
     <Tooltip>
       <TooltipTrigger asChild={true}>
@@ -165,6 +165,7 @@ function TemporaryChatButton({
 
 function ChatMenuItems({ menu }: { menu: ActiveChatMenu }) {
   const t = useT();
+  const locale = useLocale();
   const preStreamRunActive = useSyncExternalStore(
     subscribePreStreamRunReservations,
     () => hasPreStreamRunReservation([menu.item.id]),
@@ -183,10 +184,13 @@ function ChatMenuItems({ menu }: { menu: ActiveChatMenu }) {
       state.activeThreadId === menu.item.id
         ? state.contextUsage
         : state.contextUsageByThreadId[menu.item.id];
-    return deriveContextUsageBar({
-      used: usage?.contextTokens ?? usage?.totalTokens ?? null,
-      total: state.loadedContextLength,
-    })?.percent ?? null;
+    return deriveContextUsageBar(
+      {
+        used: usage?.contextTokens ?? usage?.totalTokens ?? null,
+        total: state.loadedContextLength,
+      },
+      { t, locale },
+    )?.percent ?? null;
   });
   const compact = () => {
     const runtime = useChatRuntimeStore.getState();

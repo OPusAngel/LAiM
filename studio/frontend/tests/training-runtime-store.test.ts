@@ -642,12 +642,12 @@ test("resolved download repo follows status and clears between loads and jobs", 
     eval_enabled: false,
     message: "Loading model...",
     error: null,
-    details: { model_download_repo_id: "org/resolved-LAiM-bnb-4bit" },
+    details: { model_download_repo_id: "org/resolved-unsloth-bnb-4bit" },
   };
   runtime.applyStatus(status);
   assert.equal(
     useTrainingRuntimeStore.getState().modelDownloadRepoId,
-    "org/resolved-LAiM-bnb-4bit",
+    "org/resolved-unsloth-bnb-4bit",
   );
   runtime.applyStatus({ ...status, details: { model_download_repo_id: null } });
   assert.equal(useTrainingRuntimeStore.getState().modelDownloadRepoId, null);

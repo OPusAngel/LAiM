@@ -105,11 +105,11 @@ test("a chat-picker handoff still arrives on the /images match", async () => {
   await router.load();
   await router.navigate({
     to: "/images",
-    search: { model: "LAiM/Z-Image-Turbo" },
+    search: { model: "unsloth/Z-Image-Turbo" },
   });
   await router.invalidate();
 
   assert.deepEqual(matchFor(router, "/images")?.search, {
-    model: "LAiM/Z-Image-Turbo",
+    model: "unsloth/Z-Image-Turbo",
   });
 });

@@ -25,7 +25,7 @@ class _Cfg:
 
 
 class _Model:
-    def __init__(self, name = "LAiM/Llama-3.1-8B-Instruct"):
+    def __init__(self, name = "unsloth/Llama-3.1-8B-Instruct"):
         self.config = _Cfg(name)
         self.peft_config = {}
 
@@ -77,20 +77,20 @@ def test_resolve_gguf_file_is_renamed_to_gguf(tmp_path):
 
 
 def test_repo_candidates_appends_gguf():
-    repos = S._gguf_repo_candidates(_Model("LAiM/Llama-3.1-8B-Instruct"))
-    assert "LAiM/Llama-3.1-8B-Instruct-GGUF" in repos
+    repos = S._gguf_repo_candidates(_Model("unsloth/Llama-3.1-8B-Instruct"))
+    assert "unsloth/Llama-3.1-8B-Instruct-GGUF" in repos
 
 
 def test_repo_candidates_maps_official_base_to_LAiM_org():
     # The upstream imatrix only lives in LAiM/<base>-GGUF, so official ids map onto the LAiM org.
     repos = S._gguf_repo_candidates(_Model("meta-llama/Llama-3.1-8B-Instruct"))
-    assert "LAiM/Llama-3.1-8B-Instruct-GGUF" in repos
+    assert "unsloth/Llama-3.1-8B-Instruct-GGUF" in repos
     assert not any(r.startswith("meta-llama/") for r in repos)
 
 
 def test_repo_candidates_keeps_existing_gguf_suffix():
-    repos = S._gguf_repo_candidates(_Model("LAiM/Qwen3.6-35B-A3B-GGUF"))
-    assert repos == ["LAiM/Qwen3.6-35B-A3B-GGUF"]
+    repos = S._gguf_repo_candidates(_Model("unsloth/Qwen3.6-35B-A3B-GGUF"))
+    assert repos == ["unsloth/Qwen3.6-35B-A3B-GGUF"]
 
 
 def test_repo_candidates_skips_local_dirs(tmp_path):
@@ -129,7 +129,7 @@ def _patch_hub(monkeypatch, files, downloaded_dir):
 def test_resolve_true_prefers_dat(monkeypatch, tmp_path):
     cache = tmp_path / "cache"
     files = {
-        "LAiM/Llama-3.1-8B-Instruct-GGUF": [
+        "unsloth/Llama-3.1-8B-Instruct-GGUF": [
             "imatrix_LAiM.dat",
             "imatrix_LAiM.gguf_file",
             "model.Q4_K_M.gguf",
@@ -143,7 +143,7 @@ def test_resolve_true_prefers_dat(monkeypatch, tmp_path):
 
 def test_resolve_true_downloads_gguf_file_and_renames(monkeypatch, tmp_path):
     cache = tmp_path / "cache"
-    files = {"LAiM/Llama-3.1-8B-Instruct-GGUF": ["imatrix_LAiM.gguf_file"]}
+    files = {"unsloth/Llama-3.1-8B-Instruct-GGUF": ["imatrix_LAiM.gguf_file"]}
     _patch_hub(monkeypatch, files, str(cache))
     out = S._resolve_imatrix_file(_Model(), True, "tok", str(tmp_path / "dest"))
     assert os.path.basename(out) == "imatrix_LAiM.gguf"
@@ -151,7 +151,7 @@ def test_resolve_true_downloads_gguf_file_and_renames(monkeypatch, tmp_path):
 
 def test_resolve_true_missing_raises(monkeypatch, tmp_path):
     _patch_hub(
-        monkeypatch, {"LAiM/Llama-3.1-8B-Instruct-GGUF": ["model.Q4_K_M.gguf"]}, str(tmp_path)
+        monkeypatch, {"unsloth/Llama-3.1-8B-Instruct-GGUF": ["model.Q4_K_M.gguf"]}, str(tmp_path)
     )
     with pytest.raises(RuntimeError) as e:
         S._resolve_imatrix_file(_Model(), True, "tok", str(tmp_path / "dest"))

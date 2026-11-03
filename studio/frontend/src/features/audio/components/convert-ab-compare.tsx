@@ -4,6 +4,8 @@
 import { PillTabs } from "@/features/model-picker/components/model-selector/pill-tabs";
 import { type Ref, useCallback, useRef } from "react";
 import { type ABPlayback, nextPlayback } from "./convert-ab-compare-state";
+import { translate } from "@/i18n";
+
 
 export interface ABSide {
   label: string;
@@ -107,7 +109,7 @@ export function ABCompare({
         />
       ) : (
         <output className="flex h-12 w-full items-center justify-center rounded-md border border-border text-ui-12 text-muted-foreground">
-          {current.unavailable ?? "Loading audio…"}
+          {current.unavailable ?? translate("uxAudio.loadingAudioo88e8")}
         </output>
       )}
       {reason && !current.unavailable ? (

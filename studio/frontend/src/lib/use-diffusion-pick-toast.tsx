@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { useEffect, useState } from "react";
 
 import { ModelLoadDescription } from "@/features/chat";
@@ -24,8 +25,8 @@ function describePick(phase: PickToastPhase, progress: PickToastProgress | null)
   if (phase === "downloading") {
     return (
       <ModelLoadDescription
-        title="Downloading model…"
-        message="The model loads once its files are downloaded."
+        title={translate("uxLib.downloadingModel15lwb")}
+        message={translate("uxFeatures.theModelLoadsOncesyo2h")}
         progressPercent={
           progress ? (progress.downloadedBytes / progress.totalBytes) * 100 : null
         }
@@ -40,31 +41,31 @@ function describePick(phase: PickToastPhase, progress: PickToastProgress | null)
   if (phase === "queued") {
     return (
       <ModelLoadDescription
-        title="Download queued"
-        message="It starts once the current download finishes."
+        title={translate("uxLib.downloadQueued132xf")}
+        message={translate("uxFeatures.itStartsOnceTherjumc")}
       />
     );
   }
   if (phase === "waiting") {
     return (
       <ModelLoadDescription
-        title="Model downloaded"
-        message="It loads once the other downloads finish."
+        title={translate("uxLib.modelDownloaded8hx3p")}
+        message={translate("uxFeatures.itLoadsOnceThe59o6m")}
       />
     );
   }
   if (phase === "ready") {
     return (
       <ModelLoadDescription
-        title="Model downloaded"
+        title={translate("uxLib.modelDownloaded8hx3p")}
         message="It loads when you return to this page."
       />
     );
   }
   return (
     <ModelLoadDescription
-      title="Preparing download…"
-      message="Checking which files this model needs."
+      title={translate("uxLib.preparingDownload1dwta")}
+      message={translate("uxFeatures.checkingWhichFilesThistiqgo")}
     />
   );
 }

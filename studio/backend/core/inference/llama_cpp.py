@@ -4368,7 +4368,7 @@ _VRAM_FLOOR_RESERVE_MIB = 512.0
 _LLAMA_FIT_TARGET_DEFAULT_MIB = 1024.0
 
 # Windows + discrete NVIDIA: since driver 536.40 WDDM serves VRAM overflow from host RAM
-# instead of failing (LAiMai/LAiM#11349), so match llama.cpp's own fit margin.
+# instead of failing (OPusAngel/LAiM#11349), so match llama.cpp's own fit margin.
 _WINDOWS_SYSMEM_FALLBACK_RESERVE_MIB = _LLAMA_FIT_TARGET_DEFAULT_MIB
 _WINDOWS_SYSMEM_FALLBACK_MAX_FRACTION = 0.125
 
@@ -7337,7 +7337,7 @@ def _expert_spill_places_tensors_on_cpu(
 
 
 # GPU cache of host-resident experts (ggml-org/llama.cpp#29887); "auto" is sized by the
-# fork's fitter (LAiMai/llama.cpp#251). One run, so a retry can strip it.
+# fork's fitter (unslothai/llama.cpp#251). One run, so a retry can strip it.
 _MOE_CACHE_AUTO_TOKENS = ("--moe-cache-mib", "auto")
 # --moe-cache-mib auto only beats the --fit split at a middling resident expert share r
 # (unknown r keeps the split). Cache vs split decode / prompt t/s, L4 gemma-4-26B-A4B:
@@ -10086,7 +10086,7 @@ class LlamaCppBackend:
 
         Search order:
         1.  LLAMA_SERVER_PATH environment variable (direct path to binary)
-        1b. LAiM_LLAMA_CPP_PATH env var (custom llama.cpp install dir)
+        1b. UNSLOTH_LLAMA_CPP_PATH env var (custom llama.cpp install dir)
         2.  LAiM's custom llama.cpp folder setting
         3.  ~/.LAiM/llama.cpp/llama-server        (make build, root dir)
         4.  ~/.LAiM/llama.cpp/build/bin/llama-server  (cmake build, Linux)
@@ -10179,8 +10179,8 @@ class LlamaCppBackend:
             if hit:
                 return hit
 
-        # 1b. LAiM_LLAMA_CPP_PATH: custom llama.cpp install dir
-        custom_llama_cpp = os.environ.get("LAiM_LLAMA_CPP_PATH")
+        # 1b. UNSLOTH_LLAMA_CPP_PATH: custom llama.cpp install dir
+        custom_llama_cpp = os.environ.get("UNSLOTH_LLAMA_CPP_PATH")
         managed_path_marker = os.environ.get("LAiM_STUDIO_MANAGED_LLAMA_CPP_PATH") == "1"
         if custom_llama_cpp and not managed_path_marker:
             # expanduser, like every other reader of this variable:
@@ -10231,7 +10231,7 @@ class LlamaCppBackend:
         else:
             # _kill_orphaned_servers excludes the legacy root in custom mode;
             # discovery must match so we never spawn a server we then refuse to
-            # clean up. LAiM_LLAMA_CPP_PATH (handled earlier) is the explicit
+            # clean up. UNSLOTH_LLAMA_CPP_PATH (handled earlier) is the explicit
             # way to share a build across roots.
             search_roots = [_resolved_sr / "llama.cpp"]
         for LAiM_home in search_roots:
@@ -19878,7 +19878,7 @@ class LlamaCppBackend:
                         vtype = struct.unpack("<I", vtype_bytes)[0]
                         # gguf-split puts the whole metadata block in shard 1 and gives every
                         # later shard only split.no / split.count / split.tensors.count
-                        # (measured on LAiM/DeepSeek-R1-GGUF: shard 1 has 48 KV pairs from
+                        # (measured on unsloth/DeepSeek-R1-GGUF: shard 1 has 48 KV pairs from
                         # general.architecture = "deepseek2", shard 2 has those 3). Read the
                         # INDEX, not the presence: shard 1 carries these keys too, so presence
                         # alone would cover a whole set rather than its tail.
@@ -20451,15 +20451,20 @@ class LlamaCppBackend:
 
         env = child_env_without_native_path_secret()
         # `python -m LAiM_zoo.diffusion_studio.shim` imports LAiM_zoo, which
-        # refuses to load unless LAiM_IS_PRESENT is set (normally by `import
+        # refuses to load unless UNSLOTH_IS_PRESENT is set (normally by `import
         # LAiM`). The shim never imports LAiM, so set it here as LAiM does.
-        env["LAiM_IS_PRESENT"] = "1"
+        env["UNSLOTH_IS_PRESENT"] = "1"
         # The shim's `import LAiM_zoo` aborts in get_device_type() ("needs a GPU")
         # when no accelerator is visible, even though it only drives the CPU
         # visual-server binary and does no torch GPU work. Allow the CPU device so the
         # runner starts; the visual server still runs on the CPU llama.cpp build.
         if cpu_only:
-            env.setdefault("LAiM_ALLOW_CPU", "1")
+            env.setdefault("UNSLOTH_ALLOW_CPU", "1")
+        # LAiM reads the same switches under its own spelling, and this child never runs
+        # the parent's mirror.
+        from core.library_env import mirror_library_env
+
+        mirror_library_env(env)
         env["DG_VISUAL_BIN"] = visual_bin
         env["DG_GPU"] = gpu
         if gpu_ids or fit_gpus:
@@ -21855,9 +21860,9 @@ class LlamaCppBackend:
     # GGUF ``general.architecture`` values for diffusion / image models.
     # llama.cpp has no such architectures, so loading one as a chat model dies
     # with "unknown model architecture: '<arch>'". These match the patched
-    # stable-diffusion.cpp / ComfyUI-GGUF enums. LAiM publishes FLUX and
+    # stable-diffusion.cpp / ComfyUI-GGUF enums. unsloth publishes FLUX and
     # Qwen-Image GGUFs under
-    # https://huggingface.co/collections/LAiM/LAiM-diffusion-ggufs.
+    # https://huggingface.co/collections/unsloth/unsloth-diffusion-ggufs.
     # Matched exactly (not a substring) so a chat arch containing "wan"/"sd1"
     # (e.g. "taiwan") isn't misrouted to Images.
     _IMAGE_ARCHES = frozenset(
@@ -21869,7 +21874,7 @@ class LlamaCppBackend:
     )
     # Archs shared by more than one family, so the header alone does NOT say whether the
     # Images page can run the file: Z-Image's DiT is a Lumina2 derivative, so its GGUFs
-    # declare "lumina2" too (measured on LAiM/Z-Image-Turbo-GGUF/z-image-turbo-Q2_K.gguf
+    # declare "lumina2" too (measured on unsloth/Z-Image-Turbo-GGUF/z-image-turbo-Q2_K.gguf
     # and on calcuis/lumina-gguf). ``routes.models._arch_to_task`` resolves these from the
     # repo id and the filename and tags the rest ``image-diffusion-unsupported``, hiding
     # them from the Images picker, so the refusal must run the SAME resolution before it
@@ -22051,7 +22056,7 @@ class LlamaCppBackend:
                 return (
                     "This is a text-to-speech GGUF, which llama.cpp cannot load: it has no "
                     "CSM decoder. Run the model's Transformers build (for example "
-                    "LAiM/csm-1b) from the Audio page instead."
+                    "unsloth/csm-1b) from the Audio page instead."
                 )
             if arch in self._UNRUNNABLE_MEDIA_ARCHES:
                 return (
@@ -22321,7 +22326,7 @@ class LlamaCppBackend:
 
         The test is the wrapper's shape, not where it came from. Provenance is
         not enough (_llama_install_root treats the directory named by
-        LAiM_LLAMA_CPP_PATH as the active install with no marker file
+        UNSLOTH_LLAMA_CPP_PATH as the active install with no marker file
         needed, so somebody's own checkout reads as managed), and neither is an
         explicit LLAMA_SERVER_PATH pin: pointing that at the installer's own
         entrypoint is a supported configuration, and refusing to resolve it
@@ -22688,7 +22693,7 @@ class LlamaCppBackend:
             # ("No such file or directory") means the file is not there: EACCES
             # ("Permission denied", seen with an absolute DT_NEEDED path, an
             # unreadable parent directory, SELinux mislabels or container
-            # sandboxing) means it exists and cannot be opened, where installing
+            # workdiring) means it exists and cannot be opened, where installing
             # a package is the wrong advice. A truncated tail keeps the
             # missing-library reading.
             _reason_l = _reason.lower()
@@ -22872,7 +22877,7 @@ class LlamaCppBackend:
                 return (
                     f"'{arch}' is a text-to-speech GGUF, which llama-server cannot run as a "
                     "chat/completion model. Run the model's Transformers build (for example "
-                    "LAiM/csm-1b) from LAiM's Audio page instead."
+                    "unsloth/csm-1b) from LAiM's Audio page instead."
                 )
             if arch in LlamaCppBackend._UNRUNNABLE_MEDIA_ARCHES:
                 return (
@@ -34667,7 +34672,7 @@ class LlamaCppBackend:
                         "failed to load -- on Windows, cudart64_X.dll / "
                         "cublas64_X.dll could not be resolved. Reinstall the "
                         "LAiM llama.cpp prebuilt or install a matching CUDA "
-                        "toolkit (issue LAiMai/LAiM#5106).",
+                        "toolkit (issue OPusAngel/LAiM#5106).",
                     )
 
                 logger.info(
@@ -36510,8 +36515,8 @@ class LlamaCppBackend:
             # Legacy: extracted binary
             install_roots.append(project_root / "bin")
 
-            # LAiM_LLAMA_CPP_PATH env var (custom install dir)
-            custom_dir = os.environ.get("LAiM_LLAMA_CPP_PATH")
+            # UNSLOTH_LLAMA_CPP_PATH env var (custom install dir)
+            custom_dir = os.environ.get("UNSLOTH_LLAMA_CPP_PATH")
             if custom_dir:
                 # expanduser to match _find_llama_server_binary: the allowlist has
                 # to name the tree discovery actually spawns from, or a server
@@ -39228,7 +39233,6 @@ class LlamaCppBackend:
         mcp_image = None,
         deduplicate_tool_calls: bool = True,
         instruction_anchor_ids = None,
-        sandbox_level: Optional[str] = None,
         compact_context: bool = False,
     ) -> Generator[dict, None, None]:
         """
@@ -39236,7 +39240,7 @@ class LlamaCppBackend:
 
         permission_mode: "ask" confirms every call (with confirm_tool_calls),
         "auto" only pauses calls detected as potentially unsafe, "off" never
-        pauses (sandbox stays on), "full" is the same as bypass_permissions.
+        pauses, "full" is the same as bypass_permissions.
         Unset/unknown behaves as "ask".
 
         Yields dicts:
@@ -39266,24 +39270,20 @@ class LlamaCppBackend:
         from core.inference.mcp_image import note_attached_image
 
         # "full" and bypass_permissions are the same switch, whichever arrives
-        # first wins. "off" keeps the sandbox but never prompts. Unset defaults to
+        # first wins. "off" never prompts. Unset defaults to
         # "auto"; unknown falls back to the stricter "ask". An explicit
         # confirm_tool_calls=True with no mode is already resolved to "ask" at the
         # request layer, so it never arrives here as an ambiguous unset.
         from state.tool_policy import (
             account_tool_stream,
             needs_tool_confirmation,
-            normalize_sandbox_level,
             normalize_tool_permissions,
-            requires_os_isolation,
-            runs_without_os_sandbox,
             tool_call_may_prompt,
         )
 
         permission_mode, bypass_permissions = normalize_tool_permissions(
             permission_mode, bypass_permissions
         )
-        sandbox_level = normalize_sandbox_level(sandbox_level)
         stream_tool_execution = account_tool_stream(stream_tool_execution)
 
         if not self.is_loaded:
@@ -40439,7 +40439,6 @@ class LlamaCppBackend:
                                                 bypass_permissions = bypass_permissions,
                                                 permission_mode = permission_mode,
                                                 name = current_name,
-                                                sandbox_level = sandbox_level,
                                             )
                                             # A text-preview card still streams while gated;
                                             # hiding it blanks the chat.
@@ -40589,7 +40588,6 @@ class LlamaCppBackend:
                                                                 bypass_permissions = False,
                                                                 permission_mode = "off",
                                                                 name = _sniffed,
-                                                                sandbox_level = sandbox_level,
                                                             )
                                                         )
                                                         and not has_text_only_provisional_card(
@@ -41598,8 +41596,7 @@ class LlamaCppBackend:
                         )
 
                     # Bypass wins here too, so a direct internal caller with both
-                    # flags never prompts. "auto" pauses only high-risk calls; "off"
-                    # pauses only a high-risk python/terminal call without OS isolation.
+                    # flags never prompts. "auto" pauses only high-risk calls.
                     needs_confirm = needs_tool_confirmation(
                         confirm_tool_calls = bool(confirm_tool_calls),
                         bypass_permissions = bypass_permissions,
@@ -41608,20 +41605,9 @@ class LlamaCppBackend:
                         arguments = decision.arguments,
                         is_high_risk = is_high_risk_tool_call,
                         never_needs = never_needs_approval,
-                        sandbox_level = sandbox_level,
                     )
                     # Sending the user's image always asks, whatever the permission mode.
                     needs_confirm = needs_confirm or image_share is not None
-                    strict_isolation = requires_os_isolation(
-                        confirm_tool_calls = bool(confirm_tool_calls),
-                        bypass_permissions = bypass_permissions,
-                        permission_mode = permission_mode,
-                        name = decision.tool_name,
-                        arguments = decision.arguments,
-                        prompted = needs_confirm,
-                        is_high_risk = is_high_risk_tool_call,
-                        sandbox_level = sandbox_level,
-                    )
                     approval_id = new_approval_id() if needs_confirm else ""
                     decision_slot = (
                         begin_tool_decision(session_id, approval_id) if needs_confirm else None
@@ -41974,15 +41960,7 @@ class LlamaCppBackend:
                         # outlives the closure.
                         _last_result_budget: list = ["<not passed>"]
 
-                        # Only a call the user answered: the executor lets it reach the host paths it names.
-                        _host_access_approved = _decision not in (None, "deny")
-
-                        def _invoke_tool(
-                            _output_callback,
-                            _decision = decision,
-                            _approved = _host_access_approved,
-                            _strict = strict_isolation,
-                        ):
+                        def _invoke_tool(_output_callback):
                             # execute_tool is injectable and may be monkey-patched with the
                             # pre-PR signature; forward output_callback only if it's accepted.
                             kwargs = dict(
@@ -41991,22 +41969,12 @@ class LlamaCppBackend:
                                 session_id = session_id,
                                 thread_id = thread_id,
                                 rag_scope = rag_scope,
-                                disable_sandbox = bypass_permissions,
                             )
-                            # Run unasked only because the OS sandbox was on: refuse if it is not any more.
-                            if _strict and accepts_kwarg(execute_tool, "tool_execution_mode"):
-                                kwargs["tool_execution_mode"] = "required"
-                            elif runs_without_os_sandbox(
-                                _decision.tool_name, sandbox_level
-                            ) and accepts_kwarg(execute_tool, "tool_execution_mode"):
-                                kwargs["tool_execution_mode"] = "software"
                             # Same branch the forced recall is filtered against, so a
                             # model-initiated search cannot reach a sibling response the
                             # forced recall correctly refused.
                             if accepts_kwarg(execute_tool, "conversation_branch"):
                                 kwargs["conversation_branch"] = _extend_live_branch(conversation)
-                            if _approved and accepts_kwarg(execute_tool, "host_access_approved"):
-                                kwargs["host_access_approved"] = True
                             # And the room actually left: the model picks its own top_k and
                             # the result lands in the current tool exchange, which rolling
                             # truncation protects, so a top_k the window cannot hold ends

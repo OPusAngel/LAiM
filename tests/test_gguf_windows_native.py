@@ -27,7 +27,7 @@ def _load_helper():
             ns: dict = {"os": os}
             exec(compile(ast.Module([node], []), str(_SAVE_PY), "exec"), ns)
             return ns["_model_basename"]
-    raise AssertionError("LAiM/save.py defines no _model_basename")
+    raise AssertionError("unsloth/save.py defines no _model_basename")
 
 
 def test_join_really_discards_the_prefix_for_a_drive_bearing_component():
@@ -65,7 +65,7 @@ def test_posix_basename_would_not_have_fixed_it():
         (r"C:\Users\Ada\OneDrive - X\Llama 3.1 8B", "Llama 3.1 8B"),
         ("D:\\", "model"),
         ("D:", "model"),
-        ("LAiM/Qwen3-8B", "Qwen3-8B"),
+        ("unsloth/Qwen3-8B", "Qwen3-8B"),
     ],
 )
 def test_basename_on_native_windows(base, expected):

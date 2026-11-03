@@ -513,7 +513,7 @@ def training_run(result_queue):
             "down_proj",
         ],
         lora_alpha = lora_rank,
-        use_gradient_checkpointing = "LAiM",
+        use_gradient_checkpointing = "unsloth",
         random_state = 3407,
     )
 

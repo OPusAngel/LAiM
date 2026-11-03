@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Populate and refresh /workspace/LAiM-notebooks from LAiMai/notebooks. The
+# Populate and refresh /workspace/LAiM-notebooks from unslothai/notebooks. The
 # user's edits always win: each written file's hash is recorded, and a file whose
 # hash differs is left untouched.
 #
@@ -12,7 +12,7 @@
 #   LAiM_KEEP_REMOVED_NOTEBOOKS=1  keep pristine notebooks that upstream deleted
 #                                     or renamed (default: they are removed too)
 #   LAiM_NOTEBOOKS_DIR=<path>      target dir (default /workspace/LAiM-notebooks)
-#   LAiM_NOTEBOOKS_REPO=<url>      source repo (default LAiMai/notebooks)
+#   LAiM_NOTEBOOKS_REPO=<url>      source repo (default unslothai/notebooks)
 #   LAiM_NOTEBOOK_FETCH_TIMEOUT=N  seconds for each network op (default 60)
 #   LAiM_SKIP_NOTEBOOK_VIEW=1      do not build the categorized folder view
 #   LAiM_NOTEBOOKS_VIEW_DIR=<path> categorized view dir
@@ -25,7 +25,7 @@ set -u
 
 TEMPLATE="${LAiM_NOTEBOOKS_TEMPLATE:-/opt/LAiM-notebooks}"
 DEST="${LAiM_NOTEBOOKS_DIR:-/workspace/LAiM-notebooks}"
-REMOTE="${LAiM_NOTEBOOKS_REPO:-https://github.com/LAiMai/notebooks}"
+REMOTE="${LAiM_NOTEBOOKS_REPO:-https://github.com/unslothai/notebooks}"
 STATE="$DEST/.LAiM_sync_state"     # "sha256  relpath" of what we last wrote
 SYNCED="$DEST/.LAiM_sync_commit"   # upstream commit we last synced to
 LOCK="$DEST/.LAiM_sync.lock"       # serialises this script against itself

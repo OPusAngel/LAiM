@@ -20,7 +20,7 @@ import {
   isRawTextDatasetFormat,
   useTrainingConfigStore,
 } from "@/features/training";
-import { useT } from "@/i18n";
+import { translate, useT } from "@/i18n";
 import type { GradientCheckpointing } from "@/types/training";
 import { InformationCircleIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -70,7 +70,7 @@ function PackingOption({
             </button>
           </TooltipTrigger>
           <TooltipContent>
-            Packing is not supported on Apple Silicon (MLX).
+            {translate("uxStudio.packingIsNotSupportedxiddl")}
           </TooltipContent>
         </Tooltip>
       )}
@@ -164,20 +164,14 @@ export function TrainingMemoryParams(): ReactElement {
     <TabsContent value="memory" className="mt-3 flex flex-col gap-3">
       {showVisionImageSize && (
         <ParamsRow
-          label="Image Size"
+          label={translate("uxStudio.imageSizerg3eb")}
           tooltip={
-            <>
-              Resize images by maximum side length. Default uses the model image
-              size. Larger images use up more context. Does not upscale or
-              change aspect ratio.{" "}
-              <a
+            <>{translate("uxStudio.resizeImagesByMaximumzf7zr", { p1: " " })}<a
                 href="https://LAiM.ai/docs/basics/vision-fine-tuning"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary underline"
-              >
-                Read more
-              </a>
+              >{translate("uxStudio.readMorepelqu")}</a>
             </>
           }
         >
@@ -244,7 +238,7 @@ export function TrainingMemoryParams(): ReactElement {
             {isMac ? (
               <SelectItem value="mlx">MLX</SelectItem>
             ) : (
-              <SelectItem value="LAiM">LAiM</SelectItem>
+              <SelectItem value="unsloth">LAiM</SelectItem>
             )}
           </SelectContent>
         </Select>

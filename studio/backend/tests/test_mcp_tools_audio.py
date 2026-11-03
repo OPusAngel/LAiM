@@ -37,7 +37,7 @@ def _clip(clip_id, **fields):
     }
 
 
-RUN = {"clips": [_clip("clip-1")], "group_id": None, "model": "LAiM/orpheus-3b", "audio": None}
+RUN = {"clips": [_clip("clip-1")], "group_id": None, "model": "unsloth/orpheus-3b", "audio": None}
 UPLOADED = {
     "id": "in-1",
     "name": "ref.wav",
@@ -273,7 +273,7 @@ def test_without_a_model_the_resident_one_is_named(monkeypatch):
 
 def test_small_audio_runs_on_the_loaded_non_transformers_model(monkeypatch):
     # Without the id the route would run its Transformers default and the result would name Qwen3-ASR.
-    asr = "LAiM/Qwen3-ASR-0.6B-GGUF"
+    asr = "unsloth/Qwen3-ASR-0.6B-GGUF"
     routes = {
         TRANSCRIPTIONS: TRANSCRIPT,
         STT_STATUS_ROUTE: {"mtmd": {"loaded_model": asr, "loading": False}},

@@ -3,6 +3,8 @@
 
 import { isTauri } from "@/lib/api-base";
 import { decodeDataUri, isDataUri } from "@/lib/data-uri";
+import { translate } from "@/i18n";
+
 
 export const NATIVE_FILE_NAME_HEADER = "x-LAiM-default-name";
 const NATIVE_FILE_SAVE_TOKEN_HEADER = "x-LAiM-save-token";
@@ -78,7 +80,7 @@ function browserUrlDownload(url: string, filename: string): void {
 async function fetchDownload(url: string): Promise<Response> {
   const response = await fetch(url);
   if (!response.ok) {
-    throw new Error(`Download failed with status ${response.status}.`);
+    throw new Error(translate("uxFeatures.downloadFailedWithStatuslihyi", { p1: response.status }));
   }
   return response;
 }

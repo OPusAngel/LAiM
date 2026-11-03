@@ -3,6 +3,8 @@ import { saveChatMessage } from "../api/chat-api";
 import type { MessageRecord } from "../types";
 import { exportedItemToRecord } from "./delete-thread-message";
 import { RESEARCH_METADATA_KEYS } from "./research-message-sync";
+import { translate } from "@/i18n";
+
 
 // Mirrors studio_db._SERVER_MANAGED_LINK_KEYS. The backend detaches a finished run only when
 // the edit drops its ownership claim; display fields such as timing and incomplete stay.
@@ -174,7 +176,7 @@ export async function updateThreadMessage(args: {
 
   const targetMessageEntry = currentExport.messages.find(m => m.message.id === messageId);
   if (!targetMessageEntry) {
-    throw new Error(`Message with ID ${messageId} not found in thread.`);
+    throw new Error(translate("uxChat.messageWithIDNotnd9a3", { p1: messageId }));
   }
 
   const { parentId: originalParentId } = targetMessageEntry;
@@ -255,7 +257,7 @@ export async function updateThreadMessage(args: {
       );
     } catch (e) {
       thread.import(originalExport);
-      console.error("Backend sync failed for message update. Rolling back UI.", e);
+      console.error(translate("uxChat.backendSyncFailedFor39nxa"), e);
       throw e;
     }
   }

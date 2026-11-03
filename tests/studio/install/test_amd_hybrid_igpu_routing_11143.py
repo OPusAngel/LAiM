@@ -133,7 +133,7 @@ def test_a_mask_this_resolver_cannot_read_is_still_an_explicit_choice(unmasked, 
 
 def _choice(install_kind: str) -> "ILP.AssetChoice":
     return ILP.AssetChoice(
-        repo = "LAiMai/llama.cpp",
+        repo = "unslothai/llama.cpp",
         tag = "b9925",
         name = "bundle.tar.gz",
         url = "https://example/bundle",

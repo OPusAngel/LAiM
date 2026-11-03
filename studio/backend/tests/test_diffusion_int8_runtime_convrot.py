@@ -331,7 +331,7 @@ def test_builder_publishes_rotated_and_plain_int8_under_different_names():
     build = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(build)
     fam = detect_family("Qwen/Qwen-Image-2.1", override = "qwen-image-2.1")
-    repo = "LAiM/Qwen-Image-2.1-FP8"
+    repo = "unsloth/Qwen-Image-2.1-FP8"
     dest = lambda rotated: build.upload_destination(
         fam, "int8", rotated = rotated, safetensors = True, upload_repo = repo
     )
@@ -466,7 +466,7 @@ def test_zimage_int8_resolves_the_rotated_artifact_first_unless_killed(
     fam = detect_family("Tongyi-MAI/Z-Image-Turbo")
     src = resolve_prequant_source(fam, "int8")
     names = candidate_filenames_of(src)
-    assert src.location == "LAiM/Z-Image-Turbo-FP8"
+    assert src.location == "unsloth/Z-Image-Turbo-FP8"
     # the plain artifact always stays in the chain behind it: not yet hosted, offline, or an older cache
     assert "Z-Image-Turbo-INT8.pt" in names
     assert (names[0] == "Z-Image-Turbo-INT8-ConvRot.safetensors") is rotated_first
@@ -548,7 +548,7 @@ def test_qwen_image_21_int8_resolves_the_rotated_artifact_first_unless_killed(
         monkeypatch.delenv(tq.INT8_CONVROT_ENV)
     else:
         monkeypatch.setenv(tq.INT8_CONVROT_ENV, env)
-    for repo in ("Qwen/Qwen-Image-2.1", "LAiM/Qwen-Image-2.1"):
+    for repo in ("Qwen/Qwen-Image-2.1", "unsloth/Qwen-Image-2.1"):
         fam = detect_family(repo)
         assert fam is not None and fam.name == "qwen-image-2.1"
         src = resolve_prequant_source(fam, "int8")
@@ -556,7 +556,7 @@ def test_qwen_image_21_int8_resolves_the_rotated_artifact_first_unless_killed(
         everything = candidate_filenames_of(src)
         names = tuple(n for n in everything if not is_comfy_prequant_filename(n))
         assert everything[0] == comfy_prequant_filename(names[0])
-        assert src.location == "LAiM/Qwen-Image-2.1-FP8"
+        assert src.location == "unsloth/Qwen-Image-2.1-FP8"
         assert "Qwen-Image-2.1-INT8.safetensors" in names
         assert (names[0] == "Qwen-Image-2.1-INT8-ConvRot.safetensors") is rotated_first
         assert ("Qwen-Image-2.1-INT8-ConvRot.safetensors" in names) is rotated_first

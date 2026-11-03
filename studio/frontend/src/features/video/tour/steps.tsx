@@ -1,40 +1,50 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import type { TourStep } from "@/features/tour";
 
 export const videoTourSteps: TourStep[] = [
   {
     id: "model",
     target: "video-model",
-    title: "Pick a model",
-    body: (
+    get title() {
+      return translate("uxVideo.pickAModelx7b6j");
+    },
+    get body() {
+      return (
       <>
-        Video models run locally, so check the size before you download. What
-        the model supports decides which controls appear below.
+        {translate("uxTour.videoModelsRunLocally11p37")}
       </>
-    ),
+    );
+    },
   },
   {
     id: "settings",
     target: "video-settings",
-    title: "Settings",
-    body: (
+    get title() {
+      return translate("shell.navigation.settings");
+    },
+    get body() {
+      return (
       <>
-        Prompt, resolution, duration in frames, steps, guidance and seed.
-        Duration and resolution drive VRAM and time most, so start small.
+        {translate("uxTour.promptResolutionDurationIn1rxvi")}
       </>
-    ),
+    );
+    },
   },
   {
     id: "preview",
     target: "video-preview",
-    title: "Results",
-    body: (
+    get title() {
+      return translate("uxVideo.results17jx8");
+    },
+    get body() {
+      return (
       <>
-        The selected clip plays here and every clip lines up below. Download it,
-        or reuse its settings for the next run.
+        {translate("uxTour.theSelectedClipPlays12tt9")}
       </>
-    ),
+    );
+    },
   },
 ];

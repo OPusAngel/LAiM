@@ -46,7 +46,7 @@ _SOURCE = ("ggml-org/llama.cpp", "upstream-source")
 def _asset_choice(**overrides):
     name = overrides.pop("name", "llama-b9001-bin-ubuntu-x64.tar.gz")
     defaults = dict(
-        repo = "LAiMai/llama.cpp",
+        repo = "unslothai/llama.cpp",
         tag = "release-1",
         name = name,
         url = f"https://example.com/{name}",
@@ -69,7 +69,7 @@ def _release_checksums(*assets: "tuple[str, str, tuple[str, str]]"):
     for asset_name, sha256, origin in assets:
         artifacts[asset_name] = _artifact(asset_name, sha256, origin)
     return LLAMA.ApprovedReleaseChecksums(
-        repo = "LAiMai/llama.cpp",
+        repo = "unslothai/llama.cpp",
         release_tag = "release-1",
         upstream_tag = "b9001",
         source_commit = "deadbeef",
@@ -123,7 +123,7 @@ def _install(
 def _fast_path(install_dir: Path, **overrides) -> bool:
     kwargs = dict(
         llama_tag = "latest",
-        published_repo = "LAiMai/llama.cpp",
+        published_repo = "unslothai/llama.cpp",
         published_release_tag = "",
         backend_request = "auto",
         force_cpu = False,

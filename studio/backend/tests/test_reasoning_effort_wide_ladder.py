@@ -108,7 +108,7 @@ def test_wide_ladder_still_disables_on_the_off_path():
 def test_a_model_advertising_no_levels_keeps_the_four_level_behaviour():
     from core.inference.llama_cpp import detect_reasoning_flags
 
-    flags = detect_reasoning_flags(GPT_OSS_TEMPLATE, "LAiM/gpt-oss-20b-GGUF")
+    flags = detect_reasoning_flags(GPT_OSS_TEMPLATE, "unsloth/gpt-oss-20b-GGUF")
     assert flags["reasoning_style"] == "reasoning_effort"
     assert flags["reasoning_effort_levels"] == []
 

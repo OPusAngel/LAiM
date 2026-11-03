@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import type { ReactNode } from "react";
 
 import {
@@ -20,7 +21,7 @@ export function InfoHint({ children }: { children: ReactNode }) {
         <button
           type="button"
           data-slot="info-hint"
-          aria-label="More info"
+          aria-label={translate("uxComponents.moreInfoyapsz")}
           className="inline-flex size-3 shrink-0 cursor-help items-center justify-center rounded-full text-muted-foreground/70 transition-colors hover:text-[#383835] dark:hover:text-[#e8e8e8] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         >
           <HugeiconsIcon

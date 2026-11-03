@@ -46,7 +46,7 @@ else:
     attn_implementation = "sdpa"
 
 model, tokenizer = FastLanguageModel.from_pretrained(
-    model_name = "LAiM/Llama-3.1-8B-Instruct",
+    model_name = "unsloth/Llama-3.1-8B-Instruct",
     max_seq_length = 2048,
     dtype = compute_dtype,
     load_in_4bit = True,
@@ -84,7 +84,7 @@ model = FastLanguageModel.get_peft_model(
     lora_alpha = 16,
     lora_dropout = 0,
     bias = "none",
-    use_gradient_checkpointing = "LAiM",
+    use_gradient_checkpointing = "unsloth",
     random_state = 3407,
     use_rslora = False,
     loftq_config = None,
@@ -170,7 +170,7 @@ model_4bit = FastLanguageModel.get_peft_model(
     lora_alpha = 16,
     lora_dropout = 0,
     bias = "none",
-    use_gradient_checkpointing = "LAiM",
+    use_gradient_checkpointing = "unsloth",
     random_state = 3407,
     use_rslora = False,
     loftq_config = None,

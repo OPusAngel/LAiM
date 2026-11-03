@@ -12,7 +12,7 @@ from models.inference import DiffusionGenerateRequest, LoadRequest
 
 def _base_load_request(**overrides):
     data = {
-        "model_path": "LAiM/test-model-GGUF",
+        "model_path": "unsloth/test-model-GGUF",
         "hf_token": None,
         "max_seq_length": 4096,
         "load_in_4bit": True,

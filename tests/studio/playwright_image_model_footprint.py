@@ -18,7 +18,7 @@ ART_DIR.mkdir(parents = True, exist_ok = True)
 CHECKPOINT_BYTES = 2_600_000_000
 COMPANION_BYTES = 8_200_000_000
 REQUIRED_BYTES = CHECKPOINT_BYTES + COMPANION_BYTES
-REPO_ID = "LAiM/FLUX.2-klein-4B-GGUF"
+REPO_ID = "unsloth/FLUX.2-klein-4B-GGUF"
 FILENAME = "FLUX.2-klein-4B-Q4_K_M.gguf"
 # The row shows the catalogue displayName, not the repo id.
 KLEIN_ROW = re.compile(r"FLUX\.2[\s\-]klein[\s\-]4B")

@@ -121,7 +121,7 @@ def test_exact_route_matrix_matches_registered_topology():
     allowed = {("POST", path) for path in INFERENCE_POST_PATHS} | {
         ("GET", "/v1/models"), ("GET", "/v1/models/LAiM/model")}
     denied = {("POST", path) for path in denied_posts} | {
-        ("POST", "/v1/models"), ("GET", "/v1/chat/completions"), ("GET", "/v1/sandbox/abc")}
+        ("POST", "/v1/models"), ("GET", "/v1/chat/completions"), ("GET", "/v1/workdir/abc")}
     assert all(scope_covers("inference", method, path) for method, path in allowed)
     assert not any(scope_covers("inference", method, path) for method, path in denied)
     assert scope_covers("inference", "GET", "/studio/v1/models/", "/studio/")
@@ -947,11 +947,11 @@ def test_a_blank_bearer_is_the_missing_header_on_routes_that_read_it_themselves(
     stale = create_access_token(
         storage.DEFAULT_ADMIN_USERNAME, expires_delta = timedelta(seconds = -60))
     for headers in (None, {"Authorization": "Bearer "}, {"Authorization": "Bearer"}):
-        sandbox = lambda token: _authenticate_header_or_query(
-            request_for(path = "/v1/sandbox/x", headers = headers), token)
+        workdir = lambda token: _authenticate_header_or_query(
+            request_for(path = "/v1/workdir/x", headers = headers), token)
         with pytest.raises(HTTPException):
-            asyncio.run(sandbox(stale))
-        assert asyncio.run(sandbox(None)) == storage.DEFAULT_ADMIN_USERNAME
+            asyncio.run(workdir(stale))
+        assert asyncio.run(workdir(None)) == storage.DEFAULT_ADMIN_USERNAME
     # /api/health has no query credential to fall back on, so "" must resolve the way None does.
     for token in (None, "", "   "):
         credentials = asyncio.run(credentials_for_token(request_for(path = "/api/health"), token))

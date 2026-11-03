@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
+
 export interface WaveRange {
   start_s: number;
   end_s: number;
@@ -227,5 +229,5 @@ export function formatRange(range: WaveRange): string {
 
 export function rangeLabel(index: number, range: WaveRange): string {
   const say = (seconds: number) => String(Math.round(seconds * 10) / 10);
-  return `Range ${index + 1}, ${say(range.start_s)} to ${say(range.end_s)} seconds`;
+  return translate("uxAudio.rangeToSeconds4i0ay", { p1: index + 1, p2: say(range.start_s), p3: say(range.end_s) });
 }

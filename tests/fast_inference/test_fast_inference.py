@@ -21,7 +21,7 @@ from tests.utils import header_footer_context
 pytestmark = pytest.mark.gpu
 
 
-MODEL_NAME = "LAiM/Qwen3-0.6B"
+MODEL_NAME = "unsloth/Qwen3-0.6B"
 MAX_SEQ_LENGTH = 256
 LORA_RANK = 8
 NUM_GENERATIONS = 2

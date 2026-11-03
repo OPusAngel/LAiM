@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   BalanceScaleIcon,
   Clock01Icon,
@@ -116,38 +117,62 @@ export type BlockDefinition = {
 export const BLOCK_GROUPS: BlockGroup[] = [
   {
     kind: "sampler",
-    title: "Generated fields",
-    description: "Create fields from lists, ranges, and reusable patterns.",
+    get title() {
+      return translate("uxRecipestudio.generatedFieldso9ee4");
+    },
+    get description() {
+      return translate("uxRecipestudio.createFieldsFromLists8qn52");
+    },
     icon: DiceFaces03Icon,
   },
   {
     kind: "seed",
-    title: "Source data",
-    description: "Start from an existing dataset or file.",
+    get title() {
+      return translate("uxRecipestudio.sourceDatabj3o5");
+    },
+    get description() {
+      return translate("uxRecipestudio.startFromAnExisting15c9r");
+    },
     icon: Plant01Icon,
   },
   {
     kind: "llm",
-    title: "AI generation",
-    description: "Generate content, connect models, and manage tools.",
+    get title() {
+      return translate("uxRecipestudio.aIGeneration17kle");
+    },
+    get description() {
+      return translate("uxRecipestudio.generateContentConnectModels1kxcp");
+    },
     icon: PencilEdit02Icon,
   },
   {
     kind: "validator",
-    title: "Checks",
-    description: "Lint or filter generated code as it moves through the recipe.",
+    get title() {
+      return translate("uxRecipestudio.checks1w0li");
+    },
+    get description() {
+      return translate("uxRecipestudio.lintOrFilterGeneratedey445");
+    },
     icon: Shield02Icon,
   },
   {
     kind: "expression",
-    title: "Formulas",
-    description: "Build a field from other fields.",
+    get title() {
+      return translate("uxRecipestudio.formulas10xdp");
+    },
+    get description() {
+      return translate("uxRecipestudio.buildAFieldFrom3emym");
+    },
     icon: FunctionIcon,
   },
   {
     kind: "note",
-    title: "Notes",
-    description: "Add markdown notes to document your flow.",
+    get title() {
+      return translate("uxRecipestudio.notes4f76g");
+    },
+    get description() {
+      return translate("uxRecipestudio.addMarkdownNotesTo1pq47");
+    },
     icon: PencilEdit02Icon,
   },
 ];
@@ -156,8 +181,12 @@ const BLOCK_DEFINITIONS: BlockDefinition[] = [
   {
     kind: "seed",
     type: "seed_hf",
-    title: "Hugging Face dataset",
-    description: "Use rows from a Hugging Face dataset as source data.",
+    get title() {
+      return translate("uxRecipestudio.huggingFaceDataset12f02");
+    },
+    get description() {
+      return translate("uxRecipestudio.useRowsFromA10wjy");
+    },
     icon: Plant01Icon,
     dialogKey: "seed",
     createConfig: (id, existing) => makeSeedConfig(id, existing, "hf"),
@@ -165,8 +194,12 @@ const BLOCK_DEFINITIONS: BlockDefinition[] = [
   {
     kind: "seed",
     type: "seed_local",
-    title: "CSV or JSON file",
-    description: "Upload CSV, JSON, JSONL, or Parquet and use its rows as source data.",
+    get title() {
+      return translate("uxRecipestudio.cSVOrJSONFilejq32m");
+    },
+    get description() {
+      return translate("uxRecipestudio.uploadCSVJSONJSONL16jzq");
+    },
     icon: DocumentCodeIcon,
     dialogKey: "seed",
     createConfig: (id, existing) => makeSeedConfig(id, existing, "local"),
@@ -174,8 +207,12 @@ const BLOCK_DEFINITIONS: BlockDefinition[] = [
   {
     kind: "seed",
     type: "seed_unstructured",
-    title: "Document file",
-    description: "Upload PDF, DOCX, or TXT and turn it into source rows.",
+    get title() {
+      return translate("uxRecipestudio.documentFilen1yko");
+    },
+    get description() {
+      return translate("uxRecipestudio.uploadPDFDOCXOr3ahyn");
+    },
     icon: DocumentAttachmentIcon,
     dialogKey: "seed",
     createConfig: (id, existing) => makeSeedConfig(id, existing, "unstructured"),
@@ -183,8 +220,12 @@ const BLOCK_DEFINITIONS: BlockDefinition[] = [
   {
     kind: "seed",
     type: "seed_github",
-    title: "GitHub repositories",
-    description: "Crawl issues, pull requests, and commits from one or more GitHub repos.",
+    get title() {
+      return translate("uxRecipestudio.gitHubRepositories1btyu");
+    },
+    get description() {
+      return translate("uxRecipestudio.crawlIssuesPullRequests17mw5");
+    },
     icon: GithubIcon,
     dialogKey: "seed",
     createConfig: (id, existing) => makeSeedConfig(id, existing, "github_repo"),
@@ -192,8 +233,12 @@ const BLOCK_DEFINITIONS: BlockDefinition[] = [
   {
     kind: "sampler",
     type: "category",
-    title: "Category",
-    description: "Generate values from a list you define, with optional weights or rules.",
+    get title() {
+      return translate("uxRecipestudio.category1cr1m");
+    },
+    get description() {
+      return translate("uxRecipestudio.generateValuesFromA16257");
+    },
     icon: Tag01Icon,
     dialogKey: "category",
     createConfig: (id, existing) => makeSamplerConfig(id, "category", existing),
@@ -201,8 +246,12 @@ const BLOCK_DEFINITIONS: BlockDefinition[] = [
   {
     kind: "sampler",
     type: "subcategory",
-    title: "Subcategory",
-    description: "Generate values from groups you define for each category.",
+    get title() {
+      return translate("uxRecipestudio.subcategory1ut5b");
+    },
+    get description() {
+      return translate("uxRecipestudio.generateValuesFromGroupsn4fzp");
+    },
     icon: TagsIcon,
     dialogKey: "subcategory",
     createConfig: (id, existing) => makeSamplerConfig(id, "subcategory", existing),
@@ -210,8 +259,12 @@ const BLOCK_DEFINITIONS: BlockDefinition[] = [
   {
     kind: "sampler",
     type: "uniform",
-    title: "Random number",
-    description: "Generate a number anywhere between a minimum and maximum.",
+    get title() {
+      return translate("uxRecipestudio.randomNumber55303");
+    },
+    get description() {
+      return translate("uxRecipestudio.generateANumberAnywherev0rcl");
+    },
     icon: EqualSignIcon,
     dialogKey: "uniform",
     createConfig: (id, existing) => makeSamplerConfig(id, "uniform", existing),
@@ -219,8 +272,12 @@ const BLOCK_DEFINITIONS: BlockDefinition[] = [
   {
     kind: "sampler",
     type: "gaussian",
-    title: "Bell-curve number",
-    description: "Generate numbers around an average value.",
+    get title() {
+      return translate("uxRecipestudio.bellCurveNumber7oiq7");
+    },
+    get description() {
+      return translate("uxRecipestudio.generateNumbersAroundAn1a3sy");
+    },
     icon: Parabola02Icon,
     dialogKey: "gaussian",
     createConfig: (id, existing) => makeSamplerConfig(id, "gaussian", existing),
@@ -228,8 +285,12 @@ const BLOCK_DEFINITIONS: BlockDefinition[] = [
   {
     kind: "sampler",
     type: "bernoulli",
-    title: "Yes/no value",
-    description: "Generate a binary result from a probability.",
+    get title() {
+      return translate("uxRecipestudio.yesNoValue5dlmq");
+    },
+    get description() {
+      return translate("uxRecipestudio.generateABinaryResult1gqxx");
+    },
     icon: EqualSignIcon,
     dialogKey: "bernoulli",
     createConfig: (id, existing) => makeSamplerConfig(id, "bernoulli", existing),
@@ -237,8 +298,12 @@ const BLOCK_DEFINITIONS: BlockDefinition[] = [
   {
     kind: "sampler",
     type: "datetime",
-    title: "Date and time",
-    description: "Generate timestamps inside a date range.",
+    get title() {
+      return translate("uxRecipestudio.dateAndTimexzc0q");
+    },
+    get description() {
+      return translate("uxRecipestudio.generateTimestampsInsideAs5aqu");
+    },
     icon: Clock01Icon,
     dialogKey: "datetime",
     createConfig: (id, existing) => makeSamplerConfig(id, "datetime", existing),
@@ -246,8 +311,12 @@ const BLOCK_DEFINITIONS: BlockDefinition[] = [
   {
     kind: "sampler",
     type: "timedelta",
-    title: "Time offset",
-    description: "Generate a time difference from another date field.",
+    get title() {
+      return translate("uxRecipestudio.timeOffset159xs");
+    },
+    get description() {
+      return translate("uxRecipestudio.generateATimeDifferencej8aa5");
+    },
     icon: Clock01Icon,
     dialogKey: "timedelta",
     createConfig: (id, existing) => makeSamplerConfig(id, "timedelta", existing),
@@ -255,8 +324,12 @@ const BLOCK_DEFINITIONS: BlockDefinition[] = [
   {
     kind: "sampler",
     type: "uuid",
-    title: "Unique ID",
-    description: "Generate unique identifiers.",
+    get title() {
+      return translate("uxRecipestudio.uniqueID1e6mu");
+    },
+    get description() {
+      return translate("uxRecipestudio.generateUniqueIdentifiersb6xen");
+    },
     icon: FingerPrintIcon,
     dialogKey: "uuid",
     createConfig: (id, existing) => makeSamplerConfig(id, "uuid", existing),
@@ -264,8 +337,12 @@ const BLOCK_DEFINITIONS: BlockDefinition[] = [
   {
     kind: "sampler",
     type: "person",
-    title: "Synthetic person",
-    description: "Generate realistic person details.",
+    get title() {
+      return translate("uxRecipestudio.syntheticPerson135dc");
+    },
+    get description() {
+      return translate("uxRecipestudio.generateRealisticPersonDetails13lil");
+    },
     icon: UserAccountIcon,
     dialogKey: "person",
     createConfig: (id, existing) => makeSamplerConfig(id, "person", existing),
@@ -273,8 +350,12 @@ const BLOCK_DEFINITIONS: BlockDefinition[] = [
   {
     kind: "llm",
     type: "text",
-    title: "AI text",
-    description: "Generate text from your prompt.",
+    get title() {
+      return translate("uxRecipestudio.aITextzzmie");
+    },
+    get description() {
+      return translate("uxRecipestudio.generateTextFromYour1ktgb");
+    },
     icon: PencilEdit02Icon,
     dialogKey: "llm",
     createConfig: (id, existing) => makeLlmConfig(id, "text", existing),
@@ -282,8 +363,12 @@ const BLOCK_DEFINITIONS: BlockDefinition[] = [
   {
     kind: "llm",
     type: "structured",
-    title: "AI structured data",
-    description: "Generate JSON that follows a response format.",
+    get title() {
+      return translate("uxRecipestudio.aIStructuredDatauqkn6");
+    },
+    get description() {
+      return translate("uxRecipestudio.generateJSONThatFollows1nu0i");
+    },
     icon: CodeIcon,
     dialogKey: "llm",
     createConfig: (id, existing) => makeLlmConfig(id, "structured", existing),
@@ -291,8 +376,12 @@ const BLOCK_DEFINITIONS: BlockDefinition[] = [
   {
     kind: "llm",
     type: "code",
-    title: "AI code",
-    description: "Generate code in the language you choose.",
+    get title() {
+      return translate("uxRecipestudio.aICode1xoyz");
+    },
+    get description() {
+      return translate("uxRecipestudio.generateCodeInThels1ky");
+    },
     icon: CodeSimpleIcon,
     dialogKey: "llm",
     createConfig: (id, existing) => makeLlmConfig(id, "code", existing),
@@ -300,8 +389,12 @@ const BLOCK_DEFINITIONS: BlockDefinition[] = [
   {
     kind: "llm",
     type: "judge",
-    title: "AI scorer",
-    description: "Score outputs against your criteria.",
+    get title() {
+      return translate("uxRecipestudio.aIScorer1yvmy");
+    },
+    get description() {
+      return translate("uxRecipestudio.scoreOutputsAgainstYourpf6gr");
+    },
     icon: BalanceScaleIcon,
     dialogKey: "llm",
     createConfig: (id, existing) => makeLlmConfig(id, "judge", existing),
@@ -309,8 +402,12 @@ const BLOCK_DEFINITIONS: BlockDefinition[] = [
   {
     kind: "llm",
     type: "model_provider",
-    title: "Provider connection",
-    description: "Choose where model requests go and how to sign in.",
+    get title() {
+      return translate("uxRecipestudio.providerConnection1307t");
+    },
+    get description() {
+      return translate("uxRecipestudio.chooseWhereModelRequests1j3di");
+    },
     icon: Shield02Icon,
     dialogKey: "model_provider",
     createConfig: (id, existing) => makeModelProviderConfig(id, existing),
@@ -318,8 +415,12 @@ const BLOCK_DEFINITIONS: BlockDefinition[] = [
   {
     kind: "llm",
     type: "model_config",
-    title: "Model preset",
-    description: "Pick a model and save reusable generation settings.",
+    get title() {
+      return translate("uxRecipestudio.modelPresetrgozj");
+    },
+    get description() {
+      return translate("uxRecipestudio.pickAModelAnd1ddyc");
+    },
     icon: Plant01Icon,
     dialogKey: "model_config",
     createConfig: (id, existing) => makeModelConfig(id, existing),
@@ -327,8 +428,12 @@ const BLOCK_DEFINITIONS: BlockDefinition[] = [
   {
     kind: "llm",
     type: "tool_config",
-    title: "Tool access",
-    description: "Choose which tools an AI step can use.",
+    get title() {
+      return translate("uxRecipestudio.toolAccess1ahyl");
+    },
+    get description() {
+      return translate("uxRecipestudio.chooseWhichToolsAn1ghl7");
+    },
     icon: Plug01Icon,
     dialogKey: "tool_config",
     createConfig: (id, existing) => makeToolProfileConfig(id, existing),
@@ -336,8 +441,12 @@ const BLOCK_DEFINITIONS: BlockDefinition[] = [
   {
     kind: "validator",
     type: "validator_python",
-    title: "Python check",
-    description: "Lint generated Python and filter out rows that fail.",
+    get title() {
+      return translate("uxRecipestudio.pythonCheck108qx");
+    },
+    get description() {
+      return translate("uxRecipestudio.lintGeneratedPythonAnd148jr");
+    },
     icon: Shield02Icon,
     dialogKey: "validator",
     createConfig: (id, existing) =>
@@ -346,8 +455,12 @@ const BLOCK_DEFINITIONS: BlockDefinition[] = [
   {
     kind: "validator",
     type: "validator_sql",
-    title: "SQL check",
-    description: "Lint generated SQL and filter out rows that fail.",
+    get title() {
+      return translate("uxRecipestudio.sQLCheck1dgl1");
+    },
+    get description() {
+      return translate("uxRecipestudio.lintGeneratedSQLAnd186qu");
+    },
     icon: Shield02Icon,
     dialogKey: "validator",
     createConfig: (id, existing) =>
@@ -356,8 +469,12 @@ const BLOCK_DEFINITIONS: BlockDefinition[] = [
   {
     kind: "validator",
     type: "validator_oxc",
-    title: "JS/TS check",
-    description: "Lint generated JavaScript or TypeScript and filter out rows that fail.",
+    get title() {
+      return translate("uxRecipestudio.jSTSCheck1ca07");
+    },
+    get description() {
+      return translate("uxRecipestudio.lintGeneratedJavaScriptOr1s3mo");
+    },
     icon: Shield02Icon,
     dialogKey: "validator",
     createConfig: (id, existing) =>
@@ -366,8 +483,10 @@ const BLOCK_DEFINITIONS: BlockDefinition[] = [
   {
     kind: "validator",
     type: "validator_json",
-    title: "JSON check",
-    description: "Verify a field contains valid JSON and filter out rows that fail.",
+    get title() { return translate("uxRecipestudio.jSONCheckmd7tu"); },
+    get description() {
+      return translate("uxRecipestudio.verifyAFieldContainso45ij");
+    },
     icon: Shield02Icon,
     dialogKey: "validator",
     createConfig: (id, existing) =>
@@ -376,8 +495,12 @@ const BLOCK_DEFINITIONS: BlockDefinition[] = [
   {
     kind: "validator",
     type: "validator_markdown",
-    title: "Markdown check",
-    description: "Verify a field contains well-formed markdown and filter out rows that fail.",
+    get title() {
+      return translate("uxRecipestudio.markdownCheck1ns37");
+    },
+    get description() {
+      return translate("uxRecipestudio.verifyAFieldContains1wmdn");
+    },
     icon: Shield02Icon,
     dialogKey: "validator",
     createConfig: (id, existing) =>
@@ -386,8 +509,12 @@ const BLOCK_DEFINITIONS: BlockDefinition[] = [
   {
     kind: "expression",
     type: "expression",
-    title: "Formula",
-    description: "Build or transform a field using other fields.",
+    get title() {
+      return translate("uxRecipestudio.formula1b8ag");
+    },
+    get description() {
+      return translate("uxRecipestudio.buildOrTransformA175c2");
+    },
     icon: FunctionIcon,
     dialogKey: "expression",
     createConfig: (id, existing) => makeExpressionConfig(id, existing),
@@ -395,8 +522,12 @@ const BLOCK_DEFINITIONS: BlockDefinition[] = [
   {
     kind: "note",
     type: "markdown_note",
-    title: "Note",
-    description: "Add a note to the canvas. Notes do not affect the run.",
+    get title() {
+      return translate("library.create.note");
+    },
+    get description() {
+      return translate("uxRecipestudio.addANoteTo1vy3x");
+    },
     icon: PencilEdit02Icon,
     dialogKey: "markdown_note",
     createConfig: (id, existing) => makeMarkdownNoteConfig(id, existing),

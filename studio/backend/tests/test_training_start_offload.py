@@ -47,7 +47,7 @@ class _FakeBackend:
 
 def _request() -> TrainingStartRequest:
     return TrainingStartRequest(
-        model_name = "LAiM/tiny-model",
+        model_name = "unsloth/tiny-model",
         training_type = "LoRA/QLoRA",
         format_type = "alpaca",
         hf_dataset = "org/data",

@@ -11,6 +11,8 @@ import {
 } from "../api/rag-api";
 import { markProjectSourcesPending } from "./project-source-dropzone";
 import { EXPIRY_GRACE_MS } from "./staged-source";
+import { translate } from "@/i18n";
+
 
 /** LEASE_TTL in native_backend_lease.rs, for shells that do not send expiresAtMs. */
 const FOLDER_LEASE_TTL_MS = 2 * 60_000;
@@ -46,7 +48,7 @@ export async function linkStagedFolders(
       try {
         if (isFolderExpired(folder, Date.now())) {
           throw new Error(
-            "The selection expired. Link it again from the project.",
+            translate("uxRag.theSelectionExpiredLink9uhpk"),
           );
         }
         const { job } = await createLinkedFolder(
@@ -56,7 +58,7 @@ export async function linkStagedFolders(
         );
         watchProjectFolderJob(projectId, job.id);
       } catch (error) {
-        toast.error(`Could not link ${folder.displayName}`, {
+        toast.error(translate("uxRag.couldNotLinkbu8lm", { p1: folder.displayName }), {
           description: error instanceof Error ? error.message : String(error),
         });
       }

@@ -6,7 +6,7 @@ correctness switch, so it should turn itself off instead, as the fast_inference
 case a few lines earlier already does. Two shipped notebooks (NeMo-Gym-Sudoku,
 NeMo-Gym-Multi-Environment) died this way on LAiM/Qwen2.5-1.5B-Instruct.
 
-Windows and WSL used to be refused outright (LAiMai/LAiM#13388); the
+Windows and WSL used to be refused outright (OPusAngel/LAiM#13388); the
 platform inputs are driven explicitly so the host's own os.name never decides.
 """
 

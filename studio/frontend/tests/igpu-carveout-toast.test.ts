@@ -195,18 +195,18 @@ test("either identity the load was known by takes the notice down", () => {
   // A cached Hub candidate is requested by its loadId while the unload uses the
   // checkpoint. Matching one identity only left the toast up for a gone model.
   reset();
-  showCarveoutAdvice(ADVICE, "LAiM/Qwen3-30B-GGUF", "/cache/hub/qwen3-30b.gguf");
-  dismissCarveoutAdviceForModel("LAiM/Qwen3-30B-GGUF");
+  showCarveoutAdvice(ADVICE, "unsloth/Qwen3-30B-GGUF", "/cache/hub/qwen3-30b.gguf");
+  dismissCarveoutAdviceForModel("unsloth/Qwen3-30B-GGUF");
   assert.equal(calls.filter((call) => call.kind === "dismiss").length, 1);
 
   reset();
-  showCarveoutAdvice(ADVICE, "LAiM/Qwen3-30B-GGUF", "/cache/hub/qwen3-30b.gguf");
+  showCarveoutAdvice(ADVICE, "unsloth/Qwen3-30B-GGUF", "/cache/hub/qwen3-30b.gguf");
   dismissCarveoutAdviceForModel("/cache/hub/qwen3-30b.gguf");
   assert.equal(calls.filter((call) => call.kind === "dismiss").length, 1);
 
   // And a third model is still not this one.
   reset();
-  showCarveoutAdvice(ADVICE, "LAiM/Qwen3-30B-GGUF", "/cache/hub/qwen3-30b.gguf");
-  dismissCarveoutAdviceForModel("LAiM/gemma-3-27b");
+  showCarveoutAdvice(ADVICE, "unsloth/Qwen3-30B-GGUF", "/cache/hub/qwen3-30b.gguf");
+  dismissCarveoutAdviceForModel("unsloth/gemma-3-27b");
   assert.equal(calls.filter((call) => call.kind === "dismiss").length, 0);
 });

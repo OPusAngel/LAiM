@@ -41,11 +41,11 @@ logger = get_logger(__name__)
 # Multilingual Whisper defaults: stable API/UI id -> Hub repository. A request may instead pass a validated Hugging
 # Face `owner/model` id.
 STT_MODELS: dict[str, str] = {
-    "tiny": "LAiM/whisper-tiny",
-    "base": "LAiM/whisper-base",
-    "small": "LAiM/whisper-small",
-    "large-v3-turbo": "LAiM/whisper-large-v3-turbo",
-    "large-v3": "LAiM/whisper-large-v3",
+    "tiny": "unsloth/whisper-tiny",
+    "base": "unsloth/whisper-base",
+    "small": "unsloth/whisper-small",
+    "large-v3-turbo": "unsloth/whisper-large-v3-turbo",
+    "large-v3": "unsloth/whisper-large-v3",
 }
 DEFAULT_STT_MODEL = "small"
 STT_KEEP_ALIVE_SECONDS = 5 * 60
@@ -1480,7 +1480,7 @@ class WhisperSttSidecar:
         Out of process because an accelerator context is never given back while the process holding
         it lives, so an in-process load made the backend permanently heavier even after unload.
 
-        A host that cannot create a child at all (a sandbox, or a frozen POSIX build) falls back to
+        A host that cannot create a child at all (a workdir, or a frozen POSIX build) falls back to
         loading here instead, on the CPU: this move may take work out of the backend, never take
         dictation away from someone who had it. The fallback waits for the CPU attempt, so a spawn
         failure on an accelerator still goes through the caller's own CPU retry.

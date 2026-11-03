@@ -15,7 +15,7 @@ training:
   random_seed: 3407
   packing: false
   train_on_completions: true
-  gradient_checkpointing: "LAiM"
+  gradient_checkpointing: "unsloth"
   optim: "adamw_8bit"
   lr_scheduler_type: "linear"
 

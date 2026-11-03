@@ -32,7 +32,6 @@ SCANNED_SCRIPTS = ENTRY_POINTS + (
     "studio/install_lemonade_prebuilt.py",
     "studio/install_llama_prebuilt.py",
     "studio/install_manifest.py",
-    "studio/install_mxc_prebuilt.py",
     "studio/install_node_prebuilt.py",
     "studio/install_python_stack.py",
     "studio/install_q4nx_converter.py",

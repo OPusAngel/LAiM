@@ -342,7 +342,7 @@ def test_an_fp32_promoted_family_keeps_the_flat_plan(monkeypatch):
     import core.inference.diffusion_fp16_guard as guard
 
     monkeypatch.setattr(d, "sdpa_subquadratic_confirmed", lambda target: True)
-    zimage = detect_family("LAiM/Z-Image-Turbo-GGUF")
+    zimage = detect_family("unsloth/Z-Image-Turbo-GGUF")
     assert zimage.name == "z-image" and zimage.fp16_incompatible
     flux = types.SimpleNamespace(name = "flux.1")
 

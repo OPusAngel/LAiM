@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   DocumentAttachmentIcon,
   PlusSignIcon,
@@ -419,7 +420,7 @@ export function RecipeStudioPage({
     if (activeView !== "easy") return;
     if (fullRunName.trim()) return;
     const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 16);
-    const base = workflowName.trim() || "Easy run";
+    const base = workflowName.trim() || translate("uxRecipestudio.easyRunud242");
     setFullRunName(`${base} ${stamp}`);
   }, [supportsEasyMode, activeView, fullRunName, workflowName, setFullRunName]);
 
@@ -704,14 +705,13 @@ export function RecipeStudioPage({
               </div>
               <div className="mt-4 space-y-2">
                 <p className="text-ui-11 font-semibold uppercase tracking-wide text-primary">
-                  Best place to start
+                  {translate("uxRecipestudio.bestPlaceToStartjsdw3")}
                 </p>
                 <p className="text-sm font-semibold text-foreground">
-                  Start with source data
+                  {translate("uxRecipestudio.startWithSourceData1ad0b")}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Most synthetic-data recipes begin with a document, dataset, or
-                  file before adding generation and checks.
+                  {translate("uxCopy.mostSyntheticDataRecipes1b2nw")}
                 </p>
               </div>
               <div className="mt-5 flex flex-col justify-center gap-2 sm:flex-row">
@@ -724,7 +724,7 @@ export function RecipeStudioPage({
                     icon={DocumentAttachmentIcon}
                     className="size-4"
                   />
-                  Start with source data
+                  {translate("uxRecipestudio.startWithSourceData1ad0b")}
                 </Button>
                 <Button
                   type="button"
@@ -733,7 +733,7 @@ export function RecipeStudioPage({
                   onClick={openRootBlockSheet}
                 >
                   <HugeiconsIcon icon={PlusSignIcon} className="size-4" />
-                  Browse all steps
+                  {translate("uxRecipestudio.browseAllSteps3lxas")}
                 </Button>
               </div>
             </div>
@@ -798,9 +798,9 @@ export function RecipeStudioPage({
     editorContent = (
       <div className="flex h-full items-center justify-center px-6">
         <div className="rounded-2xl border border-border/70 bg-background/80 px-5 py-4 text-center shadow-border backdrop-blur-[1px]">
-          <p className="text-sm font-medium text-foreground">Loading recipe</p>
+          <p className="text-sm font-medium text-foreground">{translate("uxRecipestudio.loadingRecipebdbiu")}</p>
           <p className="mt-1 text-xs text-muted-foreground">
-            Restoring the studio graph and saved settings.
+            {translate("uxRecipestudio.restoringTheStudioGraph7ju6h")}
           </p>
         </div>
       </div>

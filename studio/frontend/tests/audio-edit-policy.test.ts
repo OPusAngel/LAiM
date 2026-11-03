@@ -4,7 +4,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { readSrc, registerBundlerResolver } from "./helpers/kit.ts";
+import { readSrc, readSrcExpanded, registerBundlerResolver } from "./helpers/kit.ts";
 
 registerBundlerResolver();
 const L = await import("../src/features/audio/tools/edit-panel-logic.ts");
@@ -176,9 +176,9 @@ test("collectToolRequest returns the adapter's reason and adds nothing to the re
 });
 
 test("the registry lists the edit panels and the editor keeps its label", () => {
-  const registry = readSrc("features/audio/tools/registry.tsx");
+  const registry = readSrcExpanded("features/audio/tools/registry.tsx");
   assert.match(registry, /\.\.\.EDIT_TOOL_PANELS,/);
-  const editor = readSrc(
+  const editor = readSrcExpanded(
     "features/audio/components/transcript-diff-editor.tsx",
   );
   assert.match(editor, /aria-label="Changes from the transcript"/);

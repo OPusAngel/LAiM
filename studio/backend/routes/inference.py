@@ -4952,22 +4952,22 @@ def _effective_enable_tools(payload) -> Optional[bool]:
     return payload.enable_tools
 
 
-async def _materialize_sandbox_attachments(payload) -> None:
+async def _materialize_session_attachments(payload) -> None:
     enabled = payload.enabled_tools
     if (
-        not payload.sandbox_attachments
+        not payload.session_attachments
         or not _effective_enable_tools(payload)
         or (enabled is not None and "python" not in enabled)
     ):
         return
     from starlette.concurrency import run_in_threadpool
 
-    from core.inference.tools import materialize_sandbox_attachments
+    from core.inference.tools import materialize_session_attachments
 
     await run_in_threadpool(
-        materialize_sandbox_attachments,
+        materialize_session_attachments,
         payload.session_id,
-        [(item.sha256, item.name) for item in payload.sandbox_attachments],
+        [(item.sha256, item.name) for item in payload.session_attachments],
     )
 
 
@@ -5033,6 +5033,21 @@ def _explicit_studio_tool_loop_requested(payload) -> bool:
 
     policy = get_tool_policy()
     return policy is not False and (payload.enable_tools is True or bool(payload.mcp_enabled))
+
+
+def _admit_tool_loop(payload, llama_backend) -> bool:
+    """Whether LAiM's own tool loop may run for this request.
+
+    A chat template that cannot render tool calls vetoes the loop, which is why such a
+    model answers that it has no tools and cannot run code. Agent Core and Agent Full
+    Core are an explicit request from the user to act, so the loop opens past that veto.
+    DiffusionGemma keeps the veto: its runner drops the per-step frames the loop needs.
+    """
+    if llama_backend.supports_tools:
+        return True
+    if getattr(llama_backend, "_is_diffusion", False):
+        return False
+    return _explicit_studio_tool_loop_requested(payload)
 
 
 def _selects_only_provider_hosted_tools(
@@ -5251,7 +5266,6 @@ def _admit_tool_access(payload) -> None:
     require_tool_access(
         getattr(payload, "permission_mode", None),
         bypass_permissions = bool(getattr(payload, "bypass_permissions", False)),
-        disable_sandbox = bool(getattr(payload, "disable_sandbox", False)),
     )
 
 
@@ -5311,7 +5325,7 @@ def _permission_mode_confirm(payload) -> bool:
     return bool(getattr(payload, "stream", False))
 
 
-def _off_mode_sandbox_gate(payload, ui_events: bool) -> bool:
+def _off_mode_confirm_gate(payload, ui_events: bool) -> bool:
     """Whether an "off" request arms the confirm gate: only on a stream that can show a prompt.
 
     Elsewhere "off" stays unprompted, so no route guard or non-streaming client sees a change.
@@ -6126,16 +6140,16 @@ _TOOL_CODE_TIP = (
     "Use code execution for math, calculations, data processing, or to parse "
     "and analyze information from tool results."
 )
-# Full access only, and only alongside python/terminal. The schemas alone do not
+# Both agent cores, and only alongside python/terminal. The schemas alone do not
 # undo the model's prior: asked "can you see the files on my laptop" it answers
-# "no, I am sandboxed" from training data rather than reading its own tool list,
+# "no, I am locked down" from training data rather than reading its own tool list,
 # so the environment is stated outright and the guess sent to a tool call.
 # Fixed order so the sentence reads the same whichever way the caller listed them.
 _LOCAL_CODE_TOOLS = ("python", "terminal", "edit_file")
 
 
-def _full_access_tip(code_tools: list[str]) -> str:
-    """The Full access sentence, naming only the code tools actually selected.
+def _full_access_tip(code_tools: list[str], *, full_access: bool = True) -> str:
+    """The real-machine sentence, naming only the code tools actually selected.
 
     enabled_tools=["python"] leaves terminal out of the request's schemas, so
     naming it here would advertise a tool the loop would refuse to run.
@@ -6145,14 +6159,20 @@ def _full_access_tip(code_tools: list[str]) -> str:
     else:
         # Three names now, so only the last pair takes the "and".
         subject = "The " + ", ".join(code_tools[:-1]) + f" and {code_tools[-1]} tools run"
+    approvals = (
+        "Nothing asks the user first, so call the tool instead of offering to."
+        if full_access
+        else "The user confirms each action in a dialog, so call the tool and let that dialog decide."
+    )
     return (
-        subject + " where LAiM Studio is running, with the code sandbox and the "
-        "approval prompts disabled, so you can inspect and change whatever that "
-        "process can reach. That is not necessarily the device the user is viewing "
-        "this on, and it may be a remote host or a container that mounts only some "
-        "of its host's paths. When asked what you can see or do, check with a tool "
-        "call rather than assuming you are isolated from it, and report what the "
-        "call actually returned rather than what a whole machine would hold."
+        subject + " directly on the user's own computer, in his own account and with "
+        "all the rights that account has. Its working directory is his home folder, so "
+        "a path like Desktop\\Отчёт is the desktop he actually sees, next to his real "
+        "Documents, Downloads and every other folder, and programs run as any program "
+        "he could run himself. " + approvals + " Never say you are restricted, isolated, "
+        "or unable to reach his files: when asked what you can see or do, answer with a "
+        "tool call and report what it returned. Only say a file or folder was created "
+        "once the call came back without an error and you listed it."
     )
 
 
@@ -6299,8 +6319,8 @@ def _build_tool_action_nudge(
     )
     if full_access_only:
         tips = []
-        if full_access and has_code:
-            tips.append(_full_access_tip(code_tools))
+        if has_code:
+            tips.append(_full_access_tip(code_tools, full_access = full_access))
         if has_skills:
             tips.append(skill_tip)
         return " ".join(tip for tip in tips if tip)
@@ -6320,8 +6340,7 @@ def _build_tool_action_nudge(
         tool_tip_parts.append(_TOOL_IMAGES_TIP)
     if has_code:
         tool_tip_parts.append(_TOOL_CODE_TIP)
-        if full_access:
-            tool_tip_parts.append(_full_access_tip(code_tools))
+        tool_tip_parts.append(_full_access_tip(code_tools, full_access = full_access))
     if has_artifact:
         tool_tip_parts.append(_TOOL_ARTIFACT_TIP)
     if has_research:
@@ -6647,12 +6666,10 @@ async def _select_request_tools(
     caller should skip the tool loop, so a model-emitted built-in call can't
     piggy-back on the empty allow-list.
 
-    Under Full access the python/terminal schemas are swapped for the ones that
-    describe the unsandboxed run, since that is what the loop actually does
-    (disable_sandbox = bypass_permissions)."""
+    The built-in schemas describe the run as it is: on this computer, with the
+    account's own rights."""
     from core.inference.tools import (
         ALL_TOOLS,
-        apply_full_access_tool_descriptions,
         get_enabled_mcp_tools,
     )
 
@@ -6718,17 +6735,6 @@ async def _select_request_tools(
             # guessed tool name. Read-only and always-safe, so it prompts for nothing.
             tools = [t for t in tools if t["function"]["name"] == "search_conversation"]
     tools = _tools_for_search_images(tools)
-    # Built-ins only, so this runs before the MCP append: an MCP tool's
-    # description is the server's to write, and Full access says nothing about
-    # how that server runs.
-    if payload.bypass_permissions:
-        tools = apply_full_access_tool_descriptions(tools)
-    elif sys.platform == "win32":
-        # The isolated Windows Terminal runs cmd, not the host's Git Bash; say so in the schema.
-        from core.inference.tools import apply_terminal_profile_for_request
-        tools = await asyncio.to_thread(
-            apply_terminal_profile_for_request, tools, getattr(payload, "sandbox_level", None)
-        )
     if mcp_allowed:
         tools = tools + await get_enabled_mcp_tools()
     # getattr: callers hand in lighter payload objects than the request models, not all of
@@ -9070,7 +9076,7 @@ def _as_local_scan_folder_request(request, owner_session: bool):
     from core.inference.model_ids import hf_cache_repo_id
 
     identifier = (request.model_path or "").strip()
-    # Bare names mean LAiM/<name> remotely; a same-stemmed local file must not win them.
+    # Bare names mean unsloth/<name> remotely; a same-stemmed local file must not win them.
     if (
         not identifier
         or "/" not in identifier
@@ -10361,7 +10367,7 @@ async def _unavailable_model_message(requested_model: str) -> str:
         [base.strip().casefold()] if sep and base.strip() else []
     )
     # The advertised ids too, not just the catalog's raw model_id: a task row can be advertised
-    # under an alias (_stt_model_objects() lists "tiny" for LAiM/whisper-tiny), and a request
+    # under an alias (_stt_model_objects() lists "tiny" for unsloth/whisper-tiny), and a request
     # naming what GET /v1/models showed is a request for something that IS on this machine.
     downloaded = await _downloaded_model_ids() | {
         obj["id"].casefold()
@@ -12298,7 +12304,7 @@ def _same_loaded_identifier(loaded: Optional[str], requested: str) -> bool:
     Local filesystem paths are compared filesystem-aware via os.path.normcase: on a
     case-sensitive filesystem two checkpoint paths differing only by case are
     different models, so they must not dedup to the already-loaded fast path (which
-    would keep serving the wrong checkpoint). Hugging Face repo IDs (e.g. LAiM/Foo)
+    would keep serving the wrong checkpoint). Hugging Face repo IDs (e.g. unsloth/Foo)
     are resolved case-insensitively elsewhere in the loader, so compare those
     case-insensitively to avoid an unnecessary unload/reload of the same repo."""
     if not loaded:
@@ -14327,7 +14333,7 @@ def _estimate_disk_residency(model_identifier: str) -> str:
     # from_identifier prefixes a bare name, so ask about the id it will actually use.
     candidates = [identifier]
     if "/" not in identifier:
-        candidates.append(f"LAiM/{identifier}")
+        candidates.append(f"unsloth/{identifier}")
     try:
         from utils.models.model_config import _iter_hf_cache_snapshots
         roots = _estimate_hf_cache_roots()
@@ -15684,7 +15690,7 @@ def _local_mlx_model_dir(config: ModelConfig) -> Optional[str]:
         return None
     names = [_mlx_load_identifier(str(identifier))]
     if "/" not in names[0]:
-        names.append(f"LAiM/{names[0]}")
+        names.append(f"unsloth/{names[0]}")
     try:
         from utils.models.model_config import _iter_hf_cache_snapshots
         roots = _estimate_hf_cache_roots()
@@ -28251,7 +28257,7 @@ _MISTRAL_TOOL_CALL_ID = _re.compile(r"[a-zA-Z0-9]{9}")
 # '^[a-zA-Z0-9_-]+$'". No length cap is documented or observed, so this is charset only.
 # A colon is not in the set, and two stored shapes carry one in under 64 chars so the >64
 # branch never caught them: the duplicate-base fallback below, which keeps the whole
-# "call_0:<uuid>", and the frontend's "<sandbox>:<thread>:<approval>" confirmation ids.
+# "call_0:<uuid>", and the frontend's "<workdir>:<thread>:<approval>" confirmation ids.
 # Anthropic cannot originate either (its own ids are server-tool ids _filter_tool_calls
 # drops), so the path is a history replayed after switching an existing chat to Anthropic.
 _ANTHROPIC_TOOL_CALL_ID = _re.compile(r"[a-zA-Z0-9_-]+")
@@ -29383,8 +29389,6 @@ async def _proxy_to_external_provider(
             # The LAiM loop owns its schemas. Do not also expose a caller-supplied
             # catalog: Codex would return calls that this server is not authorized to run.
             tool_payloads = studio_tool_payloads
-            # This path runs python/terminal locally too (disable_sandbox =
-            # bypass_permissions), so it has the same false-isolation problem.
             # Only the Full access sentence and the skill catalog; this path never carried the general nudge.
             _codex_nudge = _build_tool_action_nudge(
                 tools = studio_tool_payloads,
@@ -29458,9 +29462,8 @@ async def _proxy_to_external_provider(
                     ),
                     timeout = payload.tool_call_timeout or 300,
                     permission_mode = payload.permission_mode or "auto",
-                    sandbox_level = payload.sandbox_level,
                     confirm_calls = _permission_mode_confirm(payload)
-                    or _off_mode_sandbox_gate(payload, _ui_events),
+                    or _off_mode_confirm_gate(payload, _ui_events),
                     bypass_permissions = bool(payload.bypass_permissions),
                     rag_scope = payload.rag_scope,
                     nudge_tool_calls = payload.nudge_tool_calls,
@@ -29766,7 +29769,7 @@ async def _proxy_to_external_provider(
         )
     # Built before the date, because whether a nudge exists decides whether the Modelfile
     # exemption is worth claiming: _append_to_system_message below displaces that prompt anyway.
-    # Full access disables the sandbox, so the schemas say so; the general nudge stays off this path.
+    # Only the Full access sentence and the skill catalog; this path never carried the general nudge.
     _external_nudge = ""
     if run_studio_tool_loop:
         _external_nudge = _build_tool_action_nudge(
@@ -29951,9 +29954,8 @@ async def _proxy_to_external_provider(
                     ),
                     timeout = payload.tool_call_timeout or 300,
                     permission_mode = payload.permission_mode or "auto",
-                    sandbox_level = payload.sandbox_level,
                     confirm_calls = _permission_mode_confirm(payload)
-                    or _off_mode_sandbox_gate(payload, _ui_events),
+                    or _off_mode_confirm_gate(payload, _ui_events),
                     bypass_permissions = bool(payload.bypass_permissions),
                     rag_scope = payload.rag_scope,
                     auto_heal = payload.auto_heal_tool_calls,
@@ -31417,7 +31419,7 @@ async def produce_openai_chat_completions(
     # local path flattens them, so a part neither can serve has to be refused while both are
     # still reachable. Otherwise it is dropped in silence and the answer looks legitimate.
     _reject_unsupported_content_parts(payload)
-    await _materialize_sandbox_attachments(payload)
+    await _materialize_session_attachments(payload)
     from core.inference import file_history
 
     file_history.set_turn(payload.thread_id, payload.user_message_id)
@@ -32245,7 +32247,7 @@ async def produce_openai_chat_completions(
     # for it on a backend that can't run it (DiffusionGemma forces supports_tools
     # off) must not steal client tools from the passthrough (#6851).
     _studio_tool_loop_requested = (
-        _explicit_studio_tool_loop_requested(payload) and llama_backend.supports_tools
+        _admit_tool_loop(payload, llama_backend)
     )
     _client_disabled_tool_calls = payload.tool_choice == "none" and not _studio_tool_loop_requested
     # Wider than `tool_choice: "none"`, and used only to ask "can this request ever reach
@@ -32555,7 +32557,7 @@ async def produce_openai_chat_completions(
             and bool(payload.mcp_enabled)
             and _cli_policy is not False
         )
-        use_tools = (_tools_on or _mcp_allowed) and llama_backend.supports_tools
+        use_tools = (_tools_on or _mcp_allowed) and _admit_tool_loop(payload, llama_backend)
         # A compacted thread opens the tool loop even with the user's tools off, since
         # search_conversation is the only way back to what the reset dropped, and
         # `_select_request_tools` admits it alone. Still gated on `supports_tools`: a
@@ -32570,7 +32572,7 @@ async def produce_openai_chat_completions(
         if (
             not use_tools
             and not _tool_loop_unusable
-            and llama_backend.supports_tools
+            and _admit_tool_loop(payload, llama_backend)
             and _checkpoint_recall_may_enable_tools(payload)
         ):
             use_tools = True
@@ -32647,7 +32649,7 @@ async def produce_openai_chat_completions(
                     ),
                 )
             # After the channel check, which "off" never trips.
-            _effective_confirm = _effective_confirm or _off_mode_sandbox_gate(payload, _ui_events)
+            _effective_confirm = _effective_confirm or _off_mode_confirm_gate(payload, _ui_events)
             if _wants_multiple_choices(payload):
                 raise _reject_unsupported_n("GGUF tool chat completions")
             # main's tool turn: the date and the caller's prompt, not the template's chat default.
@@ -32813,7 +32815,6 @@ async def produce_openai_chat_completions(
                     mcp_image = _mcp_image,
                     bypass_permissions = bool(payload.bypass_permissions),
                     permission_mode = payload.permission_mode,
-                    sandbox_level = payload.sandbox_level,
                     perf_callback = _gguf_perf_callback,
                     on_conversation_grew = _gguf_recost,
                     # Only the streaming path parks and reclaims, so only it can use a slot. An attached MCP
@@ -34824,7 +34825,7 @@ async def produce_openai_chat_completions(
                 ),
             )
         # After the channel check, which "off" never trips (see the GGUF branch).
-        _sf_effective_confirm = _sf_effective_confirm or _off_mode_sandbox_gate(payload, _ui_events)
+        _sf_effective_confirm = _sf_effective_confirm or _off_mode_confirm_gate(payload, _ui_events)
         _sf_nudge = _build_tool_action_nudge(
             tools = _sf_tools_to_use,
             model_name = model_name,
@@ -34969,7 +34970,6 @@ async def produce_openai_chat_completions(
                 mcp_image = _mcp_image,
                 bypass_permissions = bool(payload.bypass_permissions),
                 permission_mode = payload.permission_mode,
-                sandbox_level = payload.sandbox_level,
                 use_adapter = payload.use_adapter,
                 stats_holder = _sf_stats_holder,
                 reasoning_prefilled = _sf_reasoning_prefilled,
@@ -36369,10 +36369,10 @@ async def produce_openai_chat_completions(
 
 # =====================================================================
 
-# Sandbox file serving  (/sandbox/{session_id}/{filename})
+# Workdir file serving  (/workdir/{session_id}/{filename})
 # =====================================================================
 
-_SANDBOX_MEDIA_TYPES = {
+_SESSION_MEDIA_TYPES = {
     ".png": "image/png",
     ".jpg": "image/jpeg",
     ".jpeg": "image/jpeg",
@@ -36387,15 +36387,15 @@ _SANDBOX_MEDIA_TYPES = {
 }
 
 
-def _sandbox_dir_for(session_id: str, create: bool = True) -> str:
-    """The session's sandbox directory.
+def _session_dir_for(session_id: str, create: bool = True) -> str:
+    """The session's workdir directory.
 
     ``create=False`` resolves the path without materialising it, so a read-only
     request cannot leave a directory behind for every id it is asked about.
     """
-    from core.inference.tools import get_sandbox_workdir, resolve_sandbox_workdir
+    from core.inference.tools import get_session_workdir, resolve_session_workdir
 
-    resolver = get_sandbox_workdir if create else resolve_sandbox_workdir
+    resolver = get_session_workdir if create else resolve_session_workdir
     return os.path.realpath(resolver(session_id))
 
 
@@ -36403,8 +36403,8 @@ def _sandbox_dir_for(session_id: str, create: bool = True) -> str:
 # from the snapshot walk rather than restated, so the card can never advertise a
 # file this route would then refuse.
 from core.inference.tools import (
-    _INTERNAL_SANDBOX_FILES,
-    _MAX_SANDBOX_PATH_SEGMENTS,
+    _INTERNAL_WORKDIR_FILES,
+    _MAX_SESSION_PATH_SEGMENTS,
     _MAX_SNAPSHOT_DIRS,
     _MAX_SNAPSHOT_FILES,
     _servable_segment,
@@ -36413,16 +36413,16 @@ from core.inference.tools import (
 from utils.paths.path_utils import is_appledouble_metadata
 
 
-def _contained_sandbox_path(session_id: str, filename: str) -> tuple[str, str]:
-    """(sandbox_dir, absolute path) for a user-supplied relative path.
+def _contained_session_path(session_id: str, filename: str) -> tuple[str, str]:
+    """(session_dir_path, absolute path) for a user-supplied relative path.
 
     Character allowlist per segment and realpath containment as the image route
     has always done, factored out so the two callers cannot drift. Containment
     is decided by the resolved path, never by the string, so a symlink pointing
-    out of the sandbox is refused like any other escape.
+    out of the workdir is refused like any other escape.
     """
     parts = [part for part in filename.replace("\\", "/").split("/") if part not in ("", ".")]
-    if not parts or len(_user_path_parts(parts)) > _MAX_SANDBOX_PATH_SEGMENTS:
+    if not parts or len(_user_path_parts(parts)) > _MAX_SESSION_PATH_SEGMENTS:
         raise HTTPException(status_code = 404, detail = "Not found")
     for part in parts:
         # os.path.join would let an absolute segment (or a Windows drive) throw
@@ -36431,45 +36431,45 @@ def _contained_sandbox_path(session_id: str, filename: str) -> tuple[str, str]:
             raise HTTPException(status_code = 404, detail = "Not found")
         if not _re.fullmatch(r"[^/\\\x00-\x1f]{1,255}", part):
             raise HTTPException(status_code = 404, detail = "Not found")
-    sandbox_dir = _sandbox_dir_for(session_id, create = False)
+    session_dir_path = _session_dir_for(session_id, create = False)
     # The check above is lexical and stays in front of the loop for the cheap
     # refusal; this one is the answer: only the real scratch dir skips a segment.
-    if len(_user_path_parts(parts, sandbox_dir)) > _MAX_SANDBOX_PATH_SEGMENTS:
+    if len(_user_path_parts(parts, session_dir_path)) > _MAX_SESSION_PATH_SEGMENTS:
         raise HTTPException(status_code = 404, detail = "Not found")
-    file_path = os.path.realpath(os.path.join(sandbox_dir, *parts))
-    if file_path != sandbox_dir and not file_path.startswith(sandbox_dir + os.sep):
+    file_path = os.path.realpath(os.path.join(session_dir_path, *parts))
+    if file_path != session_dir_path and not file_path.startswith(session_dir_path + os.sep):
         raise HTTPException(
             status_code = status.HTTP_403_FORBIDDEN,
             detail = "Access denied",
         )
-    return sandbox_dir, file_path
+    return session_dir_path, file_path
 
 
-def _sandbox_listing_names(sandbox_dir: str) -> "list[str]":
-    """Relative paths of the files in a sandbox, subdirectories included.
+def _session_listing_names(session_dir_path: str) -> "list[str]":
+    """Relative paths of the files in a workdir, subdirectories included.
 
     Bounded the same way the snapshot walk is, so a chat that unpacked an
     archive cannot turn a listing into a filesystem crawl.
     """
     names: "list[str]" = []
     visited = 0
-    for base, dirs, entries in os.walk(sandbox_dir):
+    for base, dirs, entries in os.walk(session_dir_path):
         visited += 1
         if visited > _MAX_SNAPSHOT_DIRS:
             return names
-        relative = base[len(sandbox_dir) :].strip(os.sep)
+        relative = base[len(session_dir_path) :].strip(os.sep)
         depth = len(_user_path_parts(relative.split(os.sep) if relative else []))
-        # depth 0 is the sandbox itself, whose files are one segment.
+        # depth 0 is the workdir itself, whose files are one segment.
         # Segments the route would refuse are dropped here too, so the two walks agree.
         dirs[:] = (
             []
-            if depth >= _MAX_SANDBOX_PATH_SEGMENTS - 1
+            if depth >= _MAX_SESSION_PATH_SEGMENTS - 1
             else [d for d in sorted(dirs) if not d.startswith(".") and _servable_segment(d)]
         )
         for entry in sorted(entries):
             # Mirrors the snapshot, dotfiles included, and like it hides the
             # bookkeeping only where we write it.
-            if base == sandbox_dir and entry in _INTERNAL_SANDBOX_FILES:
+            if base == session_dir_path and entry in _INTERNAL_WORKDIR_FILES:
                 continue
             if not _servable_segment(entry):
                 continue
@@ -36481,19 +36481,19 @@ def _sandbox_listing_names(sandbox_dir: str) -> "list[str]":
                 continue
             if is_appledouble_metadata(Path(path)):
                 continue
-            names.append(os.path.relpath(path, sandbox_dir).replace(os.sep, "/"))
+            names.append(os.path.relpath(path, session_dir_path).replace(os.sep, "/"))
             if len(names) >= _MAX_SNAPSHOT_FILES:
                 return names
     return names
 
 
-def _sandbox_listing(sandbox_dir: str) -> "list[dict]":
+def _session_listing(session_dir_path: str) -> "list[dict]":
     """Name, size and mtime for everything this chat's tools left behind."""
     files = []
-    if not os.path.isdir(sandbox_dir):
+    if not os.path.isdir(session_dir_path):
         return files
-    for name in _sandbox_listing_names(sandbox_dir):
-        path = os.path.join(sandbox_dir, name)
+    for name in _session_listing_names(session_dir_path):
+        path = os.path.join(session_dir_path, name)
         try:
             stat = os.stat(path)
         except OSError:
@@ -36503,14 +36503,14 @@ def _sandbox_listing(sandbox_dir: str) -> "list[dict]":
                 "name": name,
                 "size": stat.st_size,
                 "modified": int(stat.st_mtime),
-                "inline": os.path.splitext(name)[1].lower() in _SANDBOX_MEDIA_TYPES,
+                "inline": os.path.splitext(name)[1].lower() in _SESSION_MEDIA_TYPES,
             }
         )
     return files
 
 
-@router.get("/sandbox/{session_id}")
-async def list_sandbox_files(
+@router.get("/workdir/{session_id}")
+async def list_session_files(
     session_id: str,
     request: Request,
     token: Optional[str] = None,
@@ -36528,36 +36528,36 @@ async def list_sandbox_files(
     def _resolve_and_list() -> "tuple[str, list[dict]]":
         # The query form carries an id a path segment cannot: an API client can
         # use one with a slash in it, and ASGI decodes %2F before route matching.
-        sandbox_dir = _sandbox_dir_for(session or session_id, create = False)
-        if not os.path.isdir(sandbox_dir):
+        session_dir_path = _session_dir_for(session or session_id, create = False)
+        if not os.path.isdir(session_dir_path):
             # Right after an upgrade the background move can rename the legacy
             # tree into place between resolving and walking it. One more resolve
             # finds it at the destination rather than showing an empty chat.
-            sandbox_dir = _sandbox_dir_for(session or session_id, create = False)
-        return sandbox_dir, _sandbox_listing(sandbox_dir)
+            session_dir_path = _session_dir_for(session or session_id, create = False)
+        return session_dir_path, _session_listing(session_dir_path)
 
     # Resolving scans the root for a marked directory and may read the legacy
     # root too, so it belongs in the worker with the walk: on a slow or network
     # filesystem either one would hold the event loop for every other request.
-    sandbox_dir, files = await run_in_threadpool(_resolve_and_list)
-    return {"path": sandbox_dir, "files": files}
+    session_dir_path, files = await run_in_threadpool(_resolve_and_list)
+    return {"path": session_dir_path, "files": files}
 
 
-def _sandbox_regular_file(session_id: str, filename: str) -> tuple[str, str]:
-    """(sandbox_dir, contained path) of a regular (not linked) file in the sandbox, or a 404."""
+def _session_regular_file(session_id: str, filename: str) -> tuple[str, str]:
+    """(session_dir_path, contained path) of a regular (not linked) file in the workdir, or a 404."""
     import stat as _stat
 
-    sandbox_dir, path = _contained_sandbox_path(session_id, filename)
+    session_dir_path, path = _contained_session_path(session_id, filename)
     try:
         entry = os.lstat(path)
     except OSError:
         raise HTTPException(status_code = 404, detail = "Not found") from None
     if not _stat.S_ISREG(entry.st_mode):
         raise HTTPException(status_code = 404, detail = "Not found")
-    return sandbox_dir, path
+    return session_dir_path, path
 
 
-def _unmoved_sandbox_file(root: str, path: str) -> str:
+def _unmoved_session_file(root: str, path: str) -> str:
     """``path`` resolved, if it still names the same file under ``root``; a link swapped in since
     the check is refused, since a reveal hands the file manager a name."""
     try:
@@ -36571,15 +36571,15 @@ def _unmoved_sandbox_file(root: str, path: str) -> str:
     return real
 
 
-@router.post("/sandbox/{session_id}/open")
-async def open_sandbox_file(
+@router.post("/workdir/{session_id}/open")
+async def open_session_file(
     session_id: str,
     request: Request,
     file: str,
     token: Optional[str] = None,
     session: Optional[str] = None,
 ):
-    """Open one of this chat's sandbox files with the OS default app.
+    """Open one of this chat's workdir files with the OS default app.
 
     Like reveal, this is the backend host's desktop, so it only means anything in
     the desktop app. Only document and media types open: the files are
@@ -36595,7 +36595,7 @@ async def open_sandbox_file(
 
     from utils.paths.path_utils import open_in_default_app
 
-    root, path = await run_in_threadpool(_sandbox_regular_file, session or session_id, file)
+    root, path = await run_in_threadpool(_session_regular_file, session or session_id, file)
     try:
         await run_in_threadpool(open_in_default_app, Path(path), Path(root))
     except PermissionError:
@@ -36605,20 +36605,20 @@ async def open_sandbox_file(
     except FileNotFoundError:
         raise HTTPException(status_code = 404, detail = "Not found") from None
     except Exception:
-        logger.error(f"Failed to open sandbox file {path}", exc_info = True)
+        logger.error(f"Failed to open workdir file {path}", exc_info = True)
         raise HTTPException(status_code = 500, detail = "Failed to open the file") from None
     return {"status": "ok"}
 
 
-@router.post("/sandbox/{session_id}/reveal")
-async def reveal_sandbox_dir(
+@router.post("/workdir/{session_id}/reveal")
+async def reveal_session_dir(
     session_id: str,
     request: Request,
     token: Optional[str] = None,
     session: Optional[str] = None,
     file: Optional[str] = None,
 ):
-    """Open this chat's sandbox directory in the OS file manager.
+    """Open this chat's workdir directory in the OS file manager.
 
     With ``file``, that file is selected in its folder instead.
 
@@ -36637,28 +36637,28 @@ async def reveal_sandbox_dir(
 
         from utils.paths.path_utils import reveal_in_file_manager
 
-        root, path = await run_in_threadpool(_sandbox_regular_file, session or session_id, file)
+        root, path = await run_in_threadpool(_session_regular_file, session or session_id, file)
         try:
-            real = await run_in_threadpool(_unmoved_sandbox_file, root, path)
+            real = await run_in_threadpool(_unmoved_session_file, root, path)
             await run_in_threadpool(reveal_in_file_manager, Path(real))
         except FileNotFoundError:
             raise HTTPException(status_code = 404, detail = "Not found") from None
         except Exception:
-            logger.error(f"Failed to reveal sandbox file {path}", exc_info = True)
+            logger.error(f"Failed to reveal workdir file {path}", exc_info = True)
             raise HTTPException(status_code = 500, detail = "Failed to open file manager") from None
         return {"status": "ok", "path": path}
 
     def _resolve_existing() -> "str | None":
-        sandbox_dir = _sandbox_dir_for(session or session_id, create = False)
-        if not os.path.isdir(sandbox_dir):
+        session_dir_path = _session_dir_for(session or session_id, create = False)
+        if not os.path.isdir(session_dir_path):
             # One more resolve, as the listing does: the legacy move can rename
             # the tree into place between resolving it and looking.
-            sandbox_dir = _sandbox_dir_for(session or session_id, create = False)
-        return sandbox_dir if os.path.isdir(sandbox_dir) else None
+            session_dir_path = _session_dir_for(session or session_id, create = False)
+        return session_dir_path if os.path.isdir(session_dir_path) else None
 
-    # Resolving scans the sandbox root, so it stays off the event loop.
-    sandbox_dir = await run_in_threadpool(_resolve_existing)
-    if sandbox_dir is None:
+    # Resolving scans the workdir root, so it stays off the event loop.
+    session_dir_path = await run_in_threadpool(_resolve_existing)
+    if session_dir_path is None:
         raise HTTPException(status_code = 404, detail = "This chat has no folder yet")
 
     from pathlib import Path
@@ -36666,64 +36666,64 @@ async def reveal_sandbox_dir(
     from utils.paths.path_utils import reveal_in_file_manager
 
     try:
-        # expect_dir: a sandbox is always a directory, and a running tool can
+        # expect_dir: a workdir is always a directory, and a running tool can
         # replace its own with a file, which would take the file branch and show
-        # the parent, here the root holding every other chat's sandbox.
-        await run_in_threadpool(reveal_in_file_manager, Path(sandbox_dir), expect_dir = True)
+        # the parent, here the root holding every other chat's workdir.
+        await run_in_threadpool(reveal_in_file_manager, Path(session_dir_path), expect_dir = True)
     except FileNotFoundError:
-        # Two things raise this: the sandbox going between resolve and open, and
+        # Two things raise this: the workdir going between resolve and open, and
         # Popen not finding the file manager at all. Only the first is "no
         # folder"; the second reported that way hides a missing xdg-open.
-        if os.path.isdir(sandbox_dir):
-            logger.error(f"Failed to reveal sandbox {sandbox_dir}", exc_info = True)
+        if os.path.isdir(session_dir_path):
+            logger.error(f"Failed to reveal workdir {session_dir_path}", exc_info = True)
             raise HTTPException(status_code = 500, detail = "Failed to open file manager")
         raise HTTPException(status_code = 404, detail = "This chat has no folder yet")
     except Exception:
-        logger.error(f"Failed to reveal sandbox {sandbox_dir}", exc_info = True)
+        logger.error(f"Failed to reveal workdir {session_dir_path}", exc_info = True)
         raise HTTPException(status_code = 500, detail = "Failed to open file manager")
-    return {"status": "ok", "path": sandbox_dir}
+    return {"status": "ok", "path": session_dir_path}
 
 
-@router.post("/sandbox/{session_id}/upload")
-async def upload_sandbox_file(
+@router.post("/workdir/{session_id}/upload")
+async def upload_session_file(
     session_id: str,
     file: UploadFile = File(...),
     overwrite: bool = Form(False),
     session: Optional[str] = None,
     current_subject: str = Depends(get_current_subject),
 ):
-    """Put one file into this chat's sandbox folder, where its tools read and write.
+    """Put one file into this chat's workdir folder, where its tools read and write.
 
     Saved at the folder's root under the file's own name. A taken name is a 409 unless
     ``overwrite``, so a second upload never silently replaces what a tool wrote.
     """
     from starlette.concurrency import run_in_threadpool
 
-    from core.inference.tools import SandboxUploadExists, save_sandbox_upload
-    from utils.upload_limits import SANDBOX_UPLOAD_MAX_BYTES
+    from core.inference.tools import SessionUploadExists, save_session_upload
+    from utils.upload_limits import SESSION_UPLOAD_MAX_BYTES
 
     def _chunks():
         total = 0
         while chunk := file.file.read(1 << 20):
             total += len(chunk)
-            if total > SANDBOX_UPLOAD_MAX_BYTES:
+            if total > SESSION_UPLOAD_MAX_BYTES:
                 raise HTTPException(status_code = 413, detail = f"{file.filename} is too large")
             yield chunk
 
     try:
         saved = await run_in_threadpool(
-            save_sandbox_upload, session or session_id, file.filename, _chunks(), overwrite
+            save_session_upload, session or session_id, file.filename, _chunks(), overwrite
         )
-    except SandboxUploadExists as exc:
+    except SessionUploadExists as exc:
         raise HTTPException(status_code = 409, detail = f"{exc} already exists") from None
     except OSError:
-        logger.error("Failed to save a sandbox upload", exc_info = True)
+        logger.error("Failed to save a workdir upload", exc_info = True)
         raise HTTPException(status_code = 500, detail = "Could not save the file") from None
     return saved
 
 
-@router.api_route("/sandbox/{session_id}/{filename:path}", methods = ["GET", "HEAD"])
-async def serve_sandbox_file(
+@router.api_route("/workdir/{session_id}/{filename:path}", methods = ["GET", "HEAD"])
+async def serve_session_file(
     session_id: str,
     filename: str,
     request: Request,
@@ -36731,7 +36731,7 @@ async def serve_sandbox_file(
     session: Optional[str] = None,
 ):
     """
-    Serve a file a tool call created in this chat's sandbox.
+    Serve a file a tool call created in this chat's workdir.
 
     Images keep their real media type and render inline. Everything else is an
     opaque attachment: the model picks these filenames, so an inline text/html
@@ -36751,14 +36751,14 @@ async def serve_sandbox_file(
 
     safe_filename = os.path.basename(filename)
 
-    # In a worker like the listing: resolving the sandbox touches the
+    # In a worker like the listing: resolving the workdir touches the
     # filesystem, and so does the open below.
     def _open_checked() -> "tuple[int, int]":
-        _dir, path = _contained_sandbox_path(session or session_id, filename)
+        _dir, path = _contained_session_path(session or session_id, filename)
         if not os.path.isfile(path):
             # As in the listing: the legacy move can rename the tree out from
             # under a path resolved a moment ago, and the file is at the new one.
-            _dir, path = _contained_sandbox_path(session or session_id, filename)
+            _dir, path = _contained_session_path(session or session_id, filename)
         try:
             # O_NOFOLLOW: tool code runs in this directory and can put a link
             # here between the check and the open.
@@ -36770,7 +36770,7 @@ async def serve_sandbox_file(
             # The descriptor is what gets read, so it is what the containment
             # check has to be about: resolved again, and the same file, or a
             # parent swapped for a link would be served from outside the root.
-            _dir, again = _contained_sandbox_path(session or session_id, filename)
+            _dir, again = _contained_session_path(session or session_id, filename)
             checked = os.stat(again)
             if not _stat.S_ISREG(info.st_mode) or (checked.st_dev, checked.st_ino) != (
                 info.st_dev,
@@ -36791,7 +36791,7 @@ async def serve_sandbox_file(
         os.close(handle)
 
     ext = os.path.splitext(safe_filename)[1].lower()
-    media_type = _SANDBOX_MEDIA_TYPES.get(ext)
+    media_type = _SESSION_MEDIA_TYPES.get(ext)
     headers = {
         "Cache-Control": "private, no-store",
         "X-Content-Type-Options": "nosniff",
@@ -43415,7 +43415,7 @@ async def chat_count_tokens(
     openai_tools = _passthrough_client_tools(payload) if _takes_passthrough else None
     # The CLI hard-override still applies: _effective_enable_tools resolves it into _tools_on.
     _client_disabled_tool_calls = getattr(payload, "tool_choice", None) == "none" and not (
-        _explicit_studio_tool_loop_requested(payload) and llama_backend.supports_tools
+        _admit_tool_loop(payload, llama_backend)
     )
     # Schemas and the nudge are a large share of the prompt: price the completion's own selection.
     _tools_on = False if _client_disabled_tool_calls else _effective_enable_tools(payload)
@@ -43434,7 +43434,7 @@ async def chat_count_tokens(
     # path fills instead, and an incomplete view is declined rather than undercounted.
     _mcp_allowed = False
     _mcp_tools: list[dict] = []
-    if _mcp_on and not _takes_passthrough and llama_backend.supports_tools:
+    if _mcp_on and not _takes_passthrough and _admit_tool_loop(payload, llama_backend):
         from core.inference.tools import cached_mcp_tools, set_mcp_listing_context_tokens
 
         set_mcp_listing_context_tokens(
@@ -43454,7 +43454,7 @@ async def chat_count_tokens(
                 status_code = 503,
                 detail = "Cannot count tokens until enabled MCP tools have been discovered.",
             )
-    if not _takes_passthrough and (_tools_on or _mcp_on) and llama_backend.supports_tools:
+    if not _takes_passthrough and (_tools_on or _mcp_on) and _admit_tool_loop(payload, llama_backend):
         tools_to_use = await _select_request_tools(
             payload,
             tools_on = _tools_on,
@@ -43629,7 +43629,6 @@ def _anthropic_chat_fields(
             mcp_enabled = False,
             confirm_tool_calls = False,
             permission_mode = payload.permission_mode,
-            sandbox_level = payload.sandbox_level,
             bypass_permissions = bool(payload.bypass_permissions),
             rag_scope = getattr(payload, "rag_scope", None),
             max_tool_calls_per_message = 25,
@@ -44193,7 +44192,7 @@ async def anthropic_count_tokens(
     # passthrough support, falls through to plain generation there and does carry the date.
     _count_server_tools = (
         _count_selects_server_tools
-        and llama_backend.supports_tools
+        and _admit_tool_loop(payload, llama_backend)
         and not _anthropic_request_has_image(payload, tool_results = llama_backend.is_vision)
     )
     _count_selected_server_tools = []
@@ -44249,18 +44248,6 @@ async def anthropic_count_tokens(
         )
     if _count_server_tools:
         openai_tools = _count_selected_server_tools
-        _count_full_access = bool(getattr(payload, "bypass_permissions", False))
-        if _count_full_access:
-            # Same schemas /messages renders under Full access, or the count prices a different prompt.
-            from core.inference.tools import apply_full_access_tool_descriptions
-            openai_tools = apply_full_access_tool_descriptions(openai_tools)
-        elif sys.platform == "win32":
-            from core.inference.tools import apply_terminal_profile_for_request
-            openai_tools = await asyncio.to_thread(
-                apply_terminal_profile_for_request,
-                openai_tools,
-                getattr(payload, "sandbox_level", None),
-            )
         _count_nudge = _build_tool_action_nudge(
             tools = openai_tools,
             model_name = _llama_public_model_id(llama_backend, payload.model),
@@ -45061,7 +45048,7 @@ async def anthropic_messages(
     ]
     server_tools = (
         bool(selected_server_tools)
-        and llama_backend.supports_tools
+        and _admit_tool_loop(payload, llama_backend)
         and not _anthropic_has_image
         and not _schema_disables_server_tools
     )
@@ -45460,25 +45447,11 @@ async def anthropic_messages(
 
         # As the tool loop does, so the opening usage count prices what it sends.
         openai_messages = await asyncio.to_thread(restore_replayed_tool_results, openai_messages)
-        from core.inference.tools import apply_full_access_tool_descriptions
-
         # ask/auto (and an omitted mode selecting a gate-needing terminal/python
         # tool) were already rejected before the auto-switch above, so an invalid
         # confirm-gated request never evicts the resident model; the selection
         # here just picks the tools for the actual server-tool loop.
         openai_tools = selected_server_tools
-        # Mirrors _select_request_tools: this path builds its own selection, so
-        # the Full access swap has to be repeated rather than inherited.
-        _full_access = bool(getattr(payload, "bypass_permissions", False))
-        if _full_access:
-            openai_tools = apply_full_access_tool_descriptions(openai_tools)
-        elif sys.platform == "win32":
-            from core.inference.tools import apply_terminal_profile_for_request
-            openai_tools = await asyncio.to_thread(
-                apply_terminal_profile_for_request,
-                openai_tools,
-                getattr(payload, "sandbox_level", None),
-            )
 
         server_tool_choice = _anthropic_server_tool_choice(openai_tool_choice)
         message = _anthropic_server_tool_refusal(payload, server_tool_choice, openai_tools)
@@ -45549,7 +45522,6 @@ async def anthropic_messages(
                 disable_parallel_tool_use = _disable_parallel,
                 bypass_permissions = bool(payload.bypass_permissions),
                 permission_mode = getattr(payload, "permission_mode", None),
-                sandbox_level = getattr(payload, "sandbox_level", None),
                 promote_reasoning_only = False,
                 perf_callback = _monitor_perf_callback(
                     monitor_id,

@@ -8,6 +8,8 @@ import { parseLlm } from "./parsers/llm-parser";
 export { parseModelConfig, parseModelProvider } from "./parsers/model-parser";
 import { parseSampler } from "./parsers/sampler-parser";
 import { parseValidator } from "./parsers/validator-parser";
+import { translate } from "@/i18n";
+
 
 type ColumnParser = (
   column: Record<string, unknown>,
@@ -34,7 +36,7 @@ export function parseColumn(
 ): NodeConfig | null {
   const name = readString(column.name);
   if (!name) {
-    errors.push("Column missing name.");
+    errors.push(translate("uxRecipestudio.columnMissingNameeq9hj"));
     return null;
   }
   const columnType = readString(column.column_type);
@@ -42,6 +44,6 @@ export function parseColumn(
   if (parser) {
     return parser(column, name, id, errors);
   }
-  errors.push(`Column ${name}: unsupported column_type.`);
+  errors.push(translate("uxRecipestudio.columnUnsupportedColumnType95vcn", { p1: name }));
   return null;
 }

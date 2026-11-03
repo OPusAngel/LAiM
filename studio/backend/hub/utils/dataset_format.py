@@ -853,7 +853,7 @@ _ROLE_MAP = {
 
 def _normalize_role_alias(role: Any) -> str:
     """Match aliases the way the trainer does: `role.strip().lower()`, as
-    `standardize_data_formats` compares them (LAiMai/LAiM-zoo#1225)."""
+    `standardize_data_formats` compares them (OPusAngel/LAiM-zoo#1225)."""
     if role is None:
         return ""
     return str(role).strip().lower()

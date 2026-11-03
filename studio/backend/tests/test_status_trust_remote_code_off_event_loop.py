@@ -13,7 +13,7 @@ from types import SimpleNamespace
 import routes.inference as inference_routes
 
 
-def _backend(active = "LAiM/Qwen3-8B", info = None):
+def _backend(active = "unsloth/Qwen3-8B", info = None):
     return SimpleNamespace(
         active_model_name = active,
         models = {active: dict(info or {})} if active else {},
@@ -61,7 +61,7 @@ def test_the_fallback_runs_inside_the_offline_guard(monkeypatch):
 
     _status()
 
-    assert guarded == [("LAiM/Qwen3-8B",)]
+    assert guarded == [("unsloth/Qwen3-8B",)]
 
 
 def test_a_trust_decision_stored_at_load_skips_the_guard_and_the_thread(monkeypatch):
@@ -90,11 +90,11 @@ def test_a_trust_decision_stored_at_load_skips_the_guard_and_the_thread(monkeypa
 
 
 def test_a_load_completing_mid_resolve_does_not_mix_two_models(monkeypatch):
-    backend = _backend("LAiM/Qwen3-8B")
+    backend = _backend("unsloth/Qwen3-8B")
 
     def _auto_map(*_args, **_kwargs):
-        backend.active_model_name = "LAiM/Llama-3.1-8B"
-        backend.models = {"LAiM/Llama-3.1-8B": {}}
+        backend.active_model_name = "unsloth/Llama-3.1-8B"
+        backend.models = {"unsloth/Llama-3.1-8B": {}}
         return True
 
     monkeypatch.setattr(inference_routes, "_peek_inference_backend", lambda *a, **k: backend)
@@ -102,9 +102,9 @@ def test_a_load_completing_mid_resolve_does_not_mix_two_models(monkeypatch):
 
     response = _status()
 
-    assert response.active_model == "LAiM/Qwen3-8B"
+    assert response.active_model == "unsloth/Qwen3-8B"
     assert response.requires_trust_remote_code is True
-    assert response.loaded == ["LAiM/Qwen3-8B"]
+    assert response.loaded == ["unsloth/Qwen3-8B"]
 
 
 def test_no_loaded_model_reads_nothing(monkeypatch):

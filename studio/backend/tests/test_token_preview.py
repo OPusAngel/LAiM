@@ -42,7 +42,7 @@ def captured(monkeypatch):
 
 def test_a_request_without_a_dataset_or_text_is_refused(captured):
     with pytest.raises(HTTPException) as excinfo:
-        _call_route(TokenPreviewRequest(model_name = "LAiM/Qwen3-0.6B"))
+        _call_route(TokenPreviewRequest(model_name = "unsloth/Qwen3-0.6B"))
     assert excinfo.value.status_code == 400
     assert captured == []
 
@@ -50,7 +50,7 @@ def test_a_request_without_a_dataset_or_text_is_refused(captured):
 def test_the_pool_and_the_run_settings_reach_the_worker(captured):
     _call_route(
         TokenPreviewRequest(
-            model_name = "LAiM/Qwen3-0.6B",
+            model_name = "unsloth/Qwen3-0.6B",
             dataset_name = "org/data",
             num_samples = 3,
             seed = 1,
@@ -64,7 +64,7 @@ def test_the_pool_and_the_run_settings_reach_the_worker(captured):
     assert payload["train_on_completions"] is True
     assert payload["raw_text"] is False
     assert payload["max_seq_length"] == 512
-    assert captured[-1][1]["model_name"] == "LAiM/Qwen3-0.6B"
+    assert captured[-1][1]["model_name"] == "unsloth/Qwen3-0.6B"
 
 
 def test_samples_are_drawn_by_seed():
@@ -79,7 +79,7 @@ def test_samples_are_drawn_by_seed():
 def test_continued_pretraining_trains_every_token(captured):
     _call_route(
         TokenPreviewRequest(
-            model_name = "LAiM/Qwen3-0.6B",
+            model_name = "unsloth/Qwen3-0.6B",
             dataset_name = "org/data",
             is_cpt = True,
             train_on_completions = True,
@@ -99,7 +99,7 @@ def test_typed_text_reads_no_dataset(captured, monkeypatch):
         lambda *args, **kwargs: pytest.fail("typed text must not read the dataset"),
     )
     _call_route(
-        TokenPreviewRequest(model_name = "LAiM/Qwen3-0.6B", dataset_name = "org/data", text = "hi")
+        TokenPreviewRequest(model_name = "unsloth/Qwen3-0.6B", dataset_name = "org/data", text = "hi")
     )
     assert captured[-1][2]["rows"] is None
     assert captured[-1][2]["text"] == "hi"
@@ -192,7 +192,7 @@ def test_the_subprocess_tokenizes_and_masks_typed_text(real_worker):
 
 def test_typed_text_carries_the_dataset_format(captured):
     _call_route(
-        TokenPreviewRequest(model_name = "LAiM/Qwen3-0.6B", text = "hi", final_format = "alpaca")
+        TokenPreviewRequest(model_name = "unsloth/Qwen3-0.6B", text = "hi", final_format = "alpaca")
     )
     assert captured[-1][2]["final_format"] == "alpaca"
 
@@ -254,7 +254,7 @@ def test_a_supplied_cache_folder_is_never_the_tokenizer_source(captured):
     _call_route(
         TokenPreviewRequest.model_validate(
             {
-                "model_name": "LAiM/Qwen3-0.6B",
+                "model_name": "unsloth/Qwen3-0.6B",
                 "text": "hi",
                 "model_known_cached": True,
                 "model_local_path": "/somewhere/else",
@@ -276,7 +276,7 @@ def test_a_sentencepiece_word_keeps_its_leading_space():
 def test_audio_models_train_every_token_as_training_does(captured):
     _call_route(
         TokenPreviewRequest(
-            model_name = "LAiM/orpheus-3b-0.1-ft",
+            model_name = "unsloth/orpheus-3b-0.1-ft",
             model_type = "audio",
             text = "hi",
             train_on_completions = True,

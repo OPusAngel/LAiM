@@ -23,7 +23,7 @@ import {
   fetchTokenPreview,
   useTrainingConfigStore,
 } from "@/features/training";
-import { useT } from "@/i18n";
+import { translate, useT } from "@/i18n";
 import { copyToClipboard } from "@/lib/copy-to-clipboard";
 import { toast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
@@ -71,7 +71,7 @@ const TokenStream = memo(function TokenStream({
         <span
           // biome-ignore lint/suspicious/noArrayIndexKey: tokens are positional
           key={index}
-          title={`#${index}  id ${id}`}
+          title={translate("uxStudio.idzg5l9", { p1: index, p2: id })}
           className={cn(
             "rounded-[3px] px-px",
             trained

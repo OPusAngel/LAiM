@@ -19,6 +19,8 @@ import type {
   ValidatorConfig,
 } from "../types";
 import { nextName } from "./naming";
+import { translate } from "@/i18n";
+
 
 export function makeUnstructuredUploadUid(): string {
   if (typeof globalThis.crypto?.randomUUID === "function") {
@@ -237,7 +239,7 @@ export function makeLlmConfig(
     prompt:
       llmType === "judge"
         ? "Evaluate the content using the scoring criteria below."
-        : "Write a response.",
+        : translate("uxRecipestudio.writeAResponsexbzv5"),
     // biome-ignore lint/style/useNamingConvention: api schema
     system_prompt: "",
     // biome-ignore lint/style/useNamingConvention: api schema

@@ -27,7 +27,7 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { type TranslationKey, useLocale, useT } from "@/i18n";
+import { translate, type TranslationKey, useLocale, useT } from "@/i18n";
 import { cn } from "@/lib/utils";
 import {
   Add01Icon,
@@ -1173,7 +1173,7 @@ export function DecisionTryDialog({
                     {t("decisions.jsonHelp")}
                   </p>
                   <CodeBlock
-                    title="POST /v1/systemone"
+                    title={translate("uxSettings.pOSTV1Systemonenhdmf")}
                     value={jsonText}
                     onChange={setJsonText}
                   />

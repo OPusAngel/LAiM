@@ -1132,7 +1132,7 @@ class TestSixteenBitCheckpointDetection:
 
     class _NonPeft:
         class config:
-            _name_or_path = "LAiM/Qwen3-32B"
+            _name_or_path = "unsloth/Qwen3-32B"
 
     class _NonPeftFromDisk:
         def __init__(self, directory):
@@ -2583,7 +2583,7 @@ class TestTheFallbackFollowsTheReusedCheckpoint:
         assert S._gguf_model_input_directory(_FakeAdapterModel(), "model") == "model"
 
     def test_a_hub_id_is_not_a_directory(self):
-        model = self._NonPeftFromDisk("LAiM/Qwen3-32B")
+        model = self._NonPeftFromDisk("unsloth/Qwen3-32B")
         assert S._gguf_model_input_directory(model, "model") == "model"
 
     def test_a_model_with_no_config_reads_the_output(self):
@@ -2919,7 +2919,7 @@ class TestTheGgufPreflightIsToldTheModelDtype:
         def __init__(self, dtype):
             self.torch_dtype = dtype
             self.dtype = dtype
-            self._name_or_path = "LAiM/model"
+            self._name_or_path = "unsloth/model"
 
     class _Model:
         def __init__(self, config):

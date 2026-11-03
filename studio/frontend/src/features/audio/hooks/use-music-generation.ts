@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { toast } from "@/lib/toast";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { runAudio } from "../api";
@@ -155,7 +156,7 @@ export function useMusicGeneration({
   const editProblem =
     rule?.id === "edit"
       ? sourceStatus.phase === "uploading" || sourceStatus.phase === "recording"
-        ? "Waiting for the clip to finish uploading."
+        ? translate("uxAudio.waitingForTheClipu4rzw")
         : sourceStatus.phase === "error"
           ? sourceStatus.message
           : sourceExpired
@@ -174,7 +175,7 @@ export function useMusicGeneration({
             ? {
                 actions: [
                   {
-                    label: "Add a clip",
+                    label: translate("uxAudio.addAClip1p0iv"),
                     onClick: () => sourceHandle.current?.browse(),
                   },
                 ],
@@ -229,14 +230,14 @@ export function useMusicGeneration({
     const reloads = notice !== null;
     setRunStatus(
       reloads
-        ? `Reloading ${modelName ?? "the model"} for ${variations} variations…`
+        ? translate("uxAudio.reloadingForVariationst7ou1", { p1: modelName ?? "the model", p2: variations })
         : rule.id === "edit"
-          ? "Editing the clip…"
+          ? translate("uxAudio.editingTheClip3gews")
           : variations > 1
-            ? `Making ${variations} variations…`
+            ? translate("uxAudio.makingVariationsaraar", { p1: variations })
             : rule.id === "sfx"
-              ? "Making the sound…"
-              : "Making the music…",
+              ? translate("uxAudio.makingTheSoundtyar9")
+              : translate("uxAudio.makingTheMusictqkwt"),
     );
     const controller = new AbortController();
     generateAbort.current = controller;
@@ -258,7 +259,7 @@ export function useMusicGeneration({
       if (!controller.signal.aborted) {
         updateGenerationPhase("finishing");
         const message =
-          error instanceof Error ? error.message : "Music generation failed.";
+          error instanceof Error ? error.message : translate("uxAudio.musicGenerationFailedg7xe3");
         setGenerationError(message);
         toast.error(message);
         await refreshStatus();

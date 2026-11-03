@@ -17,7 +17,7 @@ def _rl_py_constant(name: str) -> str:
             isinstance(t, ast.Name) and t.id == name for t in node.targets
         ):
             return ast.literal_eval(node.value)
-    raise AssertionError(f"LAiM/models/rl.py no longer defines {name}")
+    raise AssertionError(f"unsloth/models/rl.py no longer defines {name}")
 
 
 def _reject_aux_loss_opt_in(src: str) -> str:

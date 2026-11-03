@@ -33,7 +33,7 @@ for model_type in sys.argv[1:]:
     # Stand-in for DeepseekV41ForCausalLM: post_patch_model keys the GC mode on config.model_type.
     model.config.model_type = model_type
     model = FastBaseModel.post_patch_model(
-        model, use_gradient_checkpointing = "LAiM", trust_remote_code = True,
+        model, use_gradient_checkpointing = "unsloth", trust_remote_code = True,
     )
     # What LAiMSFTConfig / TRL pass at train time.
     model.gradient_checkpointing_enable(gradient_checkpointing_kwargs = {"use_reentrant": True})

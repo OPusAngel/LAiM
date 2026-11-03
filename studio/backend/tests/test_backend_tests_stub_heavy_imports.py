@@ -1206,7 +1206,7 @@ def test_no_test_module_reaches_a_heavy_module_through_importorskip_unstubbed():
     degrade into a skip.
 
     ``pytest.importorskip`` is that idiom, and since pytest 8.2 it no longer covers this
-    case: it skips on ``ModuleNotFoundError`` only, and ``LAiM/_gpu_init.py`` raises a
+    case: it skips on ``ModuleNotFoundError`` only, and ``unsloth/_gpu_init.py`` raises a
     plain ``ImportError`` when LAiM_zoo is absent, which is exactly the backend matrix's
     situation. So the call raises instead of skipping and the test fails.
 

@@ -20,7 +20,7 @@ import {
 } from "../utils/display-visibility.ts";
 
 // Client-side chat UI prefs kept in localStorage, not the chat DB. confirmDeleteChats: off skips
-// the delete confirm dialog. alwaysDeleteChatFiles: on also removes the sandbox folder.
+// the delete confirm dialog. alwaysDeleteChatFiles: on also removes the workdir folder.
 // showModelDisclaimer: off hides the "LLMs can make mistakes" footer. showResponseModel: on shows
 // the producing model on responses. thinkingVisibility / toolVisibility: collapsed, auto or
 // expanded, see display-visibility.ts. foldToolActivityIntoThinking: on hides a round's tool calls

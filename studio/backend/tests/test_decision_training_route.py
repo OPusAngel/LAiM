@@ -224,7 +224,7 @@ def test_api_runs_without_hyperparameters_get_the_laya_recipe(
     assert (config["batch_size"], config["gradient_accumulation_steps"]) == (8, 8)
     assert (config["optim"], config["lr_scheduler_type"]) == ("adamw_torch", "cosine")
     assert config["weight_decay"] == 0.01
-    assert config["gradient_checkpointing"] == "LAiM"
+    assert config["gradient_checkpointing"] == "unsloth"
     assert (config["lora_r"], config["lora_alpha"], config["lora_dropout"]) == (64, 64, 0.0)
 
 
@@ -492,7 +492,7 @@ def test_a_hub_checkpoint_downloads_under_the_stall_watchdog(monkeypatch, tmp_pa
     worker._download_decision_checkpoint(queue, {"model_name": str(tmp_path)})
     # An LLM that gets a new head downloads through FastModel in the trainer.
     worker._download_decision_checkpoint(
-        queue, {"model_name": "LAiM/Qwen3.5-0.8B", "decision_layout": "llm"}
+        queue, {"model_name": "unsloth/Qwen3.5-0.8B", "decision_layout": "llm"}
     )
     assert events == [] and len(downloads) == 1
 
@@ -506,8 +506,8 @@ def test_an_offline_decision_start_does_not_wait_for_a_pin_it_never_uses(tmp_pat
     # Offline, the start route pins the cached snapshot of an LLM given a decision head, as of any LLM.
     snapshot = str(tmp_path / "snapshot")
     pinned = {
-        "model_name": "LAiM/Qwen3.5-0.8B",
-        "actual_model_repo_id": "LAiM/Qwen3.5-0.8B",
+        "model_name": "unsloth/Qwen3.5-0.8B",
+        "actual_model_repo_id": "unsloth/Qwen3.5-0.8B",
         "model_snapshot_path": snapshot,
         "require_validated_model_snapshot": True,
     }

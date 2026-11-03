@@ -6,6 +6,7 @@
 
 "use client";
 
+import { translate } from "@/i18n";
 import { Spinner } from "@/components/ui/spinner";
 import {
   downloadUrl,
@@ -66,7 +67,7 @@ export const downloadImagePart = (
   const filename = part.filename ?? `image.${ext}`;
   void downloadUrl(part.image, filename).catch((error) => {
     if (!isDownloadCancelled(error)) {
-      toast.error("Could not save image.");
+      toast.error(translate("uxComponents.couldNotSaveImageds4ug"));
     }
   });
 };
@@ -79,7 +80,7 @@ export const copyImagePart = async (
     !navigator.clipboard ||
     typeof ClipboardItem === "undefined"
   ) {
-    throw new Error("Clipboard API is not available in this environment.");
+    throw new Error(translate("uxComponents.clipboardAPIIsNot8tzoc"));
   }
   const blob = await urlToBlob(part.image);
   const mime = mimeFromImage(part.image) || blob.type || "image/png";
@@ -150,7 +151,7 @@ function ImagePreview({
   containerClassName,
   onLoad,
   onError,
-  alt = "Image content",
+  alt = translate("uxComponents.imageContentbpjnv"),
   src,
   ...props
 }: ImagePreviewProps) {
@@ -248,7 +249,7 @@ type ImageZoomProps = PropsWithChildren<{
   alt?: string;
 }>;
 
-function ImageZoom({ src, alt = "Image preview", children }: ImageZoomProps) {
+function ImageZoom({ src, alt = translate("uxComponents.imagePreviewAlty1tag"), children }: ImageZoomProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleOpen = () => setIsOpen(true);
@@ -284,7 +285,7 @@ function ImageZoom({ src, alt = "Image preview", children }: ImageZoomProps) {
         type="button"
         onClick={handleOpen}
         className="aui-image-zoom-trigger w-full cursor-zoom-in border-0 bg-transparent p-0 text-left"
-        aria-label="Click to zoom image"
+        aria-label={translate("uxComponents.clickToZoomImage105g4")}
       >
         {children}
       </button>
@@ -296,7 +297,7 @@ function ImageZoom({ src, alt = "Image preview", children }: ImageZoomProps) {
             data-slot="image-zoom-overlay"
             className="aui-image-zoom-overlay fade-in fixed inset-0 z-50 flex animate-in items-center justify-center border-0 bg-[#061d21]/80 p-0 duration-200"
             onClick={handleClose}
-            aria-label="Close zoomed image"
+            aria-label={translate("uxComponents.closeZoomedImage1b43y")}
           >
             <img
               data-slot="image-zoom-content"
@@ -321,7 +322,7 @@ function ImageGenerating({ className }: { className?: string }) {
       )}
     >
       <Spinner className="size-8 text-muted-foreground" />
-      <span className="sr-only">Generating image…</span>
+      <span className="sr-only">{translate("uxComponents.generatingImage9smvj")}</span>
     </div>
   );
 }
@@ -342,7 +343,7 @@ function ImageContentFilterError({
       )}
     >
       <ShieldAlertIcon className="size-8 text-muted-foreground" />
-      <p className="font-medium text-sm">Image could not be generated</p>
+      <p className="font-medium text-sm">{translate("uxCopy.imageCouldNotBe1nhk2")}</p>
       {reason && <p className="text-muted-foreground text-xs">{reason}</p>}
     </div>
   );
@@ -374,7 +375,7 @@ function RegenerateButton({
       }}
       disabled={isRegenerating}
       data-slot="image-regenerate"
-      aria-label="Regenerate image"
+      aria-label={translate("uxComponents.regenerateImagex1v3q")}
       className="inline-flex size-7 items-center justify-center rounded hover:bg-muted disabled:opacity-50"
     >
       <RefreshGlyph
@@ -394,7 +395,7 @@ function ImageActions({ part, onRegenerate, className }: ImageActionsProps) {
         type="button"
         onClick={() => downloadImagePart(part)}
         data-slot="image-download"
-        aria-label="Download image"
+        aria-label={translate("uxComponents.downloadImagewxvc7")}
         className="inline-flex size-7 items-center justify-center rounded hover:bg-muted"
       >
         <HugeiconsIcon icon={Download01Icon} className="size-4" />
@@ -407,7 +408,7 @@ function ImageActions({ part, onRegenerate, className }: ImageActionsProps) {
           });
         }}
         data-slot="image-copy"
-        aria-label="Copy image"
+        aria-label={translate("imageViewer.copy")}
         className="inline-flex size-7 items-center justify-center rounded hover:bg-muted"
       >
         <HugeiconsIcon icon={Copy01Icon} className="size-4" />
@@ -419,7 +420,7 @@ function ImageActions({ part, onRegenerate, className }: ImageActionsProps) {
 
 const ImageImpl: ImageMessagePartComponent = (props) => {
   const { image, filename, status } = props;
-  const alt = filename || "Image content";
+  const alt = filename || translate("uxComponents.imageContentbpjnv");
 
   if (status?.type === "running") {
     return (
@@ -433,7 +434,7 @@ const ImageImpl: ImageMessagePartComponent = (props) => {
   if (status?.type === "incomplete" && status.reason === "content-filter") {
     return (
       <ImageRoot>
-        <ImageContentFilterError reason="The provider blocked this image." />
+        <ImageContentFilterError reason={translate("uxComponents.theProviderBlockedThis7s1l2")} />
       </ImageRoot>
     );
   }

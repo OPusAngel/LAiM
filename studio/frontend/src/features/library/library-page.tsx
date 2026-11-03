@@ -134,7 +134,7 @@ const DELETE_NOTES: Record<string, TranslationKey> = {
   image: "library.dialog.deleteImage",
   video: "library.dialog.deleteVideo",
   audio: "library.dialog.deleteAudio",
-  sandbox: "library.dialog.deleteSandbox",
+  workdir: "library.dialog.deleteWorkdir",
   model: "library.dialog.deleteModel",
 };
 

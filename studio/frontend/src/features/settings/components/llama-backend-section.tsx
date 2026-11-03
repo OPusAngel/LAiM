@@ -98,7 +98,7 @@ function LlamaCppPathRow({ onChanged }: { onChanged: () => void }) {
   const detail = settings
     ? settings.source === "environment"
       ? t("settings.resources.llamaBackend.customPath.environmentManaged", {
-          variable: settings.environmentVariable ?? "LAiM_LLAMA_CPP_PATH",
+          variable: settings.environmentVariable ?? "UNSLOTH_LLAMA_CPP_PATH",
         })
       : settings.available
         ? settings.reloadRequired

@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
-"""Hosted LTX-2.5 DiT checkpoints (LAiM/LTX-2.5-FP8): which base seeds them, which file each scheme asks for, and
+"""Hosted LTX-2.5 DiT checkpoints (unsloth/LTX-2.5-FP8): which base seeds them, which file each scheme asks for, and
 that the metadata the builder bakes is what this runtime accepts. Network-free and torch-free."""
 
 from __future__ import annotations
@@ -34,7 +34,7 @@ from core.inference.video_families import (
 
 PACK = "Lightricks/LTX-2.5-Diffusers"
 SINGLE_FILE_RELEASE = "Lightricks/LTX-2.5"
-REPO = "LAiM/LTX-2.5-FP8"
+REPO = "unsloth/LTX-2.5-FP8"
 
 
 @pytest.fixture
@@ -105,7 +105,7 @@ def test_ltx23_keeps_its_own_hosted_dit():
     ltx2 = detect_video_family("Lightricks/LTX-2.3")
     assert ltx2 is not None and ltx2.name == "ltx-2"
     src = resolve_prequant_source(ltx2, "fp8", base_repo = "Lightricks/LTX-2.3")
-    assert (src.location, src.filename) == ("LAiM/LTX-2.3-FP8", "LTX-2.3-FP8.safetensors")
+    assert (src.location, src.filename) == ("unsloth/LTX-2.3-FP8", "LTX-2.3-FP8.safetensors")
     assert resolve_prequant_source(ltx2, "int8", base_repo = "Lightricks/LTX-2.3") is None
     assert video_family_prequant_repo(ltx2, "fp8", PACK) is None
 

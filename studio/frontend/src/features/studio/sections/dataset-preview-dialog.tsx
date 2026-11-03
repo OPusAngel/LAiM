@@ -20,7 +20,7 @@ import {
   useTrainingActions,
   useTrainingConfigStore,
 } from "@/features/training";
-import { useT } from "@/i18n";
+import { translate, useT } from "@/i18n";
 import type { DatasetSource } from "@/types/training";
 import {
   AlertCircleIcon,
@@ -487,9 +487,7 @@ export function DatasetPreviewDialog({
                   );
                 })}
                 {images.length > 4 && (
-                  <span className="text-xs text-muted-foreground self-end">
-                    +{images.length - 4} more
-                  </span>
+                  <span className="text-xs text-muted-foreground self-end">{translate("uxStudio.more5b069", { p1: images.length - 4 })}</span>
                 )}
               </div>
             );
@@ -522,9 +520,7 @@ export function DatasetPreviewDialog({
           <div className="flex flex-col gap-2">
             <span className="font-heading text-ui-13 font-semibold tracking-tight text-foreground">
               System{" "}
-              <span className="text-muted-foreground font-normal">
-                (generated)
-              </span>
+              <span className="text-muted-foreground font-normal">{translate("uxStudio.generatedhh2kg")}</span>
             </span>
             {mappingEnabled && (
               <Badge
@@ -570,7 +566,7 @@ export function DatasetPreviewDialog({
               <HugeiconsIcon icon={Database02Icon} className="size-4" />
             </div>
             <DialogTitle className="font-heading text-lg font-semibold tracking-tight">
-              Dataset Preview
+              {translate("uxStudio.datasetPreview1wvec")}
             </DialogTitle>
           </div>
         </DialogHeader>
@@ -590,7 +586,7 @@ export function DatasetPreviewDialog({
               </p>
               {isHfDataset && (
                 <p className="text-xs text-muted-foreground/60">
-                  This may take a moment for large datasets
+                  {translate("uxStudio.thisMayTakeA119op")}
                 </p>
               )}
             </div>
@@ -608,7 +604,7 @@ export function DatasetPreviewDialog({
               <div className="text-center space-y-1">
                 <p className="text-sm font-medium text-destructive">{error}</p>
                 <p className="text-xs text-muted-foreground">
-                  Make sure the backend is running and reachable.
+                  {translate("uxStudio.makeSureTheBackendnl84m")}
                 </p>
               </div>
             </div>
@@ -619,15 +615,15 @@ export function DatasetPreviewDialog({
             <>
               {/* Metadata card */}
               <div className="rounded-xl corner-squircle ring-1 ring-border/60 bg-muted/30 px-5 py-4 mb-4 space-y-2">
-                <MetaRow label="Source" value={sourceLabel} />
+                <MetaRow label={translate("uxVideo.sourcer5qyu")} value={sourceLabel} />
                 <MetaRow
-                  label="Format"
+                  label={translate("uxHub.format1yy13")}
                   value={
                     isRawFormat ? "Raw Text" : data.detected_format || "--"
                   }
                 />
                 <MetaRow
-                  label="Total Rows"
+                  label={translate("uxStudio.totalRows1vpp3")}
                   value={
                     data.total_rows != null
                       ? data.total_rows.toLocaleString()
@@ -635,7 +631,7 @@ export function DatasetPreviewDialog({
                   }
                 />
                 <MetaRow
-                  label="Columns"
+                  label={translate("studio.dataset.columns")}
                   value={
                     <span className="flex items-center gap-1.5 flex-wrap">
                       {columns.map((col) => (
@@ -659,7 +655,7 @@ export function DatasetPreviewDialog({
                     className="mt-0.5 size-4 shrink-0"
                   />
                   <div className="space-y-0.5">
-                    <p className="font-medium">Ready for training</p>
+                    <p className="font-medium">{translate("uxCopy.readyForTraining1jdis")}</p>
                     {readyDetail && <p>{readyDetail}</p>}
                   </div>
                 </div>
@@ -707,8 +703,7 @@ export function DatasetPreviewDialog({
 
                 {mode === "preview" && mappingEnabled && (
                   <p className="mt-2 text-ui-11 text-muted-foreground/70 text-center">
-                    Mapping is saved automatically. You can start training
-                    anytime.
+                    {translate("uxCopy.mappingIsSavedAutomatically7yych")}
                   </p>
                 )}
 

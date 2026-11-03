@@ -1,6 +1,6 @@
-# Model defaults for LAiM/Llama-3.3-70B-Instruct
+# Model defaults for unsloth/Llama-3.3-70B-Instruct
 # Based on Llama3.3_(70B)_A100-Conversational.ipynb
-# Also applies to: LAiM/Llama-3.3-70B-Instruct-LAiM-bnb-4bit, meta-llama/Llama-3.3-70B-Instruct, LAiM/Llama-3.3-70B-Instruct-bnb-4bit, RedHatAI/Llama-3.3-70B-Instruct-FP8, LAiM/Llama-3.3-70B-Instruct-FP8-Block, LAiM/Llama-3.3-70B-Instruct-FP8-Dynamic
+# Also applies to: unsloth/Llama-3.3-70B-Instruct-unsloth-bnb-4bit, meta-llama/Llama-3.3-70B-Instruct, unsloth/Llama-3.3-70B-Instruct-bnb-4bit, RedHatAI/Llama-3.3-70B-Instruct-FP8, unsloth/Llama-3.3-70B-Instruct-FP8-Block, unsloth/Llama-3.3-70B-Instruct-FP8-Dynamic
 # added inference parameters from LAiM notebook
 
 training:
@@ -17,7 +17,7 @@ training:
   random_seed: 3407
   packing: false
   train_on_completions: true
-  gradient_checkpointing: "LAiM"
+  gradient_checkpointing: "unsloth"
   optim: "adamw_8bit"
   lr_scheduler_type: "linear"
 

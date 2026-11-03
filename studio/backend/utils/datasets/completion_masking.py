@@ -29,6 +29,37 @@ def lookup_manual_markers(model_name):
     return template, None, None
 
 
+# Attribute names the tokenizer carries its chat-template markers under. The LAiM package
+# stamps them as `_LAiM_*`, the LAiM_zoo loader reads the upstream `_unsloth_*` spelling, and
+# the zoo's `train_on_responses_only` looks only at the latter -- so both are written, and a
+# marker present under either name counts.
+_MARKER_ATTRS = {
+    "instruction": ("_LAiM_input_part", "_unsloth_input_part"),
+    "response": ("_LAiM_output_part", "_unsloth_output_part"),
+}
+
+
+def preset_marker_value(tokenizer, kind):
+    for name in _MARKER_ATTRS[kind]:
+        if hasattr(tokenizer, name):
+            return getattr(tokenizer, name)
+    return None
+
+
+def has_preset_markers(tokenizer) -> bool:
+    return all(preset_marker_value(tokenizer, kind) is not None for kind in _MARKER_ATTRS)
+
+
+def read_preset_markers(tokenizer):
+    return tuple(preset_marker_value(tokenizer, kind) for kind in ("instruction", "response"))
+
+
+def write_preset_markers(tokenizer, instruction, response) -> None:
+    for kind, value in (("instruction", instruction), ("response", response)):
+        for name in _MARKER_ATTRS[kind]:
+            setattr(tokenizer, name, value)
+
+
 def _mask_tool_responses(trainer, start_id, end_id, turn_id):
     def mask(batch):
         all_labels = []
@@ -123,19 +154,13 @@ def apply_completion_masking(
         markers = TEMPLATE_TO_RESPONSES_MAPPER.get(dataset_template)
         if not markers:
             raise ValueError(f"Unknown completion masking template: {dataset_template}")
-        has_preset_markers = hasattr(inner, "_LAiM_input_part") and hasattr(
-            inner, "_LAiM_output_part"
-        )
-        if has_preset_markers:
-            previous_instruction = inner._LAiM_input_part
-            previous_response = inner._LAiM_output_part
-            inner._LAiM_input_part = markers["instruction"]
-            inner._LAiM_output_part = markers["response"]
+        if has_preset_markers(inner):
+            previous = read_preset_markers(inner)
+            write_preset_markers(inner, markers["instruction"], markers["response"])
             try:
                 trainer = train_fn(trainer, **kwargs)
             finally:
-                inner._LAiM_input_part = previous_instruction
-                inner._LAiM_output_part = previous_response
+                write_preset_markers(inner, previous[0], previous[1])
         else:
             trainer = train_fn(
                 trainer,
@@ -159,7 +184,7 @@ def apply_completion_masking(
             template = "gpt-oss"
             instruction_part = markers["instruction"]
             response_part = markers["response"]
-    if hasattr(inner, "_LAiM_input_part") and hasattr(inner, "_LAiM_output_part"):
+    if has_preset_markers(inner):
         # Markers preset on the tokenizer; zoo reuses them on a bare call.
         trainer = train_fn(trainer, **kwargs)
         notify(

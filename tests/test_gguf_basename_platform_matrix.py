@@ -65,7 +65,7 @@ def _load_helper():
             ns: dict = {"os": os}
             exec(compile(ast.Module([node], []), str(_SAVE_PY), "exec"), ns)
             return ns["_model_basename"]
-    raise AssertionError("LAiM/save.py defines no _model_basename")
+    raise AssertionError("unsloth/save.py defines no _model_basename")
 
 
 # OS flavour -> (path module, a base-model path that OS actually produces)

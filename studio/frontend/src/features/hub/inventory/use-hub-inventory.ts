@@ -52,6 +52,8 @@ import {
   INVENTORY_FRESHNESS_WINDOW_MS,
   isInventoryStampFresh,
 } from "./inventory-freshness";
+import { translate } from "@/i18n";
+
 
 export interface HubInventory {
   cachedRows: CachedInventoryRow[];
@@ -126,11 +128,11 @@ function compareCachedRows(
 function localDatasetSourceLabel(source?: string | null): string {
   switch (source) {
     case "recipe":
-      return "Recipe dataset";
+      return translate("uxHub.recipeDataset9d40y");
     case "upload":
-      return "Uploaded dataset";
+      return translate("uxHub.uploadedDatasetu7tdu");
     default:
-      return "Local dataset";
+      return translate("uxHub.localDatasetbgywl");
   }
 }
 

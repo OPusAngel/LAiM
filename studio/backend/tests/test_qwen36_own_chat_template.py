@@ -12,7 +12,7 @@ if str(_BACKEND) not in sys.path:
 
 from utils.datasets.model_mappings import MODEL_TO_TEMPLATE_MAPPER  # noqa: E402
 
-MODEL = "LAiM/Qwen3.6-27B"
+MODEL = "unsloth/Qwen3.6-27B"
 
 _QWEN36_STYLE_TEMPLATE = (
     "{% for m in messages %}{{ '<|im_start|>' + m.role + '\\n' }}"
@@ -89,7 +89,7 @@ def test_preserve_thinking_keeps_earlier_reasoning_for_qwen36(monkeypatch):
 
 @pytest.mark.parametrize(
     "name",
-    ["LAiM/Qwen3.6-27B", "Qwen/Qwen3.6-27B", "LAiM/Qwen3.6-35B-A3B", "Qwen/Qwen3.6-35B-A3B"],
+    ["unsloth/Qwen3.6-27B", "Qwen/Qwen3.6-27B", "unsloth/Qwen3.6-35B-A3B", "Qwen/Qwen3.6-35B-A3B"],
 )
 def test_qwen36_keeps_own_template_like_qwen35(name):
-    assert MODEL_TO_TEMPLATE_MAPPER[name.lower()] == MODEL_TO_TEMPLATE_MAPPER["LAiM/qwen3.5-27b"]
+    assert MODEL_TO_TEMPLATE_MAPPER[name.lower()] == MODEL_TO_TEMPLATE_MAPPER["unsloth/qwen3.5-27b"]

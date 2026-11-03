@@ -20,14 +20,14 @@ from core.inference.model_ids import mlx_bnb_base_repo, mlx_bnb_substitutions  #
 
 def test_LAiM_bnb_repos_resolve_to_their_base():
     assert (
-        mlx_bnb_base_repo("LAiM/Qwen2-VL-2B-Instruct-bnb-4bit") == "LAiM/Qwen2-VL-2B-Instruct"
+        mlx_bnb_base_repo("unsloth/Qwen2-VL-2B-Instruct-bnb-4bit") == "unsloth/Qwen2-VL-2B-Instruct"
     )
-    assert mlx_bnb_base_repo("LAiM/gemma-3-4b-it-LAiM-bnb-4bit") == "LAiM/gemma-3-4b-it"
+    assert mlx_bnb_base_repo("unsloth/gemma-3-4b-it-unsloth-bnb-4bit") == "unsloth/gemma-3-4b-it"
 
 
 def test_repos_mlx_loads_as_given_have_no_base():
-    assert mlx_bnb_base_repo("LAiM/Qwen3-4B-Instruct-2507") is None
-    assert mlx_bnb_base_repo("LAiM/Llama-3.2-1B-Instruct-GGUF") is None
+    assert mlx_bnb_base_repo("unsloth/Qwen3-4B-Instruct-2507") is None
+    assert mlx_bnb_base_repo("unsloth/Llama-3.2-1B-Instruct-GGUF") is None
     assert mlx_bnb_base_repo("someone-else/model-bnb-4bit") is None
     assert mlx_bnb_base_repo(None) is None
 
@@ -36,18 +36,18 @@ def test_a_local_directory_is_never_remapped(monkeypatch, tmp_path):
     (tmp_path / "LAiM" / "model-bnb-4bit").mkdir(parents = True)
     monkeypatch.chdir(tmp_path)
 
-    assert mlx_bnb_base_repo("LAiM/model-bnb-4bit") is None
+    assert mlx_bnb_base_repo("unsloth/model-bnb-4bit") is None
 
 
 def test_substitutions_cover_a_loras_base():
-    swaps = mlx_bnb_substitutions(["me/my-lora", "LAiM/Meta-Llama-3.1-8B-Instruct-bnb-4bit"])
+    swaps = mlx_bnb_substitutions(["me/my-lora", "unsloth/Meta-Llama-3.1-8B-Instruct-bnb-4bit"])
     assert swaps == [
-        ("LAiM/Meta-Llama-3.1-8B-Instruct-bnb-4bit", "LAiM/Meta-Llama-3.1-8B-Instruct")
+        ("unsloth/Meta-Llama-3.1-8B-Instruct-bnb-4bit", "unsloth/Meta-Llama-3.1-8B-Instruct")
     ]
 
-    already_watched = ["LAiM/gemma-3-4b-it-bnb-4bit", "LAiM/gemma-3-4b-it"]
+    already_watched = ["unsloth/gemma-3-4b-it-bnb-4bit", "unsloth/gemma-3-4b-it"]
     assert mlx_bnb_substitutions(already_watched) == [
-        ("LAiM/gemma-3-4b-it-bnb-4bit", "LAiM/gemma-3-4b-it")
+        ("unsloth/gemma-3-4b-it-bnb-4bit", "unsloth/gemma-3-4b-it")
     ]
 
 
@@ -62,7 +62,7 @@ def test_mlx_defaults_recommend_the_repos_mlx_actually_loads(monkeypatch):
     models = defaults_mod.get_default_models()
 
     assert [model for model in models if model.endswith("bnb-4bit")] == []
-    assert "LAiM/Qwen2-VL-2B-Instruct" in models
+    assert "unsloth/Qwen2-VL-2B-Instruct" in models
     assert len(models) == len(set(models))
 
 
@@ -83,22 +83,22 @@ def test_chat_only_hosts_are_untouched(monkeypatch):
     "identifier,base_model,is_lora,expected",
     [
         (
-            "LAiM/Qwen2-VL-2B-Instruct-bnb-4bit",
+            "unsloth/Qwen2-VL-2B-Instruct-bnb-4bit",
             None,
             False,
-            ["LAiM/Qwen2-VL-2B-Instruct"],
+            ["unsloth/Qwen2-VL-2B-Instruct"],
         ),
         (
             "me/my-lora",
-            "LAiM/Qwen2-VL-2B-Instruct-bnb-4bit",
+            "unsloth/Qwen2-VL-2B-Instruct-bnb-4bit",
             True,
-            ["me/my-lora", "LAiM/Qwen2-VL-2B-Instruct"],
+            ["me/my-lora", "unsloth/Qwen2-VL-2B-Instruct"],
         ),
         (
-            "LAiM/Qwen2-VL-2B-Instruct-bnb-4bit",
-            "LAiM/Qwen2-VL-2B-Instruct",
+            "unsloth/Qwen2-VL-2B-Instruct-bnb-4bit",
+            "unsloth/Qwen2-VL-2B-Instruct",
             True,
-            ["LAiM/Qwen2-VL-2B-Instruct"],
+            ["unsloth/Qwen2-VL-2B-Instruct"],
         ),
     ],
 )
@@ -149,12 +149,12 @@ def test_the_host_rule_only_fires_on_mlx(monkeypatch):
     from core.inference.model_ids import mlx_host_bnb_base_repo
 
     monkeypatch.setattr(hw, "get_device", lambda: hw.DeviceType.CUDA)
-    assert mlx_host_bnb_base_repo("LAiM/Qwen2-VL-2B-Instruct-bnb-4bit") is None
+    assert mlx_host_bnb_base_repo("unsloth/Qwen2-VL-2B-Instruct-bnb-4bit") is None
 
     monkeypatch.setattr(hw, "get_device", lambda: hw.DeviceType.MLX)
     assert (
-        mlx_host_bnb_base_repo("LAiM/Qwen2-VL-2B-Instruct-bnb-4bit")
-        == "LAiM/Qwen2-VL-2B-Instruct"
+        mlx_host_bnb_base_repo("unsloth/Qwen2-VL-2B-Instruct-bnb-4bit")
+        == "unsloth/Qwen2-VL-2B-Instruct"
     )
 
 
@@ -162,8 +162,8 @@ def test_diffusion_bnb_repos_are_loaded_as_named(monkeypatch):
     from core.inference.model_ids import mlx_host_bnb_base_repo
 
     monkeypatch.setattr(hw, "get_device", lambda: hw.DeviceType.MLX)
-    assert mlx_host_bnb_base_repo("LAiM/Qwen-Image-2512-LAiM-bnb-4bit") is None
-    assert mlx_host_bnb_base_repo("LAiM/Z-Image-Turbo-LAiM-bnb-4bit") is None
+    assert mlx_host_bnb_base_repo("unsloth/Qwen-Image-2512-unsloth-bnb-4bit") is None
+    assert mlx_host_bnb_base_repo("unsloth/Z-Image-Turbo-unsloth-bnb-4bit") is None
 
 
 def test_validate_reports_the_repo_mlx_will_load(monkeypatch):
@@ -172,16 +172,16 @@ def test_validate_reports_the_repo_mlx_will_load(monkeypatch):
     from routes.inference import _mlx_base_for_config
 
     monkeypatch.setattr(hw, "get_device", lambda: hw.DeviceType.MLX)
-    pick = SimpleNamespace(identifier = "LAiM/Qwen2-VL-2B-Instruct-bnb-4bit", base_model = None)
-    assert _mlx_base_for_config(pick) == "LAiM/Qwen2-VL-2B-Instruct"
+    pick = SimpleNamespace(identifier = "unsloth/Qwen2-VL-2B-Instruct-bnb-4bit", base_model = None)
+    assert _mlx_base_for_config(pick) == "unsloth/Qwen2-VL-2B-Instruct"
 
     adapter = SimpleNamespace(
         identifier = "me/my-lora",
-        base_model = "LAiM/gemma-3-4b-it-bnb-4bit",
+        base_model = "unsloth/gemma-3-4b-it-bnb-4bit",
     )
-    assert _mlx_base_for_config(adapter) == "LAiM/gemma-3-4b-it"
+    assert _mlx_base_for_config(adapter) == "unsloth/gemma-3-4b-it"
 
-    plain = SimpleNamespace(identifier = "LAiM/Qwen3-4B-Instruct-2507", base_model = None)
+    plain = SimpleNamespace(identifier = "unsloth/Qwen3-4B-Instruct-2507", base_model = None)
     assert _mlx_base_for_config(plain) is None
 
 
@@ -189,20 +189,20 @@ def test_the_fetched_ranking_is_mapped_on_a_mac_too(monkeypatch):
     import core.inference.orchestrator as orch_mod
 
     monkeypatch.setattr(orch_mod.InferenceOrchestrator, "_fetch_top_models", lambda self: None)
-    monkeypatch.setattr(defaults_mod, "get_default_models", lambda: ["LAiM/curated"])
+    monkeypatch.setattr(defaults_mod, "get_default_models", lambda: ["unsloth/curated"])
     monkeypatch.setattr(hw, "DETECTION_GENERATION", 1)
     monkeypatch.setattr(hw, "CHAT_ONLY", False)
     monkeypatch.setattr(hw, "DEVICE", hw.DeviceType.MLX)
 
     orch = orch_mod.InferenceOrchestrator()
-    orch._top_gguf_cache = ["LAiM/Qwen3-4B-GGUF"]
-    orch._top_hub_cache = ["LAiM/Qwen3-8B-LAiM-bnb-4bit", "LAiM/Qwen3-4B-Instruct-2507"]
+    orch._top_gguf_cache = ["unsloth/Qwen3-4B-GGUF"]
+    orch._top_hub_cache = ["unsloth/Qwen3-8B-unsloth-bnb-4bit", "unsloth/Qwen3-4B-Instruct-2507"]
 
     assert orch.default_models == [
-        "LAiM/curated",
-        "LAiM/Qwen3-4B-GGUF",
-        "LAiM/Qwen3-8B",
-        "LAiM/Qwen3-4B-Instruct-2507",
+        "unsloth/curated",
+        "unsloth/Qwen3-4B-GGUF",
+        "unsloth/Qwen3-8B",
+        "unsloth/Qwen3-4B-Instruct-2507",
     ]
 
 
@@ -210,25 +210,25 @@ def test_a_diffusion_bnb_repo_in_the_ranking_keeps_its_name(monkeypatch):
     import core.inference.orchestrator as orch_mod
 
     monkeypatch.setattr(orch_mod.InferenceOrchestrator, "_fetch_top_models", lambda self: None)
-    monkeypatch.setattr(defaults_mod, "get_default_models", lambda: ["LAiM/curated"])
+    monkeypatch.setattr(defaults_mod, "get_default_models", lambda: ["unsloth/curated"])
     monkeypatch.setattr(hw, "DETECTION_GENERATION", 1)
     monkeypatch.setattr(hw, "CHAT_ONLY", False)
     monkeypatch.setattr(hw, "DEVICE", hw.DeviceType.MLX)
 
     orch = orch_mod.InferenceOrchestrator()
     orch._top_hub_cache = [
-        "LAiM/Qwen-Image-2512-LAiM-bnb-4bit",
-        "LAiM/Z-Image-Turbo-LAiM-bnb-4bit",
-        "LAiM/Qwen3-8B-LAiM-bnb-4bit",
+        "unsloth/Qwen-Image-2512-unsloth-bnb-4bit",
+        "unsloth/Z-Image-Turbo-unsloth-bnb-4bit",
+        "unsloth/Qwen3-8B-unsloth-bnb-4bit",
     ]
 
     assert orch.default_models == [
-        "LAiM/curated",
+        "unsloth/curated",
         # diffusion: read as named by diffusers/MPS
-        "LAiM/Qwen-Image-2512-LAiM-bnb-4bit",
-        "LAiM/Z-Image-Turbo-LAiM-bnb-4bit",
+        "unsloth/Qwen-Image-2512-unsloth-bnb-4bit",
+        "unsloth/Z-Image-Turbo-unsloth-bnb-4bit",
         # text: mlx-lm cannot read it, so name the repo it really loads
-        "LAiM/Qwen3-8B",
+        "unsloth/Qwen3-8B",
     ]
 
 
@@ -236,25 +236,25 @@ def test_the_fetched_ranking_is_untouched_off_mlx(monkeypatch):
     import core.inference.orchestrator as orch_mod
 
     monkeypatch.setattr(orch_mod.InferenceOrchestrator, "_fetch_top_models", lambda self: None)
-    monkeypatch.setattr(defaults_mod, "get_default_models", lambda: ["LAiM/curated"])
+    monkeypatch.setattr(defaults_mod, "get_default_models", lambda: ["unsloth/curated"])
     monkeypatch.setattr(hw, "DETECTION_GENERATION", 1)
     monkeypatch.setattr(hw, "CHAT_ONLY", False)
     monkeypatch.setattr(hw, "DEVICE", hw.DeviceType.CUDA)
 
     orch = orch_mod.InferenceOrchestrator()
-    orch._top_hub_cache = ["LAiM/Qwen3-8B-LAiM-bnb-4bit"]
+    orch._top_hub_cache = ["unsloth/Qwen3-8B-unsloth-bnb-4bit"]
 
-    assert orch.default_models == ["LAiM/curated", "LAiM/Qwen3-8B-LAiM-bnb-4bit"]
+    assert orch.default_models == ["unsloth/curated", "unsloth/Qwen3-8B-unsloth-bnb-4bit"]
 
 
 def test_the_mirror_still_matches_the_loader_it_mirrors():
     loader = pytest.importorskip("LAiM_zoo.mlx.loader")
 
     for name in (
-        "LAiM/Qwen2-VL-2B-Instruct-bnb-4bit",
-        "LAiM/gemma-3-4b-it-LAiM-bnb-4bit",
-        "LAiM/Qwen3-4B-Instruct-2507",
-        "LAiM/Llama-3.2-1B-Instruct-GGUF",
+        "unsloth/Qwen2-VL-2B-Instruct-bnb-4bit",
+        "unsloth/gemma-3-4b-it-unsloth-bnb-4bit",
+        "unsloth/Qwen3-4B-Instruct-2507",
+        "unsloth/Llama-3.2-1B-Instruct-GGUF",
         "someone-else/model-bnb-4bit",
     ):
         remapped, _revision, swapped_from = loader._remap_LAiM_bnb_hub_id_for_mlx(
@@ -283,7 +283,7 @@ def test_mlx_progress_verifies_loader_files_without_a_manifest(
     from hub.services import snapshot_progress
     from hub.services.models import cache_inventory, downloads
 
-    repo = "LAiM/progress-model"
+    repo = "unsloth/progress-model"
     entry = tmp_path / "models--LAiM--progress-model"
     snap = entry / "snapshots" / ("a" * 40)
     snap.mkdir(parents = True)
@@ -350,7 +350,7 @@ def test_mlx_metadata_outage_reuses_plan_and_bounds_retries(monkeypatch, warm):
     from huggingface_hub import HfApi
     from hub.services.models import cache_inventory
 
-    key = ("LAiM/cached-base", cache_inventory.hf_cache_scan.token_fingerprint(None))
+    key = ("unsloth/cached-base", cache_inventory.hf_cache_scan.token_fingerprint(None))
     plan = (4, frozenset({"weight"}), ())
     expired = cache_inventory.time.monotonic() - cache_inventory._REPO_SIZE_POS_TTL - 1
     monkeypatch.setattr(

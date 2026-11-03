@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { readLastPrompt, saveLastPrompt } from "@/lib/last-prompt";
 import { toast } from "@/lib/toast";
@@ -320,7 +321,7 @@ export function useSpeechGeneration({
       busyRef.current = null;
       setBusy(null);
       toast.error(
-        "Add a music description. This model needs one beside the lyrics.",
+        translate("uxAudio.addAMusicDescription1nff7"),
       );
       return;
     }
@@ -385,7 +386,7 @@ export function useSpeechGeneration({
         if (!voiceController.signal.aborted) {
           updateGenerationPhase("finishing");
           const message =
-            error instanceof Error ? error.message : "Audio generation failed.";
+            error instanceof Error ? error.message : translate("uxAudio.audioGenerationFailedjo7fd");
           setGenerationError(message);
           toast.error(message);
           await refreshStatus();
@@ -427,8 +428,8 @@ export function useSpeechGeneration({
       if (generated.choices[0]?.finish_reason === "length")
         toast.warning(
           maxTokens < TTS_MAX_TOKENS
-            ? "Speech stopped at the Max tokens limit before the end of the text. Raise Max tokens under Advanced to hear the rest."
-            : "Speech stopped at the Max tokens limit before the end of the text. Split the text into shorter parts to hear the rest.",
+            ? translate("uxAudio.speechStoppedAtThesy96h")
+            : translate("uxAudio.speechStoppedAtTheipqrn"),
         );
       updateGenerationPhase("finishing");
       const refreshed = await refreshGallery();
@@ -464,10 +465,10 @@ export function useSpeechGeneration({
       if (!controller.signal.aborted) {
         updateGenerationPhase("finishing");
         setGenerationError(
-          error instanceof Error ? error.message : "Audio generation failed.",
+          error instanceof Error ? error.message : translate("uxAudio.audioGenerationFailedid5gc"),
         );
         toast.error(
-          error instanceof Error ? error.message : "Audio generation failed.",
+          error instanceof Error ? error.message : translate("uxAudio.audioGenerationFailedjo7fd"),
         );
         await refreshStatus();
       }

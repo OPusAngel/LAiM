@@ -22,8 +22,8 @@ class TestGetModelName(unittest.TestCase):
     @patch.object(loader_utils, "_get_new_mapper", _no_remote_mapper)
     def test_resolution_matrix(self):
         cases = [
-            ("meta-llama/Llama-2-7b-hf", True, "LAiM/llama-2-7b-bnb-4bit", True),
-            ("meta-llama/Llama-2-7b-hf", False, "LAiM/llama-2-7b", True),
+            ("meta-llama/Llama-2-7b-hf", True, "unsloth/llama-2-7b-bnb-4bit", True),
+            ("meta-llama/Llama-2-7b-hf", False, "unsloth/llama-2-7b", True),
             (
                 "mistralai/Ministral-8B-Instruct-2410",
                 True,
@@ -33,108 +33,108 @@ class TestGetModelName(unittest.TestCase):
             (
                 "meta-llama/Llama-3.2-1B-Instruct",
                 False,
-                "LAiM/Llama-3.2-1B-Instruct",
+                "unsloth/Llama-3.2-1B-Instruct",
                 True,
             ),
             (
                 "meta-llama/Llama-2-7b-chat-hf",
                 True,
-                "LAiM/llama-2-7b-chat-bnb-4bit",
+                "unsloth/llama-2-7b-chat-bnb-4bit",
                 True,
             ),
             (
                 "meta-llama/Llama-3.3-70B-Instruct",
                 True,
-                "LAiM/llama-3.3-70b-instruct-LAiM-bnb-4bit",
+                "unsloth/llama-3.3-70b-instruct-unsloth-bnb-4bit",
                 True,
             ),
-            ("Qwen/Qwen3-8B", True, "LAiM/Qwen3-8B-LAiM-bnb-4bit", True),
-            ("Qwen/Qwen3-8B", False, "LAiM/Qwen3-8B", True),
-            ("Qwen/Qwen3-8B-FP8", False, "LAiM/Qwen3-8B-FP8", True),
-            ("Qwen/Qwen3-8B-FP8", True, "LAiM/Qwen3-8B-LAiM-bnb-4bit", True),
+            ("Qwen/Qwen3-8B", True, "unsloth/Qwen3-8B-unsloth-bnb-4bit", True),
+            ("Qwen/Qwen3-8B", False, "unsloth/Qwen3-8B", True),
+            ("Qwen/Qwen3-8B-FP8", False, "unsloth/Qwen3-8B-FP8", True),
+            ("Qwen/Qwen3-8B-FP8", True, "unsloth/Qwen3-8B-unsloth-bnb-4bit", True),
             (
                 "mistralai/Ministral-3-3B-Instruct-2512",
                 True,
-                "LAiM/Ministral-3-3B-Instruct-2512-LAiM-bnb-4bit",
+                "unsloth/Ministral-3-3B-Instruct-2512-unsloth-bnb-4bit",
                 True,
             ),
             (
                 "mistralai/Ministral-3-3B-Instruct-2512",
                 False,
-                "LAiM/Ministral-3-3B-Instruct-2512",
+                "unsloth/Ministral-3-3B-Instruct-2512",
                 True,
             ),
             (
                 "allenai/Olmo-3-7B-Instruct",
                 True,
-                "LAiM/Olmo-3-7B-Instruct-LAiM-bnb-4bit",
+                "unsloth/Olmo-3-7B-Instruct-unsloth-bnb-4bit",
                 True,
             ),
             (
                 "allenai/Olmo-3-7B-Instruct",
                 False,
-                "LAiM/Olmo-3-7B-Instruct",
+                "unsloth/Olmo-3-7B-Instruct",
                 True,
             ),
             (
                 "allenai/Olmo-3-7B-Think",
                 True,
-                "LAiM/Olmo-3-7B-Think-LAiM-bnb-4bit",
+                "unsloth/Olmo-3-7B-Think-unsloth-bnb-4bit",
                 True,
             ),
             (
                 "allenai/Olmo-3-7B-Think",
                 False,
-                "LAiM/Olmo-3-7B-Think",
+                "unsloth/Olmo-3-7B-Think",
                 True,
             ),
             (
                 "allenai/Olmo-3-32B-Think",
                 True,
-                "LAiM/Olmo-3-32B-Think-LAiM-bnb-4bit",
+                "unsloth/Olmo-3-32B-Think-unsloth-bnb-4bit",
                 True,
             ),
             (
                 "allenai/Olmo-3-32B-Think",
                 False,
-                "LAiM/Olmo-3-32B-Think",
+                "unsloth/Olmo-3-32B-Think",
                 True,
             ),
-            ("LAiM/Kimi-K2-Instruct", True, "LAiM/Kimi-K2-Instruct-BF16", True),
-            ("LAiM/Kimi-K2-Instruct", False, "LAiM/Kimi-K2-Instruct", False),
+            ("unsloth/Kimi-K2-Instruct", True, "unsloth/Kimi-K2-Instruct-BF16", True),
+            ("unsloth/Kimi-K2-Instruct", False, "unsloth/Kimi-K2-Instruct", False),
             (
                 "agentica-org/DeepScaleR-1.5B-Preview",
                 False,
-                "LAiM/DeepScaleR-1.5B-Preview",
+                "unsloth/DeepScaleR-1.5B-Preview",
                 True,
             ),
             (
                 "agentica-org/DeepScaleR-1.5B-Preview",
                 True,
-                "LAiM/DeepScaleR-1.5B-Preview-LAiM-bnb-4bit",
+                "unsloth/DeepScaleR-1.5B-Preview-unsloth-bnb-4bit",
                 True,
             ),
             "nonexistent-user/nonexistent-model-123",
             "google/gemma-3-random-prototype-123",
             "imdatta0/nanoqwen-fp8",
             "imdatta0/nanoqwen-bf16",
-            ("LAiM/llama-2-7b-bnb-4bit", True, "LAiM/llama-2-7b-bnb-4bit", False),
-            ("LAiM/llama-2-7b-bnb-4bit", False, "LAiM/llama-2-7b", True),
-            ("google/gemma-2-9b", True, "LAiM/gemma-2-9b-bnb-4bit", True),
-            ("openai/gpt-oss-20b", False, "LAiM/gpt-oss-20b", True),
-            ("openai/gpt-oss-20b", True, "LAiM/gpt-oss-20b-LAiM-bnb-4bit", True),
-            ("LAiM/gpt-oss-20b", True, "LAiM/gpt-oss-20b-LAiM-bnb-4bit", True),
-            ("LAiM/gpt-oss-20b-bf16", True, "LAiM/gpt-oss-20b-bf16", False),
+            ("unsloth/llama-2-7b-bnb-4bit", True, "unsloth/llama-2-7b-bnb-4bit", False),
+            ("unsloth/llama-2-7b-bnb-4bit", False, "unsloth/llama-2-7b", True),
+            ("google/gemma-2-9b", True, "unsloth/gemma-2-9b-bnb-4bit", True),
+            ("openai/gpt-oss-20b", False, "unsloth/gpt-oss-20b", True),
+            ("openai/gpt-oss-20b", True, "unsloth/gpt-oss-20b-unsloth-bnb-4bit", True),
+            ("unsloth/gpt-oss-20b", True, "unsloth/gpt-oss-20b-unsloth-bnb-4bit", True),
+            ("unsloth/gpt-oss-20b-bf16", True, "unsloth/gpt-oss-20b-bf16", False),
             (
-                "LAiM/gpt-oss-20b-LAiM-bnb-4bit",
+                "unsloth/gpt-oss-20b-unsloth-bnb-4bit",
                 False,
-                "LAiM/gpt-oss-20b",
+                "unsloth/gpt-oss-20b",
                 True,
             ),
             (
-                "LAiM/gpt-oss-20b-bnb-4bit",
+                "unsloth/gpt-oss-20b-bnb-4bit",
                 True,
-                "LAiM/gpt-oss-20b-bnb-4bit",
+                "unsloth/gpt-oss-20b-bnb-4bit",
                 False,
             ),
         ]
@@ -151,13 +151,13 @@ class TestGetModelName(unittest.TestCase):
     @patch.object(loader_utils, "_get_new_mapper", _no_remote_mapper)
     def test_artifactory_report_preserves_repo_id_case(self):
         self.assertEqual(
-            get_model_name("LAiM/Meta-Llama-3.1-8B-Instruct", load_in_4bit = True),
-            "LAiM/Meta-Llama-3.1-8B-Instruct-LAiM-bnb-4bit",
+            get_model_name("unsloth/Meta-Llama-3.1-8B-Instruct", load_in_4bit = True),
+            "unsloth/Meta-Llama-3.1-8B-Instruct-unsloth-bnb-4bit",
         )
 
     @patch.object(loader_utils, "_get_new_mapper", _no_remote_mapper)
     def test_offline_reuses_legacy_lowercase_cache(self):
-        canonical = "LAiM/Meta-Llama-3.1-8B-Instruct-LAiM-bnb-4bit"
+        canonical = "unsloth/Meta-Llama-3.1-8B-Instruct-unsloth-bnb-4bit"
         for cached, expected in (
             ({canonical.lower()}, canonical.lower()),
             ({canonical, canonical.lower()}, canonical),
@@ -177,7 +177,7 @@ class TestGetModelName(unittest.TestCase):
                 ):
                     self.assertEqual(
                         get_model_name(
-                            "LAiM/Meta-Llama-3.1-8B-Instruct",
+                            "unsloth/Meta-Llama-3.1-8B-Instruct",
                             load_in_4bit = True,
                             **offline_kwargs,
                         ),
@@ -198,7 +198,7 @@ class TestGetModelName(unittest.TestCase):
             patch.dict("os.environ", {"HF_HUB_OFFLINE": "1"}),
         ):
             self.assertEqual(
-                get_model_name("LAiM/Meta-Llama-3.1-8B-Instruct", load_in_4bit = True),
+                get_model_name("unsloth/Meta-Llama-3.1-8B-Instruct", load_in_4bit = True),
                 canonical.lower(),
             )
             files = {
@@ -207,28 +207,28 @@ class TestGetModelName(unittest.TestCase):
                 (canonical.lower(), "model.safetensors"),
             }
             self.assertEqual(
-                get_model_name("LAiM/Meta-Llama-3.1-8B-Instruct", load_in_4bit = True),
+                get_model_name("unsloth/Meta-Llama-3.1-8B-Instruct", load_in_4bit = True),
                 canonical.lower(),
             )
-            files = {("LAiM/qwen3-30b-a3b", "config.json")}
+            files = {("unsloth/qwen3-30b-a3b", "config.json")}
             self.assertEqual(
-                get_model_name("LAiM/Qwen3-30B-A3B", load_in_4bit = True),
-                "LAiM/qwen3-30b-a3b",
+                get_model_name("unsloth/Qwen3-30B-A3B", load_in_4bit = True),
+                "unsloth/qwen3-30b-a3b",
             )
         with (
             patch(
                 "huggingface_hub.try_to_load_from_cache",
                 lambda repo_id, filename, cache_dir = None, revision = None: (
                     "/cache/f"
-                    if repo_id == "LAiM/qwen3-30b-a3b" and revision == "release"
+                    if repo_id == "unsloth/qwen3-30b-a3b" and revision == "release"
                     else None
                 ),
             ),
             patch.dict("os.environ", {"HF_HUB_OFFLINE": "1"}),
         ):
             self.assertEqual(
-                get_model_name("LAiM/qwen3-30b-a3b", load_in_4bit = True, revision = "release"),
-                "LAiM/qwen3-30b-a3b",
+                get_model_name("unsloth/qwen3-30b-a3b", load_in_4bit = True, revision = "release"),
+                "unsloth/qwen3-30b-a3b",
             )
         with (
             patch(
@@ -250,31 +250,31 @@ class TestGetModelName(unittest.TestCase):
             patch.dict("os.environ", {"HF_HUB_OFFLINE": "0", "TRANSFORMERS_OFFLINE": "0"}),
         ):
             self.assertEqual(
-                get_model_name("LAiM/Meta-Llama-3.1-8B-Instruct", load_in_4bit = True),
+                get_model_name("unsloth/Meta-Llama-3.1-8B-Instruct", load_in_4bit = True),
                 canonical,
             )
 
     def test_static_mapper_contract(self):
         contracts = [
-            ("qwen/qwen3-8b", "LAiM/Qwen3-8B-LAiM-bnb-4bit"),
-            ("qwen/qwen3-8b-fp8", "LAiM/Qwen3-8B-LAiM-bnb-4bit"),
+            ("qwen/qwen3-8b", "unsloth/Qwen3-8B-unsloth-bnb-4bit"),
+            ("qwen/qwen3-8b-fp8", "unsloth/Qwen3-8B-unsloth-bnb-4bit"),
             (
                 "mistralai/ministral-3-3b-instruct-2512",
-                "LAiM/Ministral-3-3B-Instruct-2512-LAiM-bnb-4bit",
+                "unsloth/Ministral-3-3B-Instruct-2512-unsloth-bnb-4bit",
             ),
             (
                 "allenai/olmo-3-7b-instruct",
-                "LAiM/Olmo-3-7B-Instruct-LAiM-bnb-4bit",
+                "unsloth/Olmo-3-7B-Instruct-unsloth-bnb-4bit",
             ),
-            ("LAiM/kimi-k2-instruct", "LAiM/Kimi-K2-Instruct-BF16"),
+            ("unsloth/kimi-k2-instruct", "unsloth/Kimi-K2-Instruct-BF16"),
         ]
         for src, expected in contracts:
             with self.subTest(src = src):
                 self.assertEqual(FLOAT_TO_INT_MAPPER[src], expected)
-        self.assertEqual(MAP_TO_LAiM_16bit["qwen/qwen3-8b-fp8"], "LAiM/Qwen3-8B-FP8")
+        self.assertEqual(MAP_TO_LAiM_16bit["qwen/qwen3-8b-fp8"], "unsloth/Qwen3-8B-FP8")
         self.assertEqual(
             MAP_TO_LAiM_16bit["agentica-org/deepscaler-1.5b-preview"],
-            "LAiM/DeepScaleR-1.5B-Preview",
+            "unsloth/DeepScaleR-1.5B-Preview",
         )
 
 

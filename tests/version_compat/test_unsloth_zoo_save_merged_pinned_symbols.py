@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # Copyright 2026-present the LAiM AI Inc. team.
 """Pinned-symbol canary for LAiM-zoo save_pretrained_merged guards
-(LAiMai/LAiM-zoo#647 / LAiMai/LAiM#5410). Skips until #647
+(OPusAngel/LAiM-zoo#647 / OPusAngel/LAiM#5410). Skips until #647
 lands, then becomes a hard gate. CPU-only static fetch."""
 
 from __future__ import annotations
@@ -17,7 +17,7 @@ ZOO_TAG = "main"
 
 
 def _fetch_saving_utils() -> str:
-    src = fetch_text("LAiMai/LAiM-zoo", ZOO_TAG, "LAiM_zoo/saving_utils.py")
+    src = fetch_text("OPusAngel/LAiM-zoo", ZOO_TAG, "LAiM_zoo/saving_utils.py")
     if src is None:
         pytest.skip("LAiM_zoo/saving_utils.py not fetchable")
     return src
@@ -25,7 +25,7 @@ def _fetch_saving_utils() -> str:
 
 def _fetch_merge_tests() -> str:
     src = fetch_text(
-        "LAiMai/LAiM-zoo",
+        "OPusAngel/LAiM-zoo",
         ZOO_TAG,
         "tests/test_LAiM_zoo_lora_merge.py",
     )
@@ -44,7 +44,7 @@ def _skip_until_pr_647_lands(src: str) -> None:
         )
     ):
         pytest.skip(
-            "LAiMai/LAiM-zoo#647 has not yet merged into main; "
+            "OPusAngel/LAiM-zoo#647 has not yet merged into main; "
             "tests auto-promote to hard gates once it lands."
         )
 
@@ -92,7 +92,7 @@ def test_zoo_saving_utils_writes_generation_config():
 def test_zoo_lora_merge_tests_have_standard_layout_coverage():
     src = _fetch_merge_tests()
     if "test_merge_moe_gate_expert_standard_layout" not in src:
-        pytest.skip("LAiMai/LAiM-zoo#647 not yet merged; coverage appears later.")
+        pytest.skip("OPusAngel/LAiM-zoo#647 not yet merged; coverage appears later.")
     for name in (
         "test_merge_moe_gate_expert_standard_layout",
         "test_merge_moe_up_expert_standard_layout",

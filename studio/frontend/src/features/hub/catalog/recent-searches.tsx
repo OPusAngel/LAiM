@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Cancel01Icon, Clock01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
@@ -29,20 +30,18 @@ export function RecentSearches({
     <div
       className="hub-recent-panel menu-soft-surface dropdown-surface absolute inset-x-0 top-full z-50 mt-2 overflow-hidden rounded-[16px] p-1.5"
       style={top === undefined ? undefined : { top }}
-      aria-label="Recent searches"
+      aria-label={translate("uxHub.recentSearches1slpp")}
       onMouseDown={(event) => event.preventDefault()}
     >
       <div className="flex items-center justify-between gap-2 px-2.5 pb-1.5 pt-1">
         <span className="text-ui-11 font-semibold uppercase tracking-[0.04em] text-muted-foreground/70">
-          Recent searches
+          {translate("uxHub.recentSearches1slpp")}
         </span>
         <button
           type="button"
           onClick={onClear}
           className="hub-recent-clear rounded-full px-2 py-0.5 text-ui-11p5 font-medium text-muted-foreground transition-colors hover:text-foreground"
-        >
-          Clear all
-        </button>
+        >{translate("uxHub.clearAllyye4n")}</button>
       </div>
       <ul className="flex flex-col">
         {searches.map((query) => (
@@ -64,7 +63,7 @@ export function RecentSearches({
               </button>
               <button
                 type="button"
-                aria-label={`Remove “${query}” from recent searches`}
+                aria-label={translate("uxHub.removeFromRecentSearcheswb0xq", { p1: query })}
                 onClick={() => onRemove(query)}
                 className="hub-recent-remove ml-1 inline-flex size-6 shrink-0 items-center justify-center rounded-full text-muted-foreground opacity-0 transition-[opacity,color,background-color] hover:text-foreground focus-visible:opacity-100 group-hover/recent:opacity-100"
               >

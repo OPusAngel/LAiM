@@ -10,6 +10,8 @@ import {
 import { downloadRecipeJobDataset } from "../../api";
 import type { RecipeExecutionRecord } from "../../execution-types";
 import { hasCompleteLocalDataset } from "../../executions/execution-helpers";
+import { translate } from "@/i18n";
+
 
 /** Whether the bytes are known to have landed: a browser anchor click resolves before the request
  * is even sent, while the native downloader streams and rejects a non-2xx. "partial" is the rows
@@ -69,7 +71,7 @@ export async function downloadExecutionDataset(
   }
 
   if (execution.dataset.length === 0) {
-    throw new Error("This run does not have a dataset to download yet.");
+    throw new Error(translate("uxRecipestudio.thisRunDoesNotlw4f4"));
   }
 
   await triggerClientJsonlDownload(execution.dataset, filenameStem);

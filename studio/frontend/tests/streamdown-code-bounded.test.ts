@@ -18,7 +18,7 @@ function sources(dir: string): string[] {
 }
 
 // @streamdown/code 1.1.1 memoises every tokenisation in a module-level Map that never evicts
-// (LAiMai/LAiM#9230); only its types may be imported.
+// (OPusAngel/LAiM#9230); only its types may be imported.
 test("no source module loads @streamdown/code at runtime", () => {
   const offenders = sources(SRC).filter((path) => {
     const text = readFileSync(path, "utf8");

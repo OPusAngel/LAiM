@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -108,18 +109,18 @@ function McpServerCard({
     provider.env && provider.env.length > 0
       ? provider.env
       : [{ key: "", value: "" }];
-  const summaryTitle = provider.name.trim() || `Tool server ${index + 1}`;
+  const summaryTitle = provider.name.trim() || translate("uxRecipestudio.toolServer622g3", { p1: index + 1 });
   const transportLabel =
     provider.provider_type === "stdio"
-      ? "Local command"
+      ? translate("uxRecipestudio.localCommandv3ueo")
       : provider.provider_type === "sse"
         ? "SSE"
         : "HTTP";
   const toolsLabel = typeof toolsCount === "number" ? `${toolsCount} tools` : null;
   const description =
     provider.provider_type === "stdio"
-      ? "Runs a local tool server."
-      : "Calls a remote tool server.";
+      ? translate("uxRecipestudio.runsALocalToolu2l18")
+      : translate("uxRecipestudio.callsARemoteToolepf0g");
 
   return (
     <Collapsible open={open} onOpenChange={onOpenChange}>
@@ -171,11 +172,11 @@ function McpServerCard({
           )}
 
           <div className="grid gap-1.5">
-            <FieldLabel label="Server name" hint="Name shown in this tool access setup." />
+            <FieldLabel label={translate("uxRecipestudio.serverName27lpf")} hint={translate("uxRecipestudio.nameShownInThiszqtwq")} />
             <Input
               className="nodrag"
               value={provider.name}
-              placeholder="context7"
+              placeholder={translate("uxRecipestudio.context710ipn")}
               onChange={(event) =>
                 onUpdateProviderAt(index, { name: event.target.value })
               }
@@ -195,20 +196,20 @@ function McpServerCard({
             }
           >
               <TabsList className="w-full">
-                <TabsTrigger value="stdio">Local command</TabsTrigger>
-                <TabsTrigger value="streamable_http">HTTP endpoint</TabsTrigger>
-                <TabsTrigger value="sse">SSE endpoint</TabsTrigger>
+                <TabsTrigger value="stdio">{translate("uxRecipestudio.localCommandhhihj")}</TabsTrigger>
+                <TabsTrigger value="streamable_http">{translate("uxRecipestudio.hTTPEndpointdqrzn")}</TabsTrigger>
+                <TabsTrigger value="sse">{translate("uxRecipestudio.sSEEndpointv36yk")}</TabsTrigger>
               </TabsList>
           </Tabs>
 
           {provider.provider_type === "stdio" ? (
             <div className="space-y-4">
               <div className="grid gap-1.5">
-                <FieldLabel label="Command" hint="Command used to start the tool server." />
+                <FieldLabel label={translate("uxRecipestudio.command1j2mk")} hint={translate("uxRecipestudio.commandUsedToStartaibch")} />
                 <Input
                   className="nodrag"
                   value={provider.command ?? ""}
-                  placeholder="npx"
+                  placeholder={translate("uxRecipestudio.npx8psja")}
                   onChange={(event) =>
                     onUpdateProviderAt(index, { command: event.target.value })
                   }
@@ -217,7 +218,7 @@ function McpServerCard({
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between gap-3">
-                  <FieldLabel label="Arguments" hint="Optional command arguments." />
+                  <FieldLabel label={translate("uxRecipestudio.arguments19ai8")} hint={translate("uxRecipestudio.optionalCommandArguments1l5iu")} />
                   <Button
                     type="button"
                     size="xs"
@@ -225,7 +226,7 @@ function McpServerCard({
                     onClick={() => onAddProviderArg(index)}
                   >
                     <HugeiconsIcon icon={PlusSignIcon} className="size-3.5" />
-                    Add arg
+                    {translate("uxRecipestudio.addArg1v4q9")}
                   </Button>
                 </div>
                 {args.map((arg, argIndex) => (
@@ -252,7 +253,7 @@ function McpServerCard({
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between gap-3">
-                  <FieldLabel label="Environment variables" hint="Optional values passed to the tool server." />
+                  <FieldLabel label={translate("uxRecipestudio.environmentVariables17826")} hint={translate("uxRecipestudio.optionalValuesPassedToa8yp0")} />
                   <Button
                     type="button"
                     size="xs"
@@ -260,7 +261,7 @@ function McpServerCard({
                     onClick={() => onAddProviderEnv(index)}
                   >
                     <HugeiconsIcon icon={PlusSignIcon} className="size-3.5" />
-                    Add env
+                    {translate("uxRecipestudio.addEnvlsdsm")}
                   </Button>
                 </div>
                 {envVars.map((item, envIndex) => (
@@ -282,7 +283,7 @@ function McpServerCard({
                       className="nodrag"
                       data-reload-snapshot-sensitive
                       value={item.value}
-                      placeholder="value"
+                      placeholder={translate("uxRecipestudio.valueieyeh")}
                       onChange={(event) =>
                         onUpdateProviderEnv(index, envIndex, {
                           value: event.target.value,
@@ -304,7 +305,7 @@ function McpServerCard({
           ) : (
             <div className="space-y-4">
               <div className="grid gap-1.5">
-                <FieldLabel label="Endpoint" hint="URL for the tool server." />
+                <FieldLabel label={translate("uxModelpicker.endpointb2lti")} hint={translate("uxRecipestudio.uRLForTheTool198d4")} />
                 <Input
                   className="nodrag"
                   value={provider.endpoint ?? ""}
@@ -317,8 +318,8 @@ function McpServerCard({
               <div className="grid gap-2 sm:grid-cols-2">
                 <div className="grid gap-1.5">
                   <FieldLabel
-                    label="API key environment variable"
-                    hint="Optional environment variable that stores the API key."
+                    label={translate("uxRecipestudio.aPIKeyEnvironmentVariableas26h")}
+                    hint={translate("uxRecipestudio.optionalEnvironmentVariableThat1b7b3")}
                   />
                   <Input
                     className="nodrag"
@@ -334,14 +335,14 @@ function McpServerCard({
                 </div>
                 <div className="grid gap-1.5">
                   <FieldLabel
-                    label="API key"
-                    hint="Optional API key."
+                    label={translate("uxRecipestudio.aPIKeyrxain")}
+                    hint={translate("uxRecipestudio.optionalAPIKey1qlfw")}
                   />
                   <Input
                     className="nodrag"
                     data-reload-snapshot-sensitive
                     value={provider.api_key ?? ""}
-                    placeholder="token"
+                    placeholder={translate("uxRecipestudio.token15735")}
                     onChange={(event) =>
                       onUpdateProviderAt(index, {
                         // biome-ignore lint/style/useNamingConvention: api schema
@@ -544,8 +545,8 @@ export function ToolProfileDialog({
     const readyProviders = providers.filter(isProviderReadyForToolFetch);
     if (readyProviders.length === 0) {
       toastError(
-        "No tool servers are ready",
-        "Add a server name plus a command or endpoint first.",
+        translate("uxRecipestudio.noToolServersArexh4je"),
+        translate("uxRecipestudio.addAServerNamet8maf"),
       );
       return;
     }
@@ -577,14 +578,14 @@ export function ToolProfileDialog({
         Object.fromEntries(
           response.providers
             .filter((provider) => provider.name.trim() && provider.error)
-            .map((provider) => [provider.name.trim(), provider.error ?? "Failed to load tools."]),
+            .map((provider) => [provider.name.trim(), provider.error ?? translate("uxRecipestudio.failedToLoadToolsruuys")]),
         ),
       );
       setDuplicateTools(response.duplicate_tools ?? {});
     } catch (error) {
       toastError(
-        "Couldn't load tools",
-        error instanceof Error ? error.message : "We couldn't load the tools for these servers.",
+        translate("uxRecipestudio.couldnTLoadTools86qfx"),
+        error instanceof Error ? error.message : translate("uxRecipestudio.weCouldnTLoadvc81o"),
       );
     } finally {
       setLoadingTools(false);
@@ -619,13 +620,13 @@ export function ToolProfileDialog({
       className="w-full"
     >
       <TabsList className="w-full">
-        <TabsTrigger value="servers">1. Add servers</TabsTrigger>
-        <TabsTrigger value="profile">2. Choose tools</TabsTrigger>
+        <TabsTrigger value="servers">{translate("uxRecipestudio.1AddServersfxka0")}</TabsTrigger>
+        <TabsTrigger value="profile">{translate("uxRecipestudio.2ChooseTools9chla")}</TabsTrigger>
       </TabsList>
 
       <TabsContent value="profile" className="space-y-4 pt-3">
         <NameField
-          label="Tool access name"
+          label={translate("uxRecipestudio.toolAccessName16t4c")}
           value={config.name}
           onChange={(value) => onUpdate({ name: value })}
         />
@@ -633,36 +634,33 @@ export function ToolProfileDialog({
         {!hasProviders ? (
           <div className="space-y-3">
             <EmptyState
-              title="Add a server to start choosing tools"
-              description="Set up a server first, then come back here to choose which tools this step can use."
+              title={translate("uxRecipestudio.addAServerTo1tv5v")}
+              description={translate("uxRecipestudio.setUpAServer16hof")}
             />
             <Button
               type="button"
               variant="outline"
               onClick={() => setActiveTab("servers")}
             >
-              Add servers first
+              {translate("uxCopy.addServersFirst6b2eo")}
             </Button>
           </div>
         ) : (
           <>
             <div className="rounded-2xl border border-border/60 bg-muted/10 px-4 py-3">
               <p className="text-sm font-semibold text-foreground">
-                Pick which tools this setup may use
+                {translate("uxRecipestudio.pickWhichToolsThisw6mfs")}
               </p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                1. Load tool names from your servers. 2. Leave the list empty to
-                allow all tools, or add only the ones this step should use.
-              </p>
+              <p className="mt-1 text-xs text-muted-foreground">{translate("uxRecipestudio.1LoadToolNamesp2nhw")}</p>
             </div>
             <div className="space-y-3 rounded-2xl border border-border/60 bg-muted/10 p-4">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="text-sm font-semibold text-foreground">
-                    Available tools
+                    {translate("uxRecipestudio.availableTools7lmji")}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Load tool names so you can pick from a list instead of guessing.
+                    {translate("uxRecipestudio.loadToolNamesSoxx3sy")}
                   </p>
                 </div>
                 <Button
@@ -674,14 +672,14 @@ export function ToolProfileDialog({
                     void loadTools();
                   }}
                 >
-                  {loadingTools ? "Loading..." : "Load tools"}
+                  {loadingTools ? "Loading..." : translate("uxRecipestudio.loadToolscyweq")}
                 </Button>
               </div>
 
               {Object.keys(toolsByProvider).length === 0 &&
                 Object.keys(providerErrors).length === 0 && (
                   <p className="text-xs text-muted-foreground">
-                    Load tools to browse what's available.
+                    {translate("uxRecipestudio.loadToolsToBrowsen0j22")}
                   </p>
                 )}
 
@@ -718,8 +716,8 @@ export function ToolProfileDialog({
 
             <div className="grid gap-1.5">
               <FieldLabel
-                label="Tools this setup may use"
-                hint="Leave this empty to allow every tool from these servers."
+                label={translate("uxRecipestudio.toolsThisSetupMay1x883")}
+                hint={translate("uxRecipestudio.leaveThisEmptyToymbu0")}
               />
               <ChipInput
                 values={config.allow_tools ?? []}
@@ -738,14 +736,14 @@ export function ToolProfileDialog({
                     ),
                   })
                 }
-                placeholder="Type tool name and press Enter"
+                placeholder={translate("uxRecipestudio.typeToolNameAnd1c4qh")}
               />
             </div>
 
             <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
               <CollapsibleTrigger asChild={true}>
                 <CollapsibleSectionTriggerButton
-                  label="Tool-call limits"
+                  label={translate("uxRecipestudio.toolCallLimits1bl11")}
                   open={advancedOpen}
                 />
               </CollapsibleTrigger>
@@ -753,8 +751,8 @@ export function ToolProfileDialog({
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="grid gap-1.5">
                     <FieldLabel
-                      label="Max tool-use turns"
-                      hint="How many back-and-forth tool calls an AI step can make."
+                      label={translate("uxRecipestudio.maxToolUseTurns9upyt")}
+                      hint={translate("uxRecipestudio.howManyBackAnd24mmp")}
                     />
                     <Input
                       className="nodrag"
@@ -769,8 +767,8 @@ export function ToolProfileDialog({
                   </div>
                   <div className="grid gap-1.5">
                     <FieldLabel
-                      label="Timeout (seconds)"
-                      hint="How long to wait when loading or calling tools."
+                      label={translate("uxRecipestudio.timeoutSeconds65n31")}
+                      hint={translate("uxRecipestudio.howLongToWait4n7fv")}
                     />
                     <Input
                       className="nodrag"
@@ -793,28 +791,27 @@ export function ToolProfileDialog({
       <TabsContent value="servers" className="space-y-4 pt-3">
         <div className="rounded-2xl border border-border/60 bg-muted/10 px-4 py-3">
           <p className="text-sm font-semibold text-foreground">
-            Add one or more tool servers
+            {translate("uxRecipestudio.addOneOrMoreujl8i")}
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
-            After your servers are ready, switch to Choose tools to load names
-            and decide which ones this setup should allow.
+            {translate("uxCopy.afterYourServersAre3ddr7")}
           </p>
         </div>
         <div className="flex items-center justify-between gap-3">
           <FieldLabel
-            label="Tool servers"
-            hint="These servers belong to this tool access setup and can be reused by linked AI steps."
+            label={translate("uxRecipestudio.toolServers1hihz")}
+            hint={translate("uxRecipestudio.theseServersBelongTo172hp")}
           />
           <Button type="button" size="xs" variant="outline" onClick={addProvider}>
             <HugeiconsIcon icon={PlusSignIcon} className="size-3.5" />
-            Add server
+            {translate("uxRecipestudio.addServer16t20")}
           </Button>
         </div>
 
         {!hasProviders ? (
           <EmptyState
-            title="No tool servers yet"
-            description="Add one or more servers here, then go back to Access to load and choose tools."
+            title={translate("uxRecipestudio.noToolServersYet1rtfc")}
+            description={translate("uxRecipestudio.addOneOrMorelep13")}
           />
         ) : (
           <div className="space-y-3">

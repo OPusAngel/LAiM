@@ -149,7 +149,7 @@ test("a rejected username reports the field error FastAPI sends as an array", as
 
 test("model access is set with PUT on the account and null clears it", async () => {
   const c = client(() => Response.json({}));
-  await c.api.setAccountModelAllowlist("alice/id", ["LAiM/*"]);
+  await c.api.setAccountModelAllowlist("alice/id", ["unsloth/*"]);
   await c.api.setAccountModelAllowlist("alice/id", null);
   const put = (allowlist: string[] | null) => ({
     method: "PUT",
@@ -157,7 +157,7 @@ test("model access is set with PUT on the account and null clears it", async () 
     body: JSON.stringify({ model_allowlist: allowlist }),
   });
   assert.deepEqual(c.requests, [
-    { path: "/api/accounts/alice%2Fid/model-access", init: put(["LAiM/*"]) },
+    { path: "/api/accounts/alice%2Fid/model-access", init: put(["unsloth/*"]) },
     { path: "/api/accounts/alice%2Fid/model-access", init: put(null) },
   ]);
 });

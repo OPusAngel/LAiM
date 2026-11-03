@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -52,9 +53,9 @@ export function DatetimeDialog({
         <div className="grid gap-2 sm:grid-cols-2">
           <div className="grid gap-1.5">
             <FieldLabel
-              label="Start"
+              label={translate("uxRecipestudio.start30xvg")}
               htmlFor={startId}
-              hint="Earliest datetime allowed."
+              hint={translate("uxRecipestudio.earliestDatetimeAllowed1hlw5")}
             />
             <Input
               id={startId}
@@ -68,9 +69,9 @@ export function DatetimeDialog({
           </div>
           <div className="grid gap-1.5">
             <FieldLabel
-              label="End"
+              label={translate("studio.dataset.endPlaceholder")}
               htmlFor={endId}
-              hint="Latest datetime allowed."
+              hint={translate("uxRecipestudio.latestDatetimeAllowedgrdc9")}
             />
             <Input
               id={endId}
@@ -85,16 +86,16 @@ export function DatetimeDialog({
         </div>
         <div className="grid gap-1.5">
           <FieldLabel
-            label="Unit"
+            label={translate("uxRecipestudio.unitt3mdr")}
             htmlFor={unitId}
-            hint="Sampling granularity for generated timestamps."
+            hint={translate("uxRecipestudio.samplingGranularityForGeneratedal701")}
           />
           <Select
             value={config.datetime_unit ?? ""}
             onValueChange={(value) => updateField("datetime_unit", value)}
           >
             <SelectTrigger className="nodrag w-full" id={unitId}>
-              <SelectValue placeholder="Select unit" />
+              <SelectValue placeholder={translate("uxRecipestudio.selectUnit15rxz")} />
             </SelectTrigger>
             <SelectContent>
               {DATETIME_UNITS.map((unit) => (

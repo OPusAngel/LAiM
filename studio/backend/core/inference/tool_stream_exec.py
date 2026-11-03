@@ -63,7 +63,7 @@ def _hold_back_partial_secret(text: str) -> int:
             # Keep going left: a terminated occurrence says nothing about an EARLIER one, and
             # stopping at the first one found hid an open token behind it.
             index = tail.rfind(prefix, 0, index)
-    # Also a tail that is a PREFIX of a prefix ("...sk-unslo"), which no rfind above can see.
+    # Also a tail that is a PREFIX of a prefix ("...sk-LAi"), which no rfind above can see.
     for prefix in _SECRET_PREFIXES:
         for length in range(min(len(prefix) - 1, len(text)), 0, -1):
             if text.endswith(prefix[:length]):

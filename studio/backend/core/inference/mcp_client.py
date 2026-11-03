@@ -258,7 +258,7 @@ def _session_log_id(url: str) -> str:
 
 
 def stdio_mcp_enabled() -> bool:
-    """stdio MCP servers spawn local processes as the backend user (bypassing the sandbox), so allowed
+    """stdio MCP servers spawn local processes as the backend user (bypassing the workdir), so allowed
     only when the host is the user's own machine. On startup a loopback bind defaults
     LAiM_STUDIO_ALLOW_STDIO_MCP=1 (see utils.host_policy.apply_stdio_mcp_loopback_default, called
     from run.py); the Tauri app does the same. Off for Colab and any network (0.0.0.0) bind unless
@@ -493,7 +493,7 @@ def _stdio_env(headers: Optional[dict], command: Optional[str] = None) -> Option
     key = _path_key(env)
     base = env.get(key)
     if isinstance(base, str) and not base:
-        # An explicitly empty PATH is a deliberate sandbox: hand it over untouched.
+        # An explicitly empty PATH is a deliberate workdir: hand it over untouched.
         return env
     if command is not None and not _is_node_command(command):
         return env or None

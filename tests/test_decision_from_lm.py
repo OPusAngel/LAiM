@@ -419,7 +419,7 @@ def _typed_decision_rows(n):
     not _qwen3_5_runs_here(), reason = "causal_conv1d is installed but there is no CUDA device"
 )
 def test_the_decision_notebook_runs_unchanged_on_a_plain_qwen3_5(tmp_path, monkeypatch):
-    # LAiMai/notebooks#380's call sequence, on a tiny Qwen3.5 with no decision_head argument.
+    # unslothai/notebooks#380's call sequence, on a tiny Qwen3.5 with no decision_head argument.
     from datasets import Dataset
     from real_accelerator import has_real_cuda
     from transformers import TrainingArguments
@@ -437,7 +437,7 @@ def test_the_decision_notebook_runs_unchanged_on_a_plain_qwen3_5(tmp_path, monke
         r = 16,
         lora_alpha = 16,
         lora_dropout = 0,
-        use_gradient_checkpointing = "LAiM",
+        use_gradient_checkpointing = "unsloth",
         random_state = 3407,
     )
     dataset = Dataset.from_list(_typed_decision_rows(40))

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
-// Same sandboxed frame and strict CSP as an HTML page: every script is inline (no eval, blob: or modules).
+// Same locked-down frame and strict CSP as an HTML page: every script is inline (no eval, blob: or modules).
 
 export type RuntimeScript = { name: string; code: string };
 

@@ -5,6 +5,8 @@ import * as yaml from "js-yaml";
 import type { BackendModelConfig } from "../api/models-api";
 import type { TrainingConfigState } from "../types/config";
 import { drafterRequestFrom } from "./drafter-config";
+import { translate } from "@/i18n";
+
 
 const EXPECTED_TOP_KEYS = new Set(["training", "lora", "logging", "inference"]);
 
@@ -16,7 +18,7 @@ export function parseYamlConfig(text: string): BackendModelConfig {
   const parsed = yaml.load(text);
   if (parsed == null || typeof parsed !== "object" || Array.isArray(parsed)) {
     throw new Error(
-      "Invalid config: expected a YAML mapping with training/lora/logging sections",
+      translate("uxFeatures.invalidConfigExpectedAv1fet"),
     );
   }
 

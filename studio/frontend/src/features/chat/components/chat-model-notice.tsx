@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { ArrowTurnBackwardIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Popover as PopoverPrimitive } from "radix-ui";
@@ -133,19 +134,17 @@ export function ChatModelNotice({
             </button>
           </PopoverTrigger>
         </TooltipTrigger>
-        <TooltipContent side="bottom" sideOffset={6}>
-          Original model: {label}
-        </TooltipContent>
+        <TooltipContent side="bottom" sideOffset={6}>{translate("uxChat.originalModelm5dml", { p1: label })}</TooltipContent>
       </Tooltip>
       <PopoverContent
         align="start"
         sideOffset={6}
         collisionPadding={12}
-        aria-label="Original model"
+        aria-label={translate("uxChat.originalModeltfqhh")}
         className="menu-soft-surface w-64 gap-1 rounded-[14px] p-1"
       >
         <div className="space-y-1 px-3 py-2">
-          <p className="text-ui-12 text-muted-foreground">Original model</p>
+          <p className="text-ui-12 text-muted-foreground">{translate("uxChat.originalModel34v1x")}</p>
           <p className="break-words text-ui-13 font-medium">{label}</p>
         </div>
         <PopoverPrimitive.Close asChild={true}>
@@ -162,7 +161,7 @@ export function ChatModelNotice({
               className="size-icon"
               aria-hidden={true}
             />
-            Switch back
+            {translate("uxChat.switchBack1jb28")}
           </Button>
         </PopoverPrimitive.Close>
       </PopoverContent>

@@ -27,7 +27,7 @@ from packaging.version import InvalidVersion, Version
 from .update_status import DISABLE_ENV_VAR, RELEASE_NOTES_URL
 
 # A release entry carries its whole body (~40 KiB lately), so per_page=100 would be ~4 MiB, twice the cap below, and the fetch would fail outright. 30 is ~1.2 MiB, newest first.
-RELEASES_API_URL = "https://api.github.com/repos/LAiMai/LAiM/releases?per_page=30"
+RELEASES_API_URL = "https://api.github.com/repos/OPusAngel/LAiM/releases?per_page=30"
 RELEASES_URL_ENV_VAR = "LAiM_RELEASES_URL"
 RELEASES_TIMEOUT_SECONDS = 3
 RELEASES_MAX_BYTES = 2 * 1024 * 1024

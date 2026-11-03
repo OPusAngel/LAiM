@@ -27,7 +27,7 @@ const { drafterStateFrom } =
 const { phaseColors } =
   await import("../src/features/studio/sections/progress-section-lib.ts");
 
-const MODEL = "LAiM/Qwen3-1.7B";
+const MODEL = "unsloth/Qwen3-1.7B";
 
 function capability(patch: Partial<DrafterCapability> = {}): DrafterCapability {
   return {
@@ -48,7 +48,7 @@ function config(patch: Partial<TrainingConfigState> = {}): TrainingConfigState {
     modelType: "text",
     selectedModel: MODEL,
     datasetSource: "huggingface",
-    dataset: "LAiM/test",
+    dataset: "unsloth/test",
     ...patch,
   };
 }

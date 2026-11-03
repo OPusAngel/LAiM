@@ -273,7 +273,7 @@ _GGUF_VARIANT_OPTION = typer.Option(
     "--gguf-variant",
     rich_help_panel = _PANEL_MODEL,
     help = "GGUF quant variant to load (e.g. UD-Q4_K_XL). Defaults to UD-Q4_K_XL for "
-    "LAiM/* GGUF repos, else Q4_K_M.",
+    "unsloth/* GGUF repos, else Q4_K_M.",
 )
 _CONTEXT_OPTION = typer.Option(
     0,
@@ -2827,7 +2827,7 @@ def _preflight_agent_gguf(
                 return
         except OSError:
             return
-        repo = f"LAiM/{repo}"
+        repo = f"unsloth/{repo}"
     if not _is_hub_model_id(repo):
         return
     files = _hub_gguf_files(repo)
@@ -2936,7 +2936,7 @@ def _attach_gguf_check(
     # server's cwd passes the gate and evicts. Only an error falls through.
     candidates = [repo]
     if "/" not in repo and (not _is_model_path(repo) or bare_missing_gguf):
-        candidates.append(f"LAiM/{repo}")
+        candidates.append(f"unsloth/{repo}")
     for candidate in candidates:
         try:
             info = _http_json(
@@ -5097,9 +5097,9 @@ def write_openclaw_config(
     # Pin a default model, else OpenClaw drops into its setup agent ("no models available").
     agents = _subdict(config, "agents")
     defaults = _subdict(agents, "defaults")
-    _subdict(defaults, "model")["primary"] = f"LAiM/{model['id']}"
+    _subdict(defaults, "model")["primary"] = f"unsloth/{model['id']}"
     # OpenClaw applies extra_body last; its own params only read camelCase keys, so top_p would be lost.
-    model_ref = f"LAiM/{model['id']}"
+    model_ref = f"unsloth/{model['id']}"
     model_settings = defaults.get("models")
     if request_body or (isinstance(model_settings, dict) and model_ref in model_settings):
         params = _subdict(_subdict(_subdict(defaults, "models"), model_ref), "params")
@@ -6380,7 +6380,7 @@ def _openclaw_app_updates(
     agents = config.get("agents")
     defaults = agents.get("defaults") if isinstance(agents, dict) else None
     defaults = defaults if isinstance(defaults, dict) else {}
-    ref = f"LAiM/{entry['id']}"
+    ref = f"unsloth/{entry['id']}"
     changes = [
         (("models", "providers", "LAiM"), _openclaw_provider(base, key, entry, max_tokens))
     ]

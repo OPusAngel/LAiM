@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { createRoute } from "@tanstack/react-router";
 import { lazy } from "react";
 import { requirePasswordChangeFlow } from "../auth-guards";
@@ -15,7 +16,7 @@ const ChangePasswordPage = lazy(() =>
 export const Route = createRoute({
   getParentRoute: () => rootRoute,
   path: "/change-password",
-  staticData: { title: "Change Password", isAuthFlow: true },
+  staticData: { title: translate("uxApp.changePassword100ew"), isAuthFlow: true },
   beforeLoad: () => requirePasswordChangeFlow(),
   component: ChangePasswordPage,
 });

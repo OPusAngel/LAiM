@@ -78,7 +78,7 @@ def run(args) -> dict:
     result["load_seconds"] = round(time.time() - t0, 1)
     result["resolved_checkpoint"] = getattr(getattr(model, "config", None), "_name_or_path", None)
 
-    # LAiM redirects to a pre-quantised -LAiM-bnb-4bit repo; this arm quantises the original.
+    # LAiM redirects to a pre-quantised -unsloth-bnb-4bit repo; this arm quantises the original.
 
     from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
 

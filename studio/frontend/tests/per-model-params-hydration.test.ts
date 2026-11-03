@@ -32,8 +32,8 @@ const { REMEMBERED_MAX_TOKENS_MAX } = await import(
   "../src/features/chat/lib/per-model-params.ts"
 );
 
-const QWEN = "LAiM/Qwen3.5-9B-GGUF";
-const LLAMA = "LAiM/Llama-4-8B";
+const QWEN = "unsloth/Qwen3.5-9B-GGUF";
+const LLAMA = "unsloth/Llama-4-8B";
 const EXTERNAL = "external::anthropic::claude-opus-5";
 const TUNED = { temperature: 0.2, maxTokens: 4096, systemPrompt: "Be terse." };
 

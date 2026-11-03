@@ -735,10 +735,10 @@ def test_non_ollama_paths_take_the_existing_path(tmp_path):
     from routes.inference import _resolve_model_identifier_for_request
 
     identifier, label, native_grant_backed = _resolve_model_identifier_for_request(
-        LoadRequest(model_path = "LAiM/model-GGUF"), operation = "load-model"
+        LoadRequest(model_path = "unsloth/model-GGUF"), operation = "load-model"
     )
     assert (identifier, label, native_grant_backed) == (
-        "LAiM/model-GGUF",
-        "LAiM/model-GGUF",
+        "unsloth/model-GGUF",
+        "unsloth/model-GGUF",
         False,
     )

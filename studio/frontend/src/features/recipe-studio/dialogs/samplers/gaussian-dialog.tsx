@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -35,9 +36,9 @@ export function GaussianDialog({
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="grid gap-1.5">
           <FieldLabel
-            label="Mean"
+            label={translate("uxRecipestudio.mean1lci9")}
             htmlFor={meanId}
-            hint="Center of the normal distribution."
+            hint={translate("uxRecipestudio.centerOfTheNormaldjvfg")}
           />
           <Input
             id={meanId}
@@ -49,9 +50,9 @@ export function GaussianDialog({
         </div>
         <div className="grid gap-1.5">
           <FieldLabel
-            label="Std"
+            label={translate("uxRecipestudio.std7g2j5")}
             htmlFor={stdId}
-            hint="Standard deviation. must be > 0."
+            hint={translate("uxRecipestudio.standardDeviationMustBegi90t")}
           />
           <Input
             id={stdId}
@@ -64,9 +65,9 @@ export function GaussianDialog({
       </div>
       <div className="grid gap-1.5">
         <FieldLabel
-          label="Convert to"
+          label={translate("uxRecipestudio.convertTooaov5")}
           htmlFor={convertId}
-          hint="Optionally cast sampled values before output."
+          hint={translate("uxRecipestudio.optionallyCastSampledValuestvgyy")}
         />
         <Select
           value={config.convert_to ?? "none"}
@@ -78,7 +79,7 @@ export function GaussianDialog({
           }
         >
           <SelectTrigger className="nodrag w-full" id={convertId}>
-            <SelectValue placeholder="No conversion" />
+            <SelectValue placeholder={translate("uxRecipestudio.noConversion838oh")} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="none">None</SelectItem>

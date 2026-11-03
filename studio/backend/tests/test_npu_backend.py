@@ -1012,5 +1012,5 @@ def test_model_id_from_path_rejects_non_ids(path):
 
 
 def test_other_model_paths_are_not_npu():
-    assert not nb.is_npu_model_path("LAiM/Qwen3-0.6B-GGUF")
+    assert not nb.is_npu_model_path("unsloth/Qwen3-0.6B-GGUF")
     assert not nb.is_npu_model_path(None)

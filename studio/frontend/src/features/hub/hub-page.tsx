@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import type { PipelineType } from "@huggingface/hub";
 import { useAppShellReadySignal } from "@/components/app-readiness";
 import { matchesHubAudioTask } from "@/lib/hub-audio-task";
@@ -233,7 +234,7 @@ function buildFocusedHeading({
   isDataset: boolean;
 }): string {
   const trimmed = query.trim();
-  if (trimmed) return `Results for "${trimmed}"`;
+  if (trimmed) return translate("uxHub.resultsFord80u4", { p1: trimmed });
   if (channel && channel.id !== DEFAULT_DISCOVER_CHANNEL) return channel.label;
   return isDataset ? "Datasets" : "Models";
 }
@@ -1641,21 +1642,32 @@ export function ModelsPage() {
 
   const { vramInfo } = useHubModelVram(selectedModel, gpu);
 
-  const gpuLabel = gpu.available
-    ? `${Math.round(gpu.dedicatedMemoryTotalGb)} GiB`
-    : "Unavailable";
+  // A GGUF-only host can enumerate its card through the inference probe while the
+  // torch view reports none, so the chip falls back to whichever probe saw a GPU.
+  const vramSource = gpu.available
+    ? gpu
+    : inferenceGpu.available
+      ? inferenceGpu
+      : null;
+  const gpuLabel = vramSource
+    ? `${Math.round(
+        vramSource.dedicatedMemoryTotalGb > 0
+          ? vramSource.dedicatedMemoryTotalGb
+          : vramSource.memoryTotalGb,
+      )} GiB`
+    : translate("uxHub.unavailable324pz");
   const gpuSharedLabel =
-    gpu.available && gpu.memorySharedGb > 0
-      ? `${Math.round(gpu.memorySharedGb)} GiB`
+    vramSource && vramSource.memorySharedGb > 0
+      ? `${Math.round(vramSource.memorySharedGb)} GiB`
       : null;
   const ramLabel =
     gpu.systemRamTotalGb > 0
       ? `${Math.round(gpu.systemRamTotalGb)} GiB`
-      : "Unavailable";
+      : translate("uxHub.unavailable324pz");
   const coreLabel =
     gpu.cpuCore > 0 && gpu.cpuThread > 0
       ? `${gpu.cpuCore}/${gpu.cpuThread}`
-      : "Unavailable";
+      : translate("uxHub.unavailable324pz");
   const handleSearchHub = useCallback(
     (next: string) => {
       const trimmed = next.trim();
@@ -1760,7 +1772,7 @@ export function ModelsPage() {
         )
       ) {
         toast.error(
-          `${selectedModel.hubRepoId} is not an audio model LAiM can run yet. The Audio page lists the families it supports.`,
+          translate("uxHub.isNotAnAudioetsd0", { p1: selectedModel.hubRepoId }),
           { duration: 7000 },
         );
         return;
@@ -1780,9 +1792,9 @@ export function ModelsPage() {
           selection,
         });
         if (!request) {
-          toast.error("Couldn't open run settings.", {
+          toast.error(translate("uxHub.couldnTOpenRun1mbgi"), {
             description:
-              "The model or selected quantization is no longer available to run.",
+              translate("uxHub.theModelOrSelected18kap"),
           });
           return;
         }
@@ -2042,7 +2054,7 @@ export function ModelsPage() {
   const downloadedHeader = useMemo(() => {
     return (
       <HubListHeader
-        title="On device"
+        title={translate("settings.general.rag.onDevice")}
         count={filteredCachedRows.length + filteredLocalRows.length}
         view={allModelsView}
         onViewChange={setAllModelsView}
@@ -2201,7 +2213,7 @@ export function ModelsPage() {
             </div>
           ) : (
             <div className="hidden min-h-0 flex-1 items-center justify-center px-6 text-center text-ui-13 text-muted-foreground lg:flex">
-              Select a model to preview its details.
+              {translate("uxHub.selectAModelTo12p1q")}
             </div>
           )
         ) : (

@@ -13,16 +13,16 @@ pytestmark = pytest.mark.gpu
 # One model per save path, the smallest that still exercises it: this file runs in the default
 # `pytest tests/` walk, so every entry is paid by anyone running the suite.
 model_to_test = [
-    "LAiM/Qwen2.5-0.5B-Instruct",
+    "unsloth/Qwen2.5-0.5B-Instruct",
     # Pre-quantized checkpoint: the merge must dequantize back out of it.
-    "LAiM/tinyllama-bnb-4bit",
+    "unsloth/tinyllama-bnb-4bit",
     # The only entry whose merged output exceeds the 5GB shard limit, so it alone covers sharded output
     # in a default run. Keep an entry above 5GB here.
-    "LAiM/Qwen2.5-VL-3B-Instruct-bnb-4bit",
+    "unsloth/Qwen2.5-VL-3B-Instruct-bnb-4bit",
 ]
 
 torchao_models = [
-    "LAiM/Qwen2.5-0.5B-Instruct",
+    "unsloth/Qwen2.5-0.5B-Instruct",
 ]
 
 
@@ -54,7 +54,7 @@ def loaded_model_tokenizer(request):
         r = 16,
         target_modules = ["q_proj", "k_proj", "v_proj", "o_proj"],
         lora_alpha = 16,
-        use_gradient_checkpointing = "LAiM",
+        use_gradient_checkpointing = "unsloth",
     )
 
     return model, tokenizer
@@ -78,7 +78,7 @@ def fp16_model_tokenizer(request):
         r = 16,
         target_modules = ["q_proj", "k_proj", "v_proj", "o_proj"],
         lora_alpha = 16,
-        use_gradient_checkpointing = "LAiM",
+        use_gradient_checkpointing = "unsloth",
     )
 
     return model, tokenizer

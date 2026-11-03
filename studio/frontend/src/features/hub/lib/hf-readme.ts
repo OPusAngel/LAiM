@@ -6,6 +6,8 @@ import { fetchWithTimeout } from "@/features/hub/lib/network";
 import { fingerprintToken } from "@/features/hub/lib/token-fingerprint";
 import { getHfEndpoint } from "@/lib/hf-endpoint";
 import { defaultUrlTransform, type UrlTransform } from "streamdown";
+import { translate } from "@/i18n";
+
 
 export type ReadmeKind = "model" | "dataset";
 
@@ -73,7 +75,7 @@ async function fetchReadmeOnce(
     }
   }
   if (transient) {
-    throw new Error(`Failed to fetch README for ${repoId}`);
+    throw new Error(translate("uxHub.failedToFetchREADMEn1thq", { p1: repoId }));
   }
   return null;
 }

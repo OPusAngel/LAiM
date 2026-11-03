@@ -127,7 +127,7 @@ class TestTheKvCacheEstimateEnvelope:
             monkeypatch,
             path = gguf,
             weights_bytes = 4_000_000_000,
-            repo_id = "LAiM/contract-freeze-GGUF",
+            repo_id = "unsloth/contract-freeze-GGUF",
             speculative_type = None,
         )
         assert out is not None, "the route answered None for a sizable local GGUF"
@@ -159,7 +159,7 @@ class TestTheKvCacheEstimateEnvelope:
             monkeypatch,
             path = gguf,
             weights_bytes = quant_size,
-            repo_id = "LAiM/contract-freeze-GGUF",
+            repo_id = "unsloth/contract-freeze-GGUF",
             speculative_type = None,
         )
         assert out[
@@ -187,7 +187,7 @@ class TestTheKvCacheEstimateEnvelope:
             monkeypatch,
             path = gguf,
             weights_bytes = 4_000_000_000,
-            repo_id = "LAiM/contract-freeze-GGUF",
+            repo_id = "unsloth/contract-freeze-GGUF",
             speculative_type = None,
         )
         for field in ("gpu_bytes", "total_bytes", "gpu_floor_bytes", "compute_bytes"):

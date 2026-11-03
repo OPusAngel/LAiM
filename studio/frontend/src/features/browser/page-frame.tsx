@@ -122,7 +122,7 @@ function userActive(frame: HTMLIFrameElement, message: FrameMessage): boolean {
   return active ?? message.type !== "external";
 }
 
-/** A page written into the sandbox shell (opaque origin, so it can't reach Studio's storage or API). */
+/** A page written into the workdir shell (opaque origin, so it can't reach Studio's storage or API). */
 export function PageFrame({
   html,
   url,

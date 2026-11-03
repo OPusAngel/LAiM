@@ -24,7 +24,7 @@ pytestmark = [
     ),
 ]
 
-MODEL = os.environ.get("LAiM_GGUF_TEST_MODEL", "LAiM/Qwen2.5-0.5B-Instruct")
+MODEL = os.environ.get("LAiM_GGUF_TEST_MODEL", "unsloth/Qwen2.5-0.5B-Instruct")
 PHRASE = "BANANAPHONE42"
 _ANSWER = f"The secret LAiM code is {PHRASE}."
 
@@ -199,7 +199,7 @@ def test_gguf_llama_cli_inference_reflects_finetune(exported_gguf):
 
 
 # Needs a base whose LAiM/<base>-GGUF ships an imatrix.
-IMATRIX_MODEL = os.environ.get("LAiM_IMATRIX_TEST_MODEL", "LAiM/Llama-3.2-1B-Instruct")
+IMATRIX_MODEL = os.environ.get("LAiM_IMATRIX_TEST_MODEL", "unsloth/Llama-3.2-1B-Instruct")
 IMATRIX_QUANTS = ["iq2_xxs", "iq4_xs"]
 
 

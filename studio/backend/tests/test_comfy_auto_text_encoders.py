@@ -2,7 +2,7 @@
 # Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """A local DiT inside a ComfyUI tree takes its text encoder from the tree's ``text_encoders/`` folder instead of
-downloading the base repo's (LAiMai/LAiM#8950). CPU only, tiny Qwen3 encoders in the ComfyUI layout."""
+downloading the base repo's (OPusAngel/LAiM#8950). CPU only, tiny Qwen3 encoders in the ComfyUI layout."""
 
 from __future__ import annotations
 

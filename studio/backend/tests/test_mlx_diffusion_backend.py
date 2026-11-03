@@ -23,7 +23,7 @@ from core.inference.diffusion_families import (
 
 ZIMAGE = next(f for f in _FAMILIES if f.name == "z-image")
 
-REPO = "LAiM/Z-Image-Turbo-GGUF"
+REPO = "unsloth/Z-Image-Turbo-GGUF"
 GGUF = "z-image-turbo-Q4_0.gguf"
 _REAL_RESOLVE_VARIANT_BASE = getattr(mb, "resolve_variant_base", None)
 BASE = "Tongyi-MAI/Z-Image-Turbo"
@@ -243,7 +243,7 @@ def test_local_files_only_reaches_every_fetch(env):
 )
 def test_begin_load_refuses_what_it_cannot_run(env, kwargs, needle):
     backend, _rt, _calls = env
-    repo = "LAiM/SDXL-GGUF" if "sdxl" in str(kwargs.get("gguf_filename")) else REPO
+    repo = "unsloth/SDXL-GGUF" if "sdxl" in str(kwargs.get("gguf_filename")) else REPO
     with pytest.raises(ValueError, match = needle):
         backend.begin_load(repo, **kwargs)
     assert backend.loading_repo_ids() == ()
@@ -384,7 +384,7 @@ def test_unload_during_load_waits_for_the_build_and_discards_it(env, monkeypatch
     runtime.build = _slow_build
     backend.begin_load(REPO, gguf_filename = GGUF, model_kind = "gguf")
     assert started.wait(5)
-    assert backend.loading_repo_ids() == (REPO, BASE, "LAiM/Z-Image-Turbo")
+    assert backend.loading_repo_ids() == (REPO, BASE, "unsloth/Z-Image-Turbo")
     with pytest.raises(RuntimeError, match = "already in progress"):
         backend.begin_load(REPO, gguf_filename = GGUF, model_kind = "gguf")
     done = threading.Event()
@@ -461,7 +461,7 @@ def test_a_cache_only_undistilled_pick_with_no_record_builds_the_base_config(env
     monkeypatch.setattr(mb, "resolve_variant_base", _REAL_RESOLVE_VARIANT_BASE, raising = False)
     monkeypatch.setattr(companion, "read_companion_links", lambda: {})
     backend.begin_load(
-        "LAiM/Z-Image-GGUF",
+        "unsloth/Z-Image-GGUF",
         gguf_filename = "z-image-Q4_0.gguf",
         model_kind = "gguf",
         local_files_only = True,
@@ -474,11 +474,11 @@ def test_a_cache_only_undistilled_pick_with_no_record_builds_the_base_config(env
 @pytest.mark.parametrize(
     "repo_id, gguf_filename, expected",
     [
-        ("LAiM/Z-Image-GGUF", "z-image-Q4_K_M.gguf", "Tongyi-MAI/Z-Image"),
-        ("LAiM/Z-Image-GGUF", "z-image-BF16.gguf", "Tongyi-MAI/Z-Image"),
-        ("LAiM/Z-Image-Turbo-GGUF", "z-image-turbo-Q4_K_M.gguf", BASE),
-        ("LAiM/Z-Image-GGUF", "z-image-turbo-Q4_0.gguf", BASE),
-        ("LAiM/Z-Image-Turbo-GGUF", "z-image-Q4_0.gguf", BASE),
+        ("unsloth/Z-Image-GGUF", "z-image-Q4_K_M.gguf", "Tongyi-MAI/Z-Image"),
+        ("unsloth/Z-Image-GGUF", "z-image-BF16.gguf", "Tongyi-MAI/Z-Image"),
+        ("unsloth/Z-Image-Turbo-GGUF", "z-image-turbo-Q4_K_M.gguf", BASE),
+        ("unsloth/Z-Image-GGUF", "z-image-turbo-Q4_0.gguf", BASE),
+        ("unsloth/Z-Image-Turbo-GGUF", "z-image-Q4_0.gguf", BASE),
         ("leejet/Z-Image-Turbo-GGUF", "z_image_turbo-Q4_K.gguf", BASE),
         ("someone/my-gguf-models", "model-Q4_K_M.gguf", BASE),
         ("someone/Z-Image-GGUF", "model-Q4_K_M.gguf", "Tongyi-MAI/Z-Image"),
@@ -502,14 +502,14 @@ def test_a_recorded_default_does_not_overrule_an_undistilled_name(monkeypatch):
     import hub.utils.companion_assets as companion
 
     fam = ZIMAGE
-    links = {"LAiM/z-image-gguf": [BASE]}
+    links = {"unsloth/z-image-gguf": [BASE]}
     monkeypatch.setattr(companion, "read_companion_links", lambda: links)
-    assert mb._cached_variant_base("LAiM/Z-Image-GGUF", fam, "z-image-Q4_K_M.gguf", BASE) == (
+    assert mb._cached_variant_base("unsloth/Z-Image-GGUF", fam, "z-image-Q4_K_M.gguf", BASE) == (
         "Tongyi-MAI/Z-Image"
     )
-    links["LAiM/z-image-turbo-gguf"] = ["Tongyi-MAI/Z-Image"]
+    links["unsloth/z-image-turbo-gguf"] = ["Tongyi-MAI/Z-Image"]
     assert (
-        mb._cached_variant_base("LAiM/Z-Image-Turbo-GGUF", fam, "z-image-turbo-Q4_0.gguf", BASE)
+        mb._cached_variant_base("unsloth/Z-Image-Turbo-GGUF", fam, "z-image-turbo-Q4_0.gguf", BASE)
         == "Tongyi-MAI/Z-Image"
     )
 
@@ -714,7 +714,7 @@ def test_an_online_undistilled_pick_without_a_card_tag_keeps_the_named_variant(
     monkeypatch.setattr(mb, "resolve_variant_base", _REAL_RESOLVE_VARIANT_BASE, raising = False)
     monkeypatch.setattr(diffusion, "_hf_base_model", lambda repo_id, token: card_tag)
     monkeypatch.setattr(diffusion, "_remember_companion_base", lambda *a: None)
-    backend.begin_load("LAiM/Z-Image-GGUF", gguf_filename = "z-image-Q4_0.gguf", model_kind = "gguf")
+    backend.begin_load("unsloth/Z-Image-GGUF", gguf_filename = "z-image-Q4_0.gguf", model_kind = "gguf")
     assert _wait_loaded(backend)["phase"] == "ready"
     assert calls["fetch_base"][-1] == (expected_base, False)
     assert runtime.builds[-1]["model_config"] == expected_config
@@ -728,7 +728,7 @@ def test_a_resolver_error_keeps_the_named_variant(monkeypatch):
 
     monkeypatch.setattr(diffusion, "_hf_base_model", _boom)
     out = mb.resolve_variant_base(
-        "LAiM/Z-Image-GGUF", ZIMAGE, None, "z-image-Q4_0.gguf", fallback = BASE
+        "unsloth/Z-Image-GGUF", ZIMAGE, None, "z-image-Q4_0.gguf", fallback = BASE
     )
     assert out == "Tongyi-MAI/Z-Image"
 
@@ -1027,7 +1027,7 @@ def test_base_companions_come_from_the_repo_the_plan_staged(monkeypatch):
     monkeypatch.setattr(
         mb,
         "prefer_ungated_mirror",
-        lambda base, tok = None, *, files = None: judged.append(files) or "LAiM/Z-Image-Turbo",
+        lambda base, tok = None, *, files = None: judged.append(files) or "unsloth/Z-Image-Turbo",
         raising = False,
     )
     fetched = []
@@ -1039,8 +1039,8 @@ def test_base_companions_come_from_the_repo_the_plan_staged(monkeypatch):
     )
     mb.fetch_base_snapshot(BASE, None, local_files_only = False)
     assert judged == [files]
-    assert listed == [BASE, "LAiM/Z-Image-Turbo"]
-    assert fetched == [("LAiM/Z-Image-Turbo", f, "abc") for f in files]
+    assert listed == [BASE, "unsloth/Z-Image-Turbo"]
+    assert fetched == [("unsloth/Z-Image-Turbo", f, "abc") for f in files]
 
 
 def _companion_snapshot(
@@ -1075,7 +1075,7 @@ def test_cache_only_companions_read_the_mirror_and_the_live_cache_root(monkeypat
     monkeypatch.setattr(
         mb,
         "prefer_ungated_mirror",
-        lambda base, tok = None, **k: "LAiM/Z-Image-Turbo",
+        lambda base, tok = None, **k: "unsloth/Z-Image-Turbo",
         raising = False,
     )
     mirror_snapshot = _companion_snapshot(tmp_path / "live" / "mirror-snap")
@@ -1090,14 +1090,14 @@ def test_cache_only_companions_read_the_mirror_and_the_live_cache_root(monkeypat
     ):
         assert local_files_only
         asked.append((repo, cache_dir))
-        if (repo, cache_dir) == ("LAiM/Z-Image-Turbo", live):
+        if (repo, cache_dir) == ("unsloth/Z-Image-Turbo", live):
             return mirror_snapshot
         raise LocalEntryNotFoundError("not cached")
 
     monkeypatch.setattr(huggingface_hub, "snapshot_download", _snapshot)
     out = mb.fetch_base_snapshot(BASE, None, local_files_only = True)
     assert out == mirror_snapshot
-    assert asked == [("LAiM/Z-Image-Turbo", live)]
+    assert asked == [("unsloth/Z-Image-Turbo", live)]
     asked.clear()
     monkeypatch.setattr(mb, "prefer_ungated_mirror", lambda base, tok = None, **k: base)
     monkeypatch.setenv("LAiM_DIFFUSION_NO_MIRROR", "1")
@@ -1121,7 +1121,7 @@ def test_cache_only_companions_skip_an_incomplete_upstream_for_the_staged_mirror
     monkeypatch.setattr(mb, "prefer_ungated_mirror", lambda base, tok = None, **k: base)
     snapshots = {
         BASE: _companion_snapshot(tmp_path / "upstream", complete = False),
-        "LAiM/Z-Image-Turbo": _companion_snapshot(tmp_path / "mirror"),
+        "unsloth/Z-Image-Turbo": _companion_snapshot(tmp_path / "mirror"),
     }
 
     def _snapshot(
@@ -1139,9 +1139,9 @@ def test_cache_only_companions_skip_an_incomplete_upstream_for_the_staged_mirror
     monkeypatch.setattr(huggingface_hub, "snapshot_download", _snapshot)
     assert (
         mb.fetch_base_snapshot(BASE, None, local_files_only = True)
-        == snapshots["LAiM/Z-Image-Turbo"]
+        == snapshots["unsloth/Z-Image-Turbo"]
     )
-    del snapshots["LAiM/Z-Image-Turbo"]
+    del snapshots["unsloth/Z-Image-Turbo"]
     with pytest.raises(LocalEntryNotFoundError, match = "complete"):
         mb.fetch_base_snapshot(BASE, None, local_files_only = True)
 
@@ -1336,7 +1336,7 @@ def test_cache_only_companions_skip_a_snapshot_without_tokenizer_config(monkeypa
     monkeypatch.setattr(mb, "prefer_ungated_mirror", lambda base, tok = None, **k: base)
     snapshots = {
         BASE: _companion_snapshot(tmp_path / "upstream", tokenizer_config = False),
-        "LAiM/Z-Image-Turbo": _companion_snapshot(tmp_path / "mirror"),
+        "unsloth/Z-Image-Turbo": _companion_snapshot(tmp_path / "mirror"),
     }
 
     def _snapshot(
@@ -1353,7 +1353,7 @@ def test_cache_only_companions_skip_a_snapshot_without_tokenizer_config(monkeypa
     monkeypatch.setattr(huggingface_hub, "snapshot_download", _snapshot)
     assert (
         mb.fetch_base_snapshot(BASE, None, local_files_only = True)
-        == snapshots["LAiM/Z-Image-Turbo"]
+        == snapshots["unsloth/Z-Image-Turbo"]
     )
 
 
@@ -1375,17 +1375,17 @@ def test_a_cancelled_load_keeps_the_companion_mirror_guarded(env, monkeypatch):
     runtime.build = _slow_build
     backend.begin_load(REPO, gguf_filename = GGUF, model_kind = "gguf")
     assert started.wait(5)
-    assert "LAiM/Z-Image-Turbo" in backend.loading_repo_ids()
-    assert "using this repo" in (deletion._diffusion_blocks_delete("LAiM/Z-Image-Turbo") or "")
+    assert "unsloth/Z-Image-Turbo" in backend.loading_repo_ids()
+    assert "using this repo" in (deletion._diffusion_blocks_delete("unsloth/Z-Image-Turbo") or "")
     unloader = threading.Thread(target = backend.unload)
     unloader.start()
     deadline = time.time() + 5
     while not backend._unloading and time.time() < deadline:
         time.sleep(0.01)
     try:
-        assert "LAiM/Z-Image-Turbo" in backend.draining_repo_ids()
+        assert "unsloth/Z-Image-Turbo" in backend.draining_repo_ids()
         assert "still releasing" in (
-            deletion._diffusion_blocks_delete("LAiM/Z-Image-Turbo") or ""
+            deletion._diffusion_blocks_delete("unsloth/Z-Image-Turbo") or ""
         )
     finally:
         gate.set()

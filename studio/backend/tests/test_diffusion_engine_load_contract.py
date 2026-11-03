@@ -74,7 +74,7 @@ def test_both_engines_accept_every_keyword_the_route_passes(engine):
     # has to be constructed. bind checks names and arity, never values.
     signature.bind(
         None,
-        "LAiM/FLUX.1-dev-GGUF",
+        "unsloth/FLUX.1-dev-GGUF",
         **{name: None for name in keywords},
     )
 
@@ -140,7 +140,7 @@ def _drive_the_images_load(monkeypatch, *, user_initiated: bool):
     asyncio.run(
         load_diffusion_model_gated(
             DiffusionLoadRequest(
-                model_path = "LAiM/FLUX.1-dev-GGUF",
+                model_path = "unsloth/FLUX.1-dev-GGUF",
                 gguf_filename = "flux1-dev-Q4_K_M.gguf",
             ),
             "test-user",
@@ -207,7 +207,7 @@ def test_a_cache_only_native_load_makes_no_hub_call(monkeypatch):
 
     monkeypatch.setattr(Native, "_fetch_assets", _fetch)
 
-    repo = "LAiM/FLUX.1-dev-GGUF"
+    repo = "unsloth/FLUX.1-dev-GGUF"
     Native._run_load(
         backend,
         repo_id = repo,
@@ -240,12 +240,12 @@ def test_the_native_fetch_resolves_from_cache_only(monkeypatch, tmp_path):
     monkeypatch.setattr(xet, "hf_hub_download_with_xet_fallback", _download)
 
     Native(engine = None)._fetch_assets(
-        [("LAiM/FLUX.1-dev-GGUF", "flux1-dev-Q4_K_M.gguf", "diffusion_model")],
+        [("unsloth/FLUX.1-dev-GGUF", "flux1-dev-Q4_K_M.gguf", "diffusion_model")],
         None,
         local_files_only = True,
     )
 
-    assert seen == [("LAiM/FLUX.1-dev-GGUF", "flux1-dev-Q4_K_M.gguf", True)]
+    assert seen == [("unsloth/FLUX.1-dev-GGUF", "flux1-dev-Q4_K_M.gguf", True)]
 
 
 def test_an_uncached_asset_fails_with_a_local_error_naming_it(monkeypatch):
@@ -271,7 +271,7 @@ def test_an_uncached_asset_fails_with_a_local_error_naming_it(monkeypatch):
     assert "ae.safetensors" in message
     # The FETCH repo, which is where the bytes were looked for: the gated vendor base is swapped
     # to its ungated mirror before the lookup, so naming the upstream id would misdirect.
-    assert "LAiM/FLUX.1-dev" in message
+    assert "unsloth/FLUX.1-dev" in message
 
 
 def test_an_uncached_vision_projector_does_not_fail_an_offline_load(monkeypatch, tmp_path):
@@ -292,7 +292,7 @@ def test_an_uncached_vision_projector_does_not_fail_an_offline_load(monkeypatch,
         return str(cached)
 
     monkeypatch.setattr(xet, "hf_hub_download_with_xet_fallback", _download)
-    repo = "LAiM/Qwen3-VL-8B-Instruct-GGUF"
+    repo = "unsloth/Qwen3-VL-8B-Instruct-GGUF"
     paths = Native(engine = None)._fetch_assets(
         [(repo, cached.name, "llm"), (repo, "mmproj-F16.gguf", "llm_vision")],
         None,
@@ -320,7 +320,7 @@ def test_the_default_still_takes_the_xet_fallback_ladder(monkeypatch, tmp_path):
     monkeypatch.setattr(xet, "_shared_hf_hub_download_with_xet_fallback", _shared)
 
     xet.hf_hub_download_with_xet_fallback(
-        "LAiM/FLUX.1-dev-GGUF", "flux1-dev-Q4_K_M.gguf", None, cache_dir = str(tmp_path)
+        "unsloth/FLUX.1-dev-GGUF", "flux1-dev-Q4_K_M.gguf", None, cache_dir = str(tmp_path)
     )
 
     assert len(seen) == 1
@@ -351,7 +351,7 @@ def test_the_offline_download_never_reaches_the_shared_ladder(monkeypatch, tmp_p
     monkeypatch.setattr(huggingface_hub, "hf_hub_download", _hub)
 
     xet.hf_hub_download_with_xet_fallback(
-        "LAiM/FLUX.1-dev-GGUF",
+        "unsloth/FLUX.1-dev-GGUF",
         "flux1-dev-Q4_K_M.gguf",
         None,
         cache_dir = str(tmp_path),
@@ -369,7 +369,7 @@ def test_a_cancelled_offline_download_still_stops(monkeypatch, tmp_path):
     cancel.set()
     with pytest.raises(RuntimeError):
         xet.hf_hub_download_with_xet_fallback(
-            "LAiM/FLUX.1-dev-GGUF",
+            "unsloth/FLUX.1-dev-GGUF",
             "flux1-dev-Q4_K_M.gguf",
             None,
             cache_dir = str(tmp_path),

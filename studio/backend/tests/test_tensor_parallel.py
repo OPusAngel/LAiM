@@ -1288,7 +1288,7 @@ def test_split_mode_tensor_arch_failure_message():
     msg = LlamaCppBackend._classify_llama_start_failure(
         "llama_model_create: LLAMA_SPLIT_MODE_TENSOR not implemented for architecture 'deepseek2'",
         None,
-        "LAiM/DeepSeek-V3-GGUF",
+        "unsloth/DeepSeek-V3-GGUF",
     )
     assert "Tensor parallelism is not supported" in msg
 

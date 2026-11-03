@@ -748,7 +748,7 @@ def test_codeowners_pattern_semantics(pattern, path, matches):
     "token, valid",
     [
         ("@danielhanchen", True),
-        ("@LAiMai/maintainers", True),
+        ("@unslothai/maintainers", True),
         ("danielhanchen@gmail.com", True),
         ("not-an-owner", False),
         ("@", False),
@@ -2783,7 +2783,7 @@ def test_an_action_used_from_a_checkout_subdirectory_is_reachable(tmp_path):
         "on:\n  pull_request:\n"
         "jobs:\n  build:\n    runs-on: ubuntu-latest\n"
         "    steps:\n"
-        # checked out under `LAiM/`, so the reference carries that prefix
+        # checked out under `unsloth/`, so the reference carries that prefix
         "      - uses: ./LAiM/.github/actions/nested-cache\n"
     )
     (wf / "release-desktop.yml").write_text(

@@ -5,7 +5,6 @@ import { authFetch } from "@/features/auth";
 import type { ChatPresetSource } from "../presets/preset-policy";
 import type {
   PermissionMode,
-  SandboxLevel,
   RagAutoInject,
   RagMode,
   RagSource,
@@ -23,6 +22,8 @@ import {
   ChatSettingsRequestError,
   isUnderKeepaliveBudget,
 } from "../utils/settings-retry";
+import { translate } from "@/i18n";
+
 
 export type { PersistedInferenceParams };
 
@@ -63,9 +64,8 @@ export interface PersistedChatSettings {
   researchModelTimeoutSeconds?: number;
   mcpEnabledForChat?: boolean;
   confirmToolCalls?: boolean;
-  /** "full" (Full access) is session-only and never leaves the browser. */
+  /** "full" (Full access) is kept in local storage and never leaves the browser. */
   permissionMode?: Exclude<PermissionMode, "full">;
-  sandboxLevel?: SandboxLevel;
   ragSource?: RagSource;
   ragMode?: RagMode;
   ragTopK?: number;
@@ -117,7 +117,7 @@ function parseErrorText(status: number, body: unknown): string {
   ) {
     return body.message;
   }
-  return `Request failed (${status})`;
+  return translate("uxChat.requestFailedb9a7f", { p1: status });
 }
 
 async function parseJsonOrThrow<T>(response: Response): Promise<T> {

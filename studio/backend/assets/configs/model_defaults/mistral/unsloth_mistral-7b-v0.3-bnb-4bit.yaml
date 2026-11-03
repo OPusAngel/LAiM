@@ -1,6 +1,6 @@
-# Model defaults for LAiM/mistral-7b-v0.3-bnb-4bit
+# Model defaults for unsloth/mistral-7b-v0.3-bnb-4bit
 # Based on Mistral_v0.3_(7B)-Alpaca.ipynb
-# Also applies to: "LAiM/mistral-7b-v0.3", "mistralai/Mistral-7B-v0.3",
+# Also applies to: "unsloth/mistral-7b-v0.3", "mistralai/Mistral-7B-v0.3",
 training:
   max_seq_length: 2048
   # num_epochs: 4
@@ -15,7 +15,7 @@ training:
   random_seed: 3407
   packing: false
   train_on_completions: true
-  gradient_checkpointing: "LAiM"
+  gradient_checkpointing: "unsloth"
   optim: "adamw_8bit"
   lr_scheduler_type: "linear"
 

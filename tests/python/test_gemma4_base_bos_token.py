@@ -144,7 +144,7 @@ def test_load_correct_tokenizer_skips_instruct():
         )
 
     with patch.object(tu, "AutoTokenizer", types.SimpleNamespace(from_pretrained = from_pretrained)):
-        result = tu._load_correct_tokenizer("LAiM/gemma-4-E2B-it", fix_tokenizer = True)
+        result = tu._load_correct_tokenizer("unsloth/gemma-4-E2B-it", fix_tokenizer = True)
 
     assert result.add_bos_token is False
 
@@ -198,12 +198,12 @@ def test_gemma4_e2b_hub_tokenizer_prepends_bos():
     pytest.importorskip("transformers")
     from transformers import AutoTokenizer
 
-    tok = tu.load_correct_tokenizer("LAiM/gemma-4-E2B", fix_tokenizer = True)
+    tok = tu.load_correct_tokenizer("unsloth/gemma-4-E2B", fix_tokenizer = True)
     assert tok.add_bos_token is True
     ids = tok("This book is largely concerned with Hobbits,")["input_ids"]
     assert ids[0] == tok.bos_token_id
 
-    raw = AutoTokenizer.from_pretrained("LAiM/gemma-4-E2B", trust_remote_code = True)
+    raw = AutoTokenizer.from_pretrained("unsloth/gemma-4-E2B", trust_remote_code = True)
     raw_ids = raw("This book is largely concerned with Hobbits,")["input_ids"]
     assert raw_ids[0] != raw.bos_token_id
 

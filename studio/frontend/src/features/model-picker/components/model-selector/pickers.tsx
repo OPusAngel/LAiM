@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   isChatGgufTask,
   reconcileGgufPinsAfterDelete,
@@ -307,7 +308,7 @@ function dedupe(values: string[]): string[] {
 
 /** The primary namespace used by runtime trust gates. */
 function isLAiMRepoId(repoId: string): boolean {
-  return repoId.toLowerCase().startsWith("LAiM/");
+  return repoId.toLowerCase().startsWith("unsloth/");
 }
 
 /** Official publisher namespaces used only for visual On Device grouping. */
@@ -522,7 +523,7 @@ function ListLabel({
             <button
               type="button"
               onClick={onToggle}
-              aria-label={collapsed ? "Expand section" : "Collapse section"}
+              aria-label={collapsed ? translate("uxModelpicker.expandSectiontanlo") : translate("uxModelpicker.collapseSection9qgmi")}
               className="-mr-0.5 shrink-0 rounded p-1 text-muted-foreground/80 transition-colors hover:text-foreground"
             >
               {collapsed ? (
@@ -566,7 +567,9 @@ const CAPABILITY_BADGES: {
 }[] = [
   {
     key: "videoGen",
-    title: "Generates video",
+    get title() {
+      return translate("uxModelpicker.generatesVideo88dn4");
+    },
     // Warm, at the vision indigo's lightness and chroma: amber-300 outshone every other tag.
     tone: "text-[oklch(0.5_0.1_55)] dark:text-[oklch(0.78_0.09_60)]",
     Glyph: (props) => (
@@ -575,7 +578,9 @@ const CAPABILITY_BADGES: {
   },
   {
     key: "imageGen",
-    title: "Generates images",
+    get title() {
+      return translate("uxModelpicker.generatesImages1ttyo");
+    },
     // Pink, as the Hub tags diffusion models.
     tone: "text-pink-700 dark:text-pink-300",
     Glyph: (props) => (
@@ -586,7 +591,9 @@ const CAPABILITY_BADGES: {
     key: "audio",
     // Direction-neutral, unlike the two above: `audio` covers ASR and classification as well as
     // synthesis, so a Whisper row would claim to generate what it consumes.
-    title: "Audio",
+    get title() {
+      return translate("shell.navigation.audio");
+    },
     // Teal, not the Hub's rose, which is too close to the image pink at this size; held to the
     // vision indigo's lightness and chroma, as sky-300 read brighter than the tags beside it.
     tone: "text-[oklch(0.5_0.08_190)] dark:text-[oklch(0.78_0.08_190)]",
@@ -644,14 +651,14 @@ function VisionBadge() {
     <Tooltip delayDuration={0}>
       <TooltipTrigger asChild={true}>
         <span
-          aria-label="Vision"
+          aria-label={translate("uxModelpicker.visionvap9v")}
           className="flex h-[calc(18px*var(--ui-space-scale,1))] shrink-0 items-center justify-center rounded-md border border-border px-1.5 text-indigo-700 dark:text-indigo-300"
         >
           <HugeiconsIcon icon={ViewIcon} className="size-3" strokeWidth={1.8} />
         </span>
       </TooltipTrigger>
       <TooltipContent side="top" className="tooltip-compact">
-        This model can process image inputs
+        {translate("uxModelpicker.thisModelCanProcessqywh6")}
       </TooltipContent>
     </Tooltip>
   );
@@ -708,7 +715,7 @@ function DownloadedBadge() {
     <Tooltip delayDuration={0}>
       <TooltipTrigger asChild={true}>
         <span
-          aria-label="On device"
+          aria-label={translate("settings.general.rag.onDevice")}
           className="flex h-[calc(18px*var(--ui-space-scale,1))] w-[calc(14px*var(--ui-space-scale,1))] shrink-0 items-center justify-center"
         >
           <span
@@ -718,7 +725,7 @@ function DownloadedBadge() {
         </span>
       </TooltipTrigger>
       <TooltipContent side="top" className="tooltip-compact">
-        On device
+        {translate("settings.general.rag.onDevice")}
       </TooltipContent>
     </Tooltip>
   );
@@ -733,7 +740,7 @@ function PartialBadge({ resumable }: { resumable?: boolean }) {
     <Tooltip delayDuration={0}>
       <TooltipTrigger asChild={true}>
         <span
-          aria-label="Partial download"
+          aria-label={translate("uxHub.partialDownload1ynvx")}
           className="flex h-[calc(18px*var(--ui-space-scale,1))] w-[calc(14px*var(--ui-space-scale,1))] shrink-0 items-center justify-center"
         >
           <span
@@ -744,8 +751,8 @@ function PartialBadge({ resumable }: { resumable?: boolean }) {
       </TooltipTrigger>
       <TooltipContent side="top" className="tooltip-compact">
         {resumable
-          ? "Partial download. Select to resume it, or delete it."
-          : "Partial download. Select to continue it, or delete it."}
+          ? translate("uxModelpicker.partialDownloadSelectTozf18k")
+          : translate("uxModelpicker.partialDownloadSelectTovnbf8")}
       </TooltipContent>
     </Tooltip>
   );
@@ -764,30 +771,44 @@ const ORANGE = "!text-orange-600 dark:!text-orange-300";
  *  gives `free - reserve`, which on an idle card IS the budget this tier passed, so
  *  `_select_gpus` hands it to --fit every time. Raising the budget is the lever. */
 const MIGHT_FIT: FitVerdict = {
-  label: "Over budget",
+  get label() {
+    return translate("uxHub.overBudgetsel34");
+  },
   tone: AMBER,
-  hint: "Larger than your VRAM Budget allows, so part of it offloads even on an idle GPU. It is still smaller than the card, so raising the budget can keep it resident.",
+  get hint() { return translate("uxModelpicker.largerThanYourVRAMlwq76"); },
 };
 /** Past the card. Every GGUF over budget lands here however far over, since llama-server never
  *  refuses one on size: `_select_gpus` returns `(None, use_fit=True)` and --fit offloads. */
 const OFFLOADS: FitVerdict = {
-  label: "Does not fit",
+  get label() {
+    return translate("uxHub.doesNotFitwrsym");
+  },
   tone: ORANGE,
-  hint: "Model may not fit but still works with offloading. Expect slower inference.",
+  get hint() {
+    return translate("uxHub.modelMayNotFit1jood");
+  },
 };
 /** checkVramFit's 75-100% band, the ONLY source of `tight` here: a torch estimate that still
  *  fits on the card entirely, with no --fit, so it neither spills nor offloads. */
 const DEVICE_TIGHT: FitVerdict = {
-  label: "Tight fit",
+  get label() {
+    return translate("uxModelpicker.tightFitnwjpt");
+  },
   tone: AMBER,
-  hint: "Uses nearly all your VRAM, with little headroom for anything else.",
+  get hint() {
+    return translate("uxModelpicker.usesNearlyAllYour1xvku");
+  },
 };
 /** A torch load, which has no --fit to fall back on: the pipeline goes wholly on the device. */
 const WONT_FIT: FitVerdict = {
-  label: "Does not fit",
+  get label() {
+    return translate("uxHub.doesNotFitwrsym");
+  },
   tone: ORANGE,
   // "memory", not "VRAM": this also carries a diffusion refusal on a shared pool, where the two are the same bytes.
-  hint: "Needs more memory than this device has. This model will not load.",
+  get hint() {
+    return translate("uxModelpicker.needsMoreMemoryThan1p3aq");
+  },
 };
 
 /** What each fit verdict marks and says, keyed by the Hub's classes so one question has one
@@ -799,9 +820,11 @@ const VRAM_VERDICT: Record<GgufFitClass | VramFitStatus, FitVerdict | null> = {
   tight: DEVICE_TIGHT,
   partial: OFFLOADS,
   ram: {
-    label: "RAM fallback",
+    get label() { return translate("uxModelpicker.rAMFallbackzkwxb"); },
     tone: ORANGE,
-    hint: "No GPU detected. Runs on system RAM and CPU. Expect much slower inference.",
+    get hint() {
+      return translate("uxModelpicker.noGPUDetectedRuns4stes");
+    },
   },
   oom: OFFLOADS,
   exceeds: WONT_FIT,
@@ -957,11 +980,8 @@ export function GgufDownloadFootprintExplanation({
 }) {
   return (
     <>
-      <span className="font-medium">Full required size</span>
-      <span className="ml-1 text-muted-foreground">
-        {formatFootprintBytes(checkpointBytes)} model +{" "}
-        {formatFootprintBytes(companionBytes)} required assets
-      </span>
+      <span className="font-medium">{translate("uxCopy.fullRequiredSize1npfn")}</span>
+      <span className="ml-1 text-muted-foreground">{translate("uxModelpicker.modelRequiredAssetsdkk9f", { p1: formatFootprintBytes(checkpointBytes), p2: " ", p3: formatFootprintBytes(companionBytes) })}</span>
     </>
   );
 }
@@ -1121,7 +1141,7 @@ function ConnectedGroupHeading({
               <button
                 type="button"
                 onClick={onConfigure}
-                aria-label={configureLabel ?? "Connection settings"}
+                aria-label={configureLabel ?? translate("uxModelpicker.connectionSettings9eftm")}
                 // Hidden until the heading is hovered, like a row's own gear. The chevron beside
                 // it stays: folding is what the heading is for.
                 className={cn(
@@ -1137,14 +1157,14 @@ function ConnectedGroupHeading({
               </button>
             </TooltipTrigger>
             <TooltipContent side="bottom" className="tooltip-compact">
-              {configureLabel ?? "Connection settings"}
+              {configureLabel ?? translate("uxModelpicker.connectionSettingstfain")}
             </TooltipContent>
           </Tooltip>
         ) : null}
         <button
           type="button"
           onClick={onToggle}
-          aria-label={collapsed ? "Expand section" : "Collapse section"}
+          aria-label={collapsed ? translate("uxModelpicker.expandSectiontanlo") : translate("uxModelpicker.collapseSection9qgmi")}
           className={HEADING_ACTION_CLASS}
         >
           {collapsed ? (
@@ -1240,7 +1260,7 @@ function ModelRow({
         // is weights plus activations plus KV, so "Needs ~47GB VRAM" contradicted the verdict.
         ? vramBudget
           ? curatedBudgetText(vramEst, gpuGb, vramBudget)
-          : `Needs ~${vramEst}GB memory (GPU: ${gpuGb}GB)`
+          : translate("uxModelpicker.needsGBMemoryGPUlks17", { p1: vramEst, p2: gpuGb })
         : vramStatus === "tight" || vramStatus === "marginal"
           ? `~${vramEst}GB VRAM (tight fit on ${gpuGb}GB)`
           : `~${vramEst}GB VRAM`
@@ -1437,7 +1457,7 @@ function ModelRow({
           {aligned && loaded && (
             <DotTag
               tone="success"
-              label="Loaded"
+              label={translate("settings.voice.dictation.sttLoaded")}
               className="ml-2 h-[calc(18px*var(--ui-space-scale,1))] shrink-0 gap-1 self-center rounded-md px-1.5"
               dotClassName="size-[calc(5px*var(--ui-space-scale,1))]"
             />
@@ -1503,7 +1523,7 @@ function ModelRow({
               {loaded && (
                 <DotTag
                   tone="success"
-                  label="Loaded"
+                  label={translate("settings.voice.dictation.sttLoaded")}
                   className="h-[calc(18px*var(--ui-space-scale,1))] gap-1 rounded-md px-1.5"
                   dotClassName="size-[calc(5px*var(--ui-space-scale,1))]"
                 />
@@ -1944,13 +1964,13 @@ function GgufVariantExpander({
   const [variantsAreGguf, setVariantsAreGguf] = useState(true);
   const onUpdateVariant = variantsAreGguf ? variantActions?.onUpdate : undefined;
   const updateVariantTitle =
-    variantActions?.updateTitle ?? "Update cached model?";
+    variantActions?.updateTitle ?? translate("uxModelpicker.updateCachedModel7ki4q");
   const renderUpdateVariantDescription =
     variantActions?.renderUpdateDescription;
   const updateDisabled = variantActions?.updateDisabled ?? false;
   const onDeleteVariant = variantsAreGguf ? variantActions?.onDelete : undefined;
   const deleteVariantTitle =
-    variantActions?.deleteTitle ?? "Delete cached model?";
+    variantActions?.deleteTitle ?? translate("uxModelpicker.deleteCachedModelz7flt");
   const renderDeleteVariantDescription =
     variantActions?.renderDeleteDescription;
   const getDeleteVariantSuccessMessage =
@@ -2340,7 +2360,7 @@ function GgufVariantExpander({
     [repoId, displayVariants],
   );
   const variantList = useRovingModelList({
-    label: `${repoId} quantizations`,
+    get label() { return translate("uxModelpicker.quantizationsrg5n3", { p1: repoId }); },
     optionKeys: variantOptionKeys,
     onNavigatePastStart,
     onNavigatePastEnd,
@@ -2350,7 +2370,7 @@ function GgufVariantExpander({
     return (
       <div className="flex items-center gap-2 px-5 py-2">
         <Spinner className="size-3 text-muted-foreground" />
-        <span className="text-xs text-muted-foreground">Loading variants…</span>
+        <span className="text-xs text-muted-foreground">{translate("uxModelpicker.loadingVariants5lpkl")}</span>
       </div>
     );
   }
@@ -2373,7 +2393,7 @@ function GgufVariantExpander({
   if (!displayVariants || displayVariants.length === 0) {
     return (
       <div className="px-5 py-2 text-xs text-muted-foreground">
-        No GGUF variants found.
+        {translate("uxModelpicker.noGGUFVariantsFound1mfos")}
       </div>
     );
   }
@@ -2393,7 +2413,7 @@ function GgufVariantExpander({
       {!onDevice && !displayVariantGroups.some((group) => group.title) && (
         <div className="px-2 py-1 flex items-center gap-1.5">
           <span className="text-ui-10 font-semibold uppercase tracking-wider text-muted-foreground">
-            Quantizations
+            {translate("uxModelpicker.quantizations1rcfi")}
           </span>
           {showVision && (
             <span className="flex items-center gap-0.5 text-ui-9 font-medium text-indigo-700 dark:text-indigo-300">
@@ -2402,7 +2422,7 @@ function GgufVariantExpander({
                 className="size-3"
                 strokeWidth={1.8}
               />
-              Vision
+              {translate("uxModelpicker.visionvap9v")}
             </span>
           )}
         </div>
@@ -2417,7 +2437,7 @@ function GgufVariantExpander({
                 className="size-3"
                 strokeWidth={1.8}
               />
-              Vision
+              {translate("uxModelpicker.visionvap9v")}
             </span>
           </div>
         )}
@@ -2485,9 +2505,7 @@ function GgufVariantExpander({
                     downloaded
                   </span>
                   {v.update_available ? (
-                    <span className="ml-1.5 text-ui-9 font-sans font-medium text-amber-700 dark:text-amber-300">
-                      update available
-                    </span>
+                    <span className="ml-1.5 text-ui-9 font-sans font-medium text-amber-700 dark:text-amber-300">{translate("uxModelpicker.updateAvailablevfdj5")}</span>
                   ) : null}
                 </>
               ) : v.partial === true ? (
@@ -2551,7 +2569,7 @@ function GgufVariantExpander({
             )}
             {v.downloaded && onConfigure && (
               <ModelLoadSettingsAction
-                ariaLabel={`Inference settings for ${repoId} ${v.quant}`}
+                ariaLabel={translate("uxModelpicker.inferenceSettingsForn2lkr", { p1: repoId, p2: v.quant })}
                 className="relative left-0.5"
                 onConfigure={() =>
                   onConfigure(repoId, {
@@ -2574,7 +2592,7 @@ function GgufVariantExpander({
                 onDeleteVariant ||
                 !isLocalPath) && (
                 <ModelRowMenu
-                  ariaLabel={`More options for ${repoId} ${v.quant}`}
+                  ariaLabel={translate("uxModelpicker.moreOptionsForuxbkk", { p1: repoId, p2: v.quant })}
                   iconClassName="size-3"
                   cachePath={
                     isLocalPath ? undefined : { repoId, variant: v.quant }
@@ -2596,9 +2614,7 @@ function GgufVariantExpander({
                           description: renderUpdateVariantDescription?.(
                             v.quant,
                           ) ?? (
-                            <>
-                              This will update{" "}
-                              <span className="font-medium text-foreground">
+                            <>{translate("uxModelpicker.thisWillUpdateuwue2", { p1: " " })}<span className="font-medium text-foreground">
                                 {repoId} ({v.quant})
                               </span>
                               {"."}
@@ -2625,17 +2641,13 @@ function GgufVariantExpander({
                           description: renderDeleteVariantDescription?.(
                             v.quant,
                           ) ?? (
-                            <>
-                              This will remove{" "}
-                              <span className="font-medium text-foreground">
+                            <>{translate("uxModelpicker.thisWillRemovebmxmc", { p1: " " })}<span className="font-medium text-foreground">
                                 {repoId} ({v.quant})
-                              </span>{" "}
-                              from disk. You can re-download it later.
-                            </>
+                              </span>{translate("uxModelpicker.fromDiskYouCan8ww0x", { p1: " " })}</>
                           ),
                           successMessage:
                             getDeleteVariantSuccessMessage?.(v.quant) ??
-                            `Deleted ${repoId} ${v.quant}`,
+                            translate("uxModelpicker.deletedsjjtx", { p1: repoId, p2: v.quant }),
                           disabled: deleteDisabled,
                           onConfirm: async () => {
                             await onDeleteVariant(v.quant, v.cache_ref ?? v.cache_path);
@@ -2830,8 +2842,8 @@ export function hasDownloadedModels(): boolean {
 /** Sort LM Studio models with LAiM publisher first. */
 function sortLmStudio(models: LocalModelInfo[]): LocalModelInfo[] {
   return [...models].sort((a, b) => {
-    const aLAiM = (a.model_id ?? "").startsWith("LAiM/") ? 0 : 1;
-    const bLAiM = (b.model_id ?? "").startsWith("LAiM/") ? 0 : 1;
+    const aLAiM = (a.model_id ?? "").startsWith("unsloth/") ? 0 : 1;
+    const bLAiM = (b.model_id ?? "").startsWith("unsloth/") ? 0 : 1;
     if (aLAiM !== bLAiM) return aLAiM - bLAiM;
     return (a.model_id ?? a.display_name).localeCompare(
       b.model_id ?? b.display_name,
@@ -2852,19 +2864,19 @@ function canDeleteLoraModel(model: LoraModelOption): boolean {
 type RecommendedSortKey = "fresh" | "trendingScore" | "lastModified";
 
 const RECOMMENDED_SORT_OPTIONS: HubOption<RecommendedSortKey>[] = [
-  { value: "fresh", label: "Latest" },
-  { value: "trendingScore", label: "Trending" },
-  { value: "lastModified", label: "Recent" },
+  { value: "fresh", get label() { return translate("uxHub.latest11lm8"); } },
+  { value: "trendingScore", get label() { return translate("uxHub.trending1jevu"); } },
+  { value: "lastModified", get label() { return translate("uxHub.recentmg65f"); } },
 ];
 
 // Sort for the On Device lists: "recent" = last loaded, "downloaded" = file download date.
 type LocalSortKey = "recent" | "downloaded" | "size" | "name";
 
 const LOCAL_SORT_OPTIONS: HubOption<LocalSortKey>[] = [
-  { value: "recent", label: "Recent" },
-  { value: "size", label: "Size" },
-  { value: "name", label: "Name" },
-  { value: "downloaded", label: "Downloaded" },
+  { value: "recent", get label() { return translate("uxHub.recentmg65f"); } },
+  { value: "size", get label() { return translate("library.toolbar.sortSize"); } },
+  { value: "name", get label() { return translate("browser.bookmarks.name"); } },
+  { value: "downloaded", get label() { return translate("browser.downloads.downloaded"); } },
 ];
 
 // Format filter dropdown for the LAiM listing; the plain labels are reused in the empty-state copy.
@@ -2907,8 +2919,8 @@ const FORMAT_FILTER_OPTIONS: HubOption<FormatFilter>[] = (
 type ConnectedSortKey = "provider" | "name";
 
 const CONNECTED_SORT_OPTIONS: HubOption<ConnectedSortKey>[] = [
-  { value: "provider", label: "Connection" },
-  { value: "name", label: "Name" },
+  { value: "provider", get label() { return translate("settings.voice.dictation.connectionLabel"); } },
+  { value: "name", get label() { return translate("browser.bookmarks.name"); } },
 ];
 
 // Modality filter for Connected, mirroring the On Device format filter. The keys are the marks a
@@ -3585,10 +3597,10 @@ export function HubModelPicker({
         onFoldersChange?.();
         void refreshScanFolders();
       } catch (e) {
-        const message = e instanceof Error ? e.message : "Failed to add folder";
+        const message = e instanceof Error ? e.message : translate("uxModelpicker.failedToAddFoldertu2n9");
         setFolderError(message);
         if (fromBrowser) {
-          toast.error("Couldn't add folder", { description: message });
+          toast.error(translate("uxModelpicker.couldnTAddFolder10ugi"), { description: message });
         }
       } finally {
         setFolderLoading(false);
@@ -3627,7 +3639,7 @@ export function HubModelPicker({
         refreshLocalModelsList();
         onFoldersChange?.();
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "Failed to remove folder");
+        toast.error(e instanceof Error ? e.message : translate("uxModelpicker.failedToRemoveFolderw102r"));
         refreshScanFolders();
       }
     },
@@ -3655,11 +3667,13 @@ export function HubModelPicker({
           } else if (outcome === "busy") {
             // A sibling variant/snapshot for this repo is already downloading, so this update did not
             // start; say so instead of leaving the cached copy stale.
-            toast.info("A download for this model is already in progress", {
-              description: "Try updating again once it finishes.",
+            toast.info(translate("uxModelpicker.aDownloadForThiscyb17"), {
+              get description() {
+                return translate("uxModelpicker.tryUpdatingAgainOnceibh7x");
+              },
             });
           } else if (outcome === "error") {
-            throw new Error("Failed to start update");
+            throw new Error(translate("uxModelpicker.failedToStartUpdateudint"));
           }
         });
     },
@@ -3989,7 +4003,7 @@ export function HubModelPicker({
   );
 
   const isLAiMOwned = useCallback(
-    (id: string) => id.toLowerCase().startsWith("LAiM/"),
+    (id: string) => id.toLowerCase().startsWith("unsloth/"),
     [],
   );
 
@@ -4093,7 +4107,7 @@ export function HubModelPicker({
       if (upstream) above.add(upstream.toLowerCase());
     }
     const communityRows = communityBrowse.results
-      .filter((r) => !r.id.toLowerCase().startsWith("LAiM/"))
+      .filter((r) => !r.id.toLowerCase().startsWith("unsloth/"))
       .filter((r) => isLoadableCommunityRepo(r.id))
       .filter((r) => !above.has(r.id.toLowerCase()))
       .filter(keepCommunity)
@@ -4808,7 +4822,7 @@ export function HubModelPicker({
         ) {
           // Loading it here would evict the chat model for a repo neither surface can run.
           toast.error(
-            `${id} is not an audio model LAiM can run yet. The Audio page lists the families it supports.`,
+            translate("uxModelpicker.isNotAnAudioetsd0", { p1: id }),
             { duration: 7000 },
           );
           return;
@@ -5089,9 +5103,9 @@ export function HubModelPicker({
   // plain HTTP on a LAN address, where reading .writeText off it throws before any catch runs.
   const copyConnectedModelId = useCallback(async (providerModelId: string) => {
     if (await copyToClipboard(providerModelId)) {
-      toast.success(`Copied ${providerModelId}`);
+      toast.success(translate("uxModelpicker.copiedrmmsb", { p1: providerModelId }));
     } else {
-      toast.error("Could not copy the model ID");
+      toast.error(translate("uxModelpicker.couldNotCopyTheo2vcs"));
     }
   }, []);
 
@@ -5837,7 +5851,9 @@ export function HubModelPicker({
     [hubOptionKeys, value],
   );
   const hubModelList = useRovingModelList({
-    label: "Hub models",
+    get label() {
+      return translate("uxModelpicker.hubModels10md0");
+    },
     optionKeys: hubOptionKeys,
     selectedOptionKey: selectedHubOptionKey,
   });
@@ -6129,12 +6145,11 @@ export function HubModelPicker({
             aria-hidden={true}
             className="pointer-events-none size-3.5 rounded-full border-muted-foreground/70 [&_svg]:!size-2.5"
           />
-          Only show models that fit
+          {translate("settings.chat.modelSelection.fitOnDeviceOnly")}
         </button>
       </TooltipTrigger>
       <TooltipContent side="bottom">
-        Hides models larger than this device's memory budget. Downloaded models
-        stay visible.
+        {translate("uxCopy.hidesModelsLargerThanyug8l")}
       </TooltipContent>
     </Tooltip>
   );
@@ -6156,7 +6171,7 @@ export function HubModelPicker({
         value={recommendedSort}
         options={RECOMMENDED_SORT_OPTIONS}
         onValueChange={setRecommendedSort}
-        ariaLabel="Sort LAiM models"
+        ariaLabel={translate("uxModelpicker.sortLAiMModelsl1ywv")}
         align="end"
         className={sortTriggerClassName}
         contentClassName={sortMenuContentClassName}
@@ -6172,7 +6187,7 @@ export function HubModelPicker({
         value={downloadedSort}
         options={LOCAL_SORT_OPTIONS}
         onValueChange={setDownloadedSort}
-        ariaLabel="Sort downloaded models"
+        ariaLabel={translate("uxModelpicker.sortDownloadedModelsn8lcy")}
         align="end"
         className={sortTriggerClassName}
         contentClassName={sortMenuContentClassName}
@@ -6187,7 +6202,7 @@ export function HubModelPicker({
         value={customSort}
         options={LOCAL_SORT_OPTIONS}
         onValueChange={setCustomSort}
-        ariaLabel="Sort custom models"
+        ariaLabel={translate("uxModelpicker.sortCustomModelsfsbm2")}
         align="end"
         className={sortTriggerClassName}
         contentClassName={sortMenuContentClassName}
@@ -6227,7 +6242,7 @@ export function HubModelPicker({
         <div className="min-w-0 flex-1">{row}</div>
         <span className={ROW_ACTIONS_CLASS}>
           <ModelLoadSettingsAction
-            ariaLabel={`Inference settings for ${id}`}
+            ariaLabel={translate("uxModelpicker.inferenceSettingsFormlfme", { p1: id })}
             onConfigure={() =>
               onConfigure(cachedIdFor(id) ?? id, {
                 source: "hub",
@@ -6267,7 +6282,9 @@ export function HubModelPicker({
       ? [
           {
             key: "eject",
-            label: "Eject",
+            get label() {
+              return translate("settings.general.rag.unload");
+            },
             icon: (
               <HugeiconsIcon
                 icon={RemoveCircleIcon}
@@ -6326,7 +6343,7 @@ export function HubModelPicker({
                     e.stopPropagation();
                     onEject?.(checkpoint);
                   }}
-                  aria-label={`Eject ${entry.id}`}
+                  aria-label={translate("uxModelpicker.eject44xl2", { p1: entry.id })}
                   className="flex size-5 shrink-0 items-center justify-center rounded-md text-muted-foreground/60 transition-colors hover:bg-[rgb(6_29_33_/_calc(0.05*var(--contrast-wash-gain,1)))] hover:text-red-500 dark:hover:bg-[rgb(249_226_222_/_calc(0.1*var(--contrast-wash-gain,1)))]"
                 >
                   <HugeiconsIcon
@@ -6337,7 +6354,7 @@ export function HubModelPicker({
                 </button>
               </TooltipTrigger>
               <TooltipContent side="top" className="tooltip-compact">
-                Eject
+                {translate("settings.general.rag.unload")}
               </TooltipContent>
             </Tooltip>
           ) : null}
@@ -6410,8 +6427,8 @@ export function HubModelPicker({
         </div>
         <span className={ROW_ACTIONS_CLASS}>
           <ModelLoadSettingsAction
-            ariaLabel={`Settings for ${model.name}`}
-            tooltip="Model settings"
+            ariaLabel={translate("uxModelpicker.settingsForemuwz", { p1: model.name })}
+            tooltip={translate("uxModelpicker.modelSettingsuvxen")}
             onConfigure={() =>
               setSettingsModel({
                 model,
@@ -6427,7 +6444,7 @@ export function HubModelPicker({
             }
           />
           <ModelRowMenu
-            ariaLabel={`More options for ${model.name}`}
+            ariaLabel={translate("uxModelpicker.moreOptionsForwg1ye", { p1: model.name })}
             pin={{
               pinned: isPinned,
               pinLabel: "Pin",
@@ -6437,7 +6454,9 @@ export function HubModelPicker({
             items={[
               {
                 key: "info",
-                label: "Model info",
+                get label() {
+                  return translate("uxModelpicker.modelInfo1km6k");
+                },
                 icon: (
                   <HugeiconsIcon
                     icon={InformationCircleIcon}
@@ -6458,7 +6477,9 @@ export function HubModelPicker({
               },
               {
                 key: "copy",
-                label: "Copy model ID",
+                get label() {
+                  return translate("uxModelpicker.copyModelIDtn27b");
+                },
                 icon: (
                   <HugeiconsIcon
                     icon={Copy01Icon}
@@ -6560,7 +6581,7 @@ export function HubModelPicker({
         <span className={ROW_ACTIONS_CLASS}>
           {onConfigure && (
             <ModelLoadSettingsAction
-              ariaLabel={`Inference settings for ${entry.repoId} ${entry.quant}`}
+              ariaLabel={translate("uxModelpicker.inferenceSettingsForn2lkr", { p1: entry.repoId, p2: entry.quant })}
               onConfigure={() =>
                 onConfigure(entry.repoId, {
                   source: "hub",
@@ -6576,7 +6597,7 @@ export function HubModelPicker({
             />
           )}
           <ModelRowMenu
-            ariaLabel={`More options for ${entry.repoId} ${entry.quant}`}
+            ariaLabel={translate("uxModelpicker.moreOptionsForuxbkk", { p1: entry.repoId, p2: entry.quant })}
             cachePath={{ repoId: entry.repoId, variant: entry.quant }}
             pin={{
               pinned: true,
@@ -6585,7 +6606,9 @@ export function HubModelPicker({
               onToggle: () => togglePinned(entry.repoId, entry.quant),
             }}
             del={{
-              title: "Delete cached model?",
+              get title() {
+                return translate("uxHub.deleteCachedModelwm7o4");
+              },
               // Same preview the Hub On Device row asks for, so a companion base an installed image model
               // still needs shows the reason and a disabled Delete.
               impact: {
@@ -6594,15 +6617,11 @@ export function HubModelPicker({
                 cachePath: pinnedCopyPath,
               },
               description: (
-                <>
-                  This will remove{" "}
-                  <span className="font-medium text-foreground">
+                <>{translate("uxModelpicker.thisWillRemovebmxmc", { p1: " " })}<span className="font-medium text-foreground">
                     {entry.repoId} ({entry.quant})
-                  </span>{" "}
-                  from disk. You can re-download it later.
-                </>
+                  </span>{translate("uxModelpicker.fromDiskYouCan8ww0x", { p1: " " })}</>
               ),
-              successMessage: `Deleted ${entry.repoId} ${entry.quant}`,
+              successMessage: translate("uxModelpicker.deletedsjjtx", { p1: entry.repoId, p2: entry.quant }),
               disabled: deleteDisabled,
               onConfirm: async () => {
                 await deleteCachedModel(
@@ -6712,12 +6731,12 @@ export function HubModelPicker({
         <span className={ROW_ACTIONS_CLASS}>
           {onConfigure && (
             <ModelLoadSettingsAction
-              ariaLabel={`Inference settings for ${onDeviceRepoLabel(c.repo_id)} ${variant.quant}`}
+              ariaLabel={translate("uxModelpicker.inferenceSettingsForn2lkr", { p1: onDeviceRepoLabel(c.repo_id), p2: variant.quant })}
               onConfigure={() => onConfigure(c.repo_id, selectMeta)}
             />
           )}
           <ModelRowMenu
-            ariaLabel={`More options for ${onDeviceRepoLabel(c.repo_id)} ${variant.quant}`}
+            ariaLabel={translate("uxModelpicker.moreOptionsForuxbkk", { p1: onDeviceRepoLabel(c.repo_id), p2: variant.quant })}
             cachePath={{ repoId: c.repo_id, variant: variant.quant }}
             items={ejectMenuItems(c.repo_id)}
             pin={{
@@ -6727,7 +6746,9 @@ export function HubModelPicker({
               onToggle: () => togglePinned(c.repo_id, variant.quant),
             }}
             del={{
-              title: "Delete cached model?",
+              get title() {
+                return translate("uxHub.deleteCachedModelwm7o4");
+              },
               impact: {
                 repoId: c.repo_id,
                 variant: variant.quant,
@@ -6737,15 +6758,11 @@ export function HubModelPicker({
                   (mediaPageForTask(c.task) ? c.cache_path : null),
               },
               description: (
-                <>
-                  This will remove{" "}
-                  <span className="font-medium text-foreground">
+                <>{translate("uxModelpicker.thisWillRemovebmxmc", { p1: " " })}<span className="font-medium text-foreground">
                     {onDeviceRepoLabel(c.repo_id)} ({variant.quant})
-                  </span>{" "}
-                  from disk. You can re-download it later.
-                </>
+                  </span>{translate("uxModelpicker.fromDiskYouCan8ww0x", { p1: " " })}</>
               ),
-              successMessage: `Deleted ${onDeviceRepoLabel(c.repo_id)} ${variant.quant}`,
+              successMessage: translate("uxModelpicker.deletedsjjtx", { p1: onDeviceRepoLabel(c.repo_id), p2: variant.quant }),
               disabled: deleteDisabled,
               onConfirm: async () => {
                 await deleteCachedModel(
@@ -6830,25 +6847,22 @@ export function HubModelPicker({
           {isPartialRepo ? (
             <span className={ROW_ACTIONS_PINNED_CLASS}>
               <ModelRowMenu
-                ariaLabel={`More options for ${onDeviceRepoLabel(c.repo_id)}`}
+                ariaLabel={translate("uxModelpicker.moreOptionsForwg1ye", { p1: onDeviceRepoLabel(c.repo_id) })}
                 cachePath={{ repoId: c.repo_id }}
                 del={{
-                  title: "Delete cached model?",
+                  get title() {
+                    return translate("uxHub.deleteCachedModelwm7o4");
+                  },
                   impact: { repoId: c.repo_id },
                   // Repo-wide, like every other repo-level delete: no variant is passed, and
                   // one repo id can also hold a complete copy in another format. Saying
                   // "the partial download" would name a smaller scope than the one that runs.
                   description: (
-                    <>
-                      This will remove{" "}
-                      <span className="font-medium text-foreground">
+                    <>{translate("uxModelpicker.thisWillRemovebmxmc", { p1: " " })}<span className="font-medium text-foreground">
                         {onDeviceRepoLabel(c.repo_id)}
-                      </span>{" "}
-                      and everything downloaded under it from disk. You can
-                      download it again later.
-                    </>
+                      </span>{translate("uxModelpicker.andEverythingDownloadedUnderzn0f9", { p1: " " })}</>
                   ),
-                  successMessage: `Deleted ${onDeviceRepoLabel(c.repo_id)}`,
+                  successMessage: translate("uxModelpicker.deletedpyid0", { p1: onDeviceRepoLabel(c.repo_id) }),
                   disabled: deleteDisabled,
                   onConfirm: async () => {
                     await deleteCachedModel(
@@ -6971,7 +6985,7 @@ export function HubModelPicker({
         >
           {onConfigure && (
             <ModelLoadSettingsAction
-              ariaLabel={`Inference settings for ${c.repo_id}`}
+              ariaLabel={translate("uxModelpicker.inferenceSettingsFormlfme", { p1: c.repo_id })}
               onConfigure={() =>
                 onConfigure(c.repo_id, {
                   source: "hub",
@@ -6990,7 +7004,7 @@ export function HubModelPicker({
             />
           )}
           <ModelRowMenu
-            ariaLabel={`More options for ${c.repo_id}`}
+            ariaLabel={translate("uxModelpicker.moreOptionsForwg1ye", { p1: c.repo_id })}
             cachePath={{ repoId: c.repo_id }}
             items={ejectMenuItems(c.repo_id)}
             pin={{
@@ -7000,18 +7014,16 @@ export function HubModelPicker({
               onToggle: () => togglePinned(c.repo_id),
             }}
             del={{
-              title: "Delete cached model?",
+              get title() {
+                return translate("uxHub.deleteCachedModelwm7o4");
+              },
               impact: { repoId: c.repo_id },
               description: (
-                <>
-                  This will remove{" "}
-                  <span className="font-medium text-foreground">
+                <>{translate("uxModelpicker.thisWillRemovebmxmc", { p1: " " })}<span className="font-medium text-foreground">
                     {c.repo_id}
-                  </span>{" "}
-                  from disk. You can re-download it later.
-                </>
+                  </span>{translate("uxModelpicker.fromDiskYouCan8ww0x", { p1: " " })}</>
               ),
-              successMessage: `Deleted ${c.repo_id}`,
+              successMessage: translate("uxModelpicker.deletedpyid0", { p1: c.repo_id }),
               disabled: deleteDisabled,
               onConfirm: async () => {
                 await deleteCachedModel(
@@ -7036,21 +7048,19 @@ export function HubModelPicker({
     const name = m.model_id ?? m.display_name;
     return (
       <ModelRowMenu
-        ariaLabel={`More options for ${name}`}
+        ariaLabel={translate("uxModelpicker.moreOptionsForwg1ye", { p1: name })}
         onReveal={() => revealLocalModel(m.path, m.id)}
         del={
           DELETABLE_LOCAL_SOURCES.has(m.source)
             ? {
-                title: "Delete local model?",
+                get title() {
+                  return translate("uxHub.deleteLocalModel18bwy");
+                },
                 description: (
-                  <>
-                    This will permanently remove{" "}
-                    <span className="font-medium text-foreground">{name}</span>{" "}
-                    from{" "}
-                    <span className="break-all font-mono text-xs">{m.path}</span>.
+                  <>{translate("uxModelpicker.thisWillPermanentlyRemovenzn11", { p1: " " })}<span className="font-medium text-foreground">{name}</span>{translate("uxModelpicker.fromldt4a", { p1: " ", p2: " " })}<span className="break-all font-mono text-xs">{m.path}</span>.
                   </>
                 ),
-                successMessage: `Deleted ${name}`,
+                successMessage: translate("uxModelpicker.deletedpyid0", { p1: name }),
                 disabled: deleteDisabled,
                 onConfirm: () => deleteLocalModel(m.path, m.id),
                 onDeleted: refreshLocalModelsList,
@@ -7075,7 +7085,7 @@ export function HubModelPicker({
             hubUrl={isLocalPath ? undefined : hubRepoUrl(model.id)}
             meta={
               isLocalPath
-                ? (model.description ?? "Trained here")
+                ? (model.description ?? translate("uxModelpicker.trainedHere1ob07"))
                 : `${model.isGguf === true ? "GGUF" : "Safetensors"}${model.deviceSize ? ` · ${model.deviceSize}` : ""}`
             }
             quantChip={model.deviceQuant}
@@ -7104,21 +7114,19 @@ export function HubModelPicker({
         {isAudioCppFolderId(model.id) ? (
           <span className={ROW_ACTIONS_CLASS}>
             <ModelRowMenu
-              ariaLabel={`More options for ${onDeviceRepoLabel(model.id)}`}
+              ariaLabel={translate("uxModelpicker.moreOptionsForwg1ye", { p1: onDeviceRepoLabel(model.id) })}
               cachePath={{ repoId: model.id }}
               del={{
-                title: "Delete cached model?",
+                get title() {
+                  return translate("uxHub.deleteCachedModelwm7o4");
+                },
                 impact: { repoId: model.id },
                 description: (
-                  <>
-                    This will remove{" "}
-                    <span className="font-medium text-foreground">
+                  <>{translate("uxModelpicker.thisWillRemovebmxmc", { p1: " " })}<span className="font-medium text-foreground">
                       {onDeviceRepoLabel(model.id)}
-                    </span>{" "}
-                    from disk. You can re-download it later.
-                  </>
+                    </span>{translate("uxModelpicker.fromDiskYouCan8ww0x", { p1: " " })}</>
                 ),
-                successMessage: `Deleted ${onDeviceRepoLabel(model.id)}`,
+                successMessage: translate("uxModelpicker.deletedpyid0", { p1: onDeviceRepoLabel(model.id) }),
                 disabled: deleteDisabled,
                 onConfirm: async () => {
                   await deleteCachedModel(model.id, undefined, hfToken || undefined);
@@ -7200,7 +7208,7 @@ export function HubModelPicker({
     const settings =
       onConfigure && model.downloaded && !downloading ? (
         <ModelLoadSettingsAction
-          ariaLabel={`Inference settings for ${model.id}`}
+          ariaLabel={translate("uxModelpicker.inferenceSettingsFormlfme", { p1: model.id })}
           onConfigure={() =>
             onConfigure(model.model_path, {
               ...meta,
@@ -7220,10 +7228,10 @@ export function HubModelPicker({
           {settings}
           {onDevice && (
             <ModelDeleteAction
-              ariaLabel={`Delete ${model.id}`}
-              title={`Delete ${model.id}?`}
-              description="This removes the model's NPU files from this device."
-              successMessage={`Deleted ${model.id}`}
+              ariaLabel={translate("uxModelpicker.delete5wk0k", { p1: model.id })}
+              title={translate("uxModelpicker.delete124ur", { p1: model.id })}
+              description={translate("uxHub.thisRemovesTheModel1vccz")}
+              successMessage={translate("uxModelpicker.deletedpyid0", { p1: model.id })}
               disabled={isLoaded}
               onConfirm={() => npuCatalog.remove(model)}
             />
@@ -7261,10 +7269,10 @@ export function HubModelPicker({
               onChange={(event) => setQuery(event.target.value)}
               placeholder={
                 section === "downloaded"
-                  ? "Search local models"
+                  ? translate("uxModelpicker.searchLocalModelsaa253")
                   : communityDiscoveryEnabled
-                    ? "Search models"
-                    : "Search LAiM models"
+                    ? translate("uxModelpicker.searchModelsfq3is")
+                    : translate("uxModelpicker.searchLAiMModels7bivm")
               }
               data-model-picker-search-input={true}
               className="field-soft h-(--picker-control-h) border-0 pl-8 pr-8 text-sm"
@@ -7279,17 +7287,17 @@ export function HubModelPicker({
                 <button
                   type="button"
                   onClick={onBrowseHub}
-                  aria-label="Search more models on the Hub"
+                  aria-label={translate("uxModelpicker.searchMoreModelsOnnq9wn")}
                   className="hub-tab-toggle-pill hub-pill-action flex h-(--picker-control-h) w-(--picker-control-w) shrink-0 items-center justify-center gap-[calc(5px*var(--ui-space-scale,1))] rounded-full border-0 text-xs text-foreground transition-colors"
                 >
                   <HugeiconsIcon
                     icon={DashboardCircleIcon}
                     className="size-4"
                   />
-                  Search Hub
+                  {translate("uxModelpicker.searchHub18fhf")}
                 </button>
               </TooltipTrigger>
-              <TooltipContent>Search all models</TooltipContent>
+              <TooltipContent>{translate("uxModelpicker.searchAllModelsu4sjj")}</TooltipContent>
             </Tooltip>
           ) : null}
         </div>
@@ -7309,7 +7317,7 @@ export function HubModelPicker({
                 value={connectedModality}
                 options={CONNECTED_MODALITY_OPTIONS}
                 onValueChange={setConnectedModality}
-                ariaLabel="Filter by modality"
+                ariaLabel={translate("uxModelpicker.filterByModality54wmz")}
                 align="end"
                 className={sortTriggerClassName}
                 contentClassName={sortMenuContentClassName}
@@ -7319,7 +7327,7 @@ export function HubModelPicker({
                 value={connectedSort}
                 options={CONNECTED_SORT_OPTIONS}
                 onValueChange={setConnectedSort}
-                ariaLabel="Sort connected models"
+                ariaLabel={translate("uxModelpicker.sortConnectedModelsbxvp0")}
                 align="end"
                 className={sortTriggerClassName}
                 contentClassName={sortMenuContentClassName}
@@ -7337,7 +7345,7 @@ export function HubModelPicker({
                 value={formatFilter}
                 options={formatFilterOptions}
                 onValueChange={setFormatFilter}
-                ariaLabel="Filter by format"
+                ariaLabel={translate("uxModelpicker.filterByFormatmb1en")}
                 align="end"
                 className={sortTriggerClassName}
                 contentClassName={sortMenuContentClassName}
@@ -7389,8 +7397,8 @@ export function HubModelPicker({
               connectedMatches.length === 0 ? (
                 <div className="px-2.5 py-2 text-xs leading-relaxed text-muted-foreground">
                   {externalModels.length === 0
-                    ? "No models from your connections. Set up in Settings then Connections."
-                    : "No models match your search."}
+                    ? translate("uxModelpicker.noModelsFromYour3eesw")
+                    : translate("uxModelpicker.noModelsMatchYournd06h")}
                 </div>
               ) : (
                 <>
@@ -7401,7 +7409,7 @@ export function HubModelPicker({
                         icon={
                           <HugeiconsIcon icon={PinIcon} className="size-3.5" />
                         }
-                        label="Pinned"
+                        label={translate("library.chats.toolbar.pinned")}
                         collapsed={pinnedConnectedCollapsed}
                         onToggle={() =>
                           setPinnedConnectedCollapsed((value) => !value)
@@ -7467,9 +7475,7 @@ export function HubModelPicker({
                 downloadedEmpty ? (
                   <div className="flex items-center gap-2 px-5 py-3">
                     <Spinner className="size-3 text-muted-foreground" />
-                    <span className="text-xs text-muted-foreground">
-                      Loading models…
-                    </span>
+                    <span className="text-xs text-muted-foreground">{translate("uxModelpicker.loadingModels1mxxq")}</span>
                   </div>
                 ) : null}
 
@@ -7481,10 +7487,10 @@ export function HubModelPicker({
                 sortedCustomFolderModels.length === 0 ? (
                   <div className="px-2.5 py-2 text-xs text-muted-foreground">
                     {showHfSection
-                      ? "No matching models on device."
+                      ? translate("uxModelpicker.noMatchingModelsOnqddda")
                       : formatFilter === "all"
-                        ? "No downloaded models yet. Search above or pick Recommended."
-                        : `No downloaded ${FORMAT_FILTER_LABELS[formatFilter]} models yet.`}
+                        ? translate("uxModelpicker.noDownloadedModelsYetdz2h4")
+                        : translate("uxModelpicker.noDownloadedModelsYetriufg", { p1: FORMAT_FILTER_LABELS[formatFilter] })}
                   </div>
                 ) : null}
 
@@ -7549,7 +7555,7 @@ export function HubModelPicker({
                                 <button
                                   type="button"
                                   onClick={scrollToOtherModels}
-                                  aria-label="Go to other models"
+                                  aria-label={translate("uxModelpicker.goToOtherModels1hl01")}
                                   className="shrink-0 rounded p-1 text-muted-foreground/80 transition-colors hover:text-foreground"
                                 >
                                   <HugeiconsIcon
@@ -7561,9 +7567,7 @@ export function HubModelPicker({
                               <TooltipContent
                                 side="bottom"
                                 className="tooltip-compact"
-                              >
-                                Other non-LAiM models
-                              </TooltipContent>
+                              >{translate("uxModelpicker.otherNonLAiMModelsu5vg2")}</TooltipContent>
                             </Tooltip>
                           ) : null}
                           {!task && (
@@ -7572,7 +7576,7 @@ export function HubModelPicker({
                                 <button
                                   type="button"
                                   onClick={scrollToFineTuned}
-                                  aria-label="Go to fine-tuned models"
+                                  aria-label={translate("uxModelpicker.goToFineTunednowvi")}
                                   className="shrink-0 rounded p-1 text-muted-foreground/80 transition-colors hover:text-foreground"
                                 >
                                   <HugeiconsIcon
@@ -7585,7 +7589,7 @@ export function HubModelPicker({
                                 side="bottom"
                                 className="tooltip-compact"
                               >
-                                Go to fine-tuned models
+                                {translate("uxModelpicker.goToFineTunednowvi")}
                               </TooltipContent>
                             </Tooltip>
                           )}
@@ -7594,7 +7598,7 @@ export function HubModelPicker({
                               <button
                                 type="button"
                                 onClick={scrollToCustomFolders}
-                                aria-label="Go to custom folders"
+                                aria-label={translate("uxModelpicker.goToCustomFolders59poh")}
                                 className="shrink-0 rounded p-1 text-muted-foreground/80 transition-colors hover:text-foreground"
                               >
                                 <HugeiconsIcon
@@ -7607,7 +7611,7 @@ export function HubModelPicker({
                               side="bottom"
                               className="tooltip-compact"
                             >
-                              Go to custom folders
+                              {translate("uxModelpicker.goToCustomFolders59poh")}
                             </TooltipContent>
                           </Tooltip>
                         </>
@@ -7637,9 +7641,7 @@ export function HubModelPicker({
                       }
                       collapsed={otherModelsCollapsed}
                       onToggle={() => setOtherModelsCollapsed((v) => !v)}
-                    >
-                      Other models
-                    </ListLabel>
+                    >{translate("uxModelpicker.otherModels0zbox")}</ListLabel>
                     {!otherModelsCollapsed &&
                       otherCachedGguf.map(renderDownloadedGgufRow)}
                     {!otherModelsCollapsed &&
@@ -7681,15 +7683,15 @@ export function HubModelPicker({
                     >
                       <span className="flex items-center gap-1.5 text-ui-10 font-semibold uppercase tracking-wider text-muted-foreground">
                         <HugeiconsIcon icon={TrainIcon} className="size-3.5" />
-                        Fine-tuned
+                        {translate("uxModelpicker.fineTuned4r7hw")}
                       </span>
                       <div className="ml-auto">
                         <button
                           type="button"
                           aria-label={
                             fineTunedCollapsed
-                              ? "Expand fine-tuned models"
-                              : "Collapse fine-tuned models"
+                              ? translate("uxModelpicker.expandFineTunedModelsshinb")
+                              : translate("uxModelpicker.collapseFineTunedModelsgdr4l")
                           }
                           title={fineTunedCollapsed ? "Expand" : "Collapse"}
                           onClick={() => setFineTunedCollapsed((v) => !v)}
@@ -7731,25 +7733,25 @@ export function HubModelPicker({
                       <button
                         type="button"
                         onClick={() => void browseForFolder()}
-                        title="Browse folders on the server"
+                        title={translate("uxModelpicker.browseFoldersOnThe1qm3u")}
                         className="flex items-center gap-1.5 text-ui-10 font-semibold uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground"
                       >
                         <HugeiconsIcon
                           icon={Folder02Icon}
                           className="size-3.5"
                         />
-                        Custom Folders
+                        {translate("uxModelpicker.customFolders8g4ju")}
                       </button>
                       <div className="flex items-center gap-0.5">
                         <button
                           type="button"
                           aria-label={
                             showFolderInput
-                              ? "Cancel adding folder"
-                              : "Add scan folder by path"
+                              ? translate("uxModelpicker.cancelAddingFolderadvu2")
+                              : translate("uxModelpicker.addScanFolderBycofrh")
                           }
                           title={
-                            showFolderInput ? "Cancel" : "Add by typing a path"
+                            showFolderInput ? "Cancel" : translate("uxModelpicker.addByTypingAl6yv2")
                           }
                           onClick={() => {
                             setShowFolderInput((open) => {
@@ -7769,8 +7771,8 @@ export function HubModelPicker({
                         </button>
                         <button
                           type="button"
-                          aria-label="Browse for a folder on the server"
-                          title="Browse folders on the server"
+                          aria-label={translate("uxModelpicker.browseForAFolderrqnqg")}
+                          title={translate("uxModelpicker.browseFoldersOnThe1qm3u")}
                           onClick={() => void browseForFolder()}
                           className="shrink-0 rounded p-0.5 text-muted-foreground/80 transition-colors hover:text-foreground"
                         >
@@ -7785,8 +7787,8 @@ export function HubModelPicker({
                           type="button"
                           aria-label={
                             customFoldersCollapsed
-                              ? "Expand custom folders"
-                              : "Collapse custom folders"
+                              ? translate("uxModelpicker.expandCustomFoldersskrjj")
+                              : translate("uxModelpicker.collapseCustomFolders4z7j6")
                           }
                           title={customFoldersCollapsed ? "Expand" : "Collapse"}
                           onClick={() => setCustomFoldersCollapsed((v) => !v)}
@@ -7833,7 +7835,7 @@ export function HubModelPicker({
                             <button
                               type="button"
                               onClick={() => handleRemoveFolder(f.id)}
-                              aria-label={`Remove folder ${f.path}`}
+                              aria-label={translate("uxModelpicker.removeFolderjmwuk", { p1: f.path })}
                               className="shrink-0 rounded p-1 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive focus-visible:bg-destructive/10 focus-visible:text-destructive"
                             >
                               <HugeiconsIcon
@@ -7863,7 +7865,7 @@ export function HubModelPicker({
                                 type="button"
                                 onClick={() => void handleAddFolder(p)}
                                 disabled={folderLoading}
-                                title={`Add ${p}`}
+                                title={translate("uxModelpicker.addbq0ee", { p1: p })}
                                 className="rounded-full border border-dashed border-border px-2 py-0.5 font-mono text-ui-10 text-muted-foreground/80 transition-colors hover:border-[color-mix(in_oklab,var(--foreground)_calc(30%*var(--contrast-edge-gain,1)),transparent)] hover:bg-accent hover:text-foreground disabled:opacity-40"
                               >
                                 <span className="text-ui-11 font-semibold">
@@ -7912,8 +7914,8 @@ export function HubModelPicker({
                             type="button"
                             onClick={() => void browseForFolder()}
                             disabled={folderLoading}
-                            aria-label="Browse for folder"
-                            title="Browse folders on the server"
+                            aria-label={translate("uxModelpicker.browseForFolderbddlh")}
+                            title={translate("uxModelpicker.browseFoldersOnThe1qm3u")}
                             className="flex h-6 shrink-0 items-center justify-center rounded border border-border px-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-40"
                           >
                             <HugeiconsIcon
@@ -8034,9 +8036,7 @@ export function HubModelPicker({
                               <span className={ROW_ACTIONS_CLASS}>
                                 {isDirectGguf && onConfigure && (
                                   <ModelLoadSettingsAction
-                                    ariaLabel={`Inference settings for ${
-                                      m.model_id ?? m.display_name
-                                    }`}
+                                    ariaLabel={translate("uxModelpicker.inferenceSettingsFormlfme", { p1: m.model_id ?? m.display_name })}
                                     onConfigure={() =>
                                       onConfigure(
                                         m.id,
@@ -8047,9 +8047,7 @@ export function HubModelPicker({
                                 )}
                                 {!isGguf && onConfigure && (
                                   <ModelLoadSettingsAction
-                                    ariaLabel={`Inference settings for ${
-                                      m.model_id ?? m.display_name
-                                    }`}
+                                    ariaLabel={translate("uxModelpicker.inferenceSettingsFormlfme", { p1: m.model_id ?? m.display_name })}
                                     onConfigure={() =>
                                       onConfigure(
                                         m.id,
@@ -8093,7 +8091,7 @@ export function HubModelPicker({
                     showHfSection &&
                     sortedCustomFolderModels.length === 0 ? (
                       <div className="px-2.5 py-2 text-xs text-muted-foreground">
-                        No matching models in custom folders.
+                        {translate("uxModelpicker.noMatchingModelsInr8cuk")}
                       </div>
                     ) : null}
                   </>
@@ -8181,9 +8179,7 @@ export function HubModelPicker({
                               <span className={ROW_ACTIONS_CLASS}>
                                 {isGgufFile && onConfigure && (
                                   <ModelLoadSettingsAction
-                                    ariaLabel={`Inference settings for ${
-                                      m.model_id ?? m.display_name
-                                    }`}
+                                    ariaLabel={translate("uxModelpicker.inferenceSettingsFormlfme", { p1: m.model_id ?? m.display_name })}
                                     onConfigure={() =>
                                       onConfigure(
                                         m.id,
@@ -8194,9 +8190,7 @@ export function HubModelPicker({
                                 )}
                                 {!isGguf && onConfigure && (
                                   <ModelLoadSettingsAction
-                                    ariaLabel={`Inference settings for ${
-                                      m.model_id ?? m.display_name
-                                    }`}
+                                    ariaLabel={translate("uxModelpicker.inferenceSettingsFormlfme", { p1: m.model_id ?? m.display_name })}
                                     onConfigure={() =>
                                       onConfigure(
                                         m.id,
@@ -8243,9 +8237,7 @@ export function HubModelPicker({
                       divider={true}
                       collapsed={localDirCollapsed}
                       onToggle={() => setLocalDirCollapsed((v) => !v)}
-                    >
-                      Local models
-                    </ListLabel>
+                    >{translate("uxModelpicker.localModelsxtb2d")}</ListLabel>
                     {!localDirCollapsed &&
                       sortedLocalDir.map((m) => {
                         // A loose ./models/*.gguf loads directly; a GGUF repo dir expands. The variant scanner returns
@@ -8315,9 +8307,7 @@ export function HubModelPicker({
                               <span className={ROW_ACTIONS_CLASS}>
                                 {isGgufFile && onConfigure && (
                                   <ModelLoadSettingsAction
-                                    ariaLabel={`Inference settings for ${
-                                      m.model_id ?? m.display_name
-                                    }`}
+                                    ariaLabel={translate("uxModelpicker.inferenceSettingsFormlfme", { p1: m.model_id ?? m.display_name })}
                                     onConfigure={() =>
                                       onConfigure(
                                         m.id,
@@ -8328,9 +8318,7 @@ export function HubModelPicker({
                                 )}
                                 {!isGguf && onConfigure && (
                                   <ModelLoadSettingsAction
-                                    ariaLabel={`Inference settings for ${
-                                      m.model_id ?? m.display_name
-                                    }`}
+                                    ariaLabel={translate("uxModelpicker.inferenceSettingsFormlfme", { p1: m.model_id ?? m.display_name })}
                                     onConfigure={() =>
                                       onConfigure(
                                         m.id,
@@ -8406,9 +8394,7 @@ export function HubModelPicker({
                     recommendedEmpty === "loading" ? (
                       <div className="flex items-center gap-2 px-5 py-3">
                         <Spinner className="size-3 text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground">
-                          Loading models…
-                        </span>
+                        <span className="text-xs text-muted-foreground">{translate("uxModelpicker.loadingModels1mxxq")}</span>
                       </div>
                     ) : recommendedRows.length === 0 &&
                       recommendedEmpty === "failed" ? (
@@ -8418,7 +8404,7 @@ export function HubModelPicker({
                       />
                     ) : recommendedRows.length === 0 ? (
                       <div className="px-2.5 py-2 text-xs text-muted-foreground">
-                        No models found.
+                        {translate("studio.modelPicker.noModelsFound")}
                       </div>
                     ) : (
                       recommendedRows.map((r) => {
@@ -8675,8 +8661,8 @@ export function HubModelPicker({
                       ) : (
                         <div className="px-2.5 py-2 text-xs text-muted-foreground">
                           {communityDiscoveryEnabled
-                            ? "No matching models."
-                            : "No matching LAiM models."}
+                            ? translate("uxModelpicker.noMatchingModels23ewf")
+                            : translate("uxModelpicker.noMatchingLAiMModelsxlmgw")}
                         </div>
                       )
                     ) : (
@@ -8809,10 +8795,10 @@ export function HubModelPicker({
               type="button"
               onClick={() => (ejectsAll ? onEjectAll?.() : onEject())}
               className="pointer-events-auto inline-flex items-center justify-center gap-2 rounded-md bg-popover px-3 py-2 text-ui-13 font-medium text-destructive shadow-[0_2px_8px_-2px_rgba(0,0,0,0.16)] transition-colors hover:bg-[color-mix(in_srgb,var(--foreground)_8%,var(--popover))] dark:bg-sidebar-accent dark:shadow-none dark:hover:bg-[color-mix(in_srgb,var(--foreground)_8%,var(--sidebar-accent))]"
-              title={ejectsAll ? "Eject all models" : "Eject model"}
+              title={ejectsAll ? translate("uxModelpicker.ejectAllModelst6c2v") : translate("uxModelpicker.ejectModel0rupc")}
             >
               <HugeiconsIcon icon={RemoveCircleIcon} className="size-3.5" />
-              {ejectsAll ? "Eject all" : "Eject model"}
+              {ejectsAll ? translate("uxModelpicker.ejectAllhph3a") : translate("uxModelpicker.ejectModelgt5qd")}
             </button>
           </div>
         ) : null}
@@ -8963,7 +8949,7 @@ function FineTunedRows({
             ? "GGUF"
             : "Local"
           : isTrainingFull
-            ? "Full finetune"
+            ? translate("uxModelpicker.fullFinetuneic0cl")
             : isExported
               ? `${tag} · Exported`
               : tag;
@@ -9029,12 +9015,12 @@ function FineTunedRows({
               <span className={ROW_ACTIONS_CLASS}>
                 {canConfigure && onConfigure && (
                   <ModelLoadSettingsAction
-                    ariaLabel={`Inference settings for ${adapter.name}`}
+                    ariaLabel={translate("uxModelpicker.inferenceSettingsFormlfme", { p1: adapter.name })}
                     onConfigure={() => onConfigure(adapter.id, selectionMeta)}
                   />
                 )}
                 <ModelRowMenu
-                  ariaLabel={`More options for ${adapter.name}`}
+                  ariaLabel={translate("uxModelpicker.moreOptionsForwg1ye", { p1: adapter.name })}
                   pin={{
                     pinned: pinnedKeys.includes(pinKey(adapter.id)),
                     pinLabel: "Pin",
@@ -9053,17 +9039,15 @@ function FineTunedRows({
                   del={
                     canDelete
                       ? {
-                          title: "Delete fine-tuned model?",
+                          get title() {
+                            return translate("uxModelpicker.deleteFineTunedModel159p5");
+                          },
                           description: (
-                            <>
-                              This will remove{" "}
-                              <span className="font-medium text-foreground">
+                            <>{translate("uxModelpicker.thisWillRemovebmxmc", { p1: " " })}<span className="font-medium text-foreground">
                                 {adapter.name}
-                              </span>{" "}
-                              from disk. This cannot be undone.
-                            </>
+                              </span>{translate("uxModelpicker.fromDiskThisCannotup1lc", { p1: " " })}</>
                           ),
-                          successMessage: `Deleted ${adapter.name}`,
+                          successMessage: translate("uxModelpicker.deletedpyid0", { p1: adapter.name }),
                           disabled: deleteDisabled,
                           onConfirm: async () => {
                             await deleteFineTunedModel({
@@ -9101,18 +9085,14 @@ function FineTunedRows({
                 budgetKnown={gpu.budgetKnown}
                 sourceOverride={isExportedGguf ? "exported" : undefined}
                 variantActions={{
-                  deleteTitle: "Delete exported GGUF variant?",
+                  get deleteTitle() { return translate("uxModelpicker.deleteExportedGGUFVariantbfyks"); },
                   renderDeleteDescription: (quant) => (
-                    <>
-                      This will remove{" "}
-                      <span className="font-medium text-foreground">
+                    <>{translate("uxModelpicker.thisWillRemovebmxmc", { p1: " " })}<span className="font-medium text-foreground">
                         {adapter.name} ({quant})
-                      </span>{" "}
-                      from disk. This cannot be undone.
-                    </>
+                      </span>{translate("uxModelpicker.fromDiskThisCannotup1lc", { p1: " " })}</>
                   ),
                   getDeleteSuccessMessage: (quant) =>
-                    `Deleted ${adapter.name} ${quant}`,
+                    translate("uxModelpicker.deletedsjjtx", { p1: adapter.name, p2: quant }),
                   deleteDisabled: deleteDisabled,
                   onDelete: isExportedGguf
                     ? async (quant) => {

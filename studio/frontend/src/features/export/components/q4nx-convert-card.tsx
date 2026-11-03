@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { SectionCard } from "@/components/section-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +15,7 @@ import { convertGgufToQ4nx } from "../api/export-api";
 
 type Source = "hub" | "local";
 
-// LAiM/Qwen3-0.6B-GGUF -> LAiM/Qwen3-0.6B, the repo holding config.json and the tokenizer.
+// unsloth/Qwen3-0.6B-GGUF -> unsloth/Qwen3-0.6B, the repo holding config.json and the tokenizer.
 function baseRepoFor(repoId: string): string {
   return repoId.trim().replace(/-GGUF$/i, "");
 }
@@ -68,7 +69,7 @@ export function Q4nxConvertCard() {
       });
       setResult({
         ok: true,
-        text: `Saved to ${response.details?.output_path ?? saveDirectory}`,
+        get text() { return translate("uxExport.savedTonv1ne", { p1: response.details?.output_path ?? saveDirectory }); },
       });
     } catch (error) {
       setResult({
@@ -83,14 +84,14 @@ export function Q4nxConvertCard() {
   return (
     <SectionCard
       icon={<HugeiconsIcon icon={CpuIcon} className="size-5" />}
-      title="Convert a GGUF to Q4NX (AMD NPU)"
-      description="Turn a Q4_0, Q4_1 or Q4_K_M GGUF you already have into a FastFlowLM folder for Ryzen AI NPUs (XDNA 2). No training or GPU needed."
+      title={translate("uxExport.convertAGGUFTo1j6iw")}
+      description={translate("uxExport.turnAQ4012649")}
       className="mt-6"
     >
       <Tabs value={source} onValueChange={(v) => setSource(v as Source)}>
         <TabsList>
           <TabsTrigger value="hub">Hugging Face</TabsTrigger>
-          <TabsTrigger value="local">Local file</TabsTrigger>
+          <TabsTrigger value="local">{translate("uxExport.localFile5e1fo")}</TabsTrigger>
         </TabsList>
       </Tabs>
       <div className="grid gap-4 sm:grid-cols-2">
@@ -98,14 +99,14 @@ export function Q4nxConvertCard() {
           <>
             <Field
               id="q4nx-repo"
-              label="GGUF repo"
-              placeholder="LAiM/Qwen3-0.6B-GGUF"
+              label={translate("uxExport.gGUFRepo1ccv7")}
+              placeholder="unsloth/Qwen3-0.6B-GGUF"
               value={repoId}
               onChange={(e) => setRepoId(e.target.value)}
             />
             <Field
               id="q4nx-file"
-              label="GGUF file"
+              label={translate("uxExport.gGUFFilet4jkt")}
               placeholder="Qwen3-0.6B-Q4_1.gguf"
               value={filename}
               onChange={(e) => setFilename(e.target.value)}
@@ -114,7 +115,7 @@ export function Q4nxConvertCard() {
         ) : (
           <Field
             id="q4nx-path"
-            label="GGUF file path"
+            label={translate("uxExport.gGUFFilePath17l70")}
             placeholder="/path/to/model.Q4_1.gguf"
             value={ggufPath}
             onChange={(e) => setGgufPath(e.target.value)}
@@ -122,14 +123,14 @@ export function Q4nxConvertCard() {
         )}
         <Field
           id="q4nx-base"
-          label="Original model (config and tokenizer)"
-          placeholder="LAiM/Qwen3-0.6B"
+          label={translate("uxExport.originalModelConfigAnd124eq")}
+          placeholder="unsloth/Qwen3-0.6B"
           value={effectiveBase}
           onChange={(e) => setBaseModel(e.target.value)}
         />
         <Field
           id="q4nx-save"
-          label="Save directory"
+          label={translate("uxExport.saveDirectory8v00u")}
           value={saveDirectory}
           onChange={(e) => setSaveDirectory(e.target.value)}
         />
@@ -143,7 +144,7 @@ export function Q4nxConvertCard() {
           }
         >
           {result?.text ??
-            "Runs as a drop-in for a FastFlowLM catalog model of the same family and size."}
+            translate("uxExport.runsAsADroprxsck")}
         </p>
         <Button disabled={!canConvert} onClick={handleConvert}>
           {running && <Spinner />}

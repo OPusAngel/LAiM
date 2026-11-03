@@ -2,21 +2,23 @@
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
 import test from "node:test";
-import { fileURLToPath } from "node:url";
+
+import { expandI18n, readSrc } from "./helpers/kit.ts";
 
 import { matchesFormat } from "../src/features/hub/lib/format-filters.ts";
 
+// The wording these rows must show lives in the catalogs now, so the shape
+// assertions read the file with the English copy folded back in.
 function read(path: string): string {
-  return readFileSync(fileURLToPath(new URL(path, import.meta.url)), "utf-8");
+  return expandI18n(readSrc(path));
 }
 
-const HUB_PAGE = read("../src/features/hub/hub-page.tsx");
-const CATALOG = read("../src/features/hub/catalog/models-catalog.tsx");
-const LISTS = read("../src/features/hub/catalog/models-catalog-lists.tsx");
-const TABLE = read("../src/features/hub/catalog/models-table.tsx");
-const ROWS = read("../src/features/hub/catalog/models-catalog-rows.tsx");
+const HUB_PAGE = read("features/hub/hub-page.tsx");
+const CATALOG = read("features/hub/catalog/models-catalog.tsx");
+const LISTS = read("features/hub/catalog/models-catalog-lists.tsx");
+const TABLE = read("features/hub/catalog/models-table.tsx");
+const ROWS = read("features/hub/catalog/models-catalog-rows.tsx");
 
 test("a single format filter admits one dot color, so the dot says nothing", () => {
   const formats = [

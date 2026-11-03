@@ -56,7 +56,7 @@ OPTIMIZER_BYTES_PER_PARAM: Dict[str, int] = {
 GC_LAYER_MULTIPLIERS = {
     "none": (None, None),
     "true": (2.0, 1.0),
-    "LAiM": (1.5, 1.0),
+    "unsloth": (1.5, 1.0),
 }
 
 
@@ -107,7 +107,7 @@ class TrainingVramConfig:
     max_seq_length: int = 2048
     lora_rank: int = 16
     target_modules: list = field(default_factory = lambda: list(DEFAULT_TARGET_MODULES))
-    gradient_checkpointing: str = "LAiM"
+    gradient_checkpointing: str = "unsloth"
     optimizer: str = "adamw_8bit"
     load_in_4bit: bool = True
     attention_implementation: str = "flash_attention_2"

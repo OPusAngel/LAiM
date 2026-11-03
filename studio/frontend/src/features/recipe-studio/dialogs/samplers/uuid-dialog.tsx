@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Input } from "@/components/ui/input";
 import type { ReactElement } from "react";
 import type { SamplerConfig } from "../../types";
@@ -31,9 +32,9 @@ export function UuidDialog({
       />
       <div className="grid gap-1.5">
         <FieldLabel
-          label="UUID format (optional)"
+          label={translate("uxRecipestudio.uUIDFormatOptional1p20a")}
           htmlFor={uuidId}
-          hint="Optional formatter e.g. prefix:, short, uppercase."
+          hint={translate("uxRecipestudio.optionalFormatterEG1ykj9")}
         />
         <Input
           id={uuidId}

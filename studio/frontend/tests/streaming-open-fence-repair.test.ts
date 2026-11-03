@@ -121,7 +121,7 @@ test("a marker left open before the fence keeps the whole-tail repair", () => {
  * zero-width space the whole-tail repair does not add -- a hidden character in
  * rendered code, and on the clipboard behind the copy button.
  *
- * Reported on LAiMai/LAiM#9517 as review item 3836360429.
+ * Reported on OPusAngel/LAiM#9517 as review item 3836360429.
  */
 for (const filler of [" ", "\t"]) {
   for (const underline of ["-", "--", "=", "=="]) {
@@ -184,7 +184,7 @@ const FENCE_OPENER = `${BACKTICK}${BACKTICK}${BACKTICK}\n`;
  * tail does not. Neither is reachable from a refusal on the cut, which is why
  * the body-marker refusal covers the retained window and not just the middle.
  *
- * Reported on LAiMai/LAiM#9517 as review item 3836846709.
+ * Reported on OPusAngel/LAiM#9517 as review item 3836846709.
  */
 for (const [name, windowText] of [
   ["an escaped fence", `${ESCAPED_FENCE} more`],

@@ -85,7 +85,7 @@ SECRETS = [
 
 # Real log lines. Each one must come back byte for byte.
 KEEP = [
-    "LAiM/Llama-3.2-3B-Instruct-LAiM-bnb-4bit",
+    "unsloth/Llama-3.2-3B-Instruct-unsloth-bnb-4bit",
     "blk.31.attn_q.weight  q4_K  [ 3072,  3072 ]",
     "/home/dan/.LAiM/studio/cache/models/models--LAiM--gemma-3-4b-it/snapshots/9a2f1c8b7e6d5c4b3a2918f7e6d5c4b3a2918f7e",
     "sha256:4f3c9a1b2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c",
@@ -384,7 +384,7 @@ def test_the_strip_is_unchanged_by_the_rewrite():
         "Cookie: session=abcdef123456",
         "?token=abcdef123456&next=1",
         "--password hunter2secret",
-        "INFO loading LAiM/Llama-3.2-1B revision 8f3a2b1c in 13ms",
+        "INFO loading unsloth/Llama-3.2-1B revision 8f3a2b1c in 13ms",
         "n_tokens = 4096, token_id=128009",
     ]
     checked = 0

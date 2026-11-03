@@ -3,6 +3,7 @@
 
 "use client";
 
+import { translate } from "@/i18n";
 import type { ToolCallMessagePartComponent } from "@assistant-ui/react";
 import { useToolArgsStatus } from "@assistant-ui/react";
 import { TerminalIcon } from "lucide-react";
@@ -17,8 +18,8 @@ import { isToolCallRunning, toolArgText } from "./tool-arg-text";
 import { CopyBtn, ToolCodeCell } from "./tool-code-cell";
 import { ToolLiveOutput } from "./tool-live-output";
 import { ToolResultOutput } from "./tool-result-output";
-import { SandboxFiles } from "./sandbox-files-view";
-import { isSandboxToolResult, type SandboxFile } from "./sandbox-files";
+import { WorkdirFiles } from "./workdir-files-view";
+import { isWorkdirToolResult, type WorkdirFile } from "./workdir-files";
 import { useChatRuntimeStore } from "@/features/chat/stores/chat-runtime-store";
 
 import {
@@ -43,8 +44,8 @@ const TerminalToolUIImpl: ToolCallMessagePartComponent = ({
   // A command that wrote files arrives as the python tool's structured shape; a plain string means
   // it wrote none. The same test the adapter applies: a foreign result that merely has text would
   // otherwise be rendered as that field alone.
-  const structured = isSandboxToolResult(result)
-    ? (result as unknown as { text: string; sessionId?: string; files?: SandboxFile[] })
+  const structured = isWorkdirToolResult(result)
+    ? (result as unknown as { text: string; sessionId?: string; files?: WorkdirFile[] })
     : null;
   const files = structured?.files ?? [];
   const sessionId = structured?.sessionId ?? "";
@@ -88,7 +89,7 @@ const TerminalToolUIImpl: ToolCallMessagePartComponent = ({
       <ToolFallbackContent>
         {command && (
           <ToolCodeCell
-            label="command"
+            label={translate("uxComponents.command14vtq")}
             code={command}
             language="bash"
             downloadName="command.sh"
@@ -102,10 +103,10 @@ const TerminalToolUIImpl: ToolCallMessagePartComponent = ({
                 <Spinner className="size-3.5" />
                 <span>
                   {awaitingApproval
-                    ? "Waiting for approval…"
+                    ? translate("uxComponents.waitingForApprovalu473o")
                     : isWriting
-                      ? "Writing command…"
-                      : "Running…"}
+                      ? translate("uxComponents.writingCommandil9r0")
+                      : translate("uxComponents.runningEllipsisw2les")}
                 </span>
               </div>
               {/* Live stdout streamed via tool_output SSE events. */}
@@ -123,7 +124,7 @@ const TerminalToolUIImpl: ToolCallMessagePartComponent = ({
         </div>
       </ToolFallbackContent>
       {/* Files stay outside even when the card is collapsed (#10425) */}
-      <SandboxFiles className="ml-5" sessionId={sessionId} files={files} />
+      <WorkdirFiles className="ml-5" sessionId={sessionId} files={files} />
     </ToolFallbackRoot>
   );
 };

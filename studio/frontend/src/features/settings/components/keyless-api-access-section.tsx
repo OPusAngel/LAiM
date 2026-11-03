@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -219,7 +220,7 @@ export function KeylessApiAccessSection({
       <div className="border-t border-border/60 px-4 py-1">
         <SettingsRow
           label="Чат и инференс"
-          description="Обслуживать одобренные OpenAI и Anthropic эндпоинты инференса на localhost и активном приватном LAN."
+          description={translate("uxSettings.openAIAnthropicLocalhostLAN3mhb5")}
         >
           <Switch
             checked={scope !== "off"}
@@ -245,7 +246,7 @@ export function KeylessApiAccessSection({
 
         <SettingsRow
           label="Разрешить инструменты"
-          description="Разрешить пользователям без ключа использовать встроенные инструменты Python, терминала и веб-поиска. По умолчанию отключено."
+          description={translate("uxSettings.pythoncztk7")}
         >
           <Switch
             checked={tools}

@@ -190,7 +190,7 @@ test("only models that can actually be selected are offered", () => {
 });
 
 const HUB = "/home/u/.cache/huggingface/hub";
-const REPO_ID = "LAiM/Repo-GGUF";
+const REPO_ID = "unsloth/Repo-GGUF";
 const SNAPSHOT_A = `${HUB}/models--LAiM--Repo-GGUF/snapshots/aaa1111`;
 const SNAPSHOT_B = `${HUB}/models--LAiM--Repo-GGUF/snapshots/bbb2222`;
 
@@ -205,7 +205,7 @@ test("Switch Back resolves a snapshot-path chat to the live picker row", () => {
     SNAPSHOT_B,
   );
   assert.equal(
-    chatModelSelectableId(SNAPSHOT_A, new Set(["LAiM/Other-GGUF"])),
+    chatModelSelectableId(SNAPSHOT_A, new Set(["unsloth/Other-GGUF"])),
     null,
   );
   assert.equal(
@@ -239,7 +239,7 @@ test("a snapshot-path chat is already on its repo-id checkpoint", () => {
   );
   assert.equal(chatModelIsResident(created, REPO_ID, "Q8_0"), false);
   assert.equal(
-    chatModelIsResident(created, "LAiM/Other-GGUF", "Q4_K_M"),
+    chatModelIsResident(created, "unsloth/Other-GGUF", "Q4_K_M"),
     false,
   );
 });
@@ -462,7 +462,7 @@ test("a saved GGUF variant is carried back exactly", () => {
   );
   assert.deepEqual(
     chatModelSwitchMeta(
-      { modelId: "LAiM/Qwen3-4B-GGUF", ggufVariant: "Q8_0" },
+      { modelId: "unsloth/Qwen3-4B-GGUF", ggufVariant: "Q8_0" },
       [],
     ),
     { ggufVariant: "Q8_0" },
@@ -475,7 +475,7 @@ test("switching back to a hub GGUF loads it instead of staging a download", () =
   // manager. Two of requestStart's outcomes, conflict and busy, toast and return without
   // loading, so a switch back that lands there silently does nothing.
   const selection = switchBackSelection({
-    modelId: "LAiM/Qwen3-4B-GGUF",
+    modelId: "unsloth/Qwen3-4B-GGUF",
     ggufVariant: "Q8_0",
   });
   assert.equal(wantsDownloadManagerStaging(selection), false);
@@ -484,7 +484,7 @@ test("switching back to a hub GGUF loads it instead of staging a download", () =
   // A pick the picker itself marks as a hub row still stages, so nothing else moved.
   assert.equal(
     wantsDownloadManagerStaging({
-      id: "LAiM/Qwen3-4B-GGUF",
+      id: "unsloth/Qwen3-4B-GGUF",
       source: "hub",
       ggufVariant: "Q8_0",
     }),
@@ -681,7 +681,7 @@ test("switch back recovers a repo-keyed context through a snapshot path", () => 
   store.clear();
   const snapshotPath =
     "/home/u/.cache/huggingface/hub/models--LAiM--Repo-GGUF/snapshots/2f1c9ab";
-  const repoId = "LAiM/Repo-GGUF";
+  const repoId = "unsloth/Repo-GGUF";
   assert.ok(
     savePerModelConfig(repoId, "Q4_K_M", {
       ...DEFAULT_PER_MODEL_CONFIG,
@@ -735,7 +735,7 @@ test("a Hub or external id is still switched on the id alone", () => {
   // isExternalModelId routes the rest. Inventing a "local" source for them would
   // send them down the wrong branch of handleCheckpointChange.
   assert.equal(
-    chatModelSwitchMeta({ modelId: "LAiM/Qwen3-4B-GGUF" }, []),
+    chatModelSwitchMeta({ modelId: "unsloth/Qwen3-4B-GGUF" }, []),
     undefined,
   );
   assert.equal(

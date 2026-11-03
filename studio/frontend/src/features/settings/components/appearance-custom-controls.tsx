@@ -26,7 +26,7 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { NumericValueInput } from "@/features/model-picker/components/numeric-value-input";
-import { type TranslationKey, useT } from "@/i18n";
+import { translate, type TranslationKey, useT } from "@/i18n";
 import { ChevronDownStandardIcon } from "@/lib/chevron-icons";
 import { toast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
@@ -127,7 +127,9 @@ export function ActiveColorControl({
 /** Font each slot resolves to when no override is set (see index.css). */
 const DEFAULT_FONT_NAMES = {
   ui: "Inter Variable",
-  heading: "Hellix",
+  get heading() {
+    return translate("uxSettings.hellixx2jtw");
+  },
   chat: "Inter Variable",
   code: "JetBrains Mono",
 } as const;

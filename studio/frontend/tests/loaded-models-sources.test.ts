@@ -51,10 +51,10 @@ test("an unreachable runtime yields no rows rather than throwing", () => {
 test("a GGUF chat model reports its variant", () => {
   const [row] = describeInferenceStatus(
     inferenceStatus({
-      active_model: "LAiM/gemma-3-4b-it-GGUF",
+      active_model: "unsloth/gemma-3-4b-it-GGUF",
       is_gguf: true,
       gguf_variant: "Q4_K_M",
-      loaded: ["LAiM/gemma-3-4b-it-GGUF"],
+      loaded: ["unsloth/gemma-3-4b-it-GGUF"],
     }),
   );
   assert.equal(row.kind, "text");
@@ -66,7 +66,7 @@ test("a GGUF chat model reports its variant", () => {
 test("an audio model is a speech row, and a whisper one is dictation", () => {
   const [tts] = describeInferenceStatus(
     inferenceStatus({
-      active_model: "LAiM/orpheus-3b-0.1-ft",
+      active_model: "unsloth/orpheus-3b-0.1-ft",
       is_audio: true,
       audio_type: "tts",
     }),
@@ -87,13 +87,13 @@ test("an audio model is a speech row, and a whisper one is dictation", () => {
 test("a model the runtime still holds besides the active one gets its own row", () => {
   const rows = describeInferenceStatus(
     inferenceStatus({
-      active_model: "LAiM/Llama-3.2-3B",
-      loaded: ["LAiM/Llama-3.2-3B", "LAiM/Qwen3-4B"],
+      active_model: "unsloth/Llama-3.2-3B",
+      loaded: ["unsloth/Llama-3.2-3B", "unsloth/Qwen3-4B"],
     }),
   );
   assert.equal(rows.length, 2);
   assert.equal(rows[0].inactive, undefined);
-  assert.equal(rows[1].name, "LAiM/Qwen3-4B");
+  assert.equal(rows[1].name, "unsloth/Qwen3-4B");
   assert.equal(rows[1].inactive, true);
 });
 
@@ -121,13 +121,13 @@ test("an engine block wins over the legacy fields, and never doubles a row", () 
 test("each STT engine that has a model resident gets a row naming its engine", () => {
   const rows = describeSttStatus({
     transformers: { loaded_model: null },
-    mtmd: { loaded_model: "LAiM/voxtral-mini", device: "cuda" },
+    mtmd: { loaded_model: "unsloth/voxtral-mini", device: "cuda" },
     gguf: { loaded_model: "ggml-base.en", device: "metal" },
   });
   assert.deepEqual(
     rows.map((row) => [row.sttEngine, row.name]),
     [
-      ["mtmd", "LAiM/voxtral-mini"],
+      ["mtmd", "unsloth/voxtral-mini"],
       ["gguf", "ggml-base.en"],
     ],
   );
@@ -157,14 +157,14 @@ test("a real device is still reported next to its engine", () => {
 test("image and video rows omit the parts the backend did not report", () => {
   const [image] = describeDiffusionStatus({
     loaded: true,
-    repo_id: "LAiM/FLUX.1-dev",
+    repo_id: "unsloth/FLUX.1-dev",
     family: "flux",
     device: null,
   } as never);
   assert.equal(image.detail, "flux");
   const [video] = describeVideoStatus({
     loaded: true,
-    repo_id: "LAiM/Wan2.2-T2V-A14B",
+    repo_id: "unsloth/Wan2.2-T2V-A14B",
     family: "wan",
     model_kind: "gguf",
     device: "cuda",
@@ -175,7 +175,7 @@ test("image and video rows omit the parts the backend did not report", () => {
 test("a row names the precision the pipeline actually loaded at", () => {
   const [image] = describeDiffusionStatus({
     loaded: true,
-    repo_id: "LAiM/FLUX.1-dev",
+    repo_id: "unsloth/FLUX.1-dev",
     family: "flux",
     dtype: "bfloat16",
     device: "cuda",
@@ -186,7 +186,7 @@ test("a row names the precision the pipeline actually loaded at", () => {
   // wins over the pipeline dtype.
   const [video] = describeVideoStatus({
     loaded: true,
-    repo_id: "LAiM/Wan2.2-T2V-A14B",
+    repo_id: "unsloth/Wan2.2-T2V-A14B",
     family: "wan",
     dtype: "bfloat16",
     transformer_quant: "fp8",
@@ -198,7 +198,7 @@ test("a row names the precision the pipeline actually loaded at", () => {
 test("a bf16 video load falls back to the pipeline dtype", () => {
   const [video] = describeVideoStatus({
     loaded: true,
-    repo_id: "LAiM/Wan2.2-T2V-A14B",
+    repo_id: "unsloth/Wan2.2-T2V-A14B",
     family: "wan",
     dtype: "bfloat16",
     // "none" is the backend's word for plain bf16, not a precision to print.
@@ -211,7 +211,7 @@ test("a bf16 video load falls back to the pipeline dtype", () => {
 test("a GGUF video row names its selected quant instead of its compute dtype", () => {
   const [video] = describeVideoStatus({
     loaded: true,
-    repo_id: "LAiM/Wan2.2-T2V-A14B-GGUF",
+    repo_id: "unsloth/Wan2.2-T2V-A14B-GGUF",
     family: "wan",
     model_kind: "gguf",
     gguf_variant: "Q4_K_M",
@@ -225,7 +225,7 @@ test("a lowercase quant filename still reads as an upper-case quant", () => {
   // Hub repos ship q8_0 filenames, and every other quant label in the UI is upper-cased.
   const [image] = describeDiffusionStatus({
     loaded: true,
-    repo_id: "LAiM/Z-Image-Turbo-GGUF",
+    repo_id: "unsloth/Z-Image-Turbo-GGUF",
     family: "z-image",
     model_kind: "gguf",
     gguf_variant: "q8_0",
@@ -238,7 +238,7 @@ test("a lowercase quant filename still reads as an upper-case quant", () => {
 test("a GGUF image load does not print GGUF twice", () => {
   const [image] = describeDiffusionStatus({
     loaded: true,
-    repo_id: "LAiM/FLUX.1-dev-GGUF",
+    repo_id: "unsloth/FLUX.1-dev-GGUF",
     family: "flux",
     model_kind: "gguf",
     dtype: "gguf",
@@ -253,7 +253,7 @@ test("a GGUF image row names the quant that was picked, not the compute dtype", 
   // quant is what distinguishes the file that was downloaded and opened.
   const [image] = describeDiffusionStatus({
     loaded: true,
-    repo_id: "LAiM/Z-Image-Turbo-GGUF",
+    repo_id: "unsloth/Z-Image-Turbo-GGUF",
     family: "z-image",
     model_kind: "gguf",
     gguf_variant: "Q8_0",
@@ -269,7 +269,7 @@ test("a native GGUF image row names its selected quant without model_kind", () =
   // both have to survive on that field alone.
   const [image] = describeDiffusionStatus({
     loaded: true,
-    repo_id: "LAiM/Z-Image-Turbo-GGUF",
+    repo_id: "unsloth/Z-Image-Turbo-GGUF",
     family: "z-image",
     gguf_variant: "Q8_0",
     dtype: "gguf",
@@ -283,7 +283,7 @@ test("a GGUF pick the dense fast path replaced names that build instead", () => 
   // .gguf, so the row must neither call it GGUF nor print a quant no tensor carries.
   const [image] = describeDiffusionStatus({
     loaded: true,
-    repo_id: "LAiM/Z-Image-Turbo-GGUF",
+    repo_id: "unsloth/Z-Image-Turbo-GGUF",
     family: "z-image",
     model_kind: "gguf",
     gguf_variant: "Q8_0",
@@ -301,7 +301,7 @@ test("a GGUF pick the dense fast path replaced names that build instead", () => 
 test("an audio-input VLM stays a chat row, not Speech", () => {
   const [row] = describeInferenceStatus(
     inferenceStatus({
-      active_model: "LAiM/gemma-3n-E4B-it",
+      active_model: "unsloth/gemma-3n-E4B-it",
       is_audio: false,
       audio_type: "audio_vlm",
       has_audio_input: true,
@@ -342,7 +342,7 @@ test("a dictation row opens Voice settings", () => {
 test("the target follows the runtime, not the kind", () => {
   const [chatWhisper] = describeInferenceStatus(
     inferenceStatus({
-      active_model: "LAiM/whisper-large-v3",
+      active_model: "unsloth/whisper-large-v3",
       is_audio: true,
       audio_type: "whisper",
     }),
@@ -355,13 +355,13 @@ test("every runtime's rows appear together, in a fixed order", () => {
   const merged = mergeLoadedModels([
     describeInferenceStatus(
       inferenceStatus({
-        active_model: "LAiM/orpheus-3b-0.1-ft",
+        active_model: "unsloth/orpheus-3b-0.1-ft",
         is_audio: true,
       }),
     ),
     describeDiffusionStatus({
       loaded: true,
-      repo_id: "LAiM/FLUX.1-dev",
+      repo_id: "unsloth/FLUX.1-dev",
     } as never),
     describeVideoStatus(null),
     describeSttStatus({ gguf: { loaded_model: "ggml-base.en" } }),
@@ -375,10 +375,10 @@ test("every runtime's rows appear together, in a fixed order", () => {
 test("one runtime naming the same model twice is still one row", () => {
   const duplicated: LoadedModelEntry[] = [
     {
-      id: "chat:LAiM/Qwen3-4B",
+      id: "chat:unsloth/Qwen3-4B",
       kind: "text",
       source: "chat",
-      name: "LAiM/Qwen3-4B",
+      name: "unsloth/Qwen3-4B",
       detail: "GGUF",
     },
   ];
@@ -389,25 +389,25 @@ test("one runtime naming the same model twice is still one row", () => {
 // up to one poll old must be checked against the runtime before either fires.
 test("a runtime holding the row's model is safe to unload", () => {
   assert.equal(
-    verifyResident("LAiM/FLUX.1-dev", "LAiM/FLUX.1-dev", modelIdsMatch),
+    verifyResident("unsloth/FLUX.1-dev", "unsloth/FLUX.1-dev", modelIdsMatch),
     "match",
   );
 });
 
 test("a runtime holding something else must not be unloaded", () => {
   assert.equal(
-    verifyResident("LAiM/FLUX.1-dev", "LAiM/Qwen-Image", modelIdsMatch),
+    verifyResident("unsloth/FLUX.1-dev", "unsloth/Qwen-Image", modelIdsMatch),
     "replaced",
   );
 });
 
 test("an idle runtime is already free, so there is nothing to unload", () => {
   assert.equal(
-    verifyResident("LAiM/FLUX.1-dev", null, modelIdsMatch),
+    verifyResident("unsloth/FLUX.1-dev", null, modelIdsMatch),
     "gone",
   );
   assert.equal(
-    verifyResident("LAiM/FLUX.1-dev", undefined, modelIdsMatch),
+    verifyResident("unsloth/FLUX.1-dev", undefined, modelIdsMatch),
     "gone",
   );
 });
@@ -421,15 +421,15 @@ test("a trailing separator or casing difference is not a replacement", () => {
     "match",
   );
   assert.equal(
-    verifyResident("LAiM/FLUX.1-dev", "LAiM/flux.1-dev", modelIdsMatch),
+    verifyResident("unsloth/FLUX.1-dev", "unsloth/flux.1-dev", modelIdsMatch),
     "match",
   );
 });
 
 test("a local load shows its model folder rather than leading directories", () => {
   assert.equal(
-    shortModelLabel("LAiM/gemma-3-4b-it"),
-    "LAiM/gemma-3-4b-it",
+    shortModelLabel("unsloth/gemma-3-4b-it"),
+    "unsloth/gemma-3-4b-it",
   );
   assert.equal(
     shortModelLabel("/Users/me/models/hub/gemma-3-4b-it"),
@@ -443,7 +443,7 @@ test("a local load shows its model folder rather than leading directories", () =
 // load for its whole duration, so the row can match the toast.
 test("a chat model still loading gets its own row", () => {
   const rows = describeInferenceStatus(
-    inferenceStatus({ loading: ["LAiM/Qwen3.5-9B-GGUF"] }),
+    inferenceStatus({ loading: ["unsloth/Qwen3.5-9B-GGUF"] }),
   );
   assert.equal(rows.length, 1);
   assert.equal(rows[0].loading, true);
@@ -453,9 +453,9 @@ test("a chat model still loading gets its own row", () => {
 test("a model that finished loading is not listed twice", () => {
   const rows = describeInferenceStatus(
     inferenceStatus({
-      active_model: "LAiM/Qwen3.5-9B-GGUF",
+      active_model: "unsloth/Qwen3.5-9B-GGUF",
       is_gguf: true,
-      loading: ["LAiM/Qwen3.5-9B-GGUF"],
+      loading: ["unsloth/Qwen3.5-9B-GGUF"],
     }),
   );
   assert.equal(rows.length, 1);
@@ -471,12 +471,12 @@ test("a dictation sidecar that is starting shows as loading", () => {
 test("an announced load shows before any status confirms it", () => {
   const rows = withPendingLoads(
     [],
-    new Map([["image", "LAiM/Z-Image-Turbo-GGUF"]]),
+    new Map([["image", "unsloth/Z-Image-Turbo-GGUF"]]),
   );
   assert.equal(rows.length, 1);
   assert.equal(rows[0].kind, "image");
   assert.equal(rows[0].loading, true);
-  assert.equal(rows[0].name, "LAiM/Z-Image-Turbo-GGUF");
+  assert.equal(rows[0].name, "unsloth/Z-Image-Turbo-GGUF");
 });
 
 // The backend's answer wins: otherwise a finished load shows twice for the
@@ -484,12 +484,12 @@ test("an announced load shows before any status confirms it", () => {
 test("a status row for that runtime replaces the announced one", () => {
   const loaded = describeDiffusionStatus({
     loaded: true,
-    repo_id: "LAiM/Z-Image-Turbo-GGUF",
+    repo_id: "unsloth/Z-Image-Turbo-GGUF",
     family: "z-image",
   } as never);
   const rows = withPendingLoads(
     loaded,
-    new Map([["image", "LAiM/Z-Image-Turbo-GGUF"]]),
+    new Map([["image", "unsloth/Z-Image-Turbo-GGUF"]]),
   );
   assert.equal(rows.length, 1);
   assert.notEqual(rows[0].loading, true);
@@ -506,28 +506,28 @@ test("nothing announced leaves the polled rows untouched", () => {
 test("a swap shows the incoming model alongside the outgoing one", () => {
   const resident = describeDiffusionStatus({
     loaded: true,
-    repo_id: "LAiM/FLUX.1-dev",
+    repo_id: "unsloth/FLUX.1-dev",
     family: "flux",
   } as never);
   const rows = withPendingLoads(
     resident,
-    new Map([["image", "LAiM/Z-Image-Turbo-GGUF"]]),
+    new Map([["image", "unsloth/Z-Image-Turbo-GGUF"]]),
   );
   assert.equal(rows.length, 2);
   const incoming = rows.find((row) => row.loading);
-  assert.equal(incoming?.name, "LAiM/Z-Image-Turbo-GGUF");
-  assert.ok(rows.some((row) => row.name === "LAiM/FLUX.1-dev"));
+  assert.equal(incoming?.name, "unsloth/Z-Image-Turbo-GGUF");
+  assert.ok(rows.some((row) => row.name === "unsloth/FLUX.1-dev"));
 });
 
 test("the announced row yields once that same model is resident", () => {
   const resident = describeDiffusionStatus({
     loaded: true,
-    repo_id: "LAiM/Z-Image-Turbo-GGUF",
+    repo_id: "unsloth/Z-Image-Turbo-GGUF",
     family: "z-image",
   } as never);
   const rows = withPendingLoads(
     resident,
-    new Map([["image", "LAiM/Z-Image-Turbo-GGUF"]]),
+    new Map([["image", "unsloth/Z-Image-Turbo-GGUF"]]),
   );
   assert.equal(rows.length, 1);
   assert.notEqual(rows[0].loading, true);
@@ -536,7 +536,7 @@ test("the announced row yields once that same model is resident", () => {
 test("an nvfp4 image row names the kernel backend that served it", () => {
   const [flashinfer] = describeDiffusionStatus({
     loaded: true,
-    repo_id: "LAiM/Z-Image-Turbo-NVFP4",
+    repo_id: "unsloth/Z-Image-Turbo-NVFP4",
     family: "z-image",
     transformer_quant: "nvfp4",
     transformer_quant_backend: "flashinfer",
@@ -547,7 +547,7 @@ test("an nvfp4 image row names the kernel backend that served it", () => {
 
   const [torchao] = describeDiffusionStatus({
     loaded: true,
-    repo_id: "LAiM/Z-Image-Turbo-NVFP4",
+    repo_id: "unsloth/Z-Image-Turbo-NVFP4",
     family: "z-image",
     transformer_quant: "nvfp4",
     transformer_quant_backend: "torchao",
@@ -560,7 +560,7 @@ test("an nvfp4 image row names the kernel backend that served it", () => {
 test("a row without a quant backend is unchanged, on old and new backends alike", () => {
   const [fp8] = describeDiffusionStatus({
     loaded: true,
-    repo_id: "LAiM/Z-Image-Turbo",
+    repo_id: "unsloth/Z-Image-Turbo",
     family: "z-image",
     transformer_quant: "fp8",
     transformer_quant_backend: null,
@@ -570,7 +570,7 @@ test("a row without a quant backend is unchanged, on old and new backends alike"
   assert.equal(fp8.detail, "z-image · FP8 · cuda");
   const [old] = describeDiffusionStatus({
     loaded: true,
-    repo_id: "LAiM/Z-Image-Turbo",
+    repo_id: "unsloth/Z-Image-Turbo",
     family: "z-image",
     transformer_quant: "fp8",
     dtype: "bfloat16",
@@ -582,7 +582,7 @@ test("a row without a quant backend is unchanged, on old and new backends alike"
 test("an nvfp4 video row names the kernel backend that served it", () => {
   const [flashinfer] = describeVideoStatus({
     loaded: true,
-    repo_id: "LAiM/Wan2.2-T2V-A14B-NVFP4",
+    repo_id: "unsloth/Wan2.2-T2V-A14B-NVFP4",
     family: "wan2.2-t2v-a14b",
     transformer_quant: "nvfp4",
     transformer_quant_backend: "flashinfer",
@@ -596,7 +596,7 @@ test("an nvfp4 video row names the kernel backend that served it", () => {
 
   const [torchao] = describeVideoStatus({
     loaded: true,
-    repo_id: "LAiM/Wan2.2-T2V-A14B-NVFP4",
+    repo_id: "unsloth/Wan2.2-T2V-A14B-NVFP4",
     family: "wan2.2-t2v-a14b",
     transformer_quant: "nvfp4",
     transformer_quant_backend: "torchao",
@@ -609,7 +609,7 @@ test("an nvfp4 video row names the kernel backend that served it", () => {
 test("a video row without a quant backend is unchanged", () => {
   const [row] = describeVideoStatus({
     loaded: true,
-    repo_id: "LAiM/Wan2.2-T2V-A14B",
+    repo_id: "unsloth/Wan2.2-T2V-A14B",
     family: "wan2.2-t2v-a14b",
     transformer_quant: "fp8",
     dtype: "bfloat16",

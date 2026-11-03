@@ -247,8 +247,8 @@ test("music and clone-only models never speak, and an unknown repo uses the fami
     null,
   );
   assert.equal(
-    S.pickAudioApiModel([tts("LAiM/orpheus-3b-0.1-ft")], "speak"),
-    "LAiM/orpheus-3b-0.1-ft",
+    S.pickAudioApiModel([tts("unsloth/orpheus-3b-0.1-ft")], "speak"),
+    "unsloth/orpheus-3b-0.1-ft",
   );
   assert.equal(S.pickAudioApiModel([], "transcribe"), null);
 });
@@ -256,15 +256,15 @@ test("music and clone-only models never speak, and an unknown repo uses the fami
 test("a page's model is used only where it can run the example", () => {
   const listed = [
     tts(cpp("Kokoro-82M-GGUF")),
-    tts("LAiM/orpheus-3b-0.1-ft"),
+    tts("unsloth/orpheus-3b-0.1-ft"),
   ];
   assert.ok(!S.audioApiModelFits(listed, cpp("HTDemucs-GGUF"), "separate"));
   assert.ok(!S.audioApiModelFits(listed, cpp("HTDemucs-GGUF"), "speak"));
   assert.ok(!S.audioApiModelFits(listed, cpp("Kokoro-82M-GGUF"), "clone"));
-  assert.ok(S.audioApiModelFits(listed, "LAiM/orpheus-3b-0.1-ft", "speak"));
-  assert.ok(!S.audioApiModelFits(listed, "LAiM/Qwen3-8B-GGUF", "speak"));
+  assert.ok(S.audioApiModelFits(listed, "unsloth/orpheus-3b-0.1-ft", "speak"));
+  assert.ok(!S.audioApiModelFits(listed, "unsloth/Qwen3-8B-GGUF", "speak"));
   assert.ok(S.audioApiModelFits(null, cpp("Kokoro-82M-GGUF"), "speak"));
-  assert.ok(!S.audioApiModelFits(null, "LAiM/Qwen3-8B-GGUF", "speak"));
+  assert.ok(!S.audioApiModelFits(null, "unsloth/Qwen3-8B-GGUF", "speak"));
 });
 
 test("the Convert and Music bodies follow what the model accepts", () => {

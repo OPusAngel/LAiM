@@ -3,6 +3,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { fetchSystemInfo } from "@/hooks/use-system";
+import { translate } from "@/i18n";
+
 import {
   type MemoryEstimate,
   type MemoryEstimateRequest,
@@ -121,7 +123,7 @@ export function useMemoryEstimate(
           if (controller.signal.aborted) return;
           if (refreshMemory && estimate.available) {
             const probe = await fetchSystemInfo({ refreshMemory: true });
-            if (!probe?.memory_refreshed) throw new Error("Memory probe unavailable");
+            if (!probe?.memory_refreshed) throw new Error(translate("uxModelpicker.memoryProbeUnavailable4p2vl"));
           }
           if (controller.signal.aborted) return;
           shownModel.current = identity;

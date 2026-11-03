@@ -36,7 +36,7 @@ def _fast_models():
     return [FastLlamaModel, FastBaseModel]
 
 
-@pytest.mark.parametrize("use_gradient_checkpointing", [False, True, "LAiM"])
+@pytest.mark.parametrize("use_gradient_checkpointing", [False, True, "unsloth"])
 @pytest.mark.parametrize("fast_model", range(2))
 def test_for_training_disables_the_cache_with_or_without_checkpointing(
     fast_model, use_gradient_checkpointing

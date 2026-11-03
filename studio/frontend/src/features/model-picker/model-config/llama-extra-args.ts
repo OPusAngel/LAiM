@@ -516,6 +516,8 @@ export function extraArgFlags(tokens: readonly string[]): string[] {
 // runtime with no bundler, so a tested helper importing a sibling by path cannot load.
 
 import type { LlamaFlagCatalog } from "../api/llama-flags";
+import { translate } from "@/i18n";
+
 
 /** What to tell the user about what they typed, before the load tries it. Three levels: an `error`
  *  is refused by the backend so the load cannot start, a `warning` is allowed through because
@@ -529,60 +531,60 @@ export type ExtraArgsDiagnostic = {
  *  flag catalogue is loading: the backend denies these unconditionally, so they must never
  *  fall through to the "wins" note. */
 const MANAGED_CONTROL_FLAGS: Record<string, string> = {
-  "--parallel": "Parallel Slots",
-  "--n-parallel": "Parallel Slots",
-  "-np": "Parallel Slots",
+  "--parallel": translate("uxModelpicker.parallelSlots2ysyj"),
+  "--n-parallel": translate("uxModelpicker.parallelSlots2ysyj"),
+  "-np": translate("uxModelpicker.parallelSlots2ysyj"),
 };
 
 /** Pass-through flags that a control in this panel also emits. The backend appends these last and
  *  reconciles the ones that affect its sizing, so the mapping explains which value wins. */
 const CONTROL_OWNED_FLAGS: Record<string, string> = {
-  "--ctx-size": "Context Length",
-  "-c": "Context Length",
-  "--batch-size": "Batch Size",
-  "-b": "Batch Size",
+  "--ctx-size": translate("uxModelpicker.contextLength8qr6n"),
+  "-c": translate("uxModelpicker.contextLength8qr6n"),
+  "--batch-size": translate("uxModelpicker.batchSizebhabf"),
+  "-b": translate("uxModelpicker.batchSizebhabf"),
   "--ubatch-size": "Micro-batch Size",
   "-ub": "Micro-batch Size",
-  "--cache-type-k": "KV Cache Dtype",
-  "-ctk": "KV Cache Dtype",
-  "--cache-type-v": "KV Cache Dtype",
-  "-ctv": "KV Cache Dtype",
-  "--gpu-layers": "GPU Layers",
-  "--n-gpu-layers": "GPU Layers",
-  "-ngl": "GPU Layers",
-  "--n-cpu-moe": "MoE Layers on CPU",
-  "-ncmoe": "MoE Layers on CPU",
-  "--split-mode": "Tensor Parallelism",
-  "-sm": "Tensor Parallelism",
-  "--spec-type": "Speculative Decoding",
-  "--spec-draft-n-max": "Draft Tokens",
-  "--chat-template": "Chat Template",
-  "--chat-template-file": "Chat Template",
+  "--cache-type-k": translate("uxModelpicker.kVCacheDtypewgdr2"),
+  "-ctk": translate("uxModelpicker.kVCacheDtypewgdr2"),
+  "--cache-type-v": translate("uxModelpicker.kVCacheDtypewgdr2"),
+  "-ctv": translate("uxModelpicker.kVCacheDtypewgdr2"),
+  "--gpu-layers": translate("uxModelpicker.gPULayerskrj9m"),
+  "--n-gpu-layers": translate("uxModelpicker.gPULayerskrj9m"),
+  "-ngl": translate("uxModelpicker.gPULayerskrj9m"),
+  "--n-cpu-moe": translate("uxModelpicker.moELayersOnCPUumzbs"),
+  "-ncmoe": translate("uxModelpicker.moELayersOnCPUumzbs"),
+  "--split-mode": translate("uxModelpicker.tensorParallelismbk0cp"),
+  "-sm": translate("uxModelpicker.tensorParallelismbk0cp"),
+  "--spec-type": translate("uxModelpicker.speculativeDecodingit90m"),
+  "--spec-draft-n-max": translate("uxModelpicker.draftTokensuy0tg"),
+  "--chat-template": translate("uxModelpicker.chatTemplatep7f0d"),
+  "--chat-template-file": translate("uxModelpicker.chatTemplatep7f0d"),
   "--load-mode": "Mmap/Mlock",
   "-lm": "Mmap/Mlock",
   // Both halves, since the control sets one dtype for the pair, and both spellings, since which one
   // a build understands is a version question.
-  "--spec-draft-type-k": "Spec Decoding KV Cache Dtype",
-  "-ctkd": "Spec Decoding KV Cache Dtype",
-  "--cache-type-k-draft": "Spec Decoding KV Cache Dtype",
-  "--spec-draft-type-v": "Spec Decoding KV Cache Dtype",
-  "-ctvd": "Spec Decoding KV Cache Dtype",
-  "--cache-type-v-draft": "Spec Decoding KV Cache Dtype",
+  "--spec-draft-type-k": translate("uxModelpicker.specDecodingKVCache203st"),
+  "-ctkd": translate("uxModelpicker.specDecodingKVCache203st"),
+  "--cache-type-k-draft": translate("uxModelpicker.specDecodingKVCache203st"),
+  "--spec-draft-type-v": translate("uxModelpicker.specDecodingKVCache203st"),
+  "-ctvd": translate("uxModelpicker.specDecodingKVCache203st"),
+  "--cache-type-v-draft": translate("uxModelpicker.specDecodingKVCache203st"),
   "--ctx-checkpoints": "Checkpoints",
   "-ctxcp": "Checkpoints",
   // upstream's older spelling of the same flag
   "--swa-checkpoints": "Checkpoints",
-  "--cache-ram": "Cache RAM",
-  "-cram": "Cache RAM",
+  "--cache-ram": translate("uxModelpicker.cacheRAMj6h4j"),
+  "-cram": translate("uxModelpicker.cacheRAMj6h4j"),
 };
 
 /** Flags the launch REMOVES when the GPU picker owns placement. Not a shadow the user wins:
  *  `_strip_device_extra_args` deletes these whenever gpu_ids is set. */
 const GPU_SELECTION_STRIPPED_FLAGS: Record<string, string> = {
-  "--device": "GPU selection",
-  "-dev": "GPU selection",
-  "--main-gpu": "GPU selection",
-  "-mg": "GPU selection",
+  "--device": translate("uxModelpicker.gPUSelection9l23r"),
+  "-dev": translate("uxModelpicker.gPUSelection9l23r"),
+  "--main-gpu": translate("uxModelpicker.gPUSelection9l23r"),
+  "-mg": translate("uxModelpicker.gPUSelection9l23r"),
 };
 
 /** Flags Manual GPU memory REMOVES without translating, unlike the layer count. `/load` calls
@@ -590,12 +592,12 @@ const GPU_SELECTION_STRIPPED_FLAGS: Record<string, string> = {
  *  survives because the route writes it into the first-class field first, while the MoE count
  *  and the fitter are dropped and the controls' own values run. */
 const MANUAL_OFFLOAD_STRIPPED_FLAGS: Record<string, string> = {
-  "--n-cpu-moe": "MoE Layers on CPU",
-  "-ncmoe": "MoE Layers on CPU",
-  "--cpu-moe": "MoE Layers on CPU",
-  "-cmoe": "MoE Layers on CPU",
-  "--fit": "GPU Memory",
-  "-fit": "GPU Memory",
+  "--n-cpu-moe": translate("uxModelpicker.moELayersOnCPUumzbs"),
+  "-ncmoe": translate("uxModelpicker.moELayersOnCPUumzbs"),
+  "--cpu-moe": translate("uxModelpicker.moELayersOnCPUumzbs"),
+  "-cmoe": translate("uxModelpicker.moELayersOnCPUumzbs"),
+  "--fit": translate("uxModelpicker.gPUMemory6ul0r"),
+  "-fit": translate("uxModelpicker.gPUMemory6ul0r"),
 };
 
 /** Flags Model Memory removes, per setting. apply_model_memory_policy runs before the extras reach
@@ -603,27 +605,27 @@ const MANUAL_OFFLOAD_STRIPPED_FLAGS: Record<string, string> = {
  *  other load-mode-bearing flag, since a trailing one resets the whole mode; "Don't reserve
  *  system RAM" drops the flags that would hold a full host copy. */
 const KEEP_RESIDENT_STRIPPED_FLAGS: Record<string, string> = {
-  "--mlock": "Keep model in GPU memory",
-  "-mlock": "Keep model in GPU memory",
-  "--load-mode": "Keep model in GPU memory",
-  "-lm": "Keep model in GPU memory",
-  "--no-mmap": "Keep model in GPU memory",
-  "-no-mmap": "Keep model in GPU memory",
-  "--mmap": "Keep model in GPU memory",
-  "--direct-io": "Keep model in GPU memory",
-  "-dio": "Keep model in GPU memory",
-  "--no-direct-io": "Keep model in GPU memory",
-  "-ndio": "Keep model in GPU memory",
+  "--mlock": translate("uxModelpicker.keepModelInGPUa0nkt"),
+  "-mlock": translate("uxModelpicker.keepModelInGPUa0nkt"),
+  "--load-mode": translate("uxModelpicker.keepModelInGPUa0nkt"),
+  "-lm": translate("uxModelpicker.keepModelInGPUa0nkt"),
+  "--no-mmap": translate("uxModelpicker.keepModelInGPUa0nkt"),
+  "-no-mmap": translate("uxModelpicker.keepModelInGPUa0nkt"),
+  "--mmap": translate("uxModelpicker.keepModelInGPUa0nkt"),
+  "--direct-io": translate("uxModelpicker.keepModelInGPUa0nkt"),
+  "-dio": translate("uxModelpicker.keepModelInGPUa0nkt"),
+  "--no-direct-io": translate("uxModelpicker.keepModelInGPUa0nkt"),
+  "-ndio": translate("uxModelpicker.keepModelInGPUa0nkt"),
 };
 
 /** The subset no-reserve vetoes: mmap and dio hold no full host copy, so they stay. */
 const NO_RAM_RESERVE_STRIPPED_FLAGS: Record<string, string> = {
-  "--mlock": "Don't reserve system RAM",
-  "-mlock": "Don't reserve system RAM",
-  "--no-mmap": "Don't reserve system RAM",
-  "-no-mmap": "Don't reserve system RAM",
-  "--no-direct-io": "Don't reserve system RAM",
-  "-ndio": "Don't reserve system RAM",
+  "--mlock": translate("uxModelpicker.donTReserveSystemyr1b2"),
+  "-mlock": translate("uxModelpicker.donTReserveSystemyr1b2"),
+  "--no-mmap": translate("uxModelpicker.donTReserveSystemyr1b2"),
+  "-no-mmap": translate("uxModelpicker.donTReserveSystemyr1b2"),
+  "--no-direct-io": translate("uxModelpicker.donTReserveSystemyr1b2"),
+  "-ndio": translate("uxModelpicker.donTReserveSystemyr1b2"),
 };
 
 /** Smallest value the backend's own parser accepts, per flag. parse_ctx_override refuses a negative
@@ -854,13 +856,17 @@ export function diagnoseExtraArgs(
   if (unterminatedQuote) {
     out.push({
       level: "error",
-      message: `Unclosed ${unterminatedQuote === '"' ? "double" : "single"} quote.`,
+      message: translate(
+        unterminatedQuote === '"'
+          ? "uxModelpicker.unclosedDoubleQuoteE95tn"
+          : "uxModelpicker.unclosedSingleQuoteG18vc",
+      ),
     });
   }
   if (tokens.length > EXTRA_ARGS_MAX_TOKENS) {
     out.push({
       level: "error",
-      message: `Too many arguments: ${tokens.length}, limit ${EXTRA_ARGS_MAX_TOKENS}.`,
+      get message() { return translate("uxModelpicker.tooManyArgumentsLimit3lhgs", { p1: tokens.length, p2: EXTRA_ARGS_MAX_TOKENS }); },
     });
   }
   // The other half of the backend's bounds: a grammar or JSON schema is one long token, so a payload
@@ -871,7 +877,7 @@ export function diagnoseExtraArgs(
   if (bytes > maxBytes) {
     out.push({
       level: "error",
-      message: `Arguments are too large: ${bytes} bytes, limit ${maxBytes}.`,
+      get message() { return translate("uxModelpicker.argumentsAreTooLargeog2l1", { p1: bytes, p2: maxBytes }); },
     });
   }
   // And on Windows, what the quoting makes of them: a backslash run before a quote doubles, so bytes
@@ -881,7 +887,7 @@ export function diagnoseExtraArgs(
     if (quoted > catalog.windowsCommandBudget) {
       out.push({
         level: "error",
-        message: `Arguments are too long for a Windows command line: ${quoted} characters after quoting, limit ${catalog.windowsCommandBudget}.`,
+        get message() { return translate("uxModelpicker.argumentsAreTooLongfbn4i", { p1: quoted, p2: catalog.windowsCommandBudget }); },
       });
     }
   }
@@ -891,7 +897,7 @@ export function diagnoseExtraArgs(
   if (tokens.some((token) => CONTROL_CHARACTERS.test(token))) {
     out.push({
       level: "error",
-      message: "Arguments cannot contain control characters.",
+      get message() { return translate("uxModelpicker.argumentsCannotContainControlkc6gq"); },
     });
   } else if (tokens.some((token) => isUnusableInArgv(token))) {
     // What is left once control characters are ruled out: half a surrogate pair, which pasting a
@@ -899,7 +905,7 @@ export function diagnoseExtraArgs(
     // llama-server; an emoji is a whole pair and stays fine.
     out.push({
       level: "error",
-      message: "Arguments contain an incomplete character.",
+      get message() { return translate("uxModelpicker.argumentsContainAnIncompletep2sm6"); },
     });
   }
 
@@ -932,7 +938,7 @@ export function diagnoseExtraArgs(
       if (pendingValues <= 0) {
         out.push({
           level: "error",
-          message: `"${token}" belongs to no flag. Every value has to follow its flag.`,
+          get message() { return translate("uxModelpicker.belongsToNoFlagaxf4m", { p1: token }); },
         });
         break;
       }
@@ -1004,8 +1010,8 @@ export function diagnoseExtraArgs(
       let message: string | null = null;
       if (missing) {
         message = numeric
-          ? `${flag} needs a number after it.`
-          : `${flag} needs a value after it.`;
+          ? translate("uxModelpicker.needsANumberAfter2iop7", { p1: flag })
+          : translate("uxModelpicker.needsAValueAfterfbx28", { p1: flag });
       } else if (RATIO_VALUE_FLAGS.has(flag)) {
         message = ratioValueProblem(flag, value, reserializesSplit);
       } else if (!numeric) {
@@ -1048,14 +1054,14 @@ export function diagnoseExtraArgs(
       // the log. Reported whether or not a control owns the flag.
       out.push({
         level: "error",
-        message: `Remove the spaces around "${token}". llama-server reads them as part of the flag.`,
+        get message() { return translate("uxModelpicker.removeTheSpacesAroundz3631", { p1: token }); },
       });
     } else if (token.includes("=") && !isManaged) {
       // Measured on b10342 and b10360: "--top-k=20", "--ctx-size=4096" and "--flash-attn=on" each exit
       // with "error: invalid argument". A managed flag is left to the message below.
       out.push({
         level: "error",
-        message: `llama-server does not read "${flag}=value". Write ${flag} and its value as two arguments.`,
+        get message() { return translate("uxModelpicker.llamaServerDoesNot1ymrg", { p1: flag, p2: flag }); },
       });
     }
 
@@ -1064,8 +1070,8 @@ export function diagnoseExtraArgs(
       out.push({
         level: "error",
         message: control
-          ? `${flag} is set by ${control} above and cannot be passed here.`
-          : `${flag} is managed by LAiM and cannot be passed here.`,
+          ? translate("uxModelpicker.isSetByAbovelfg8r", { p1: flag, p2: control })
+          : translate("uxModelpicker.isManagedByLAiMnudzk", { p1: flag }),
       });
       continue;
     }
@@ -1094,7 +1100,7 @@ export function diagnoseExtraArgs(
     if (REQUEST_SCOPED_FLAGS.has(flag)) {
       out.push({
         level: "note",
-        message: `${flag} only sets a default here. Sampling for a conversation lives in its chat settings.`,
+        get message() { return translate("uxModelpicker.onlySetsADefault37thv", { p1: flag }); },
       });
       continue;
     }
@@ -1108,15 +1114,15 @@ export function diagnoseExtraArgs(
   if (stripped.length > 0) {
     out.push({
       level: "warning",
-      message: `${stripped.join(", ")} will be removed: the GPU selection above owns placement. Set GPU Memory to Default to pass it yourself.`,
+      get message() { return translate("uxModelpicker.willBeRemovedThedglb5", { p1: stripped.join(", ") }); },
     });
   }
   for (const owner of owedValues) {
     const message = TWO_VALUE_FLAGS.has(owner)
-      ? `${owner} needs two values, a start and an end layer.`
+      ? translate("uxModelpicker.needsTwoValuesAx6jts", { p1: owner })
       : INTEGER_VALUE_FLAGS.has(owner)
-        ? `${owner} needs a number after it.`
-        : `${owner} needs a value after it.`;
+        ? translate("uxModelpicker.needsANumberAfter3eu30", { p1: owner })
+        : translate("uxModelpicker.needsAValueAfterkhtpu", { p1: owner });
     if (!reportedValues.has(message)) {
       reportedValues.add(message);
       out.push({ level: "error", message });
@@ -1127,19 +1133,19 @@ export function diagnoseExtraArgs(
     const setting = memoryStripped[0][1];
     out.push({
       level: "warning",
-      message: `${memoryStripped.map(([flag]) => flag).join(", ")} will be removed: ${setting} in Settings owns how the weights are held.`,
+      get message() { return translate("uxModelpicker.willBeRemovedIn8ejlp", { p1: memoryStripped.map(([flag]) => flag).join(", "), p2: setting }); },
     });
   }
   if (manualStripped.length > 0) {
     out.push({
       level: "warning",
-      message: `${manualStripped.join(", ")} will be removed: GPU Memory is Manual, and its controls own offload. Set GPU Memory to Default to pass it yourself.`,
+      get message() { return translate("uxModelpicker.willBeRemovedGPUeo2af", { p1: manualStripped.join(", ") }); },
     });
   }
   if (shadowed.length > 0) {
     out.push({
       level: "note",
-      message: `Passed after the controls above, so ${shadowed.join(", ")} wins.`,
+      get message() { return translate("uxModelpicker.passedAfterTheControlsb5ehc", { p1: shadowed.join(", ") }); },
     });
   }
   if (unknown.length > 0) {
@@ -1147,8 +1153,8 @@ export function diagnoseExtraArgs(
       level: "warning",
       message:
         unknown.length === 1
-          ? `${unknown[0]} is not in this llama-server's --help. It will still be passed.`
-          : `${unknown.join(", ")} are not in this llama-server's --help. They will still be passed.`,
+          ? translate("uxModelpicker.isNotInThisx1y14", { p1: unknown[0] })
+          : translate("uxModelpicker.areNotInThisk992j", { p1: unknown.join(", ") }),
     });
   }
   return out;

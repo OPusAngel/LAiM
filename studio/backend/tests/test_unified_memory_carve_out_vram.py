@@ -206,7 +206,7 @@ def test_a_270m_model_now_fits(monkeypatch):
     """The reported symptom, end to end through the helper the training gate uses.
 
     "Falling back to all visible GPUs; model may not fit:
-     model=LAiM/gemma-3-270m-it usable_gb=0.3 required_gb=2.251"
+     model=unsloth/gemma-3-270m-it usable_gb=0.3 required_gb=2.251"
     """
     from routes.training_vram import _free_vram_by_index
 

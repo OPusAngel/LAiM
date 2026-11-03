@@ -117,13 +117,13 @@ def test_drafter_predicate_and_mirrors_agree(path, expected):
 @pytest.mark.parametrize(
     "model_id,size_b",
     [
-        ("LAiM/gemma-4-E2B-it-GGUF", 2.0),
-        ("LAiM/gemma-4-E4B-it", 4.0),
-        ("LAiM/gemma-3n-E4B-it", 4.0),
+        ("unsloth/gemma-4-E2B-it-GGUF", 2.0),
+        ("unsloth/gemma-4-E4B-it", 4.0),
+        ("unsloth/gemma-3n-E4B-it", 4.0),
         # MoE active params beat effective and total notation.
-        ("LAiM/Qwen3.5-35B-A3B", 3.0),
-        ("LAiM/gemma-4-12b-it-GGUF", 12.0),
-        ("LAiM/Qwen3.5-9B-MTP-GGUF", 9.0),
+        ("unsloth/Qwen3.5-35B-A3B", 3.0),
+        ("unsloth/gemma-4-12b-it-GGUF", 12.0),
+        ("unsloth/Qwen3.5-9B-MTP-GGUF", 9.0),
         ("no-size-here", None),
     ],
 )
@@ -798,7 +798,7 @@ def test_download_mtp_prefers_root_over_new_scheme_copies(monkeypatch):
 
     b = LlamaCppBackend()
     b._download_companion_gguf = _fake_companion
-    b._download_mtp(hf_repo = "LAiM/gemma-4-E4B-it-qat-mobile-GGUF")
+    b._download_mtp(hf_repo = "unsloth/gemma-4-E4B-it-qat-mobile-GGUF")
 
     repo_files = [
         "MTP/mtp-gemma-4-E4B-it-BF16.gguf",
@@ -904,7 +904,7 @@ def test_download_mtp_refetches_when_the_cache_holds_only_a_shared_head(tmp_path
     captured = _capture_companion_download(b)
 
     got = b._download_mtp(
-        hf_repo = "LAiM/Qwen3.8-Flash-Next-GGUF", near_path = str(snap / "UD-IQ1_S" / "model.gguf")
+        hf_repo = "unsloth/Qwen3.8-Flash-Next-GGUF", near_path = str(snap / "UD-IQ1_S" / "model.gguf")
     )
     assert "pick" in captured, "a lone shared head was reused without consulting the repo"
     assert got == "/downloaded/mtp-Qwen3.8-Flash-Next-Q8_0.gguf"
@@ -928,7 +928,7 @@ def test_download_mtp_still_reuses_a_cached_self_contained_head(tmp_path, monkey
     captured = _capture_companion_download(b)
 
     got = b._download_mtp(
-        hf_repo = "LAiM/Qwen3.8-Flash-Next-GGUF", near_path = str(snap / "UD-IQ1_S" / "model.gguf")
+        hf_repo = "unsloth/Qwen3.8-Flash-Next-GGUF", near_path = str(snap / "UD-IQ1_S" / "model.gguf")
     )
     assert "pick" not in captured
     assert got is not None and Path(got).name == "mtp-Qwen3.8-Flash-Next-Q8_0.gguf"
@@ -948,7 +948,7 @@ def test_download_mtp_keeps_a_lone_shared_head_offline(tmp_path, monkeypatch):
     captured = _capture_companion_download(b)
 
     got = b._download_mtp(
-        hf_repo = "LAiM/Qwen3.8-Flash-Next-GGUF", near_path = str(snap / "UD-IQ1_S" / "model.gguf")
+        hf_repo = "unsloth/Qwen3.8-Flash-Next-GGUF", near_path = str(snap / "UD-IQ1_S" / "model.gguf")
     )
     assert "pick" not in captured
     assert got is not None and Path(got).name == "mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf"
@@ -1000,7 +1000,7 @@ def test_download_mtp_lists_the_repo_past_the_helpers_own_snapshot_reuse(tmp_pat
     )
 
     got = LlamaCppBackend()._download_mtp(
-        hf_repo = "LAiM/Qwen3.8-Flash-Next-GGUF",
+        hf_repo = "unsloth/Qwen3.8-Flash-Next-GGUF",
         near_path = str(snap / "UD-IQ1_S" / "model.gguf"),
     )
     assert got is not None and Path(got).name == "mtp-Qwen3.8-Flash-Next-Q8_0.gguf", (
@@ -1024,7 +1024,7 @@ def test_download_mtp_keeps_the_borrowing_head_when_the_listing_never_answers(
     _stub_hub(monkeypatch, [], listing_fails = True)
 
     got = LlamaCppBackend()._download_mtp(
-        hf_repo = "LAiM/Qwen3.8-Flash-Next-GGUF",
+        hf_repo = "unsloth/Qwen3.8-Flash-Next-GGUF",
         near_path = str(snap / "UD-IQ1_S" / "model.gguf"),
     )
     assert got is not None and Path(got).name == "mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf"
@@ -1046,7 +1046,7 @@ def test_download_mtp_reuses_cached_root_drafter_offline(tmp_path, monkeypatch):
     )
     monkeypatch.setattr(mc, "_iter_hf_cache_snapshots", lambda repo: [snap])
 
-    got = LlamaCppBackend()._download_mtp(hf_repo = "LAiM/gemma-4-E4B-it-qat-mobile-GGUF")
+    got = LlamaCppBackend()._download_mtp(hf_repo = "unsloth/gemma-4-E4B-it-qat-mobile-GGUF")
     assert got is not None and Path(got).name == "mtp-gemma-4-E4B-it.gguf"
 
 
@@ -1066,7 +1066,7 @@ def test_download_mtp_reuses_cached_subdir_copy_when_no_root_offline(tmp_path, m
     )
     monkeypatch.setattr(mc, "_iter_hf_cache_snapshots", lambda repo: [snap])
 
-    got = LlamaCppBackend()._download_mtp(hf_repo = "LAiM/gemma-4-E4B-it-qat-mobile-GGUF")
+    got = LlamaCppBackend()._download_mtp(hf_repo = "unsloth/gemma-4-E4B-it-qat-mobile-GGUF")
     assert got is not None and Path(got).name == "mtp-gemma-4-E4B-it-BF16.gguf"
 
 
@@ -1082,7 +1082,7 @@ def test_download_mtp_prefers_root_across_snapshots_offline(tmp_path, monkeypatc
     snap_full = _seed_snapshot(tmp_path / "old", ["mtp-gemma-4-E4B-it.gguf"])
     monkeypatch.setattr(mc, "_iter_hf_cache_snapshots", lambda repo: [snap_partial, snap_full])
 
-    got = LlamaCppBackend()._download_mtp(hf_repo = "LAiM/gemma-4-E4B-it-qat-mobile-GGUF")
+    got = LlamaCppBackend()._download_mtp(hf_repo = "unsloth/gemma-4-E4B-it-qat-mobile-GGUF")
     assert got is not None and Path(got).name == "mtp-gemma-4-E4B-it.gguf"
 
 
@@ -1098,7 +1098,7 @@ def test_download_mtp_reuse_follows_snapshot_order_offline(tmp_path, monkeypatch
     oldest = _seed_snapshot(tmp_path / "oldest", ["mtp-gemma-4-E4B-it.gguf"])
     monkeypatch.setattr(mc, "_iter_hf_cache_snapshots", lambda repo: [newest, oldest])
 
-    got = LlamaCppBackend()._download_mtp(hf_repo = "LAiM/gemma-4-E4B-it-qat-mobile-GGUF")
+    got = LlamaCppBackend()._download_mtp(hf_repo = "unsloth/gemma-4-E4B-it-qat-mobile-GGUF")
     assert got is not None and Path(got).parent.parent.name == "newest"
 
 
@@ -1121,7 +1121,7 @@ def test_download_mtp_prefers_main_snapshot_offline(tmp_path, monkeypatch):
     monkeypatch.setattr(mc, "_iter_hf_cache_snapshots", lambda _repo: [new, old])
 
     got = LlamaCppBackend()._download_mtp(
-        hf_repo = "LAiM/gemma-GGUF",
+        hf_repo = "unsloth/gemma-GGUF",
         near_path = str(main),
     )
 
@@ -1179,7 +1179,7 @@ def test_download_mtp_online_skips_cache_reuse(tmp_path, monkeypatch):
 
     b = LlamaCppBackend()
     b._download_companion_gguf = _fake_companion
-    assert b._download_mtp(hf_repo = "LAiM/gemma-4-E4B-it-qat-mobile-GGUF") is None
+    assert b._download_mtp(hf_repo = "unsloth/gemma-4-E4B-it-qat-mobile-GGUF") is None
     assert reached.get("hit") is True
 
 
@@ -1227,7 +1227,7 @@ def _dspark_download_probe(
     b = LlamaCppBackend()
     b._download_companion_gguf = _fake_companion
     got = b._download_dspark(
-        hf_repo = "LAiM/DeepSeek-V4-Flash-0731-GGUF",
+        hf_repo = "unsloth/DeepSeek-V4-Flash-0731-GGUF",
         near_path = "/cache/snap/DeepSeek-V4-Flash-0731-Q4_K_M.gguf",
         binary = "/fake/llama-server",
     )
@@ -1479,7 +1479,7 @@ def test_a_rejected_candidate_does_not_win_the_tier_comparison(tmp_path):
 
 
 def test_a_qat_weight_still_pairs_with_its_base_family_drafter(tmp_path):
-    """Negative control for the ranking above: LAiM/gemma-4-12B-it-qat-GGUF
+    """Negative control for the ranking above: unsloth/gemma-4-12B-it-qat-GGUF
     ships mtp-gemma-4-12B-it.gguf, so the prefix rule has to keep working when no
     more specific sidecar exists."""
     weight = tmp_path / "gemma-4-12B-it-qat-UD-Q4_K_XL.gguf"
@@ -1793,7 +1793,7 @@ def test_cached_mtp_lookup_ranks_nested_copies_like_the_download(tmp_path, monke
     )
     backend = llama_cpp_module.LlamaCppBackend.__new__(llama_cpp_module.LlamaCppBackend)
 
-    found = backend._cached_repo_mtp_drafter("LAiM/Qwen3.8-Flash-Next-GGUF")
+    found = backend._cached_repo_mtp_drafter("unsloth/Qwen3.8-Flash-Next-GGUF")
     assert found is not None
     assert Path(found).name == "mtp-Qwen3.8-Flash-Next-Q8_0.gguf", (
         f"offline reuse picked {Path(found).name}; the online picker takes "
@@ -1949,7 +1949,7 @@ def test_deleting_one_of_several_variants_keeps_the_dspark_drafter(tmp_path):
 
     repo, snap = _cache_repo(
         tmp_path,
-        "LAiM/DeepSeek-V4-Flash-0731-GGUF",
+        "unsloth/DeepSeek-V4-Flash-0731-GGUF",
         [
             "model-Q4_K_M.gguf",
             "model-Q8_0.gguf",
@@ -1957,7 +1957,7 @@ def test_deleting_one_of_several_variants_keeps_the_dspark_drafter(tmp_path):
         ],
     )
     _delete_gguf_variant_from_repos(
-        "LAiM/DeepSeek-V4-Flash-0731-GGUF", "Q4_K_M", [repo], None, root = tmp_path
+        "unsloth/DeepSeek-V4-Flash-0731-GGUF", "Q4_K_M", [repo], None, root = tmp_path
     )
 
     assert not (snap / "model-Q4_K_M.gguf").is_symlink()
@@ -1972,11 +1972,11 @@ def test_deleting_the_last_variant_reclaims_an_opt_in_dspark_drafter(tmp_path):
 
     repo, snap = _cache_repo(
         tmp_path,
-        "LAiM/DeepSeek-V4-Flash-0731-GGUF",
+        "unsloth/DeepSeek-V4-Flash-0731-GGUF",
         ["model-Q4_K_M.gguf", "dspark/dspark-DeepSeek-V4-Flash-0731-BF16.gguf"],
     )
     _delete_gguf_variant_from_repos(
-        "LAiM/DeepSeek-V4-Flash-0731-GGUF", "Q4_K_M", [repo], None, root = tmp_path
+        "unsloth/DeepSeek-V4-Flash-0731-GGUF", "Q4_K_M", [repo], None, root = tmp_path
     )
 
     assert not (snap / "model-Q4_K_M.gguf").is_symlink()
@@ -1993,7 +1993,7 @@ def test_a_suffix_scheme_sidecar_is_not_mistaken_for_a_quant(tmp_path):
 
     repo, snap = _cache_repo(
         tmp_path,
-        "LAiM/DeepSeek-V4-Flash-0731-GGUF",
+        "unsloth/DeepSeek-V4-Flash-0731-GGUF",
         [
             "model-Q4_K_M.gguf",
             "model-Q8_0.gguf",
@@ -2001,7 +2001,7 @@ def test_a_suffix_scheme_sidecar_is_not_mistaken_for_a_quant(tmp_path):
         ],
     )
     _delete_gguf_variant_from_repos(
-        "LAiM/DeepSeek-V4-Flash-0731-GGUF", "Q8_0", [repo], None, root = tmp_path
+        "unsloth/DeepSeek-V4-Flash-0731-GGUF", "Q8_0", [repo], None, root = tmp_path
     )
 
     assert not (snap / "model-Q8_0.gguf").is_symlink()
@@ -2010,7 +2010,7 @@ def test_a_suffix_scheme_sidecar_is_not_mistaken_for_a_quant(tmp_path):
 
     # ...and it still goes with the last variant.
     _delete_gguf_variant_from_repos(
-        "LAiM/DeepSeek-V4-Flash-0731-GGUF", "Q4_K_M", [repo], None, root = tmp_path
+        "unsloth/DeepSeek-V4-Flash-0731-GGUF", "Q4_K_M", [repo], None, root = tmp_path
     )
     assert not (snap / "dspark" / "DeepSeek-V4-Flash-0731-Q8_0-dspark.gguf").is_symlink()
 
@@ -2191,7 +2191,7 @@ def _spec_flags(backend, **kwargs):
         speculative_type = None,
         spec_draft_n_max = None,
         extra_args = None,
-        model_identifier = "LAiM/Muse-Glimmer-30B-GGUF",
+        model_identifier = "unsloth/Muse-Glimmer-30B-GGUF",
         model_path = None,
         gpus = True,
         binary = "/fake/llama-server",
@@ -2277,7 +2277,7 @@ def test_a_dropped_unloadable_drafter_reports_its_own_reason(monkeypatch):
     flags = _spec_flags(
         backend,
         # The arm is _mtp_drafter_missing, which is the name-only (Gemma) MTP shape.
-        model_identifier = "LAiM/gemma-4-12b-it-GGUF",
+        model_identifier = "unsloth/gemma-4-12b-it-GGUF",
         speculative_type = "mtp",
         mtp_draft_path = None,
         mtp_drafter_unloadable = True,
@@ -2331,7 +2331,7 @@ def test_a_genuinely_absent_drafter_still_reports_not_found(monkeypatch):
     backend = _spec_backend(monkeypatch)
     _spec_flags(
         backend,
-        model_identifier = "LAiM/gemma-4-12b-it-GGUF",
+        model_identifier = "unsloth/gemma-4-12b-it-GGUF",
         speculative_type = "mtp",
         mtp_draft_path = None,
     )
@@ -2536,7 +2536,7 @@ def _dflash_download_probe(
     b = LlamaCppBackend()
     b._download_companion_gguf = _fake_companion
     got = b._download_dflash(
-        hf_repo = "LAiM/Muse-Glimmer-30B-GGUF",
+        hf_repo = "unsloth/Muse-Glimmer-30B-GGUF",
         near_path = "/cache/snap/Muse-Glimmer-30B-UD-Q4_K_XL.gguf",
         binary = "/fake/llama-server",
     )
@@ -2720,7 +2720,7 @@ def test_download_dflash_takes_the_sidecar_naming_this_weight(monkeypatch):
 
 @pytest.mark.parametrize("sidecar", ["dflash-kquant.gguf", "dflash-bf16.gguf"])
 def test_download_dflash_keeps_the_single_published_sidecar(monkeypatch, sidecar):
-    """The shipped LAiM/Muse-Glimmer-30B-GGUF layout. Its sidecar's stem is a
+    """The shipped unsloth/Muse-Glimmer-30B-GGUF layout. Its sidecar's stem is a
     precision token, not a family, so nothing may treat "names no weight here"
     as a rejection."""
     assert (

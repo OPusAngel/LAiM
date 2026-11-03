@@ -42,7 +42,7 @@ def _auto_select(
         patch.object(hw, "get_visible_gpu_utilization", return_value = {"devices": devices}),
         patch.object(hw, "_torch_get_device_inventory", return_value = inventory) as inv,
     ):
-        selected, metadata = auto_select_gpu_ids("LAiM/test")
+        selected, metadata = auto_select_gpu_ids("unsloth/test")
     return selected, metadata, inv
 
 

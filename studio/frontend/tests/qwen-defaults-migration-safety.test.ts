@@ -23,7 +23,7 @@ const {
   "../src/features/chat/stores/chat-runtime-store.ts"
 );
 
-const QWEN38 = "LAiM/Qwen3.8-27B-GGUF";
+const QWEN38 = "unsloth/Qwen3.8-27B-GGUF";
 const LEGACY_SNAPSHOT = {
   temperature: 0.6,
   topP: 0.95,
@@ -273,7 +273,7 @@ test("a status refresh cannot outrank the installation's persisted reasoning", a
   });
   // This browser never loaded QWEN38: clear any load marker left by an earlier
   // case, then let a status merely report the model (fromLoad defaults false).
-  noteLoadedModelReasoningMode("LAiM/Llama-3.2-3B-Instruct-GGUF", false);
+  noteLoadedModelReasoningMode("unsloth/Llama-3.2-3B-Instruct-GGUF", false);
   noteLoadedModelReasoningMode(QWEN38, true);
 
   await useChatRuntimeStore.getState().hydratePersistedSettings();
@@ -319,7 +319,7 @@ test("a model without reasoning support is migrated as non-thinking", async () =
     settingsHydrated: false,
   });
   // A status reported this checkpoint, and it cannot reason.
-  noteLoadedModelReasoningMode("LAiM/Llama-3.2-3B-Instruct-GGUF", false);
+  noteLoadedModelReasoningMode("unsloth/Llama-3.2-3B-Instruct-GGUF", false);
   useChatRuntimeStore.setState({ reasoningEnabled: true });
   noteLoadedModelReasoningMode(QWEN38, true);
 
@@ -391,7 +391,7 @@ test("a checkpoint switch during the conditional write is not migrated", async (
   // The CAS commits for QWEN38, but the user moves to another Qwen before the
   // response resolves. Applying then would mark the second model's row migrated
   // while the server updated only the first.
-  const other = "LAiM/Qwen3.6-9B-GGUF";
+  const other = "unsloth/Qwen3.6-9B-GGUF";
   resetHttp({ ...LEGACY_SETTINGS });
   settingsHttp.beforeConditionalApply = () => {
     useChatRuntimeStore.setState((state) => ({
@@ -475,7 +475,7 @@ test("selecting an external Qwen migrates its dormant row", async () => {
     inferenceParamsByModel: { [external]: LEGACY_SNAPSHOT },
   });
   useChatRuntimeStore.setState((state) => ({
-    params: { ...state.params, checkpoint: "LAiM/Llama-3.2-3B-Instruct-GGUF" },
+    params: { ...state.params, checkpoint: "unsloth/Llama-3.2-3B-Instruct-GGUF" },
     paramsByModel: { [external]: { ...LEGACY_SNAPSHOT } },
     ...BUILTIN_DEFAULT,
     rememberParamsPerModel: true,
@@ -503,7 +503,7 @@ test("the send barrier waits for a migration a model pick just scheduled", async
     inferenceParamsByModel: { [external]: LEGACY_SNAPSHOT },
   });
   useChatRuntimeStore.setState((state) => ({
-    params: { ...state.params, checkpoint: "LAiM/Llama-3.2-3B-Instruct-GGUF" },
+    params: { ...state.params, checkpoint: "unsloth/Llama-3.2-3B-Instruct-GGUF" },
     paramsByModel: { [external]: { ...LEGACY_SNAPSHOT } },
     ...BUILTIN_DEFAULT,
     rememberParamsPerModel: true,
@@ -618,7 +618,7 @@ test("a case-distinct external switch during the write is not migrated", async (
 });
 
 test("an earlier retry settling does not clear a later retry's barrier", async () => {
-  const QWEN36 = "LAiM/Qwen3.6-14B-GGUF";
+  const QWEN36 = "unsloth/Qwen3.6-14B-GGUF";
   const base = {
     ...BUILTIN_DEFAULT,
     inferenceParamsByModel: {
@@ -675,7 +675,7 @@ test("an earlier retry settling does not clear a later retry's barrier", async (
 });
 
 test("the send barrier follows a retry that replaces the one it captured", async () => {
-  const QWEN36 = "LAiM/Qwen3.6-14B-GGUF";
+  const QWEN36 = "unsloth/Qwen3.6-14B-GGUF";
   const base = {
     ...BUILTIN_DEFAULT,
     inferenceParamsByModel: {
@@ -816,7 +816,7 @@ test("a null model map is fenced rather than treated as empty", async () => {
 });
 
 test("per-model memory enabled during the read cancels the global migration", async () => {
-  const OTHER = "LAiM/Llama-3.2-3B-GGUF";
+  const OTHER = "unsloth/Llama-3.2-3B-GGUF";
   // Scheduled while the global snapshot was the active model's to rewrite; the
   // confirming read shows per-model memory on, so it no longer is.
   resetHttp({
@@ -967,7 +967,7 @@ test("an unreachable backend does not spin the migration rearm", async () => {
 });
 
 test("a model switch during hydration still gets its own row migrated", async () => {
-  const QWEN36 = "LAiM/Qwen3.6-14B-GGUF";
+  const QWEN36 = "unsloth/Qwen3.6-14B-GGUF";
   const stored = {
     ...BUILTIN_DEFAULT,
     inferenceParamsByModel: {

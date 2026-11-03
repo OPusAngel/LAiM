@@ -5,7 +5,9 @@
  *  note the row prints about it. Split out of model-config-page.tsx and kept free of `@/`
  *  ALIAS imports so `tests/` can load it under `node --experimental-strip-types`, which does
  *  not resolve that alias. Imports below are RELATIVE with explicit extensions for the same
- *  reason; an `@/` spelling breaks the three tests that load this module directly. */
+ *  reason; an `@/` spelling breaks the three tests that load this module directly. The one
+ *  exception is a TYPE-only `@/i18n` import: the stripper erases it before resolution, so
+ *  nothing at runtime ever looks for the alias. */
 
 // The fit vocabulary and unit formatting live in src/lib/memory/, shared with the Hub memory
 // bar so the two surfaces cannot describe one load differently. Re-exported here because
@@ -22,12 +24,26 @@ import {
   worseMemoryFit,
 } from "../../../lib/memory/verdict.ts";
 import type { MemoryFitVerdict } from "../../../lib/memory/verdict.ts";
+import type { InterpolationValues, TranslationKey } from "@/i18n";
 import { formatBytesGiB } from "../../../lib/memory/format.ts";
 import type {
   ReconciledGpuSelection,
   SystemGpuDevice,
 } from "../../../hooks/gpu-selection.ts";
 import { gpuMemoryTotalsGb, sharesHostMemory } from "../../../hooks/gpu-vram.ts";
+
+/** What the panel says, in the language the UI is showing, and how it groups digits.
+ *  Handed in by the caller rather than imported: this module answers to
+ *  `node --experimental-strip-types`, which cannot resolve the `@/` alias `@/i18n` sits
+ *  behind, and a node test must be able to pin one wording and one grouping regardless
+ *  of the host's own locale. The import below is type-only, so the stripper erases it and
+ *  nothing needs the alias at runtime. */
+type Translate = (key: TranslationKey, values?: InterpolationValues) => string;
+
+export interface MemoryFitView {
+  t: Translate;
+  locale: string;
+}
 
 /** A memory figure in bytes, to two decimals. @deprecated Prefer `formatBytesGiB` from
  *  `@/lib/memory/format`, whose name says which unit it takes. This alias exists because a
@@ -279,6 +295,7 @@ function autoContextFigures(
 export function resolveMemoryFit(
   estimate: MemoryFitEstimate,
   capacity: MemoryFitCapacity,
+  view: MemoryFitView,
 ): MemoryFitResult {
   const { singleMemoryPool } = capacity;
   const cpuOnly =
@@ -358,18 +375,22 @@ export function resolveMemoryFit(
     totalFit,
     bounded,
     prefix: bounded ? "≥ " : "",
-    advisory: resolveMemoryAdvisory(estimate, {
-      cpuOnly,
-      singleMemoryPool,
-      totalFit,
-      combinedFit,
-      hostShareFit,
-      gpuFit,
-      rawGpuFit,
-      gpuPressured,
-      hostPressured,
-      contextShrinks,
-    }),
+    advisory: resolveMemoryAdvisory(
+      estimate,
+      {
+        cpuOnly,
+        singleMemoryPool,
+        totalFit,
+        combinedFit,
+        hostShareFit,
+        gpuFit,
+        rawGpuFit,
+        gpuPressured,
+        hostPressured,
+        contextShrinks,
+      },
+      view,
+    ),
   };
 }
 
@@ -412,15 +433,19 @@ function classifyAvailableMemory(
 }
 
 /** Explain why Auto's native estimate can exceed capacity without a warning. */
-function contextShrinksAdvisory(estimate: MemoryFitEstimate): MemoryAdvisory {
+function contextShrinksAdvisory(
+  estimate: MemoryFitEstimate,
+  view: MemoryFitView,
+): MemoryAdvisory {
+  const { t, locale } = view;
   const nCtx = estimate.nCtx;
   const priced =
     nCtx != null && Number.isFinite(nCtx) && nCtx > 0
-      ? `the full ${nCtx.toLocaleString()}-token context`
-      : "the model's full context";
+      ? t("uxMemory.advisoryContextFull", { nCtx: nCtx.toLocaleString(locale) })
+      : t("uxMemory.advisoryContextModelFull");
   return {
     tone: "muted",
-    text: `Estimated at ${priced}. Auto context will shrink it to fit.`,
+    text: t("uxMemory.advisoryContextShrinks", { context: priced }),
   };
 }
 
@@ -432,42 +457,44 @@ function contextShrinksAdvisory(estimate: MemoryFitEstimate): MemoryAdvisory {
 export function resolveMemoryAdvisory(
   estimate: MemoryFitEstimate,
   verdicts: AdvisoryVerdicts,
+  view: MemoryFitView,
 ): MemoryAdvisory | null {
+  const { t } = view;
   if (!estimate.kvEstimable) {
     return {
       tone: "warn",
-      text: "KV cache size is unknown: missing attention dimensions. Actual usage will be higher.",
+      text: t("uxMemory.advisoryKvUnknown"),
     };
   }
   if (estimate.drafterKvUnsized) {
     return {
       tone: "warn",
-      text: "A remote draft model or vision component is partly unmeasured. Actual usage will be higher.",
+      text: t("uxMemory.advisoryDrafterUnsized"),
     };
   }
   if (estimate.adaptersUnsized) {
     return {
       tone: "warn",
-      text: "An adapter or control vector is unmeasured. Actual usage will be higher.",
+      text: t("uxMemory.advisoryAdapterUnsized"),
     };
   }
   if (estimate.moeOffloadUnmodelled && !verdicts.cpuOnly) {
     return {
       tone: "muted",
-      text: "Expert layers on the CPU are not reflected here. GPU usage may be lower.",
+      text: t("uxMemory.advisoryMoeOffload"),
     };
   }
   if (verdicts.cpuOnly) {
     if (verdicts.totalFit === "exceeds") {
       return {
         tone: "warn",
-        text: "Exceeds system RAM. Try a shorter context or smaller model.",
+        text: t("uxMemory.advisoryRamExceeded"),
       };
     }
     if (verdicts.hostPressured) {
       return {
         tone: "muted",
-        text: "Fits system RAM, but little is free right now. Free memory, or try a shorter context or smaller model.",
+        text: t("uxMemory.advisoryRamPressured"),
       };
     }
     return null;
@@ -476,7 +503,7 @@ export function resolveMemoryAdvisory(
     if (verdicts.totalFit === "exceeds") {
       return {
         tone: "warn",
-        text: "Exceeds shared memory. Try a shorter context or smaller model; CPU offloading adds no memory.",
+        text: t("uxMemory.advisorySharedExceeded"),
       };
     }
     // One pool, so one pressure question however it was measured: the GPU's free reading and the
@@ -485,13 +512,13 @@ export function resolveMemoryAdvisory(
       return {
         tone: "muted",
         text: hasContextFloor(estimate)
-          ? "Fits this machine, but little memory is free right now, so Auto may pick a shorter context. Free memory first."
-          : "Fits this machine, but little memory is free right now. Free memory or try Auto context.",
+          ? t("uxMemory.advisoryMachinePressuredFloor")
+          : t("uxMemory.advisoryMachinePressured"),
       };
     }
     // Free-memory pressure takes priority because the loader fits against available memory.
     if (verdicts.contextShrinks) {
-      return contextShrinksAdvisory(estimate);
+      return contextShrinksAdvisory(estimate, view);
     }
     return null;
   }
@@ -502,7 +529,7 @@ export function resolveMemoryAdvisory(
   ) {
     return {
       tone: "warn",
-      text: "Exceeds combined GPU and system memory. Try a shorter context or smaller model.",
+      text: t("uxMemory.advisoryCombinedExceeded"),
     };
   }
   if (
@@ -511,13 +538,13 @@ export function resolveMemoryAdvisory(
   ) {
     return {
       tone: "warn",
-      text: "GPU and system memory are both under pressure. Try a shorter context or smaller model.",
+      text: t("uxMemory.advisoryBothPressured"),
     };
   }
   if (verdicts.hostShareFit === "exceeds") {
     return {
       tone: "warn",
-      text: "CPU placement exceeds system RAM. Try fewer CPU layers or a smaller model.",
+      text: t("uxMemory.advisoryCpuExceedsRam"),
     };
   }
   if (verdicts.gpuFit === "exceeds") {
@@ -526,19 +553,19 @@ export function resolveMemoryAdvisory(
       return {
         tone: "warn",
         text: estimate.floorCanOffload
-          ? "Exceeds GPU memory even at the shortest context the loader tries, so some layers will run on the CPU and generation will be slower."
-          : "Exceeds GPU memory even at the shortest context the loader tries, and these settings keep layers from moving to the CPU, so loading may fail.",
+          ? t("uxMemory.advisoryGpuFloorOffload")
+          : t("uxMemory.advisoryGpuFloorNoOffload"),
       };
     }
     return {
       tone: "warn",
-      text: "Exceeds GPU memory. Try Auto context or fewer GPU layers; loading may still fail.",
+      text: t("uxMemory.advisoryGpuExceeded"),
     };
   }
   if (verdicts.hostPressured) {
     return {
       tone: "muted",
-      text: "Fits system RAM, but little is free right now. Free memory, or try a shorter context or smaller model.",
+      text: t("uxMemory.advisoryRamPressured"),
     };
   }
   // Tight still fits the card.
@@ -546,13 +573,17 @@ export function resolveMemoryAdvisory(
     return {
       tone: "muted",
       text: hasContextFloor(estimate)
-        ? `Fits this GPU, but little VRAM is free right now, so Auto may pick a shorter context${estimate.floorCanOffload ? " or run some layers on the CPU" : ""}. Free memory first.`
-        : "Fits this GPU, but little VRAM is free right now. Free memory or try Auto context.",
+        ? t("uxMemory.advisoryGpuPressuredFloor", {
+            offload: estimate.floorCanOffload
+              ? t("uxMemory.advisoryGpuPressuredFloorOffload")
+              : "",
+          })
+        : t("uxMemory.advisoryGpuPressured"),
     };
   }
   // As above, show free-memory pressure before the Auto note.
   if (verdicts.contextShrinks) {
-    return contextShrinksAdvisory(estimate);
+    return contextShrinksAdvisory(estimate, view);
   }
   return null;
 }
@@ -580,24 +611,33 @@ export function glueNoteItems(note: string): string {
 }
 
 /** The KV line's caption: dtype, what was priced, and where it lives. */
-export function resolveKvNote(estimate: {
-  cacheTypeKv: string | null;
-  nCtx: number;
-  nParallel: number;
-  kvOnGpu: boolean;
-}): string {
+export function resolveKvNote(
+  estimate: {
+    cacheTypeKv: string | null;
+    nCtx: number;
+    nParallel: number;
+    kvOnGpu: boolean;
+  },
+  view: MemoryFitView,
+): string {
+  const { t, locale } = view;
   return [
     estimate.cacheTypeKv ?? "f16",
     // Off the wire, so it is not trusted to be a number: `.toLocaleString()` on a null throws, and
     // one bad field must not take the whole panel down.
-    `${Number.isFinite(estimate.nCtx) ? Math.max(0, estimate.nCtx).toLocaleString() : "0"} tokens`,
+    t("uxMemory.kvTokens", {
+      count: (Number.isFinite(estimate.nCtx)
+        ? Math.max(0, estimate.nCtx)
+        : 0
+      ).toLocaleString(locale),
+    }),
     Number.isFinite(estimate.nParallel) && estimate.nParallel > 1
-      ? `${estimate.nParallel} slots`
+      ? t("uxMemory.kvSlots", { count: estimate.nParallel })
       : null,
-    estimate.kvOnGpu ? null : "host RAM",
+    estimate.kvOnGpu ? null : t("uxMemory.hostRam"),
   ]
     .filter(Boolean)
-    .join(" · ");
+    .join(NOTE_SEPARATOR);
 }
 
 /** Where the draft cache actually sits, read from its own GPU share rather than kvOnGpu.
@@ -608,12 +648,15 @@ export function resolveKvNote(estimate: {
 export function resolveDraftCacheNote(
   drafterRuntimeGpuBytes: number,
   drafterRuntimeBytes: number,
+  view: MemoryFitView,
 ): string | undefined {
   if (!(drafterRuntimeGpuBytes > 0)) {
-    return "host RAM";
+    return view.t("uxMemory.hostRam");
   }
   if (drafterRuntimeGpuBytes < drafterRuntimeBytes) {
-    return `${formatMemoryGb(drafterRuntimeGpuBytes)} on GPU`;
+    return view.t("uxMemory.onGpu", {
+      size: formatMemoryGb(drafterRuntimeGpuBytes),
+    });
   }
   return undefined;
 }

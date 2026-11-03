@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { checkpointFirst } from "./required-assets";
 import { useEffect, useRef } from "react";
 import { create } from "zustand";
@@ -53,8 +54,8 @@ export function useHubDownloadQueue() {
     publishQueue: false,
     onReady: () => {
       finish();
-      toast.success("Download complete", {
-        description: "Select the model when you are ready to load it.",
+      toast.success(translate("browser.downloads.complete"), {
+        description: translate("uxHub.selectTheModelWhenirmjz"),
       });
     },
     onCancelled: finish,

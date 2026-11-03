@@ -27,7 +27,7 @@ def _convert(
     request = ConvertQ4NXRequest(
         save_directory = "q4nx",
         gguf_path = str(gguf_path) if gguf_path else None,
-        base_model = fields.pop("base_model", "LAiM/Qwen3-0.6B"),
+        base_model = fields.pop("base_model", "unsloth/Qwen3-0.6B"),
         hf_token = "own-token",
         **fields,
     )
@@ -65,7 +65,7 @@ def converted(monkeypatch, authorized):
 def test_hub_repos_are_authorized_for_the_caller_before_converting(converted, authorized):
     with pytest.raises(HTTPException):
         _convert(ALICE, repo_id = "org/private-GGUF", filename = "m.Q4_1.gguf")
-    assert authorized == ["org/private-GGUF", "LAiM/Qwen3-0.6B"]
+    assert authorized == ["org/private-GGUF", "unsloth/Qwen3-0.6B"]
 
 
 def test_a_refused_hub_repo_stops_before_converting(monkeypatch, converted):

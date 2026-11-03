@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogFooter, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -77,9 +78,9 @@ export function ProcessorsDialog({
         <div className="space-y-4">
           <div className="flex items-center justify-between gap-3 corner-squircle rounded-2xl border border-border/60 px-3 py-2">
             <div>
-              <p className="text-sm font-semibold">Schema transform</p>
+              <p className="text-sm font-semibold">{translate("uxRecipestudio.schemaTransform1j7gm")}</p>
               <p className="text-xs text-muted-foreground">
-                Transform final rows to target schema (post-batch).
+                {translate("uxRecipestudio.transformFinalRowsTonc71e")}
               </p>
             </div>
             <Switch
@@ -93,9 +94,9 @@ export function ProcessorsDialog({
               <AvailableVariables configId="" />
               <div className="grid gap-1.5">
                 <FieldLabel
-                  label="Name"
+                  label={translate("browser.bookmarks.name")}
                   htmlFor={nameId}
-                  hint="Processor name shown in graph and payload."
+                  hint={translate("uxRecipestudio.processorNameShownIn1g500")}
                 />
                 <Input
                   id={nameId}
@@ -106,9 +107,9 @@ export function ProcessorsDialog({
               </div>
               <div className="grid gap-1.5">
                 <FieldLabel
-                  label="Template (JSON)"
+                  label={translate("uxRecipestudio.templateJSONq42gj")}
                   htmlFor={templateId}
-                  hint="Target output schema template using Jinja references."
+                  hint={translate("uxRecipestudio.targetOutputSchemaTemplate1dcgl")}
                 />
                 <Textarea
                   id={templateId}
@@ -118,9 +119,7 @@ export function ProcessorsDialog({
                     updateSchema({ template: event.target.value })
                   }
                 />
-                <p className="text-xs text-muted-foreground">
-                  Use Jinja refs like {"{{ customer_review }}"} in values.
-                </p>
+                <p className="text-xs text-muted-foreground">{translate("uxRecipestudio.useJinjaRefsLike9us3u", { p1: "{{ customer_review }}" })}</p>
               </div>
             </div>
           )}

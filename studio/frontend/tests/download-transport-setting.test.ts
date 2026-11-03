@@ -102,18 +102,13 @@ test("the copy explains the difference, not just the names", () => {
 // The four below are source assertions, in this file's idiom: they pin the shape of a fix
 // rather than its behaviour, so each names the failure it exists for.
 
-test("the Hub's automatic fallback is not stored at all", () => {
-  // TransportToggle drops a stored "xet" to "http" when hf_xet is missing. Written install-wide
-  // that replaced everyone's choice; written locally it outranked the install setting and
-  // survived hf_xet being repaired.
-  assert.match(TOGGLE, /setMode\("http",\s*\{\s*persist:\s*false\s*\}\)/);
-  assert.match(PREFERENCE, /opts\.persist === false/);
-  // Reflected and returned BEFORE either write.
-  const setter = PREFERENCE.slice(PREFERENCE.indexOf("const set = useCallback"));
-  assert.ok(
-    setter.indexOf("opts.persist === false") < setter.indexOf("localStorage.setItem"),
-    "the persist opt-out must be checked before the local write",
-  );
+test("the Hub toggle offers Auto only", () => {
+  // HTTP and Xet were opaque choices on the Hub tab; the downloader picks per machine, and
+  // the install-wide choice lives in Settings > General.
+  assert.match(TOGGLE, /settings\.appearance\.custom\.sentAttachments\.auto/);
+  assert.match(TOGGLE, /settings\.general\.downloads\.autoHint/);
+  assert.doesNotMatch(TOGGLE, /value: "http"/);
+  assert.doesNotMatch(TOGGLE, /value: "xet"/);
 });
 
 test("a download re-reads the install setting instead of trusting the cache", () => {
@@ -193,7 +188,11 @@ test("Xet cannot be chosen before its availability is known", () => {
 test("a failed install-wide write is reported, not just logged", () => {
   // The row calls this setting install-wide, so a local-only save is a mismatch nobody can
   // otherwise see.
-  assert.match(PREFERENCE, /Saved for this browser, but not for this install\./);
+  assert.match(PREFERENCE, /translate\("uxHub\.savedForThisBrowserv0jb5"\)/);
+  assert.match(
+    EN,
+    /"savedForThisBrowserv0jb5":\s*"Saved for this browser, but not for this install\."/,
+  );
 });
 
 test("the transport row is reachable from Settings search", () => {
@@ -218,24 +217,17 @@ test("a refresh does not ride on a request that predates it", () => {
   assert.match(API, /request === latestRequest/);
 });
 
-test("the Hub toggle also waits to know whether Xet can run", () => {
-  // Same window as the settings row: clicking Xet before the capability lands stored it on a
-  // machine that cannot run it.
-  assert.match(TOGGLE, /const xetUnavailable = isLoading \|\| xetKnownUnavailable/);
+test("the Hub toggle is display-only", () => {
+  // It used to read and rewrite the stored mode, which either stored a choice the user never
+  // made or disagreed with the Settings row; now it just shows Auto.
+  assert.doesNotMatch(TOGGLE, /useTransportMode/);
+  assert.doesNotMatch(TOGGLE, /setMode\(/);
 });
 
 test("each indexed option has somewhere for search to scroll to", () => {
   // An indexed label with no data-settings-label produces a result that opens General and
   // then fails to find anything.
   assert.match(ROW, /data-settings-label=\{t\(opt\.labelKey\)\}/);
-});
-
-test("the display only falls back once Xet is known unavailable", () => {
-  // Disabling on unknown and falling back on unknown are different rules: conflating them
-  // showed HTTP for a stored Xet that turned out to be fine, with nothing to restore it.
-  assert.match(TOGGLE, /xetKnownUnavailable = capabilities\?\.xet\.available === false/);
-  assert.match(TOGGLE, /mode === "xet" && xetKnownUnavailable/);
-  assert.match(TOGGLE, /isLoading \|\| xetKnownUnavailable/);
 });
 
 test("a refresh is not swallowed by the hydration wrapper", () => {

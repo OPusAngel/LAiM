@@ -25,7 +25,7 @@ def _studio():
     return _studio_mod
 
 
-_BASE = ["--model", "LAiM/Qwen3-1.7B-GGUF"]
+_BASE = ["--model", "unsloth/Qwen3-1.7B-GGUF"]
 
 
 @pytest.fixture(autouse = True)

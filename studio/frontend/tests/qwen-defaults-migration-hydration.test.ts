@@ -20,7 +20,7 @@ const {
   "../src/features/chat/stores/chat-runtime-store.ts"
 );
 
-const QWEN38 = "LAiM/Qwen3.8-27B-GGUF";
+const QWEN38 = "unsloth/Qwen3.8-27B-GGUF";
 const LEGACY_SNAPSHOT = {
   temperature: 0.6,
   topP: 0.95,
@@ -405,7 +405,7 @@ test("a model switch during the confirming read leaves the former row untouched"
     await sleep(0);
   }
   useChatRuntimeStore.setState((state) => ({
-    params: { ...state.params, checkpoint: "LAiM/Qwen3.6-9B-GGUF" },
+    params: { ...state.params, checkpoint: "unsloth/Qwen3.6-9B-GGUF" },
     reasoningEnabled: false,
   }));
   releaseConfirmation(legacySettings);
@@ -563,7 +563,7 @@ test("a retry revalidates the checkpoint after its confirming read", async () =>
   useChatRuntimeStore.setState((state) => ({
     params: {
       ...state.params,
-      checkpoint: "LAiM/Qwen3.6-9B-GGUF",
+      checkpoint: "unsloth/Qwen3.6-9B-GGUF",
     },
     reasoningEnabled: false,
   }));
@@ -631,7 +631,7 @@ test("deferred global ownership cannot follow a later checkpoint", async () => {
   useChatRuntimeStore.setState((current) => ({
     params: {
       ...current.params,
-      checkpoint: "LAiM/Qwen3.6-9B-GGUF",
+      checkpoint: "unsloth/Qwen3.6-9B-GGUF",
     },
     reasoningEnabled: false,
   }));
@@ -971,7 +971,7 @@ test("routine model-default refreshes skip migration reads without a candidate",
   await sleep(0);
   assert.equal(settingsHttp.gets, 0);
 
-  const llamaCheckpoint = "LAiM/Llama-3.2-3B-Instruct-GGUF";
+  const llamaCheckpoint = "unsloth/Llama-3.2-3B-Instruct-GGUF";
   const current = useChatRuntimeStore.getState();
   current.setParams(
     { ...current.params, checkpoint: llamaCheckpoint },

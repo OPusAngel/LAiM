@@ -39,7 +39,7 @@ export async function withAttachmentOriginal(
   epoch: number,
   forPythonTool: boolean,
 ): Promise<CompleteAttachment> {
-  // Any other document is kept only for the python tool, which gets a copy in its sandbox: an
+  // Any other document is kept only for the python tool, which gets a copy in its workdir: an
   // upload no one reads would only delay the send.
   const upload =
     complete.type === "document" && !attachmentOriginal(complete)

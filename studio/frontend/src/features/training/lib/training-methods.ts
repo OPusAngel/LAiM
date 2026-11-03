@@ -7,12 +7,14 @@ import type {
   TrainingMethod,
 } from "@/types/training";
 import type { LoraVariant } from "../types/config";
+import { translate } from "@/i18n";
+
 
 const BACKEND_TRAINING_TYPE: Record<TrainingMethod, string> = {
   qlora: "LoRA/QLoRA",
   lora: "LoRA/QLoRA",
-  full: "Full Finetuning",
-  cpt: "Continued Pretraining",
+  get full() { return translate("uxFeatures.fullFinetuningt3xb4"); },
+  get cpt() { return translate("uxFeatures.continuedPretrainingma2l4"); },
 };
 
 const TRAINING_METHOD_LABELS: Record<TrainingMethod, string> = {

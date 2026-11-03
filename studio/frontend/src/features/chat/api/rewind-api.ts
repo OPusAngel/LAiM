@@ -4,6 +4,8 @@
 import { authFetch } from "@/features/auth";
 import { formatApiErrorBody } from "@/lib/format-fastapi-error";
 import type { RewindResult } from "../utils/rewind";
+import { translate } from "@/i18n";
+
 
 /** 409 while a tool call is running or the chat is generating; `detail` says which. */
 export async function rewindChatThread(
@@ -21,7 +23,7 @@ export async function rewindChatThread(
   const payload = await response.json().catch(() => null);
   if (!response.ok) {
     throw new Error(
-      formatApiErrorBody(payload) ?? `Request failed (${response.status})`,
+      formatApiErrorBody(payload) ?? translate("uxChat.requestFailedb9a7f", { p1: response.status }),
     );
   }
   return payload as RewindResult;

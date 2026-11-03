@@ -9,11 +9,66 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 import ts from "@typescript/typescript6";
 
+import {
+  LAiM_PROTOCOL,
+  LAiM_SCHEME,
+  isLAiMProtocol,
+} from "../../src/config/deep-link.ts";
+import { en } from "../../src/i18n/locales/en.ts";
+
 /** A JSX element as the stub runtime below records it. */
 export type StubElement = {
   type: unknown;
   props: Record<string, unknown>;
 };
+
+const PLACEHOLDER = /\{([a-zA-Z0-9_]+)\}/g;
+
+function enMessage(key: string): string {
+  let cursor: unknown = en;
+  for (const segment of key.split(".")) {
+    if (cursor === null || typeof cursor !== "object") return key;
+    cursor = (cursor as Record<string, unknown>)[segment];
+  }
+  return typeof cursor === "string" ? cursor : key;
+}
+
+function enTranslate(
+  key: string,
+  values?: Record<string, unknown> | undefined,
+): string {
+  if (values === undefined) return enMessage(key);
+  return enMessage(key).replace(PLACEHOLDER, (match, name: string) =>
+    Object.prototype.hasOwnProperty.call(values, name)
+      ? String(values[name] ?? "")
+      : match,
+  );
+}
+
+/** For a test that runs a slice of src through `new Function`, where no import can reach. */
+export { enTranslate };
+
+/**
+ * Stand-ins for imports no stub map names.
+ *
+ * The translation sweep added `@/i18n` to modules all over src, and a stub map
+ * lists a module's imports as they were when the test was written. Loading the
+ * English catalog directly keeps those tests reading the strings they assert on
+ * without each one restating the same ten-line stub.
+ */
+const builtInStubs: Record<string, unknown> = {
+  "@/config/deep-link": { LAiM_SCHEME, LAiM_PROTOCOL, isLAiMProtocol },
+  "@/i18n": {
+    translate: enTranslate,
+    useT: () => enTranslate,
+    useLocale: () => "en",
+    getLocale: () => "en",
+    messages: { en },
+  },
+};
+
+/** The stand-ins above, for a test whose stub map cannot fall back to them. */
+export const defaultStubs = builtInStubs;
 
 /** The sibling a relative specifier names, trying the extensions src actually uses. */
 function resolveSibling(fromPath: string, specifier: string): URL {
@@ -52,7 +107,14 @@ export function loadWithStubs<T>(
   });
   const loaded = { exports: {} as T };
   const requireStub = (specifier: string): unknown => {
-    if (specifier in stubs) return stubs[specifier];
+    if (specifier in stubs) {
+      const builtIn = builtInStubs[specifier];
+      // A stub map written before a module grew an import still wins for the
+      // exports it names, but the stand-in above fills the ones it never lists.
+      return builtIn && stubs[specifier] && typeof stubs[specifier] === "object"
+        ? { ...builtIn, ...(stubs[specifier] as Record<string, unknown>) }
+        : stubs[specifier];
+    }
     // Opt-in: load a sibling source for real, with the same stubs, instead of failing.
     // A stub map names the module's imports, so without this every import ADDED to the
     // module under test breaks each test that loads it, even when the new import is
@@ -61,6 +123,7 @@ export function loadWithStubs<T>(
     if (options.relativePassthrough && specifier.startsWith(".")) {
       return loadWithStubs(resolveSibling(path, specifier), stubs, options);
     }
+    if (specifier in builtInStubs) return builtInStubs[specifier];
     throw new Error(`no stub for import "${specifier}" in ${path}`);
   };
   new Function("require", "module", "exports", outputText)(

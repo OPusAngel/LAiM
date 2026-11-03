@@ -28,5 +28,5 @@ test("preserves repository identifiers that contain no local path syntax", () =>
 
 test("does not classify Hugging Face repository identifiers as paths", () => {
   assert.equal(looksLikeLocalPath("HuggingFaceH4/ultrachat_200k"), false);
-  assert.equal(looksLikeLocalPath("LAiM/Qwen3-4B"), false);
+  assert.equal(looksLikeLocalPath("unsloth/Qwen3-4B"), false);
 });

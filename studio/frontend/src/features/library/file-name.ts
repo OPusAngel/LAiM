@@ -131,10 +131,10 @@ export function itemVersion(item: { id: string; updatedAt: number; sizeBytes: nu
 }
 
 export function hasOwnFile(itemId: string): boolean {
-  return /^(upload|image|video|audio|sandbox):/.test(itemId);
+  return /^(upload|image|video|audio|workdir):/.test(itemId);
 }
 
-const STREAMED_SOURCES = new Set(["upload", "audio", "video", "sandbox"]);
+const STREAMED_SOURCES = new Set(["upload", "audio", "video", "workdir"]);
 
 export function streamsPreview(itemId: string, body: string | null): boolean {
   if (body !== "audio" && body !== "video") return false;

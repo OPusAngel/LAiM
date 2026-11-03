@@ -23,7 +23,7 @@ function hasLocal(key: string): boolean {
   try {
     return window.localStorage.getItem(key) !== null;
   } catch {
-    // Storage can be blocked outright (sandboxed context). These overrides are optional, so fall
+    // Storage can be blocked outright (locked-down context). These overrides are optional, so fall
     // back to the backend defaults rather than failing the upload that asked for them.
     return false;
   }

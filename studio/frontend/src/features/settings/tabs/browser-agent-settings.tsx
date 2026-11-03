@@ -93,7 +93,7 @@ function PermissionsTable() {
       setInvalid(true);
       return;
     }
-    // A site added here is one the user trusts: open it without asking, keep the action prompts.
+    // A site added here is one the user trusts: open it without asking even if the default row asks.
     setSiteRule(site, permissions.sites[site] ?? { ...DEFAULT_AGENT_RULE, browsing: "allow" });
     setDraft(null);
     setInvalid(false);
@@ -230,6 +230,7 @@ export function BrowserAgentSettings() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="allow">{t("browser.agentSettings.alwaysAllow")}</SelectItem>
               <SelectItem value="ask">{t("browser.agentSettings.askEveryTime")}</SelectItem>
               <SelectItem value="never">{t("browser.agentSettings.never")}</SelectItem>
             </SelectContent>

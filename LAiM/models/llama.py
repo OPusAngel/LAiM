@@ -252,7 +252,7 @@ def _offload_frozen_module_for_training(
     module in place. ``original_device`` is the placement recorded before any
     disk offload rebuilt the module, used when the copy no longer carries one.
     Modifies ``module`` in-place.
-    See https://github.com/LAiMai/LAiM/pull/1200 (Tesla T4 float32).
+    See https://github.com/OPusAngel/LAiM/pull/1200 (Tesla T4 float32).
     """
     if not hasattr(module, "modules_to_save"):
         return None
@@ -1104,7 +1104,7 @@ def LlamaDecoderLayer_fast_forward(
     return outputs
 
 
-# See LAiMai/LAiM#404 (comment 2323473452).
+# See OPusAngel/LAiM#404 (comment 2323473452).
 __DTYPE_MAP = {
     "float32": torch.float32,
     torch.float32: torch.float32,
@@ -3109,7 +3109,7 @@ class FastLlamaModel:
             f"   {chr(92)}{chr(92)}   /|    {gpu_stats_name}Num GPUs = {DEVICE_COUNT}. Max memory: {max_memory} GB. Platform: {platform_system}.\n"
             f"O^O/ {chr(92)}_/ {chr(92)}    Torch: {torch.__version__}. {gpu_stats_snippet} Triton: {triton_version}\n"
             f"{chr(92)}        /    Bfloat16 = {str(SUPPORTS_BFLOAT16).upper()}. FA [Xformers = {xformers_version}. FA2 = {HAS_FLASH_ATTENTION}]\n"
-            f' "-____-"     Free license: http://github.com/LAiMai/LAiM'
+            f' "-____-"     Free license: http://github.com/OPusAngel/LAiM'
         )
 
         print(statistics)
@@ -3331,7 +3331,7 @@ class FastLlamaModel:
                 if not has_rope_scaling:
                     raise RuntimeError(
                         f"However, {model_name} doesn't support RoPE Scaling!\n"
-                        "Please file a feature request at https://github.com/LAiMai/LAiM."
+                        "Please file a feature request at https://github.com/OPusAngel/LAiM."
                     )
                 kwargs["rope_scaling"] = linear_scaling
             else:

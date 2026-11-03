@@ -638,8 +638,8 @@ def test_local_dir_answer_ignores_the_hub_cache_of_the_same_name(in_tmp_cwd, mon
 
     from utils.models.model_config import detect_gguf_model
 
-    assert detect_gguf_model("LAiM/foo") is None
-    assert _variants("LAiM/foo").variants == []
+    assert detect_gguf_model("unsloth/foo") is None
+    assert _variants("unsloth/foo").variants == []
 
 
 def test_wsl_drive_path_is_normalized_like_the_load(in_tmp_cwd, monkeypatch):

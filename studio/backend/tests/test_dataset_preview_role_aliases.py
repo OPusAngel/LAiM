@@ -2,7 +2,7 @@
 # Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """The preview's copy of the alias map matched the RAW role, while the zoo matches
-`role.strip().lower()` (LAiMai/LAiM-zoo#1225), so "Human"/"GPT" trained differently."""
+`role.strip().lower()` (OPusAngel/LAiM-zoo#1225), so "Human"/"GPT" trained differently."""
 
 import json
 import sys

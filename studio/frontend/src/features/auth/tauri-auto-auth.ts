@@ -2,6 +2,7 @@
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { isTauri } from "@/lib/api-base";
+import { translate } from "@/i18n";
 import {
   clearAuthTokens,
   hasAuthToken,
@@ -35,14 +36,15 @@ export function isTauriLoginRequired(): boolean {
   return tauriLoginRequired;
 }
 
-const TAURI_AUTH_FAILURE_FALLBACK =
-  "Desktop authentication failed. Update or repair the managed LAiM install, then restart LAiM.";
+// Called on demand: at module scope the active locale may not be loaded yet.
+const tauriAuthFailureFallback = () =>
+  translate("uxFeatures.desktopAuthenticationFailedvo778");
 const BACKEND_NOT_READY_MESSAGE = "Backend is not ready";
 
 function authFailureMessage(error: unknown): string {
   if (typeof error === "string" && error) return error;
   if (error instanceof Error && error.message) return error.message;
-  return TAURI_AUTH_FAILURE_FALLBACK;
+  return tauriAuthFailureFallback();
 }
 
 export function getTauriAuthFailure(): string | null {

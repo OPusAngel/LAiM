@@ -24,6 +24,8 @@ import {
   worseMemoryFit,
 } from "../src/features/model-picker/model-config/memory-fit.ts";
 
+import { englishView } from "./helpers/kit.ts";
+
 const GB = 1024 ** 3;
 
 const SIZED: MemoryFitEstimate = {
@@ -59,7 +61,7 @@ const fit = (
   estimate: Partial<MemoryFitEstimate>,
   capacity: Partial<MemoryFitCapacity>,
   base: MemoryFitCapacity = IDLE_DISCRETE,
-) => resolveMemoryFit({ ...SIZED, ...estimate }, { ...base, ...capacity });
+) => resolveMemoryFit({ ...SIZED, ...estimate }, { ...base, ...capacity }, englishView);
 
 // ---------------------------------------------------------------------------
 // classifyMemoryFit
@@ -488,18 +490,27 @@ test("a figure is always finite and never negative", () => {
 
 test("the KV caption names the dtype, what was priced, and where it lives", () => {
   assert.equal(
-    resolveKvNote({ cacheTypeKv: "q8_0", nCtx: 32768, nParallel: 1, kvOnGpu: true }),
+    resolveKvNote(
+      { cacheTypeKv: "q8_0", nCtx: 32768, nParallel: 1, kvOnGpu: true },
+      englishView,
+    ),
     "q8_0 · 32,768 tokens",
   );
   // No dtype reported falls back to f16, several slots are named, and a cache the
   // loader moved off the GPU says where it went.
   assert.equal(
-    resolveKvNote({ cacheTypeKv: null, nCtx: 4096, nParallel: 4, kvOnGpu: false }),
+    resolveKvNote(
+      { cacheTypeKv: null, nCtx: 4096, nParallel: 4, kvOnGpu: false },
+      englishView,
+    ),
     "f16 · 4,096 tokens · 4 slots · host RAM",
   );
   // A single slot is the unremarkable case and is not named.
   assert.equal(
-    resolveKvNote({ cacheTypeKv: "f16", nCtx: 4096, nParallel: 1, kvOnGpu: false }),
+    resolveKvNote(
+      { cacheTypeKv: "f16", nCtx: 4096, nParallel: 1, kvOnGpu: false },
+      englishView,
+    ),
     "f16 · 4,096 tokens · host RAM",
   );
 });
@@ -508,20 +519,26 @@ test("the KV caption survives a field that is not a number", () => {
   // `.toLocaleString()` on a null throws, and one bad field must not take the panel
   // down with it.
   assert.doesNotThrow(() =>
-    resolveKvNote({
-      cacheTypeKv: null,
-      nCtx: null as unknown as number,
-      nParallel: Number.NaN,
-      kvOnGpu: true,
-    }),
+    resolveKvNote(
+      {
+        cacheTypeKv: null,
+        nCtx: null as unknown as number,
+        nParallel: Number.NaN,
+        kvOnGpu: true,
+      },
+      englishView,
+    ),
   );
   assert.equal(
-    resolveKvNote({
-      cacheTypeKv: null,
-      nCtx: Number.NaN,
-      nParallel: 1,
-      kvOnGpu: true,
-    }),
+    resolveKvNote(
+      {
+        cacheTypeKv: null,
+        nCtx: Number.NaN,
+        nParallel: 1,
+        kvOnGpu: true,
+      },
+      englishView,
+    ),
     "f16 · 0 tokens",
   );
 });
@@ -529,12 +546,12 @@ test("the KV caption survives a field that is not a number", () => {
 test("the draft cache note reads its OWN placement, not the target cache's", () => {
   // --spec-draft-ngl 0 moves the drafter while --no-kv-offload moves the target, so a
   // boolean read off the target was wrong in both directions.
-  assert.equal(resolveDraftCacheNote(0, 4 * GB), "host RAM");
+  assert.equal(resolveDraftCacheNote(0, 4 * GB, englishView), "host RAM");
   // Under MTP the term is split across both placements: a third case.
-  assert.equal(resolveDraftCacheNote(1 * GB, 4 * GB), "1.00 GiB on GPU");
+  assert.equal(resolveDraftCacheNote(1 * GB, 4 * GB, englishView), "1.00 GiB on GPU");
   // Entirely on the GPU is the unremarkable case and gets no caption.
-  assert.equal(resolveDraftCacheNote(4 * GB, 4 * GB), undefined);
-  assert.equal(resolveDraftCacheNote(Number.NaN, 4 * GB), "host RAM");
+  assert.equal(resolveDraftCacheNote(4 * GB, 4 * GB, englishView), undefined);
+  assert.equal(resolveDraftCacheNote(Number.NaN, 4 * GB, englishView), "host RAM");
 });
 
 test("an unsizable pass-through adapter marks the total a floor", () => {
@@ -544,6 +561,7 @@ test("an unsizable pass-through adapter marks the total a floor", () => {
   const bounded = resolveMemoryFit(
     { ...SIZED, adaptersUnsized: true, totalBytes: 8 * GB, gpuBytes: 8 * GB },
     IDLE_DISCRETE,
+    englishView,
   );
   assert.equal(bounded.bounded, true);
   assert.equal(bounded.prefix, "≥ ");
@@ -552,6 +570,7 @@ test("an unsizable pass-through adapter marks the total a floor", () => {
   const sized = resolveMemoryFit(
     { ...SIZED, totalBytes: 8 * GB, gpuBytes: 8 * GB },
     IDLE_DISCRETE,
+    englishView,
   );
   assert.equal(sized.bounded, false);
 });

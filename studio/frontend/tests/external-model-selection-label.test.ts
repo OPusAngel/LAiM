@@ -325,7 +325,7 @@ test("a model the connection still offers is not treated as missing", () => {
 
 test("local and hub selections are left to the generic helper", () => {
   for (const id of [
-    "LAiM/gemma-3-4b-it-GGUF",
+    "unsloth/gemma-3-4b-it-GGUF",
     "/models/gemma-3-4b-it.gguf",
     "C:\\models\\gemma.gguf",
     "",
@@ -346,14 +346,14 @@ test("compare toasts name the connected model, not its id", () => {
   );
   // Unchanged for everything else.
   assert.equal(
-    compareModelDisplayName("LAiM/gemma-3-4b-it"),
+    compareModelDisplayName("unsloth/gemma-3-4b-it"),
     "gemma-3-4b-it",
   );
   assert.equal(compareModelDisplayName("gemma-3-4b-it"), "gemma-3-4b-it");
 });
 
 test("externalModelLabel yields null for a non-external id", () => {
-  assert.equal(externalModelLabel("LAiM/gemma-3-4b-it"), null);
+  assert.equal(externalModelLabel("unsloth/gemma-3-4b-it"), null);
   assert.equal(externalModelLabel(null), null);
   assert.equal(externalModelLabel(DROPPED_ID), "kimi-k2.5");
 });

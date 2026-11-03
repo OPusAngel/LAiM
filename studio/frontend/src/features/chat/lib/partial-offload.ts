@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
-import { CPU_FALLBACK_MESSAGE } from "../utils/mmproj-fallback";
+import { translate } from "@/i18n";
+import { cpuFallbackMessage } from "../utils/mmproj-fallback";
 
 // React-free so node:test can import it; shared by every model load path.
 
@@ -62,8 +63,8 @@ export function offloadWarning(counts: OffloadCounts): OffloadWarning | null {
   } = counts;
   if (cpuFallbackReason === "vulkan_startup_crash") {
     return {
-      titleSuffix: " on CPU",
-      description: CPU_FALLBACK_MESSAGE,
+      titleSuffix: translate("uxChat.onCpuU58fa"),
+      description: cpuFallbackMessage(),
     };
   }
   // An unrecognised reason is still a reason: say nothing rather than guess at it.
@@ -73,12 +74,8 @@ export function offloadWarning(counts: OffloadCounts): OffloadWarning | null {
   // Before the pin check: a GPU backend that failed to load is never what was asked for.
   if (offloaded <= 0 && gpuBackendUnavailable && gpuLayers !== 0) {
     return {
-      titleSuffix: ", on CPU",
-      description:
-        "The GPU was found but llama.cpp could not use it, so the model runs " +
-        "entirely on CPU and generation will be slow. This is a backend " +
-        "problem rather than a size one, so a smaller quantization will not " +
-        "help. The llama-server log in Settings > Logs has the reason.",
+      titleSuffix: translate("uxChat.commaOnCpuI24pl"),
+      description: translate("uxChat.gpuBackendOnCpuSlowE82jm"),
     };
   }
   const manualPin =
@@ -88,12 +85,17 @@ export function offloadWarning(counts: OffloadCounts): OffloadWarning | null {
   if (manualPin || offloadOverridden) return null;
   if (offloaded <= 0) {
     return {
-      titleSuffix: ", on CPU",
-      description: `None of the ${total} layers fit on the GPU, so the model runs entirely on CPU and generation will be slow. A smaller quantization or a shorter context may leave room on the GPU.`,
+      titleSuffix: translate("uxChat.commaOnCpuI24pl"),
+      get description() {
+        return translate("uxChat.noneOfTheLayerse25q8", { p1: total });
+      },
     };
   }
   return {
-    titleSuffix: ", partly on CPU",
-    description: `${offloaded} of ${total} layers are on the GPU. The rest run on CPU, so generation will be slower. A smaller quantization or a shorter context may let more of it fit on the GPU.`,
+    titleSuffix: translate("uxChat.commaPartlyOnCpuO91zt"),
+    description: translate("uxChat.layersOnGpuRestOnCpuR46nv", {
+      p1: offloaded,
+      p2: total,
+    }),
   };
 }

@@ -653,7 +653,7 @@ function OwnerAccountsTab() {
                 id="account-model-allowlist"
                 value={allowlistText}
                 onChange={(event) => setAllowlistText(event.target.value)}
-                placeholder={"LAiM/Qwen3-4B-GGUF\nLAiM/*"}
+                placeholder={"unsloth/Qwen3-4B-GGUF\nLAiM/*"}
                 autoComplete="off"
                 autoCapitalize="none"
                 spellCheck={false}

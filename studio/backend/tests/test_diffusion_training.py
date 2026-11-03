@@ -807,7 +807,7 @@ def test_route_start_preflights_the_normalized_fetch_mirror(
     from core.inference import diffusion_families
 
     source = "black-forest-labs/FLUX.2-klein-base-9B"
-    mirror = "LAiM/FLUX.2-klein-base-9B"
+    mirror = "unsloth/FLUX.2-klein-base-9B"
     monkeypatch.setattr(
         diffusion_families,
         "prefer_ungated_mirror",
@@ -851,7 +851,7 @@ def test_a_tokenless_run_takes_the_mirror_even_with_the_vendor_repo_cached(
     from core.training.diffusion_train_common import DiffusionLoraConfig
 
     source = "black-forest-labs/FLUX.1-dev"
-    mirror = "LAiM/FLUX.1-dev"
+    mirror = "unsloth/FLUX.1-dev"
     # The vendor repo looks cached, which is what made the old code keep it.
     monkeypatch.setattr(diffusion_families, "prefer_ungated_mirror", lambda base, token = None: base)
     if no_mirror_env:
@@ -1808,7 +1808,7 @@ def test_route_start_refuses_non_sdxl_base_without_freeing_gpu(client, monkeypat
     freed = []
     monkeypatch.setattr(tr, "_free_gpu_for_diffusion_training", lambda: freed.append(1))
     r = client.post(
-        "/api/train/diffusion/start", json = {**_BODY, "base_model": "LAiM/FLUX.1-dev-GGUF"}
+        "/api/train/diffusion/start", json = {**_BODY, "base_model": "unsloth/FLUX.1-dev-GGUF"}
     )
     assert r.status_code == 400
     assert "SDXL" in r.json()["detail"]
@@ -2136,7 +2136,7 @@ def test_route_start_refuses_ltx2_without_the_pipeline_before_freeing_gpu(client
 
 
 def test_route_start_refuses_a_component_repo_before_freeing_gpu(client, monkeypatch):
-    # LAiM/LTX-2-FP8 holds pre-cast component archives, not a pipeline: no model_index.json,
+    # unsloth/LTX-2-FP8 holds pre-cast component archives, not a pipeline: no model_index.json,
     # no VAE. The name still carries the "ltx-2" token so the family detector claimed it, the
     # LAiM/* trust gate passed it, and the gated-access probe ignores the model_index.json 404
     # (a 404 is not an access problem) -- so the start evicted the resident models and only then
@@ -2146,7 +2146,7 @@ def test_route_start_refuses_a_component_repo_before_freeing_gpu(client, monkeyp
     freed = []
     monkeypatch.setattr(tr, "_free_gpu_for_diffusion_training", lambda: freed.append(1))
 
-    r = client.post("/api/train/diffusion/start", json = {**_BODY, "base_model": "LAiM/LTX-2-FP8"})
+    r = client.post("/api/train/diffusion/start", json = {**_BODY, "base_model": "unsloth/LTX-2-FP8"})
     assert r.status_code == 400, r.text
     detail = r.json()["detail"]
     assert "model_index.json" in detail  # says why it cannot be a base
@@ -2604,7 +2604,7 @@ def test_diffusion_seed_is_bounded_to_torch_range():
     from models.training import DiffusionTrainingStartRequest
 
     base = {
-        "base_model": "LAiM/sdxl-turbo",
+        "base_model": "unsloth/sdxl-turbo",
         "data_dir": "/tmp/x",
         "output_dir": "/tmp/out",
         "seed": 2**64,

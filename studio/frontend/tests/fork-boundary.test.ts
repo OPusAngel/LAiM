@@ -11,7 +11,7 @@ import test from "node:test";
 
 import ts from "@typescript/typescript6";
 
-import { readSrc, registerBundlerResolver } from "./helpers/kit.ts";
+import { readSrc, readSrcExpanded, registerBundlerResolver } from "./helpers/kit.ts";
 
 registerBundlerResolver();
 
@@ -100,7 +100,7 @@ test("clearing a thread that has no entry keeps the identity", () => {
 
 // --- the wiring in thread.tsx -------------------------------------------------
 
-const threadSource = readSrc("components/assistant-ui/thread.tsx");
+const threadSource = readSrcExpanded("components/assistant-ui/thread.tsx");
 const sourceFile = ts.createSourceFile(
   "thread.tsx",
   threadSource,

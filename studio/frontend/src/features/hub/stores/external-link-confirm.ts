@@ -22,7 +22,7 @@ export function isLAiMSiteUrl(url: string): boolean {
     const host = hostname.toLowerCase();
     return (
       (protocol === "https:" || protocol === "http:") &&
-      (host === "LAiM.ai" || host.endsWith(".LAiM.ai"))
+      (host === "laim.ai" || host.endsWith(".laim.ai"))
     );
   } catch {
     return false;

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { useCallback, useRef, useState } from "react";
 import {
   fetchSttStatus,
@@ -241,7 +242,7 @@ export function useSttSidecar({
 
       setBusy("loading");
       // Claim ownership only once resident: a cancelled download would otherwise unload another surface's model.
-      const toastId = toast.loading(`Preparing ${audioModelLabel(sidecarKey)}…`);
+      const toastId = toast.loading(translate("uxAudio.preparingl57oo", { p1: audioModelLabel(sidecarKey) }));
       const ggufVariant =
         engine === "audiocpp"
           ? (sttGgufVariants.current.get(repoId.toLowerCase()) ?? null)
@@ -290,7 +291,7 @@ export function useSttSidecar({
             if (!download?.downloading) break;
           }
           if (!isCurrent()) return;
-          toast.loading(`Loading ${audioModelLabel(sidecarKey)}…`, {
+          toast.loading(translate("uxAudio.loadinghxnta", { p1: audioModelLabel(sidecarKey) }), {
             id: toastId,
           });
           await loadSttModel(
@@ -304,7 +305,7 @@ export function useSttSidecar({
         }
         if (isCurrent()) {
           setLastSttRepo(repoId);
-          toast.success("Transcription model ready", { id: toastId });
+          toast.success(translate("uxAudio.transcriptionModelReady551d5"), { id: toastId });
           return true;
         }
         return false;
@@ -313,7 +314,7 @@ export function useSttSidecar({
           toast.error(
             error instanceof Error
               ? error.message
-              : "Transcription model failed.",
+              : translate("uxAudio.transcriptionModelFailed4i0pt"),
             { id: toastId },
           );
         }

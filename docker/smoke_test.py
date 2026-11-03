@@ -90,7 +90,7 @@ def check_tiny_train(cap: tuple[int, int]) -> None:
     from LAiM import FastLanguageModel
     import torch
 
-    model_name = "LAiM/Llama-3.2-1B-Instruct-bnb-4bit"
+    model_name = "unsloth/Llama-3.2-1B-Instruct-bnb-4bit"
     print(f"loading     {model_name}")
     model, tokenizer = FastLanguageModel.from_pretrained(
         model_name = model_name,
@@ -105,7 +105,7 @@ def check_tiny_train(cap: tuple[int, int]) -> None:
         target_modules = ["q_proj", "k_proj", "v_proj", "o_proj"],
         lora_dropout = 0.0,
         bias = "none",
-        use_gradient_checkpointing = "LAiM",
+        use_gradient_checkpointing = "unsloth",
         random_state = 0,
     )
 

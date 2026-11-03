@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { Spinner } from "@/components/ui/spinner";
 import { type BrowseFoldersResponse, browseFolders } from "@/features/chat";
-import { useT } from "@/i18n";
+import { translate, useT } from "@/i18n";
 import { ChevronUpStandardIcon } from "@/lib/chevron-icons";
 import { cn } from "@/lib/utils";
 import { Folder02Icon } from "@hugeicons/core-free-icons";
@@ -83,9 +83,9 @@ export function FolderBrowser({
   onOpenChange,
   onSelect,
   initialPath,
-  title = "Select folder to detect models",
+  title = translate("uxModelpicker.selectFolderToDetect4x6f9"),
   description,
-  confirmLabel = "Use this folder",
+  confirmLabel = translate("uxModelpicker.useThisFolderl469e"),
   showModelHints = true,
 }: FolderBrowserProps) {
   const t = useT();
@@ -168,7 +168,7 @@ export function FolderBrowser({
         {/* Breadcrumb */}
         <div className="flex flex-wrap items-center gap-0.5 border-t border-border px-6 py-2 font-mono text-ui-11 text-muted-foreground">
           {crumbs.length === 0 ? (
-            <span className="text-muted-foreground/80">(loading…)</span>
+            <span className="text-muted-foreground/80">{translate("uxModelpicker.loadingi80el")}</span>
           ) : (
             crumbs.map((c, i) => (
               <span key={c.value} className="flex items-center gap-0.5">
@@ -246,24 +246,19 @@ export function FolderBrowser({
               {data.entries.length === 0 &&
                 (!showModelHints ||
                   !(data.model_files_here && data.model_files_here > 0)) && (
-                  <div className="px-6 py-3 text-xs text-muted-foreground/80">
-                    (empty directory)
-                  </div>
+                  <div className="px-6 py-3 text-xs text-muted-foreground/80">{translate("uxModelpicker.emptyDirectoryl09h3")}</div>
                 )}
               {showModelHints &&
                 data.model_files_here !== undefined &&
                 data.model_files_here > 0 && (
                   <div className="border-t border-border px-6 py-1.5 text-ui-10 text-muted-foreground">
-                    {data.model_files_here} model file
-                    {data.model_files_here === 1 ? "" : "s"} in this folder.
-                    Click "Use this folder" to scan it.
+                    {translate("uxModelpicker.modelFilesInThisFolderk7tq2", {
+                      p1: data.model_files_here,
+                    })}
                   </div>
                 )}
               {data.truncated === true && (
-                <div className="border-t border-border px-6 py-1.5 text-ui-10 text-muted-foreground/80">
-                  Showing first {data.entries.length} entries. Narrow the path
-                  to see more.
-                </div>
+                <div className="border-t border-border px-6 py-1.5 text-ui-10 text-muted-foreground/80">{translate("uxModelpicker.showingFirstEntriesNarrowhl3h1", { p1: data.entries.length })}</div>
               )}
               {data.entries.map((e) => (
                 <button
@@ -315,12 +310,12 @@ export function FolderBrowser({
                 navigate(path, next);
               }}
             />
-            Show hidden
+            {translate("uxModelpicker.showHiddenu66s5")}
           </label>
           <div className="flex gap-2">
             <DialogClose asChild={true}>
               <Button type="button" variant="ghost">
-                Cancel
+                {translate("browser.agentSettings.cancel")}
               </Button>
             </DialogClose>
             <Button

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   Select,
   SelectContent,
@@ -60,9 +61,9 @@ export function ExpressionDialog({
       />
       <div className="grid gap-1.5">
         <FieldLabel
-          label="Output type"
+          label={translate("uxRecipestudio.outputType5ic22")}
           htmlFor={dtypeId}
-          hint="Choose how this formula should be stored in the final dataset."
+          hint={translate("uxRecipestudio.chooseHowThisFormula1nube")}
         />
         <Select
           value={config.dtype}
@@ -71,7 +72,7 @@ export function ExpressionDialog({
           }
         >
           <SelectTrigger className="nodrag w-full" id={dtypeId}>
-            <SelectValue placeholder="Select type" />
+            <SelectValue placeholder={translate("uxRecipestudio.selectType1q1rq")} />
           </SelectTrigger>
           <SelectContent>
             {DTYPE_OPTIONS.map((dtype) => (
@@ -84,9 +85,9 @@ export function ExpressionDialog({
       </div>
       <div className="grid gap-1.5">
         <FieldLabel
-          label="Formula"
+          label={translate("uxRecipestudio.formula1b8ag")}
           htmlFor={exprId}
-          hint="Build this field from other fields."
+          hint={translate("uxRecipestudio.buildThisFieldFrom1oyew")}
         />
         <Textarea
           id={exprId}
@@ -104,9 +105,7 @@ export function ExpressionDialog({
               : ""}
           </p>
         )}
-        <p className="text-xs text-muted-foreground">
-          Insert other fields like {"{{ field_name }}"}.
-        </p>
+        <p className="text-xs text-muted-foreground">{translate("uxRecipestudio.insertOtherFieldsLikec6fbd", { p1: "{{ field_name }}" })}</p>
       </div>
     </div>
   );

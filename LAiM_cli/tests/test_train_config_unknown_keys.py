@@ -96,7 +96,7 @@ def test_valid_config_still_loads(tmp_path):
 
     cfg = load_config(path)
 
-    assert cfg.model == "LAiM/Qwen2.5-0.5B"
+    assert cfg.model == "unsloth/Qwen2.5-0.5B"
     assert cfg.data.dataset == "tatsu-lab/alpaca"
     assert cfg.training.num_epochs == 9
     assert cfg.training.learning_rate == 5e-5
@@ -189,12 +189,12 @@ def test_a_byte_order_mark_written_by_notepad_still_loads(tmp_path, suffix):
     body = (
         "model: LAiM/Qwen2.5-0.5B\n"
         if suffix == ".yaml"
-        else '{"model": "LAiM/Qwen2.5-0.5B"}'
+        else '{"model": "unsloth/Qwen2.5-0.5B"}'
     )
     path = tmp_path / f"config{suffix}"
     path.write_bytes(b"\xef\xbb\xbf" + body.encode("utf-8"))
 
-    assert load_config(path).model == "LAiM/Qwen2.5-0.5B"
+    assert load_config(path).model == "unsloth/Qwen2.5-0.5B"
 
 
 def test_a_whitespace_only_json_config_loads_defaults_like_yaml_does(tmp_path):

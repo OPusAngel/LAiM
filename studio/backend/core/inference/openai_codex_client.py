@@ -664,6 +664,32 @@ def _is_terminal_quota(detail: str | None) -> bool:
     )
 
 
+def _quota_refusal(response: httpx.Response, detail: str | None) -> str:
+    """What upstream actually said about a 429, in one sentence.
+
+    The body names the plan that ran out and when it resets; a generic "temporarily
+    unavailable" sent users waiting for a limit that a wait cannot clear.
+    """
+    try:
+        payload = response.json()
+    except (ValueError, json.JSONDecodeError, httpx.HTTPError, AttributeError):
+        payload = {}
+    error = payload.get("error") if isinstance(payload, dict) else None
+    error = error if isinstance(error, dict) else {}
+    plan = error.get("plan_type") if isinstance(error.get("plan_type"), str) else None
+    resets_at = error.get("resets_at")
+    if isinstance(resets_at, (int, float)) and not isinstance(resets_at, bool):
+        when = time.strftime("%d.%m.%Y %H:%M UTC", time.gmtime(resets_at))
+    else:
+        when = None
+    parts = [detail or "ChatGPT subscription quota is temporarily unavailable."]
+    if plan:
+        parts.append(f"Plan: {plan}.")
+    if when:
+        parts.append(f"Resets {when}.")
+    return " ".join(parts)
+
+
 def _retry_delay_seconds(response: httpx.Response, attempt: int) -> float:
     raw = response.headers.get("retry-after-ms")
     if raw:
@@ -761,8 +787,12 @@ async def _validated_stream_response(
                         return
                     continue
                 if response.status_code == 429:
+                    # Upstream says why in the body. Replacing it with a canned "temporarily
+                    # unavailable" turned every rejection -- a plan that ran out, a terminal
+                    # spend cap, a model the account never had -- into the same retryable
+                    # sentence, so a user could wait all day for a quota that was not the problem.
                     raise CodexQuotaError(
-                        "ChatGPT subscription quota is temporarily unavailable.",
+                        _quota_refusal(response, detail),
                         status = 429,
                         metadata = _quota_metadata(response, terminal = terminal_quota),
                     )

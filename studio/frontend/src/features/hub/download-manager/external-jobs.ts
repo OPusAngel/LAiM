@@ -9,6 +9,8 @@ import {
 } from "@/lib/transfer-stats";
 import { DOWNLOAD_KIND } from "./constants";
 import { patchJob, putJob, scheduleRemoval } from "./download-manager-state";
+import { translate } from "@/i18n";
+
 
 /**
  * Downloads owned by another subsystem that still belong in the shared panel.
@@ -110,7 +112,7 @@ export function finishExternalJob(
     state: outcome,
     bytesPerSec: 0,
     etaSeconds: 0,
-    error: outcome === "error" ? (error ?? "Download failed.") : null,
+    error: outcome === "error" ? (error ?? translate("uxHub.downloadFailed84wh3")) : null,
     ...(outcome === "complete" ? { fraction: 1, completeOnDisk: true } : {}),
   });
   scheduleRemoval(key, TERMINAL_LINGER_MS);

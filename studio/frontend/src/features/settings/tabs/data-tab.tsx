@@ -48,7 +48,7 @@ import {
   fileImportSource,
   type ImportSource,
   notifyChatProjectsUpdated,
-  offerToDeleteKeptSandboxes,
+  offerToDeleteKeptWorkdirs,
   useChatPreferencesStore,
   useChatRuntimeStore,
   useChatSidebarItems,
@@ -607,9 +607,9 @@ export function DataTab({ searchEntry }: { searchEntry?: string }) {
       });
       refreshLibraryStorage();
       const clearedCount = result.deletedThreadIds.length;
-      // A sandbox the backend could not remove, asked for or not.
+      // A workdir the backend could not remove, asked for or not.
       // After a clear there is no row left to reach it from.
-      offerToDeleteKeptSandboxes(result.sandboxesKept);
+      offerToDeleteKeptWorkdirs(result.workdirsKept);
       const hasFailedStore =
         result.backend === "failed" || result.legacy === "failed";
       if (!hasFailedStore && result.failedThreadIds.length === 0) {
@@ -1108,8 +1108,8 @@ export function DataTab({ searchEntry }: { searchEntry?: string }) {
           />
         </SettingsRow>
         <SettingsRow
-          label={t("settings.data.sandboxFiles")}
-          description={t("settings.data.sandboxFilesDescription")}
+          label={t("settings.data.workdirFiles")}
+          description={t("settings.data.workdirFilesDescription")}
         >
           <Select
             value={alwaysDeleteChatFiles ? "delete" : "keep"}
@@ -1117,16 +1117,16 @@ export function DataTab({ searchEntry }: { searchEntry?: string }) {
           >
             <SelectTrigger
               size="sm"
-              aria-label={t("settings.data.sandboxFiles")}
+              aria-label={t("settings.data.workdirFiles")}
             >
               <SelectValue />
             </SelectTrigger>
             <SelectContent align="end">
               <SelectItem value="keep">
-                {t("settings.data.keepSandboxFiles")}
+                {t("settings.data.keepWorkdirFiles")}
               </SelectItem>
               <SelectItem value="delete">
-                {t("settings.data.deleteSandboxFiles")}
+                {t("settings.data.deleteWorkdirFiles")}
               </SelectItem>
             </SelectContent>
           </Select>
@@ -1171,7 +1171,7 @@ export function DataTab({ searchEntry }: { searchEntry?: string }) {
                   variant="destructive"
                   onSelect={() => openClearConfirmation(true)}
                 >
-                  {t("settings.data.deleteChatsAndSandboxes")}
+                  {t("settings.data.deleteChatsAndWorkdirs")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -1250,10 +1250,10 @@ export function DataTab({ searchEntry }: { searchEntry?: string }) {
           <fieldset disabled={clearing} className="min-w-0 disabled:opacity-50">
             <DeleteChatFilesSwitch
               id="clear-chats-delete-files"
-              label={t("settings.data.deleteSandboxFiles")}
+              label={t("settings.data.deleteWorkdirFiles")}
               checked={deleteFilesOnClear}
               onCheckedChange={setDeleteFilesOnClear}
-              description={t("settings.data.deleteSandboxFilesDescription")}
+              description={t("settings.data.deleteWorkdirFilesDescription")}
             />
           </fieldset>
           <DialogFooter>

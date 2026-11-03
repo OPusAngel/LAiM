@@ -16,6 +16,8 @@ import type {
 import { toast } from "sonner";
 import { externalModelLabel } from "./lib/external-model-label";
 import { useChatRuntimeStore } from "./stores/chat-runtime-store";
+import { translate } from "@/i18n";
+
 
 // crypto.randomUUID is undefined in non-secure contexts (HTTP over a LAN IP).
 function newAttachmentId(): string {
@@ -42,7 +44,7 @@ export class VideoAttachmentAdapter implements AttachmentAdapter {
         activeModel?.name ||
         externalModelLabel(checkpoint) ||
         checkpoint ||
-        "Current model";
+        translate("uxChat.currentModelvyd7k");
       // The server does not say which cause applies, so name what each backend needs.
       unavailableReason = `${label} cannot accept video. Video needs a GGUF model whose mmproj supports video, with a llama.cpp build with video enabled and ffmpeg installed on this machine, or an MLX vision model that reads video.`;
     }
@@ -57,7 +59,7 @@ export class VideoAttachmentAdapter implements AttachmentAdapter {
     }
     // One clip per message: a second would blow the context in frames alone.
     if (this.attachmentIds.size > 0) {
-      const duplicateReason = "Only one video can be attached per message.";
+      const duplicateReason = translate("uxChat.onlyOneVideoCantkmei");
       toast.error(duplicateReason);
       throw new Error(duplicateReason);
     }

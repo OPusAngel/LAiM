@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { type ReactNode, useState } from "react";
 import { AdvancedDisclosure } from "@/components/advanced-disclosure";
 import {
@@ -160,10 +161,10 @@ export function TtsRailFields({
           at, and PillTabs is a tablist with its own name. */}
       <div className="grid gap-1.5">
         <span className="text-ui-13 font-medium text-foreground">
-          Load model into
+          {translate("uxAudio.loadModelIntoqn24o")}
         </span>
         <PillTabs
-          ariaLabel="Load model into"
+          ariaLabel={translate("uxAudio.loadModelIntojy8mt")}
           value={audioDevice === "cpu" ? "cpu" : "auto"}
           disabled={busy !== null}
           onValueChange={(value) => {
@@ -172,7 +173,7 @@ export function TtsRailFields({
             // MiniMax needs CUDA; the backend refusal cannot save an already-ejected model.
             if (next === "cpu" && status?.audio_type === "minimax_music3") {
               toast.info(
-                "MiniMax Music 3 needs a GPU, so it cannot be held in CPU RAM.",
+                translate("uxAudio.miniMaxMusic3Needs1kwrl"),
               );
               return;
             }
@@ -182,8 +183,8 @@ export function TtsRailFields({
           fit={true}
           className="h-[calc(30px*var(--ui-space-scale,1))] self-start [&>button]:h-[calc(30px*var(--ui-space-scale,1))] [&>button]:px-6"
           tabs={[
-            { value: "auto", label: "GPU when available" },
-            { value: "cpu", label: "CPU RAM" },
+            { value: "auto", get label() { return translate("uxAudio.gPUWhenAvailable05hh7"); } },
+            { value: "cpu", get label() { return translate("uxAudio.cPURAM3s9to"); } },
           ]}
         />
         {/* Phrased as what the next load will do, not as the resident
@@ -191,8 +192,8 @@ export function TtsRailFields({
             be on the other device, and status does not report it. */}
         <p className="text-ui-11p5 leading-snug text-muted-foreground">
           {audioDevice === "cpu"
-            ? "New loads go into system RAM instead of the GPU. Slower to generate, and no GPU memory is used."
-            : "New loads use the GPU when there is one, and the CPU otherwise."}
+            ? translate("uxAudio.newLoadsGoIntol5t9e")
+            : translate("uxAudio.newLoadsUseThezkw7b")}
         </p>
       </div>
       {inputs ?? (
@@ -201,8 +202,8 @@ export function TtsRailFields({
           htmlFor="audio-prompt"
           hint={
             musicGeneration
-              ? "Lyrics may use sections such as [verse] and [chorus]. The completed song lands in the gallery."
-              : "What the model should say. Generation runs on the loaded TTS model and lands in the gallery."
+              ? translate("uxAudio.lyricsMayUseSectionslvgow")
+              : translate("uxAudio.whatTheModelShouldkn8r7")
           }
         >
           <Textarea
@@ -212,8 +213,8 @@ export function TtsRailFields({
             onChange={(event) => setPrompt(event.target.value)}
             placeholder={
               musicGeneration
-                ? "[verse]\nMorning light through the pines…\n\n[chorus]\n…"
-                : "Type the sentence to speak…"
+                ? translate("uxAudio.verseMorningLightThroughtupo4")
+                : translate("uxAudio.typeTheSentenceTodqsp7")
             }
             className="min-h-28"
           />
@@ -226,15 +227,15 @@ export function TtsRailFields({
           onOpenChange={setAdvancedOpen}
           description={
             musicGeneration
-              ? "Generation length and model options. Changes apply to the next audio clip."
+              ? translate("uxAudio.generationLengthAndModelxpwd5")
               : samplingControls
-                ? "Generation sampling. Changes apply to the next audio clip."
-                : "Model options. Changes apply to the next audio clip."
+                ? translate("uxAudio.generationSamplingChangesApplym2c0b")
+                : translate("uxAudio.modelOptionsChangesApplya9qcf")
           }
         >
           {!musicGeneration && samplingControls ? (
             <ParamSlider
-              label="Temperature"
+              label={translate("settings.resources.liveMonitor.temperature")}
               value={temperature}
               min={0}
               max={mossFrameLimit !== null ? 2 : 1.5}
@@ -244,7 +245,7 @@ export function TtsRailFields({
           ) : null}
           {musicGeneration ? (
             <ParamSlider
-              label="Max duration (seconds)"
+              label={translate("uxAudio.maxDurationSeconds1ljpm")}
               value={musicSeconds}
               min={musicRange.min}
               max={musicRange.max}
@@ -253,13 +254,13 @@ export function TtsRailFields({
               valueSize={8}
               info={
                 cudaMusicGeneration
-                  ? `Starts at ${MINIMAX_MUSIC_DEFAULT_SECONDS} seconds. MiniMax Music 3 generates ${MINIMAX_MUSIC_FRAMES_PER_SECOND} frames per second, up to ${musicRange.max} seconds.`
-                  : `Starts at ${MINIMAX_MUSIC_DEFAULT_SECONDS} seconds. This model generates between ${musicRange.min} and ${musicRange.max} seconds.`
+                  ? translate("uxAudio.startsAtSecondsMiniMaxa1xxy", { p1: MINIMAX_MUSIC_DEFAULT_SECONDS, p2: MINIMAX_MUSIC_FRAMES_PER_SECOND, p3: musicRange.max })
+                  : translate("uxAudio.startsAtSecondsThisdemkr", { p1: MINIMAX_MUSIC_DEFAULT_SECONDS, p2: musicRange.min, p3: musicRange.max })
               }
             />
           ) : mossFrameLimit !== null ? (
             <ParamSlider
-              label="Max duration (seconds)"
+              label={translate("uxAudio.maxDurationSeconds1ljpm")}
               value={mossMaxSeconds}
               min={1}
               max={mossMaxSecondsLimit}
@@ -270,7 +271,7 @@ export function TtsRailFields({
             />
           ) : samplingControls ? (
             <ParamSlider
-              label="Max tokens"
+              label={translate("uxAudio.maxTokenseefvt")}
               value={maxTokens}
               min={256}
               max={TTS_MAX_TOKENS}
@@ -295,7 +296,7 @@ export function TtsRailFields({
                   className="self-start"
                   onClick={handleAudioOptionsReset}
                 >
-                  Reset model options
+                  {translate("uxCopy.resetModelOptionsr2ctk")}
                 </Button>
               ) : null}
             </>
@@ -358,7 +359,7 @@ export function TtsFooter({
           </output>
           <Progress
             indeterminate
-            aria-label="Audio task in progress"
+            aria-label={translate("uxAudio.audioTaskInProgressiwi3x")}
             className="h-1.5"
           />
         </>
@@ -394,13 +395,13 @@ export function TtsFooter({
           aria-describedby={blocker ? "audio-generate-blocker" : undefined}
           aria-keyshortcuts="Control+Enter Meta+Enter"
           title={
-            generationPresentation ? undefined : `Generate (${shortcutLabel})`
+            generationPresentation ? undefined : translate("uxAudio.generatejwrb5", { p1: shortcutLabel })
           }
         >
           {generationPresentation?.canStop ? (
             <>
               <HugeiconsIcon icon={StopIcon} className="mr-2 size-4" />
-              Stop
+              {translate("browser.agent.stop")}
             </>
           ) : generationPresentation ? (
             <>
@@ -478,7 +479,7 @@ export function TtsOutput({
   clipBadge,
   renderPlayer,
   selectedPlayer,
-  useAgainLabel = "Use text again",
+  useAgainLabel = translate("uxAudio.useTextAgainfw99p"),
   showCopyText = true,
 }: Pick<
   AudioGallery,
@@ -582,9 +583,7 @@ export function TtsOutput({
               icon={FloppyDiskIcon}
               strokeWidth={1.75}
               className="size-icon"
-            />
-            Save as voice…
-          </DropdownMenuItem>
+            />{translate("uxAudio.saveAsVoicepmoqf")}</DropdownMenuItem>
           <DropdownMenuItem onClick={() => onUseTextAgain(clip)}>
             <HugeiconsIcon
               icon={SparklesIcon}
@@ -600,7 +599,7 @@ export function TtsOutput({
                 strokeWidth={1.75}
                 className="size-icon"
               />
-              Copy text
+              {translate("uxAudio.copyTextrsdwl")}
             </DropdownMenuItem>
           ) : null}
           <MusicSendToMenuItems clip={clip} />
@@ -678,15 +677,13 @@ export function TtsOutput({
         <div className="flex shrink-0 flex-col gap-2">
           <div className="flex items-center justify-between">
             <span className="text-ui-11p5 font-medium text-muted-foreground">
-              History
+              {translate("browser.pages.history")}
             </span>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => void handleClearGallery()}
-            >
-              Clear all
-            </Button>
+            >{translate("uxAudio.clearAllyye4n")}</Button>
           </div>
           <div
             {...historyReorder.stripProps}

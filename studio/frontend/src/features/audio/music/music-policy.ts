@@ -3,6 +3,7 @@
 
 // No app imports: the node test runner loads this directly.
 
+import { translate } from "@/i18n";
 import type {
   AudioOptionScalar,
   AudioTextRunRequest,
@@ -26,9 +27,9 @@ export const MUSIC_MODE_LABELS: Record<MusicMode, string> = {
 };
 
 export const MUSIC_MODE_HINTS: Record<MusicMode, string> = {
-  song: "A song or an instrumental from a description and lyrics.",
+  get song() { return translate("uxAudio.aSongOrAnnpi1v"); },
   sfx: "A short sound from a description.",
-  edit: "Change part of a clip, extend it, or give it a new style.",
+  get edit() { return translate("uxAudio.changePartOfAugb0f"); },
 };
 
 export function musicModeLabel(rule: MusicModeRule): string {
@@ -39,7 +40,7 @@ export function musicModeLabel(rule: MusicModeRule): string {
 
 export function musicModeHint(rule: MusicModeRule): string {
   return rule.id === "song" && rule.instrumental === "always"
-    ? "Music without vocals, from a description."
+    ? translate("uxAudio.musicWithoutVocalsFromihmun")
     : MUSIC_MODE_HINTS[rule.id];
 }
 
@@ -135,14 +136,14 @@ export function instrumentalChoice(
         shown: false,
         enabled: false,
         value: true,
-        reason: "This model makes instrumentals only.",
+        get reason() { return translate("uxAudio.thisModelMakesInstrumentalsjyhc9"); },
       };
     case "never":
       return {
         shown: true,
         enabled: false,
         value: false,
-        reason: "This model always sings the lyrics.",
+        get reason() { return translate("uxAudio.thisModelAlwaysSings4gqr5"); },
       };
     default:
       return { shown: false, enabled: false, value: false, reason: null };
@@ -160,8 +161,8 @@ export function lyricsShown(
 
 export function durationLabel(rule: MusicModeRule): string {
   return rule.duration?.approximate
-    ? "Length (seconds, approximate)"
-    : "Length (seconds)";
+    ? translate("uxAudio.lengthSecondsApproximate2rfj2")
+    : translate("uxAudio.lengthSecondsh9uv7");
 }
 
 export function musicDurationFor(
@@ -194,54 +195,78 @@ export function reloadNotice(
   const rules = rule.variations;
   if (!rules || rules.how !== "batch" || variations <= rules.loaded)
     return null;
-  const name = modelName?.trim() || "the model";
-  return `Reloads ${name} to make ${variations} variations at once, about 15 s the first time.`;
+  const name = modelName?.trim() || translate("uxAudio.theModel4h1ky");
+  return translate("uxAudio.reloadsToMakeVariationsn27dg", { p1: name, p2: variations });
 }
 
 export const MUSIC_EXAMPLES = {
   description: [
     {
-      label: "Acoustic pop",
-      text: "Upbeat acoustic pop, bright female vocals, guitar and light drums, 100 BPM",
+      get label() {
+        return translate("uxAudio.acousticPop1fiii");
+      },
+      get text() {
+        return translate("uxAudio.upbeatAcousticPopBright19863");
+      },
     },
     {
-      label: "Lo-fi hip hop",
-      text: "Lo-fi hip hop beat, warm vinyl crackle, mellow piano, relaxed",
+      get label() {
+        return translate("uxAudio.loFiHipHop4vgdp");
+      },
+      get text() {
+        return translate("uxAudio.loFiHipHop1oicu");
+      },
     },
     {
-      label: "Orchestral",
-      text: "Epic orchestral trailer music, big drums, rising strings",
+      get label() {
+        return translate("uxAudio.orchestral1ub5c");
+      },
+      get text() {
+        return translate("uxAudio.epicOrchestralTrailerMusic124nw");
+      },
     },
-  ],
-  instrumental: [
+  ], get instrumental() { return [
     {
-      label: "Lo-fi",
-      text: "Warm lo-fi hip hop beat, vinyl crackle, mellow piano, relaxed",
+      get label() {
+        return translate("uxAudio.loFi1qrf3");
+      },
+      get text() {
+        return translate("uxAudio.warmLoFiHipa13xr");
+      },
     },
     {
-      label: "House",
-      text: "Uplifting house music with bright synths, 124 BPM",
+      get label() {
+        return translate("uxAudio.house1e9xq");
+      },
+      get text() {
+        return translate("uxAudio.upliftingHouseMusicWith1ekhw");
+      },
     },
     {
-      label: "Orchestral",
-      text: "Epic orchestral trailer music, big drums, rising strings",
+      get label() {
+        return translate("uxAudio.orchestral1ub5c");
+      },
+      get text() {
+        return translate("uxAudio.epicOrchestralTrailerMusic124nw");
+      },
     },
-  ],
-  lyrics: [
+  ]; }, get lyrics() { return [
     {
-      label: "River song",
-      text: "Sunlight on the river, golden in the morning\nWe walk along the water, singing as we go\n\nOh, oh, the river runs\nOh, oh, into the sun",
+      get label() {
+        return translate("uxAudio.riverSong1gtak");
+      },
+      get text() {
+        return translate("uxAudio.sunlightOnTheRiverko6k3");
+      },
     },
-  ],
-  sfx: [
-    { label: "Rain", text: "Heavy rain on a tin roof with distant thunder" },
-    { label: "Footsteps", text: "Footsteps on gravel, slow walk" },
-    { label: "Creaky door", text: "A door creaking open in an empty hall" },
-  ],
-  edit: [
-    "Same melody with a saxophone lead",
-    "Softer, with only piano and strings",
-  ],
+  ]; }, get sfx() { return [
+    { label: translate("uxAudio.rain2q0iy"), get text() { return translate("uxAudio.heavyRainOnA8lbm9"); } },
+    { label: translate("uxAudio.footstepsp83ch"), get text() { return translate("uxAudio.footstepsOnGravelSlow1av60"); } },
+    { label: translate("uxAudio.creakyDoorbi6x9"), get text() { return translate("uxAudio.aDoorCreakingOpen1hr3l"); } },
+  ]; }, get edit() { return [
+    translate("uxAudio.sameMelodyWithAmxa9a"),
+    translate("uxAudio.softerWithOnlyPianowpmfa"),
+  ]; },
 } as const;
 
 export function exampleLyrics(
@@ -276,17 +301,17 @@ export function musicBlocker(inputs: MusicInputs): string | null {
     const description = inputs.description.trim();
     const lyrics = inputs.lyrics.trim();
     if (rule.description === "required" && !description)
-      return "Describe the music. This model needs a description.";
+      return translate("uxAudio.describeTheMusicThismm8n8");
     if (rule.lyrics === "required" && !instrumental && !lyrics)
-      return "Write the lyrics. This model sings them.";
+      return translate("uxAudio.writeTheLyricsThist5bk6");
     if (!description && (!lyrics || instrumental))
       return instrumental
-        ? "Describe the music you want."
-        : "Describe the music or write lyrics.";
+        ? translate("uxAudio.describeTheMusicYouq9mnr")
+        : translate("uxAudio.describeTheMusicOru549j");
     return null;
   }
   if (rule.id === "sfx") {
-    return inputs.sfx.prompt.trim() ? null : "Describe the sound you want.";
+    return inputs.sfx.prompt.trim() ? null : translate("uxAudio.describeTheSoundYou2axj5");
   }
   return inputs.editProblem ?? null;
 }

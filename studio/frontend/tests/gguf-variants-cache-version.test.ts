@@ -9,8 +9,8 @@ import {
   getGgufVariantsCacheVersion,
 } from "../src/features/hub/inventory/gguf-variants-cache-events.ts";
 
-const REPO = "LAiM/Qwen3-8B-GGUF";
-const OTHER = "LAiM/Llama-3.1-8B-Instruct-GGUF";
+const REPO = "unsloth/Qwen3-8B-GGUF";
+const OTHER = "unsloth/Llama-3.1-8B-Instruct-GGUF";
 
 /** What the picker watches: one snapshot over the repos it lists. */
 const snapshot = (repoIds: string[]) =>
@@ -39,7 +39,7 @@ test("the aggregated snapshot moves when any listed repo is invalidated", () => 
 test("an unrelated repo's invalidation leaves the snapshot alone", () => {
   const repos = [REPO, OTHER];
   const before = snapshot(repos);
-  bumpGgufVariantsCacheVersion("LAiM/gemma-3-4b-it-GGUF");
+  bumpGgufVariantsCacheVersion("unsloth/gemma-3-4b-it-GGUF");
   assert.equal(snapshot(repos), before);
 });
 

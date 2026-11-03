@@ -6,6 +6,8 @@ import { readFastApiError } from "@/lib/format-fastapi-error";
 import { AudioApiError } from "./api";
 import type { AudioSourceRef } from "./audio-run-request";
 import type { SttCapabilities } from "./transcribe-capabilities";
+import { translate } from "@/i18n";
+
 import {
   type TranscriptProgress,
   type TranscriptRecord,
@@ -56,7 +58,7 @@ export async function transcribeSourceWithProgress(
   // The status matters: a 404 means the upload expired, and the card says so.
   if (!response.ok)
     throw new AudioApiError(await readFastApiError(response), response.status);
-  if (!response.body) throw new Error("The transcription response was empty.");
+  if (!response.body) throw new Error(translate("uxAudio.theTranscriptionResponseWasp8to3"));
   return readTranscriptStream(response.body, onProgress);
 }
 

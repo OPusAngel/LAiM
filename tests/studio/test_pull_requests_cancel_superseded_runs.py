@@ -65,7 +65,7 @@ def _context(ref: str, event_name: str = "pull_request") -> dict[str, str]:
         "github.ref": ref,
         "github.sha": "a" * 40,
         "github.event_name": event_name,
-        "github.repository": "LAiMai/LAiM",
+        "github.repository": "OPusAngel/LAiM",
         "github.ref_name": ref.rsplit("/", 1)[-1],
     }
 

@@ -85,7 +85,7 @@ RELEASE_NOTES = {
 }
 RELEASE_NOTES_NONE = dict(RELEASE_NOTES, markdown = "", matched = False)
 # Inherited overflow-wrap:anywhere split "Download" in the Link column.
-_DL = "https://github.com/LAiMai/LAiM/releases/latest/download"
+_DL = "https://github.com/unslothai/unsloth/releases/latest/download"
 RELEASE_NOTES_TABLE = dict(
     RELEASE_NOTES,
     markdown = "\n".join(
@@ -169,8 +169,8 @@ LLAMA_CHANGELOG = {
             "summary": "llama: batched readahead for lazily read gather tables",
             "links": [
                 {
-                    "label": "LAiMai/llama.cpp#137",
-                    "url": "https://github.com/LAiMai/llama.cpp/pull/137",
+                    "label": "unslothai/llama.cpp#137",
+                    "url": "https://github.com/unslothai/llama.cpp/pull/137",
                 }
             ],
         },
@@ -178,7 +178,7 @@ LLAMA_CHANGELOG = {
     ],
     "total_changes": 3,
     "truncated": False,
-    "release_url": "https://github.com/LAiMai/llama.cpp/releases/tag/b10333-mix-e34b418",
+    "release_url": "https://github.com/unslothai/llama.cpp/releases/tag/b10333-mix-e34b418",
     "error": None,
 }
 # whisper.cpp renames the shared runtime card instead of adding a banner.
@@ -254,8 +254,8 @@ SWEEP_BUDGET_S = step_budget_s(420)
 
 # Shaped as in playwright_loaded_models_indicator.py; one loaded chat model puts the card in the rail.
 CHAT_LOADED = {
-    "active_model": "LAiM/Qwen3-4B",
-    "loaded": ["LAiM/Qwen3-4B"],
+    "active_model": "unsloth/Qwen3-4B",
+    "loaded": ["unsloth/Qwen3-4B"],
     "is_gguf": False,
     "is_mlx": False,
     "is_vision": False,

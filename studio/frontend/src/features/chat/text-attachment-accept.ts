@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
+
 /**
  * Extensions `TextAttachmentAdapter` reads inline; shared with the drop path.
  *
@@ -1067,7 +1069,7 @@ function unsupportedCharsetError(
 ): UndecodableTextError {
   return new UndecodableTextError(
     fileName,
-    `It declares charset "${charset}", which this browser has no decoder for.`,
+    translate("uxChat.itDeclaresCharsetWhich4ovbs", { p1: charset }),
   );
 }
 
@@ -1078,7 +1080,7 @@ function contradictedCharsetError(
 ): UndecodableTextError {
   return new UndecodableTextError(
     fileName,
-    `It declares charset "${charset}" but does not hold valid ${charset} text.`,
+    translate("uxChat.itDeclaresCharsetButhjdmr", { p1: charset, p2: charset }),
   );
 }
 
@@ -1202,7 +1204,7 @@ function decodeVCardPerProperty(
             return {
               failure: new UndecodableTextError(
                 fileName,
-                `One of its properties declares two charsets (${charsets.join(", ")}).`,
+                translate("uxChat.oneOfItsPropertiesg54bh", { p1: charsets.join(", ") }),
               ),
             };
           }
@@ -1329,7 +1331,7 @@ export function decodeTextAttachmentBytes(
       // corrupt all but one of them, and this is not a MIME parser.
       throw new UndecodableTextError(
         fileName,
-        `It declares more than one charset (${declared.join(", ")}), and is read as one unit.`,
+        translate("uxChat.itDeclaresMoreThan4lgma", { p1: declared.join(", ") }),
       );
     }
     // Otherwise a legacy code page, but which one is not knowable from the bytes: the same byte is a
@@ -1342,8 +1344,8 @@ export function decodeTextAttachmentBytes(
 export class UndecodableTextError extends Error {
   constructor(fileName: string, reason?: string) {
     super(
-      `${fileName || "This file"} is not UTF-8 text. ${
-        reason ?? "It looks like a legacy code page."
+      `${fileName || translate("uxChat.thisFilej9c57")} is not UTF-8 text. ${
+        reason ?? translate("uxChat.itLooksLikeA6r90b")
       } Convert it to UTF-8 before attaching it.`,
     );
     this.name = "UndecodableTextError";

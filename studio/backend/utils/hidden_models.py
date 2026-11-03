@@ -19,26 +19,26 @@ _PROBE_REPO_ID = "ggml-org/models"
 _PROBE_FILENAME = "stories260k.gguf"
 # Keep previously cached defaults hidden after settings changes.
 _DEFAULT_EMBEDDING_REPO_IDS = {
-    "LAiM/bge-small-en-v1.5",
-    "LAiM/bge-small-en-v1.5-GGUF",
+    "unsloth/bge-small-en-v1.5",
+    "unsloth/bge-small-en-v1.5-GGUF",
 }
 # Local copies do not always retain the repo id.
 _DEFAULT_EMBEDDING_PATH_BASENAMES = {"bge-small-en-v1.5"}
 # Curated dictation checkpoints (STT, never chat), hidden from chat inventory and pickers. The GGUF companions carry a raw .bin with no config.json, so config sniffing cannot catch them and they must be listed by id; the Qwen3-ASR GGUFs likewise, since llama.cpp loads one as a chat model that only answers with transcripts.
 _HIDDEN_STT_REPO_IDS = frozenset(
     {
-        "LAiM/whisper-tiny",
-        "LAiM/whisper-base",
-        "LAiM/whisper-small",
-        "LAiM/whisper-large-v3-turbo",
-        "LAiM/whisper-large-v3",
-        "LAiMai/whisper-tiny-GGUF",
-        "LAiMai/whisper-base-GGUF",
-        "LAiMai/whisper-small-GGUF",
-        "LAiMai/whisper-large-v3-turbo-GGUF",
-        "LAiMai/whisper-large-v3-GGUF",
-        "LAiMai/Qwen3-ASR-0.6B-GGUF",
-        "LAiMai/Qwen3-ASR-1.7B-GGUF",
+        "unsloth/whisper-tiny",
+        "unsloth/whisper-base",
+        "unsloth/whisper-small",
+        "unsloth/whisper-large-v3-turbo",
+        "unsloth/whisper-large-v3",
+        "unslothai/whisper-tiny-GGUF",
+        "unslothai/whisper-base-GGUF",
+        "unslothai/whisper-small-GGUF",
+        "unslothai/whisper-large-v3-turbo-GGUF",
+        "unslothai/whisper-large-v3-GGUF",
+        "unslothai/Qwen3-ASR-0.6B-GGUF",
+        "unslothai/Qwen3-ASR-1.7B-GGUF",
     }
 )
 _HIDDEN_STT_REPO_IDS_LOWER = frozenset(repo_id.lower() for repo_id in _HIDDEN_STT_REPO_IDS)
@@ -51,15 +51,15 @@ _HIDDEN_AUDIO_CPP_REPO_IDS_LOWER = frozenset({"audio-cpp/audio.cpp-gguf"})
 # Curated Audio-page TTS checkpoints, which stay VISIBLE but must not be chat-loadable: a chat turn on one comes back as synthesized speech. Listed by id because config sniffing cannot catch them (Orpheus/OuteTTS are LlamaForCausalLM, Spark is Qwen2ForCausalLM) and a GGUF companion carries no tokenizer_config for the codec probe.
 _CURATED_TTS_REPO_IDS = frozenset(
     {
-        "LAiM/orpheus-3b-0.1-ft",
-        "LAiM/orpheus-3b-0.1-ft-bnb-4bit",
-        "LAiM/orpheus-3b-0.1-ft-LAiM-bnb-4bit",
-        "LAiM/orpheus-3b-0.1-ft-GGUF",
+        "unsloth/orpheus-3b-0.1-ft",
+        "unsloth/orpheus-3b-0.1-ft-bnb-4bit",
+        "unsloth/orpheus-3b-0.1-ft-unsloth-bnb-4bit",
+        "unsloth/orpheus-3b-0.1-ft-GGUF",
         "canopylabs/orpheus-3b-0.1-ft",
-        "LAiM/csm-1b",
+        "unsloth/csm-1b",
         "sesame/csm-1b",
-        "LAiM/Spark-TTS-0.5B",
-        "LAiM/Llama-OuteTTS-1.0-1B",
+        "unsloth/Spark-TTS-0.5B",
+        "unsloth/Llama-OuteTTS-1.0-1B",
     }
 )
 _CURATED_TTS_REPO_IDS_LOWER = frozenset(repo_id.lower() for repo_id in _CURATED_TTS_REPO_IDS)

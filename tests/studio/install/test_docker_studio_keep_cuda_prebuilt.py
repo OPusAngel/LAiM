@@ -34,7 +34,7 @@ _linux_published_attempts = INSTALL_LLAMA_PREBUILT._linux_published_attempts
 
 RELEASE_TAG = "b10840-mix-d5c17a0"
 LLAMA_TAG = "b10840"
-FORK = "LAiMai/llama.cpp"
+FORK = "unslothai/llama.cpp"
 
 
 def _usable_bash():

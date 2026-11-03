@@ -1231,7 +1231,7 @@ def _scheme_supported(
 _CHILD_PROBE_TIMEOUT = 180.0
 
 # Set once the spawn machinery has been shown not to work here (frozen build without multiprocessing support, a
-# sandbox that refuses to fork/exec), so the fallback is paid once rather than on every miss.
+# locked-down host that refuses to fork/exec), so the fallback is paid once rather than on every miss.
 _CHILD_PROBE_UNAVAILABLE = False
 
 # Consecutive OSErrors out of the spawn before that latch is set anyway. An OSError is resource pressure and clears,
@@ -1255,7 +1255,7 @@ def _child_probe_table(device: str) -> Optional[dict[str, Optional[bool]]]:
     Verdicts are the child's ``_run_smoke_probe``, the same function the in-process path calls, so
     the two cannot drift. ``None`` for a scheme is an allocator failure, which the caller must not
     cache. ``None`` for the whole table means no child ran -- a frozen build without
-    multiprocessing, a sandbox that refuses to spawn, a timeout -- and the caller then probes
+    multiprocessing, a locked-down host that refuses to spawn, a timeout -- and the caller then probes
     in-process exactly as before, since refusing a load over a missing subprocess would be worse
     than the VRAM it saves.
     """

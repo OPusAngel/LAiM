@@ -4,7 +4,7 @@
 """Resuming a pinned snapshot must use the same load roots as everything else.
 
 ``ca7c72e75`` taught the cached-snapshot probes about ``security_load_subdirs`` so a repo
-like ``LAiM/Spark-TTS-0.5B`` -- whose snapshot root holds only ``README.md`` and
+like ``unsloth/Spark-TTS-0.5B`` -- whose snapshot root holds only ``README.md`` and
 ``config.yaml``, with everything trainable under ``LLM/`` -- is not reported as absent.
 The resume branch of ``_reject_untrainable_model_request`` kept its own hardcoded
 ``("config.json", "adapter_config.json")`` tuple, so the one path that *already has* a
@@ -26,8 +26,8 @@ from models.training import TrainingStartRequest
 from routes import training as training_routes
 
 
-_BICODEC = "LAiM/Spark-TTS-0.5B"
-_PLAIN = "LAiM/Llama-3.2-1B-Instruct"
+_BICODEC = "unsloth/Spark-TTS-0.5B"
+_PLAIN = "unsloth/Llama-3.2-1B-Instruct"
 
 
 @pytest.fixture

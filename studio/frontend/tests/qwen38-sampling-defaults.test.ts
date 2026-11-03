@@ -23,11 +23,11 @@ const { useChatRuntimeStore } = await import(
 test("Qwen3.8 reuses the Qwen3.6 sampling table in both modes", () => {
   for (const thinkingOn of [true, false]) {
     const qwen36 = resolveQwenThinkingParams(
-      "LAiM/Qwen3.6-27B-GGUF",
+      "unsloth/Qwen3.6-27B-GGUF",
       thinkingOn,
     );
     const qwen38 = resolveQwenThinkingParams(
-      "LAiM/Qwen3.8-27B-GGUF",
+      "unsloth/Qwen3.8-27B-GGUF",
       thinkingOn,
     );
 
@@ -42,7 +42,7 @@ test("the Qwen3.8 Think toggle puts 1.5 in the live chat settings", () => {
     useChatRuntimeStore.setState({
       params: {
         ...store.params,
-        checkpoint: "LAiM/Qwen3.8-27B-GGUF",
+        checkpoint: "unsloth/Qwen3.8-27B-GGUF",
         presencePenalty: 0.0,
       },
       activePresetSource: "builtin-default",
@@ -66,7 +66,7 @@ test("every status merge is wired to the active Qwen thinking table", () => {
 
 test("Qwen3.8 does not change the generic Qwen3 presence penalty", () => {
   assert.equal(
-    resolveQwenThinkingParams("LAiM/Qwen3-8B-GGUF", true)?.presencePenalty,
+    resolveQwenThinkingParams("unsloth/Qwen3-8B-GGUF", true)?.presencePenalty,
     undefined,
   );
 });

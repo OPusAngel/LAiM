@@ -7,6 +7,8 @@ import { useEffect, useState } from "react";
 import type { RecipeRecord, SaveRecipeInput } from "../types";
 import { importLegacyRecipes } from "./legacy-import";
 import { RecipeApiError, recipeRequest } from "./recipes-api";
+import { translate } from "@/i18n";
+
 
 const recentRecipeCache = new Map<string, RecipeRecord>();
 const listeners = new Set<(recipes: RecipeRecord[]) => void>();
@@ -163,7 +165,7 @@ export function useRecipes(enabled = true): {
     listeners.add(listener);
     listRecipes().catch((error) => {
       // biome-ignore lint/suspicious/noConsole: the page keeps its cached list
-      console.error("Load data recipes failed:", error);
+      console.error(translate("uxDatarecipes.loadDataRecipesFailedcp6wq"), error);
       setReady(true);
     });
     return () => {

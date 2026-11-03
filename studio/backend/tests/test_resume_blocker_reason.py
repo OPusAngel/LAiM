@@ -26,7 +26,7 @@ from core.training.provenance import (
 def _config(**overrides):
     config = {
         RESOURCE_PROVENANCE_KEY: {"version": 1, "status": "complete"},
-        "model_name": "LAiM/Llama-3.2-1B-Instruct",
+        "model_name": "unsloth/Llama-3.2-1B-Instruct",
     }
     config.update(overrides)
     return config

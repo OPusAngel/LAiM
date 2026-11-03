@@ -20,7 +20,7 @@ import {
   sanitizeRagSource,
 } from "./mirrored-chat-settings.ts";
 
-/** "full" (Full access) is session-only, so a thread never carries it. */
+/** "full" (Full access) is restored from local storage, so a thread never carries it. */
 export type ThreadPermissionMode = Exclude<PermissionMode, "full">;
 
 export interface ThreadScopedSettings {

@@ -37,7 +37,7 @@ from fastapi.testclient import TestClient  # noqa: E402
 
 CATALOG = [
     {
-        "id": "LAiM/Qwen3.8-27B-GGUF",
+        "id": "unsloth/Qwen3.8-27B-GGUF",
         "object": "model",
         "created": 1_700_000_000,
         "owned_by": "LAiM",
@@ -45,7 +45,7 @@ CATALOG = [
         "quant": "UD-Q4_K_XL",
     },
     {
-        "id": "LAiM/Laguna-S-2.1-GGUF",
+        "id": "unsloth/Laguna-S-2.1-GGUF",
         "object": "model",
         "created": 1_700_000_000,
         "owned_by": "LAiM",
@@ -67,7 +67,7 @@ class _Backend:
         self.is_loaded = loaded
         self.effective_parallel_slots = slots
         self.model_identifier = "/media/models/qwen/model.gguf"
-        self._openai_advertised_id = "LAiM/Qwen3.8-27B-GGUF"
+        self._openai_advertised_id = "unsloth/Qwen3.8-27B-GGUF"
         self.context_length = 262144
         self.chat_template = "{{ messages }}"
         self._props = props
@@ -222,7 +222,7 @@ def test_props_never_echoes_the_on_disk_gguf_path():
     with _client(mod) as c:
         raw = c.get("/props")
     body = raw.json()
-    assert body["model_path"] == "LAiM/Qwen3.8-27B-GGUF"
+    assert body["model_path"] == "unsloth/Qwen3.8-27B-GGUF"
     assert "HDD-Models1" not in raw.text
     assert body["total_slots"] == 4
     assert body["default_generation_settings"]["n_ctx"] == 65536
@@ -233,7 +233,7 @@ def test_props_degrades_to_the_local_view_when_the_engine_cannot_be_read():
     mod = _load(backend = _Backend(props = None))
     with _client(mod) as c:
         body = c.get("/props").json()
-    assert body["model_path"] == "LAiM/Qwen3.8-27B-GGUF"
+    assert body["model_path"] == "unsloth/Qwen3.8-27B-GGUF"
     assert body["default_generation_settings"]["n_ctx"] == 262144
     # Not 0: this same response advertises the model as loaded, and a client reading
     # props for capacity would conclude it cannot serve. The backend knows what it
@@ -274,7 +274,7 @@ def test_version_answers_on_the_bare_path_only():
     assert prefixed.status_code == 404
 
 
-# ── platform and robustness, from the sandbox run ─────────────────────────────
+# ── platform and robustness, from the workdir run ─────────────────────────────
 
 
 @pytest.mark.parametrize(
@@ -297,7 +297,7 @@ def test_props_never_500s_and_never_leaks_a_path_on_a_hostile_upstream(upstream)
         r = c.get("/props")
     assert r.status_code == 200, r.text
     assert "/media/" not in r.text
-    assert r.json()["model_path"] == "LAiM/Qwen3.8-27B-GGUF"
+    assert r.json()["model_path"] == "unsloth/Qwen3.8-27B-GGUF"
 
 
 def test_props_survives_an_engine_query_that_raises():
@@ -311,7 +311,7 @@ def test_props_survives_an_engine_query_that_raises():
     with _client(mod) as c:
         r = c.get("/props")
     assert r.status_code == 200
-    assert r.json()["model_path"] == "LAiM/Qwen3.8-27B-GGUF"
+    assert r.json()["model_path"] == "unsloth/Qwen3.8-27B-GGUF"
 
 
 def test_the_version_lookup_survives_an_import_failure(monkeypatch):
@@ -456,12 +456,12 @@ def test_props_does_not_pair_an_orchestrator_model_with_llama_server_fields():
     described a serving model as having no context and no slots."""
 
     class _Orchestrator:
-        active_model_name = "LAiM/Llama-3.2-3B"
+        active_model_name = "unsloth/Llama-3.2-3B"
 
     mod = _load(backend = _Backend(loaded = False), orchestrator = _Orchestrator())
     with _client(mod) as c:
         body = c.get("/props").json()
-    assert body["model_path"] == "LAiM/Llama-3.2-3B"
+    assert body["model_path"] == "unsloth/Llama-3.2-3B"
     for llama_only in ("total_slots", "chat_template", "default_generation_settings"):
         assert llama_only not in body, llama_only
 
@@ -809,7 +809,7 @@ def test_a_transient_props_failure_does_not_report_zero_slots():
     mod = _load(backend = _Backend(props = None, slots = 8))
     with _client(mod) as c:
         body = c.get("/props").json()
-    assert body["model_path"] == "LAiM/Qwen3.8-27B-GGUF"
+    assert body["model_path"] == "unsloth/Qwen3.8-27B-GGUF"
     assert body["total_slots"] == 8
 
 
@@ -819,7 +819,7 @@ def test_an_unreadable_slot_count_is_omitted_rather_than_reported_as_zero(slots)
     with _client(mod) as c:
         body = c.get("/props").json()
     assert "total_slots" not in body, body.get("total_slots")
-    assert body["model_path"] == "LAiM/Qwen3.8-27B-GGUF"
+    assert body["model_path"] == "unsloth/Qwen3.8-27B-GGUF"
 
 
 def test_a_backend_that_raises_on_the_slot_count_still_answers():
@@ -1080,12 +1080,12 @@ def test_props_hides_a_resident_that_belongs_to_another_account(monkeypatch):
         lambda *a, **k: (_ for _ in ()).throw(AssertionError("owner path consulted policy")),
     )
     with _client(mod) as c:
-        assert c.get("/props").json()["model_path"] == "LAiM/Qwen3.8-27B-GGUF"
+        assert c.get("/props").json()["model_path"] == "unsloth/Qwen3.8-27B-GGUF"
 
 
 # ── Open WebUI llama.cpp model management (#10610) ──────────────────────────
 
-QWEN = "LAiM/Qwen3.8-27B-GGUF"
+QWEN = "unsloth/Qwen3.8-27B-GGUF"
 
 
 def _management(
@@ -1141,7 +1141,7 @@ def _no_local_gguf(monkeypatch):
 
 
 def test_management_list_is_the_v1_chat_catalog():
-    media = {"id": "LAiM/FLUX.2-klein-GGUF", "task": "text-to-image", "loaded": True}
+    media = {"id": "unsloth/FLUX.2-klein-GGUF", "task": "text-to-image", "loaded": True}
     mod, _ = _management(catalog = CATALOG + [media])
     with _client(mod) as c:
         for path in ("/models", "/models/"):
@@ -1259,7 +1259,7 @@ def test_management_unload_cancels_a_load_under_the_path_it_runs_as(monkeypatch,
 
 @pytest.mark.parametrize("path", ["/models/load", "/models/unload"])
 def test_management_rejects_unlisted_task_or_missing_models(path, _no_local_gguf):
-    media = {"id": "LAiM/FLUX.2-klein-GGUF", "task": "text-to-image", "loaded": True}
+    media = {"id": "unsloth/FLUX.2-klein-GGUF", "task": "text-to-image", "loaded": True}
     mod, calls = _management(catalog = CATALOG + [media])
     with _client(mod) as c:
         assert c.post(path, json = {"model": "someone/else"}).status_code == 404

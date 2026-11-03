@@ -18,11 +18,11 @@ import { readSrc } from "./helpers/kit.ts";
 
 test("distinguishes Klein base checkpoints from distilled checkpoints", () => {
   for (const size of ["4B", "9B"]) {
-    assert.deepEqual(defaultsFor(`LAiM/FLUX.2-klein-base-${size}`), {
+    assert.deepEqual(defaultsFor(`unsloth/FLUX.2-klein-base-${size}`), {
       steps: 20,
       guidance: 5,
     });
-    assert.deepEqual(defaultsFor(`LAiM/FLUX.2-klein-${size}`), {
+    assert.deepEqual(defaultsFor(`unsloth/FLUX.2-klein-${size}`), {
       steps: 4,
       guidance: 1,
     });
@@ -183,7 +183,7 @@ test("defaults follow ComfyUI's official templates for the same model", () => {
 
 test("every Qwen-Image-Layered spelling the backend accepts gets its 20 / 2.5 recipe", () => {
   for (const id of [
-    "LAiM/Qwen-Image-Layered-GGUF",
+    "unsloth/Qwen-Image-Layered-GGUF",
     "local/qwen_image_layered",
     "local/qwenimagelayered-q4",
   ]) {

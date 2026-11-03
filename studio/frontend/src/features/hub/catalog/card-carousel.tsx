@@ -16,6 +16,8 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from "lucide-react";
+import { translate } from "@/i18n";
+
 
 export const CARD_GAP_PX = 16;
 const CAROUSEL_TOP_PADDING_PX = 8;
@@ -34,7 +36,7 @@ export function CarouselArrow({
   return (
     <button
       type="button"
-      aria-label={side === "left" ? "Scroll left" : "Scroll right"}
+      aria-label={side === "left" ? translate("uxHub.scrollLeft7a7fw") : translate("uxHub.scrollRighti46rk")}
       aria-hidden={!visible}
       tabIndex={visible ? 0 : -1}
       onClick={onClick}

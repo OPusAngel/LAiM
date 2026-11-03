@@ -96,13 +96,13 @@ def test_normalize_accepts_ids_urls_quants_and_patterns():
     assert storage.normalize_model_allowlist(["", "  "]) is None
     assert storage.normalize_model_allowlist(
         [
-            " LAiM/Qwen3-4B-GGUF ",
-            "https://huggingface.co/LAiM/qwen3-4b-gguf",
-            "LAiM/Qwen3-4B-GGUF:Q4_K_M",
+            " unsloth/Qwen3-4B-GGUF ",
+            "https://huggingface.co/unsloth/qwen3-4b-gguf",
+            "unsloth/Qwen3-4B-GGUF:Q4_K_M",
             "meta-llama/*",
             "GPT2",
         ]
-    ) == ["LAiM/qwen3-4b-gguf", "meta-llama/*", "gpt2"]
+    ) == ["unsloth/qwen3-4b-gguf", "meta-llama/*", "gpt2"]
     for bad in ("*", "../etc/passwd", "*/model", "a/b/c", "org/na me"):
         with pytest.raises(ValueError):
             storage.normalize_model_allowlist([bad])
@@ -131,13 +131,13 @@ def test_schema_upgrade_is_idempotent_and_defaults_to_unrestricted(env):
 
 @pytest.mark.parametrize("actor", ["alice", "bob"])
 def test_only_the_owner_can_set_model_access(env, actor):
-    response = put_access(env, "alice", ["LAiM/*"], actor = actor)
+    response = put_access(env, "alice", ["unsloth/*"], actor = actor)
     assert response.status_code == 403
     assert storage.account_model_allowlist(storage.get_account("alice").account_id) is None
 
 
 def test_owner_cannot_be_restricted_and_bad_input_is_refused(env):
-    assert put_access(env, "LAiM", ["LAiM/*"]).status_code == 400
+    assert put_access(env, "LAiM", ["unsloth/*"]).status_code == 400
     assert put_access(env, "alice", ["not a repo"]).status_code == 422
     response = env.put(
         "/api/accounts/missing/model-access", headers = headers(), json = {"model_allowlist": None}
@@ -147,25 +147,25 @@ def test_owner_cannot_be_restricted_and_bad_input_is_refused(env):
 
 def test_set_is_idempotent_and_listed(env):
     for _ in range(2):
-        response = put_access(env, "alice", ["LAiM/*", "LAiM/*"])
+        response = put_access(env, "alice", ["unsloth/*", "unsloth/*"])
         assert response.status_code == 200
-        assert response.json()["model_allowlist"] == ["LAiM/*"]
+        assert response.json()["model_allowlist"] == ["unsloth/*"]
     listed = {
         row["username"]: row
         for row in env.get("/api/accounts", headers = headers()).json()["accounts"]
     }
-    assert listed["alice"]["model_allowlist"] == ["LAiM/*"]
+    assert listed["alice"]["model_allowlist"] == ["unsloth/*"]
     assert listed["bob"]["model_allowlist"] is None
     assert put_access(env, "alice", []).json()["model_allowlist"] is None
 
 
 def test_allowlist_gates_listing_loading_and_downloading(env):
-    assert put_access(env, "alice", ["LAiM/*", "google/gemma-3-1b-it"]).status_code == 200
-    for repo in ("LAiM/Qwen3-4B-GGUF", "Google/Gemma-3-1B-it"):
+    assert put_access(env, "alice", ["unsloth/*", "google/gemma-3-1b-it"]).status_code == 200
+    for repo in ("unsloth/Qwen3-4B-GGUF", "Google/Gemma-3-1B-it"):
         assert as_user("alice", access.repo_visible, repo)
         as_user("alice", access.require_model_access, repo)
         as_user("alice", access.authorize_download, repo, "model", None)
-    as_user("alice", access.require_model_access, "LAiM/Qwen3-4B-GGUF:Q4_K_M")
+    as_user("alice", access.require_model_access, "unsloth/Qwen3-4B-GGUF:Q4_K_M")
 
     assert not as_user("alice", access.repo_visible, "meta-llama/Llama-3.2-1B")
     for gate in (
@@ -179,7 +179,7 @@ def test_allowlist_gates_listing_loading_and_downloading(env):
         assert refused.value.status_code == 403
         assert refused.value.detail == access.MODEL_NOT_ALLOWED
 
-    rows = [{"id": "LAiM/Qwen3-4B-GGUF"}, {"id": "meta-llama/Llama-3.2-1B"}]
+    rows = [{"id": "unsloth/Qwen3-4B-GGUF"}, {"id": "meta-llama/Llama-3.2-1B"}]
     assert as_user("alice", access.filter_model_rows, rows) == rows[:1]
     # Datasets are not models; the allowlist leaves them alone.
     assert as_user("alice", access.repo_visible, "meta-llama/some-dataset", "dataset")
@@ -194,7 +194,7 @@ def test_allowlist_applies_to_cached_snapshot_paths(env, tmp_path, monkeypatch):
     snapshot.mkdir(parents = True)
     monkeypatch.setattr("utils.hf_cache_settings.known_hf_hub_caches", lambda: [cache])
     assert as_user("alice", access.model_visible, str(snapshot))
-    assert put_access(env, "alice", ["LAiM/*"]).status_code == 200
+    assert put_access(env, "alice", ["unsloth/*"]).status_code == 200
     assert not as_user("alice", access.model_visible, str(snapshot))
     with pytest.raises(HTTPException) as refused:
         as_user("alice", access.require_model_access, str(snapshot))
@@ -204,7 +204,7 @@ def test_allowlist_applies_to_cached_snapshot_paths(env, tmp_path, monkeypatch):
 def test_changes_apply_on_the_next_request(env):
     rows = [{"id": "meta-llama/Llama-3.2-1B"}]
     assert as_user("alice", access.filter_model_rows, rows) == rows
-    put_access(env, "alice", ["LAiM/*"])
+    put_access(env, "alice", ["unsloth/*"])
     assert as_user("alice", access.filter_model_rows, rows) == []
     put_access(env, "alice", None)
     assert as_user("alice", access.filter_model_rows, rows) == rows
@@ -213,7 +213,7 @@ def test_changes_apply_on_the_next_request(env):
 def test_a_grant_from_an_earlier_download_does_not_outrank_the_allowlist(env):
     as_user("alice", access.record_model_grant, "meta-llama/Llama-3.2-1B")
     assert as_user("alice", access.repo_visible, "meta-llama/Llama-3.2-1B")
-    put_access(env, "alice", ["LAiM/*"])
+    put_access(env, "alice", ["unsloth/*"])
     assert not as_user("alice", access.repo_visible, "meta-llama/Llama-3.2-1B")
 
 
@@ -221,7 +221,7 @@ def test_setting_access_drops_resident_shares(env):
     alice = storage.get_account("alice").account_id
     access._resident_sharers["chat"] = {alice, "someone-else"}
     try:
-        put_access(env, "alice", ["LAiM/*"])
+        put_access(env, "alice", ["unsloth/*"])
         assert access._resident_sharers["chat"] == {"someone-else"}
     finally:
         access._resident_sharers.pop("chat", None)
@@ -230,8 +230,8 @@ def test_setting_access_drops_resident_shares(env):
 def test_training_jobs_refuse_a_base_model_outside_the_allowlist(env):
     from core.training import account_jobs as jobs
 
-    put_access(env, "alice", ["LAiM/*"])
-    as_user("alice", jobs.validate_job_paths, {"model_name": "LAiM/Qwen3-4B", "hf_token": "t"})
+    put_access(env, "alice", ["unsloth/*"])
+    as_user("alice", jobs.validate_job_paths, {"model_name": "unsloth/Qwen3-4B", "hf_token": "t"})
     for key, model in (
         ("model_name", "meta-llama/Llama-3.2-1B"),
         ("model_name", "gpt2"),
@@ -271,7 +271,7 @@ def test_a_loaded_model_taken_off_the_list_stops_serving_its_loader(env):
         put_access(env, "alice", ["meta-llama/*"])
         access._resident_sharers["chat"] = {alice}
         assert not as_user("alice", access.resident_hidden, "chat")
-        put_access(env, "alice", ["LAiM/*"])
+        put_access(env, "alice", ["unsloth/*"])
         access._resident_sharers["chat"] = {alice}
         assert as_user("alice", access.resident_hidden, "chat")
         assert as_user("alice", access.joins_resident_runtime, "chat")

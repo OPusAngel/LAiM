@@ -8,6 +8,8 @@ import {
   readFastApiError,
 } from "@/lib/format-fastapi-error";
 import { openStreamResponse } from "@/lib/open-stream-response";
+import { translate } from "@/i18n";
+
 
 const DEFAULT_BASE = "/api/data-recipe";
 
@@ -204,7 +206,7 @@ export type McpToolsListResponse = {
 async function parseErrorResponse(response: Response): Promise<string> {
   const text = (await response.text()).trim();
   if (!text) {
-    return "Request failed.";
+    return translate("uxRecipestudio.requestFailedb7ib1");
   }
   try {
     const parsed = JSON.parse(text) as {
@@ -421,7 +423,7 @@ export async function streamRecipeJobEvents(options: {
     throw new Error(await parseErrorResponse(response));
   }
   if (!response.body) {
-    throw new Error("Job stream unavailable.");
+    throw new Error(translate("uxRecipestudio.jobStreamUnavailableu5ca0"));
   }
 
   options.onOpen?.();
@@ -512,12 +514,12 @@ export async function uploadUnstructuredFile(
       filename: file.name,
       size_bytes: file.size,
       status: "error",
-      error: await readFastApiError(res, "File too large"),
+      error: await readFastApiError(res, translate("uxRecipestudio.fileTooLarge6fnow")),
     };
   }
 
   if (!res.ok) {
-    throw new Error(await readFastApiError(res, "Upload failed"));
+    throw new Error(await readFastApiError(res, translate("uxRecipestudio.uploadFailed5gra7")));
   }
 
   return res.json();
@@ -532,7 +534,7 @@ export async function removeUnstructuredFile(
     { method: "DELETE" },
   );
   if (!res.ok && res.status !== 404) {
-    throw new Error("Failed to remove file");
+    throw new Error(translate("uxRecipestudio.failedToRemoveFilec8qh3"));
   }
 }
 
@@ -542,6 +544,6 @@ export async function removeUnstructuredBlock(blockId: string): Promise<void> {
     { method: "DELETE" },
   );
   if (!res.ok && res.status !== 404) {
-    throw new Error("Failed to remove uploaded files");
+    throw new Error(translate("uxRecipestudio.failedToRemoveUploaded25s0q"));
   }
 }

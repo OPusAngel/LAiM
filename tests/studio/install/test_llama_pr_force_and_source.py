@@ -223,7 +223,7 @@ class TestBashFixedMainlineSource:
 
     def test_env_source_override_is_ignored(self):
         script = _bash_resolution_fragment(
-            llama_source = "https://github.com/LAiMai/llama.cpp.git",
+            llama_source = "https://github.com/unslothai/llama.cpp.git",
         )
         r = run_bash(script)
         assert r.returncode == 0
@@ -281,12 +281,12 @@ class TestBashCloneUrlParameterized:
             mock_bin,
             build_tmp,
             llama_pr = "123",
-            llama_source = "https://github.com/LAiMai/llama.cpp",
+            llama_source = "https://github.com/unslothai/llama.cpp",
         )
         r = run_bash(script)
         assert r.returncode == 0
         log = log_file.read_text()
-        assert "LAiMai/llama.cpp.git" in log
+        assert "unslothai/llama.cpp.git" in log
         assert "ggml-org" not in log
 
     def test_non_pr_path_uses_custom_source(self, tmp_path: Path):
@@ -295,12 +295,12 @@ class TestBashCloneUrlParameterized:
         script = self._clone_script(
             mock_bin,
             build_tmp,
-            llama_source = "https://github.com/LAiMai/llama.cpp",
+            llama_source = "https://github.com/unslothai/llama.cpp",
         )
         r = run_bash(script)
         assert r.returncode == 0
         log = log_file.read_text()
-        assert "LAiMai/llama.cpp.git" in log
+        assert "unslothai/llama.cpp.git" in log
         assert "ggml-org" not in log
 
     def test_default_source_unchanged(self, tmp_path: Path):
@@ -363,11 +363,14 @@ class TestSourcePatternsSh:
         assert "LAiM_LLAMA_SOURCE:-${_DEFAULT_LLAMA_SOURCE}" not in self.content
         assert '_LLAMA_SOURCE="${_DEFAULT_LLAMA_SOURCE}"' in self.content
 
-    def test_release_repo_override_removed(self):
-        # No env release-repo override; every host routes to the fork, mirroring setup.sh.
-        assert "LAiM_LLAMA_RELEASE_REPO:-LAiMai/llama.cpp" not in self.content
-        assert '_HELPER_RELEASE_REPO="LAiMai/llama.cpp"' in self.content
-        assert '_HELPER_RELEASE_REPO="ggml-org/llama.cpp"' not in self.content
+    def test_release_repo_is_upstream_and_stays_overridable(self):
+        # LAiM must never serve a fork build by default: the fork lags upstream on new GGUF
+        # architectures, so «Обновить» has to reach ggml-org. The env knob is the escape hatch back
+        # to a fork, kept because a mixed install may still have one on disk.
+        assert (
+            '_HELPER_RELEASE_REPO="${LAiM_LLAMA_RELEASE_REPO:-ggml-org/llama.cpp}"' in self.content
+        )
+        assert '_HELPER_RELEASE_REPO="unslothai/llama.cpp"' not in self.content
 
     def test_force_compile_skips_prebuilt_resolution_early(self):
         assert 'if [ "$_LLAMA_FORCE_COMPILE" = "1" ]; then' in self.content
@@ -428,10 +431,13 @@ class TestSourcePatternsPs1:
         assert "$LlamaSource = if ($env:LAiM_LLAMA_SOURCE)" not in self.content
         assert "$LlamaSource = $DefaultLlamaSource" in self.content
 
-    def test_release_repo_override_removed(self):
-        assert "$HelperReleaseRepo = if ($env:LAiM_LLAMA_RELEASE_REPO)" not in self.content
-        assert '$HelperReleaseRepo = "LAiMai/llama.cpp"' in self.content
-        assert "$HelperReleaseRepo = if (" not in self.content
+    def test_release_repo_is_upstream_and_stays_overridable(self):
+        # Mirrors the bash check above: upstream ggml-org by default, env knob kept for a fork build.
+        assert (
+            '$HelperReleaseRepo = if ($env:LAiM_LLAMA_RELEASE_REPO) '
+            '{ $env:LAiM_LLAMA_RELEASE_REPO } else { "ggml-org/llama.cpp" }' in self.content
+        )
+        assert '$HelperReleaseRepo = "unslothai/llama.cpp"' not in self.content
 
     def test_force_compile_skips_prebuilt_resolution_early(self):
         assert 'if ($env:LAiM_LLAMA_FORCE_COMPILE -eq "1") {' in self.content
@@ -561,7 +567,7 @@ class TestPwshPrForcePromotion:
     def test_env_source_override_is_ignored(self):
         r = self._run(
             env = {
-                "LAiM_LLAMA_SOURCE": "https://github.com/LAiMai/llama.cpp",
+                "LAiM_LLAMA_SOURCE": "https://github.com/unslothai/llama.cpp",
             }
         )
         assert r.returncode == 0
@@ -578,7 +584,7 @@ class TestPwshPrForcePromotion:
     def test_trailing_git_override_is_ignored(self):
         r = self._run(
             env = {
-                "LAiM_LLAMA_SOURCE": "https://github.com/LAiMai/llama.cpp.git",
+                "LAiM_LLAMA_SOURCE": "https://github.com/unslothai/llama.cpp.git",
             }
         )
         assert r.returncode == 0

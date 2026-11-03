@@ -16,7 +16,7 @@ const klein = {
       params: "9B",
       qlora_vram_gb: 18,
     },
-    "LAiM/FLUX.2-klein-base-9B": {
+    "unsloth/FLUX.2-klein-base-9B": {
       params: "9B",
       qlora_vram_gb: 18,
     },
@@ -26,7 +26,7 @@ const klein = {
 test("shows checkpoint-specific Klein facts for the 9B vendor and mirror ids", () => {
   for (const repo of [
     "black-forest-labs/FLUX.2-klein-base-9B",
-    "LAiM/FLUX.2-KLEIN-BASE-9B",
+    "unsloth/FLUX.2-KLEIN-BASE-9B",
   ]) {
     assert.deepEqual(resolveDiffusionTrainingFacts(klein, repo), {
       params: "9B",

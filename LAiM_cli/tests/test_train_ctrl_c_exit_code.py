@@ -150,7 +150,7 @@ def mlx_adapter():
     adapter.load_model = lambda **kwargs: True
     adapter.prepare_model_for_training = lambda **kwargs: True
     adapter.load_and_format_dataset = lambda **kwargs: ([], None)
-    adapter._model_config = {"model_name": "LAiM/Qwen3-0.6B"}
+    adapter._model_config = {"model_name": "unsloth/Qwen3-0.6B"}
     adapter._dataset_config = {"dataset_source": "yahma/alpaca-cleaned"}
     adapter._build_worker_config = lambda training_args: {}
     adapter._run_mlx_worker = _fake_mlx_worker

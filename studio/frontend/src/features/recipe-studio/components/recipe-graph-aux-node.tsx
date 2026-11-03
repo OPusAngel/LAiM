@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -198,7 +199,7 @@ function AuxNodeBase({
     <BaseNode className="corner-squircle w-full min-w-0 rounded-4xl border-border/60 bg-card shadow-sm">
       <BaseNodeHeader className="border-b border-border/50 px-3 py-2">
         <BaseNodeHeaderTitle className="text-xs">
-          {score.name.trim() || `Scorer ${data.scoreIndex + 1}`}
+          {score.name.trim() || translate("uxRecipestudio.scorer519et", { p1: data.scoreIndex + 1 })}
         </BaseNodeHeaderTitle>
         <Button
           type="button"
@@ -214,14 +215,14 @@ function AuxNodeBase({
       <BaseNodeContent className="gap-2 px-3 py-2">
         <Input
           className="nodrag h-7 w-full text-xs"
-          placeholder="Score name"
+          placeholder={translate("uxRecipestudio.scoreName3plc0")}
           value={score.name}
           disabled={executionLocked}
           onChange={(event) => updateScore({ name: event.target.value })}
         />
         <Textarea
           className="corner-squircle nodrag nowheel max-h-32 min-h-[calc(56px*var(--ui-space-scale,1))] w-full resize-none overflow-y-auto text-xs"
-          placeholder="Score description"
+          placeholder={translate("uxRecipestudio.scoreDescription1qy32")}
           value={score.description}
           disabled={executionLocked}
           onChange={(event) => updateScore({ description: event.target.value })}
@@ -231,7 +232,7 @@ function AuxNodeBase({
             <div key={`${data.llmId}-score-${data.scoreIndex}-opt-${optionIndex}`} className="grid grid-cols-[74px_1fr_auto] gap-1">
               <Input
                 className="nodrag h-7 text-xs"
-                placeholder="Value"
+                placeholder={translate("uxRecipestudio.value1m2g8")}
                 value={option.value}
                 disabled={executionLocked}
                 onChange={(event) =>
@@ -240,7 +241,7 @@ function AuxNodeBase({
               />
               <Input
                 className="nodrag h-7 text-xs"
-                placeholder="Description"
+                placeholder={translate("skills.descriptionLabel")}
                 value={option.description}
                 disabled={executionLocked}
                 onChange={(event) =>
@@ -268,9 +269,7 @@ function AuxNodeBase({
             className="nodrag mt-1"
             disabled={executionLocked}
             onClick={addOption}
-          >
-            Add option
-          </Button>
+          >{translate("uxRecipestudio.addOptionqw5oq")}</Button>
         </div>
       </BaseNodeContent>
       {sourceHandles}

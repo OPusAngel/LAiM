@@ -93,7 +93,6 @@ class StubExecutor:
         session_id = None,
         thread_id = None,
         rag_scope = None,
-        disable_sandbox = False,
     ):
         self.calls.append((name, arguments))
         return self.result

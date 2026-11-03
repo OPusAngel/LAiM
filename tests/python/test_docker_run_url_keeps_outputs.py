@@ -326,7 +326,7 @@ def test_run_sh_starts_LAiM_run_in_the_mounted_host_dir(tmp_path):
     argv = _run_sh_argv(
         tmp_path, "LAiM-run", "--timeout", "60", "https://example.invalid/nb/Llama.ipynb"
     )
-    image = argv.index("LAiM/LAiM:latest")
+    image = argv.index("unsloth/LAiM:latest")
     assert ["-w", "/workspace/host"] in [argv[i : i + 2] for i in range(image)]
     pairs = [argv[i : i + 2] for i in range(image)]
     assert ["-e", f"LAiM_RUN_UID={os.getuid()}"] in pairs
@@ -422,7 +422,7 @@ def test_run_sh_starts_a_host_script_in_the_mounted_host_dir(tmp_path, command):
         (tmp_path / "job").mkdir()
         (tmp_path / "job" / "__main__.py").write_text("print('job')\n", encoding = "utf-8")
     argv = _run_sh_argv(tmp_path, *command)
-    image = argv.index("LAiM/LAiM:latest")
+    image = argv.index("unsloth/LAiM:latest")
     assert ["-w", "/workspace/host"] in [argv[i : i + 2] for i in range(image)]
     assert argv[image + 1 :] == list(command)
 
@@ -488,7 +488,7 @@ def test_run_sh_leaves_other_commands_in_the_image_workdir(tmp_path, command):
     if "/workspace/host/data.json" in command:
         (tmp_path / "data.json").write_text("{}\n", encoding = "utf-8")
     argv = _run_sh_argv(tmp_path, *command)
-    flags = argv[: argv.index("LAiM/LAiM:latest")]
+    flags = argv[: argv.index("unsloth/LAiM:latest")]
     assert "-w" not in flags
     assert not any(flag.startswith("LAiM_RUN_UID=") for flag in flags)
     assert not any(flag.startswith("LAiM_RUN_GID=") for flag in flags)

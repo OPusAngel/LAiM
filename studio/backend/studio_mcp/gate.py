@@ -204,7 +204,7 @@ class StudioMcpGate:
         scope.setdefault("state", {})[STATE_KEY] = Caller(
             token = token,
             account_id = record["account_id"],
-            # Host files are the owner's: a managed account stays inside its sandbox even on loopback.
+            # Host files are the owner's: a managed account stays inside its workdir even on loopback.
             direct_local = record.get("role") == ROLE_OWNER
             and is_direct_local_request(Request(scope)),
             public_base = f"{outer.scheme}://{outer.netloc}{prefix}",

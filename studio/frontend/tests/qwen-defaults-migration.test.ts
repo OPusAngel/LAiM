@@ -14,7 +14,7 @@ const { migrateLegacyQwenDefaults, isPresenceBumpQwen } = await import(
   "../src/features/chat/utils/qwen-defaults-migration.ts"
 );
 
-const QWEN38 = "LAiM/Qwen3.8-27B-GGUF";
+const QWEN38 = "unsloth/Qwen3.8-27B-GGUF";
 const LEGACY_SNAPSHOT = {
   temperature: 0.6,
   topP: 0.95,
@@ -120,8 +120,8 @@ test("migrates temperature and top-p for a non-thinking session", () => {
 
 test("also repairs the same auto-generated snapshot for Qwen3.5 and Qwen3.6", () => {
   for (const modelId of [
-    "LAiM/Qwen3.5-9B-GGUF",
-    "LAiM/Qwen3.6-27B-MTP-GGUF",
+    "unsloth/Qwen3.5-9B-GGUF",
+    "unsloth/Qwen3.6-27B-MTP-GGUF",
   ]) {
     const migrated = migrateLegacyQwenDefaults(
       settingsFor(modelId),
@@ -136,7 +136,7 @@ test("also repairs the same auto-generated snapshot for Qwen3.5 and Qwen3.6", ()
 });
 
 test("migrates only the active model when several legacy Qwen rows are saved", () => {
-  const qwen36Small = "LAiM/Qwen3.6-9B-GGUF";
+  const qwen36Small = "unsloth/Qwen3.6-9B-GGUF";
   const settings = settingsFor(QWEN38);
   settings.inferenceParamsByModel = {
     [QWEN38]: LEGACY_SNAPSHOT,
@@ -199,7 +199,7 @@ test("does not migrate dormant Qwen rows while a non-Qwen model is active", () =
 
   const migrated = migrateLegacyQwenDefaults(
     settings,
-    "LAiM/Llama-3.2-3B-Instruct-GGUF",
+    "unsloth/Llama-3.2-3B-Instruct-GGUF",
     true,
   );
 
@@ -227,9 +227,9 @@ test("preserves a customized snapshot", () => {
 });
 
 test("does not migrate generic Qwen3 or a custom preset", () => {
-  const generic = settingsFor("LAiM/Qwen3-8B-GGUF");
+  const generic = settingsFor("unsloth/Qwen3-8B-GGUF");
   assert.equal(
-    migrateLegacyQwenDefaults(generic, "LAiM/Qwen3-8B-GGUF", true).patch,
+    migrateLegacyQwenDefaults(generic, "unsloth/Qwen3-8B-GGUF", true).patch,
     null,
   );
 
@@ -263,9 +263,9 @@ test("external checkpoints are decoded before the family is matched", () => {
 });
 
 test("matches presence-bump versions only at model-id boundaries", () => {
-  const future = settingsFor("LAiM/Qwen3.80-27B-GGUF");
+  const future = settingsFor("unsloth/Qwen3.80-27B-GGUF");
   assert.equal(
-    migrateLegacyQwenDefaults(future, "LAiM/Qwen3.80-27B-GGUF", true).patch,
+    migrateLegacyQwenDefaults(future, "unsloth/Qwen3.80-27B-GGUF", true).patch,
     null,
   );
 });

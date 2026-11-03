@@ -14,10 +14,10 @@ const { notifyModelDeleted, subscribeModelDeleted } = await import(
 test("a cached-model delete is announced with its repo id", () => {
   const seen: string[] = [];
   const unsubscribe = subscribeModelDeleted((repoId) => seen.push(repoId));
-  notifyModelDeleted("LAiM/orpheus-3b-0.1-ft-GGUF");
+  notifyModelDeleted("unsloth/orpheus-3b-0.1-ft-GGUF");
   unsubscribe();
-  notifyModelDeleted("LAiM/after-unsubscribe");
-  assert.deepEqual(seen, ["LAiM/orpheus-3b-0.1-ft-GGUF"]);
+  notifyModelDeleted("unsloth/after-unsubscribe");
+  assert.deepEqual(seen, ["unsloth/orpheus-3b-0.1-ft-GGUF"]);
 });
 
 test("only a delete the server accepted is announced", () => {

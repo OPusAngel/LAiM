@@ -22,7 +22,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useT } from "@/i18n";
+import { translate, useT } from "@/i18n";
 import { StarPointedIcon } from "@/lib/hugeicons-derived";
 import { cn } from "@/lib/utils";
 import { type MediaNoun, useProjectSubmenu } from "./project-submenu";
@@ -94,7 +94,7 @@ export function GalleryItemMenu({
         <Button
           size={overlay || row ? "icon-xs" : "icon-sm"}
           variant="ghost"
-          aria-label={`More actions for this ${noun}`}
+          aria-label={translate("uxComponents.moreActionsForThisvwu9j", { p1: noun })}
           className={cn(
             // Circular hover, no border: focus returning on close would draw one. Keyboard focus tints instead.
             "rounded-full border-0 focus-visible:bg-muted dark:focus-visible:bg-muted/50",
@@ -138,7 +138,7 @@ export function GalleryItemMenu({
         {onDownload ? (
           <DropdownMenuItem onClick={onDownload}>
             <HugeiconsIcon icon={Download01Icon} strokeWidth={1.75} className="size-icon" />
-            Download
+            {translate("imageViewer.download")}
           </DropdownMenuItem>
         ) : null}
         {project.submenu}
@@ -149,7 +149,7 @@ export function GalleryItemMenu({
         <DropdownMenuSeparator />
         <DropdownMenuItem variant="destructive" onClick={onDelete}>
           <HugeiconsIcon icon={Delete02Icon} strokeWidth={1.75} className="size-icon" />
-          Delete
+          {translate("common.delete")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -195,7 +195,7 @@ export function GalleryPinBadge({
       <TooltipTrigger asChild={true}>
         <button
           type="button"
-          aria-label={`Unpin this ${noun}`}
+          aria-label={translate("uxComponents.unpinThis1293o", { p1: noun })}
           onClick={onUnpin}
           className={cn(
             "group/pin absolute flex items-center justify-center rounded-full bg-background/80 p-0.5 text-foreground shadow-sm ring-1 ring-border backdrop-blur outline-none transition-colors hover:bg-background focus-visible:ring-2 focus-visible:ring-ring",

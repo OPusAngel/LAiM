@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -70,8 +71,8 @@ const OWNER_LABEL: Record<
   Exclude<LanAccessStatus["managedBy"], null>,
   string
 > = {
-  launch: "Launch managed",
-  settings: "Settings managed",
+  get launch() { return translate("uxSettings.launchManagedhql43"); },
+  get settings() { return translate("uxSettings.settingsManageds3gwx"); },
 };
 
 function stateDotClass(state?: LanAccessStatus["state"]): string {
@@ -144,7 +145,7 @@ function LanUrlQrButton({ url }: { url: string }) {
           size="sm"
           variant="outline"
           className="gap-1.5"
-          aria-label={`Show QR code for ${url}`}
+          aria-label={translate("uxSettings.showQRCodeForisllg", { p1: url })}
         >
           <HugeiconsIcon icon={QrCodeIcon} className="size-3.5" />
           QR
@@ -152,9 +153,9 @@ function LanUrlQrButton({ url }: { url: string }) {
       </DialogTrigger>
       <DialogContent className="sm:max-w-xs">
         <DialogHeader>
-          <DialogTitle>Open on your phone</DialogTitle>
+          <DialogTitle>{translate("uxCopy.openOnYourPhone1hw3v")}</DialogTitle>
           <DialogDescription>
-            Scan from a device on the same network to open this address.
+            {translate("uxSettings.scanFromADevice6247n")}
           </DialogDescription>
         </DialogHeader>
         <div className="mx-auto mt-2 rounded-md bg-[#f9e2de] p-3">
@@ -223,11 +224,7 @@ function LanUrlPanel({ status }: { status: LanAccessStatus | null }) {
         </div>
       ))}
       {status.publicUrls.length > 0 ? (
-        <span className="text-xs text-destructive leading-snug">
-          {status.publicUrls[0]} is a public internet address, so this reaches
-          beyond your local network. Anyone who has the password or an API key
-          can sign in and run code on this machine.
-        </span>
+        <span className="text-xs text-destructive leading-snug">{translate("uxSettings.isAPublicInternet8h5wb", { p1: status.publicUrls[0] })}</span>
       ) : (
         <span className="text-xs text-muted-foreground leading-snug">
           {status.servesWebUi
@@ -427,7 +424,7 @@ export function LanAccessSection() {
 
   return (
     <section
-      data-settings-label="LAN access"
+      data-settings-label={translate("uxSettings.lANAccess10vxg")}
       className="overflow-hidden rounded-lg border border-border/70"
     >
       <div className="flex items-center justify-between gap-4 bg-muted/30 p-4">
@@ -441,13 +438,12 @@ export function LanAccessSection() {
           <div className="flex min-w-0 flex-col gap-0.5">
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="settings-heading text-base font-semibold font-heading">
-                LAN access
+                {translate("uxSettings.lANAccess10vxg")}
               </h2>
               <AccessStatus status={status} />
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Use LAiM and its APIs from other devices on your Wi-Fi or wired
-              network.
+              {translate("uxCopy.useLAiMAndIts185p5")}
             </p>
           </div>
         </div>
@@ -472,8 +468,8 @@ export function LanAccessSection() {
       <div className="border-t border-border/60 px-4 py-1">
         {status?.portConfigurationSupported ? (
           <SettingsRow
-            label="Port"
-            description="Automatic tries 8888, then 8889–8908. Custom uses only the selected port. Stop LAN access before changing it."
+            label={translate("uxSettings.port1qx5a")}
+            description={translate("uxSettings.automaticTries8888Then1b2qu")}
             // Always mounted, even when empty: a live region has to exist before its
             // text changes for the change to be announced.
             below={
@@ -503,7 +499,7 @@ export function LanAccessSection() {
                 <SelectTrigger
                   size="sm"
                   className="w-28"
-                  aria-label="LAN port mode"
+                  aria-label={translate("uxSettings.lANPortModec9qah")}
                 >
                   <SelectValue />
                 </SelectTrigger>
@@ -519,7 +515,7 @@ export function LanAccessSection() {
                   max={65535}
                   value={portDraft}
                   disabled={busy !== null || lanAccessPortReadOnly(status)}
-                  aria-label="Custom LAN port"
+                  aria-label={translate("uxSettings.customLANPort1o84y")}
                   aria-invalid={portInvalid}
                   aria-describedby={portErrorVisible ? portErrorId : undefined}
                   className="h-8 w-24"
@@ -548,8 +544,8 @@ export function LanAccessSection() {
         {status?.addressConfigurationSupported ? (
           <>
             <SettingsRow
-              label="Addresses"
-              description="Automatic uses every address this machine has, public ones included. Choose uses only the addresses you tick, such as a Tailscale address. Stop LAN access before changing it, and save before starting."
+              label={translate("uxSettings.addresses1em0q")}
+              description={translate("uxSettings.automaticUsesEveryAddressspept")}
               below={
                 <span
                   id={addressErrorId}
@@ -581,7 +577,7 @@ export function LanAccessSection() {
                   <SelectTrigger
                     size="sm"
                     className="w-28"
-                    aria-label="LAN address mode"
+                    aria-label={translate("uxSettings.lANAddressMode1g6f1")}
                   >
                     <SelectValue />
                   </SelectTrigger>
@@ -609,10 +605,10 @@ export function LanAccessSection() {
                   addressErrorVisible ? addressErrorId : undefined
                 }
               >
-                <legend className="sr-only">LAN addresses to use</legend>
+                <legend className="sr-only">{translate("uxCopy.lANAddressesToUse11lt5")}</legend>
                 {addressChoices.length === 0 ? (
                   <span className="text-xs text-muted-foreground">
-                    No network address found on this machine.
+                    {translate("uxSettings.noNetworkAddressFound1cm70")}
                   </span>
                 ) : null}
                 {addressChoices.map((choice) => (
@@ -637,12 +633,12 @@ export function LanAccessSection() {
                       </code>
                       {choice.public ? (
                         <span className="text-xs text-destructive">
-                          Public internet address
+                          {translate("uxSettings.publicInternetAddress1mk3g")}
                         </span>
                       ) : null}
                       {choice.detected ? null : (
                         <span className="text-xs text-muted-foreground">
-                          Not on this machine right now
+                          {translate("uxSettings.notOnThisMachined1srt")}
                         </span>
                       )}
                     </label>
@@ -653,7 +649,7 @@ export function LanAccessSection() {
           </>
         ) : null}
         <SettingsRow
-          label="Keyless API status"
+          label={translate("uxSettings.keylessAPIStatusy622q")}
           description={keylessLanAccessDescription(status)}
         >
           <span className="text-xs font-medium text-muted-foreground">
@@ -665,8 +661,8 @@ export function LanAccessSection() {
           </span>
         </SettingsRow>
         <SettingsRow
-          label="Start automatically"
-          description="Put LAiM on the network each time it starts. Stopping LAN access now won’t turn this off."
+          label={translate("uxSettings.startAutomaticallyc1rqr")}
+          description={translate("uxSettings.putLAiMOnThesspze")}
         >
           <Switch
             checked={status?.autoStart ?? false}
@@ -676,7 +672,7 @@ export function LanAccessSection() {
               (addressesDirty && !status?.autoStart)
             }
             onCheckedChange={setAutoStart}
-            aria-label="Start automatically"
+            aria-label={translate("uxSettings.startAutomaticallyc1rqr")}
           />
         </SettingsRow>
       </div>

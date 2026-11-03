@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   Collapsible,
   CollapsibleContent,
@@ -182,7 +183,7 @@ export function LlmGeneralTab({
       {needsSetupHelp ? (
         <div className="rounded-2xl border border-border/60 bg-muted/10 px-4 py-3 text-xs text-muted-foreground">
           <p className="text-sm font-semibold text-foreground">
-            Set up the model once, then come back here
+            {translate("uxRecipestudio.setUpTheModelxy3fy")}
           </p>
           <div className="mt-2 space-y-1.5">
             {!hasModelProviders && (
@@ -190,7 +191,7 @@ export function LlmGeneralTab({
                 <ChevronRightIcon
                   className="mt-0.5 size-3.5 shrink-0 text-primary"
                 />
-                <span>Add a Provider connection step in AI generation → Setup.</span>
+                <span>{translate("uxRecipestudio.addAProviderConnectionlshhd")}</span>
               </p>
             )}
             {!hasModelConfigs && (
@@ -198,7 +199,7 @@ export function LlmGeneralTab({
                 <ChevronRightIcon
                   className="mt-0.5 size-3.5 shrink-0 text-primary"
                 />
-                <span>Add a Model preset step, connect it, then choose it below.</span>
+                <span>{translate("uxCopy.addAModelPreset13fxf")}</span>
               </p>
             )}
           </div>
@@ -206,19 +207,18 @@ export function LlmGeneralTab({
       ) : needsModelChoice ? (
         <div className="rounded-2xl border border-border/60 bg-muted/10 px-4 py-3 text-xs text-muted-foreground">
           <p className="text-sm font-semibold text-foreground">
-            Start by choosing a model preset
+            {translate("uxRecipestudio.startByChoosingAfi8zc")}
           </p>
           <p className="mt-1">
-            Once that is in place, write the prompt and add optional tool access
-            if this step needs tools.
+            {translate("uxCopy.onceThatIsIn14ghx")}
           </p>
         </div>
       ) : null}
       <div className="grid gap-1.5">
         <FieldLabel
-          label="Model preset"
+          label={translate("uxRecipestudio.modelPresetrgozj")}
           htmlFor={modelAliasId}
-          hint="Choose the reusable model setup for this step."
+          hint={translate("uxRecipestudio.chooseTheReusableModelrphab")}
         />
         <div ref={modelAliasAnchorRef}>
           <Combobox
@@ -233,7 +233,7 @@ export function LlmGeneralTab({
             <ComboboxInput
               id={modelAliasId}
               className="nodrag w-full"
-              placeholder="Choose a model preset"
+              placeholder={translate("uxRecipestudio.chooseAModelPreseto786k")}
               onBlur={(event) => {
                 const inputValue = event.target.value;
                 if (inputValue !== config.model_alias) {
@@ -242,7 +242,7 @@ export function LlmGeneralTab({
               }}
             />
             <ComboboxContent anchor={modelAliasAnchorRef}>
-              <ComboboxEmpty>No model configs found</ComboboxEmpty>
+              <ComboboxEmpty>{translate("uxCopy.noModelConfigsFound1edqo")}</ComboboxEmpty>
               <ComboboxList>
                 {(alias: string) => (
                   <ComboboxItem key={alias} value={alias}>
@@ -255,17 +255,14 @@ export function LlmGeneralTab({
         </div>
       </div>
       {!hasToolProfiles && (
-        <p className="text-xs text-muted-foreground">
-          Need tools for this step? Add a Tool access step in AI generation →
-          Setup.
-        </p>
+        <p className="text-xs text-muted-foreground">{translate("uxRecipestudio.needToolsForThisgxr25")}</p>
       )}
       {(hasToolProfiles || Boolean(config.tool_alias?.trim())) && (
         <div className="grid gap-1.5">
           <FieldLabel
-            label="Tool access (optional)"
+            label={translate("uxRecipestudio.toolAccessOptional1lqyt")}
             htmlFor={toolAliasId}
-            hint="Choose saved tool access for this step. Leave empty if this step should not use tools."
+            hint={translate("uxRecipestudio.chooseSavedToolAccessumanc")}
           />
           <div ref={toolAliasAnchorRef}>
             <Combobox
@@ -280,7 +277,7 @@ export function LlmGeneralTab({
               <ComboboxInput
                 id={toolAliasId}
                 className="nodrag w-full"
-                placeholder="Choose tool access"
+                placeholder={translate("uxRecipestudio.chooseToolAccess1yt9w")}
                 onBlur={(event) => {
                   const inputValue = event.target.value;
                   if (inputValue !== (config.tool_alias ?? "")) {
@@ -289,7 +286,7 @@ export function LlmGeneralTab({
                 }}
               />
               <ComboboxContent anchor={toolAliasAnchorRef}>
-                <ComboboxEmpty>No tool access found</ComboboxEmpty>
+                <ComboboxEmpty>{translate("uxCopy.noToolAccessFound1yztb")}</ComboboxEmpty>
                 <ComboboxList>
                   {(alias: string) => (
                     <ComboboxItem key={alias} value={alias}>
@@ -305,16 +302,16 @@ export function LlmGeneralTab({
       {config.llm_type === "code" && (
         <div className="grid gap-1.5">
           <FieldLabel
-            label="Code language"
+            label={translate("uxRecipestudio.codeLanguage1nmd0")}
             htmlFor={codeLangId}
-            hint="Choose the language this AI step should generate."
+            hint={translate("uxRecipestudio.chooseTheLanguageThismez9r")}
           />
           <Select
             value={config.code_lang ?? "python"}
             onValueChange={(value) => onUpdate({ code_lang: value })}
           >
             <SelectTrigger className="nodrag w-full" id={codeLangId}>
-              <SelectValue placeholder="Select language" />
+              <SelectValue placeholder={translate("uxRecipestudio.selectLanguage12c4d")} />
             </SelectTrigger>
             <SelectContent>
               {CODE_LANG_OPTIONS.map((lang) => (
@@ -328,7 +325,7 @@ export function LlmGeneralTab({
       )}
       <div className="grid gap-1.5">
         <FieldLabel
-          label="Prompt"
+          label={translate("uxVideo.prompt1lmzx")}
           htmlFor={promptId}
           hint="Write the prompt for this step. Insert other fields with {{ field_name }}."
         />
@@ -353,9 +350,9 @@ export function LlmGeneralTab({
         <div className="space-y-2">
           <div className="flex items-center justify-between gap-3">
             <FieldLabel
-              label="Use image context"
+              label={translate("uxRecipestudio.useImageContext1u98n")}
               htmlFor={imageContextToggleId}
-              hint="Attach one image field from your source data to this AI step."
+              hint={translate("uxRecipestudio.attachOneImageFieldoij70")}
             />
             <Switch
               id={imageContextToggleId}
@@ -378,9 +375,9 @@ export function LlmGeneralTab({
           {imageContext.enabled && (
             <div className="grid gap-1.5">
               <FieldLabel
-                label="Image field"
+                label={translate("uxRecipestudio.imageFieldbcxbk")}
                 htmlFor={imageContextColumnId}
-                hint="Choose the source-data field that contains the image."
+                hint={translate("uxRecipestudio.chooseTheSourceData1mwcx")}
               />
               <Select
                 value={imageContext.column_name || undefined}
@@ -398,7 +395,7 @@ export function LlmGeneralTab({
                   className="nodrag w-full"
                   id={imageContextColumnId}
                 >
-                  <SelectValue placeholder="Select image column" />
+                  <SelectValue placeholder={translate("uxRecipestudio.selectImageColumns9esd")} />
                 </SelectTrigger>
                 <SelectContent>
                   {imageContextColumnOptions.map((columnName) => (
@@ -415,9 +412,9 @@ export function LlmGeneralTab({
       {config.llm_type === "structured" && (
         <div className="grid gap-1.5">
           <FieldLabel
-            label="Response format"
+            label={translate("uxRecipestudio.responseFormatffb5u")}
             htmlFor={outputFormatId}
-            hint="Describe the JSON shape you want back."
+            hint={translate("uxRecipestudio.describeTheJSONShape1d5n3")}
           />
           <Textarea
             id={outputFormatId}
@@ -435,16 +432,16 @@ export function LlmGeneralTab({
       >
         <CollapsibleTrigger asChild={true}>
           <CollapsibleSectionTriggerButton
-            label="Trace and extra controls"
+            label={translate("uxRecipestudio.traceAndExtraControls1tg57")}
             open={advancedOpen}
           />
         </CollapsibleTrigger>
         <CollapsibleContent className="mt-3 space-y-4">
           <div className="grid gap-1.5">
             <FieldLabel
-              label="Instructions (optional)"
+              label={translate("uxRecipestudio.instructionsOptionalxdpn4")}
               htmlFor={systemPromptId}
-              hint="Add extra guidance that should apply before the prompt."
+              hint={translate("uxRecipestudio.addExtraGuidanceThat1b159")}
             />
             <Textarea
               id={systemPromptId}
@@ -466,9 +463,9 @@ export function LlmGeneralTab({
           </div>
           <div className="grid gap-1.5">
             <FieldLabel
-              label="Save trace details"
+              label={translate("uxRecipestudio.saveTraceDetails1wa8n")}
               htmlFor={traceModeId}
-              hint="Adds a trace field you can inspect later."
+              hint={translate("uxRecipestudio.addsATraceField1ouuc")}
             />
             <Select
               value={config.with_trace ?? "none"}
@@ -480,7 +477,7 @@ export function LlmGeneralTab({
               }
             >
               <SelectTrigger className="nodrag w-full" id={traceModeId}>
-                <SelectValue placeholder="Select trace mode" />
+                <SelectValue placeholder={translate("uxRecipestudio.selectTraceMode11mhv")} />
               </SelectTrigger>
               <SelectContent>
                 {TRACE_MODE_OPTIONS.map((traceMode) => (
@@ -493,9 +490,9 @@ export function LlmGeneralTab({
           </div>
           <div className="flex items-center justify-between gap-3">
             <FieldLabel
-              label="Save reasoning text"
+              label={translate("uxRecipestudio.saveReasoningText1kfc4")}
               htmlFor={reasoningToggleId}
-              hint="Adds a reasoning field when the model returns one."
+              hint={translate("uxRecipestudio.addsAReasoningField1j332")}
             />
             <Switch
               id={reasoningToggleId}

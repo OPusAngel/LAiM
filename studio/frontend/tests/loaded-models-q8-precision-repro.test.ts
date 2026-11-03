@@ -9,7 +9,7 @@ import { describeDiffusionStatus } from "../src/features/loaded-models/loaded-mo
 test("fixed: a Q8 Z-Image GGUF row names Q8 instead of its BF16 compute dtype", () => {
   const [row] = describeDiffusionStatus({
     loaded: true,
-    repo_id: "LAiM/Z-Image-Turbo-GGUF",
+    repo_id: "unsloth/Z-Image-Turbo-GGUF",
     family: "z-image",
     device: "cuda",
     dtype: "bfloat16",

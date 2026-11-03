@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Badge } from "@/components/ui/badge";
 import { type ReactElement, useLayoutEffect, useRef, useState } from "react";
 import type { AvailableVariableEntry } from "../../utils/variables";
@@ -67,7 +68,7 @@ export function AvailableReferencesInline({
   return (
     <div className="space-y-1">
       <p className="text-ui-10 font-medium text-muted-foreground">
-        Available references
+        {translate("uxRecipestudio.availableReferencesdah4w")}
       </p>
       <div ref={wrapperRef} className="relative">
         {!expanded && (
@@ -112,18 +113,14 @@ export function AvailableReferencesInline({
               type="button"
               className="corner-squircle h-4 px-1.5 text-ui-10 text-muted-foreground hover:text-foreground"
               onClick={() => setExpanded(true)}
-            >
-              +{hiddenCount} more
-            </button>
+            >{translate("uxRecipestudio.morep7cd8", { p1: hiddenCount })}</button>
           )}
           {expanded && collapsedCount < entries.length && (
             <button
               type="button"
               className="corner-squircle h-4 px-1.5 text-ui-10 text-muted-foreground hover:text-foreground"
               onClick={() => setExpanded(false)}
-            >
-              Show less
-            </button>
+            >{translate("uxRecipestudio.showLess4bgul")}</button>
           )}
         </div>
       </div>

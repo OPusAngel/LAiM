@@ -1,6 +1,6 @@
-# Model defaults for LAiM/gemma-2-2b
+# Model defaults for unsloth/gemma-2-2b
 # Based on Gemma2_(2B)-Alpaca.ipynb
-# Also applies to: LAiM/gemma-2-2b-bnb-4bit, google/gemma-2-2b
+# Also applies to: unsloth/gemma-2-2b-bnb-4bit, google/gemma-2-2b
 
 training:
   max_seq_length: 2048
@@ -16,7 +16,7 @@ training:
   random_seed: 3407
   packing: false
   train_on_completions: true
-  gradient_checkpointing: "LAiM"
+  gradient_checkpointing: "unsloth"
   optim: "adamw_8bit"
   lr_scheduler_type: "linear"
 

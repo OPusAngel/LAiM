@@ -80,7 +80,7 @@ def _run_pin(step: dict, tmp_path: Path, *, gh: str) -> tuple[subprocess.Complet
     out.write_text("", encoding = "utf-8")
     script = (
         step["run"]
-        .replace("${{ github.repository }}", "LAiMai/LAiM")
+        .replace("${{ github.repository }}", "OPusAngel/LAiM")
         .replace("${{ github.run_id }}", "424242")
     )
     assert "${{" not in script
@@ -107,7 +107,7 @@ def test_the_pin_date_is_the_run_creation_date(doc: dict, tmp_path: Path):
     )
     assert res.returncode == 0, res.stdout + res.stderr
     assert out == "date=2026.09.05\n"
-    assert "repos/LAiMai/LAiM/actions/runs/424242 --jq .created_at" in res.stderr
+    assert "repos/OPusAngel/LAiM/actions/runs/424242 --jq .created_at" in res.stderr
 
 
 @pytest.mark.parametrize("gh", ["exit 1", "printf ''", "printf 'null'"])
@@ -190,7 +190,7 @@ def _run_manifest(
     digests.mkdir()
     (digests / ("a" * 64)).write_text("", encoding = "utf-8")
     script = step.replace("${{ env.REGISTRY }}", "docker.io").replace(
-        "${{ env.IMAGE_NAME }}", "LAiM/LAiM"
+        "${{ env.IMAGE_NAME }}", "unsloth/LAiM"
     )
     assert "${{" not in script
     env = dict(os.environ)
@@ -321,7 +321,7 @@ def _run_cleanup(
     assert "${{" not in script, "unexpanded expression in the cleanup step"
     env = dict(os.environ)
     env["PATH"] = f"{bin_dir}{os.pathsep}" + env["PATH"]
-    env.update(IMAGE_NAME = "LAiM/LAiM", NIGHTLY_KEEP_DAYS = "60")
+    env.update(IMAGE_NAME = "unsloth/LAiM", NIGHTLY_KEEP_DAYS = "60")
     res = subprocess.run(
         ["bash", "-e", "-c", script],
         capture_output = True,

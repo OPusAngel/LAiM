@@ -3,7 +3,7 @@
 
 """Reuse, preflight and deletion of shared image-model companion assets (issue #8116).
 
-The shape under test is the reporter's: ``LAiM/FLUX.2-klein-4B-GGUF`` holding two quants,
+The shape under test is the reporter's: ``unsloth/FLUX.2-klein-4B-GGUF`` holding two quants,
 and one cached copy of ``black-forest-labs/FLUX.2-klein-4B`` carrying the 8.23 GB of text
 encoder, VAE, tokenizer and configs that both quants load through.
 """
@@ -19,7 +19,7 @@ from fastapi import HTTPException
 from hub.services.models import cache_inventory, companion_cleanup, deletion
 from hub.utils import companion_assets
 
-GGUF_REPO = "LAiM/FLUX.2-klein-4B-GGUF"
+GGUF_REPO = "unsloth/FLUX.2-klein-4B-GGUF"
 BASE_REPO = "black-forest-labs/FLUX.2-klein-4B"
 # Real byte counts, measured from a cache holding exactly this pair.
 Q2_K_BYTES = 1_827_807_808
@@ -158,14 +158,14 @@ def test_shared_base_delete_is_still_blocked_by_a_single_remaining_quant(monkeyp
 
 def test_shared_base_delete_is_blocked_through_the_ungated_mirror_identity(monkeypatch):
     """The same logical base has two ids. Deleting either must be refused while a quant needs it."""
-    gguf = _repo("LAiM/FLUX.1-schnell-GGUF", [("flux1-schnell-Q4_K_M.gguf", Q4_K_M_BYTES)])
+    gguf = _repo("unsloth/FLUX.1-schnell-GGUF", [("flux1-schnell-Q4_K_M.gguf", Q4_K_M_BYTES)])
     _install(
         monkeypatch,
         gguf,
-        _base_repo("LAiM/FLUX.1-schnell"),
+        _base_repo("unsloth/FLUX.1-schnell"),
         _base_repo("black-forest-labs/FLUX.1-schnell"),
     )
-    for identity in ("LAiM/FLUX.1-schnell", "black-forest-labs/FLUX.1-schnell"):
+    for identity in ("unsloth/FLUX.1-schnell", "black-forest-labs/FLUX.1-schnell"):
         with pytest.raises(HTTPException) as excinfo:
             asyncio.run(deletion.delete_cached_model_response(identity))
         assert excinfo.value.status_code == 400, identity
@@ -175,14 +175,14 @@ def test_a_base_reached_only_through_a_card_tag_is_still_protected(monkeypatch):
     """A GGUF pick caches no model card, so family detection alone answers the family DEFAULT
     base. The checkpoint's own identity names the variant it needs, and the link the resolver
     recorded at load time confirms it."""
-    gguf = _repo("LAiM/FLUX.2-klein-9B-GGUF", [("flux-2-klein-9b-Q4_K_M.gguf", Q4_K_M_BYTES)])
+    gguf = _repo("unsloth/FLUX.2-klein-9B-GGUF", [("flux-2-klein-9b-Q4_K_M.gguf", Q4_K_M_BYTES)])
     other_base = "black-forest-labs/FLUX.2-klein-9B"
     _install(monkeypatch, gguf, _base_repo(other_base))
     # Before any load has been recorded: the id says klein-9B, so the curated klein-9B base is derived
     # even though the family default is klein-4B.
-    assert companion_cleanup.companion_dependents(other_base) == ["LAiM/FLUX.2-klein-9B-GGUF"]
-    companion_assets.record_companion_link("LAiM/FLUX.2-klein-9B-GGUF", other_base)
-    assert companion_cleanup.companion_dependents(other_base) == ["LAiM/FLUX.2-klein-9B-GGUF"]
+    assert companion_cleanup.companion_dependents(other_base) == ["unsloth/FLUX.2-klein-9B-GGUF"]
+    companion_assets.record_companion_link("unsloth/FLUX.2-klein-9B-GGUF", other_base)
+    assert companion_cleanup.companion_dependents(other_base) == ["unsloth/FLUX.2-klein-9B-GGUF"]
     with pytest.raises(HTTPException) as excinfo:
         asyncio.run(deletion.delete_cached_model_response(other_base))
     assert excinfo.value.status_code == 400
@@ -210,7 +210,7 @@ def test_delete_of_a_companion_base_fails_closed_when_the_cache_cannot_be_read(m
 
 def test_the_guard_leaves_ordinary_repos_alone(monkeypatch):
     """Only a known companion base takes the extra check, so a chat GGUF is untouched by it."""
-    assert not companion_assets.is_companion_base("LAiM/Qwen3-8B-GGUF")
+    assert not companion_assets.is_companion_base("unsloth/Qwen3-8B-GGUF")
     assert companion_assets.is_companion_base(BASE_REPO)
 
 
@@ -288,13 +288,13 @@ def test_recording_a_link_keeps_the_ones_already_there():
     assert companion_assets.record_companion_link(GGUF_REPO, BASE_REPO) is True
     assert (
         companion_assets.record_companion_link(
-            "LAiM/FLUX.2-klein-9B-GGUF", "black-forest-labs/FLUX.2-klein-9B"
+            "unsloth/FLUX.2-klein-9B-GGUF", "black-forest-labs/FLUX.2-klein-9B"
         )
         is True
     )
     links = companion_assets.read_companion_links()
     assert links[GGUF_REPO.lower()] == [BASE_REPO]
-    assert links["LAiM/flux.2-klein-9b-gguf"] == ["black-forest-labs/FLUX.2-klein-9B"]
+    assert links["unsloth/flux.2-klein-9b-gguf"] == ["black-forest-labs/FLUX.2-klein-9B"]
     # Re-recording the same pair is a no-op rather than a duplicate.
     assert companion_assets.record_companion_link(GGUF_REPO, BASE_REPO) is False
     assert companion_assets.read_companion_links()[GGUF_REPO.lower()] == [BASE_REPO]
@@ -324,16 +324,16 @@ def test_a_cached_mirror_and_its_upstream_do_not_pin_each_other(monkeypatch):
     that as a dependency would make a cache holding both unable to delete either, forever."""
     _install(
         monkeypatch,
-        _base_repo("LAiM/FLUX.1-schnell"),
+        _base_repo("unsloth/FLUX.1-schnell"),
         _base_repo("black-forest-labs/FLUX.1-schnell"),
     )
-    assert companion_cleanup.companion_dependents("LAiM/FLUX.1-schnell") == []
+    assert companion_cleanup.companion_dependents("unsloth/FLUX.1-schnell") == []
     assert companion_cleanup.companion_dependents("black-forest-labs/FLUX.1-schnell") == []
     offered = [
         c["repo_id"]
         for c in asyncio.run(companion_cleanup.orphan_companions_response())["companions"]
     ]
-    assert offered == ["black-forest-labs/FLUX.1-schnell", "LAiM/FLUX.1-schnell"]
+    assert offered == ["black-forest-labs/FLUX.1-schnell", "unsloth/FLUX.1-schnell"]
 
 
 def test_the_link_trim_keeps_the_newest_not_the_alphabetically_last(monkeypatch):
@@ -344,19 +344,19 @@ def test_the_link_trim_keeps_the_newest_not_the_alphabetically_last(monkeypatch)
     """
     monkeypatch.setattr(companion_assets, "_MAX_LINKS", 3)
     # Recorded newest-last but named so that alphabetical order is the exact reverse.
-    for name in ("LAiM/zz-GGUF", "LAiM/mm-GGUF", "LAiM/aa-GGUF"):
+    for name in ("unsloth/zz-GGUF", "unsloth/mm-GGUF", "unsloth/aa-GGUF"):
         assert companion_assets.record_companion_link(name, BASE_REPO) is True
     assert list(companion_assets.read_companion_links()) == [
-        "LAiM/zz-gguf",
-        "LAiM/mm-gguf",
-        "LAiM/aa-gguf",
+        "unsloth/zz-gguf",
+        "unsloth/mm-gguf",
+        "unsloth/aa-gguf",
     ]
     # A fourth evicts the oldest, which is the first recorded, not "aa".
-    assert companion_assets.record_companion_link("LAiM/nn-GGUF", BASE_REPO) is True
+    assert companion_assets.record_companion_link("unsloth/nn-GGUF", BASE_REPO) is True
     assert list(companion_assets.read_companion_links()) == [
-        "LAiM/mm-gguf",
-        "LAiM/aa-gguf",
-        "LAiM/nn-gguf",
+        "unsloth/mm-gguf",
+        "unsloth/aa-gguf",
+        "unsloth/nn-gguf",
     ]
 
 
@@ -364,24 +364,24 @@ def test_recording_a_second_base_refreshes_the_checkpoints_recency(monkeypatch):
     """Recording is the only recency signal there is, so a checkpoint that just resolved must
     move to the newest end rather than keep the position it was first written at."""
     monkeypatch.setattr(companion_assets, "_MAX_LINKS", 2)
-    assert companion_assets.record_companion_link("LAiM/first-GGUF", BASE_REPO) is True
-    assert companion_assets.record_companion_link("LAiM/second-GGUF", BASE_REPO) is True
-    assert companion_assets.record_companion_link("LAiM/first-GGUF", "LAiM/other-base") is (
+    assert companion_assets.record_companion_link("unsloth/first-GGUF", BASE_REPO) is True
+    assert companion_assets.record_companion_link("unsloth/second-GGUF", BASE_REPO) is True
+    assert companion_assets.record_companion_link("unsloth/first-GGUF", "unsloth/other-base") is (
         True
     )
     assert list(companion_assets.read_companion_links()) == [
-        "LAiM/second-gguf",
-        "LAiM/first-gguf",
+        "unsloth/second-gguf",
+        "unsloth/first-gguf",
     ]
-    assert companion_assets.read_companion_links()["LAiM/first-gguf"] == [
+    assert companion_assets.read_companion_links()["unsloth/first-gguf"] == [
         BASE_REPO,
-        "LAiM/other-base",
+        "unsloth/other-base",
     ]
     # "second" is the oldest now, so it is what a third checkpoint displaces.
-    assert companion_assets.record_companion_link("LAiM/third-GGUF", BASE_REPO) is True
+    assert companion_assets.record_companion_link("unsloth/third-GGUF", BASE_REPO) is True
     assert list(companion_assets.read_companion_links()) == [
-        "LAiM/first-gguf",
-        "LAiM/third-gguf",
+        "unsloth/first-gguf",
+        "unsloth/third-gguf",
     ]
 
 
@@ -411,16 +411,16 @@ def test_reusing_an_existing_link_still_refreshes_its_recency(monkeypatch):
     the 512-link cap could throw away exactly the link that is in constant use, and for a
     card-tag-only base losing that link is the delete guard going quiet on it."""
     monkeypatch.setattr(companion_assets, "_MAX_LINKS", 2)
-    assert companion_assets.record_companion_link("LAiM/old-GGUF", BASE_REPO) is True
-    assert companion_assets.record_companion_link("LAiM/new-GGUF", BASE_REPO) is True
+    assert companion_assets.record_companion_link("unsloth/old-GGUF", BASE_REPO) is True
+    assert companion_assets.record_companion_link("unsloth/new-GGUF", BASE_REPO) is True
     # The old one resolves again to the SAME base: nothing new to record, but it is now the freshest
     # link, so the next checkpoint displaces the other one.
-    assert companion_assets.record_companion_link("LAiM/old-GGUF", BASE_REPO) is False
-    assert companion_assets.read_companion_links()["LAiM/old-gguf"] == [BASE_REPO]
-    assert companion_assets.record_companion_link("LAiM/third-GGUF", BASE_REPO) is True
+    assert companion_assets.record_companion_link("unsloth/old-GGUF", BASE_REPO) is False
+    assert companion_assets.read_companion_links()["unsloth/old-gguf"] == [BASE_REPO]
+    assert companion_assets.record_companion_link("unsloth/third-GGUF", BASE_REPO) is True
     assert list(companion_assets.read_companion_links()) == [
-        "LAiM/old-gguf",
-        "LAiM/third-gguf",
+        "unsloth/old-gguf",
+        "unsloth/third-gguf",
     ]
 
 
@@ -431,7 +431,7 @@ def test_a_cached_community_repack_is_a_companion_identity_too(monkeypatch):
     unprotected: deletable after unload, and the GGUF stranded."""
     from core.inference.diffusion_families import legacy_source_repo
 
-    mirror = "LAiM/Z-Image-Turbo-ComfyUI"
+    mirror = "unsloth/Z-Image-Turbo-ComfyUI"
     repack = legacy_source_repo(mirror)
     assert repack, "the mirror table no longer names a legacy repack; pick another for this test"
     companion_assets.record_companion_link(GGUF_REPO, mirror)
@@ -465,7 +465,7 @@ def test_a_chat_model_borrowed_as_an_encoder_is_never_offered(monkeypatch):
     """That table deliberately includes repos that are perfectly good chat models sd.cpp also
     borrows. Offering one as an unused asset would take away a model the user downloaded on
     purpose; holding a GGUF is what keeps it out."""
-    borrowed = "LAiM/Qwen2.5-VL-7B-Instruct-GGUF"
+    borrowed = "unsloth/Qwen2.5-VL-7B-Instruct-GGUF"
     _install(monkeypatch, _repo(borrowed, [("Qwen2.5-VL-7B-Instruct-Q4_K_M.gguf", 4_000_000)]))
     offered = asyncio.run(companion_cleanup.orphan_companions_response())["companions"]
     assert offered == []
@@ -542,7 +542,7 @@ def test_deleting_the_companion_quant_itself_runs_the_guard(monkeypatch):
     """
     from hub.services.models import deletion
 
-    encoder_repo = "LAiM/Qwen2.5-VL-7B-Instruct-GGUF"
+    encoder_repo = "unsloth/Qwen2.5-VL-7B-Instruct-GGUF"
     _install(
         monkeypatch,
         _repo("some-owner/qwen-image", [("Qwen-Image-Q4_K_M.gguf", 9_000_000)]),
@@ -584,8 +584,8 @@ def test_orphaned_native_components_do_not_hold_each_other_on_disk(monkeypatch):
     keyword of their own, so the derivation read a bare text-encoder fetch as an installed model
     and recorded the sibling VAE as still required: the pair survived every cleanup pass until the
     user happened to remove one of them by hand."""
-    encoder = "LAiM/FLUX.2-dev-ComfyUI"
-    vae = "LAiM/FLUX.2-VAE"
+    encoder = "unsloth/FLUX.2-dev-ComfyUI"
+    vae = "unsloth/FLUX.2-VAE"
     _install(
         monkeypatch,
         _repo(
@@ -604,19 +604,19 @@ def test_orphaned_native_components_do_not_hold_each_other_on_disk(monkeypatch):
 def test_a_component_repo_holding_a_checkpoint_is_still_a_checkpoint(monkeypatch):
     """The exclusion above is denoiser-gated, so a curated component id the user really did
     install a GGUF from keeps pinning what it needs."""
-    encoder = "LAiM/FLUX.2-dev-ComfyUI"
+    encoder = "unsloth/FLUX.2-dev-ComfyUI"
     _install(
         monkeypatch,
         _repo(encoder, [("split_files/diffusion_models/flux2-dev-Q4_K_M.gguf", 8_000_000)]),
-        _repo("LAiM/FLUX.2-VAE", [("split_files/vae/flux2-vae.safetensors", 300_000)]),
+        _repo("unsloth/FLUX.2-VAE", [("split_files/vae/flux2-vae.safetensors", 300_000)]),
     )
-    assert companion_cleanup.companion_dependents("LAiM/FLUX.2-VAE") == [encoder]
+    assert companion_cleanup.companion_dependents("unsloth/FLUX.2-VAE") == [encoder]
 
 
 def test_a_vae_only_prequant_fetch_is_not_a_dependent(monkeypatch):
     """#11825: a VAE-only fetch from a prequant repo must not pin the base."""
-    gguf = "LAiM/Qwen-Image-2.1-GGUF"
-    prequant = "LAiM/Qwen-Image-2.1-FP8"
+    gguf = "unsloth/Qwen-Image-2.1-GGUF"
+    prequant = "unsloth/Qwen-Image-2.1-FP8"
     base = "Qwen/Qwen-Image-2.1"
     _install(
         monkeypatch,
@@ -632,7 +632,7 @@ def test_a_vae_only_prequant_fetch_is_not_a_dependent(monkeypatch):
 
 def test_a_prequant_repo_holding_its_checkpoint_still_pins_the_base(monkeypatch):
     """A root prequant checkpoint in the same repo is an installed model and still pins it."""
-    prequant = "LAiM/Qwen-Image-2.1-FP8"
+    prequant = "unsloth/Qwen-Image-2.1-FP8"
     base = "Qwen/Qwen-Image-2.1"
     _install(
         monkeypatch,
@@ -650,7 +650,7 @@ def test_a_prequant_repo_holding_its_checkpoint_still_pins_the_base(monkeypatch)
 
 def test_a_pre_cast_encoder_fetch_is_not_a_dependent(monkeypatch):
     """Qwen-Image-2.1 defaults to the pre-cast fp8 encoder, fetched to the prequant repo's root."""
-    prequant = "LAiM/Qwen-Image-2.1-FP8"
+    prequant = "unsloth/Qwen-Image-2.1-FP8"
     base = "Qwen/Qwen-Image-2.1"
     _install(
         monkeypatch,
@@ -663,7 +663,7 @@ def test_a_pre_cast_encoder_fetch_is_not_a_dependent(monkeypatch):
 
 
 def test_a_prequant_repo_holding_its_checkpoint_and_encoder_still_pins_the_base(monkeypatch):
-    prequant = "LAiM/Qwen-Image-2.1-FP8"
+    prequant = "unsloth/Qwen-Image-2.1-FP8"
     base = "Qwen/Qwen-Image-2.1"
     _install(
         monkeypatch,
@@ -683,7 +683,7 @@ def test_a_borrowed_chat_repo_is_never_advertised_as_freeable(monkeypatch):
     """The delete preview must point only at rows Free up space will really show. A borrowed chat
     GGUF repo is a curated companion id but holds a denoiser, so the orphan listing skips it;
     naming it here sent the user to remove something that is never on that list."""
-    borrowed = "LAiM/Qwen2.5-VL-7B-Instruct-GGUF"
+    borrowed = "unsloth/Qwen2.5-VL-7B-Instruct-GGUF"
     checkpoint = "some-owner/qwen-image"
     _install(
         monkeypatch,
@@ -791,10 +791,10 @@ def test_a_single_file_safetensors_pick_pins_its_base(monkeypatch):
     dev = "black-forest-labs/FLUX.2-dev"
     _install(
         monkeypatch,
-        _repo("LAiM/custom", [("FLUX.2-dev-fp8.safetensors", 9_000_000)]),
+        _repo("unsloth/custom", [("FLUX.2-dev-fp8.safetensors", 9_000_000)]),
         _repo(dev, [("model_index.json", 460)]),
     )
-    assert companion_cleanup.companion_dependents(dev) == ["LAiM/custom"]
+    assert companion_cleanup.companion_dependents(dev) == ["unsloth/custom"]
     assert asyncio.run(companion_cleanup.orphan_companions_response())["companions"] == []
 
 
@@ -803,7 +803,7 @@ def test_a_legacy_component_repack_is_not_read_as_a_checkpoint(monkeypatch):
     That id matches its family just as literally, so without expanding the exclusion through the
     same mirror identities the orphaned pair kept holding each other on disk."""
     legacy = "Comfy-Org/flux2-dev"
-    vae = "LAiM/FLUX.2-VAE"
+    vae = "unsloth/FLUX.2-VAE"
     _install(
         monkeypatch,
         _repo(
@@ -927,7 +927,7 @@ def test_the_preview_reads_a_path_qualified_variant(monkeypatch):
     """The inventory and the delete identify a row by gguf_variant_key, which for a checkpoint in
     its own directory is not the bare quant label. Comparing labels reported 0 B reclaimed and
     described the last checkpoint's companions as retained rather than freed."""
-    repo = "LAiM/LTX-2.3-22B-GGUF"
+    repo = "unsloth/LTX-2.3-22B-GGUF"
     variant = "distilled/ltx-2.3-22b-distilled-Q6_K"
     _install(
         monkeypatch,

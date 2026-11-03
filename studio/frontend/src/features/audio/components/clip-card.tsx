@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Download01Icon, SentIcon, StopIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import type { ReactNode } from "react";
@@ -38,7 +39,7 @@ export function ClipSendToMenu({ handlers }: { handlers: ClipSendHandlers }) {
           strokeWidth={1.75}
           className="size-icon"
         />
-        Send to
+        {translate("uxAudio.sendToxvnh7")}
       </DropdownMenuSubTrigger>
       <DropdownMenuSubContent>
         <SendToItems handlers={handlers} />
@@ -97,7 +98,7 @@ export function ClipCard({
         <Button
           variant="ghost"
           size="icon-sm"
-          aria-label="Download audio clip"
+          aria-label={translate("uxAudio.downloadAudioClipcv7mb")}
           disabled={!onDownload}
           onClick={onDownload ?? undefined}
           className="shrink-0 rounded-full"
@@ -112,7 +113,7 @@ export function ClipCard({
             peaks={peaks}
             durationS={durationS}
             src={src}
-            label={title || "audio clip"}
+            label={title || translate("uxAudio.audioClip6rb2o")}
           />
         </div>
       )}
@@ -158,7 +159,7 @@ export function PendingClipCard({
             className="shrink-0 hover:bg-muted"
           >
             <HugeiconsIcon icon={StopIcon} className="size-3.5" />
-            Stop
+            {translate("browser.agent.stop")}
           </Button>
         ) : null}
       </div>
@@ -166,7 +167,7 @@ export function PendingClipCard({
         peaks={null}
         durationS={null}
         src={null}
-        label="clip in progress"
+        label={translate("uxAudio.clipInProgressyj7g9")}
       />
     </Card>
   );

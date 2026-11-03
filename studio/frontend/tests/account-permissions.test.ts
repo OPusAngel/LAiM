@@ -9,19 +9,7 @@ import {
   type StubElement,
 } from "./helpers/module-stubs.ts";
 
-type Capability = {
-  pythonOsIsolated: boolean;
-  terminalOsIsolated: boolean;
-  backend?: string;
-} | null;
-
-function permissionUi(
-  owner: boolean,
-  permissionMode: string,
-  loginMode = "multi",
-  capability: Capability = null,
-  sandboxLevel = "high",
-) {
+function permissionUi(owner: boolean, permissionMode: string, loginMode = "multi") {
   const accountSession = loadWithStubs<{
     useFullAccessAllowed: () => boolean;
   }>(new URL("../src/features/auth/account-session.ts", import.meta.url), {
@@ -36,25 +24,8 @@ function permissionUi(
     },
   });
   const changes: string[] = [];
-  const levels: string[] = [];
-  const popups: boolean[] = [];
-  const opened: [string, unknown][] = [];
-  const capabilityStub = {
-    loadSandboxCapability: async () => capability,
-    loadSettledSandboxCapability: async () => capability,
-    // Nothing cached: every pick reads, so these cases see the settled answer.
-    cachedSandboxCapability: () => null,
-    onSandboxCapabilityChange: () => () => {},
-    sandboxReady: (value: NonNullable<Capability>) =>
-      value.pythonOsIsolated && value.terminalOsIsolated,
-    capabilityPending: () => false,
-  };
   const state = {
     permissionMode,
-    sandboxLevel,
-    setSandboxLevel: (value: string) => {
-      levels.push(value);
-    },
     setPermissionMode: (value: string) => {
       changes.push(value);
     },
@@ -63,11 +34,13 @@ function permissionUi(
     PermissionModeMenuItems: (props: {
       onRequestFullAccess: () => void;
     }) => StubElement;
-    PermissionMenuLabel: (props: {
-      sandboxControls: boolean;
-      onOsSandboxMissing?: () => void;
-    }) => StubElement;
-    PERMISSION_MODE_OPTIONS: readonly { value: string; label: string }[];
+    PermissionMenuLabel: () => StubElement;
+    PERMISSION_MODE_OPTIONS: readonly {
+      value: string;
+      label: string;
+      description: string;
+      icon: string;
+    }[];
     permissionModeOption: (mode: string) => { value: string; label: string };
     FullAccessConfirmDialog: (props: {
       open: boolean;
@@ -80,8 +53,7 @@ function permissionUi(
       react: {
         useEffect: (effect: () => void) => effect(),
         useLayoutEffect: (effect: () => void) => effect(),
-        // The capability hook starts at null; the menu sees the stubbed answer.
-        useState: (initial: unknown) => [initial === null ? capability : initial, () => {}],
+        useState: (initial: unknown) => [initial, () => {}],
         useId: () => "id",
         useRef: (current: unknown) => ({ current }),
       },
@@ -100,46 +72,31 @@ function permissionUi(
       "@/features/settings": {
         useSettingsDialogStore: (selector: (state: unknown) => unknown) =>
           selector({
-            openDialog: (tab: string, options?: { scrollTarget?: string }) => {
-              opened.push([tab, options?.scrollTarget]);
-            },
+            openDialog: () => {},
           }),
       },
       "@/i18n": { useT: () => (key: string) => key },
       "@/features/auth/account-session": accountSession,
-      "./api/sandbox-capability": capabilityStub,
-      "./sandbox-pick": loadWithStubs(
-        new URL("../src/features/chat/sandbox-pick.ts", import.meta.url),
-        { "./api/sandbox-capability": capabilityStub },
-      ),
-      "./sandbox-setup-dialog": {
-        SandboxSetupDialog: "SandboxSetupDialog",
-        useSandboxSetupDialogStore: (selector: (state: unknown) => unknown) =>
-          selector({
-            setOpen: (open: boolean) => {
-              popups.push(open);
-            },
-          }),
-      },
       "@/components/ui/alert-dialog": { AlertDialog: "AlertDialog" },
       "@/components/ui/button": { Button: "Button" },
-      "@/components/ui/switch": { Switch: "Switch" },
-      "./sandbox-level": loadWithStubs(
-        new URL("../src/features/chat/sandbox-level.ts", import.meta.url),
-        {},
-      ),
       "@/components/ui/dropdown-menu": {
+        DropdownMenu: "DropdownMenu",
+        DropdownMenuContent: "DropdownMenuContent",
         DropdownMenuItem: "DropdownMenuItem",
-        DropdownMenuSeparator: "DropdownMenuSeparator",
-        DropdownMenuSubContent: "DropdownMenuSubContent",
+        DropdownMenuLabel: "DropdownMenuLabel",
+        DropdownMenuTrigger: "DropdownMenuTrigger",
       },
-      "@/lib/chevron-icons": {},
+      "@/lib/chevron-icons": { ChevronDownStandardIcon: "ChevronDownStandardIcon" },
+      "@/lib/agent-core-icons": {
+        PlanetCoreGlyph: "PlanetCoreGlyph",
+        SaturnCoreGlyph: "SaturnCoreGlyph",
+      },
       "@/lib/sparkles-icon": { SparklesGlyph: "SparklesGlyph" },
       "@/lib/shield-alert-icon": { ShieldAlertGlyph: "ShieldAlertGlyph" },
       "@hugeicons/core-free-icons": {},
-      "@/lib/tick-icon": {},
+      "@/lib/tick-icon": { MenuTickIcon: "MenuTickIcon" },
       "@/lib/utils": { cn: () => "" },
-      "@hugeicons/react": {},
+      "@hugeicons/react": { HugeiconsIcon: "HugeiconsIcon" },
       "./stores/chat-runtime-store": {
         useChatRuntimeStore: Object.assign(
           (selector: (state: unknown) => unknown) => selector(state),
@@ -148,19 +105,23 @@ function permissionUi(
       },
     },
   );
-  return { component, changes, levels, popups, opened };
+  return { component, changes };
+}
+
+/** The option rows the menu paints, in order. */
+function menuRows(ui: ReturnType<typeof permissionUi>) {
+  const menu = ui.component.PermissionModeMenuItems({ onRequestFullAccess() {} });
+  return menu.props.children as StubElement[];
 }
 
 for (const loginMode of ["single", "multi"]) {
   for (const owner of [true, false]) {
     test(`${loginMode} permission menu allows full access only for the owner (${owner})`, () => {
       const ui = permissionUi(owner, "full", loginMode);
-      const menu = ui.component.PermissionModeMenuItems({
-        onRequestFullAccess() {},
-      });
-      const rows = menu.props.children as StubElement[];
-      assert.equal(rows.length, owner ? 4 : 3);
-      assert.deepEqual(ui.changes, owner ? [] : ["auto"]);
+      const rows = menuRows(ui);
+      assert.equal(rows.length, owner ? 2 : 1);
+      // A non-owner left on Full access is stepped down to the asking level.
+      assert.deepEqual(ui.changes, owner ? [] : ["ask"]);
       const dialog = ui.component.FullAccessConfirmDialog({
         open: true,
         onOpenChange() {},
@@ -170,155 +131,56 @@ for (const loginMode of ["single", "multi"]) {
   }
 }
 
-test("multi-user policy leaves non-full preferences untouched", () => {
-  for (const mode of ["ask", "auto", "off"]) {
-    const ui = permissionUi(false, mode);
-    ui.component.PermissionModeMenuItems({
-      onRequestFullAccess() {
-        assert.fail("Full access must be unavailable");
-      },
-    });
-    assert.deepEqual(ui.changes, []);
-  }
+test("multi-user policy leaves a non-full preference untouched", () => {
+  const ui = permissionUi(false, "ask");
+  menuRows(ui);
+  assert.deepEqual(ui.changes, []);
 });
 
-test("the stored values keep their order and their names", () => {
+test("the stored values keep their order, their names and their planets", () => {
   const ui = permissionUi(true, "auto");
   assert.deepEqual(
     ui.component.PERMISSION_MODE_OPTIONS.map((option) => [
       option.value,
       option.label,
+      option.icon,
     ]),
     [
-      ["ask", "Ask for approval"],
-      ["auto", "Approve for me"],
-      ["off", "Run automatically"],
-      ["full", "Full access"],
+      ["ask", "Agent Core", "PlanetCoreGlyph"],
+      ["full", "Agent Core AI", "SaturnCoreGlyph"],
     ],
   );
-  assert.equal(ui.component.permissionModeOption("bogus").value, "auto");
+  // Legacy stored levels ("auto", "off", the sandbox-era names) read as Agent Core.
+  assert.equal(ui.component.permissionModeOption("bogus").value, "ask");
 });
 
-const NO_OS_SANDBOX = { pythonOsIsolated: false, terminalOsIsolated: false, backend: "bubblewrap" };
-const OS_SANDBOX = { pythonOsIsolated: true, terminalOsIsolated: true, backend: "bubblewrap" };
-const tick = () => new Promise((resolve) => setTimeout(resolve, 5));
-
-for (const [name, capability] of [
-  ["no OS sandbox", NO_OS_SANDBOX],
-  ["a working OS sandbox", OS_SANDBOX],
-  ["an older server that cannot say", null],
-] as const) {
-  test(`picking Run automatically with ${name} applies it, with no popup and no row hint`, () => {
-    const ui = permissionUi(true, "auto", "single", capability);
-    const rows = ui.component.PermissionModeMenuItems({
-      onRequestFullAccess() {
-        assert.fail("not Full access");
-      },
-    }).props.children as StubElement[];
-    const off = rows[2];
-    (off.props.onSelect as () => void)();
-    assert.deepEqual(ui.changes, ["off"]);
-    assert.deepEqual(ui.popups, []);
-    // The row holds its icon and the label/description column only: no "not available" line.
-    const [, column] = off.props.children as [StubElement, StubElement];
-    assert.equal((column.props.children as unknown[]).length, 2);
-  });
-}
-
-function sandboxPicker(ui: ReturnType<typeof permissionUi>, onOsSandboxMissing?: () => void) {
-  const label = ui.component.PermissionMenuLabel({ sandboxControls: true, onOsSandboxMissing });
-  const [heading, control] = label.props.children as [StubElement, StubElement];
-  const sub = (control.type as (props: unknown) => StubElement)(control.props);
-  const [chip, content] = sub.props.children as [StubElement, StubElement];
-  // Heading (with Learn more beside it), then the levels.
-  const [pickerHeading, levels] = content.props.children as [StubElement, StubElement[]];
-  const [, learnMore] = pickerHeading.props.children as [StubElement, StubElement];
-  // Listed weakest first; the stub JSX runtime drops keys, so rows go by position.
-  // Disabled leads the list only under Full access.
-  const order = levels.length === 3 ? ["off", "low", "high"] : ["low", "high"];
-  assert.equal(levels.length, order.length);
-  const level = (value: string) => levels[order.indexOf(value)];
-  // The ticked row is the level in effect.
-  const active = order.find((_, i) => (levels[i].props.children as unknown[])[1] !== null);
-  return { heading, chip, level, active, learnMore };
-}
-
-test("the menu heading says Permissions and has no switch where Settings shows its own", () => {
-  const ui = permissionUi(true, "auto", "single", OS_SANDBOX);
-  const label = ui.component.PermissionMenuLabel({ sandboxControls: false });
-  const [heading, control] = label.props.children as [StubElement, unknown];
-  assert.equal(heading.props.children, "settings.general.permissions.sectionTitle");
-  assert.equal(control, null);
+test("the menu heading says Permissions and offers nothing else", () => {
+  const ui = permissionUi(true, "ask", "single");
+  const label = ui.component.PermissionMenuLabel();
+  // LAiM runs every tool on the host with full rights, so the heading is one span
+  // and the menu has no second control beside it.
+  const children = label.props.children as StubElement;
+  assert.equal(children.props.children, "settings.general.permissions.sectionTitle");
 });
 
-for (const [name, capability, level, mode, active, disabled] of [
-  ["High with a working OS sandbox", OS_SANDBOX, "high", "auto", "high", false],
-  ["High saved but no OS sandbox", NO_OS_SANDBOX, "high", "auto", "low", false],
-  ["Low", OS_SANDBOX, "low", "auto", "low", false],
-  ["Full access", OS_SANDBOX, "high", "full", "off", true],
-] as const) {
-  test(`the Sandbox picker for ${name}`, () => {
-    const ui = permissionUi(true, mode, "single", capability, level);
-    const picker = sandboxPicker(ui);
-    assert.equal(picker.active, active);
-    // The chip still opens, so Full access users can see why the sandbox is off.
-    assert.equal(picker.chip.props.disabled, undefined);
-    assert.equal(picker.level("low").props.disabled, disabled);
-    assert.equal(picker.level("high").props.disabled, disabled);
-  });
-}
+test("picking a level applies it, and picking Full access asks first", () => {
+  let requested = 0;
+  const ui = permissionUi(true, "ask", "single");
+  const component = ui.component;
+  const rows = component.PermissionModeMenuItems({
+    onRequestFullAccess: () => {
+      requested += 1;
+    },
+  }).props.children as StubElement[];
+  // Already on Agent Core: picking it again is a no-op.
+  (rows[0].props.onSelect as () => void)();
+  assert.deepEqual(ui.changes, []);
+  (rows[1].props.onSelect as () => void)();
+  assert.equal(requested, 1);
+  assert.deepEqual(ui.changes, []);
 
-test("under Full access, Disabled is ticked and picking it or a locked level changes nothing", async () => {
-  const ui = permissionUi(true, "full", "single", OS_SANDBOX, "high");
-  const picker = sandboxPicker(ui);
-  assert.equal(picker.level("off").props.disabled, false);
-  (picker.level("off").props.onSelect as () => void)();
-  await tick();
-  assert.deepEqual(ui.levels, []);
-  assert.deepEqual(ui.popups, []);
-});
-
-test("picking High without an OS sandbox opens the install popup and keeps Low", async () => {
-  const ui = permissionUi(true, "auto", "single", NO_OS_SANDBOX, "low");
-  (sandboxPicker(ui).level("high").props.onSelect as () => void)();
-  await tick();
-  assert.deepEqual(ui.popups, [true]);
-  assert.deepEqual(ui.levels, []);
-
-  const local: string[] = [];
-  const own = sandboxPicker(permissionUi(true, "auto", "single", NO_OS_SANDBOX, "low"), () =>
-    local.push("popup"),
-  );
-  (own.level("high").props.onSelect as () => void)();
-  await tick();
-  assert.deepEqual(local, ["popup"]);
-});
-
-test("picking High with a working OS sandbox applies it; picking Low applies at once", async () => {
-  const ui = permissionUi(true, "auto", "single", OS_SANDBOX, "low");
-  (sandboxPicker(ui).level("high").props.onSelect as () => void)();
-  await tick();
-  assert.deepEqual(ui.levels, ["high"]);
-  assert.deepEqual(ui.popups, []);
-
-  const high = permissionUi(true, "auto", "single", OS_SANDBOX, "high");
-  (sandboxPicker(high).level("low").props.onSelect as () => void)();
-  await tick();
-  assert.deepEqual(high.levels, ["low"]);
-});
-
-test("picking the level already in effect changes nothing", async () => {
-  const ui = permissionUi(true, "auto", "single", OS_SANDBOX, "high");
-  (sandboxPicker(ui).level("high").props.onSelect as () => void)();
-  await tick();
-  assert.deepEqual(ui.levels, []);
-  assert.deepEqual(ui.popups, []);
-});
-
-test("Learn more beside the picker heading opens Settings > Sandbox at Permissions", async () => {
-  const ui = permissionUi(true, "auto", "single", OS_SANDBOX);
-  const { learnMore } = sandboxPicker(ui);
-  (learnMore.props.onSelect as () => void)();
-  await tick();
-  assert.deepEqual(ui.opened, [["sandbox", "sandbox-permissions"]]);
+  const fromFull = permissionUi(true, "full", "single");
+  const fullRows = menuRows(fromFull);
+  (fullRows[0].props.onSelect as () => void)();
+  assert.deepEqual(fromFull.changes, ["ask"]);
 });

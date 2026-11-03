@@ -14,7 +14,7 @@ import LAiM_cli.commands.start as start_cli
 
 BASE = "http://127.0.0.1:8888"
 KEY = "k"
-RESIDENT = {"id": "LAiM/Qwen3-8B", "loaded": True}
+RESIDENT = {"id": "unsloth/Qwen3-8B", "loaded": True}
 
 
 class FakeServer:
@@ -192,7 +192,7 @@ def test_active_model_decides_the_resident_not_list_order(monkeypatch):
     """active_model, not catalog order, names the resident."""
     server = FakeServer(
         [
-            {"id": "LAiM/whisper-large", "loaded": True},
+            {"id": "unsloth/whisper-large", "loaded": True},
             {"id": RESIDENT["id"], "loaded": True},
         ],
         {"is_gguf": False, "active_model": RESIDENT["id"], "model_identifier": RESIDENT["id"]},
@@ -250,11 +250,11 @@ def test_explicit_flags_matching_defaults_still_reload(monkeypatch):
 def test_inferred_attach_pins_the_resident_quant(monkeypatch):
     """A repo-id GGUF is re-sent with the quant it is running."""
     server = FakeServer(
-        [{"id": "LAiM/Qwen3-30B-A3B-GGUF", "loaded": True}],
+        [{"id": "unsloth/Qwen3-30B-A3B-GGUF", "loaded": True}],
         {
             "is_gguf": True,
-            "active_model": "LAiM/Qwen3-30B-A3B-GGUF",
-            "model_identifier": "LAiM/Qwen3-30B-A3B-GGUF",
+            "active_model": "unsloth/Qwen3-30B-A3B-GGUF",
+            "model_identifier": "unsloth/Qwen3-30B-A3B-GGUF",
             "gguf_variant": "Q8_0",
             "requested_context_length": 0,
         },
@@ -268,7 +268,7 @@ def test_inferred_attach_pins_the_resident_quant(monkeypatch):
     )
 
     assert sent(server) == {
-        "model_path": "LAiM/Qwen3-30B-A3B-GGUF",
+        "model_path": "unsloth/Qwen3-30B-A3B-GGUF",
         "gguf_variant": "Q8_0",
         "max_seq_length": 8192,
     }
@@ -277,11 +277,11 @@ def test_inferred_attach_pins_the_resident_quant(monkeypatch):
 def test_inferred_attach_at_the_default_context_does_not_reresolve_the_quant(monkeypatch):
     """The --context-length 0 reset still names the running quant."""
     server = FakeServer(
-        [{"id": "LAiM/Qwen3-30B-A3B-GGUF", "loaded": True}],
+        [{"id": "unsloth/Qwen3-30B-A3B-GGUF", "loaded": True}],
         {
             "is_gguf": True,
-            "active_model": "LAiM/Qwen3-30B-A3B-GGUF",
-            "model_identifier": "LAiM/Qwen3-30B-A3B-GGUF",
+            "active_model": "unsloth/Qwen3-30B-A3B-GGUF",
+            "model_identifier": "unsloth/Qwen3-30B-A3B-GGUF",
             "gguf_variant": "Q8_0",
             "requested_context_length": 0,
         },
@@ -295,7 +295,7 @@ def test_inferred_attach_at_the_default_context_does_not_reresolve_the_quant(mon
     )
 
     assert sent(server) == {
-        "model_path": "LAiM/Qwen3-30B-A3B-GGUF",
+        "model_path": "unsloth/Qwen3-30B-A3B-GGUF",
         "gguf_variant": "Q8_0",
         "max_seq_length": 0,
     }
@@ -344,10 +344,10 @@ def test_hf_cache_resident_matches_the_advertised_repo_id(monkeypatch):
         "/snapshots/abc123/qwen3-8b-Q4_K_M.gguf"
     )
     server = FakeServer(
-        [{"id": "LAiM/Qwen3-8B-GGUF", "loaded": True}],
+        [{"id": "unsloth/Qwen3-8B-GGUF", "loaded": True}],
         {
             "is_gguf": True,
-            "active_model": "LAiM/Qwen3-8B-GGUF",
+            "active_model": "unsloth/Qwen3-8B-GGUF",
             "model_identifier": cache_path,
             "requested_context_length": 4096,
         },
@@ -356,13 +356,13 @@ def test_hf_cache_resident_matches_the_advertised_repo_id(monkeypatch):
     entry = start_cli._resolve_model(BASE, KEY, None, start_cli.LoadOptions(max_seq_length = 32768))
 
     assert sent(server) == {"model_path": cache_path, "max_seq_length": 32768}
-    assert entry["id"] == "LAiM/Qwen3-8B-GGUF"
+    assert entry["id"] == "unsloth/Qwen3-8B-GGUF"
 
 
 def test_status_names_the_resident_even_when_the_catalog_lags(monkeypatch):
     """A status id absent from the listing still names the resident."""
     server = FakeServer(
-        [{"id": "LAiM/whisper-large", "loaded": True}],
+        [{"id": "unsloth/whisper-large", "loaded": True}],
         {
             "is_gguf": False,
             "active_model": RESIDENT["id"],
@@ -402,9 +402,9 @@ def test_omitted_default_flags_are_not_forwarded(monkeypatch):
         {"is_gguf": False, "active_model": RESIDENT["id"], "model_identifier": RESIDENT["id"]},
     ).install(monkeypatch)
 
-    start_cli._resolve_model(BASE, KEY, "LAiM/Qwen3-14B", start_cli.LoadOptions())
+    start_cli._resolve_model(BASE, KEY, "unsloth/Qwen3-14B", start_cli.LoadOptions())
 
-    assert sent(server) == {"model_path": "LAiM/Qwen3-14B"}
+    assert sent(server) == {"model_path": "unsloth/Qwen3-14B"}
 
 
 def _registered_command_name(command) -> str:
@@ -620,7 +620,7 @@ def test_four_bit_flag_does_not_warn_about_a_gguf_resident(monkeypatch, capsys):
 def test_status_reporting_no_chat_resident_does_not_pick_a_speech_sidecar(monkeypatch):
     """A null active_model is refused, not resolved from the catalog."""
     server = FakeServer(
-        [{"id": "LAiM/whisper-large-v3", "loaded": True}],
+        [{"id": "unsloth/whisper-large-v3", "loaded": True}],
         {"is_gguf": False, "active_model": None, "model_identifier": None},
     ).install(monkeypatch)
 
@@ -634,7 +634,7 @@ def test_failed_inferred_load_names_the_inferred_resident(monkeypatch, capsys):
     """The survivor probe uses the inferred target."""
     server = FakeServer(
         [
-            {"id": "LAiM/whisper-large-v3", "loaded": True},
+            {"id": "unsloth/whisper-large-v3", "loaded": True},
             {"id": RESIDENT["id"], "loaded": True},
         ],
         {
@@ -1046,7 +1046,7 @@ def test_no_status_and_several_loaded_models_refuses_to_guess(monkeypatch):
     """Several loaded models without status is refused."""
     server = FakeServer(
         [
-            {"id": "LAiM/whisper-large-v3", "loaded": True},
+            {"id": "unsloth/whisper-large-v3", "loaded": True},
             dict(RESIDENT),
         ],
         {},
@@ -1138,12 +1138,12 @@ def test_a_differing_quant_on_a_direct_file_is_still_refused(monkeypatch):
 def test_a_diffusion_resident_is_never_an_attach_target(monkeypatch):
     """An image runtime answers with an active_model but can never serve chat."""
     server = FakeServer(
-        [{"id": "LAiM/FLUX.1-dev-GGUF", "loaded": True}],
+        [{"id": "unsloth/FLUX.1-dev-GGUF", "loaded": True}],
         {
             "is_gguf": True,
             "is_diffusion": True,
-            "active_model": "LAiM/FLUX.1-dev-GGUF",
-            "model_identifier": "LAiM/FLUX.1-dev-GGUF",
+            "active_model": "unsloth/FLUX.1-dev-GGUF",
+            "model_identifier": "unsloth/FLUX.1-dev-GGUF",
             "requested_context_length": 4096,
         },
     ).install(monkeypatch)

@@ -75,7 +75,7 @@ function stubHub(opts: {
       return new Response('[{"id":"private/model"}]', { status: 200, headers: upstream });
     }
     const status = opts.anonymousStatus ?? 200;
-    return new Response(status === 200 ? '[{"id":"LAiM/Qwen3-0.6B-GGUF"}]' : "{}", {
+    return new Response(status === 200 ? '[{"id":"unsloth/Qwen3-0.6B-GGUF"}]' : "{}", {
       status,
       headers: upstream,
     });
@@ -121,7 +121,7 @@ test("a refused token is retried once without it and the public answer is return
   try {
     const response = await fetchHub(API, withToken(OAUTH));
     assert.equal(response.status, 200);
-    assert.deepEqual(await response.json(), [{ id: "LAiM/Qwen3-0.6B-GGUF" }]);
+    assert.deepEqual(await response.json(), [{ id: "unsloth/Qwen3-0.6B-GGUF" }]);
     assert.deepEqual(
       hub.sent.map((s) => s.authorization),
       [`Bearer ${OAUTH}`, null],

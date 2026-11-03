@@ -20,7 +20,7 @@ function params(overrides: Record<string, unknown>) {
   return {
     sourceMode: "model",
     checkpointPath: null,
-    source: "LAiM/Qwen3-0.6B",
+    source: "unsloth/Qwen3-0.6B",
     modelSource: "hf",
     trustRemoteCode: false,
     exportMethod: "gguf",

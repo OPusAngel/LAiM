@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -101,7 +102,7 @@ export function AudioOptionFields({
                 disabled={disabled}
               >
                 <SelectTrigger id={id} size="sm" className="w-full">
-                  <SelectValue placeholder="Model default" />
+                  <SelectValue placeholder={translate("uxAudio.modelDefault1tnnr")} />
                 </SelectTrigger>
                 <SelectContent>
                   {(spec.values ?? []).map((choice) => (
@@ -134,7 +135,7 @@ export function AudioOptionFields({
                 values[spec.name] === undefined ? "" : String(values[spec.name])
               }
               placeholder={
-                spec.default != null ? String(spec.default) : "Model default"
+                spec.default != null ? String(spec.default) : translate("uxAudio.modelDefaultzjtw4")
               }
               disabled={disabled}
               onChange={(event) => {

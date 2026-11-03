@@ -9,6 +9,7 @@
 // No store and no mounted component either: the toast owns its text for as long as it
 // is up, so there is no state to keep or invalidate.
 
+import { translate } from "@/i18n";
 import { toast } from "@/lib/toast";
 
 import { dismissCarveoutNotice } from "./api/igpu-carveout-notice";
@@ -75,7 +76,7 @@ export function showCarveoutAdvice(
     duration: IGPU_CARVEOUT_NOTICE_DURATION_MS,
     classNames: { actionButton: IGPU_CARVEOUT_ACTION_CLASS },
     action: {
-      label: "Don't show again",
+      label: translate("uxFeatures.donTShowAgainkn4ir"),
       // Fire and forget: dismissCarveoutNotice swallows its own failures, and the
       // worst case is the notice returning on a later load.
       onClick: () => {

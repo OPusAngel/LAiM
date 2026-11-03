@@ -21,7 +21,7 @@ import {
 } from "@/features/chat";
 import { publicModelId } from "@/features/hub";
 import { isServedByLlamaCpp } from "@/features/model-picker";
-import { useT } from "@/i18n";
+import { translate, useT } from "@/i18n";
 import type { TranslationKey } from "@/i18n";
 import { isTauri } from "@/lib/api-base";
 import { copyToClipboard } from "@/lib/copy-to-clipboard";
@@ -86,14 +86,14 @@ type Variant = "plain" | "tools" | "advanced";
 
 const TYPE_TABS: { id: ExampleType; label: string }[] = [
   { id: "curl", label: "curl" },
-  { id: "python", label: "Python" },
-  { id: "javascript", label: "JavaScript" },
-  { id: "curlTools", label: "curl + tools" },
-  { id: "pythonTools", label: "Python + tools" },
-  { id: "javascriptTools", label: "JavaScript + tools" },
-  { id: "curlAdvanced", label: "curl + advanced" },
-  { id: "pythonAdvanced", label: "Python + advanced" },
-  { id: "javascriptAdvanced", label: "JavaScript + advanced" },
+  { id: "python", get label() { return translate("uxSettings.python1r830"); } },
+  { id: "javascript", get label() { return translate("uxSettings.javaScriptsczm2"); } },
+  { id: "curlTools", get label() { return translate("uxSettings.curlToolsr0d1l"); } },
+  { id: "pythonTools", get label() { return translate("settings.apiKeys.examplePythonTools"); } },
+  { id: "javascriptTools", get label() { return translate("settings.apiKeys.exampleJavaScriptTools"); } },
+  { id: "curlAdvanced", get label() { return translate("uxSettings.curlAdvancedgwhhm"); } },
+  { id: "pythonAdvanced", get label() { return translate("settings.apiKeys.examplePythonAdvanced"); } },
+  { id: "javascriptAdvanced", get label() { return translate("settings.apiKeys.exampleJavaScriptAdvanced"); } },
 ];
 
 // guards a restored tab against a snippet type dropped in a later release.
@@ -140,24 +140,30 @@ const ADV = {
 } as const;
 
 const DOC_LINKS = [
-  { label: "Claude Code", href: "https://LAiM.ai/docs/basics/claude-code" },
-  { label: "Codex", href: "https://LAiM.ai/docs/basics/codex" },
+  { get label() { return translate("uxSettings.claudeCoderfupt"); }, href: "https://LAiM.ai/docs/basics/claude-code" },
+  { get label() { return translate("uxSettings.codexy01ka"); }, href: "https://LAiM.ai/docs/basics/codex" },
   {
-    label: "VS Code",
+    get label() {
+      return translate("uxSettings.vSCode1hq5g");
+    },
     href: "https://code.visualstudio.com/docs/copilot/customization/language-models",
   },
   {
-    label: "DeepSeek Harness",
+    get label() {
+      return translate("uxSettings.deepSeekHarness5ohg5");
+    },
     href: "https://github.com/deepseek-ai/deepseek-harness",
   },
-  { label: "OpenCode", href: "https://LAiM.ai/docs/integrations/opencode" },
+  { get label() { return translate("uxSettings.openCode1oc6j"); }, href: "https://LAiM.ai/docs/integrations/opencode" },
   {
-    label: "Hermes Agent",
+    get label() {
+      return translate("uxSettings.hermesAgentmn72r");
+    },
     href: "https://LAiM.ai/docs/integrations/hermes-agent",
   },
-  { label: "OpenClaw", href: "https://LAiM.ai/docs/integrations/openclaw" },
+  { get label() { return translate("uxSettings.openClawoic9k"); }, href: "https://LAiM.ai/docs/integrations/openclaw" },
   { label: "Pi", href: "https://pi.dev" },
-  { label: "Mistral Vibe", href: "https://github.com/mistralai/mistral-vibe" },
+  { get label() { return translate("uxSettings.mistralVibe12shc"); }, href: "https://github.com/mistralai/mistral-vibe" },
 ];
 
 // Fallback until the backend's installed-CLI check resolves. Mirrors CODING_AGENTS in

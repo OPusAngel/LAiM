@@ -244,9 +244,9 @@ curl -fsSL https://LAiM.ai/install.sh | sh
 
 ## What's Changed
 
-* Something by @someone in https://github.com/LAiMai/LAiM/pull/1
+* Something by @someone in https://github.com/OPusAngel/LAiM/pull/1
 
-**Full Changelog**: https://github.com/LAiMai/LAiM/compare/v1...v2
+**Full Changelog**: https://github.com/OPusAngel/LAiM/compare/v1...v2
 """
 
 
@@ -417,7 +417,7 @@ def test_the_offered_version_is_echoed_not_looked_up(notes_module, serve_release
                 "tag_name": "v0.1.60-beta",
                 "name": "Meta Muse Glimmer",
                 "body": "The announcement.\n",
-                "html_url": "https://github.com/LAiMai/LAiM/releases/tag/v0.1.60-beta",
+                "html_url": "https://github.com/unslothai/unsloth/releases/tag/v0.1.60-beta",
                 "published_at": "2026-08-10T11:59:46Z",
             }
         )
@@ -502,7 +502,7 @@ def test_a_release_with_no_announcement_shows_none(notes_module, serve_releases)
                 "tag_name": "v0.1.527-beta",
                 "name": "LAiM v0.1.527-beta",
                 "body": (BODIES / "v0.1.527-beta.md").read_text(encoding = "utf-8"),
-                "html_url": "https://github.com/LAiMai/LAiM/releases/tag/v0.1.527-beta",
+                "html_url": "https://github.com/unslothai/unsloth/releases/tag/v0.1.527-beta",
                 "published_at": "2026-08-09T17:14:42Z",
             },
             {
@@ -1130,8 +1130,8 @@ def test_expanded_popup_fits_a_short_viewport(banner):
 def test_relative_release_body_links_point_at_the_repository():
     """Repository-relative links would resolve against LAiM's own origin."""
     src = LINKS.read_text(encoding = "utf-8")
-    assert "https://github.com/LAiMai/LAiM/blob/main/" in src
-    assert "https://raw.githubusercontent.com/LAiMai/LAiM/main/" in src
+    assert "https://github.com/OPusAngel/LAiM/blob/main/" in src
+    assert "https://raw.githubusercontent.com/OPusAngel/LAiM/main/" in src
     assert "ABSOLUTE" in src and "codeSpans" in src and "FENCE" in src
     panel = PANEL.read_text(encoding = "utf-8")
     assert "resolveReleaseBodyLinks" in panel
@@ -1994,7 +1994,7 @@ def test_a_link_indented_under_a_bullet_still_resolves(run_scanner):
     holding a link. Measuring from the margin called it code (section 4.4) and
     left the destination relative to LAiM's own origin."""
     resolved = run_scanner("links", "- Details:\n\n    [guide](docs/a.md)\n")
-    assert "https://github.com/LAiMai/LAiM/blob/main/docs/a.md" in resolved
+    assert "https://github.com/OPusAngel/LAiM/blob/main/docs/a.md" in resolved
     code = run_scanner("links", "- Added.\n\n      [guide](docs/a.md)\n")
     assert "[guide](docs/a.md)" in code and "github.com" not in code
     top = run_scanner("links", "Intro.\n\n    [guide](docs/a.md)\n")
@@ -2098,7 +2098,7 @@ def test_an_unclosed_comment_in_prose_cannot_hide_later_links(run_scanner):
     """CommonMark opens an HTML block (spec 0.31.2 section 4.6, type 2) only when
     the line begins with `<!--`; one mid-sentence is inline and cannot outlive
     its block. Carrying the unclosed state on masked every link below it."""
-    repo = "https://github.com/LAiMai/LAiM/blob/main/docs/a.md"
+    repo = "https://github.com/OPusAngel/LAiM/blob/main/docs/a.md"
     item = run_scanner("links", "- Type <!-- to begin a comment\n- See [docs](docs/a.md)\n")
     assert repo in item
     paragraph = run_scanner("links", "Type <!-- to begin\n\nSee [docs](docs/a.md)\n")
@@ -2140,7 +2140,7 @@ def test_a_comment_between_bullets_closes_the_list(notes_module, run_scanner):
     code = run_scanner("links", "- old item\n<!-- separator -->\n    [guide](docs/a.md)\n")
     assert "[guide](docs/a.md)" in code and "github.com" not in code
     prose = run_scanner("links", "- old item\n  <!-- separator -->\n    [guide](docs/a.md)\n")
-    assert "https://github.com/LAiMai/LAiM/blob/main/docs/a.md" in prose
+    assert "https://github.com/OPusAngel/LAiM/blob/main/docs/a.md" in prose
     preview = run_scanner(
         "preview",
         "- Details:\n<!-- separator -->\n    ```\n    - hidden sample\n- Real second item\n",
@@ -2153,21 +2153,21 @@ def test_a_parenthesised_link_destination_still_resolves(run_scanner):
     6.3), so `[x]((draft).md)` points at `(draft).md`. Stopping at the first
     paren matched an empty destination and left the link relative."""
     leading = run_scanner("links", "[details]((draft).md)\n")
-    assert "https://github.com/LAiMai/LAiM/blob/main/(draft).md" in leading
+    assert "https://github.com/OPusAngel/LAiM/blob/main/(draft).md" in leading
     image = run_scanner("links", "![shield]((badge).png)\n")
-    assert "https://raw.githubusercontent.com/LAiMai/LAiM/main/(badge).png" in image
+    assert "https://raw.githubusercontent.com/OPusAngel/LAiM/main/(badge).png" in image
     middle = run_scanner("links", "[api](docs/(v2)/api.md)\n")
-    assert "https://github.com/LAiMai/LAiM/blob/main/docs/(v2)/api.md" in middle
+    assert "https://github.com/OPusAngel/LAiM/blob/main/docs/(v2)/api.md" in middle
     unbalanced = run_scanner("links", "[x](a(b.md)\n")
     assert unbalanced == "[x](a(b.md)\n"
     closed = run_scanner("links", "[x](a(b.md))\n")
-    assert "https://github.com/LAiMai/LAiM/blob/main/a(b.md)" in closed
+    assert "https://github.com/OPusAngel/LAiM/blob/main/a(b.md)" in closed
     nested = run_scanner("links", "[x](((draft)).md)\n")
-    assert "https://github.com/LAiMai/LAiM/blob/main/((draft)).md" in nested
+    assert "https://github.com/OPusAngel/LAiM/blob/main/((draft)).md" in nested
     deep = run_scanner("links", "![shot](((((v2))))).png)\n")
-    assert "https://raw.githubusercontent.com/LAiMai/LAiM/main/((((v2))))" in deep
+    assert "https://raw.githubusercontent.com/OPusAngel/LAiM/main/((((v2))))" in deep
     across = run_scanner("links", "[x](((a).md\n[y](docs/y.md)\n")
-    assert "https://github.com/LAiMai/LAiM/blob/main/docs/y.md" in across
+    assert "https://github.com/OPusAngel/LAiM/blob/main/docs/y.md" in across
     assert "[x](((a).md" in across
 
 
@@ -2182,9 +2182,9 @@ def test_a_fence_inside_a_container_still_hides_its_sample(run_scanner):
     uneven = run_scanner("links", "> ```\n> [guide](docs/a.md)\n> ````\n")
     assert "[guide](docs/a.md)" in uneven and "github.com" not in uneven
     left = run_scanner("links", "> ~~~\n[guide](docs/a.md)\n")
-    assert "https://github.com/LAiMai/LAiM/blob/main/docs/a.md" in left
+    assert "https://github.com/OPusAngel/LAiM/blob/main/docs/a.md" in left
     dedented = run_scanner("links", "- a\n  ~~~\n[guide](docs/a.md)\n")
-    assert "https://github.com/LAiMai/LAiM/blob/main/docs/a.md" in dedented
+    assert "https://github.com/OPusAngel/LAiM/blob/main/docs/a.md" in dedented
     document = run_scanner("links", "~~~\n> [guide](docs/a.md)\n~~~\n")
     assert "[guide](docs/a.md)" in document and "github.com" not in document
     code = run_scanner("links", "- Details:\n\n      ~~~\n      [guide](docs/a.md)\n")
@@ -2200,9 +2200,9 @@ def test_an_html_block_inside_a_container_is_literal_too(run_scanner):
     quoted = run_scanner("links", "> <pre>\n> [x](docs/x.md)\n> </pre>\n")
     assert "[x](docs/x.md)" in quoted and "github.com" not in quoted
     dedented = run_scanner("links", "- a\n  - b\n    <details>\n[x](docs/x.md)\n")
-    assert "https://github.com/LAiMai/LAiM/blob/main/docs/x.md" in dedented
+    assert "https://github.com/OPusAngel/LAiM/blob/main/docs/x.md" in dedented
     blank = run_scanner("links", "> <details>\n>\n> [x](docs/x.md)\n")
-    assert "https://github.com/LAiMai/LAiM/blob/main/docs/x.md" in blank
+    assert "https://github.com/OPusAngel/LAiM/blob/main/docs/x.md" in blank
 
 
 def test_an_underline_left_of_an_item_is_lazy_text_of_it(notes_module, run_scanner):
@@ -2217,7 +2217,7 @@ def test_an_underline_left_of_an_item_is_lazy_text_of_it(notes_module, run_scann
     apart = "## 1.0\n- old note\n\n===\n  ## 2.0\n"
     assert [e.version for e in parse_sections(notes_module, apart)] == ["1.0", "2.0"]
     resolved = run_scanner("links", "- Details:\n===\n\n    [guide](docs/a.md)\n")
-    assert "https://github.com/LAiMai/LAiM/blob/main/docs/a.md" in resolved
+    assert "https://github.com/OPusAngel/LAiM/blob/main/docs/a.md" in resolved
 
 
 def test_a_quote_keeps_its_paragraph_to_itself(notes_module, run_scanner):
@@ -2260,9 +2260,9 @@ def test_a_fence_written_as_an_item_first_content_opens_in_that_item(run_scanner
     preview = run_scanner("preview", "- ```md\n  sample text\n  ```\n- Added tests\n")
     assert preview_leads(preview) == ["Added tests"]
     padded = run_scanner("links", "-     ```\n  [example](docs/a.md)\n")
-    assert "https://github.com/LAiMai/LAiM/blob/main/docs/a.md" in padded
+    assert "https://github.com/OPusAngel/LAiM/blob/main/docs/a.md" in padded
     lazy = run_scanner("links", "Intro.\n2. ```\n[guide](docs/a.md)\n")
-    assert "https://github.com/LAiMai/LAiM/blob/main/docs/a.md" in lazy
+    assert "https://github.com/OPusAngel/LAiM/blob/main/docs/a.md" in lazy
 
 
 def test_an_html_block_ends_with_the_item_it_was_written_in(notes_module, run_scanner):
@@ -2288,7 +2288,7 @@ def test_a_comment_may_close_on_a_later_line_of_its_paragraph(run_scanner):
     Ending it at its own line left a backtick inside pairing with a real one
     below, hiding a link, and left the preview quoting hidden text."""
     carried = run_scanner("links", "Note <!-- ` open\nstill --> see [d](docs/a.md) and `x`\n")
-    assert "https://github.com/LAiMai/LAiM/blob/main/docs/a.md" in carried
+    assert "https://github.com/OPusAngel/LAiM/blob/main/docs/a.md" in carried
     inside = run_scanner("links", "Note <!-- see [c](docs/c.md)\nmore --> end\n")
     assert "[c](docs/c.md)" in inside and "github.com" not in inside
     preview = run_scanner(
@@ -2296,9 +2296,9 @@ def test_a_comment_may_close_on_a_later_line_of_its_paragraph(run_scanner):
     )
     assert preview_leads(preview) == ["Added X", "Second"]
     broken = run_scanner("links", "Note <!-- open\n\nsecret --> end [d](docs/a.md)\n")
-    assert "https://github.com/LAiMai/LAiM/blob/main/docs/a.md" in broken
+    assert "https://github.com/OPusAngel/LAiM/blob/main/docs/a.md" in broken
     headed = run_scanner("links", "Note <!-- open\n## 2.0 --> end [d](docs/a.md)\n")
-    assert "https://github.com/LAiMai/LAiM/blob/main/docs/a.md" in headed
+    assert "https://github.com/OPusAngel/LAiM/blob/main/docs/a.md" in headed
     assert preview_leads(run_scanner("preview", "Note <!-- open\n\n- Second\n")) == ["Second"]
 
 
@@ -2307,11 +2307,11 @@ def test_only_punctuation_is_escapable_in_a_link_destination(run_scanner):
     2.4), so the backslash in `docs\\alpha.md` is a character of the path.
     Dropping it rewrote a Windows or namespaced path to the wrong file."""
     kept = run_scanner("links", "[guide](docs\\alpha.md)\n")
-    assert "https://github.com/LAiMai/LAiM/blob/main/docs%5Calpha.md" in kept
+    assert "https://github.com/OPusAngel/LAiM/blob/main/docs%5Calpha.md" in kept
     escaped = run_scanner("links", "[guide](docs\\\\alpha.md)\n")
-    assert "https://github.com/LAiMai/LAiM/blob/main/docs%5Calpha.md" in escaped
+    assert "https://github.com/OPusAngel/LAiM/blob/main/docs%5Calpha.md" in escaped
     paren = run_scanner("links", "[guide](a\\(b.md)\n")
-    assert "https://github.com/LAiMai/LAiM/blob/main/a(b.md" in paren
+    assert "https://github.com/OPusAngel/LAiM/blob/main/a(b.md" in paren
     spaced = run_scanner("links", "[guide](a\\ b.md)\n")
     assert spaced == "[guide](a\\ b.md)\n"
 
@@ -2328,11 +2328,11 @@ def test_one_definition_does_not_hide_the_next(run_scanner):
         "[xpu]: docs/basics/xpu.md\n"
     )
     resolved = run_scanner("links", text)
-    base = "https://github.com/LAiMai/LAiM/blob/main/docs/basics/"
+    base = "https://github.com/OPusAngel/LAiM/blob/main/docs/basics/"
     assert f"[amd]: {base}amd.md" in resolved
     assert f"[xpu]: {base}xpu.md" in resolved
     run = run_scanner("links", "[a]: docs/a.md\n[b]: docs/b.md\n[c]: docs/c.md\n")
-    assert run.count("https://github.com/LAiMai/LAiM/blob/main/docs/") == 3
+    assert run.count("https://github.com/OPusAngel/LAiM/blob/main/docs/") == 3
     prose = run_scanner("links", "[a]: docs/a.md\nintro\n[b]: docs/b.md\n")
     assert "[b]: docs/b.md" in prose
 
@@ -2359,9 +2359,9 @@ def test_a_comment_closed_on_its_own_line_still_closes(run_scanner):
     )
     assert preview_leads(underscored) == ["DoRA training is available."]
     broken = run_scanner("links", "Note <!-- open\n## 2.0\nsecret --> [d](docs/a.md)\n")
-    assert "https://github.com/LAiMai/LAiM/blob/main/docs/a.md" in broken
+    assert "https://github.com/OPusAngel/LAiM/blob/main/docs/a.md" in broken
     item = run_scanner("links", "Note <!-- open\n- bullet\nsecret --> [d](docs/a.md)\n")
-    assert "https://github.com/LAiMai/LAiM/blob/main/docs/a.md" in item
+    assert "https://github.com/OPusAngel/LAiM/blob/main/docs/a.md" in item
 
 
 def test_a_comment_written_as_an_item_first_content_is_a_block(notes_module, run_scanner):
@@ -2380,7 +2380,7 @@ def test_a_comment_written_as_an_item_first_content_is_a_block(notes_module, run
     multiline = run_scanner("links", "- <!-- hidden\n  [a](docs/x.md)\n  -->\n")
     assert "[a](docs/x.md)" in multiline and "github.com" not in multiline
     dedented = run_scanner("links", "- <!-- hidden\n[a](docs/x.md)\n")
-    assert "https://github.com/LAiMai/LAiM/blob/main/docs/x.md" in dedented
+    assert "https://github.com/OPusAngel/LAiM/blob/main/docs/x.md" in dedented
     preview = run_scanner("preview", "- <!-- new --> hidden note\n- Real bullet\n")
     assert preview_leads(preview) == ["Real bullet"]
     text = "## 1.0\n\n- <!-- hidden\n\n  ## 2.0\n"

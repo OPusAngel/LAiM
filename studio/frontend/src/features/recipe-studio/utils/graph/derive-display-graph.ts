@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import type { Edge, Node, XYPosition } from "@xyflow/react";
 import type { RecipeGraphAuxNodeData } from "../../components/recipe-graph-aux-node";
 import { DEFAULT_NODE_HEIGHT, DEFAULT_NODE_WIDTH } from "../../constants";
@@ -475,7 +476,7 @@ export function deriveDisplayGraph({
           kind: "llm-prompt-input",
           llmId: config.id,
           field: "system_prompt",
-          title: "System Prompt",
+          title: translate("uxRecipestudio.systemPromptae4pi"),
           executionLocked,
         },
       });
@@ -488,7 +489,7 @@ export function deriveDisplayGraph({
           kind: "llm-prompt-input",
           llmId: config.id,
           field: "prompt",
-          title: "Prompt",
+          title: translate("uxVideo.prompt1lmzx"),
           executionLocked,
         },
       });

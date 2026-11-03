@@ -628,14 +628,14 @@ def test_ltx2_preflight_refuses_a_diffusers_without_the_pipeline(monkeypatch):
 
 
 def test_a_component_repo_is_refused_as_a_training_base():
-    # LAiM/LTX-2-FP8 holds pre-cast component archives: no model_index.json, no VAE, no
+    # unsloth/LTX-2-FP8 holds pre-cast component archives: no model_index.json, no VAE, no
     # pipeline. It still carries the "ltx-2" token, so the family detector claimed it and the
     # LAiM/* trust gate passed it, and the gated-access probe ignores the model_index.json 404
     # because a 404 is not an access problem -- so the run evicted the resident models and only
     # then failed inside LTX2Pipeline.from_pretrained.
     catalogued = _component_only_repos()
-    assert catalogued["LAiM/ltx-2-fp8"] == ("ltx-2", "text_encoder", "Lightricks/LTX-2")
-    for base, family in (("LAiM/LTX-2-FP8", None), ("LAiM/LTX-2-FP8", "ltx-2")):
+    assert catalogued["unsloth/ltx-2-fp8"] == ("ltx-2", "text_encoder", "Lightricks/LTX-2")
+    for base, family in (("unsloth/LTX-2-FP8", None), ("unsloth/LTX-2-FP8", "ltx-2")):
         with pytest.raises(ValueError) as exc:
             resolve_trainable_family(base, family)
         message = str(exc.value)
@@ -647,8 +647,8 @@ def test_the_component_rule_reads_the_registry_rather_than_a_repo_blocklist():
     # The rule is "registered only as a component, never as a base". The image FP8 repos are
     # listed in prequant_repos (a full-model mirror) as well as te_prequant_repos, so they are
     # bases and must keep resolving exactly as before.
-    assert "LAiM/qwen-image-fp8" not in _component_only_repos()
-    assert resolve_trainable_family("LAiM/Qwen-Image-FP8") == "qwen-image"
+    assert "unsloth/qwen-image-fp8" not in _component_only_repos()
+    assert resolve_trainable_family("unsloth/Qwen-Image-FP8") == "qwen-image"
     # An official base is never a component, whichever registry it comes from.
     assert "lightricks/ltx-2" not in _component_only_repos()
 

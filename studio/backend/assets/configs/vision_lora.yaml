@@ -1,4 +1,4 @@
-model: LAiM/Qwen2-VL-2B-Instruct-bnb-4bit
+model: unsloth/Qwen2-VL-2B-Instruct-bnb-4bit
 
 data:
   dataset: philschmid/amazon-product-descriptions-vlm
@@ -20,7 +20,7 @@ training:
   random_seed: 3407
   packing: false
   train_on_completions: false
-  gradient_checkpointing: "LAiM"
+  gradient_checkpointing: "unsloth"
 
 lora:
   lora_r: 64

@@ -33,7 +33,7 @@ from core.inference.llama_cpp import (  # noqa: E402
 def intent():
     # Lists in: __post_init__ freezes them to tuples so the intent stays hashable.
     return GgufLoadIntent(
-        model_identifier = "LAiM/gemma-4-E2B-it-GGUF",
+        model_identifier = "unsloth/gemma-4-E2B-it-GGUF",
         gpu_ids = [0, 1],
         extra_args = ["--flash-attn"],
         tensor_split = [0.5, 0.5],
@@ -67,7 +67,7 @@ def test_replace_preserves_the_rest(intent):
 
 def test_equality_ignores_whether_sequences_arrived_as_lists(intent):
     assert intent == GgufLoadIntent(
-        model_identifier = "LAiM/gemma-4-E2B-it-GGUF",
+        model_identifier = "unsloth/gemma-4-E2B-it-GGUF",
         gpu_ids = (0, 1),
         extra_args = ("--flash-attn",),
         tensor_split = (0.5, 0.5),

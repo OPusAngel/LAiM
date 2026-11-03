@@ -17,19 +17,19 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { readText } from "./helpers/kit.ts";
+import { readSrcExpanded } from "./helpers/kit.ts";
 
 const PAGES = [
-  ["Images", "../src/features/images/images-page.tsx"],
-  ["Video", "../src/features/video/video-page.tsx"],
+  ["Images", "features/images/images-page.tsx"],
+  ["Video", "features/video/video-page.tsx"],
 ] as const;
 
-const DOWNLOAD_PANEL = readText(
-  "../src/features/hub/download-manager/download-manager-panel.tsx",
+const DOWNLOAD_PANEL = readSrcExpanded(
+  "features/hub/download-manager/download-manager-panel.tsx",
 );
 
 for (const [page, path] of PAGES) {
-  const SOURCE = readText(path);
+  const SOURCE = readSrcExpanded(path);
 
   test(`the ${page} load toast offers a Cancel action`, () => {
     assert.match(
@@ -341,7 +341,7 @@ test("cancelling a deploy does not leave the adapter queued", () => {
   // is applied to whatever LoRA-capable model becomes resident NEXT, so a cancelled deploy would
   // silently mix a discarded adapter into an unrelated model's generations. Clearing it belongs
   // in dropResidentState, which every cancel and every eject already runs.
-  const SOURCE = readText("../src/features/images/images-page.tsx");
+  const SOURCE = readSrcExpanded("features/images/images-page.tsx");
   const drop = SOURCE.slice(
     SOURCE.indexOf("const dropResidentState = useCallback("),
     // Anchored from the opening, so the deps can grow without silently widening this slice.

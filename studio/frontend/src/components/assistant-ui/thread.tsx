@@ -261,8 +261,8 @@ import { useRagToolDisabled } from "@/features/chat/hooks/use-rag-tool-disabled"
 import { BypassPermissionsMenuItem } from "@/features/chat/bypass-permissions-menu-item";
 import { PermissionModeComposerPill } from "@/features/chat/permission-mode-select";
 import {
-  codeToolsOn,
   settleThreadScopedSettingsForCopy,
+  selectToolsSelectable,
   useChatRuntimeStore,
 } from "@/features/chat/stores/chat-runtime-store";
 import {
@@ -374,7 +374,6 @@ import { MicIcon } from "@/lib/mic-icon";
 import { downloadFile, isDownloadCancelled } from "@/lib/native-files";
 import { toast } from "@/lib/toast";
 import { Tick02Icon } from "@/lib/tick-icon";
-import { BrowserAgentMenuItem, BrowserAgentPill } from "@/features/browser/agent/lazy-composer-toggle";
 import {
   BranchNextIcon,
   BranchPrevIcon,
@@ -401,7 +400,6 @@ import { flushResourcesSync } from "@assistant-ui/tap";
 import {
   AttachmentIcon,
   Bookmark02Icon,
-  CodeIcon,
   Copy01Icon,
   Delete02Icon,
   Download01Icon,
@@ -1399,8 +1397,8 @@ function steerPromptQueueTarget(target: PromptQueueTarget) {
     // Pausing already cancels the dispatched target once.
     if (cancelledTarget !== target) target.cancelActiveRun();
   } catch {
-    toast.info("Your follow-up is queued next", {
-      description: "The current response could not be interrupted.",
+    toast.info(translate("uxComponents.yourFollowUpIs16n9o"), {
+      description: translate("uxComponents.theCurrentResponseCould1khpf"),
     });
   }
   // Dispatch waits for cancellation to finish.
@@ -1419,8 +1417,8 @@ function steerPromptQueueItem(itemId: string) {
     return false;
   }
   if (item.target.researchStarted()) {
-    toast.info("Research is still running", {
-      description: "Stop research before steering with a queued prompt.",
+    toast.info(translate("uxComponents.researchIsStillRunning1ag9t"), {
+      description: translate("uxComponents.stopResearchBeforeSteeringzc0v9"),
     });
     return false;
   }
@@ -1445,7 +1443,7 @@ function startPromptQueue(
   const steering = behavior === "steer";
   const targetIds = getPromptQueueTargetIds(target);
   if (steering && targetIds.length === 0) {
-    throw new Error("The chat is no longer available for steering.");
+    throw new Error(translate("uxComponents.theChatIsNol2mgb"));
   }
   const existingRun = findPromptQueueRunByTarget(target);
   if (existingRun) {
@@ -1949,7 +1947,7 @@ const ForkContinuationRule: FC = () => {
   const label = (
     <>
       <HugeiconsIcon icon={WorkflowCircle05Icon} strokeWidth={1.75} className="size-3.5" />
-      Continued from chat
+      {translate("uxComponents.continuedFromChat1fpyy")}
     </>
   );
   const labelClass =
@@ -1966,14 +1964,14 @@ const ForkContinuationRule: FC = () => {
         <button
           type="button"
           data-slot="fork-continuation-link"
-          title="Open the chat this was forked from"
+          title={translate("uxComponents.openTheChatThis1ibyy")}
           // Checked on the way out, not on render: the tombstone set is this tab's own, so a
           // source deleted on another device still looks openable until something asks for it.
           // Only a definite "no" stops the trip; an unreachable backend is not a deletion.
           onClick={async () => {
             const source = await readBackendChatThread(sourceThreadId);
             if (source === null) {
-              toast.info("That chat has been deleted.");
+              toast.info(translate("uxComponents.thatChatHasBeen1yuai"));
               return;
             }
             navigate({
@@ -2445,7 +2443,7 @@ const GeneratedImageViewportOverlay: FC<{
         type="button"
         className="pointer-events-auto absolute inset-0 bg-background/65 dark:bg-background/55"
         onClick={closeOverlay}
-        aria-label="Close generated image preview"
+        aria-label={translate("uxComponents.closeGeneratedImagePreviewwrb0r")}
       />
       <section
         className={cn(
@@ -2461,7 +2459,7 @@ const GeneratedImageViewportOverlay: FC<{
             ? { bottom: bottomOffsetPx }
             : undefined
         }
-        aria-label="Generated image preview"
+        aria-label={translate("uxComponents.generatedImagePreview19c8x")}
       >
         <div className="pointer-events-auto relative flex min-h-0 w-full max-w-[calc(1100px*var(--ui-space-scale,1))] flex-1 flex-col items-center justify-center gap-3 rounded-3xl bg-muted/10 p-3 ring-1 ring-border/20">
           <div className="absolute inset-x-3 top-3 z-10 flex justify-end">
@@ -2477,7 +2475,7 @@ const GeneratedImageViewportOverlay: FC<{
                     filename: overlay.filename,
                   })
                 }
-                aria-label="Download generated image"
+                aria-label={translate("uxComponents.downloadGeneratedImage1ott0")}
               >
                 <HugeiconsIcon icon={Download01Icon} className="size-3.5" />
               </Button>
@@ -2487,7 +2485,7 @@ const GeneratedImageViewportOverlay: FC<{
                 size="icon-sm"
                 className="size-7 rounded-full"
                 onClick={closeOverlay}
-                aria-label="Close generated image preview"
+                aria-label={translate("uxComponents.closeGeneratedImagePreviewwrb0r")}
               >
                 <XIcon className="size-3.5" />
               </Button>
@@ -2505,7 +2503,7 @@ const GeneratedImageViewportOverlay: FC<{
             title={overlay.title}
           >
             <p className="truncate text-xs font-semibold text-foreground/80">
-              Generated image
+              {translate("uxComponents.generatedImagezcu9j")}
             </p>
             {overlay.metadata ? (
               <p className="truncate text-ui-11 font-medium text-muted-foreground">
@@ -2514,7 +2512,7 @@ const GeneratedImageViewportOverlay: FC<{
             ) : null}
             {hideComposer ? null : (
               <p className="mx-auto mt-2 inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-                Type edits below, then send
+                {translate("uxComponents.typeEditsBelowThenhgshn")}
               </p>
             )}
           </div>
@@ -2642,7 +2640,7 @@ const ThreadComposerDock: FC<{
         </div>
         {showModelDisclaimer && (
           <p className="composer-footer-note">
-            LLMs can make mistakes. Double-check responses.
+            {translate("uxComponents.lLMsCanMakeMistakes43ocz")}
           </p>
         )}
       </div>
@@ -2664,7 +2662,7 @@ const ThreadScrollToBottom: FC = () => {
   );
   return (
     <TooltipIconButton
-      tooltip="Scroll to bottom"
+      tooltip={translate("uxComponents.scrollToBottombc7jo")}
       variant="outline"
       onClick={() => scrollToBottom("auto")}
       className={cn(
@@ -2684,49 +2682,48 @@ const ThreadScrollToBottom: FC = () => {
 const pickRandom = <T,>(arr: T[]): T =>
   arr[Math.floor(Math.random() * arr.length)];
 
-// Each greeting carries its matching sloth picture so a line always shows the
-// same mascot. Greeting varies by local time; name-bearing lines drop the
-// name when none is set. Text is a message key, translated at render so a
-// language switch updates the open greeting.
-type Welcome = { key: TranslationKey; name?: string; sloth: string };
+// The greeting varies by local time; name-bearing lines drop the name when none is set.
+// Text is a message key, translated at render so a language switch updates the open
+// greeting. One mascot art file serves every line: /LAiM_anim.webp.
+type Welcome = { key: TranslationKey; name?: string };
 const DEFAULT_WELCOME: Welcome = {
   key: "welcome.onYourMind",
-  sloth: "sloth magnify final.png",
 };
 
+const MASCOT_SRC = "LAiM_anim.webp";
+
 function buildWelcome(hour: number, name: string): Welcome {
-  const g = (key: TranslationKey, sloth: string): Welcome => ({ key, sloth });
+  const g = (key: TranslationKey): Welcome => ({ key });
   const named = (
     key: TranslationKey,
     namedKey: TranslationKey,
-    sloth: string,
-  ): Welcome => (name ? { key: namedKey, name, sloth } : { key, sloth });
+  ): Welcome => (name ? { key: namedKey, name } : { key });
   // Use the name on ~a third of lines (only direct salutations where it reads
   // naturally); the rest stay name-free so greetings don't feel repetitive.
   const base: Welcome[] = [
-    named("welcome.goodToSeeYou", "welcome.goodToSeeYouName", "large sloth wave.png"),
-    g("welcome.readyWhenYouAre", "large sloth thumbs.png"),
+    named("welcome.goodToSeeYou", "welcome.goodToSeeYouName"),
+    g("welcome.readyWhenYouAre"),
     DEFAULT_WELCOME,
-    g("welcome.howCanIHelp", "sloth sir large.png"),
+    g("welcome.howCanIHelp"),
   ];
   if (hour >= 4 && hour < 9) {
-    const morning = named("welcome.goodMorning", "welcome.goodMorningName", "large sloth drink.png");
+    const morning = named("welcome.goodMorning", "welcome.goodMorningName");
     return pickRandom([...base, morning]);
   }
   if (hour >= 17 && hour < 23) {
     const evening: Welcome[] = [
-      named("welcome.goodEvening", "welcome.goodEveningName", "sloth shy large.png"),
-      g("welcome.tonight", "large sloth glasses.png"),
+      named("welcome.goodEvening", "welcome.goodEveningName"),
+      g("welcome.tonight"),
     ];
     // Lean toward an evening line, but a base greeting can still appear.
     return pickRandom(Math.random() < 0.75 ? evening : base);
   }
   if (hour >= 23 || hour < 4) {
     return pickRandom([
-      g("welcome.nightOwl", "large sloth glasses.png"),
-      g("welcome.lateNightIdeas", "large sloth yay.png"),
-      g("welcome.upLate", "large sloth heart.png"),
-      named("welcome.nightShift", "welcome.nightShiftName", "large sloth drink.png"),
+      g("welcome.nightOwl"),
+      g("welcome.lateNightIdeas"),
+      g("welcome.upLate"),
+      named("welcome.nightShift", "welcome.nightShiftName"),
     ]);
   }
   return pickRandom(base);
@@ -2751,8 +2748,6 @@ const ThreadWelcome: FC<{
     setWelcome(buildWelcome(new Date().getHours(), name));
   }, [displayName, nickname]);
 
-  const currentEmojiSrc = `Sloth emojis/${welcome.sloth}`;
-
   return (
     <div className="aui-thread-welcome-root mx-auto my-auto flex w-full max-w-(--thread-max-width) grow flex-col">
       {/* With a files panel showing (chat with files, or project sources), center the whole block. */}
@@ -2764,7 +2759,7 @@ const ThreadWelcome: FC<{
             {/* Temporary chat keeps the title on its own, no mascot. */}
             {showGreetingSloth && !incognito && (
               <MascotImg
-                src={currentEmojiSrc}
+                src={MASCOT_SRC}
                 className="LAiM-welcome-sloth size-[calc(44px*var(--ui-space-scale,1))] -translate-y-[2px]"
               />
             )}
@@ -2845,7 +2840,7 @@ const PendingAudioChip: FC = () => {
           type="button"
           onClick={clearPendingAudio}
           className="flex size-4 items-center justify-center rounded-full hover:bg-destructive hover:text-destructive-foreground"
-          aria-label="Remove audio"
+          aria-label={translate("uxComponents.removeAudiogzgml")}
         >
           <XIcon className="size-3" />
         </button>
@@ -2875,6 +2870,7 @@ const Composer: FC<{
   disableQueue?: boolean;
 }> = ({ disabled, threadId, menuSide, disableQueue }) => {
   const aui = useAui();
+  const t = useT();
   const isDictating = useAuiState((s) => s.composer.dictation != null);
   const pageDragging = useContext(PageDragContext);
   const nativeDragging = useContext(NativeAttachmentDragContext);
@@ -2884,8 +2880,7 @@ const Composer: FC<{
   );
   const toolsEnabled = useChatRuntimeStore((s) => s.toolsEnabled);
 
-  const supportsTools = useChatRuntimeStore((s) => s.supportsTools);
-  const codeToolsEnabled = useChatRuntimeStore((s) => s.codeToolsEnabled);
+  const supportsTools = useChatRuntimeStore(selectToolsSelectable);
   const imageToolsEnabled = useChatRuntimeStore((s) => s.imageToolsEnabled);
   const supportsBuiltinImageGeneration = useChatRuntimeStore(
     (s) => s.supportsBuiltinImageGeneration,
@@ -2930,12 +2925,13 @@ const Composer: FC<{
       useChatRuntimeStore.getState().setDeepResearchEnabled(false);
     }
   }, [deepResearchEnabled, hasResearchMessage, researchThreadId, researchUsed]);
-  // More than 4 pills: collapse to icons only. Search, Tools, and permissions
-  // always show; Images, RAG, MCP and Deep Research are conditional.
+  // More than 4 pills: collapse to icons only. The permission pill always shows;
+  // Images, RAG, MCP and Deep Research are conditional. Internet and Code tools
+  // left the row - they are an always-on default with the switch in the + menu.
   // Narrow viewports collapse too: the labelled row is wider than a phone composer.
   const isMobile = useIsMobile();
   const pillCount =
-    3 +
+    1 +
     (ragEnabled ? 1 : 0) +
     (supportsBuiltinImageGeneration ? 1 : 0) +
     (mcpEnabledForChat ? 1 : 0) +
@@ -3067,8 +3063,8 @@ const Composer: FC<{
           dropReplacedSelection();
         },
         () =>
-          toast.error("Could not attach the pasted text.", {
-            description: "Paste it again, or paste it in smaller pieces.",
+          toast.error(translate("uxComponents.couldNotAttachThe1cet4"), {
+            description: translate("uxComponents.pasteItAgainOr1e7cy"),
           }),
         pastedTextMinChars,
       );
@@ -3081,8 +3077,8 @@ const Composer: FC<{
           );
         },
         () =>
-          toast.error("Could not paste files.", {
-            description: "The clipboard item is unsupported, unreadable, or exceeds its size limit.",
+          toast.error(translate("uxComponents.couldNotPasteFiles1d8k6"), {
+            description: translate("uxComponents.theClipboardItemIs65a0s"),
           }),
       );
       if (event.defaultPrevented) return;
@@ -3228,7 +3224,7 @@ const Composer: FC<{
     // aui.composer() is whichever chat is open now: a switch mid-batch must not take the rest.
     const add = async (file: File) => {
       if (disposed || nativeAttachmentTargetKeyRef.current !== targetKey) {
-        throw new Error("The chat changed before this file was attached.");
+        throw new Error(translate("uxComponents.theChatChangedBeforemrru9"));
       }
       await aui.composer().addAttachment(file);
     };
@@ -3399,7 +3395,7 @@ const Composer: FC<{
             try {
               file = await nativeAttachmentIntentToFile(intent);
             } catch (error) {
-              toast.error("Could not attach dropped audio", {
+              toast.error(translate("uxComponents.couldNotAttachDropped1g4dq"), {
                 description:
                   error instanceof Error ? error.message : String(error),
               });
@@ -3515,7 +3511,7 @@ const Composer: FC<{
             try {
               file = await nativeAttachmentIntentToFile(intent);
             } catch (error) {
-              toast.error("Could not attach dropped video", {
+              toast.error(translate("uxComponents.couldNotAttachDropped1kda1"), {
                 description:
                   error instanceof Error ? error.message : String(error),
               });
@@ -3669,7 +3665,7 @@ const Composer: FC<{
       } finally {
         draining = false;
         if (readFailures > 0) {
-          toast.error("Could not attach dropped images", {
+          toast.error(translate("uxComponents.couldNotAttachDropped12zkv"), {
             description:
               lastReadError instanceof Error
                 ? lastReadError.message
@@ -3763,7 +3759,7 @@ const Composer: FC<{
             try {
               file = await nativeAttachmentIntentToFile(intent);
             } catch (error) {
-              toast.error("Could not attach dropped document", {
+              toast.error(translate("uxComponents.couldNotAttachDropped1ma98"), {
                 description:
                   error instanceof Error ? error.message : String(error),
               });
@@ -4403,7 +4399,7 @@ const Composer: FC<{
         const epoch = appendEpoch;
         const thread = getThreadRuntime();
         if (!thread) {
-          throw new Error("Prompt queue thread runtime is unavailable");
+          throw new Error(translate("uxComponents.promptQueueThreadRuntimecm52e"));
         }
         if (incognitoAtQueueStart) {
           for (const id of getQueueThreadIds()) {
@@ -4423,7 +4419,7 @@ const Composer: FC<{
             assistantRuntime ?? aui.threads().__internal_getAssistantRuntime?.();
           const state = getThreadListItemState();
           if (!runtime || !state) {
-            throw new Error("Prompt queue thread item is unavailable");
+            throw new Error(translate("uxComponents.promptQueueThreadItemxrgyv"));
           }
           if (chatHistoryClearBoundary.capture() !== historyClearGeneration) {
             return;
@@ -4687,9 +4683,9 @@ const Composer: FC<{
           }
         })
         .catch((error) => {
-          toast.error("Could not start prompt queue", {
+          toast.error(translate("uxComponents.couldNotStartPromptsto4j"), {
             description:
-              error instanceof Error ? error.message : "Please try again.",
+              error instanceof Error ? error.message : translate("uxChat.pleaseTryAgain53jxh"),
           });
           onAborted?.();
         })
@@ -4743,8 +4739,8 @@ const Composer: FC<{
             armJustSent(text);
           },
           () => {
-            toast.info("Text attachments were not queued", {
-              description: "The chat or settings changed. Send them again.",
+            toast.info(translate("uxComponents.textAttachmentsWereNotjpsrg"), {
+              description: translate("uxComponents.theChatOrSettings174yf"),
             });
           },
           undefined,
@@ -4798,8 +4794,8 @@ const Composer: FC<{
             armJustSent(state.text);
           },
           () => {
-            toast.info("Pasted text was not queued", {
-              description: "The chat settings changed. Send it again.",
+            toast.info(translate("uxComponents.pastedTextWasNotbie8z"), {
+              description: translate("uxComponents.theChatSettingsChanged1uvoe"),
             });
           },
           capturedAt,
@@ -4865,8 +4861,8 @@ const Composer: FC<{
           queueTexts(texts, pendingRead);
         })
         .catch(() => {
-          toast.error("Could not queue the pasted text.", {
-            description: "Show it in the text field, then send it again.",
+          toast.error(translate("uxComponents.couldNotQueueThe14rcd"), {
+            description: translate("uxComponents.showItInTheft2fp"),
           });
         })
         .finally(() => {
@@ -4957,20 +4953,20 @@ const Composer: FC<{
       setPendingSend(true);
       const title =
         waitingOn === "running"
-          ? "Waiting for the current response to finish"
+          ? translate("uxComponents.waitingForCurrentResponseb1e26")
           : waitingOn === "images"
-            ? "Waiting for dropped images"
+            ? translate("uxComponents.waitingForDroppedImagesip9rt")
             : waitingOn === "audio"
-              ? "Waiting for dropped audio"
+              ? translate("uxComponents.waitingForDroppedAudio274pn")
               : waitingOn === "video"
-                ? "Waiting for dropped video"
+                ? translate("uxComponents.waitingForDroppedVideo84gbg")
                 : waitingOn === "settings"
-                  ? "Loading this chat's settings"
-                  : "Waiting for documents to finish indexing";
+                  ? translate("uxComponents.loadingChatSettingstuo6i")
+                  : translate("uxComponents.waitingForDocumentsIndexingmav27");
       waitToastRef.current = toast(title, {
-        description: "Your message will send automatically once it is ready.",
+        description: translate("uxComponents.yourMessageWillSend1kjnw"),
         duration: Infinity,
-        cancel: { label: "Cancel", onClick: cancelQueuedSend },
+        cancel: { label: translate("browser.agentSettings.cancel"), onClick: cancelQueuedSend },
       });
     },
     [cancelQueuedSend],
@@ -5056,7 +5052,7 @@ const Composer: FC<{
       },
     });
     if (!reservationToken) {
-      toast.error("Wait for the current response to finish");
+      toast.error(translate("rewind.waitForResponse"));
       return;
     }
     preStreamRunReservationRef.current = reservationToken;
@@ -5083,9 +5079,9 @@ const Composer: FC<{
         notifyPromptQueueRunFailed(referenceThreadId);
       }
       preStreamRunReservationRef.current = null;
-      toast.error("Could not prepare attachments", {
+      toast.error(translate("uxComponents.couldNotPrepareAttachments16s5u"), {
         description:
-          error instanceof Error ? error.message : "Please retry the send.",
+          error instanceof Error ? error.message : translate("uxComponents.pleaseRetryTheSendgcpgo"),
       });
     }
   }, [
@@ -5193,7 +5189,7 @@ const Composer: FC<{
       if (waitForCurrentRun || queueAlreadyActive) {
         // queueing here would bind the follow-up to a nonexistent project new-chat thread.
         if (disableQueue) {
-          toast.error("Wait for the current response to finish");
+          toast.error(translate("rewind.waitForResponse"));
           return;
         }
         // queueComposerText preserves the draft until the queue starts.
@@ -5210,9 +5206,9 @@ const Composer: FC<{
         }
         // sending here would add the attachment to the active thread.
         if (overlay || hasAttachments || hasPendingAudio) {
-          toast.error("Wait for the current response to finish", {
+          toast.error(translate("rewind.waitForResponse"), {
             description:
-              "Only text prompts can be queued while a response is running or the prompt queue is active.",
+              translate("uxComponents.onlyTextPromptsCan3gorn"),
           });
         }
         return;
@@ -5513,11 +5509,11 @@ const Composer: FC<{
         event.preventDefault();
         const runtime = useChatRuntimeStore.getState();
         if (!referenceThreadId || aui.thread().getState().messages.length === 0) {
-          toast.info("Nothing to compact yet");
+          toast.info(translate("chatMenu.compactEmpty"));
           return;
         }
         if (runtime.incognito || isThreadIncognito(referenceThreadId)) {
-          toast.info("Temporary chats are not saved, so they cannot be compacted");
+          toast.info(translate("uxComponents.temporaryChatsAreNot1amkh"));
           return;
         }
         // The compacted turns stay reachable only through search_conversation, so no tools, no reset.
@@ -5531,7 +5527,7 @@ const Composer: FC<{
             checkpoint: runtime.params.checkpoint,
           })
         ) {
-          toast.info("/compact works with GGUF and MLX models that support tools");
+          toast.info(translate("uxComponents.compactWorksWithGGUFuqbv2"));
           return;
         }
         requestThreadCompaction(referenceThreadId);
@@ -5585,7 +5581,7 @@ const Composer: FC<{
         event.preventDefault();
         // the project new-chat composer has no thread to bind a queue to.
         if (disableQueue) {
-          toast.error("Wait for the current response to finish");
+          toast.error(translate("rewind.waitForResponse"));
           return;
         }
         if (!canQueueCurrentPrompt) {
@@ -5605,11 +5601,11 @@ const Composer: FC<{
           if (overlay || hasAttachments || hasPendingAudio) {
             toast.error(
               liveThreadIsRunning
-                ? "Wait for the current response to finish"
-                : "Wait for the prompt queue to finish",
+                ? translate("uxComponents.waitForCurrentResponseewzv2")
+                : translate("uxComponents.waitForPromptQueue7br2p"),
               {
                 description:
-                  "Only text prompts and ready attachments can be queued while a response is running or the prompt queue is active.",
+                  translate("uxComponents.onlyTextPromptsAnd16cn1"),
               },
             );
           }
@@ -5632,17 +5628,17 @@ const Composer: FC<{
         }
         if (!overlay.openaiImageGenerationCallId) {
           event.preventDefault();
-          toast.error("This generated image cannot be edited", {
+          toast.error(translate("uxComponents.thisGeneratedImageCannot1jfx4"), {
             description:
-              "The original image reference is missing. Generate the image again, then retry the edit.",
+              translate("uxComponents.theOriginalImageReferencepk35a"),
           });
           closeOverlay();
           return;
         }
         if ((overlay.threadId ?? null) !== referenceThreadId) {
           event.preventDefault();
-          toast.error("This generated image belongs to another chat", {
-            description: "Open the original chat and retry the edit.",
+          toast.error(translate("uxComponents.thisGeneratedImageBelongszs5sy"), {
+            description: translate("uxComponents.openTheOriginalChatqszby"),
           });
           closeOverlay();
           return;
@@ -5782,9 +5778,8 @@ const Composer: FC<{
                   onConfigure={() => setResearchWebsiteAccessOpen(true)}
                 />
               ) : null}
-              <WebSearchToggle />
-              <CodeToolsToggle />
-              <BrowserAgentPill glyph={(icon) => <PillGlyph>{icon}</PillGlyph>} />
+              {/* Internet and Code tools have no pill: they are always on for a new
+                  chat and switched only from the + menu, never per chat. */}
               <ImagesToggle />
               <KnowledgeBaseComposerButton side={effectiveMenuSide} />
               {mcpEnabledForChat ? (
@@ -5819,7 +5814,9 @@ const Composer: FC<{
                 id={inputId}
                 submitMode="none"
                 placeholder={
-                  overlay ? "Type your edits for your image" : "Ask anything"
+                  overlay
+                    ? t("composer.plus.imageEditPrompt")
+                    : t("composer.plus.askAnything")
                 }
                 ref={inputRef}
                 data-type-to-activate="composer"
@@ -5845,7 +5842,9 @@ const Composer: FC<{
                 <TooltipIconButton
                   type="button"
                   tooltip={
-                    isWritingExpanded ? "Collapse composer" : "Expand composer"
+                    isWritingExpanded
+                      ? t("composer.plus.collapse")
+                      : t("composer.plus.expand")
                   }
                   aria-expanded={isWritingExpanded}
                   aria-controls={inputId}
@@ -5927,7 +5926,7 @@ const Composer: FC<{
         className="size-6 text-primary"
       />
       <span className="text-sm font-medium text-primary">
-        Drop files here
+        {translate("uxComponents.dropFilesHere14tis")}
       </span>
     </div>
   );
@@ -6301,6 +6300,7 @@ const ThinkIcon: FC = () => <BulbIcon className="size-[calc(15.5px*var(--ui-spac
 const ReasoningToggle: FC<{ side?: "top" | "bottom" }> = ({
   side = "bottom",
 }) => {
+  const t = useT();
   const modelLoaded = useChatRuntimeStore(
     (s) => !!s.params.checkpoint && !s.modelLoading,
   );
@@ -6380,17 +6380,27 @@ const ReasoningToggle: FC<{ side?: "top" | "bottom" }> = ({
     effectiveReasoningEnabled && displayedEffort !== "none";
   const disabled =
     !modelLoaded || !(effectiveSupportsReasoning || supportsPreserveThinking);
+  const effortLabels: Record<string, string> = {
+    none: t("composer.pill.effortNone"),
+    minimal: t("composer.pill.effortMinimal"),
+    low: t("composer.pill.effortLow"),
+    medium: t("composer.pill.effortMedium"),
+    high: t("composer.pill.effortHigh"),
+  };
   const formatEffortLabel = (level: typeof reasoningEffort): string => {
     if (level !== "xhigh")
-      return level.charAt(0).toUpperCase() + level.slice(1);
+      return (
+        effortLabels[level] ??
+        level.charAt(0).toUpperCase() + level.slice(1)
+      );
     const normalized = externalSelection?.modelId?.trim().toLowerCase() ?? "";
     if (
       normalized.startsWith("claude-opus-4-6") ||
       normalized.startsWith("claude-sonnet-4-6")
     ) {
-      return "Max";
+      return t("composer.pill.effortMax");
     }
-    return "Extra High";
+    return t("composer.pill.effortExtraHigh");
   };
   const effortLabel = formatEffortLabel(displayedEffort);
 
@@ -6425,7 +6435,7 @@ const ReasoningToggle: FC<{ side?: "top" | "bottom" }> = ({
             type="button"
             disabled={disabled}
             className="LAiM-thinking-pill"
-            data-pill-label="Thinking settings"
+            data-pill-label={t("composer.pill.thinkingSettings")}
             data-active={activeLook ? "true" : "false"}
             aria-label={thinkEffortAriaLabel({
               modelLoaded,
@@ -6436,7 +6446,9 @@ const ReasoningToggle: FC<{ side?: "top" | "bottom" }> = ({
             <ThinkIcon />
             {activeLook ? (
               <span className="LAiM-thinking-label">
-                {isEffort ? `Thinking · ${effortLabel}` : "Thinking"}
+                {isEffort
+                  ? `${t("composer.pill.thinking")} · ${effortLabel}`
+                  : t("composer.pill.thinking")}
               </span>
             ) : null}
             <ChevronDownIcon strokeWidth={1.5} className="LAiM-thinking-caret size-[calc(15px*var(--ui-space-scale,1))]" />
@@ -6518,7 +6530,7 @@ const ReasoningToggle: FC<{ side?: "top" | "bottom" }> = ({
                 }
               }}
             >
-              Thinking
+              {t("composer.pill.thinking")}
               <HugeiconsIcon
                   icon={Tick02Icon}
                   strokeWidth={2}
@@ -6544,7 +6556,7 @@ const ReasoningToggle: FC<{ side?: "top" | "bottom" }> = ({
               }
             }}
           >
-            Preserve thinking
+            {t("composer.pill.preserveThinking")}
             <HugeiconsIcon
                   icon={Tick02Icon}
                   strokeWidth={2}
@@ -6566,7 +6578,7 @@ const ReasoningToggle: FC<{ side?: "top" | "bottom" }> = ({
       aria-disabled={disabled || reasoningLockedOn}
       title={
         reasoningLockedOn
-          ? "This model requires reasoning to stay on."
+          ? t("composer.pill.reasoningLockedOn")
           : undefined
       }
       onClick={() => {
@@ -6580,7 +6592,7 @@ const ReasoningToggle: FC<{ side?: "top" | "bottom" }> = ({
         }
       }}
       className="LAiM-thinking-pill"
-      data-pill-label="Thinking"
+      data-pill-label={t("composer.pill.thinking")}
       data-active={activeLook ? "true" : "false"}
       aria-label={thinkToggleAriaLabel({
         reasoningLockedOn,
@@ -6593,7 +6605,7 @@ const ReasoningToggle: FC<{ side?: "top" | "bottom" }> = ({
         <ThinkIcon />
       </PillGlyph>
       {activeLook ? (
-        <span className="LAiM-thinking-label">Thinking</span>
+        <span className="LAiM-thinking-label">{t("composer.pill.thinking")}</span>
       ) : null}
     </button>
   );
@@ -6607,110 +6619,8 @@ const PillGlyph: FC<{ children: ReactNode }> = ({ children }) => (
   </span>
 );
 
-const WebSearchToggle: FC = () => {
-  const modelLoaded = useChatRuntimeStore(
-    (s) => !!s.params.checkpoint && !s.modelLoading,
-  );
-  const checkpoint = useChatRuntimeStore((s) => s.params.checkpoint);
-  const supportsTools = useChatRuntimeStore((s) => s.supportsTools);
-  // External providers (OpenAI today) expose a server-side web_search tool
-  // even without the local tool runtime; gate the pill on either source so it
-  // lights up on external models too. Mirror of shared-composer's searchDisabled.
-  const supportsBuiltinWebSearch = useChatRuntimeStore(
-    (s) => s.supportsBuiltinWebSearch,
-  );
-  const toolsEnabled = useChatRuntimeStore((s) => s.toolsEnabled);
-  const setToolsEnabled = useChatRuntimeStore((s) => s.setToolsEnabled);
-  const setReasoningEnabled = useChatRuntimeStore((s) => s.setReasoningEnabled);
-  const connectionsEnabled = useExternalProvidersStore(
-    (s) => s.connectionsEnabled,
-  );
-  const externalProvidersAll = useExternalProvidersStore((s) => s.providers);
-  const externalProviders = connectionsEnabled ? externalProvidersAll : [];
-  const externalSelection = parseExternalModelId(checkpoint);
-  const selectedExternalProvider =
-    externalSelection != null
-      ? externalProviders.find((p) => p.id === externalSelection.providerId)
-      : undefined;
-  const isKimiExternal = kimiSearchExcludesThinking(
-    selectedExternalProvider?.providerType,
-    externalSelection?.modelId,
-  );
-  // Disable only when a loaded model lacks the capability; with no model the
-  // tool can still be pre-selected, matching the + menu.
-  const disabled = modelLoaded && !(supportsTools || supportsBuiltinWebSearch);
-
-  return (
-    <button
-      type="button"
-      disabled={disabled}
-      onClick={() => {
-        const next = !toolsEnabled;
-        setToolsEnabled(next);
-        // Kimi's $web_search builtin requires thinking=disabled (see
-        // https://platform.kimi.ai/docs/guide/use-web-search). Keep the two
-        // pills mutually exclusive so visible state matches what's sent.
-        if (isKimiExternal) {
-          setReasoningEnabled(!next, { persist: false });
-          applyQwenThinkingParams(!next);
-        }
-      }}
-      className="composer-pill-btn"
-      data-pill-label="Search"
-      data-active={toolsEnabled && !disabled ? "true" : "false"}
-      aria-label={toolsEnabled ? "Disable web search" : "Enable web search"}
-    >
-      <PillGlyph>
-        <InternetGlyph className="size-[calc(15px*var(--ui-space-scale,1))]" />
-      </PillGlyph>
-      <span>Search</span>
-    </button>
-  );
-};
-
-const CodeToolsToggle: FC = () => {
-  const modelLoaded = useChatRuntimeStore(
-    (s) => !!s.params.checkpoint && !s.modelLoading,
-  );
-  const supportsTools = useChatRuntimeStore((s) => s.supportsTools);
-  // External providers have no local tool runtime, but Anthropic's Claude 4.x
-  // dispatches code_execution_20250825 server-side; the chat-page resolver
-  // stashes that capability in the runtime store (next to
-  // supportsBuiltinWebSearch). Mirror of shared-composer's codeDisabled.
-  const supportsBuiltinCodeExecution = useChatRuntimeStore(
-    (s) => s.supportsBuiltinCodeExecution,
-  );
-  const codeToolsEnabled = useChatRuntimeStore(codeToolsOn);
-  const setCodeToolsEnabled = useChatRuntimeStore((s) => s.setCodeToolsEnabled);
-  // Disable only when a loaded model lacks the capability; with no model the
-  // tool can still be pre-selected, matching the + menu.
-  const disabled = modelLoaded && !(supportsTools || supportsBuiltinCodeExecution);
-
-  return (
-    <button
-      type="button"
-      disabled={disabled}
-      onClick={() => setCodeToolsEnabled(!codeToolsEnabled)}
-      className="composer-pill-btn"
-      data-pill-label="Tools"
-      data-active={codeToolsEnabled && !disabled ? "true" : "false"}
-      aria-label={
-        codeToolsEnabled ? "Disable tools" : "Enable tools"
-      }
-    >
-      <PillGlyph>
-        <HugeiconsIcon
-          icon={CodeIcon}
-          className="size-[calc(18.5px*var(--ui-space-scale,1))]"
-          strokeWidth={2}
-        />
-      </PillGlyph>
-      <span>Tools</span>
-    </button>
-  );
-};
-
 const ImagesToggle: FC = () => {
+  const t = useT();
   const modelLoaded = useChatRuntimeStore(
     (s) => !!s.params.checkpoint && !s.modelLoading,
   );
@@ -6734,7 +6644,7 @@ const ImagesToggle: FC = () => {
       disabled={disabled}
       onClick={() => setImageToolsEnabled(!imageToolsEnabled)}
       className="composer-pill-btn"
-      data-pill-label="Images"
+      data-pill-label={t("composer.pill.images")}
       data-active={imageToolsEnabled && !disabled ? "true" : "false"}
       aria-label={
         imageToolsEnabled
@@ -6745,7 +6655,7 @@ const ImagesToggle: FC = () => {
       <PillGlyph>
         <HugeiconsIcon icon={Image03Icon} className="size-3.5" strokeWidth={2} />
       </PillGlyph>
-      <span>Images</span>
+      <span>{t("composer.pill.images")}</span>
     </button>
   );
 };
@@ -6888,10 +6798,6 @@ const ComposerToolsMenu: FC<{
 }> = ({ side = "bottom", researchAvailable, audioUploadBusy }) => {
   const t = useT();
   const navigate = useNavigate();
-  const toolsEnabled = useChatRuntimeStore((s) => s.toolsEnabled);
-  const setToolsEnabled = useChatRuntimeStore((s) => s.setToolsEnabled);
-  const codeToolsEnabled = useChatRuntimeStore(codeToolsOn);
-  const setCodeToolsEnabled = useChatRuntimeStore((s) => s.setCodeToolsEnabled);
   const mcpEnabledForChat = useChatRuntimeStore((s) => s.mcpEnabledForChat);
   const setMcpEnabledForChat = useChatRuntimeStore(
     (s) => s.setMcpEnabledForChat,
@@ -6911,7 +6817,7 @@ const ComposerToolsMenu: FC<{
     (s) => !!s.params.checkpoint && !s.modelLoading,
   );
   const checkpoint = useChatRuntimeStore((s) => s.params.checkpoint);
-  const supportsTools = useChatRuntimeStore((s) => s.supportsTools);
+  const supportsTools = useChatRuntimeStore(selectToolsSelectable);
   const supportsBuiltinWebSearch = useChatRuntimeStore(
     (s) => s.supportsBuiltinWebSearch,
   );
@@ -6940,16 +6846,10 @@ const ComposerToolsMenu: FC<{
     selectedExternalProvider?.providerType,
     externalSelection?.modelId,
   );
-  // Disable only when a loaded model lacks the capability; with no model the
-  // tool can still be pre-selected, matching the pill logic above.
-  const searchDisabled =
-    modelLoaded && !(supportsTools || supportsBuiltinWebSearch);
-  const codeDisabled =
-    modelLoaded && !(supportsTools || supportsBuiltinCodeExecution);
   const imageDisabled = !modelLoaded;
-  // Like Search/Code: disabled only when a loaded model lacks tool support.
+  // Like Search: disabled only when a loaded model lacks tool support.
   const mcpDisabled = modelLoaded && !supportsTools;
-  // Match Search and Code: allow pre-selection before a local model loads.
+  // Match Search: allow pre-selection before a local model loads.
   const researchDisabled =
     !researchAvailable ||
     (modelLoaded && !externalSelection && !supportsTools) ||
@@ -7048,25 +6948,25 @@ const ComposerToolsMenu: FC<{
     (items: string[], fromDialog = false) => {
       // A queue started while recording would swallow the held transcript send.
       if (menuIsDictating) {
-        toast.error("Finish dictating before running a list");
+        toast.error(translate("uxComponents.finishDictatingBeforeRunninghnsl4"));
         return;
       }
       // Starting the queue cancels an in-flight transcription, which would discard it.
       if (audioUploadBusy) {
-        toast.error("Wait for the transcription to finish before running a list");
+        toast.error(translate("uxComponents.waitForTheTranscription1xh3r"));
         return;
       }
       // Mid image edit, startQueue would bypass the overlay's prompt rewrite.
       if (generatedImageOverlay) {
-        toast.error("Close the image editor before running a list", {
-          description: "Saved lists cannot be applied to a generated image.",
+        toast.error(translate("uxComponents.closeTheImageEditor10sl7"), {
+          description: translate("uxComponents.savedListsCannotBeuzg5w"),
         });
         return;
       }
       const started = startQueue(items, undefined, () => {
         if (fromDialog) setPromptStorageOpen(true);
-        toast.info("Saved list was not queued", {
-          description: "The chat changed before the queue was ready. Try again.",
+        toast.info(translate("uxComponents.savedListWasNotzmb6j"), {
+          description: translate("uxComponents.theChatChangedBeforefzj9k"),
         });
       });
       if (started) {
@@ -7074,8 +6974,8 @@ const ComposerToolsMenu: FC<{
         return;
       }
       // startQueue refuses synchronously without calling onAborted.
-      toast.error("Couldn't queue that list here", {
-        description: "Open a chat first, then run the list.",
+      toast.error(translate("uxComponents.couldnTQueueThat1hxwm"), {
+        description: translate("uxComponents.openAChatFirst7sbp7"),
       });
     },
     [startQueue, generatedImageOverlay, menuIsDictating, audioUploadBusy, setPromptStorageOpen],
@@ -7097,7 +6997,7 @@ const ComposerToolsMenu: FC<{
         onSelect={() => setDeepResearchEnabled(!deepResearchEnabled)}
       >
         <HugeiconsIcon icon={Telescope02Icon} strokeWidth={2} />
-        Deep research
+{t("settings.chat.menu.deepResearch")}
         {deepResearchEnabled && !researchDisabled ? (
           <HugeiconsIcon
             icon={Tick02Icon}
@@ -7107,7 +7007,6 @@ const ComposerToolsMenu: FC<{
         ) : null}
       </DropdownMenuItem>
     ) : null,
-    browserUse: <BrowserAgentMenuItem />,
     chatWithFiles: (
       <DropdownMenuItem
         disabled={ragDisabled}
@@ -7125,7 +7024,7 @@ const ComposerToolsMenu: FC<{
         }}
       >
         <HugeiconsIcon icon={FileDatabaseIcon} strokeWidth={2} />
-        Chat with files
+{t("settings.chat.menu.chatWithFiles")}
         {ragEnabled && !ragDisabled ? (
           <HugeiconsIcon icon={Tick02Icon} strokeWidth={2} className="ml-auto" />
         ) : null}
@@ -7142,7 +7041,7 @@ const ComposerToolsMenu: FC<{
         onSelect={() => setMcpEnabledForChat(!mcpEnabledForChat)}
       >
         <HugeiconsIcon icon={McpServerIcon} strokeWidth={2} />
-        MCP
+{t("settings.chat.menu.mcp")}
         {mcpEnabledForChat && !mcpDisabled ? (
           <HugeiconsIcon icon={Tick02Icon} strokeWidth={2} className="ml-auto" />
         ) : null}
@@ -7154,7 +7053,7 @@ const ComposerToolsMenu: FC<{
         onSelect={() => setSkillsOn(!skillsOn)}
       >
         <HugeiconsIcon icon={Scroll01Icon} strokeWidth={2} />
-        Skills
+{t("settings.chat.menu.skills")}
         {skillsOn ? (
           <HugeiconsIcon icon={Tick02Icon} strokeWidth={2} className="ml-auto" />
         ) : null}
@@ -7164,7 +7063,7 @@ const ComposerToolsMenu: FC<{
       <DropdownMenuSub>
         <DropdownMenuSubTrigger>
           <HugeiconsIcon icon={Bookmark02Icon} strokeWidth={2} />
-          Saved prompts
+{t("settings.chat.menu.savedPrompts")}
         </DropdownMenuSubTrigger>
         <DropdownMenuSubContent
           collisionPadding={16}
@@ -7188,7 +7087,7 @@ const ComposerToolsMenu: FC<{
             <DropdownMenuSeparator />
           ) : null}
           <DropdownMenuItem onSelect={() => setPromptStorageOpen(true)}>
-            All saved prompts…
+            {t("composer.plus.allSavedPrompts")}
           </DropdownMenuItem>
         </DropdownMenuSubContent>
       </DropdownMenuSub>
@@ -7196,14 +7095,14 @@ const ComposerToolsMenu: FC<{
     compareChat: (
       <DropdownMenuItem onSelect={() => startCompare()}>
         <Columns2Icon />
-        Compare chat
+{t("settings.chat.menu.compareChat")}
       </DropdownMenuItem>
     ),
     exportChat: (
       <DropdownMenuSub>
         <DropdownMenuSubTrigger disabled={exportDisabled}>
           <HugeiconsIcon icon={Download01Icon} strokeWidth={2} />
-          Export chat
+{t("settings.chat.menu.exportChat")}
         </DropdownMenuSubTrigger>
         <DropdownMenuSubContent
           collisionPadding={16}
@@ -7213,27 +7112,27 @@ const ComposerToolsMenu: FC<{
             onSelect={() => {
               if (!activeThreadId) return;
               exportConversationRawJsonl(activeThreadId).catch((error) => {
-                if (!isDownloadCancelled(error)) toast.error("Export failed.");
+                if (!isDownloadCancelled(error)) toast.error(t("composer.plus.exportFailed"));
               });
             }}
           >
-            Training JSONL
+            {t("composer.plus.exportTrainingJsonl")}
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={() => {
               if (!activeThreadId) return;
               exportConversationMessagesJsonl(activeThreadId).catch((error) => {
-                if (!isDownloadCancelled(error)) toast.error("Export failed.");
+                if (!isDownloadCancelled(error)) toast.error(t("composer.plus.exportFailed"));
               });
             }}
           >
-            Message JSONL
+            {t("composer.plus.exportMessageJsonl")}
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={() => {
               if (!activeThreadId) return;
               exportConversationCsv(activeThreadId).catch((error) => {
-                if (!isDownloadCancelled(error)) toast.error("Export failed.");
+                if (!isDownloadCancelled(error)) toast.error(t("composer.plus.exportFailed"));
               });
             }}
           >
@@ -7243,7 +7142,7 @@ const ComposerToolsMenu: FC<{
             onSelect={() => {
               if (!activeThreadId) return;
               exportConversationShareGPT(activeThreadId).catch((error) => {
-                if (!isDownloadCancelled(error)) toast.error("Export failed.");
+                if (!isDownloadCancelled(error)) toast.error(t("composer.plus.exportFailed"));
               });
             }}
           >
@@ -7253,7 +7152,7 @@ const ComposerToolsMenu: FC<{
             onSelect={() => {
               if (!activeThreadId) return;
               exportConversationMarkdown(activeThreadId).catch((error) => {
-                if (!isDownloadCancelled(error)) toast.error("Export failed.");
+                if (!isDownloadCancelled(error)) toast.error(t("composer.plus.exportFailed"));
               });
             }}
           >
@@ -7266,14 +7165,14 @@ const ComposerToolsMenu: FC<{
       <DropdownMenuSub>
         <DropdownMenuSubTrigger>
           <HugeiconsIcon icon={Folder01Icon} strokeWidth={2} />
-          Projects
+{t("shell.navigation.projects")}
         </DropdownMenuSubTrigger>
         <DropdownMenuSubContent className="LAiM-plus-menu w-[calc(232px*var(--ui-space-scale,1))]">
           <DropdownMenuItem onSelect={() => setNewProjectOpen(true)}>
             <HugeiconsIcon icon={FolderAddIcon} strokeWidth={2} />
-            New project
+{t("library.chats.toolbar.newProject")}
           </DropdownMenuItem>
-          <DropdownMenuLabel>Recents</DropdownMenuLabel>
+          <DropdownMenuLabel>{t("shell.navigation.recents")}</DropdownMenuLabel>
           {recentProjects.length > 0 ? (
             recentProjects.map((project) => (
               <DropdownMenuItem
@@ -7286,7 +7185,7 @@ const ComposerToolsMenu: FC<{
             ))
           ) : (
             <DropdownMenuItem disabled={true}>
-              No recent projects
+              {t("composer.plus.noRecentProjects")}
             </DropdownMenuItem>
           )}
         </DropdownMenuSubContent>
@@ -7315,7 +7214,7 @@ const ComposerToolsMenu: FC<{
       <DropdownMenuTrigger asChild={true}>
         <button
           type="button"
-          aria-label="Tools and attachments"
+          aria-label={translate("uxComponents.toolsAndAttachments1mnow")}
           className="LAiM-composer-plus"
           data-tour="chat-plus-menu"
         >
@@ -7336,58 +7235,7 @@ const ComposerToolsMenu: FC<{
           onSelect={() => pickAttachment()}
         >
           <HugeiconsIcon icon={AttachmentIcon} strokeWidth={2} />
-          Add photos &amp; files
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          disabled={searchDisabled}
-          className={
-            toolsEnabled && !searchDisabled
-              ? "text-primary font-medium"
-              : undefined
-          }
-          onSelect={() => {
-            const next = !toolsEnabled;
-            setToolsEnabled(next);
-            // Mirror the Search pill: Kimi forbids search + thinking together.
-            if (isKimiExternal) {
-              setReasoningEnabled(!next, { persist: false });
-              applyQwenThinkingParams(!next);
-            }
-          }}
-        >
-          <InternetGlyph />
-          Web search
-          {toolsEnabled && !searchDisabled ? (
-            <HugeiconsIcon
-              icon={Tick02Icon}
-              strokeWidth={2}
-              className="ml-auto"
-            />
-          ) : null}
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          disabled={codeDisabled}
-          className={
-            codeToolsEnabled && !codeDisabled
-              ? "text-primary font-medium"
-              : undefined
-          }
-          onSelect={() => setCodeToolsEnabled(!codeToolsEnabled)}
-        >
-          {/* Scale, not width: an oversized box pushed the label out of line. */}
-          <HugeiconsIcon
-            icon={CodeIcon}
-            strokeWidth={2}
-            className="scale-[1.12]"
-          />
-          Tools
-          {codeToolsEnabled && !codeDisabled ? (
-            <HugeiconsIcon
-              icon={Tick02Icon}
-              strokeWidth={2}
-              className="ml-auto"
-            />
-          ) : null}
+{t("settings.chat.menu.addFiles")}
         </DropdownMenuItem>
         {deepResearchWithTools ? plusMenuNodes.deepResearch : null}
         {supportsBuiltinImageGeneration && (
@@ -7401,7 +7249,7 @@ const ComposerToolsMenu: FC<{
             onSelect={() => setImageToolsEnabled(!imageToolsEnabled)}
           >
             <HugeiconsIcon icon={Image03Icon} strokeWidth={2} />
-            Images
+{t("composer.pill.images")}
             {imageToolsEnabled && !imageDisabled ? (
               <HugeiconsIcon
                 icon={Tick02Icon}
@@ -7421,7 +7269,7 @@ const ComposerToolsMenu: FC<{
         <DropdownMenuSub>
           <DropdownMenuSubTrigger>
             <MoreHorizontalIcon className="size-4" />
-            More
+{t("settings.chat.menu.more")}
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent className="LAiM-plus-menu w-[calc(248px*var(--ui-space-scale,1))]">
             {overflowPlusItems.map((id) => (
@@ -7580,7 +7428,7 @@ const ComposerRightControls: FC<{
         .catch((error) => {
           stoppingResearchRunIdRef.current = null;
           setStoppingResearchRunId(null);
-          toast.error("Could not stop research", {
+          toast.error(translate("uxComponents.couldNotStopResearchkw5s9"), {
             description: error instanceof Error ? error.message : undefined,
           });
         });
@@ -7612,8 +7460,8 @@ const ComposerRightControls: FC<{
           </Button>
         ) : (
           <TooltipIconButton
-            tooltip="Dictate"
-            aria-label="Dictate"
+            tooltip={translate("browser.annotate.dictate")}
+            aria-label={translate("browser.annotate.dictate")}
             type="button"
             variant="ghost"
             className="size-9 rounded-full text-foreground"
@@ -7633,7 +7481,7 @@ const ComposerRightControls: FC<{
           <TooltipIconButton
             tooltip={
               pendingSend
-                ? "Waiting for documents…"
+                ? translate("uxComponents.waitingForDocumentss8y1b")
                 : t("promptQueue.sendTooltip", { shortcut: shortcutLabels.send })
             }
             side="bottom"
@@ -7659,14 +7507,14 @@ const ComposerRightControls: FC<{
         <AuiIf condition={({ thread }) => !thread.isRunning}>
           {queueEntry?.paused && queueDisabled ? (
             <TooltipIconButton
-              tooltip="Resume queue"
+              tooltip={translate("promptQueue.resume")}
               side="bottom"
               type="button"
               variant="default"
               size="icon"
               onClick={onResumeClick}
               className="aui-composer-send ml-1.5 size-9 rounded-full"
-              aria-label="Resume queue"
+              aria-label={translate("promptQueue.resume")}
             >
               {/* Solid glyph, so it is smaller than the stroked send arrow. */}
               <QueueResumeIcon className="size-4" />
@@ -7677,7 +7525,7 @@ const ComposerRightControls: FC<{
               variant="default"
               size="icon"
               className="aui-composer-cancel ml-1.5 size-9 rounded-full"
-              aria-label="Stop queued message"
+              aria-label={translate("uxComponents.stopQueuedMessages08iz")}
               onClick={stop}
             >
               <SquareIcon className="size-3 fill-current" />
@@ -7726,7 +7574,7 @@ const ComposerRightControls: FC<{
                 variant="default"
                 size="icon"
                 className="aui-composer-cancel size-9 rounded-full"
-                aria-label="Stop generating"
+                aria-label={translate("uxComponents.stopGeneratings60c8")}
                 // Cancel only ends the reply; handlePromptQueueRunState then
                 // dispatches the next queued prompt. stop() ends the run.
                 onClick={stop}
@@ -7770,7 +7618,7 @@ const MessageError: FC = () => {
               className="aui-message-error-retry inline-flex shrink-0 items-center gap-1.5 rounded-md border border-destructive/40 px-2.5 py-1 text-xs font-medium transition-colors hover:bg-destructive/15"
             >
               <RefreshGlyph strokeWidth={1.75} className="size-3.5" />
-              Retry
+              {translate("common.retry")}
             </button>
           </ActionBarPrimitive.Reload>
         )}
@@ -7789,7 +7637,7 @@ const GeneratingIndicator: FC = () => {
   }
   return (
     <span className="generating-glint text-sm text-muted-foreground">
-      Working...
+      {translate("settings.data.library.working")}
     </span>
   );
 };
@@ -7807,7 +7655,7 @@ const CancelledIndicator: FC = () => {
   }
   return (
     <span className="aui-cancelled-indicator text-sm italic text-muted-foreground">
-      Cancelled.
+      {translate("uxComponents.cancelledb11ya")}
     </span>
   );
 };
@@ -8139,7 +7987,7 @@ const ContinueMessageBarForLastMessage: FC = () => {
     return (
       <div className="aui-continue-bar mt-2 flex items-center gap-2 rounded-md border border-border/70 bg-muted/50 p-2.5 text-sm text-muted-foreground">
         <Loader2Icon className="size-3.5 animate-spin" strokeWidth={1.75} />
-        Continuing automatically.
+        {translate("uxComponents.continuingAutomaticallykx2g3")}
       </div>
     );
   }
@@ -8160,7 +8008,7 @@ const ContinueMessageBarForLastMessage: FC = () => {
           }}
         >
           <QueueResumeIcon className="size-3.5" />
-          Resume
+          {translate("uxComponents.resumej88ay")}
         </Button>
       )}
     </div>
@@ -8270,9 +8118,7 @@ const DiffusionCanvas: FC = () => {
       <div className="flex items-center gap-2 border-b border-primary/10 px-3 py-1.5 text-ui-11 font-medium text-primary/80">
         <span className="inline-block size-1.5 animate-pulse rounded-full bg-primary" />
         <span>Denoising</span>
-        <span className="opacity-60">
-          block {canvas.block + 1} - {stepLabel}
-        </span>
+        <span className="opacity-60">{translate("uxComponents.block121qr", { p1: canvas.block + 1, p2: stepLabel })}</span>
       </div>
       <pre className="max-h-[60dvh] overflow-auto whitespace-pre-wrap px-3 py-2 font-mono text-ui-12p5 leading-relaxed text-foreground/90">
         {canvas.text}
@@ -8342,7 +8188,7 @@ const AssistantMessage: FC = () => {
                   || useChatRuntimeStore.getState().activeThreadId;
 
     if (!remoteId || remoteId === "" || remoteId === "/") {
-      toast.error("Save failed: No thread ID found.");
+      toast.error(translate("uxComponents.saveFailedNoThread1g0lx"));
       setEditingId(null);
       return;
     }
@@ -8360,7 +8206,7 @@ const AssistantMessage: FC = () => {
       });
     } catch (error) {
       console.error("UI: Error during save:", error);
-      toast.error("Failed to save message edits.");
+      toast.error(translate("uxComponents.failedToSaveMessage18gg6"));
     } finally {
       setEditingId(null);
     }
@@ -8478,7 +8324,7 @@ const AssistantMessage: FC = () => {
       <span
         className="aui-assistant-reveal-sentinel"
         tabIndex={0}
-        aria-label="Message actions"
+        aria-label={translate("uxComponents.messageActions1ddr7")}
       />
       </MessagePrimitive.Root>
     </ResearchMessageRunIdContext.Provider>
@@ -8524,7 +8370,7 @@ const ForkCountBadge: FC = () => {
   return (
     <span
       className="mx-1 inline-flex items-center gap-1 rounded-sm bg-primary/10 px-1.5 py-0.5 text-ui-10 font-medium text-primary"
-      title={`${count} fork${count === 1 ? "" : "s"} from this message`}
+      title={translate("uxComponents.forksFromThisMessageo7d2s", { p1: count })}
     >
       <HugeiconsIcon icon={ForkIcon} strokeWidth={1.75} className="size-3" />
       {count}
@@ -8546,7 +8392,7 @@ const useForkMessageAction = () => {
     if (useForkInFlight.getState().forking) return;
     const remoteId = aui.threadListItem().getState().remoteId;
     if (!remoteId) {
-      toast.error("Cannot fork an unsaved chat");
+      toast.error(translate("uxComponents.cannotForkAnUnsavedxboxi"));
       return;
     }
     setPending(true);
@@ -8561,9 +8407,9 @@ const useForkMessageAction = () => {
       } catch {
         // The row does not hold what is on screen, so a fork made now would carry the
         // pre-edit modes and look like it had lost the change. Better to say so.
-        toast.error("Could not fork this chat", {
+        toast.error(translate("uxComponents.couldNotForkThis1b4i1"), {
           description:
-            "Its settings could not be saved, so the fork would not match. Please retry.",
+            translate("uxComponents.itsSettingsCouldNot1mboe"),
         });
         return;
       }
@@ -8581,7 +8427,7 @@ const useForkMessageAction = () => {
       showForkCreatedToast(result.containerSnapshotWarning);
     } catch (error) {
       console.error("Failed to fork", error);
-      toast.error("Failed to fork", {
+      toast.error(translate("library.chats.toast.forkFailed"), {
         description: error instanceof Error ? error.message : undefined,
       });
     } finally {
@@ -8631,7 +8477,7 @@ const ForkMessageButton: FC = () => {
 
   return (
     <TooltipIconButton
-      tooltip="Fork in new chat"
+      tooltip={translate("uxComponents.forkInNewChat1e66s")}
       disabled={forkDisabled}
       onClick={forkMessage}
     >
@@ -8747,7 +8593,7 @@ function useDeleteMessage() {
       });
     } catch (error) {
       console.error("Failed to delete message", error);
-      toast.error("Failed to delete message");
+      toast.error(translate("uxComponents.failedToDeleteMessage1ye6t"));
     }
   };
 
@@ -8761,7 +8607,7 @@ const DeleteMessageButton: FC = () => {
   }
   return (
     <TooltipIconButton
-      tooltip="Delete"
+      tooltip={translate("common.delete")}
       disabled={isRunning}
       onClick={() => void handleDelete()}
       className="hover:!text-destructive"
@@ -8842,7 +8688,7 @@ const CopyButton: FC = () => {
   };
 
   return (
-    <TooltipIconButton tooltip="Copy" onClick={handleCopy}>
+    <TooltipIconButton tooltip={translate("chatMenu.copy")} onClick={handleCopy}>
       <HugeiconsIcon
         icon={copied ? Tick02Icon : Copy01Icon}
         strokeWidth={1.75}
@@ -8863,7 +8709,7 @@ const EditAssistantMessageButton: FC = () => {
 
   return (
     <TooltipIconButton
-      tooltip="Edit response"
+      tooltip={translate("uxComponents.editResponse1vqhi")}
       disabled={isRunning || researchActive}
       onClick={() => setEditingId(messageId)}
     >
@@ -8905,7 +8751,7 @@ const ContinueResponseMenuItemForLastMessage: FC = () => {
       className="aui-action-bar-more-item flex cursor-pointer select-none items-center gap-2 rounded-[12px] px-3 py-2 text-sm outline-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
     >
       <HugeiconsIcon icon={ContinueArrowIcon} strokeWidth={1.75} className="size-icon" />
-      Continue response
+      {translate("uxComponents.continueResponse1wn5r")}
     </ActionBarMorePrimitive.Item>
   );
 };
@@ -8927,7 +8773,7 @@ const EditAssistantMessageMenuItem: FC = () => {
       className="aui-action-bar-more-item flex cursor-pointer select-none items-center gap-2 rounded-[12px] px-3 py-2 text-sm outline-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
     >
       <HugeiconsIcon icon={EditResponseIcon} strokeWidth={1.75} className="size-icon" />
-      Edit response
+      {translate("uxComponents.editResponse1vqhi")}
     </ActionBarMorePrimitive.Item>
   );
 };
@@ -8943,7 +8789,7 @@ async function exportMessageMarkdown(content: string): Promise<void> {
     );
   } catch (error) {
     if (!isDownloadCancelled(error)) {
-      toast.error("Could not save Markdown export.", {
+      toast.error(translate("uxComponents.couldNotSaveMarkdownbpzi9"), {
         description: error instanceof Error ? error.message : String(error),
       });
     }
@@ -8990,7 +8836,7 @@ const AssistantActionBar: FC = () => {
         {inlineEdit && <EditAssistantMessageButton />}
         {!researchRunId && !researchActive && (
           <ActionBarPrimitive.Reload asChild={true}>
-            <TooltipIconButton tooltip="Refresh">
+            <TooltipIconButton tooltip={translate("common.refresh")}>
               <RefreshGlyph strokeWidth={1.75} className="size-icon" />
             </TooltipIconButton>
           </ActionBarPrimitive.Reload>
@@ -8998,7 +8844,7 @@ const AssistantActionBar: FC = () => {
         {ttsEnabled && (
           <MessagePrimitive.If speaking={false}>
             <ActionBarPrimitive.Speak asChild={true}>
-              <TooltipIconButton tooltip="Read aloud" aria-label="Read aloud">
+              <TooltipIconButton tooltip={translate("settings.voice.readAloud.sectionTitle")} aria-label={translate("settings.voice.readAloud.sectionTitle")}>
                 <HugeiconsIcon icon={ReadAloudIcon} strokeWidth={1.75} className="size-icon" />
               </TooltipIconButton>
             </ActionBarPrimitive.Speak>
@@ -9009,8 +8855,8 @@ const AssistantActionBar: FC = () => {
         <MessagePrimitive.If speaking={true}>
           <ActionBarPrimitive.StopSpeaking asChild={true}>
             <TooltipIconButton
-              tooltip="Stop reading"
-              aria-label="Stop reading"
+              tooltip={translate("uxComponents.stopReading1ynk2")}
+              aria-label={translate("uxComponents.stopReading1ynk2")}
               className="text-destructive"
             >
               <HugeiconsIcon icon={VolumeMute02Icon} strokeWidth={1.75} className="size-icon" />
@@ -9027,7 +8873,7 @@ const AssistantActionBar: FC = () => {
           <ActionBarMorePrimitive.Trigger asChild={true}>
             <TooltipIconButton
               ref={moreMenuTriggerRef}
-              tooltip="More"
+              tooltip={translate("browser.more")}
               className="data-[state=open]:bg-accent"
             >
               <MoreHorizontalIcon strokeWidth={1.75} className="size-icon" />
@@ -9058,7 +8904,7 @@ const AssistantActionBar: FC = () => {
                     strokeWidth={1.75}
                     className="size-icon"
                   />
-                  Export as markdown
+                  {translate("uxComponents.exportAsMarkdownsaahj")}
                 </ActionBarMorePrimitive.Item>
               </ActionBarPrimitive.ExportMarkdown>
               {activeProjectId && (
@@ -9077,7 +8923,7 @@ const AssistantActionBar: FC = () => {
                       ),
                     );
                     if (!text.trim()) {
-                      toast.info("No content to save.");
+                      toast.info(translate("uxComponents.noContentToSave73f8n"));
                       return;
                     }
                     const state = aui.threadListItem().getState();
@@ -9094,7 +8940,7 @@ const AssistantActionBar: FC = () => {
                         ? await getStoredChatThread(remoteId).catch(() => null)
                         : null;
                       if (!thread?.projectId) {
-                        toast.info("This chat isn't in a project.");
+                        toast.info(translate("uxComponents.thisChatIsnT1r6lc"));
                         return;
                       }
                       await saveMarkdownAsProjectSource(
@@ -9111,7 +8957,7 @@ const AssistantActionBar: FC = () => {
                     strokeWidth={1.75}
                     className="size-icon"
                   />
-                  Save to project sources
+                  {translate("uxComponents.saveToProjectSources1n5pa")}
                 </ActionBarMorePrimitive.Item>
               )}
             </div>
@@ -9182,7 +9028,7 @@ const UserMessage: FC = () => {
       <span
         className="aui-user-reveal-sentinel"
         tabIndex={0}
-        aria-label="Message actions"
+        aria-label={translate("uxComponents.messageActions1ddr7")}
       />
     </MessagePrimitive.Root>
   );
@@ -9196,7 +9042,7 @@ const UserActionBar: FC = () => {
       <CopyButton />
       {!ownsResearchMessage && !researchActive && (
         <ActionBarPrimitive.Edit asChild={true}>
-          <TooltipIconButton tooltip="Edit" className="aui-user-action-edit">
+          <TooltipIconButton tooltip={translate("uxImages.edit1i1lc")} className="aui-user-action-edit">
             <HugeiconsIcon
               icon={Edit03Icon}
               strokeWidth={1.75}
@@ -9270,11 +9116,11 @@ const EditComposer: FC = () => {
         <div className="aui-edit-composer-footer mx-3 mb-3 flex items-center gap-2 self-end">
           <ComposerPrimitive.Cancel asChild={true}>
             <Button type="button" variant="ghost" size="sm">
-              Cancel
+              {translate("browser.agentSettings.cancel")}
             </Button>
           </ComposerPrimitive.Cancel>
           <Button type="submit" size="sm" disabled={researchActive || editEmpty}>
-            Send
+            {translate("browser.annotate.send")}
           </Button>
         </div>
       </ComposerPrimitive.Root>
@@ -9298,7 +9144,7 @@ const BranchPicker: FC<BranchPickerPrimitive.Root.Props> = ({
       <BranchPickerPrimitive.Previous asChild={true}>
         <button
           type="button"
-          aria-label="Previous"
+          aria-label={translate("uxComponents.previous1t5jx")}
           className="aui-branch-chevron-btn"
         >
           <HugeiconsIcon icon={BranchPrevIcon} strokeWidth={1.75} className="size-4" />
@@ -9310,7 +9156,7 @@ const BranchPicker: FC<BranchPickerPrimitive.Root.Props> = ({
       <BranchPickerPrimitive.Next asChild={true}>
         <button
           type="button"
-          aria-label="Next"
+          aria-label={translate("uxComponents.next1padb")}
           className="aui-branch-chevron-btn"
         >
           <HugeiconsIcon icon={BranchNextIcon} strokeWidth={1.75} className="size-4" />

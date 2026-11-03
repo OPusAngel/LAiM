@@ -420,7 +420,7 @@ def test_a_child_out_of_memory_is_not_cached_and_is_not_a_verdict(monkeypatch):
 
 
 def test_no_child_falls_back_to_the_in_process_probe(monkeypatch):
-    # A frozen desktop build or a sandbox that refuses to spawn must still be able to load a
+    # A frozen desktop build or a workdir that refuses to spawn must still be able to load a
     # model: the VRAM this saves is not worth failing a load over.
     _stub_torch(monkeypatch)
     monkeypatch.setattr(tq, "_child_probe_table", lambda device: None)
@@ -643,7 +643,7 @@ def test_a_transient_spawn_oserror_is_retried_rather_than_latched(
 
 
 def test_a_host_that_refuses_every_spawn_stops_being_asked(monkeypatch):
-    # The retry is bounded: an OSError on every attempt is indistinguishable from a sandbox that
+    # The retry is bounded: an OSError on every attempt is indistinguishable from a workdir that
     # will never spawn, so the latch still lands after a short run of them.
     import multiprocessing
 

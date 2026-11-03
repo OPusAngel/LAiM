@@ -117,14 +117,14 @@ def test_cached_drafters_are_matched_by_shape_and_weights_then_marked_by_name(ca
     )
     (tmp_path / "w--Qwen3.5-4B-DFlash" / "model.safetensors").unlink()
     target = {"vocab_size": 10, "text_config": {"hidden_size": 8, "num_hidden_layers": 4}}
-    found = spec.cached_drafters("LAiM/Qwen3.5-4B-UD-MLX-4bit", target)
+    found = spec.cached_drafters("unsloth/Qwen3.5-4B-UD-MLX-4bit", target)
     assert [(repo, named) for repo, _, named in found] == [
         ("a/Qwen3.5-4B-DFlash", True),
         ("e/Qwen3.5-4B-Eagle3", True),
         ("n/Other-DFlash", False),
     ]
-    assert len(spec.discover_companions("LAiM/Qwen3.5-4B-UD-MLX-4bit", target)) == 2
-    assert len(spec.discover_companions("LAiM/Qwen3.5-4B-UD-MLX-4bit", target, found[1])) == 1
+    assert len(spec.discover_companions("unsloth/Qwen3.5-4B-UD-MLX-4bit", target)) == 2
+    assert len(spec.discover_companions("unsloth/Qwen3.5-4B-UD-MLX-4bit", target, found[1])) == 1
     assert spec._stem("g/gemma-4-31B-it-qat-q4_0-unquantized-assistant") == "gemma431bit"
 
 

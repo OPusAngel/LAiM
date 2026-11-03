@@ -4,7 +4,7 @@
 """Export checkpoint loading must shard across every visible GPU (#7053): the
 ``device_map="sequential"`` loader default stacks the whole model on GPU0 and OOMs
 while the other GPUs sit empty. The loader now passes whichever sharding map
-``get_device_map`` resolves (``"LAiM"`` on CUDA, ``"balanced"`` elsewhere), but only
+``get_device_map`` resolves (``"LAiM_balanced"`` on CUDA, ``"balanced"`` elsewhere), but only
 on a real multi-GPU host, so single-GPU, CPU and MLX are untouched."""
 
 from __future__ import annotations
@@ -185,7 +185,7 @@ def _LAiM_spill_error():
     except ValueError as original:
         try:
             raise ValueError(
-                "LAiM: LAiM/gemma-4-E2B-it-LAiM-bnb-4bit does not fit in GPU memory "
+                "LAiM: unsloth/gemma-4-E2B-it-unsloth-bnb-4bit does not fit in GPU memory "
                 "(cuda:0 has 6.84 GB free), so transformers placed part of it on the CPU, "
                 "which bitsandbytes cannot quantize."
             ) from original
@@ -349,7 +349,7 @@ def test_load_checkpoint_repairs_legacy_cache_identity_without_rewriting_adapter
     assert ok, message
     assert (
         backend.current_model.peft_config["default"].base_model_name_or_path
-        == "LAiM/Llama-3.2-1B-Instruct"
+        == "unsloth/Llama-3.2-1B-Instruct"
     )
     assert backend.current_model.config._name_or_path == str(checkpoint)
     assert adapter_path.read_text(encoding = "utf-8") == original_adapter
@@ -451,7 +451,7 @@ def test_retry_result_is_kept_even_if_it_also_offloads(monkeypatch, tmp_path):
     assert len(_AlwaysSpills.calls) == 2
 
 
-# ── the "LAiM" planner refusing to place the model ──
+# ── the "unsloth" planner refusing to place the model ──
 
 
 def test_is_device_map_infeasible_matches_by_class_name(monkeypatch):
@@ -560,7 +560,7 @@ def test_the_retry_names_sequential_rather_than_omitting_the_device_map(monkeypa
             cls.calls.append(kwargs)
             # Stands in for the planner: it refuses whenever it is the one asked to place.
             if (
-                kwargs.get("device_map") in ("LAiM", "LAiM_balanced", None)
+                kwargs.get("device_map") in ("unsloth", "LAiM_balanced", None)
                 or "device_map" not in kwargs
             ):
                 raise DeviceMapInfeasible("needs 7.57 GiB free on cuda:0, has 4.10 GiB")

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -38,7 +39,7 @@ export function InlineExpression({
   return (
     <div className="space-y-3">
       <div className="grid gap-3 sm:grid-cols-[130px_1fr]">
-        <InlineField label="Output type">
+        <InlineField label={translate("uxRecipestudio.outputType5ic22")}>
           <Select
             value={config.dtype}
             onValueChange={(value) =>
@@ -46,7 +47,7 @@ export function InlineExpression({
             }
           >
             <SelectTrigger className="nodrag h-8 w-full text-xs">
-              <SelectValue placeholder="dtype" />
+              <SelectValue placeholder={translate("uxRecipestudio.dtypeklvtx")} />
             </SelectTrigger>
             <SelectContent>
               {DTYPE_OPTIONS.map((dtype) => (
@@ -57,7 +58,7 @@ export function InlineExpression({
             </SelectContent>
           </Select>
         </InlineField>
-        <InlineField label="Expression">
+        <InlineField label={translate("uxRecipestudio.expression1tcet")}>
           <Input
             className="nodrag h-8 w-full text-xs"
             aria-invalid={invalidRefs.length > 0}

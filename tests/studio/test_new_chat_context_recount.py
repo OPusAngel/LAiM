@@ -640,7 +640,7 @@ def _run(script: str) -> dict:
 
 LOADED_MODEL = """
     seed({
-      params: { checkpoint: "LAiM/gguf-model", systemPrompt: "", systemVariables: "" },
+      params: { checkpoint: "unsloth/gguf-model", systemPrompt: "", systemVariables: "" },
       loadedContextLength: 8192,
       modelLoading: false,
     });
@@ -1045,7 +1045,7 @@ LIVE_INCOGNITO_BRANCH = """
         ),
         # The endpoint counts with whatever is resident; the reported id is the only witness.
         pytest.param(
-            TWO_STORED_TURNS, 2, "LAiM/other-gguf", id = "another_client_swapped_the_model"
+            TWO_STORED_TURNS, 2, "unsloth/other-gguf", id = "another_client_swapped_the_model"
         ),
     ],
 )
@@ -1359,7 +1359,7 @@ def test_a_count_for_a_branch_that_was_emptied_is_dropped(empties, expected_tota
     [
         (
             "{ totalTokens: 900, promptTokens: 700, completionTokens: 200, "
-            'modelId: "LAiM/gguf-model" }',
+            'modelId: "unsloth/gguf-model" }',
             0,
             900,
             200,
@@ -1429,7 +1429,7 @@ STORED_TURN = (
         ),
         (
             "{ totalTokens: 900, promptTokens: 700, completionTokens: 200, "
-            'modelId: "LAiM/gguf-model" }',
+            'modelId: "unsloth/gguf-model" }',
             {"totalTokens": 900, "completionTokens": 200, "estimated": None},
         ),
     ],
@@ -1814,9 +1814,9 @@ def test_adopting_the_resident_gguf_reprices_the_open_thread():
             });
 
             await adoptResidentModel({
-              modelId: "LAiM/gguf-model",
+              modelId: "unsloth/gguf-model",
               residentStatus: {
-                active_model: "LAiM/gguf-model",
+                active_model: "unsloth/gguf-model",
                 gguf_variant: null,
                 is_gguf: true,
                 context_length: 8192,
@@ -1853,7 +1853,7 @@ def test_status_poll_adoption_reprices_when_a_local_checkpoint_is_already_select
               { id: "m2", role: "assistant", createdAt: 2, content: [{ type: "text", text: "yo" }], metadata: {} },
             ];
             seed({
-              params: { checkpoint: "LAiM/gguf-model", systemPrompt: "", systemVariables: "" },
+              params: { checkpoint: "unsloth/gguf-model", systemPrompt: "", systemVariables: "" },
               loadedContextLength: 8192,
               activeThreadId: "thread-a",
               contextUsage: null,
@@ -1861,7 +1861,7 @@ def test_status_poll_adoption_reprices_when_a_local_checkpoint_is_already_select
             });
 
             await adoptServerStatus({
-              active_model: "LAiM/gguf-model",
+              active_model: "unsloth/gguf-model",
               gguf_variant: null,
               is_gguf: true,
               context_length: 8192,
@@ -1899,7 +1899,7 @@ REVISIT_AFTER_A_MODEL_SWITCH = """
     const beforeSwitch = world.countedMessages.length;
 
     // The user loads a different GGUF, then clicks back into thread-a in the sidebar.
-    useChatRuntimeStore.getState().setCheckpoint("LAiM/other-gguf");
+    useChatRuntimeStore.getState().setCheckpoint("unsloth/other-gguf");
     useChatRuntimeStore.getState().setActiveThreadId("thread-a");
     renderThreadContextUsageRecount();
 """
@@ -1912,7 +1912,7 @@ DEEP_LINK_HYDRATING_AFTER_THE_LOADER = """
 
     // /api/inference/status answers while the thread is still not active.
     seed({
-      params: { checkpoint: "LAiM/gguf-model", systemPrompt: "", systemVariables: "" },
+      params: { checkpoint: "unsloth/gguf-model", systemPrompt: "", systemVariables: "" },
       loadedContextLength: 8192,
       modelLoading: false,
     });
@@ -1991,7 +1991,7 @@ def test_a_thread_becoming_active_with_a_blank_bar_is_repriced(seed_script, scen
         ),
         pytest.param(
             "external::openai::gpt-x",
-            "LAiM/gguf-model",
+            "unsloth/gguf-model",
             {"totalTokens": 6, "estimated": True},
             id = "another_models_saved_usage_is_not_restored",
         ),
@@ -2155,21 +2155,21 @@ IMAGE_ONLY = '[{ type: "image", image: "data:image/png;base64,iVBORw0KGgo=" }]'
         # That model's own saved count is restored, as the history loader would ...
         (
             IMAGE_ONLY,
-            '{ promptTokens: 700, completionTokens: 9, totalTokens: 709, cachedTokens: 0, modelId: "LAiM/other-gguf" }',
+            '{ promptTokens: 700, completionTokens: 9, totalTokens: 709, cachedTokens: 0, modelId: "unsloth/other-gguf" }',
             True,
             {"total": 709, "estimated": None, "counts": 0},
         ),
         # ... unless it no longer fits a llama.cpp window ...
         (
             IMAGE_ONLY,
-            '{ promptTokens: 9000, completionTokens: 9, totalTokens: 9009, cachedTokens: 0, modelId: "LAiM/other-gguf" }',
+            '{ promptTokens: 9000, completionTokens: 9, totalTokens: 9009, cachedTokens: 0, modelId: "unsloth/other-gguf" }',
             True,
             {"total": 4, "estimated": True, "counts": 0},
         ),
         # ... which MLX runs past, so there the count stands ...
         (
             IMAGE_ONLY,
-            '{ promptTokens: 9000, completionTokens: 9, totalTokens: 9009, cachedTokens: 0, modelId: "LAiM/other-gguf" }',
+            '{ promptTokens: 9000, completionTokens: 9, totalTokens: 9009, cachedTokens: 0, modelId: "unsloth/other-gguf" }',
             False,
             {"total": 9009, "estimated": None, "counts": 0},
         ),
@@ -2207,7 +2207,7 @@ def test_a_media_chat_keeps_a_value_after_a_local_model_switch(parts, saved, ggu
             ];
             seed({{ activeThreadId: "thread-a", contextUsage: {{ promptTokens: 900, completionTokens: 9, totalTokens: 909, cachedTokens: 0 }} }});
             renderThreadContextUsageRecount();
-            useChatRuntimeStore.getState().setCheckpoint("LAiM/other-gguf");
+            useChatRuntimeStore.getState().setCheckpoint("unsloth/other-gguf");
             renderThreadContextUsageRecount();
             await new Promise((resolve) => setTimeout(resolve, 30));
             const after = snapshot();
@@ -2235,9 +2235,9 @@ def test_a_media_chat_keeps_a_value_after_a_local_model_switch(parts, saved, ggu
         ),
         # A media turn whose run never answered follows the counted reply: that count is stale.
         (
-            "LAiM/other-gguf",
+            "unsloth/other-gguf",
             ', { id: "m3", role: "user", createdAt: 3, content: [{ type: "image", image: "data:image/png;base64,iVBORw0KGgo=" }], metadata: {} }',
-            '{ promptTokens: 700, completionTokens: 9, totalTokens: 709, cachedTokens: 0, modelId: "LAiM/other-gguf" }',
+            '{ promptTokens: 700, completionTokens: 9, totalTokens: 709, cachedTokens: 0, modelId: "unsloth/other-gguf" }',
             {"total": 9, "estimated": True},
         ),
     ],
@@ -2422,7 +2422,7 @@ def test_an_output_only_audio_gguf_is_never_recounted(model_flags, expected_coun
               activeThreadId: "thread-a",
               contextUsage: null,
               contextUsageByThreadId: {{}},
-              models: [{{ id: "LAiM/gguf-model", ...{model_flags} }}],
+              models: [{{ id: "unsloth/gguf-model", ...{model_flags} }}],
             }});
             await refreshContextUsage({{ threadId: "thread-a", afterModelLoad: true }});
             console.log(JSON.stringify({{

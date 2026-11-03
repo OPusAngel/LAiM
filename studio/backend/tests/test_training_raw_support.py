@@ -63,7 +63,7 @@ class TestTrainingRawSupport(unittest.TestCase):
         ):
             backend.start_training(
                 job_id = "test-cpt-raw",
-                model_name = "LAiM/test-bnb-4bit",
+                model_name = "unsloth/test-bnb-4bit",
                 training_type = "Continued Pretraining",
                 format_type = "raw",
                 load_in_4bit = True,
@@ -108,7 +108,7 @@ class TestTrainingRawSupport(unittest.TestCase):
         ):
             backend.start_training(
                 job_id = "test-grad-clip",
-                model_name = "LAiM/test",
+                model_name = "unsloth/test",
                 training_type = "LoRA/QLoRA",
                 max_grad_norm = 0.7,
                 max_grad_value = 3.0,
@@ -154,7 +154,7 @@ class TestTrainingRawSupport(unittest.TestCase):
         ):
             backend.start_training(
                 job_id = "test-seed",
-                model_name = "LAiM/test",
+                model_name = "unsloth/test",
                 training_type = "LoRA/QLoRA",
                 random_seed = 1234,
             )
@@ -187,7 +187,7 @@ class TestTrainingRawSupport(unittest.TestCase):
 
         def request(**overrides):
             return TrainingStartRequest(
-                model_name = "LAiM/test",
+                model_name = "unsloth/test",
                 training_type = "LoRA/QLoRA",
                 format_type = "auto",
                 **overrides,
@@ -253,7 +253,7 @@ class TestTrainingRawSupport(unittest.TestCase):
         ):
             backend.start_training(
                 job_id = "test-grad-clip-default",
-                model_name = "LAiM/test",
+                model_name = "unsloth/test",
                 training_type = "LoRA/QLoRA",
             )
 
@@ -357,7 +357,7 @@ class TestTrainingRawSupport(unittest.TestCase):
             for bad in (float("inf"), float("nan")):
                 with self.assertRaises(ValidationError):
                     TrainingStartRequest(
-                        model_name = "LAiM/test",
+                        model_name = "unsloth/test",
                         training_type = "LoRA/QLoRA",
                         format_type = "auto",
                         **{field: bad},
@@ -433,7 +433,7 @@ class TestTrainingRawSupport(unittest.TestCase):
                 return True
 
         request = TrainingStartRequest(
-            model_name = "LAiM/test-bnb-4bit",
+            model_name = "unsloth/test-bnb-4bit",
             training_type = "Continued Pretraining",
             format_type = "raw",
             load_in_4bit = True,
@@ -503,7 +503,7 @@ class TestTrainingRawSupport(unittest.TestCase):
 
         result = format_and_template_dataset(
             dataset,
-            model_name = "LAiM/test",
+            model_name = "unsloth/test",
             tokenizer = None,
             format_type = "raw",
         )

@@ -34,6 +34,8 @@ import {
   RESULT_ROW_HEIGHT_PX,
   RESULT_SPLIT_ROW_HEIGHT_PX,
 } from "./models-table";
+import { translate } from "@/i18n";
+
 
 // Phones and small tablets (768px and under) show one card per row.
 const SINGLE_COLUMN_QUERY = "(max-width: 768px)";
@@ -507,7 +509,7 @@ export const ModelsCatalog = memo(function ModelsCatalog({
       </div>
       <output
         aria-live="polite"
-        aria-label={showDiscoverLoading ? "Loading models" : undefined}
+        aria-label={showDiscoverLoading ? translate("uxHub.loadingModelso1fu9") : undefined}
         className={cn(
           "pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[3px] transition-opacity duration-150",
           showDiscoverLoading ? "opacity-100" : "opacity-0",

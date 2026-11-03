@@ -8,7 +8,7 @@ Sources, each with its own id prefix so an item id says where its bytes are:
 - ``upload:<id>``                         a file uploaded straight into the Library
 - ``attachment:<message_id>:<attachment_id>``  a file attached to a chat message
 - ``image:<id>``                          an image from the Images page gallery
-- ``sandbox:<session_id>:<relative path>``     a file a chat tool wrote into its sandbox
+- ``workdir:<session_id>:<relative path>``     a file a chat tool wrote into its workdir
 - ``video:<id>``                          a clip from the Video page gallery
 - ``audio:<id>``                          a clip from the Audio page's history
 - ``model:<training|exported>:<path>``    a fine-tuned model under outputs/ or exports/ (no bytes:
@@ -129,7 +129,7 @@ def _item(
 
 
 def _fingerprint(info: os.stat_result) -> str:
-    """Which file a path-derived id (``sandbox:``, ``model:``) found: its inode (file id on Windows)
+    """Which file a path-derived id (``workdir:``, ``model:``) found: its inode (file id on Windows)
     and birth time where the OS keeps one, so an edit in place keeps it and a path made again does
     not. Not the device, which a remount changes. Linux keeps no birth time and ext4 reuses inodes,
     so there a file recreated at once can pass for the old one."""
@@ -151,7 +151,7 @@ _SOURCE_ROOTS: dict[str, Callable[[], Path]] = {
     "audio": lambda: _gallery("audio").module.gallery_dir(),
     "model:training": lambda: storage_roots.outputs_root(),
     "model:exported": lambda: storage_roots.exports_root(),
-    "sandbox": lambda: Path(importlib.import_module("core.inference.tools").sandbox_root()),
+    "workdir": lambda: Path(importlib.import_module("core.inference.tools").session_workdir_root()),
 }
 
 
@@ -801,7 +801,7 @@ def _model_items() -> list[dict]:
     return items
 
 
-class _SandboxSession(NamedTuple):
+class _WorkdirSession(NamedTuple):
     session_id: str
     thread_id: Optional[str]
     title: Optional[str]
@@ -809,7 +809,7 @@ class _SandboxSession(NamedTuple):
     project_id: Optional[str] = None
 
 
-def _sandbox_sessions() -> list[_SandboxSession]:
+def _workdir_sessions() -> list[_WorkdirSession]:
     from storage.studio_db import get_connection
 
     conn = get_connection()
@@ -822,10 +822,10 @@ def _sandbox_sessions() -> list[_SandboxSession]:
         conn.close()
     thread_ids = {row["id"] for row in threads}
     return [
-        _SandboxSession(row["id"], row["id"], row["title"], pair_id = row["pair_id"])
+        _WorkdirSession(row["id"], row["id"], row["title"], pair_id = row["pair_id"])
         for row in threads
     ] + [
-        _SandboxSession(
+        _WorkdirSession(
             f"{_PROJECT_SESSION_PREFIX}{row['id']}", None, row["name"], project_id = row["id"]
         )
         for row in projects
@@ -848,8 +848,8 @@ def _studio_project_root(root_path: Optional[str]) -> bool:
     )
 
 
-def _sandbox_session_eligible(session_id: str) -> bool:
-    """Whether one session id is among ``_sandbox_sessions``, asked of that row alone."""
+def _workdir_session_eligible(session_id: str) -> bool:
+    """Whether one session id is among ``_workdir_sessions``, asked of that row alone."""
     from storage.studio_db import get_connection
 
     conn = get_connection()
@@ -867,26 +867,26 @@ def _sandbox_session_eligible(session_id: str) -> bool:
     return row is not None and _studio_project_root(row["root_path"])
 
 
-def _sandbox_names(directory: str) -> frozenset:
-    """The files one sandbox's listing holds, remembered with the listing, so a grid of cards walks
-    a sandbox once rather than once a card."""
-    from routes.inference import _sandbox_listing_names
+def _workdir_names(directory: str) -> frozenset:
+    """The files one workdir's listing holds, remembered with the listing, so a grid of cards walks
+    a workdir once rather than once a card."""
+    from routes.inference import _session_listing_names
     return _LISTING.get(
         ("names", directory),
-        lambda: frozenset(_sandbox_listing_names(directory) if os.path.isdir(directory) else []),
-        _SANDBOX_TTL_SECONDS,
+        lambda: frozenset(_session_listing_names(directory) if os.path.isdir(directory) else []),
+        _WORKDIR_TTL_SECONDS,
     )
 
 
-def _sandbox_path(ref: str) -> str:
-    """The file a ``sandbox:`` id names, by the listing walk's rules: an eligible session, servable
+def _workdir_file_path(ref: str) -> str:
+    """The file a ``workdir:`` id names, by the listing walk's rules: an eligible session, servable
     segments, no dotfile, not too deep, no link on the way, and within the walk's cap. Checked for
     this one file, so a card never lists every chat. LookupError otherwise."""
     from core.inference.tools import (
-        _MAX_SANDBOX_PATH_SEGMENTS,
+        _MAX_SESSION_PATH_SEGMENTS,
         _servable_segment,
         _user_path_parts,
-        resolve_sandbox_workdir,
+        resolve_session_workdir,
     )
 
     session, _, relative = ref.partition(":")
@@ -894,16 +894,16 @@ def _sandbox_path(ref: str) -> str:
     parts = relative.split("/")
     if not relative or any(part.startswith(".") or not _servable_segment(part) for part in parts):
         raise LookupError(ref)
-    if not _sandbox_session_eligible(session_id):
+    if not _workdir_session_eligible(session_id):
         raise LookupError(ref)
-    directory = os.path.realpath(resolve_sandbox_workdir(session_id))
-    if len(_user_path_parts(parts, directory)) > _MAX_SANDBOX_PATH_SEGMENTS:
+    directory = os.path.realpath(resolve_session_workdir(session_id))
+    if len(_user_path_parts(parts, directory)) > _MAX_SESSION_PATH_SEGMENTS:
         raise LookupError(ref)
     path = os.path.join(directory, *parts)
     if not same_path(os.path.realpath(path), path) or not is_path_within(path, directory):
         raise LookupError(ref)
     # Past the listing's cap, or skipped by its walk: never listed, so not reachable by id either.
-    if relative not in _sandbox_names(directory):
+    if relative not in _workdir_names(directory):
         raise LookupError(ref)
     return path
 
@@ -943,23 +943,23 @@ def _open_regular(path: str) -> BinaryIO:
     return os.fdopen(fd, "rb")
 
 
-def _open_sandbox_file(ref: str) -> tuple[BinaryIO, str]:
-    """(open file, path) for a ``sandbox:`` id, opened once and checked by its descriptor: tool
+def _open_session_file(ref: str) -> tuple[BinaryIO, str]:
+    """(open file, path) for a ``workdir:`` id, opened once and checked by its descriptor: tool
     code runs here."""
-    path = _sandbox_path(ref)
+    path = _workdir_file_path(ref)
     try:
         return _open_regular(path), path
     except LookupError:
         raise LookupError(ref) from None
 
 
-def _delete_sandbox_file(ref: str, expected: Optional[str] = None) -> bool:
+def _delete_session_file(ref: str, expected: Optional[str] = None) -> bool:
     """Unlink the file an id names, only while its name is still the file checked, and with
     `expected`, only while it is the file listed with that fingerprint."""
     from core.inference.gallery_projects import _DIR_FLAGS, _USE_DIR_FD
 
     try:
-        handle, path = _open_sandbox_file(ref)
+        handle, path = _open_session_file(ref)
     except LookupError:
         return False
     parent, name = os.path.split(path)
@@ -981,18 +981,36 @@ def _delete_sandbox_file(ref: str, expected: Optional[str] = None) -> bool:
     return True
 
 
-def _sandbox_items() -> list[dict]:
-    from core.inference.tools import resolve_sandbox_workdir
-    from routes.inference import _sandbox_listing_names
+def _is_studio_workdir(directory: str) -> bool:
+    """Whether Studio made this folder, so its files are Studio's to list. A chat's tools run on the
+    user's own computer, and his home is a working directory like any other: walking it would put
+    every file he owns into a chat's card grid. Only the two folders Studio creates for itself --
+    the per-session workdir root and a project's workspace -- are listed.
+    """
+    from core.inference.tools import session_workdir_root
+    from utils.paths.storage_roots import project_workspaces_root
+
+    try:
+        roots = (session_workdir_root(), str(project_workspaces_root()))
+        return any(is_path_within(directory, os.path.realpath(root)) for root in roots)
+    except Exception:  # noqa: BLE001 - an unresolvable root lists nothing rather than everything
+        return False
+
+
+def _workdir_items() -> list[dict]:
+    from core.inference.tools import resolve_session_workdir
+    from routes.inference import _session_listing_names
 
     items = []
     generation = _LISTING.generation
-    for session_id, thread_id, title, pair_id, project_id in _sandbox_sessions():
+    for session_id, thread_id, title, pair_id, project_id in _workdir_sessions():
         try:
-            directory = os.path.realpath(resolve_sandbox_workdir(session_id))
-            names = _sandbox_listing_names(directory) if os.path.isdir(directory) else []
+            directory = os.path.realpath(resolve_session_workdir(session_id))
+            if not _is_studio_workdir(directory):
+                continue
+            names = _session_listing_names(directory) if os.path.isdir(directory) else []
         except Exception:
-            logger.debug("library.sandbox_listing_failed", exc_info = True)
+            logger.debug("library.workdir_listing_failed", exc_info = True)
             continue
         _LISTING.put(("names", directory), frozenset(names), generation)
         for relative in names:
@@ -1004,13 +1022,13 @@ def _sandbox_items() -> list[dict]:
                 continue
             items.append(
                 _item(
-                    f"sandbox:{quote(session_id, safe = '')}:{relative}",
+                    f"workdir:{quote(session_id, safe = '')}:{relative}",
                     name = os.path.basename(relative),
                     source = "generated",
                     content_type = _guess_type(relative),
                     size_bytes = info.st_size,
                     created_at = info.st_mtime_ns // 1_000_000,
-                    file_url = f"/api/inference/sandbox/{quote(session_id, safe = '')}/{quote(relative)}",
+                    file_url = f"/api/inference/workdir/{quote(session_id, safe = '')}/{quote(relative)}",
                     thread_id = thread_id,
                     thread_title = title,
                     fingerprint = _fingerprint(info),
@@ -1088,8 +1106,8 @@ _ACTIVE_TYPES = frozenset(
 
 @functools.lru_cache(maxsize = None)
 def content_types() -> dict[str, str]:
-    from routes.inference import _SANDBOX_MEDIA_TYPES
-    return {**_CONTENT_TYPES, **_SANDBOX_MEDIA_TYPES}
+    from routes.inference import _SESSION_MEDIA_TYPES
+    return {**_CONTENT_TYPES, **_SESSION_MEDIA_TYPES}
 
 
 def media_type(value: object) -> Optional[str]:
@@ -1126,7 +1144,7 @@ def item_type(item_id: str) -> str:
         if record is None:
             raise LookupError(item_id)
         return media_type(record["contentType"]) or ""
-    return _guess_type(ref) if kind == "sandbox" else ""
+    return _guess_type(ref) if kind == "workdir" else ""
 
 
 def _account_key() -> str:
@@ -1182,9 +1200,9 @@ class _Memo:
                     self._entries.popitem(last = False)
 
 
-_SANDBOX_TTL_SECONDS = 5.0
+_WORKDIR_TTL_SECONDS = 5.0
 _MODEL_TTL_SECONDS = 60.0
-# Bounded: sandboxes of chats and accounts nobody lists again would otherwise stay forever.
+# Bounded: workdirs of chats and accounts nobody lists again would otherwise stay forever.
 _LISTING = _Memo(size = 1024)
 invalidate_listing = _LISTING.forget
 
@@ -1231,7 +1249,7 @@ _SOURCES = (
     _video_items,
     _audio_items,
     _remembered("_model_items", _MODEL_TTL_SECONDS, _model_stamp),
-    _remembered("_sandbox_items", _SANDBOX_TTL_SECONDS),
+    _remembered("_workdir_items", _WORKDIR_TTL_SECONDS),
 )
 
 
@@ -1282,17 +1300,17 @@ def list_items() -> list[dict]:
 
 def path_derived(item_id: str) -> bool:
     """Whether the id names a path, which another file can take later."""
-    return item_id.partition(":")[0] in ("sandbox", "model")
+    return item_id.partition(":")[0] in ("workdir", "model")
 
 
 def fingerprint(item_id: str) -> Optional[str]:
     """The fingerprint of the file a path-derived id names now, for its overlay row; None for other
     ids (never given to another file) and for a file that is gone."""
     kind, _, ref = item_id.partition(":")
-    if kind not in ("sandbox", "model"):
+    if kind not in ("workdir", "model"):
         return None
     try:
-        path = _sandbox_path(ref) if kind == "sandbox" else local_path(item_id)
+        path = _workdir_file_path(ref) if kind == "workdir" else local_path(item_id)
         return _fingerprint(os.stat(path))
     except (LookupError, ValueError, OSError):
         return None
@@ -1328,10 +1346,10 @@ def _carry_overlay(path: str, before: os.stat_result, staged: os.stat_result) ->
             return
         for item_id, entry in library_db.list_entries().items():
             # NULL: a legacy row not yet adopted, which a listing racing this swap would adopt as the old inode.
-            if entry["fingerprint"] not in (old, None) or not item_id.startswith("sandbox:"):
+            if entry["fingerprint"] not in (old, None) or not item_id.startswith("workdir:"):
                 continue
             try:
-                listed = os.stat(_sandbox_path(item_id.partition(":")[2]))
+                listed = os.stat(_workdir_file_path(item_id.partition(":")[2]))
             except (LookupError, OSError):
                 continue
             if os.path.samestat(listed, after):
@@ -1435,8 +1453,8 @@ def open_item(item_id: str) -> ItemFile:
         path, prompt = _gallery_file(kind, ref)
         name = safe_file_name(_prompt_name(prompt, ref, path.suffix.lstrip(".")), ref)
         return ItemFile(_open_owned(path, item_id), name, _gallery(kind).folder, path.name)
-    if kind == "sandbox":
-        handle, path = _open_sandbox_file(ref)
+    if kind == "workdir":
+        handle, path = _open_session_file(ref)
         name = os.path.basename(path)
         return ItemFile(
             handle, safe_file_name(name), "files", safe_file_name(name, item_id = item_id)
@@ -1481,8 +1499,8 @@ def local_path(item_id: str) -> Path:
         return path
     if kind in _GALLERIES:
         return _gallery_file(kind, ref)[0]
-    if kind == "sandbox":
-        path = Path(_sandbox_path(ref))
+    if kind == "workdir":
+        path = Path(_workdir_file_path(ref))
         if not path.is_file():
             raise LookupError(item_id)
         return path
@@ -1649,7 +1667,7 @@ def item_exists(item_id: str, recorded: Optional[str] = None) -> bool:
         path = local_path(item_id)
     except (LookupError, ValueError):
         return False
-    if recorded is None or kind not in ("sandbox", "model"):
+    if recorded is None or kind not in ("workdir", "model"):
         return True
     try:
         return _fingerprint(os.stat(path)) == recorded
@@ -1851,13 +1869,13 @@ def _prepare_target(target: Path, key: str, current: Path) -> Path:
 
 
 def _refuse_overlap(target: Path, key: str, final: bool) -> None:
-    """Refuse a target inside another kind's folder, a chat sandbox (its listing would show the
+    """Refuse a target inside another kind's folder, a chat workdir (its listing would show the
     files as tool output, and clearing the chat would delete them), the current folder or LAiM's
     own home (the key's default aside). The `final` folder, the one files go into, also must not
     hold any of them: moving a folder into itself empties it."""
     current = _location_path(key)
     others = [_location_path(other) for other in _LOCATIONS if other != key]
-    others.append(_SOURCE_ROOTS["sandbox"]())
+    others.append(_SOURCE_ROOTS["workdir"]())
     if any(_inside(target, root) for root in (*others, current)):
         raise ValueError("That folder is inside another LAiM folder.")
     home = storage_roots.studio_root()
@@ -2336,8 +2354,8 @@ def _delete_item(item_id: str, fingerprint: Optional[str]) -> bool:
                 _forget_terminal_video(ref)
     elif kind in _GALLERIES:
         deleted = _gallery(kind).module.delete(ref)
-    elif kind == "sandbox":
-        deleted = _delete_sandbox_file(ref, fingerprint)
+    elif kind == "workdir":
+        deleted = _delete_session_file(ref, fingerprint)
     elif kind == "model":
         _origin, _, path = ref.partition(":")
         if not path or os.path.exists(path):

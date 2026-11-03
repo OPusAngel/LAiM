@@ -74,7 +74,7 @@ def _release():
     artifacts = [a for a in (m.parse_published_artifact(r) for r in raw) if a is not None]
     assert len(artifacts) == len(raw)
     return m.PublishedReleaseBundle(
-        repo = "LAiMai/llama.cpp",
+        repo = "unslothai/llama.cpp",
         release_tag = TAG,
         upstream_tag = "b11443",
         assets = {a.asset_name: f"https://example.com/{a.asset_name}" for a in artifacts},
@@ -199,7 +199,7 @@ def test_a_driver_below_the_floor_stops_the_release_walk(monkeypatch, system):
     monkeypatch.setattr(m, "apply_approved_hashes", lambda attempts, _checksums: attempts)
     monkeypatch.setattr(m, "github_release_assets", lambda _repo, _tag: {})
     with pytest.raises(m.PrebuiltFallback, match = "older than the CUDA 12.4"):
-        m._fork_manifest_release_plans("latest", host(system, (12, 2)), "LAiMai/llama.cpp", "")
+        m._fork_manifest_release_plans("latest", host(system, (12, 2)), "unslothai/llama.cpp", "")
     assert len(walked) == 1
 
 
@@ -329,7 +329,7 @@ class TestAStoredCudaChoiceBelowTheFloorFallsBackToDetection:
         return m.select_backend_install(
             backend = "cuda",
             llama_tag = "latest",
-            published_repo = "LAiMai/llama.cpp",
+            published_repo = "unslothai/llama.cpp",
             published_release_tag = "",
             host = host("Linux", driver),
         )

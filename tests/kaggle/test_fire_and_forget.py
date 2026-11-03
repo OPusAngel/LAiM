@@ -629,10 +629,10 @@ def test_an_abbreviated_sha_is_EXPANDED_before_a_status_is_posted(monkeypatch):
     """The statuses API rejects an abbreviated SHA with 422, so the poster must expand it first."""
     full = "2ecb19df" + "a" * 32
     calls = _fake_gh(monkeypatch, resolve_to = full)
-    outcome = post_statuses.post_all([dict(_STATUS)], "LAiMai/LAiM")
+    outcome = post_statuses.post_all([dict(_STATUS)], "OPusAngel/LAiM")
     assert outcome["ok"] == [_STATUS["slug"]], outcome
     posts = [c for c in calls if "/statuses/" in c[1]]
-    assert posts == [posts[0]] and posts[0][1] == f"repos/LAiMai/LAiM/statuses/{full}"
+    assert posts == [posts[0]] and posts[0][1] == f"repos/OPusAngel/LAiM/statuses/{full}"
     assert not any(c[1].endswith("/statuses/2ecb19df") for c in calls)
     # Every field is its own argument: nothing is assembled into a shell line.
     assert "-f" in posts[0] and f"description={_STATUS['description']}" in posts[0]
@@ -643,7 +643,7 @@ def test_a_commit_that_no_longer_exists_is_reported_not_silently_dropped(monkeyp
     Posting is then impossible, but it must SAY so and release the kernel rather
     than retry forever."""
     calls = _fake_gh(monkeypatch, resolve_to = None)
-    outcome = post_statuses.post_all([dict(_STATUS)], "LAiMai/LAiM")
+    outcome = post_statuses.post_all([dict(_STATUS)], "OPusAngel/LAiM")
     assert outcome["unresolved"] == [_STATUS["slug"]] and outcome["failed"] == []
     assert not any("/statuses/" in c[1] for c in calls), "posted to a commit that is gone"
     assert "Could not resolve a collected commit" in capsys.readouterr().out
@@ -734,7 +734,7 @@ def test_no_delivery_record_at_all_keeps_every_kernel_that_had_something_to_post
 
 def test_a_refused_post_is_red_and_recorded(monkeypatch, tmp_path):
     _fake_gh(monkeypatch, resolve_to = "2ecb19df" + "b" * 32, post_ok = False)
-    outcome = post_statuses.post_all([dict(_STATUS)], "LAiMai/LAiM")
+    outcome = post_statuses.post_all([dict(_STATUS)], "OPusAngel/LAiM")
     assert outcome["failed"] == [_STATUS["slug"]]
     result = tmp_path / "r.json"
     result.write_text(json.dumps({"statuses": [dict(_STATUS)]}))
@@ -1207,7 +1207,7 @@ def test_the_studio_workflow_resolves_its_ref_to_a_commit_before_dispatching():
         ), f"{path.name} dispatches on an unresolved ref"
         # Only fetching the object proves the repo has the SHA.
         assert (
-            "git fetch --quiet --depth=1 https://github.com/LAiMai/LAiM" in run
+            "git fetch --quiet --depth=1 https://github.com/OPusAngel/LAiM" in run
         ), f"{path.name} dispatches a full SHA without checking the repository serves it"
 
 
@@ -1226,7 +1226,7 @@ def test_a_lookup_that_could_not_be_made_keeps_the_kernel(monkeypatch, capsys):
     dropped connection says nothing, and reading it as "gone" deletes the only
     copy of the result."""
     calls = _fake_gh(monkeypatch, lookup_error = "gh: HTTP 503 Service Unavailable")
-    outcome = post_statuses.post_all([dict(_STATUS)], "LAiMai/LAiM")
+    outcome = post_statuses.post_all([dict(_STATUS)], "OPusAngel/LAiM")
     assert outcome["failed"] == [_STATUS["slug"]]
     assert outcome["unresolved"] == []
     assert not any("/statuses/" in c[1] for c in calls)
@@ -1429,7 +1429,7 @@ def test_old_and_new_slug_forms_for_one_commit_post_one_status(monkeypatch):
     assert len(statuses) == 2, "the collector cannot know these are one commit"
     for order in (statuses, statuses[::-1]):
         calls.clear()
-        outcome = post_statuses.post_all([dict(s) for s in order], "LAiMai/LAiM")
+        outcome = post_statuses.post_all([dict(s) for s in order], "OPusAngel/LAiM")
         posts = [c for c in calls if "/statuses/" in c[1]]
         assert len(posts) == 1, posts
         assert "state=failure" in " ".join(posts[0])
@@ -1627,7 +1627,7 @@ def test_two_commits_that_share_eight_characters_resolve_apart_and_post_twice(mo
             },
         ]
     )
-    outcome = post_statuses.post_all(statuses, "LAiMai/LAiM")
+    outcome = post_statuses.post_all(statuses, "OPusAngel/LAiM")
     posts = [c for c in calls if "/statuses/" in c[1]]
     assert len(posts) == 2
     assert {c[1].rsplit("/", 1)[-1] for c in posts} == {a_full, b_full}

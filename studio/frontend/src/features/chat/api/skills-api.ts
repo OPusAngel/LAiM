@@ -7,6 +7,8 @@ import { useEffect, useSyncExternalStore } from "react";
 import { useSkillsSwitchStore } from "../stores/skills-switch-store";
 import { refreshContextUsage } from "../utils/refresh-context-usage";
 import { SKILL_MENTION_PATTERN } from "./skill-tools";
+import { translate } from "@/i18n";
+
 
 export { SKILL_MENTION_PATTERN } from "./skill-tools";
 
@@ -71,7 +73,7 @@ async function parseResponse<T>(response: Response): Promise<T> {
     const detail =
       body && typeof body === "object" && "detail" in body
         ? String(body.detail)
-        : `Request failed (${response.status})`;
+        : translate("uxChat.requestFailedb9a7f", { p1: response.status });
     throw new Error(detail);
   }
   return body as T;
@@ -94,7 +96,7 @@ export function listSkills(force = false): Promise<readonly SkillRecord[]> {
     .then((response) => parseResponse<SkillRecord[]>(response))
     .then((skills) => {
       if (!Array.isArray(skills)) {
-        throw new Error("Could not load skills.");
+        throw new Error(translate("uxChat.couldNotLoadSkillsupl7q"));
       }
       return skills;
     })
@@ -115,7 +117,7 @@ export function listSkills(force = false): Promise<readonly SkillRecord[]> {
           error:
             error instanceof Error
               ? error.message
-              : "Could not load skills.",
+              : translate("uxChat.couldNotLoadSkillsyqpwy"),
         });
       }
       throw error;

@@ -11,9 +11,9 @@ import test from "node:test";
 import { deriveContextUsageBar } from "../src/features/chat/lib/context-usage-bar-state.ts";
 import { hasKnownContextWindow } from "../src/features/chat/lib/context-window-known.ts";
 
-import { readSrc } from "./helpers/kit.ts";
+import { englishView, readSrc, readSrcExpanded } from "./helpers/kit.ts";
 
-const RESIDENT = "LAiM/Qwen3.6-35B-A3B-MTP-GGUF";
+const RESIDENT = "unsloth/Qwen3.6-35B-A3B-MTP-GGUF";
 
 const base = {
   loadedContextLength: 32768,
@@ -60,7 +60,7 @@ test("residency not yet read still names the window", () => {
 
 // the reported case: a GGUF is resident, its window is known, nothing has been counted
 test("an uncounted chat names the window and claims no usage", () => {
-  const state = deriveContextUsageBar({ used: null, total: 32768 });
+  const state = deriveContextUsageBar({ used: null, total: 32768 }, englishView);
   assert.ok(state);
   assert.equal(state.face, "— / 32.8k");
   assert.equal(state.totalRowName, "Context window");
@@ -72,7 +72,7 @@ test("an uncounted chat names the window and claims no usage", () => {
 
 // the mutation the old source-regex tests could not see
 test("a counted zero is not the same as an uncounted chat", () => {
-  const state = deriveContextUsageBar({ used: 0, total: 32768 });
+  const state = deriveContextUsageBar({ used: 0, total: 32768 }, englishView);
   assert.ok(state);
   assert.equal(state.face, "0 / 32.8k");
   assert.equal(state.percent, 0);
@@ -85,7 +85,7 @@ test("a counted chat states the ratio", () => {
     total: 32768,
     promptTokens: 4096,
     completionTokens: 0,
-  });
+  }, englishView);
   assert.ok(state);
   assert.equal(state.face, "4.1k / 32.8k");
   assert.equal(state.percent, 12.5);
@@ -95,18 +95,18 @@ test("a counted chat states the ratio", () => {
 
 // a prompt already over the window pins at 100 rather than overflowing the fill
 test("usage past the window clamps to 100 percent", () => {
-  assert.equal(deriveContextUsageBar({ used: 40000, total: 32768 })?.percent, 100);
+  assert.equal(deriveContextUsageBar({ used: 40000, total: 32768 }, englishView)?.percent, 100);
 });
 
 // llama.cpp stops at the window; MLX runs straight past it, so the advice differs, and
 // which side of the limit a chat is on cannot be read from the clamped percent
 test("the limit advice follows the backend and the unclamped ratio", () => {
   const at = { used: 40000, total: 32768 };
-  assert.equal(deriveContextUsageBar(at)?.advice, "stops-at-limit");
+  assert.equal(deriveContextUsageBar(at, englishView)?.advice, "stops-at-limit");
   // The MLX branches are about the ratio, so they state the bound they assume: an
   // unconfirmed window advises on its own terms (see mlx-context-helpers).
   assert.equal(
-    deriveContextUsageBar({ ...at, isMlx: true, contextEnforced: true })?.advice,
+    deriveContextUsageBar({ ...at, isMlx: true, contextEnforced: true }, englishView)?.advice,
     "mlx-past-limit",
   );
   assert.equal(
@@ -115,17 +115,17 @@ test("the limit advice follows the backend and the unclamped ratio", () => {
       total: 32768,
       isMlx: true,
       contextEnforced: true,
-    })?.advice,
+    }, englishView)?.advice,
     "mlx-near-limit",
   );
-  assert.equal(deriveContextUsageBar({ used: 4096, total: 32768 })?.advice, "none");
+  assert.equal(deriveContextUsageBar({ used: 4096, total: 32768 }, englishView)?.advice, "none");
   // no window and no count: nothing to advise against
-  assert.equal(deriveContextUsageBar({ used: 40000, total: null })?.advice, "none");
+  assert.equal(deriveContextUsageBar({ used: 40000, total: null }, englishView)?.advice, "none");
 });
 
 // external providers: usage is known, the window is not
 test("an unknown window shows a bare token count and no ratio", () => {
-  const state = deriveContextUsageBar({ used: 4096, total: null });
+  const state = deriveContextUsageBar({ used: 4096, total: null }, englishView);
   assert.ok(state);
   assert.equal(state.face, "4.1k tokens");
   assert.equal(state.percent, null);
@@ -133,20 +133,20 @@ test("an unknown window shows a bare token count and no ratio", () => {
 });
 
 test("no window and no count renders nothing", () => {
-  assert.equal(deriveContextUsageBar({ used: null, total: null }), null);
-  assert.equal(deriveContextUsageBar({ used: 0, total: null }), null);
+  assert.equal(deriveContextUsageBar({ used: null, total: null }, englishView), null);
+  assert.equal(deriveContextUsageBar({ used: 0, total: null }, englishView), null);
 });
 
 // the divider would otherwise float above an empty region
 test("an uncounted chat reports no per-turn rows", () => {
   assert.equal(
-    deriveContextUsageBar({ used: null, total: 32768 })?.hasUsageDetails,
+    deriveContextUsageBar({ used: null, total: 32768 }, englishView)?.hasUsageDetails,
     false,
   );
 });
 
 test("the header renders the bar for single chats and active project threads", () => {
-  const page = readSrc("features/chat/chat-page.tsx");
+  const page = readSrcExpanded("features/chat/chat-page.tsx");
   assert.match(
     page,
     /\{showContextWindowUsage &&\s*\(view\.mode === "single" \|\|\s*\(view\.mode === "project" && activeThreadId != null\)\) &&\s*\(contextUsage \|\| contextWindowKnown\) \? \(/,

@@ -2,14 +2,12 @@
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
 import test from "node:test";
 
+import { readSrcAsyncExpanded } from "./helpers/kit.ts";
+
 function composerSource(): Promise<string> {
-  return readFile(
-    new URL("../src/components/assistant-ui/thread.tsx", import.meta.url),
-    "utf8",
-  );
+  return readSrcAsyncExpanded("components/assistant-ui/thread.tsx");
 }
 
 test("stop stays available when the running composer can queue", async () => {

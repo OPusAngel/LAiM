@@ -203,7 +203,7 @@ def run(n_installs: int, keep: bool) -> int:
 
     repo = PACKAGE_ROOT
     if not (repo / "install.sh").is_file():
-        raise TestFailure(f"install.sh not found at {repo}; run from a clone of LAiMai/LAiM")
+        raise TestFailure(f"install.sh not found at {repo}; run from a clone of OPusAngel/LAiM")
 
     test_root = Path(tempfile.mkdtemp(prefix = "LAiM_studio_clash_"))
     _log(f"test root: {test_root}")

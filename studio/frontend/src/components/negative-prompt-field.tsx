@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { ChevronDown } from "lucide-react";
 
 import { InfoHint } from "@/components/ui/info-hint";
@@ -39,9 +40,7 @@ export function NegativePromptField({
           onClick={() => onOpenChange(!open)}
           aria-expanded={open}
           className="text-xs font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          Negative prompt
-        </button>
+        >{translate("uxComponents.negativePromptvhxk7")}</button>
         {/* Chevron before the hint, so it stays next to the label it expands. */}
         <button
           type="button"
@@ -65,7 +64,7 @@ export function NegativePromptField({
           rows={2}
           className={textareaClassName}
           maxLength={NEGATIVE_PROMPT_MAX_LENGTH}
-          placeholder="What to avoid (optional)"
+          placeholder={translate("uxComponents.whatToAvoidOptional19uak")}
           value={value}
           onChange={(e) => onChange(e.target.value)}
         />

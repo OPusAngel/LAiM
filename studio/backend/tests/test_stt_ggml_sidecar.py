@@ -86,7 +86,7 @@ def test_curated_ids_mirror_transformers_sidecar():
 
 
 def test_curated_filenames_match_repo_naming():
-    # LAiMai/whisper-<id>-GGUF hosts whisper-<id>.bin; keep the download
+    # unslothai/whisper-<id>-GGUF hosts whisper-<id>.bin; keep the download
     # filename in lockstep with the repo so it resolves instead of 404ing.
     for model_id, repo in GGML_STT_REPOS.items():
         expected = repo.split("/", 1)[1].removesuffix("-GGUF") + ".bin"
@@ -1092,11 +1092,11 @@ def test_curated_gguf_dictation_repos_are_hidden():
     )
 
     for repo in (
-        "LAiMai/whisper-tiny-GGUF",
-        "LAiMai/whisper-base-GGUF",
-        "LAiMai/whisper-small-GGUF",
-        "LAiMai/whisper-large-v3-turbo-GGUF",
-        "LAiMai/whisper-large-v3-GGUF",
+        "unslothai/whisper-tiny-GGUF",
+        "unslothai/whisper-base-GGUF",
+        "unslothai/whisper-small-GGUF",
+        "unslothai/whisper-large-v3-turbo-GGUF",
+        "unslothai/whisper-large-v3-GGUF",
     ):
         assert repo in _HIDDEN_STT_REPO_IDS
         assert is_hidden_model(repo) is True
@@ -1105,8 +1105,8 @@ def test_curated_gguf_dictation_repos_are_hidden():
         assert is_hidden_model(repo.lower()) is True
 
     # A same-prefix but genuinely different repo is NOT hidden.
-    assert is_hidden_model("LAiMai/whisper-large-v3-GGUF-finetune") is False
-    assert is_curated_stt_repo_id("LAiMai/whisper-large-v3-GGUF-finetune") is False
+    assert is_hidden_model("unslothai/whisper-large-v3-GGUF-finetune") is False
+    assert is_curated_stt_repo_id("unslothai/whisper-large-v3-GGUF-finetune") is False
 
 
 def test_stt_load_has_no_engine_wide_cancel_endpoint():

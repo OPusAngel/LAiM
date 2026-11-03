@@ -32,7 +32,7 @@ from utils.hardware import hardware as hw
 # Clears every streaming precondition but the MLX guard, so only that can reject it.
 # load_in_4bit is off so the latest-sidecar probe stays offline.
 _STREAMING_START = {
-    "model_name": "LAiM/Llama-3.2-1B-Instruct",
+    "model_name": "unsloth/Llama-3.2-1B-Instruct",
     "training_type": "LoRA/QLoRA",
     "format_type": "Alpaca",
     "hf_dataset": "yahma/alpaca-cleaned",

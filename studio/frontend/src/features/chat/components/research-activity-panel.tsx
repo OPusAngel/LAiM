@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import {
   Collapsible,
@@ -285,7 +286,7 @@ export function researchStatusLabel(status: ResearchRunStatus): string {
     case "planning":
       return "Planning";
     case "awaiting_approval":
-      return "Review plan";
+      return translate("uxChat.reviewPlanu1wqm");
     case "queued":
       return "Queued";
     case "running":
@@ -416,9 +417,7 @@ const ActivityRow = memo(function ActivityRow({
             </div>
           ))}
           {activity.plan.steps.length > 3 ? (
-            <p className="pl-5 text-ui-11 text-muted-foreground">
-              +{activity.plan.steps.length - 3} more steps
-            </p>
+            <p className="pl-5 text-ui-11 text-muted-foreground">{translate("uxChat.moreStepshquxo", { p1: activity.plan.steps.length - 3 })}</p>
           ) : null}
         </div>
       ) : null}
@@ -555,7 +554,7 @@ function PlanReview({ runId }: { runId: string }): ReactElement | null {
         ingestResearchUpdate(latest);
       }
       if (!latest.planHash)
-        throw new Error("The research plan is missing its approval hash.");
+        throw new Error(translate("uxChat.theResearchPlanIsogmx3"));
       const approved = await approveResearchRun(
         latest.id,
         latest.planRevision,
@@ -563,7 +562,7 @@ function PlanReview({ runId }: { runId: string }): ReactElement | null {
       );
       ingestResearchUpdate(approved);
     } catch (error) {
-      toast.error("Could not start research", {
+      toast.error(translate("uxChat.couldNotStartResearch11rr6"), {
         description: error instanceof Error ? error.message : undefined,
       });
     } finally {
@@ -585,7 +584,7 @@ function PlanReview({ runId }: { runId: string }): ReactElement | null {
   return (
     <>
       <section className="mx-4 mt-3 rounded-2xl border border-primary/20 bg-primary/[0.045] p-3">
-        <p className="font-heading text-sm font-medium">Research plan ready</p>
+        <p className="font-heading text-sm font-medium">{translate("uxChat.researchPlanReadyvrzvq")}</p>
         <p className="mt-1 line-clamp-2 break-words text-xs text-muted-foreground">
           {run.plan.title}
         </p>
@@ -593,9 +592,7 @@ function PlanReview({ runId }: { runId: string }): ReactElement | null {
           className="mt-3 w-full"
           size="sm"
           onClick={() => setOpen(runId, true)}
-        >
-          Review plan
-        </Button>
+        >{translate("uxChat.reviewPlan3vx7q")}</Button>
       </section>
       <Dialog
         open={open}
@@ -603,17 +600,16 @@ function PlanReview({ runId }: { runId: string }): ReactElement | null {
       >
         <DialogContent className="max-h-[min(680px,calc(100dvh-6rem))] grid-rows-[auto_minmax(0,1fr)_auto] gap-0 overflow-hidden p-0 data-open:animate-none sm:max-w-3xl [&>[data-slot=dialog-close]]:right-6 [&>[data-slot=dialog-close]]:top-6">
           <DialogHeader className="border-b border-border/70 px-7 pb-4 pt-6 pr-16">
-            <DialogTitle>Review the research plan</DialogTitle>
+            <DialogTitle>{translate("uxCopy.reviewTheResearchPlan1ghtm")}</DialogTitle>
             <DialogDescription className="max-w-2xl leading-relaxed">
-              Research starts only after your approval. Check the scope and
-              search approach before continuing.
+              {translate("uxCopy.researchStartsOnlyAfter1gzv0")}
             </DialogDescription>
           </DialogHeader>
           <div className="min-h-0 overflow-y-scroll px-7 py-5 [scrollbar-gutter:stable]">
             {editing ? (
               <div className="space-y-3">
                 <Textarea
-                  aria-label="Plan title"
+                  aria-label={translate("uxChat.planTitle861z1")}
                   value={draft.title}
                   maxLength={200}
                   className="min-h-10 py-2 font-medium"
@@ -638,15 +634,13 @@ function PlanReview({ runId }: { runId: string }): ReactElement | null {
                     className="border-b border-border/60 py-3 first:pt-0 last:border-b-0 last:pb-0"
                   >
                     <div className="mb-2 flex items-center gap-1">
-                      <span className="mr-auto text-ui-11 font-medium text-muted-foreground">
-                        Step {index + 1}
-                      </span>
+                      <span className="mr-auto text-ui-11 font-medium text-muted-foreground">{translate("uxChat.steph3w3l", { p1: index + 1 })}</span>
                       <Button
                         variant="ghost"
                         size="icon-xs"
                         onClick={() => move(index, -1)}
                         disabled={index === 0}
-                        aria-label={`Move step ${index + 1} up`}
+                        aria-label={translate("uxChat.moveStepUpgm13w", { p1: index + 1 })}
                       >
                         <ArrowUp />
                       </Button>
@@ -655,7 +649,7 @@ function PlanReview({ runId }: { runId: string }): ReactElement | null {
                         size="icon-xs"
                         onClick={() => move(index, 1)}
                         disabled={index === draft.steps.length - 1}
-                        aria-label={`Move step ${index + 1} down`}
+                        aria-label={translate("uxChat.moveStepDownsfca3", { p1: index + 1 })}
                       >
                         <ArrowDown />
                       </Button>
@@ -674,13 +668,13 @@ function PlanReview({ runId }: { runId: string }): ReactElement | null {
                             ),
                           });
                         }}
-                        aria-label={`Remove step ${index + 1}`}
+                        aria-label={translate("uxChat.removeStep8r9fp", { p1: index + 1 })}
                       >
                         <Trash2 />
                       </Button>
                     </div>
                     <Textarea
-                      aria-label={`Step ${index + 1} title`}
+                      aria-label={translate("uxChat.stepTitlebv0rx", { p1: index + 1 })}
                       value={step.title}
                       maxLength={200}
                       className="mb-2 min-h-9 py-2"
@@ -691,7 +685,7 @@ function PlanReview({ runId }: { runId: string }): ReactElement | null {
                       }}
                     />
                     <Textarea
-                      aria-label={`Step ${index + 1} query`}
+                      aria-label={translate("uxChat.stepQuerykuhu5", { p1: index + 1 })}
                       value={step.query}
                       maxLength={500}
                       className="min-h-9 py-2 text-xs"
@@ -716,13 +710,12 @@ function PlanReview({ runId }: { runId: string }): ReactElement | null {
                       ...draft,
                       steps: [
                         ...draft.steps,
-                        { title: "New research step", query: "" },
+                        { title: translate("uxChat.newResearchStep18din"), query: "" },
                       ],
                     });
                   }}
                 >
-                  <Plus /> Add step
-                </Button>
+                  <Plus />{translate("uxChat.addStept0hdt")}</Button>
               </div>
             ) : (
               <div className="space-y-3">
@@ -730,9 +723,7 @@ function PlanReview({ runId }: { runId: string }): ReactElement | null {
                   <p className="break-words font-heading text-lg font-medium leading-snug text-foreground/90">
                     {draft.title}
                   </p>
-                  <span className="shrink-0 rounded-full bg-muted px-2.5 py-1 text-ui-11 font-medium text-muted-foreground">
-                    {draft.steps.length} steps
-                  </span>
+                  <span className="shrink-0 rounded-full bg-muted px-2.5 py-1 text-ui-11 font-medium text-muted-foreground">{translate("uxChat.stepsnx9h9", { p1: draft.steps.length })}</span>
                 </div>
                 {draft.steps.map((step, index) => (
                   <div
@@ -760,11 +751,11 @@ function PlanReview({ runId }: { runId: string }): ReactElement | null {
               variant="outline"
               onClick={() => setEditing(runId, !editing)}
             >
-              <Pencil /> {editing ? "Preview plan" : "Edit plan"}
+              <Pencil /> {editing ? translate("uxChat.previewPlan9mv8b") : translate("uxChat.editPlanmv85m")}
             </Button>
             <div className="flex flex-col-reverse gap-2 sm:flex-row">
               <Button variant="ghost" onClick={() => setOpen(runId, false)}>
-                Review later
+                {translate("uxChat.reviewLater54nky")}
               </Button>
               <Button
                 disabled={
@@ -781,7 +772,7 @@ function PlanReview({ runId }: { runId: string }): ReactElement | null {
                 ) : (
                   <HugeiconsIcon icon={Telescope02Icon} />
                 )}
-                {editing ? "Save and start" : "Start research"}
+                {editing ? translate("uxChat.saveAndStartdupcp") : translate("uxChat.startResearchwdeny")}
               </Button>
             </div>
           </DialogFooter>
@@ -809,7 +800,7 @@ function ResearchActions({ runId }: { runId: string }): ReactElement | null {
       useResearchRunStore.getState().setConnectionError(retried.id, null);
       ensureResearchRunFollowed(retried.id, retried);
     } catch (error) {
-      toast.error("Could not retry research", {
+      toast.error(translate("uxChat.couldNotRetryResearch14ri5"), {
         description: error instanceof Error ? error.message : undefined,
       });
     } finally {
@@ -872,7 +863,7 @@ export function ResearchActivityPanel({
   const blockedDomains = run.config?.websitePolicy?.blockedDomains ?? [];
   const websiteLimitLabel = allowedDomains.length
     ? allowedDomains.length === 1
-      ? `Only ${allowedDomains[0]}`
+      ? translate("uxChat.onlyl7ezr", { p1: allowedDomains[0] })
       : `${allowedDomains.length} allowed domains`
     : blockedDomains.length
       ? `${blockedDomains.length} blocked ${blockedDomains.length === 1 ? "domain" : "domains"}`
@@ -886,7 +877,7 @@ export function ResearchActivityPanel({
 
   return (
     <aside
-      aria-label="Research activity"
+      aria-label={translate("uxChat.researchActivitytal2m")}
       className={cn(
         "relative flex min-h-0 flex-col bg-background text-foreground",
         variant === "sheet" && "h-full",
@@ -911,7 +902,7 @@ export function ResearchActivityPanel({
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
               <h2 className="font-heading text-ui-15 font-medium">
-                Deep research
+                {translate("composer.pill.deepResearch")}
               </h2>
               <span
                 className={cn(
@@ -926,7 +917,7 @@ export function ResearchActivityPanel({
               </span>
             </div>
             <p className="mt-0.5 line-clamp-2 break-words text-xs text-muted-foreground">
-              {run.plan?.title ?? "Investigating your question"}
+              {run.plan?.title ?? translate("uxChat.investigatingYourQuestion0t0bj")}
             </p>
             {websiteLimitLabel ? (
               <p
@@ -948,7 +939,7 @@ export function ResearchActivityPanel({
             variant="ghost"
             size="icon-sm"
             onClick={onClose}
-            aria-label="Close research activity"
+            aria-label={translate("uxChat.closeResearchActivity1y1l7")}
           >
             <X />
           </Button>
@@ -958,15 +949,14 @@ export function ResearchActivityPanel({
             role="status"
             className="mt-2 flex items-center gap-2 text-ui-11 text-amber-700 dark:text-amber-300"
           >
-            <Spinner className="size-3" /> Reconnecting to research activity…
-          </div>
+            <Spinner className="size-3" />{translate("uxChat.reconnectingToResearchActivitydnpgf")}</div>
         ) : session.connection === "disconnected" &&
           !isSettledResearchRun(run, session.lastAppliedSeq) ? (
           <div
             role="status"
             className="mt-2 flex items-center justify-between gap-2 text-ui-11 text-destructive"
           >
-            <span>Research activity is unavailable.</span>
+            <span>{translate("uxCopy.researchActivityIsUnavailableoemgh")}</span>
             <Button
               size="sm"
               variant="ghost"
@@ -991,22 +981,20 @@ export function ResearchActivityPanel({
         ref={viewportRef}
         role="log"
         aria-live="off"
-        aria-label="Research activity timeline"
+        aria-label={translate("uxChat.researchActivityTimelinekg714")}
         tabIndex={0}
         className="min-h-0 flex-1 overflow-y-auto px-4 py-3 [overflow-anchor:none] focus-visible:outline-none"
       >
         {hydrating ? (
           <div className="flex items-center gap-2 py-3 text-sm text-muted-foreground">
-            <Spinner /> Restoring research activity…
-          </div>
+            <Spinner />{translate("uxChat.restoringResearchActivity463b8")}</div>
         ) : activities.length ? (
           activities.map((activity) => (
             <ActivityRow key={activity.id} runId={runId} activity={activity} />
           ))
         ) : (
           <div className="flex items-center gap-2 py-3 text-sm text-muted-foreground">
-            <Spinner /> Loading research activity…
-          </div>
+            <Spinner />{translate("uxChat.loadingResearchActivitytlebn")}</div>
         )}
       </div>
       {isAtBottom ? null : (
@@ -1041,8 +1029,8 @@ export function ResearchActivitySheet({
         showCloseButton={false}
       >
         <SheetHeader className="sr-only">
-          <SheetTitle>Deep research</SheetTitle>
-          <SheetDescription>Chronological research activity</SheetDescription>
+          <SheetTitle>{translate("uxChat.deepResearchhwj3y")}</SheetTitle>
+          <SheetDescription>{translate("uxCopy.chronologicalResearchActivity14udv")}</SheetDescription>
         </SheetHeader>
         <ResearchActivityPanel
           key={runId}

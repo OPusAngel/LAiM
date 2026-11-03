@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/tooltip";
 // eslint-disable-next-line no-restricted-imports -- the settings barrel imports this feature back
 import { useSettingsDialogStore } from "@/features/settings/stores/settings-dialog-store";
-import { useLocale, useT } from "@/i18n";
+import { translate, useLocale, useT } from "@/i18n";
 import { apiUrl } from "@/lib/api-base";
 import { cn } from "@/lib/utils";
 import {
@@ -135,10 +135,10 @@ export function buildArtifactSrcDoc(code: string): string {
 }
 
 // Preview iframes intentionally omit allow-downloads: generated canvases can offer their own
-// UI, but downloads must go through LAiM's explicit controls outside the sandbox.
+// UI, but downloads must go through LAiM's explicit controls outside the workdir.
 export function ArtifactHtmlFrame({
   code,
-  title = "HTML preview",
+  title = translate("uxChat.hTMLPreviewpf5tq"),
   className,
   fill = false,
   actionFocusTargetRef,
@@ -285,7 +285,7 @@ export function ArtifactHtmlFrame({
   const postArtifactHtml = useCallback(() => {
     if (!pendingPostRef.current) return;
     pendingPostRef.current = false;
-    // Sandboxed frame has an opaque origin ("null"), so a wildcard target is required; the payload
+    // Workdired frame has an opaque origin ("null"), so a wildcard target is required; the payload
     // only reaches this iframe's contentWindow.
     iframeRef.current?.contentWindow?.postMessage(
       { type: "LAiM:artifact-html", html: artifactHtml },

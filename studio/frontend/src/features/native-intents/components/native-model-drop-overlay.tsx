@@ -1,30 +1,31 @@
 import { cn } from "@/lib/utils";
+import { translate } from "@/i18n";
 import { FileUpIcon } from "lucide-react";
 import type { NativeModelDropState } from "../use-native-drop";
 
 function overlayCopy(state: NativeModelDropState): { title: string; description: string } {
   if (state.status === "invalid") {
     return {
-      title: "Can't use these files",
+      title: translate("uxNativeintents.canTUseThese1x76g"),
       description:
         state.reason ?? "Drop a .gguf model, or documents to chat with.",
     };
   }
   if (state.status === "valid" && state.action === "replace") {
     return {
-      title: "Drop to replace model",
-      description: "Current model will unload first.",
+      title: translate("uxNativeintents.dropToReplaceModels821k"),
+      description: translate("uxNativeintents.currentModelWillUnloadx4ch2"),
     };
   }
   if (state.status === "valid" && state.action === "load") {
     return {
-      title: "Drop to load model",
-      description: "Adds it as the active chat model.",
+      title: translate("uxNativeintents.dropToLoadModel1n8lw"),
+      description: translate("uxNativeintents.addsItAsThe11gka"),
     };
   }
   return {
-    title: "Drop to add model chip",
-    description: "Review it before loading.",
+    title: translate("uxNativeintents.dropToAddModelpqta0"),
+    description: translate("uxNativeintents.reviewItBeforeLoading1okc2"),
   };
 }
 

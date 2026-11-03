@@ -459,10 +459,10 @@ class RetiredAccountError(RuntimeError):
 root_retirement_lock = threading.RLock()
 
 
-def external_account_sandbox_root() -> Path | None:
-    """The managed account's tool sandbox when ``LAiM_STUDIO_SANDBOX_HOME`` moves it out of the
+def external_account_workdir_root() -> Path | None:
+    """The managed account's tool workdir when ``LAiM_STUDIO_WORKDIR_HOME`` moves it out of the
     workspace. A private root like the others, so retirement and ``ensure_dir`` cover it."""
-    override = (os.environ.get("LAiM_STUDIO_SANDBOX_HOME") or "").strip()
+    override = (os.environ.get("LAiM_STUDIO_WORKDIR_HOME") or "").strip()
     if is_owner_context() or not override:
         return None
     return (
@@ -475,9 +475,9 @@ def external_account_sandbox_root() -> Path | None:
 def managed_account_roots() -> tuple[Path, ...]:
     """Every private root retirement renames aside for the acting managed account."""
     roots = [workspace_root(), project_workspaces_root(), tmp_root()]
-    sandbox = external_account_sandbox_root()
-    if sandbox is not None:
-        roots.append(sandbox)
+    workdir = external_account_workdir_root()
+    if workdir is not None:
+        roots.append(workdir)
     return tuple(roots)
 
 
@@ -1327,7 +1327,7 @@ def _setup_cache_env() -> None:
         # It resolves against the CWD and the Windows launcher runs LAiM with WorkingDirectory=%USERPROFILE%, so the
         # cache landed in the user home. Must be set before LAiM_zoo.compiler imports: it reads the value at import
         # time and puts it on sys.path.
-        "LAiM_COMPILE_LOCATION": str(root.parent / "compiled_cache"),
+        "UNSLOTH_COMPILE_LOCATION": str(root.parent / "compiled_cache"),
         # Regenerable and process-scoped. Shared user data (HF hub cache, torch.hub checkpoints)
         # stays where the other tools look, except in portable mode.
         "TORCHINDUCTOR_CACHE_DIR": str(root / "torchinductor"),
@@ -1408,7 +1408,7 @@ def _setup_cache_env() -> None:
                     Path(value).mkdir(parents = True, exist_ok = False)
                 except FileExistsError:
                     created = False
-                if key == "LAiM_COMPILE_LOCATION" and created:
+                if key == "UNSLOTH_COMPILE_LOCATION" and created:
                     # Marks the directory as ours, so the cleanup can delete
                     # from it without inferring that from its contents. Only when
                     # this call made it: the marker is what licenses an rmtree.
@@ -1418,7 +1418,7 @@ def _setup_cache_env() -> None:
                 pass
             # A toolchain path we invented and could not make is worse than none: torch treats
             # it as authoritative and every compile fails, where unset would have used the
-            # library's temporary cache. Only these keys -- LAiM_COMPILE_LOCATION unset falls
+            # library's temporary cache. Only these keys -- UNSLOTH_COMPILE_LOCATION unset falls
             # back to a CWD-relative name, the bug that pin exists to fix, and the data roots
             # have no library default to fall back to.
             if key in _TOOLCHAIN_PATH_KEYS and not _usable_dir(value):
@@ -1430,7 +1430,7 @@ def setup_cache_env() -> None:
     """Seed the cache env vars without creating every studio directory.
 
     For `uvicorn main:app`, which bypasses run.py and so never reaches
-    ensure_studio_directories, but still has to pin LAiM_COMPILE_LOCATION
+    ensure_studio_directories, but still has to pin UNSLOTH_COMPILE_LOCATION
     before LAiM_zoo.compiler is imported.
     """
     _setup_cache_env()

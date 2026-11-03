@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import type { HfSortKey } from "@/features/hub/hooks/use-hub-model-search";
+import { HF_SOURCE_OWNER } from "@/config/hub-source";
 import {
   NewReleasesIcon,
   SlidersHorizontalIcon,
@@ -33,30 +35,40 @@ export interface ChannelPreset {
 export const CHANNEL_PRESETS: readonly ChannelPreset[] = [
   {
     id: "LAiM-trending",
-    label: "LAiM Trending",
+    get label() { return translate("uxHub.lAiMTrendingq99tr"); },
     icon: SparklesIcon,
-    hint: "Most trending models published by LAiM.",
-    owner: "LAiM",
+    get hint() {
+      return translate("uxHub.mostTrendingModelsPublished6r9i8");
+    },
+    owner: HF_SOURCE_OWNER,
     tags: ["gguf"],
     format: "recommended",
     sort: "trendingScore",
   },
   {
     id: "LAiM-latest",
-    label: "Latest LAiM",
+    get label() {
+      return translate("uxHub.latestLAiM14o7h");
+    },
     icon: NewReleasesIcon,
-    hint: "Freshly released models from the LAiM channel.",
-    owner: "LAiM",
+    get hint() {
+      return translate("uxHub.freshlyReleasedModelsFrom1nozq");
+    },
+    owner: HF_SOURCE_OWNER,
     format: "all",
     // Trending weighed against release age (lib/fresh-ranking.ts).
     sort: "fresh",
   },
   {
     id: "LAiM-safetensors",
-    label: "Fine-tune ready",
+    get label() {
+      return translate("uxHub.fineTuneReady15m77");
+    },
     icon: SlidersHorizontalIcon,
-    hint: "Checkpoints ready to fine-tune.",
-    owner: "LAiM",
+    get hint() {
+      return translate("uxHub.checkpointsReadyToFine1ngg2");
+    },
+    owner: HF_SOURCE_OWNER,
     format: "checkpoint",
     sort: "lastModified",
     finetunableOnly: true,
@@ -83,7 +95,7 @@ export const CHANNEL_TO_SECTION: Record<ChannelId, HubSection> = {
 };
 
 export const HUB_SECTION_TITLE: Record<HubSection, string> = {
-  trending: "Trending Now",
-  latest: "Latest LAiM Models",
-  finetune: "Fine-tune Ready",
+  get trending() { return translate("uxHub.trendingNowphyl6"); },
+  get latest() { return translate("uxHub.latestLAiMModelsip1tw"); },
+  get finetune() { return translate("uxHub.fineTuneReady1tzhp"); },
 };

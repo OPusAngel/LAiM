@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -51,7 +52,7 @@ export function DownloadLocationPicker() {
         setDownloadDir(path);
       }
     } catch (error) {
-      toast.error("Couldn't open the folder picker.", {
+      toast.error(translate("uxHub.couldnTOpenThe1olo0"), {
         description: error instanceof Error ? error.message : undefined,
       });
     }
@@ -77,8 +78,8 @@ export function DownloadLocationPicker() {
         <DropdownMenuTrigger asChild={true}>
           <button
             type="button"
-            aria-label={`Download to: ${dir ?? "Models folder"}`}
-            title={`Download to: ${dir ?? "Models folder"}`}
+            aria-label={`Download to: ${dir ?? translate("uxHub.modelsFolder0q3lg")}`}
+            title={`Download to: ${dir ?? translate("uxHub.modelsFolder0q3lg")}`}
             className="hub-tag-soft inline-flex h-[calc(26px*var(--ui-space-scale,1))] max-w-[calc(160px*var(--ui-space-scale,1))] min-w-0 cursor-pointer items-center gap-1 rounded-full border-0 px-2 text-ui-11 font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
             <HugeiconsIcon
@@ -93,13 +94,13 @@ export function DownloadLocationPicker() {
           align="end"
           className="max-w-[calc(360px*var(--ui-space-scale,1))]"
         >
-          <DropdownMenuLabel>Download to</DropdownMenuLabel>
+          <DropdownMenuLabel>{translate("uxHub.downloadTog4e7x")}</DropdownMenuLabel>
           <DropdownMenuRadioGroup
             value={dir ?? MODELS_FOLDER}
             onValueChange={(value) => setDownloadDir(value || null)}
           >
             <DropdownMenuRadioItem value={MODELS_FOLDER}>
-              Models folder
+              {translate("settings.general.storage.modelsFolder")}
             </DropdownMenuRadioItem>
             {options.map((path) => (
               <DropdownMenuRadioItem key={path} value={path} title={path}>
@@ -112,9 +113,7 @@ export function DownloadLocationPicker() {
             onSelect={() => {
               choose().catch(() => undefined);
             }}
-          >
-            Choose folder...
-          </DropdownMenuItem>
+          >{translate("uxHub.chooseFoldernt07a")}</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
       <FolderBrowser
@@ -122,8 +121,8 @@ export function DownloadLocationPicker() {
         onOpenChange={setBrowserOpen}
         onSelect={(path) => setDownloadDir(path)}
         initialPath={dir ?? undefined}
-        title="Choose download folder"
-        confirmLabel="Download here"
+        title={translate("uxHub.chooseDownloadFoldero3n91")}
+        confirmLabel={translate("uxHub.downloadHere8lqhs")}
         showModelHints={false}
       />
     </>

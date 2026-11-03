@@ -32,7 +32,7 @@ def test_slugify_project_name_rejects_path_only_or_separator_only_values():
 
 def test_build_default_output_dir_name_appends_project_slug():
     output_dir = build_default_output_dir_name(
-        "LAiM/Llama-3.2-3B-Instruct",
+        "unsloth/Llama-3.2-3B-Instruct",
         "Customer Support",
         timestamp = 1771227800,
     )
@@ -53,7 +53,7 @@ def test_build_default_output_dir_name_caps_final_component(tmp_path):
 
 def test_build_default_output_dir_name_skips_invalid_project_slug():
     output_dir = build_default_output_dir_name(
-        "LAiM/Llama-3.2-3B-Instruct",
+        "unsloth/Llama-3.2-3B-Instruct",
         "..",
         timestamp = 1771227800,
     )

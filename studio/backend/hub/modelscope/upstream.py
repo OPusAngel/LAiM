@@ -28,8 +28,8 @@ _TREE_MAX_PAGES = 200
 # HF ids ModelScope hosts under another org; only copies whose files all match (LFS sha256, else size).
 _ALIASES = {
     "model": {
-        "LAiMai/Qwen3-ASR-0.6B-GGUF": "ggml-org/Qwen3-ASR-0.6B-GGUF",
-        "LAiMai/Qwen3-ASR-1.7B-GGUF": "ggml-org/Qwen3-ASR-1.7B-GGUF",
+        "unslothai/Qwen3-ASR-0.6B-GGUF": "ggml-org/Qwen3-ASR-0.6B-GGUF",
+        "unslothai/Qwen3-ASR-1.7B-GGUF": "ggml-org/Qwen3-ASR-1.7B-GGUF",
         "MiniMaxAI/MiniMax-H3": "MiniMax/MiniMax-H3",
         "MiniMaxAI/MiniMax-Music3": "MiniMax/MiniMax-Music3",
         "OpenMOSS-Team/MOSS-TTS-Local-Transformer-v1.5": "openmoss/MOSS-TTS-Local-Transformer-v1.5",
@@ -40,7 +40,7 @@ _ALIASES = {
     },
     "dataset": {
         "openai/gsm8k": "AI-ModelScope/gsm8k",
-        "LAiM/alpaca-cleaned": "AI-ModelScope/alpaca-cleaned",
+        "unsloth/alpaca-cleaned": "AI-ModelScope/alpaca-cleaned",
         "garage-bAInd/Open-Platypus": "swift/Open-Platypus",
         "AI4Math/MathVista": "evalscope/MathVista",
         "AI4Math/MathVerse": "evalscope/MathVerse",

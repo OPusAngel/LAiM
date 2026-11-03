@@ -66,9 +66,9 @@ LTX2X_NAMES = [
     "Lightricks/LTX-2",
     "Lightricks/LTX-2.3",
     "Lightricks/LTX-2.3-fp8",
-    "LAiM/LTX-2-FP8",
-    "LAiM/LTX-2.3-FP8",
-    "LAiM/LTX-2.3-GGUF",
+    "unsloth/LTX-2-FP8",
+    "unsloth/LTX-2.3-FP8",
+    "unsloth/LTX-2.3-GGUF",
     "ltx-2-19b-dev.safetensors",
     "ltx-2.3-22b-distilled.safetensors",
     "LTX-2.3-22B-distilled-1.1-Q4_K_M.gguf",
@@ -226,7 +226,7 @@ def test_companion_base_must_be_the_same_release(tmp_path, monkeypatch):
     ltx23 = dict(gguf_filename = "distilled/ltx-2.3-22b-distilled-Q4_K_M.gguf", model_kind = "gguf")
     with pytest.raises(ValueError, match = "LTX-2.5"):
         backend.validate_load_request(
-            "LAiM/LTX-2.3-GGUF", base_repo = "LAiM/LTX-2.5-Diffusers", **ltx23
+            "unsloth/LTX-2.3-GGUF", base_repo = "unsloth/LTX-2.5-Diffusers", **ltx23
         )
     ltx25 = dict(
         gguf_filename = "distilled/ltx-2.5-22b-distilled-transformer-Q4_K_M.gguf", model_kind = "gguf"
@@ -239,7 +239,7 @@ def test_companion_base_must_be_the_same_release(tmp_path, monkeypatch):
     folder.mkdir()
     _write_index(folder, "Gemma4UnifiedForConditionalGeneration")
     with pytest.raises(ValueError, match = r"by its model_index\.json\) is LTX-2\.5"):
-        backend.validate_load_request("LAiM/LTX-2.3-GGUF", base_repo = str(folder), **ltx23)
+        backend.validate_load_request("unsloth/LTX-2.3-GGUF", base_repo = str(folder), **ltx23)
     backend.validate_load_request("vantagewithai/LTX-2.5-GGUF", base_repo = str(folder), **ltx25)
 
 

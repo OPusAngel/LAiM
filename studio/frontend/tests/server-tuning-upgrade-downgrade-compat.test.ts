@@ -54,7 +54,7 @@ const { setAuthFetchHandler } = await import("./helpers/store-stubs/auth.ts");
 
 const STORAGE_KEY = "LAiM_model_configs";
 const BACKFILL_FLAG = "LAiM_model_overrides_backfilled_v3";
-const MODEL = "LAiM/Repo-GGUF";
+const MODEL = "unsloth/Repo-GGUF";
 const VARIANT = "Q4_K_M";
 
 // Ceiling shipped by the last build BEFORE the group. A record stamped at or below
@@ -423,7 +423,7 @@ test("the eviction loop terminates when the budget needs a future record", () =>
     () => {
       const map: Record<string, unknown> = {};
       for (let index = 0; index < 505; index += 1) {
-        map[`LAiM/Model-${index}-GGUF::${VARIANT}`] = {
+        map[`unsloth/Model-${index}-GGUF::${VARIANT}`] = {
           version: 99,
           cacheRam: index,
         };
@@ -434,7 +434,7 @@ test("the eviction loop terminates when the budget needs a future record", () =>
     () => {
       const map: Record<string, unknown> = {};
       for (let index = 0; index < 20; index += 1) {
-        map[`LAiM/Model-${index}-GGUF::${VARIANT}`] = {
+        map[`unsloth/Model-${index}-GGUF::${VARIANT}`] = {
           version: 99,
           chatTemplateOverride: "x".repeat(60_000),
         };
@@ -450,7 +450,7 @@ test("the eviction loop terminates when the budget needs a future record", () =>
     // Reached at all, which is the termination assertion: node:test kills the process
     // on a hang rather than reporting one, so the failure mode is the run not ending.
     assert.equal(
-      savePerModelConfig("LAiM/New-GGUF", VARIANT, config({ cacheRam: 1 })),
+      savePerModelConfig("unsloth/New-GGUF", VARIANT, config({ cacheRam: 1 })),
       false,
       "a save that cannot fit must fail rather than evict a future record",
     );
@@ -467,22 +467,22 @@ test("eviction takes the readable records and leaves the future ones", () => {
   // candidates, and they go oldest first.
   store.clear();
   const map: Record<string, unknown> = {};
-  map["LAiM/Old-A-GGUF::Q4_K_M"] = { version: 1, nParallel: 2 };
-  map["LAiM/Future-GGUF::Q4_K_M"] = { version: 99, cacheRam: 7 };
-  map["LAiM/Old-B-GGUF::Q4_K_M"] = { version: 1, nParallel: 3 };
+  map["unsloth/Old-A-GGUF::Q4_K_M"] = { version: 1, nParallel: 2 };
+  map["unsloth/Future-GGUF::Q4_K_M"] = { version: 99, cacheRam: 7 };
+  map["unsloth/Old-B-GGUF::Q4_K_M"] = { version: 1, nParallel: 3 };
   for (let index = 0; index < 499; index += 1) {
-    map[`LAiM/Filler-${index}-GGUF::${VARIANT}`] = { version: 1, nParallel: 1 };
+    map[`unsloth/Filler-${index}-GGUF::${VARIANT}`] = { version: 1, nParallel: 1 };
   }
   writeMap(map);
 
   const evicted: { modelId: string; ggufVariant: string | null }[] = [];
   assert.ok(
-    savePerModelConfig("LAiM/New-GGUF", VARIANT, config({ cacheRam: 1 }), evicted),
+    savePerModelConfig("unsloth/New-GGUF", VARIANT, config({ cacheRam: 1 }), evicted),
   );
 
   const after = readMap();
   assert.equal(Object.keys(after).length, 500);
-  assert.deepEqual(after["LAiM/Future-GGUF::Q4_K_M"], {
+  assert.deepEqual(after["unsloth/Future-GGUF::Q4_K_M"], {
     version: 99,
     cacheRam: 7,
   });
@@ -490,9 +490,9 @@ test("eviction takes the readable records and leaves the future ones", () => {
   // list the server override of a dropped model keeps applying with nothing in the UI
   // able to forget it.
   assert.deepEqual(evicted, [
-    { modelId: "LAiM/Old-A-GGUF", ggufVariant: "Q4_K_M" },
-    { modelId: "LAiM/Old-B-GGUF", ggufVariant: "Q4_K_M" },
-    { modelId: "LAiM/Filler-0-GGUF", ggufVariant: "Q4_K_M" },
+    { modelId: "unsloth/Old-A-GGUF", ggufVariant: "Q4_K_M" },
+    { modelId: "unsloth/Old-B-GGUF", ggufVariant: "Q4_K_M" },
+    { modelId: "unsloth/Filler-0-GGUF", ggufVariant: "Q4_K_M" },
   ]);
 });
 
@@ -664,8 +664,8 @@ const OVERRIDE_KEY_FOLDS: [string, string, boolean][] = [
   ["//share/models/Foo.gguf", "\\\\SHARE\\models\\foo.gguf", true],
   ["/mnt/c/models/Foo.gguf", "/mnt/C/models/foo.gguf", true],
   ["/models/Foo.gguf", "/models/foo.gguf", false],
-  ["LAiM/Repo-GGUF", "LAiM/repo-gguf", true],
-  ["LAiM/Repo-GGUF:Q4_K_M", "LAiM/repo-gguf:q4_k_m", true],
+  ["unsloth/Repo-GGUF", "unsloth/repo-gguf", true],
+  ["unsloth/Repo-GGUF:Q4_K_M", "unsloth/repo-gguf:q4_k_m", true],
   ["/models/foo.gguf", "models/foo.gguf", false],
   ["models/foo.gguf", "/models/foo.gguf", false],
 ];

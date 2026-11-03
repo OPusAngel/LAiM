@@ -460,7 +460,7 @@ def test_a_vanished_companion_is_damage(tmp_path, monkeypatch, site_packages):
     ever looked at the companion's version."""
     dist_info = _dist(site_packages, name = "LAiM", version = VER)
     size = _write(site_packages / "LAiM" / "__init__.py", "x = 1\n")
-    _record(dist_info, [["LAiM/__init__.py", "sha256=x", size]])
+    _record(dist_info, [["unsloth/__init__.py", "sha256=x", size]])
     req_root = tmp_path / "requirements"
     req_root.mkdir()
     (req_root / install_manifest.BOOT_REQUIREMENT_FILE).write_text("", encoding = "utf-8")

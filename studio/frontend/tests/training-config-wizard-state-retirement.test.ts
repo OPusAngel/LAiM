@@ -27,7 +27,7 @@ function wizardEraBlob(): Record<string, unknown> {
   return {
     currentStep: 2,
     projectName: "customer-support-lora",
-    selectedModel: "LAiM/gemma-3-270m",
+    selectedModel: "unsloth/gemma-3-270m",
     trainingMethod: "qlora",
     maxSteps: 123,
     learningRate: 0.0002,
@@ -58,7 +58,7 @@ test("dropping the wizard step preserves every user-authored value", () => {
   >;
 
   assert.equal(state.projectName, "customer-support-lora");
-  assert.equal(state.selectedModel, "LAiM/gemma-3-270m");
+  assert.equal(state.selectedModel, "unsloth/gemma-3-270m");
   assert.equal(state.trainingMethod, "qlora");
   assert.equal(state.maxSteps, 123);
   assert.equal(state.learningRate, 0.0002);

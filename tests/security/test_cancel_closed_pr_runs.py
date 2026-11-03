@@ -20,7 +20,7 @@ import yaml
 
 REPO = Path(__file__).resolve().parents[2]
 WORKFLOW = REPO / ".github" / "workflows" / "cancel-closed-pr-runs.yml"
-REPOSITORY = "LAiMai/LAiM"
+REPOSITORY = "OPusAngel/LAiM"
 SELF_PATH = ".github/workflows/cancel-closed-pr-runs.yml"
 
 pytestmark = pytest.mark.skipif(

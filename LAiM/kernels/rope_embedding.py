@@ -164,7 +164,7 @@ def _rope_embedding(
     head_start = group_head_position * ROPE_GROUP_SIZE
     head_end = min((head_start + ROPE_GROUP_SIZE), n_heads)
 
-    # 10% faster kernel from HuyNguyen-hust, LAiMai/LAiM#238.
+    # 10% faster kernel from HuyNguyen-hust, OPusAngel/LAiM#238.
     if LONG_INDEXING:
         Q += row_position.to(tl.int64) * Q_row_stride
     else:

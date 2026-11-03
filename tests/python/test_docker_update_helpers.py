@@ -463,7 +463,7 @@ def test_studio_update_ref_puts_the_old_tree_back_when_the_new_one_cannot_start(
 def _zoo_spec(calls: str) -> str:
     for line in calls.splitlines():
         for token in line.split():
-            if token.startswith("git+https://github.com/LAiMai/LAiM-zoo.git@"):
+            if token.startswith("git+https://github.com/OPusAngel/LAiM-zoo.git@"):
                 return token
     return ""
 

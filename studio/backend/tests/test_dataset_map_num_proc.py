@@ -299,10 +299,10 @@ def test_the_env_override_reaches_these_callers(monkeypatch):
     monkeypatch.setattr(policy, "multiprocessing_start_method", lambda: "fork")
     policy.reset_warning_state()
 
-    monkeypatch.setenv("LAiM_DATASET_NUM_PROC", "2")
+    monkeypatch.setenv("UNSLOTH_DATASET_NUM_PROC", "2")
     assert hw.dataset_map_num_proc(8) == 2
 
-    monkeypatch.setenv("LAiM_DATASET_NUM_PROC", "0")
+    monkeypatch.setenv("UNSLOTH_DATASET_NUM_PROC", "0")
     assert hw.dataset_map_num_proc(8) is None
 
 
@@ -339,7 +339,7 @@ def test_the_cap_no_longer_advertises_an_override_it_cannot_honour():
     ]
     assert logged, "the cap stopped logging; re-check what this is guarding"
     assert not any(
-        "LAiM_DATASET_NUM_PROC" in line for line in logged
+        "UNSLOTH_DATASET_NUM_PROC" in line for line in logged
     ), "safe_num_proc tells the user to set an override it never reads"
 
 
@@ -494,11 +494,11 @@ def test_the_override_is_honoured_on_spawn_platforms(monkeypatch, platform):
     policy = _policy_or_skip()
     policy.reset_warning_state()
     monkeypatch.setattr(sys, "platform", platform)
-    monkeypatch.setenv("LAiM_DATASET_NUM_PROC", "2")
+    monkeypatch.setenv("UNSLOTH_DATASET_NUM_PROC", "2")
     assert hw.dataset_map_num_proc(8) == 2
 
     # Unset, the veto stands.
-    monkeypatch.delenv("LAiM_DATASET_NUM_PROC")
+    monkeypatch.delenv("UNSLOTH_DATASET_NUM_PROC")
     assert hw.dataset_map_num_proc(8) is None
 
 
@@ -507,7 +507,7 @@ def test_the_override_is_not_capped_by_the_studio_heuristics(monkeypatch):
     policy = _policy_or_skip()
     policy.reset_warning_state()
     _patch_device(monkeypatch, hw.DeviceType.CUDA, visible_gpus = 4)
-    monkeypatch.setenv("LAiM_DATASET_NUM_PROC", "16")
+    monkeypatch.setenv("UNSLOTH_DATASET_NUM_PROC", "16")
     assert hw.dataset_map_num_proc(2) == 16
 
 
@@ -524,7 +524,7 @@ def test_an_older_zoo_falls_back_to_the_LAiM_copy(monkeypatch):
 
     calls = []
     stub = types.ModuleType("LAiM.dataset_num_proc")
-    stub.NUM_PROC_ENV_VAR = "LAiM_DATASET_NUM_PROC"
+    stub.NUM_PROC_ENV_VAR = "UNSLOTH_DATASET_NUM_PROC"
     stub.get_dataset_num_proc = lambda desired = None, *, serial_as_none = True: (
         calls.append((desired, serial_as_none)) or 3
     )
@@ -576,11 +576,11 @@ def test_the_override_is_honoured_after_xpu_init(monkeypatch):
     _patch_device(monkeypatch, hw.DeviceType.XPU)
     _patch_runtime(monkeypatch, "xpu", is_initialized = True)
 
-    monkeypatch.setenv("LAiM_DATASET_NUM_PROC", "2")
+    monkeypatch.setenv("UNSLOTH_DATASET_NUM_PROC", "2")
     assert hw.dataset_map_num_proc(8) == 2
 
     # Unset, the veto stands at both layers.
-    monkeypatch.delenv("LAiM_DATASET_NUM_PROC")
+    monkeypatch.delenv("UNSLOTH_DATASET_NUM_PROC")
     assert hw.dataset_map_num_proc(8) is None
     assert hw.dataset_map_num_proc(8, serial_as_none = False) == 1
 
@@ -598,7 +598,7 @@ def test_an_ignored_override_does_not_skip_the_studio_caps(monkeypatch, raw):
     monkeypatch.setattr(policy, "_affordable_workers", lambda: 64)
     _patch_device(monkeypatch, hw.DeviceType.CUDA, visible_gpus = 4)
 
-    monkeypatch.setenv("LAiM_DATASET_NUM_PROC", raw)
+    monkeypatch.setenv("UNSLOTH_DATASET_NUM_PROC", raw)
     assert hw.dataset_map_num_proc(16) == 4
 
 

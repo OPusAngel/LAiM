@@ -23,8 +23,8 @@ const { mergeBackendRecommendedInference } = await import(
   "../src/features/chat/presets/preset-policy.ts"
 );
 
-const A = "LAiM/model-a";
-const B = "LAiM/model-b";
+const A = "unsloth/model-a";
+const B = "unsloth/model-b";
 const STATUS_CONTEXT_LENGTH = 131072;
 const STATUS = {
   inference: { temperature: 0.9 },

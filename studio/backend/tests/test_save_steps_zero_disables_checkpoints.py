@@ -57,7 +57,7 @@ CASES = [(0, "no", None), (None, "no", None), (25, "steps", 25)]
 def trainer(monkeypatch):
     monkeypatch.setattr(tmod, "should_use_mlx_training_backend", lambda *a, **k: False)
     t = tmod.LAiMTrainer()
-    t.model_name = "LAiM/csm-1b"
+    t.model_name = "unsloth/csm-1b"
     return t
 
 
@@ -111,7 +111,7 @@ def test_generic_sft_config_args(trainer, tmp_path, monkeypatch, save_steps, str
     trainer._audio_type = "bicodec"
     trainer.model = object()
     trainer.tokenizer = object()
-    trainer.model_name = "LAiM/spark-tts"
+    trainer.model_name = "unsloth/spark-tts"
 
     rows = [{"text": "a"}, {"text": "b"}]
     # _train_worker runs past config construction into stubbed-out training; only the

@@ -7,6 +7,8 @@ import type {
   RecipeExecutionStatus,
 } from "../execution-types";
 import type { RecipePayload } from "../utils/payload/types";
+import { translate } from "@/i18n";
+
 
 export const DATASET_PAGE_SIZE = 20;
 
@@ -16,13 +18,13 @@ export function buildSignature(name: string, payload: RecipePayload): string {
 
 export function formatSavedLabel(savedAt: number | null): string {
   if (!savedAt) {
-    return "Not saved yet";
+    return translate("uxRecipestudio.notSavedYet4hjuq");
   }
   const time = new Date(savedAt).toLocaleTimeString([], {
     hour: "numeric",
     minute: "2-digit",
   });
-  return `Saved ${time}`;
+  return translate("uxRecipestudio.savedxw2qn", { p1: time });
 }
 
 export function toErrorMessage(error: unknown, fallback: string): string {
@@ -89,7 +91,7 @@ export function isExecutionInProgress(status: RecipeExecutionStatus): boolean {
 }
 
 export function executionLabel(kind: "preview" | "full"): string {
-  return kind === "preview" ? "Preview" : "Full run";
+  return kind === "preview" ? "Preview" : translate("uxRecipestudio.fullRunnkju4");
 }
 
 export function normalizeRunName(value: unknown): string | null {

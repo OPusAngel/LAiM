@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   Tooltip,
   TooltipContent,
@@ -34,7 +35,7 @@ export function PathInfoButton({
       <TooltipTrigger asChild={true}>
         <button
           type="button"
-          aria-label="Copy on-device path"
+          aria-label={translate("uxHub.copyOnDevicePath10eyg")}
           onClick={handleCopy}
           className={cn(
             "inline-flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground opacity-0 transition-[opacity,background-color,color] duration-150 hover:bg-muted hover:text-foreground focus-visible:opacity-100 group-hover/dl:opacity-100",
@@ -49,7 +50,7 @@ export function PathInfoButton({
         </button>
       </TooltipTrigger>
       <TooltipContent side="bottom" className="tooltip-compact">
-        {copied ? "Copied" : "Copy path"}
+        {copied ? "Copied" : translate("uxHub.copyPath1djo8")}
       </TooltipContent>
     </Tooltip>
   );

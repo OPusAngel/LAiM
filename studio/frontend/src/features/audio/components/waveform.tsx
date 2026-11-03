@@ -17,6 +17,8 @@ import {
   useState,
 } from "react";
 import { WAVEFORM_BARS, formatSeconds } from "./waveform-peaks";
+import { translate } from "@/i18n";
+
 
 const SEEK_STEP_SECONDS = 5;
 
@@ -142,7 +144,7 @@ export function Waveform({
         variant="muted"
         size="icon"
         className="size-[calc(32px*var(--ui-space-scale,1))] shrink-0"
-        aria-label={playing ? `Pause ${label}` : `Play ${label}`}
+        aria-label={playing ? translate("uxAudio.pausenqa8z", { p1: label }) : translate("uxAudio.play7wng0", { p1: label })}
         disabled={!src}
         onClick={toggle}
       >
@@ -225,7 +227,7 @@ export function WaveformBars({
     <div
       role="slider"
       tabIndex={disabled ? -1 : 0}
-      aria-label={`${label} playback position`}
+      aria-label={translate("uxAudio.playbackPosition9holb", { p1: label })}
       aria-valuemin={0}
       aria-valuemax={Math.round(valueMax)}
       aria-valuenow={Math.round(valueNow)}

@@ -294,7 +294,7 @@ class TestExecPathForLaunch:
         monkeypatch.setattr(sys, "platform", "darwin")
         monkeypatch.delenv("LLAMA_SERVER_PATH", raising = False)
         wrapper, target = self._wrapper(tmp_path)
-        monkeypatch.setenv("LAiM_LLAMA_CPP_PATH", str(tmp_path / "llama.cpp"))
+        monkeypatch.setenv("UNSLOTH_LLAMA_CPP_PATH", str(tmp_path / "llama.cpp"))
         assert LlamaCppBackend._exec_path_for_launch(str(wrapper)) == str(target)
 
     def test_a_selected_installer_entrypoint_still_resolves_by_shape(self, monkeypatch, tmp_path):
@@ -340,7 +340,7 @@ class TestBinaryRevisionPathSpace:
         wrapper = root / "llama-server"
         wrapper.write_text('#!/bin/sh\nexec "$(dirname "$0")/build/bin/llama-server-real" "$@"\n')
         monkeypatch.delenv("LLAMA_SERVER_PATH", raising = False)
-        monkeypatch.setenv("LAiM_LLAMA_CPP_PATH", str(root))
+        monkeypatch.setenv("UNSLOTH_LLAMA_CPP_PATH", str(root))
         monkeypatch.setattr(sys, "platform", "darwin")
         return wrapper
 
@@ -400,7 +400,7 @@ class TestLocalLinkInstalls:
         link = studio_root / "llama.cpp"
         link.symlink_to(external)
         monkeypatch.delenv("LLAMA_SERVER_PATH", raising = False)
-        monkeypatch.setenv("LAiM_LLAMA_CPP_PATH", str(link))
+        monkeypatch.setenv("UNSLOTH_LLAMA_CPP_PATH", str(link))
         return link / "llama-server"
 
     def test_a_local_link_is_not_reported_as_managed(self, monkeypatch, tmp_path):
@@ -522,7 +522,7 @@ class TestTheCpuFallbackGateIsUnchangedForLinkedTrees:
         link = studio_root / "llama.cpp"
         link.symlink_to(external)
         monkeypatch.delenv("LLAMA_SERVER_PATH", raising = False)
-        monkeypatch.setenv("LAiM_LLAMA_CPP_PATH", str(link))
+        monkeypatch.setenv("UNSLOTH_LLAMA_CPP_PATH", str(link))
         return str(link / "build" / "bin" / "llama-server")
 
     def test_the_updater_cannot_repair_it(self, monkeypatch, tmp_path):
@@ -576,7 +576,7 @@ class TestAWrapperChainIsFollowedToTheEnd:
 
 
 class TestOnlyTheInstallersOwnEntrypointIsSkipped:
-    """LAiM_LLAMA_CPP_PATH makes a user's checkout read as managed.
+    """UNSLOTH_LLAMA_CPP_PATH makes a user's checkout read as managed.
 
     _llama_install_root treats the directory named by that variable as the
     active install with no marker file needed, so provenance alone said "ours"
@@ -600,7 +600,7 @@ class TestOnlyTheInstallersOwnEntrypointIsSkipped:
     def test_a_users_wrapper_in_a_custom_dir_is_launched_as_written(self, monkeypatch, tmp_path):
         root, entry = self._tree(tmp_path, self._USERS)
         monkeypatch.delenv("LLAMA_SERVER_PATH", raising = False)
-        monkeypatch.setenv("LAiM_LLAMA_CPP_PATH", str(root))
+        monkeypatch.setenv("UNSLOTH_LLAMA_CPP_PATH", str(root))
         monkeypatch.setattr(sys, "platform", "darwin")
         # It really does read as managed; the exemption is the wrapper shape.
         assert LlamaCppBackend._is_LAiM_managed_binary(str(entry)) is True
@@ -609,7 +609,7 @@ class TestOnlyTheInstallersOwnEntrypointIsSkipped:
     def test_the_installers_own_wrapper_is_still_resolved(self, monkeypatch, tmp_path):
         root, entry = self._tree(tmp_path, self._INSTALLER)
         monkeypatch.delenv("LLAMA_SERVER_PATH", raising = False)
-        monkeypatch.setenv("LAiM_LLAMA_CPP_PATH", str(root))
+        monkeypatch.setenv("UNSLOTH_LLAMA_CPP_PATH", str(root))
         monkeypatch.setattr(sys, "platform", "darwin")
         got = LlamaCppBackend._exec_path_for_launch(str(entry))
         assert got == str((root / "build" / "bin" / "llama-server").resolve())
@@ -628,7 +628,7 @@ class TestOnlyTheInstallersOwnEntrypointIsSkipped:
         link = root / "llama-server"
         link.symlink_to(real)
         monkeypatch.delenv("LLAMA_SERVER_PATH", raising = False)
-        monkeypatch.setenv("LAiM_LLAMA_CPP_PATH", str(root))
+        monkeypatch.setenv("UNSLOTH_LLAMA_CPP_PATH", str(root))
         monkeypatch.setattr(sys, "platform", "darwin")
         assert LlamaCppBackend._exec_path_for_launch(str(link)) == str(real.resolve())
 
@@ -665,7 +665,7 @@ class TestPinningTheInstallersOwnEntrypoint:
 
     def test_a_pinned_installer_wrapper_still_resolves(self, monkeypatch, tmp_path):
         root, entry = self._managed_tree(tmp_path, self._INSTALLER)
-        monkeypatch.delenv("LAiM_LLAMA_CPP_PATH", raising = False)
+        monkeypatch.delenv("UNSLOTH_LLAMA_CPP_PATH", raising = False)
         monkeypatch.setenv("LLAMA_SERVER_PATH", str(entry))
         monkeypatch.setattr(sys, "platform", "darwin")
         got = LlamaCppBackend._exec_path_for_launch(str(entry))
@@ -673,7 +673,7 @@ class TestPinningTheInstallersOwnEntrypoint:
 
     def test_a_pinned_custom_wrapper_is_still_preserved(self, monkeypatch, tmp_path):
         _root, entry = self._managed_tree(tmp_path, self._CUSTOM)
-        monkeypatch.delenv("LAiM_LLAMA_CPP_PATH", raising = False)
+        monkeypatch.delenv("UNSLOTH_LLAMA_CPP_PATH", raising = False)
         monkeypatch.setenv("LLAMA_SERVER_PATH", str(entry))
         monkeypatch.setattr(sys, "platform", "darwin")
         assert LlamaCppBackend._exec_path_for_launch(str(entry)) == str(entry)

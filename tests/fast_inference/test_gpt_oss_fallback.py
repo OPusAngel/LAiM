@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # Copyright 2026-present the LAiM AI Inc. team. All rights reserved.
 
-"""gpt-oss with fast_inference = True loads on LAiM inference instead of crashing in vLLM weight sharing (LAiMai/LAiM#4541)."""
+"""gpt-oss with fast_inference = True loads on LAiM inference instead of crashing in vLLM weight sharing (OPusAngel/LAiM#4541)."""
 
 import importlib.util
 

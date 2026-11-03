@@ -10,6 +10,8 @@ import {
   readMcpServerMutationSnapshot,
   trackMcpServerMutation,
 } from "./mcp-server-mutation-tracker";
+import { translate } from "@/i18n";
+
 
 export type McpImageInputMapping = {
   tool: string;
@@ -111,7 +113,7 @@ function parseErrorText(status: number, body: unknown): string {
     if (formatted) return formatted;
     if (typeof message === "string" && message) return message;
   }
-  return `Request failed (${status})`;
+  return translate("uxChat.requestFailedb9a7f", { p1: status });
 }
 
 async function mcpRequest<T>(

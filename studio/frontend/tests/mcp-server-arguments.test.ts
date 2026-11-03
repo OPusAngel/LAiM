@@ -20,14 +20,14 @@ import {
   waitForPendingMcpServerMutations,
 } from "../src/features/chat/api/mcp-server-mutation-tracker.ts";
 
-import { readSrc } from "./helpers/kit.ts";
+import { readSrc, readSrcExpanded } from "./helpers/kit.ts";
 
-const MCP_SERVERS_API = readSrc("features/chat/api/mcp-servers-api.ts");
-const CHAT_MCP_SERVERS_DIALOG = readSrc(
+const MCP_SERVERS_API = readSrcExpanded("features/chat/api/mcp-servers-api.ts");
+const CHAT_MCP_SERVERS_DIALOG = readSrcExpanded(
   "features/chat/chat-mcp-servers-dialog.tsx",
 );
-const MCP_COMPOSER_BUTTON = readSrc("features/chat/mcp-composer-button.tsx");
-const SYSTEMONE_API = readSrc("features/settings/api/systemone.ts");
+const MCP_COMPOSER_BUTTON = readSrcExpanded("features/chat/mcp-composer-button.tsx");
+const SYSTEMONE_API = readSrcExpanded("features/settings/api/systemone.ts");
 
 function deferred<T>() {
   let resolve!: (value: T | PromiseLike<T>) => void;
@@ -106,7 +106,7 @@ test("command, order, value, and intentional empty argument changes require enco
 });
 
 test("the helper never parses, splits, joins, trims, or quotes commands", () => {
-  const helper = readSrc("features/chat/mcp-server-form.ts");
+  const helper = readSrcExpanded("features/chat/mcp-server-form.ts");
   assert.doesNotMatch(helper, /\.(?:split|join|trim)\s*\(/);
   assert.doesNotMatch(helper, /JSON\.stringify|replace\s*\(/);
 });

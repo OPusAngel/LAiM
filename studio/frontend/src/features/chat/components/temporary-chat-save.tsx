@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -127,11 +128,11 @@ export function TemporaryChatSaveBridge() {
 
 async function copyMarkdown(markdown: string): Promise<void> {
   if (!markdown) {
-    toast.info("No exportable content.");
+    toast.info(translate("uxChat.noExportableContentfe4dd"));
     return;
   }
-  if (await copyToClipboard(markdown)) toast.success("Chat copied as Markdown");
-  else toast.error("Could not copy this chat.");
+  if (await copyToClipboard(markdown)) toast.success(translate("uxChat.chatCopiedAsMarkdown1y7oh"));
+  else toast.error(translate("uxChat.couldNotCopyThis1yd7c"));
 }
 
 /** The header's "…" menu in a temporary chat with messages: only what works without saving it. */
@@ -152,7 +153,7 @@ export function SaveTemporaryChatMenu({
   // Saving waits for a finished reply and for queued prompts, whose temporary tag would discard them.
   const canSave =
     target.hasMessages && !target.running && !target.queued && !saving;
-  const label = "Save chat to history";
+  const label = translate("uxChat.saveChatToHistoryihcp7");
 
   const save = async () => {
     setSaving(true);
@@ -160,9 +161,9 @@ export function SaveTemporaryChatMenu({
       await target.save();
       if (dontShowAgain) rememberSkipConfirm();
       setOpen(false);
-      toast.success("Chat saved to history");
+      toast.success(translate("uxChat.chatSavedToHistory3hsa7"));
     } catch (error) {
-      toast.error("Could not save chat", {
+      toast.error(translate("uxChat.couldNotSaveChat1o41f"), {
         description: error instanceof Error ? error.message : String(error),
       });
     } finally {
@@ -180,7 +181,7 @@ export function SaveTemporaryChatMenu({
                 <button
                   type="button"
                   className={cn(CHAT_MENU_TRIGGER, className)}
-                  aria-label="Chat options"
+                  aria-label={translate("browser.fullView.options")}
                 >
                   <HugeiconsIcon
                     icon={MoreHorizontalIcon}
@@ -194,9 +195,7 @@ export function SaveTemporaryChatMenu({
               side="bottom"
               sideOffset={6}
               className="tooltip-compact"
-            >
-              Chat options
-            </TooltipContent>
+            >{translate("uxChat.chatOptions4unkc")}</TooltipContent>
           </Tooltip>
           <DropdownMenuContent
             align="end"
@@ -226,7 +225,7 @@ export function SaveTemporaryChatMenu({
                 strokeWidth={1.75}
                 className="size-icon"
               />
-              Copy as Markdown
+              {translate("settings.keyboardShortcuts.actions.copyChatAsMarkdown.label")}
             </DropdownMenuItem>
             <DropdownMenuSeparator className="mx-3" />
             <DropdownMenuItem variant="destructive" onSelect={onDiscard}>
@@ -235,7 +234,7 @@ export function SaveTemporaryChatMenu({
                 strokeWidth={1.75}
                 className="size-icon"
               />
-              Delete
+              {translate("common.delete")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -258,11 +257,10 @@ export function SaveTemporaryChatMenu({
                 strokeWidth={2}
                 className="text-foreground/80 size-4.5 shrink-0"
               />
-              Save this chat to history?
+              {translate("uxChat.saveThisChatTorw2sz")}
             </DialogTitle>
             <DialogDescription>
-              The whole conversation is saved to your history, and new messages
-              are saved too.
+              {translate("uxCopy.theWholeConversationIsknxrh")}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex-wrap items-center gap-2 sm:justify-between">
@@ -278,7 +276,7 @@ export function SaveTemporaryChatMenu({
                 }
                 disabled={saving}
               />
-              Don&apos;t show again
+              {translate("uxChat.donAposTShow1482b")}
             </label>
             <div className="flex gap-2">
               <Button
@@ -286,15 +284,13 @@ export function SaveTemporaryChatMenu({
                 variant="ghost"
                 onClick={() => setOpen(false)}
                 disabled={saving}
-              >
-                Keep temporary
-              </Button>
+              >{translate("uxChat.keepTemporaryr50jr")}</Button>
               <Button
                 type="button"
                 onClick={() => void save()}
                 disabled={saving}
               >
-                {saving ? "Saving…" : "Save chat"}
+                {saving ? "Saving…" : translate("uxChat.saveChathrxwt")}
               </Button>
             </div>
           </DialogFooter>

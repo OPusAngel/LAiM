@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Input } from "@/components/ui/input";
 import type { ReactElement } from "react";
 import type { SamplerConfig } from "../../types";
@@ -25,9 +26,9 @@ export function BernoulliDialog({
       />
       <div className="grid gap-1.5">
         <FieldLabel
-          label="Probability (p)"
+          label={translate("uxRecipestudio.probabilityP1i6ps")}
           htmlFor={pId}
-          hint="Success probability in [0, 1]."
+          hint={translate("uxRecipestudio.successProbabilityIn07lcje")}
         />
         <Input
           id={pId}

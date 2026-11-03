@@ -160,7 +160,7 @@ S1 = {
 S2 = {
     **S1,
     "release_tag": "b6210",
-    "published_repo": "LAiMai/llama.cpp",
+    "published_repo": "unslothai/llama.cpp",
     "asset": "app-b6210-linux-x64-cuda12.tar.gz",
     "asset_sha256": "3f" * 32,
     "source": "published",
@@ -193,7 +193,7 @@ S12_REAL = {
     "requested_tag": "latest",
     "tag": "b10698",
     "release_tag": "b10698-mix-67dfc8b",
-    "published_repo": "LAiMai/llama.cpp",
+    "published_repo": "unslothai/llama.cpp",
     "asset": "app-b10698-mix-67dfc8b-linux-x64-cuda13-newer.tar.gz",
     "force_cpu": False,
     "llama_backend": None,

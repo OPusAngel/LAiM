@@ -95,7 +95,7 @@ def test_the_shell_guards():
     assert "requestSubmit = " not in shell
 
 
-def test_the_shell_tells_the_panel_when_the_sandbox_refuses_a_feature():
+def test_the_shell_tells_the_panel_when_the_workdir_refuses_a_feature():
     # Checked in Chromium, Firefox and WebKit, as this suite has no browser to run the shell in.
     shell = browser_mod._FRAME_HTML
     boot = shell[shell.index("const boot = ") : shell.index("const escapeAttr")]
@@ -160,7 +160,7 @@ def test_annotate_code_is_sent_only_when_annotating():
     assert response.headers["x-content-type-options"] == "nosniff"
 
 
-def test_prepare_page_strips_what_would_escape_the_sandbox():
+def test_prepare_page_strips_what_would_escape_the_workdir():
     page = (
         '<html><head><base href="/docs/">'
         '<meta http-equiv="Content-Security-Policy" content="default-src \'self\'">'

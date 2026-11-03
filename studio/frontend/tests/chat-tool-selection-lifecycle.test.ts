@@ -24,7 +24,7 @@ const runtimeUrl = new URL(
   import.meta.url,
 ).href;
 const THREAD = "tool-selection-chat";
-const MODEL = "LAiM/tool-capable-model";
+const MODEL = "unsloth/tool-capable-model";
 const LOCAL_TOOL_KEYS = [
   "toolsEnabled",
   "codeToolsEnabled",
@@ -119,11 +119,15 @@ for (const scope of ["defaults", "chat", "pending chat"] as const) {
         for (const key of LOCAL_TOOL_KEYS) {
           assert.equal(store.getState()[key], expected[key], key);
         }
-        assert.deepEqual(runtime.resolveToolsEnabledOnLoad(false), {
-          toolsEnabled: false,
-          codeToolsEnabled: false,
-          deepResearchEnabled: false,
-        });
+        // A local checkpoint keeps whatever the pills hold, even when its chat template
+        // cannot render tool calls: Agent modes open the loop anyway.
+        const resolved = runtime.resolveToolsEnabledOnLoad(false);
+        assert.equal(resolved.toolsEnabled, expected.toolsEnabled);
+        assert.equal(resolved.codeToolsEnabled, expected.codeToolsEnabled);
+        assert.equal(
+          resolved.deepResearchEnabled,
+          store.getState().deepResearchEnabled,
+        );
       });
     }
   }
@@ -153,8 +157,9 @@ test("unloading does not overwrite a settled chat or its defaults", async (t) =>
 
   store.getState().setActiveThreadId(null);
   store.getState().applyThreadScopedSettings(null, null);
-  assert.equal(store.getState().toolsEnabled, false);
-  assert.equal(store.getState().codeToolsEnabled, false);
+  // Internet and Code are both on by default for a fresh state.
+  assert.equal(store.getState().toolsEnabled, true);
+  assert.equal(store.getState().codeToolsEnabled, true);
   store.getState().setActiveThreadId(THREAD);
   store
     .getState()
@@ -180,7 +185,7 @@ test("unloading preserves armed research without changing tool exclusivity", asy
 });
 
 for (const scope of ["defaults", "chat", "pending chat"] as const) {
-  test(`${scope} disables Research for an incompatible local model and restores its preference`, async (t) => {
+  test(`${scope} keeps Research for a local model without a tool template`, async (t) => {
     const runtime = await boot(t);
     const store = runtime.useChatRuntimeStore;
     if (scope !== "defaults") {
@@ -195,14 +200,14 @@ for (const scope of ["defaults", "chat", "pending chat"] as const) {
     }
     store.getState().setDeepResearchEnabled(true);
     store.getState().clearCheckpoint();
-    store.getState().setCheckpoint("LAiM/no-tools", null);
+    store.getState().setCheckpoint("unsloth/no-tools", null);
     store.setState({
       supportsTools: false,
       ...runtime.resolveToolsEnabledOnLoad(false),
     });
-    assert.equal(store.getState().deepResearchEnabled, false);
+    assert.equal(store.getState().deepResearchEnabled, true);
     store.getState().setDeepResearchEnabled(true);
-    assert.equal(store.getState().deepResearchEnabled, false);
+    assert.equal(store.getState().deepResearchEnabled, true);
 
     if (scope === "pending chat") {
       store
@@ -211,13 +216,13 @@ for (const scope of ["defaults", "chat", "pending chat"] as const) {
     }
     store.getState().setPermissionMode("ask");
     await runtime.awaitThreadScopedSettingsWrite(THREAD);
-    assert.equal(store.getState().deepResearchEnabled, false);
+    assert.equal(store.getState().deepResearchEnabled, true);
     if (scope !== "defaults") {
       assert.equal(threadRows.rows.get(THREAD)?.deepResearchEnabled, true);
       store
         .getState()
         .applyThreadScopedSettings(THREAD, threadRows.rows.get(THREAD)!);
-      assert.equal(store.getState().deepResearchEnabled, false);
+      assert.equal(store.getState().deepResearchEnabled, true);
     } else {
       assert.equal(storage.get("LAiM_chat_deep_research_enabled"), "true");
     }
@@ -235,7 +240,7 @@ for (const scope of ["defaults", "chat", "pending chat"] as const) {
   });
 }
 
-test("late settings hydration cannot arm Research on an incompatible local model", async (t) => {
+test("late settings hydration arms Research even on a local model without tools", async (t) => {
   const runtime = await boot(t, false);
   const store = runtime.useChatRuntimeStore;
   settingsHttp.settings = { deepResearchEnabled: true };
@@ -244,7 +249,7 @@ test("late settings hydration cannot arm Research on an incompatible local model
     ...runtime.resolveToolsEnabledOnLoad(false),
   });
   await store.getState().hydratePersistedSettings();
-  assert.equal(store.getState().deepResearchEnabled, false);
+  assert.equal(store.getState().deepResearchEnabled, true);
   assert.equal(storage.get("LAiM_chat_deep_research_enabled"), "true");
   store.setState({
     supportsTools: true,
@@ -284,12 +289,25 @@ test("suppressed Research remains scoped to its chat", async (t) => {
   assert.equal(store.getState().deepResearchEnabled, false);
 });
 
+// Internet (toolsEnabled) and Code (codeToolsEnabled) are not clamped pills: every model, local
+// or cloud, runs with both on, so only these two stay capability-suppressed.
 const CLAMPED_TOOLS = [
-  ["toolsEnabled", "setToolsEnabled"],
-  ["codeToolsEnabled", "setCodeToolsEnabled"],
   ["imageToolsEnabled", "setImageToolsEnabled"],
   ["webFetchToolsEnabled", "setWebFetchToolsEnabled"],
 ] as const;
+
+test("Internet and Code stay on under a local model whose template renders no tool calls", async (t) => {
+  const runtime = await boot(t);
+  const store = runtime.useChatRuntimeStore;
+  store.getState().setCheckpoint("unsloth/no-tools", null);
+  store.setState({ supportsTools: false, ...runtime.resolveToolsEnabledOnLoad(false) });
+  assert.equal(store.getState().toolsEnabled, true);
+  assert.equal(store.getState().codeToolsEnabled, true);
+  store.getState().setToolsEnabled(true);
+  store.setState(runtime.resolveToolsEnabledOnLoad(false));
+  assert.equal(store.getState().toolsEnabled, true);
+  assert.equal(store.getState().codeToolsEnabled, true);
+});
 
 for (const [key, setter] of CLAMPED_TOOLS) {
   for (const scope of ["pending chat", "pending save", "saved chat"] as const) {
@@ -307,7 +325,7 @@ for (const [key, setter] of CLAMPED_TOOLS) {
         await runtime.awaitThreadScopedSettingsWrite(THREAD);
       }
       store.getState().clearCheckpoint();
-      store.getState().setCheckpoint("LAiM/no-tools", null);
+      store.getState().setCheckpoint("unsloth/no-tools", null);
       store.setState({ [key]: false, supportsTools: false });
       if (scope === "pending chat") {
         store.getState().applyThreadScopedSettings(THREAD, { [key]: false });
@@ -339,7 +357,7 @@ for (const [key, setter] of CLAMPED_TOOLS) {
 test("Research can be selected while model capabilities are still loading", async (t) => {
   const runtime = await boot(t);
   const store = runtime.useChatRuntimeStore;
-  store.getState().setCheckpoint("LAiM/no-tools", null);
+  store.getState().setCheckpoint("unsloth/no-tools", null);
   store.setState({ supportsTools: false });
   const lease = store.getState().beginModelLoading("loading");
   assert.ok(lease !== null);
@@ -440,9 +458,9 @@ for (const scope of ["defaults", "chat", "pending chat"] as const) {
     }
     store.getState().setDeepResearchEnabled(true);
     store.getState().clearCheckpoint();
-    store.getState().setCheckpoint("LAiM/no-tools", null);
+    store.getState().setCheckpoint("unsloth/no-tools", null);
     store.setState({ supportsTools: false, ...runtime.resolveToolsEnabledOnLoad(false) });
-    assert.equal(store.getState().deepResearchEnabled, false);
+    assert.equal(store.getState().deepResearchEnabled, true);
     store.getState().setCheckpoint("external::codex::gpt-5.4", null);
     assert.equal(store.getState().deepResearchEnabled, true);
     if (scope === "pending chat") {
@@ -534,33 +552,38 @@ test("Kimi keeps Search off and Thinking on when a chat opens without stored pil
   assert.equal(storage.get("LAiM_chat_tools_enabled"), "true");
 });
 
-test("unloading drops a Search pill the provider lit without a stored preference", async (t) => {
+test("unloading keeps Internet and Code on their installation defaults", async (t) => {
   const runtime = await boot(t);
   const store = runtime.useChatRuntimeStore;
   store.setState({ toolsEnabled: true, codeToolsEnabled: true });
   assert.equal(storage.get("LAiM_chat_tools_enabled"), undefined);
   store.getState().clearCheckpoint();
+  // Internet and Code are the installation defaults now, so an unload restores them
+  // rather than clearing them.
+  assert.equal(store.getState().toolsEnabled, true);
+  assert.equal(store.getState().codeToolsEnabled, true);
+  store.getState().setToolsEnabled(false);
+  store.getState().clearCheckpoint();
   assert.equal(store.getState().toolsEnabled, false);
-  assert.equal(store.getState().codeToolsEnabled, false);
   store.getState().setToolsEnabled(true);
   store.getState().clearCheckpoint();
   assert.equal(store.getState().toolsEnabled, true);
 });
 
-test("a held edit committed on leave cannot re-arm Research on an incompatible local model", async (t) => {
+test("a held edit committed on leave keeps Research on a local model without tools", async (t) => {
   const runtime = await boot(t);
   const store = runtime.useChatRuntimeStore;
   store.getState().setDeepResearchEnabled(true);
   store.getState().clearCheckpoint();
-  store.getState().setCheckpoint("LAiM/no-tools", null);
+  store.getState().setCheckpoint("unsloth/no-tools", null);
   store.setState({ supportsTools: false, ...runtime.resolveToolsEnabledOnLoad(false) });
-  assert.equal(store.getState().deepResearchEnabled, false);
+  assert.equal(store.getState().deepResearchEnabled, true);
   store.getState().setActiveThreadId(THREAD);
   runtime.beginThreadScopedPairing(THREAD);
   store.getState().setMcpEnabledForChat(true);
   store.getState().setActiveThreadId(null);
   const commit = runtime.commitHeldThreadScopedEditsToTheirThread();
-  assert.equal(store.getState().deepResearchEnabled, false);
+  assert.equal(store.getState().deepResearchEnabled, true);
   assert.equal(store.getState().mcpEnabledForChat, false);
   await commit;
   assert.equal(threadRows.rows.get(THREAD)?.deepResearchEnabled, false);
@@ -572,19 +595,20 @@ test("a held edit committed on leave cannot re-arm Research on an incompatible l
   assert.equal(store.getState().deepResearchEnabled, true);
 });
 
-test("a chat's stored Search and Code stay off in the composer under a model without tools", async (t) => {
+test("a chat's stored Code stays on under a model without tools, as Internet does", async (t) => {
   const runtime = await boot(t);
   const store = runtime.useChatRuntimeStore;
   store.getState().clearCheckpoint();
-  store.getState().setCheckpoint("LAiM/no-tools", null);
+  store.getState().setCheckpoint("unsloth/no-tools", null);
   store.setState({ supportsTools: false, ...runtime.resolveToolsEnabledOnLoad(false) });
   store.getState().setActiveThreadId(THREAD);
   store.getState().applyThreadScopedSettings(THREAD, {
     toolsEnabled: true,
     codeToolsEnabled: true,
   });
-  assert.equal(store.getState().toolsEnabled, false);
-  assert.equal(store.getState().codeToolsEnabled, false);
+  // Neither is clamped off: LAiM's loop heals the model's text tool calls.
+  assert.equal(store.getState().toolsEnabled, true);
+  assert.equal(store.getState().codeToolsEnabled, true);
   assert.equal(runtime.threadScopedOverride("toolsEnabled"), true);
   store.getState().setPermissionMode("ask");
   await runtime.awaitThreadScopedSettingsWrite(THREAD);
@@ -606,12 +630,14 @@ for (const pills of [
     const runtime = await boot(t);
     const store = runtime.useChatRuntimeStore;
     store.getState().clearCheckpoint();
-    store.getState().setCheckpoint("LAiM/no-tools", null);
+    store.getState().setCheckpoint("unsloth/no-tools", null);
     store.setState({ supportsTools: false, ...runtime.resolveToolsEnabledOnLoad(false) });
     store.getState().setActiveThreadId(THREAD);
     store.getState().applyThreadScopedSettings(THREAD, pills);
     for (const key of Object.keys(pills) as (keyof typeof pills)[]) {
-      assert.equal(store.getState()[key], false, key);
+      // Internet, Code and Research survive a tool-less template: Agent modes open the loop and
+      // the backend heals text tool calls, so nothing reads off while the model loads.
+      assert.equal(store.getState()[key], true, key);
     }
     const lease = store.getState().beginModelLoading("loading");
     assert.ok(lease !== null);
@@ -766,7 +792,8 @@ test("a chat stored before the pill keys has no Search override of its own", asy
   store.getState().setActiveThreadId(THREAD);
   store.getState().applyThreadScopedSettings(THREAD, { permissionMode: "ask" });
   assert.equal(runtime.threadScopedOverride("toolsEnabled"), undefined);
-  assert.equal(runtime.resolveToolsEnabledOnLoad(true).toolsEnabled, false);
+  // No override of its own means the installation default, which is Internet on.
+  assert.equal(runtime.resolveToolsEnabledOnLoad(true).toolsEnabled, true);
   store.getState().setToolsEnabled(true);
   assert.equal(runtime.threadScopedOverride("toolsEnabled"), true);
 });

@@ -23,7 +23,7 @@ from core.inference.llama_server_args import (
 GIB = 1024**3
 MIB = 1024**2
 
-# LAiM/Qwen3.8-27B-GGUF, read from the shipped file: arch qwen35, 65 blocks,
+# unsloth/Qwen3.8-27B-GGUF, read from the shipped file: arch qwen35, 65 blocks,
 # full_attention_interval 4, ssm.inner_size 6144, state_size 128, group_count 16, conv_kernel 4.
 QWEN38_27B = {
     "_n_layers": 65,
@@ -1193,7 +1193,7 @@ def test_both_estimates_price_the_count_the_launcher_emits(gemma4_gguf, monkeypa
     )
     hub = asyncio.run(
         models_routes.get_kv_cache_estimate(
-            repo_id = "LAiM/gemma-4-31B-it-GGUF",
+            repo_id = "unsloth/gemma-4-31B-it-GGUF",
             quant = "Q6_K",
             n_ctx = 262144,
             cache_type_kv = "f16",

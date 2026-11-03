@@ -15,6 +15,8 @@ import {
   type AudioWorkflowId,
   isAudioWorkflowId,
 } from "../workflows";
+import { translate } from "@/i18n";
+
 
 export function WorkflowTitleMenu({
   workflow,
@@ -30,7 +32,7 @@ export function WorkflowTitleMenu({
       <DropdownMenu>
         <DropdownMenuTrigger
           data-tour="audio-mode"
-          aria-label={`${current.heading}, switch Audio page`}
+          aria-label={translate("uxAudio.switchAudioPageb4y9g", { p1: current.heading })}
           className="-mx-2 -my-1 flex max-w-full items-center gap-2 rounded-full px-2 py-1 outline-none transition-colors duration-150 hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring data-[state=open]:bg-accent"
         >
           <HugeiconsIcon

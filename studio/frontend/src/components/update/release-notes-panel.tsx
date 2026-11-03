@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { MarkdownPreview } from "@/components/markdown/markdown-preview";
 import {
   UPDATE_NOTES_BULLET_CLASS,
@@ -61,7 +62,7 @@ function NotesLink({
       className={UPDATE_NOTES_LINK_CLASS}
       data-testid="update-release-notes-link"
     >
-      {isRelease ? "Open release" : "Open changelog"}
+      {isRelease ? translate("uxComponents.openReleasephydl") : translate("uxComponents.openChangelogvnqlv")}
     </a>
   );
 }
@@ -135,7 +136,7 @@ export function ReleaseNotesPanel({
               ref={scrollRef}
               // biome-ignore lint/a11y/noNoninteractiveTabindex: keyboard-scrollable region
               tabIndex={0}
-              aria-label={`Release notes for ${notes?.tag ?? `version ${version}`}`}
+              aria-label={translate("uxComponents.releaseNotesFor72a4h", { p1: notes?.tag ?? `version ${version}` })}
               // Long notes scroll here instead of pushing the buttons off screen.
               className={UPDATE_NOTES_EXPANDED_SCROLL_CLASS}
               data-testid="update-release-notes-scroll"
@@ -150,7 +151,7 @@ export function ReleaseNotesPanel({
               />
               {notes?.truncated ? (
                 <p className="mt-2 text-ui-10 text-muted-foreground/80">
-                  Notes truncated. See the full release notes.
+                  {translate("uxComponents.notesTruncatedSeeThevot97")}
                 </p>
               ) : null}
             </section>
@@ -191,7 +192,7 @@ function ReleaseNotesSummary({
       // biome-ignore lint/a11y/noNoninteractiveTabindex: keyboard-scrollable region
       tabIndex={0}
       // Unversioned: the notes are the release's, not the offered version's.
-      aria-label="Release notes summary"
+      aria-label={translate("uxComponents.releaseNotesSummary2p14a")}
       className="hover-scrollbar min-h-0 flex-1 space-y-1 overflow-y-auto overscroll-contain py-2 pr-1"
       data-testid="update-release-notes-summary"
     >
@@ -212,9 +213,7 @@ function ReleaseNotesSummary({
         </li>
       ))}
       {remaining > 0 ? (
-        <li className="pl-3 text-ui-10 text-muted-foreground/70">
-          +{remaining} more
-        </li>
+        <li className="pl-3 text-ui-10 text-muted-foreground/70">{translate("uxComponents.more5b069", { p1: remaining })}</li>
       ) : null}
     </ul>
   );
@@ -233,7 +232,7 @@ function NotesStatus({
   retry: () => void;
 }): ReactElement {
   if (state === "loading" || state === "idle") {
-    return <NotesMessage>Loading release notes...</NotesMessage>;
+    return <NotesMessage>{translate("uxComponents.loadingReleaseNotesmw3b9")}</NotesMessage>;
   }
 
   if (state === "error") {
@@ -254,7 +253,7 @@ function NotesStatus({
           </span>
         }
       >
-        Could not load release notes.
+        {translate("uxCopy.couldNotLoadRelease1iatn")}
       </NotesMessage>
     );
   }
@@ -263,8 +262,8 @@ function NotesStatus({
   return (
     <NotesMessage action={link}>
       {release
-        ? `No release notes published for ${release} yet.`
-        : "No release notes published yet."}
+        ? translate("uxComponents.noReleaseNotesPublishedxk3yk", { p1: release })
+        : translate("uxComponents.noReleaseNotesYet5n81c")}
     </NotesMessage>
   );
 }

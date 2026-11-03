@@ -3,7 +3,7 @@
 
 """llama.cpp converter sources (convert_lora_to_gguf.py, gguf-py) from the LAiM fork's releases.
 
-Each LAiMai/llama.cpp release carries ``llama.cpp-source-<tag>.tar.gz`` and the
+Each unslothai/llama.cpp release carries ``llama.cpp-source-<tag>.tar.gz`` and the
 ``llama-prebuilt-sha256.json`` that pins its digest, so no git and no ggml-org download is
 needed. The backend cannot import the studio/ installer scripts (see
 utils/prebuilt/runtime_libs.py), hence this small standalone copy.
@@ -22,7 +22,11 @@ import urllib.request
 from pathlib import Path, PurePosixPath
 from typing import Optional
 
-FORK_REPO = "LAiMai/llama.cpp"
+FORK_REPO = "unslothai/llama.cpp"
+# GitHub's own slug for llama.cpp. LAiM installs prebuilts from here (see
+# utils.llama_cpp_freshness.LLAMA_RELEASE_REPO), so a marker names an upstream tag and the
+# fork has no release for it; the converter then comes from upstream's own source archive.
+UPSTREAM_REPO = "ggml-org/llama.cpp"
 SHA256_ASSET_NAME = "llama-prebuilt-sha256.json"
 _USER_AGENT = "LAiM-studio-llama-cpp-source"
 
@@ -152,8 +156,50 @@ def safe_extract_tar(archive: Path, destination: Path) -> None:
             tar.extractall(destination, members = [m for m in members if m.isfile() or m.isdir()])
 
 
+def _is_upstream_release(repo: Optional[str], tag: Optional[str]) -> bool:
+    """Whether this revision is a plain upstream build tag (``bNNNN``), not a fork package."""
+    return bool(tag) and "-mix-" not in tag and (repo or "").casefold() == UPSTREAM_REPO.casefold()
+
+
+def _download_upstream_converter_source(tag: str, parent: Path) -> Path:
+    """Fetch upstream's own source archive for ``tag``; returns the extracted tree.
+
+    The fork release this module otherwise reads carries a pinned sha256 for its source
+    archive; GitHub's generated archive has none, so it is taken over HTTPS and validated by
+    its contents instead.
+    """
+    target = Path(parent) / f"llama.cpp-source-{tag}"
+    if (target / "convert_lora_to_gguf.py").is_file():
+        return target
+    url = (
+        f"https://codeload.github.com/{UPSTREAM_REPO}/tar.gz/refs/tags/"
+        f"{urllib.parse.quote(tag, safe = '')}"
+    )
+    Path(parent).mkdir(parents = True, exist_ok = True)
+    with tempfile.TemporaryDirectory(dir = parent, prefix = ".llama.cpp-source-") as tmp:
+        archive = Path(tmp) / f"llama.cpp-{tag}.tar.gz"
+        with _open(url) as response, open(archive, "wb") as out:
+            while chunk := response.read(1 << 20):
+                out.write(chunk)
+        extract_dir = Path(tmp) / "extract"
+        extract_dir.mkdir()
+        safe_extract_tar(archive, extract_dir)
+        roots = [p for p in extract_dir.iterdir() if p.is_dir()]
+        if len(roots) != 1 or not (roots[0] / "convert_lora_to_gguf.py").is_file():
+            raise RuntimeError(f"{url} has no convert_lora_to_gguf.py under one top directory")
+        if not target.exists():
+            try:
+                os.replace(roots[0], target)
+            except OSError:
+                if not (target / "convert_lora_to_gguf.py").is_file():
+                    raise
+    return target
+
+
 def download_converter_source(repo: Optional[str], tag: Optional[str], parent: Path) -> Path:
     """Download, verify and publish ``parent/llama.cpp-source-<fork tag>``; returns that dir."""
+    if _is_upstream_release(repo, tag):
+        return _download_upstream_converter_source(tag, parent)
     release_tag, checksums = resolve_fork_release(repo, tag)
     target = Path(parent) / f"llama.cpp-source-{release_tag}"
     if (target / "convert_lora_to_gguf.py").is_file():

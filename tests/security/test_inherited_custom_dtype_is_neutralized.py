@@ -167,7 +167,7 @@ def test_a_value_set_after_import_is_still_neutralized(monkeypatch):
     # `disable = True` returns before compilation; the sanitizing runs first.
     LAiM_compile_transformers(
         dtype = None,
-        model_name = "LAiM/tiny",
+        model_name = "unsloth/tiny",
         model_types = ["llama"],
         disable = True,
     )

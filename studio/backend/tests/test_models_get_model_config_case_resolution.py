@@ -303,6 +303,6 @@ def test_repo_in_any_hf_cache_matches_case_variant_in_legacy_cache(tmp_path, mon
         lambda: [active],
     )
 
-    assert models_route._repo_in_any_hf_cache("LAiM/foo") is True
+    assert models_route._repo_in_any_hf_cache("unsloth/foo") is True
     # Absent from every cache -> reported absent.
-    assert models_route._repo_in_any_hf_cache("LAiM/not-cached") is False
+    assert models_route._repo_in_any_hf_cache("unsloth/not-cached") is False

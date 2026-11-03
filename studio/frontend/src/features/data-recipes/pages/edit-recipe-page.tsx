@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { useAppShellReadySignal } from "@/components/app-readiness";
 import { Button } from "@/components/ui/button";
 import { RecipeStudioPage, type RecipePayload } from "@/features/recipe-studio";
@@ -35,7 +36,7 @@ function RecipeLoadState({
           <h1 className="text-lg font-semibold">{title}</h1>
           <p className="mt-2 text-sm text-muted-foreground">{description}</p>
           <Button type="button" variant="outline" className="mt-5" onClick={onBack}>
-            Back to Recipes
+            {translate("uxDatarecipes.backToRecipes18k25")}
           </Button>
         </div>
       </main>
@@ -79,7 +80,7 @@ export function EditRecipePage({ recipeId }: EditRecipePageProps): ReactElement 
       })
       .catch((error) => {
         // biome-ignore lint/suspicious/noConsole: the load state below is what the user sees
-        console.error("Load recipe failed:", error);
+        console.error(translate("uxDatarecipes.loadRecipeFailedvji4v"), error);
         if (active) setLoadState({ status: "missing" });
       });
     return () => {
@@ -120,8 +121,8 @@ export function EditRecipePage({ recipeId }: EditRecipePageProps): ReactElement 
   if (loadState.status === "loading") {
     return (
       <RecipeLoadState
-        title="Loading recipe..."
-        description="Please wait while we load your recipe."
+        title={translate("uxDatarecipes.loadingRecipe1ydzb")}
+        description={translate("uxDatarecipes.pleaseWaitWhileWee2azg")}
         onBack={() => void navigate({ to: "/data-recipes" })}
       />
     );
@@ -130,8 +131,8 @@ export function EditRecipePage({ recipeId }: EditRecipePageProps): ReactElement 
   if (loadState.status === "missing") {
     return (
       <RecipeLoadState
-        title="Recipe not found"
-        description="This recipe may have been deleted."
+        title={translate("uxDatarecipes.recipeNotFound1nl5w")}
+        description={translate("uxDatarecipes.thisRecipeMayHave1q3t9")}
         onBack={() => void navigate({ to: "/data-recipes" })}
       />
     );

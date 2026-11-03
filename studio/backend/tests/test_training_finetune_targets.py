@@ -8,7 +8,7 @@ from models import TrainingStartRequest
 
 def _request(**overrides):
     fields = {
-        "model_name": "LAiM/Llama-3.2-1B-Instruct",
+        "model_name": "unsloth/Llama-3.2-1B-Instruct",
         "training_type": "LoRA/QLoRA",
         "format_type": "alpaca",
     }

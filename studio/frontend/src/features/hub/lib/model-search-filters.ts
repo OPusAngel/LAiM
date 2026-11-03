@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { HF_SOURCE_OWNER } from "@/config/hub-source";
+
 /** Who uploaded a model: the LAiM org, any other organization, or a personal account. */
 export type HubUploader = "LAiM" | "organization" | "personal";
 
@@ -126,7 +128,7 @@ export async function* filterModelListing(
     if (uploaders && uploaders.length < HUB_UPLOADERS.length) {
       const owner = model.name.split("/")[0];
       const wantsOrganization = uploaders.includes("organization");
-      if (owner.toLowerCase() === "LAiM") {
+      if (owner.toLowerCase() === HF_SOURCE_OWNER) {
         if (!uploaders.includes("LAiM")) return null;
       } else if (wantsOrganization !== uploaders.includes("personal")) {
         // isVerified would drop unverified labs such as Qwen; personal accounts 404 here.

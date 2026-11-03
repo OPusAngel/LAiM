@@ -30,7 +30,7 @@ if not hasattr(sys.modules["structlog"], "get_logger"):
 import routes.inference as inference_route  # noqa: E402
 
 
-RESIDENT = "LAiM/Qwen3-8B"
+RESIDENT = "unsloth/Qwen3-8B"
 
 
 class _Backend:
@@ -278,7 +278,7 @@ class TestOmittedPrecisionKeepsTheResidentOne:
     def test_other_model_keeps_the_default(self):
         request = _Request()
         inference_route._inherit_resident_load_in_4bit(
-            _loaded(load_in_4bit = False), request, "LAiM/Llama-3.2-1B-Instruct"
+            _loaded(load_in_4bit = False), request, "unsloth/Llama-3.2-1B-Instruct"
         )
         assert request.load_in_4bit is True
 

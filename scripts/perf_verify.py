@@ -40,7 +40,7 @@ def _psnr(a: "np.ndarray", b: "np.ndarray") -> float:
 
 def main(argv = None) -> int:
     p = argparse.ArgumentParser()
-    p.add_argument("--model", default = "LAiM/Z-Image-Turbo-GGUF")
+    p.add_argument("--model", default = "unsloth/Z-Image-Turbo-GGUF")
     p.add_argument("--gguf", default = "z-image-turbo-Q4_K_M.gguf")
     p.add_argument(
         "--prompt",

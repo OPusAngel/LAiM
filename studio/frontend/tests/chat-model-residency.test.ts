@@ -15,7 +15,7 @@ import { readSrc } from "./helpers/kit.ts";
 
 const USE_CHAT_MODEL_RUNTIME = readSrc("features/chat/hooks/use-chat-model-runtime.ts");
 
-const PICKED = "LAiM/Qwen3.5-9B-GGUF";
+const PICKED = "unsloth/Qwen3.5-9B-GGUF";
 
 test("a resident model reads as loaded", () => {
   assert.equal(

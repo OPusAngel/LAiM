@@ -16,6 +16,8 @@ import {
   diffWords,
 } from "./edit-diff";
 import type { AudioModelContext } from "./tools/types";
+import { translate } from "@/i18n";
+
 
 export const FIRERED_MAX_CHANGES = 5;
 /** The route's limit on one FireRedAudio instruction. */
@@ -110,13 +112,13 @@ function fireredInstruction(change: EditChange): string | null {
   const added = change.new.join(" ");
   switch (change.kind) {
     case "replace":
-      return `Replace '${old}' with '${added}'.`;
+      return translate("uxAudio.replaceWithc2gru", { p1: old, p2: added });
     case "delete":
-      return `Delete '${old}'.`;
+      return translate("uxAudio.deletey7f1e", { p1: old });
     default:
       return change.before === null
         ? null
-        : `Insert '${added}' before '${change.before}'.`;
+        : translate("uxAudio.insertBeforeg7d2x", { p1: added, p2: change.before });
   }
 }
 
@@ -160,8 +162,8 @@ export const EDIT_ADAPTERS: Readonly<Record<string, EditAdapter>> = {
     delivery: null,
     howItEdits: (changes) =>
       changes > 1
-        ? `Redoes the ${plural(changes, "changed word group")} in one pass and keeps the rest of the recording.`
-        : "Redoes only the changed words in one pass and keeps the rest of the recording.",
+        ? translate("uxAudio.redoesTheInOnekcr94", { p1: plural(changes, "changed word group") })
+        : translate("uxAudio.redoesOnlyTheChangedzcwgi"),
     validateWords: (original, edited) => {
       const changes = changesBetween(original, edited);
       if (changes === null) return EDIT_TOO_LONG;
@@ -191,7 +193,7 @@ export const EDIT_ADAPTERS: Readonly<Record<string, EditAdapter>> = {
     maxChanges: null,
     delivery: null,
     howItEdits: () =>
-      "Speaks the whole edited sentence again in the recording's voice, in one pass.",
+      translate("uxAudio.speaksTheWholeEditedlgi4e"),
     validateWords: (original, edited) =>
       changesBetween(original, edited) === null ? EDIT_TOO_LONG : null,
     // Vevo2 reads the edited `text` itself.
@@ -206,8 +208,8 @@ export const EDIT_ADAPTERS: Readonly<Record<string, EditAdapter>> = {
     delivery: { speed: [0.5, 2, 0.1], pitchSteps: [1, 6] },
     howItEdits: (changes) =>
       changes > 1
-        ? `Applies ${plural(changes, "change")}, one pass each, every pass editing the last one's result.`
-        : "Applies each change in its own pass, every pass editing the last one's result.",
+        ? translate("uxAudio.appliesOnePassEachn2m1u", { p1: plural(changes, "change") })
+        : translate("uxAudio.appliesEachChangeInpog7i"),
     validateWords: (original, edited) => {
       const changes = changesBetween(original, edited);
       if (changes === null) return EDIT_TOO_LONG;
@@ -297,6 +299,6 @@ export function editPhaseLabel(
     : (run.edit?.instructions?.length ?? 0);
   if (passes <= 1) return null;
   return delivery
-    ? `Applying ${passes} delivery changes, one pass each`
-    : `Applying ${passes} changes, one pass each`;
+    ? translate("uxAudio.applyingDeliveryChangesOnegttte", { p1: passes })
+    : translate("uxAudio.applyingChangesOnePassz3wzy", { p1: passes });
 }

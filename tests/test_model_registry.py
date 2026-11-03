@@ -112,11 +112,11 @@ def test_unquantized_default_quant_type_is_usable():
         org = "LAiM", base_name = "Llama", version = "3.1", size = 8, instruct_tag = "Instruct"
     )
     assert info.quant_type == QuantType.NONE
-    assert info.model_path == "LAiM/Llama-3.1-8B-Instruct"
+    assert info.model_path == "unsloth/Llama-3.1-8B-Instruct"
 
 
 def test_register_model_defaults_to_no_quantization():
-    key = "LAiM/Llama-9.9-1B"
+    key = "unsloth/Llama-9.9-1B"
     MODEL_REGISTRY.pop(key, None)
     try:
         register_model(LlamaModelInfo, org = "LAiM", base_name = "Llama", version = "9.9", size = 1)
@@ -220,11 +220,11 @@ def _hub_error(cls, message):
 def test_missing_repo_is_reported_missing():
     """A repo the Hub says does not exist is a registry error."""
     api = _FakeApi(_hub_error(RepositoryNotFoundError, "404 Client Error. Repository Not Found"))
-    assert _model_is_missing(api, "LAiM/does-not-exist")
+    assert _model_is_missing(api, "unsloth/does-not-exist")
 
 
 def test_present_repo_is_not_reported_missing():
-    assert not _model_is_missing(_FakeApi(None), "LAiM/Qwen2.5-7B")
+    assert not _model_is_missing(_FakeApi(None), "unsloth/Qwen2.5-7B")
 
 
 @pytest.mark.parametrize(
@@ -240,11 +240,11 @@ def test_unreachable_hub_skips_instead_of_reporting_missing(monkeypatch, make_er
     """A hub outage must not be reported as every registered model missing."""
     error = make_error()
     with pytest.raises(HubUnavailable):
-        _model_is_missing(_FakeApi(error), "LAiM/Qwen2.5-7B")
+        _model_is_missing(_FakeApi(error), "unsloth/Qwen2.5-7B")
 
     monkeypatch.setattr(sys.modules[__name__], "HfApi", lambda: _FakeApi(error))
     with pytest.raises(pytest.skip.Exception):
-        _test_model_uploaded(["LAiM/Qwen2.5-7B"])
+        _test_model_uploaded(["unsloth/Qwen2.5-7B"])
 
 
 def test_qwen_2_5_coder_registered_without_dynamic_quants():
@@ -253,5 +253,5 @@ def test_qwen_2_5_coder_registered_without_dynamic_quants():
 
     MODEL_REGISTRY.clear()
     _register_models(Qwen_2_5_CoderMeta)
-    assert "LAiM/Qwen2.5-Coder-7B-Instruct-bnb-4bit" in MODEL_REGISTRY
+    assert "unsloth/Qwen2.5-Coder-7B-Instruct-bnb-4bit" in MODEL_REGISTRY
     assert not [k for k in MODEL_REGISTRY if "Coder" in k and k.endswith("LAiM-bnb-4bit")]

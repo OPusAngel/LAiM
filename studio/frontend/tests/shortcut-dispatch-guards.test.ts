@@ -145,21 +145,24 @@ test("dictation asks at press time, not through enabled", async () => {
 test("both copy chords report a failed write", async () => {
   assert.match(
     APP_SIDEBAR,
-    /} else if \(empty\.value\) \{[\s\S]*?\} else \{[\s\S]*?toast\.error\("Could not copy this chat\."\)/,
+    /} else if \(empty\.value\) \{[\s\S]*?\} else \{[\s\S]*?toast\.error\(translate\("uxComponents\.couldNotCopyThis1yd7c"\)\)/,
   );
-  assert.match(APP_SIDEBAR, /toast\.error\("Could not copy the session id\."\)/);
+  assert.match(
+    APP_SIDEBAR,
+    /toast\.error\(translate\("uxComponents\.couldNotCopyTheo7uao"\)\)/,
+  );
 });
 
 // Current membership says nothing about where a chat's older files went: it can
 // join a project, record that session, and move back out.
 test("the sandbox probe does not skip a chat that is out of a project", async () => {
-  const at = CHAT_ROW_MENU.indexOf("async function sandboxSessionIdsHolding");
+  const at = CHAT_ROW_MENU.indexOf("async function workdirSessionIdsHolding");
   assert.notEqual(at, -1);
   const body = CHAT_ROW_MENU.slice(at, CHAT_ROW_MENU.indexOf("\n}", at));
   assert.doesNotMatch(body, /if \(!item\.projectId\) return recorded;/);
   assert.match(
     body,
-    /if \(await sandboxHasFiles\(candidate\)\) held\.push\(candidate\);/,
+    /if \(await workdirHasFiles\(candidate\)\) held\.push\(candidate\);/,
   );
 });
 
@@ -379,16 +382,16 @@ test("the sidebar's mutating chords refuse to fire under a dialog", async () => 
 // thread folder and in the project one. Probing only the thread folder
 // answered for one and hid the other.
 test("the sandbox probe leaves the shared project folder alone", async () => {
-  const at = CHAT_ROW_MENU.indexOf("async function sandboxSessionIdsHolding(");
+  const at = CHAT_ROW_MENU.indexOf("async function workdirSessionIdsHolding(");
   assert.notEqual(at, -1);
   const body = CHAT_ROW_MENU.slice(at, CHAT_ROW_MENU.indexOf("\n}", at));
   // The shared project workspace is not probed: every chat in the project
   // writes there, so its files are no evidence about this one, and counting
   // them reported a second folder for any chat that joined a used project.
-  assert.doesNotMatch(body, /sandboxSessionIdFor\(/);
+  assert.doesNotMatch(body, /workdirSessionIdFor\(/);
   assert.doesNotMatch(body, /candidates\.add\(/);
-  assert.equal(APP_SIDEBAR.split("sandboxSessionIdsHolding(ids)").length - 1, 1);
-  assert.equal(OPEN_CHAT_FOLDER.split("sandboxSessionIdsHolding(ids)").length - 1, 1);
+  assert.equal(APP_SIDEBAR.split("workdirSessionIdsHolding(ids)").length - 1, 1);
+  assert.equal(OPEN_CHAT_FOLDER.split("workdirSessionIdsHolding(ids)").length - 1, 1);
 });
 
 // Loading a model that drops the level in force leaves the effort set to one

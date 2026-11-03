@@ -4,6 +4,8 @@
 import { authFetch, getAuthToken } from "@/features/auth";
 import { accountTransitionPending } from "@/lib/account-transition";
 import { apiUrl } from "@/lib/api-base";
+import { translate } from "@/i18n";
+
 import {
   formatApiErrorBody,
   readFastApiError,
@@ -340,7 +342,7 @@ function uploadWithProgress(
   return new Promise((resolve, reject) => {
     // Same fence as authFetch: mid-switch, this tab's file would be stored under the next account.
     if (accountTransitionPending()) {
-      reject(new Error("Another tab is switching accounts; this tab will reload."));
+      reject(new Error(translate("uxAudio.anotherTabIsSwitchingj0xdt")));
       return;
     }
     const xhr = new XMLHttpRequest();
@@ -357,7 +359,7 @@ function uploadWithProgress(
     xhr.onload = () => resolve({ status: xhr.status, body: xhr.response });
     xhr.onerror = () =>
       reject(
-        new Error("The upload failed. Check the connection and try again."),
+        new Error(translate("uxAudio.theUploadFailedCheckioiwo")),
       );
     xhr.onabort = () => reject(new DOMException("Aborted", "AbortError"));
     if (signal) {
@@ -390,7 +392,7 @@ export async function uploadAudioInput(
     if (status >= 200 && status < 300) return body as AudioInputRecord;
     if (status !== 401) {
       throw new AudioApiError(
-        formatApiErrorBody(body) ?? `Upload failed (${status})`,
+        formatApiErrorBody(body) ?? translate("uxAudio.uploadFailed4h7jy", { p1: status }),
         status,
       );
     }

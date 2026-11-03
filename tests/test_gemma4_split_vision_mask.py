@@ -43,7 +43,7 @@ def test_split_gemma4_trains_with_the_vision_attention_mask(tmp_path):
     )
     transformers.Gemma4ForConditionalGeneration(config).save_pretrained(tmp_path)
     transformers.AutoProcessor.from_pretrained(
-        "LAiM/gemma-4-31B-it-LAiM-bnb-4bit"
+        "unsloth/gemma-4-31B-it-unsloth-bnb-4bit"
     ).save_pretrained(tmp_path)
 
     # The head-aware planner's shape: embedding with lm_head on the last card, root hook on the first.

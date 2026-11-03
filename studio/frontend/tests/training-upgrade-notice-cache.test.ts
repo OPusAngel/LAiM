@@ -19,7 +19,7 @@ import {
 } from "../src/features/training/lib/training-upgrade-notice-cache.ts";
 import type { TransformersUpgradeCheck } from "../src/features/transformers-upgrade/types.ts";
 
-const MODEL = "LAiM/Muse-Glimmer-30B-LAiM-bnb-4bit";
+const MODEL = "unsloth/Muse-Glimmer-30B-unsloth-bnb-4bit";
 
 // What the check says before the install: a release to offer, and 4-bit still available
 // because the model's own code can load it on the current transformers.

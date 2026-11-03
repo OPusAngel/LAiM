@@ -44,37 +44,37 @@ def _tiny_model(name_or_path):
 
 @pytest.fixture
 def record():
-    return _load("LAiM/models/loader.py", "_record_modelscope_repo_id", {"os": os})
+    return _load("unsloth/models/loader.py", "_record_modelscope_repo_id", {"os": os})
 
 
 def test_snapshot_path_replaced_and_peft_records_repo_id(record, tmp_path):
     from peft import LoraConfig, get_peft_model
 
-    snapshot = tmp_path / "models" / "LAiM--Qwen3-0.6B-LAiM-bnb-4bit" / "snapshots" / "master"
+    snapshot = tmp_path / "models" / "LAiM--Qwen3-0.6B-unsloth-bnb-4bit" / "snapshots" / "master"
     snapshot.mkdir(parents = True)
     model = _tiny_model(str(snapshot))
-    record(model, "LAiM/Qwen3-0.6B-LAiM-bnb-4bit", str(snapshot))
+    record(model, "unsloth/Qwen3-0.6B-unsloth-bnb-4bit", str(snapshot))
 
-    assert model.config._name_or_path == "LAiM/Qwen3-0.6B-LAiM-bnb-4bit"
-    assert model.name_or_path == "LAiM/Qwen3-0.6B-LAiM-bnb-4bit"
+    assert model.config._name_or_path == "unsloth/Qwen3-0.6B-unsloth-bnb-4bit"
+    assert model.name_or_path == "unsloth/Qwen3-0.6B-unsloth-bnb-4bit"
     assert model._LAiM_modelscope_snapshot == str(snapshot)
     peft_model = get_peft_model(model, LoraConfig(r = 2, target_modules = ["q_proj"]))
     assert (
         peft_model.peft_config["default"].base_model_name_or_path
-        == "LAiM/Qwen3-0.6B-LAiM-bnb-4bit"
+        == "unsloth/Qwen3-0.6B-unsloth-bnb-4bit"
     )
 
 
-@pytest.mark.parametrize("repo_id, local_dir", [(None, None), ("LAiM/x", None), (None, "/a")])
+@pytest.mark.parametrize("repo_id, local_dir", [(None, None), ("unsloth/x", None), (None, "/a")])
 def test_noop_without_modelscope_load(record, repo_id, local_dir):
-    model = _tiny_model("LAiM/x-bnb-4bit")
+    model = _tiny_model("unsloth/x-bnb-4bit")
     record(model, repo_id, local_dir)
-    assert model.config._name_or_path == "LAiM/x-bnb-4bit"
+    assert model.config._name_or_path == "unsloth/x-bnb-4bit"
 
 
 def test_other_names_untouched(record, tmp_path):
     model = _tiny_model(str(tmp_path / "elsewhere"))
-    record(model, "LAiM/x", str(tmp_path / "snapshot"))
+    record(model, "unsloth/x", str(tmp_path / "snapshot"))
     assert model.config._name_or_path == str(tmp_path / "elsewhere")
 
 
@@ -92,7 +92,7 @@ def merge_name(monkeypatch, tmp_path):
 
     def snapshot_download(name):
         calls.append(name)
-        if name == "LAiM/missing":
+        if name == "unsloth/missing":
             raise ValueError("not on ModelScope")
         return str(tmp_path / name.replace("/", "--"))
 
@@ -101,12 +101,12 @@ def merge_name(monkeypatch, tmp_path):
     )
     logger = _Logger()
     fn = _load(
-        "LAiM/save.py",
+        "unsloth/save.py",
         "_modelscope_base_model_name",
         {
             "os": os,
             "logger": logger,
-            "get_model_name": lambda name, load_in_4bit: name.removesuffix("-LAiM-bnb-4bit"),
+            "get_model_name": lambda name, load_in_4bit: name.removesuffix("-unsloth-bnb-4bit"),
         },
     )
     return fn, calls, logger
@@ -114,16 +114,16 @@ def merge_name(monkeypatch, tmp_path):
 
 def test_modelscope_merge_fetches_16bit_base(merge_name, tmp_path):
     fn, calls, _ = merge_name
-    got = fn("LAiM/Qwen3-14B-LAiM-bnb-4bit", load_in_4bit = False)
+    got = fn("unsloth/Qwen3-14B-unsloth-bnb-4bit", load_in_4bit = False)
     assert got == str(tmp_path / "LAiM--Qwen3-14B")
-    assert calls == ["LAiM/Qwen3-14B"]
+    assert calls == ["unsloth/Qwen3-14B"]
 
 
 def test_modelscope_merge_keeps_local_dir_and_falls_back(merge_name, tmp_path):
     fn, calls, logger = merge_name
     assert fn(str(tmp_path), load_in_4bit = False) == str(tmp_path)
-    assert fn("LAiM/missing", load_in_4bit = False) == "LAiM/missing"
-    assert calls == ["LAiM/missing"]
+    assert fn("unsloth/missing", load_in_4bit = False) == "unsloth/missing"
+    assert calls == ["unsloth/missing"]
     assert "trying Hugging Face" in logger.messages[0]
 
 
@@ -132,7 +132,7 @@ def test_gguf_still_converts_the_modelscope_snapshot(tmp_path):
         pass
 
     reuses = _load(
-        "LAiM/save.py",
+        "unsloth/save.py",
         "_gguf_reuses_loaded_checkpoint",
         {
             "os": os,
@@ -141,7 +141,7 @@ def test_gguf_still_converts_the_modelscope_snapshot(tmp_path):
             "_attached_mtp_head": lambda m: None,
         },
     )
-    model = types.SimpleNamespace(config = types.SimpleNamespace(_name_or_path = "LAiM/x"))
+    model = types.SimpleNamespace(config = types.SimpleNamespace(_name_or_path = "unsloth/x"))
     assert not reuses(model)
     model._LAiM_modelscope_snapshot = str(tmp_path)
     assert reuses(model)

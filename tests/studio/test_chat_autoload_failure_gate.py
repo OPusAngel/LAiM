@@ -81,8 +81,8 @@ export function pollSignal(parent: AbortSignal, ms: number) {
 }
 """
 TEMP = WORKDIR / "temp" / "chat_autoload_failure_gate"
-DEFAULT_MODEL = "LAiM/gemma-4-E2B-it-GGUF"
-GEMMA_REPO = "LAiM/gemma-4-26B-A4B-it-qat-GGUF"
+DEFAULT_MODEL = "unsloth/gemma-4-E2B-it-GGUF"
+GEMMA_REPO = "unsloth/gemma-4-26B-A4B-it-qat-GGUF"
 LOCAL_GGUF_PATH = "/home/john-doe/models/qwen3-1.7b-instruct-q4_k_m.gguf"
 
 # Stubs for autoLoadSmallestModel's imports; scenarios supply inventory and /validate, /load replies.
@@ -730,8 +730,8 @@ export function isSpeechOnlyStatus(status: any): boolean {
 
 SCENARIO_HELPERS = """
     const GEMMA = {
-      repo_id: "LAiM/gemma-4-26B-A4B-it-qat-GGUF",
-      load_id: "LAiM/gemma-4-26B-A4B-it-qat-GGUF",
+      repo_id: "unsloth/gemma-4-26B-A4B-it-qat-GGUF",
+      load_id: "unsloth/gemma-4-26B-A4B-it-qat-GGUF",
       cache_path:
         "/home/john-doe/.cache/huggingface/hub/models--LAiM--gemma-4-26B-A4B-it-qat-GGUF",
       size_bytes: 15800000000,
@@ -772,8 +772,8 @@ SCENARIO_HELPERS = """
     const EXTERNAL = "external::openai/gpt-5";
     // A safetensors repo, which MLX serves on a Mac and transformers everywhere else.
     const QWEN = {
-      repo_id: "LAiM/Qwen3.5-4B",
-      load_id: "LAiM/Qwen3.5-4B",
+      repo_id: "unsloth/Qwen3.5-4B",
+      load_id: "unsloth/Qwen3.5-4B",
       cache_path: "/home/john-doe/.cache/huggingface/hub/models--LAiM--Qwen3.5-4B",
       size_bytes: 8000000000,
     };
@@ -990,7 +990,7 @@ def test_failed_cached_load_does_not_download_the_default_model():
         " load: (p) => p.model_path === GEMMA.repo_id ? new Error(OOM) : LOADED(p) })"
     )
 
-    assert _loaded_paths(out) == ["LAiM/gemma-4-26B-A4B-it-qat-GGUF"]
+    assert _loaded_paths(out) == ["unsloth/gemma-4-26B-A4B-it-qat-GGUF"]
     assert DEFAULT_MODEL not in _loaded_paths(out)
     assert out["result"]["loaded"] is False
     assert _toasts(out, "toast.success") == []
@@ -1020,7 +1020,7 @@ def test_load_rejection_without_a_message_still_names_the_model():
 
     assert DEFAULT_MODEL not in _loaded_paths(out)
     [error] = _toasts(out, "toast.error")
-    assert "LAiM/gemma-4-26B-A4B-it-qat-GGUF (UD-Q4_K_XL)" in error["msg"]
+    assert "unsloth/gemma-4-26B-A4B-it-qat-GGUF (UD-Q4_K_XL)" in error["msg"]
     assert error["description"]
 
 
@@ -1566,7 +1566,7 @@ def test_the_token_is_not_prepared_when_the_default_is_already_on_disk():
         "{ variants: [{ quant: 'UD-Q4_K_XL', filename: 'm-UD-Q4_K_XL.gguf',"
         " downloaded: true, size_bytes: 100 }] }"
     )
-    out = _run(f"scenario({{ variants: {{ 'LAiM/gemma-4-E2B-it-GGUF': {downloaded} }} }})")
+    out = _run(f"scenario({{ variants: {{ 'unsloth/gemma-4-E2B-it-GGUF': {downloaded} }} }})")
     kinds = [event["kind"] for event in out["events"]]
     assert "prepareHfToken" not in kinds
     assert _downloads_started(out) == []
@@ -1899,7 +1899,7 @@ def test_an_unpinned_mlx_candidate_is_loaded_at_the_window_the_backend_resolved(
     the app default there loaded every model at 4096."""
     out = _run("scenario({ modelRepos: [QWEN], platform: MAC, load: SERVED(262144) })")
     [load] = [e for e in out["events"] if e["kind"] == "loadModel"]
-    assert load["model_path"] == "LAiM/Qwen3.5-4B"
+    assert load["model_path"] == "unsloth/Qwen3.5-4B"
     # The sentinel that hands sizing to the backend.
     assert load["max_seq_length"] == 0
     assert out["store"]["maxSeqLength"] == 262144

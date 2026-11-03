@@ -31,9 +31,9 @@ function settings(model: string): Settings {
   return {
     embeddingModel: model,
     embeddingGgufRepo: "",
-    defaultEmbeddingModel: "LAiM/bge-small-en-v1.5",
+    defaultEmbeddingModel: "unsloth/bge-small-en-v1.5",
     defaultEmbeddingGgufRepo: "",
-    isCustom: model !== "LAiM/bge-small-en-v1.5",
+    isCustom: model !== "unsloth/bge-small-en-v1.5",
     loaded: false,
     backendLoaded: false,
     embeddingDevice: "auto",
@@ -54,11 +54,11 @@ function respondWith(model: string, release?: Promise<void>): void {
         // biome-ignore lint/style/useNamingConvention: API schema
         embedding_gguf_repo: "",
         // biome-ignore lint/style/useNamingConvention: API schema
-        default_embedding_model: "LAiM/bge-small-en-v1.5",
+        default_embedding_model: "unsloth/bge-small-en-v1.5",
         // biome-ignore lint/style/useNamingConvention: API schema
         default_embedding_gguf_repo: "",
         // biome-ignore lint/style/useNamingConvention: API schema
-        is_custom: model !== "LAiM/bge-small-en-v1.5",
+        is_custom: model !== "unsloth/bge-small-en-v1.5",
         loaded: false,
       }),
     } as unknown as Response;
@@ -75,11 +75,11 @@ function reset(): void {
 
 test("a mount reads the setting", async () => {
   reset();
-  respondWith("LAiM/bge-m3");
+  respondWith("unsloth/bge-m3");
   await useEmbeddingModelStore.getState().load();
   assert.equal(
     useEmbeddingModelStore.getState().settings?.embeddingModel,
-    "LAiM/bge-m3",
+    "unsloth/bge-m3",
   );
 });
 
@@ -90,29 +90,29 @@ test("a save that lands mid-read is not undone by it", async () => {
   const gate = new Promise<void>((resolve) => {
     release = () => resolve();
   });
-  respondWith("LAiM/bge-small-en-v1.5", gate);
+  respondWith("unsloth/bge-small-en-v1.5", gate);
   const reading = useEmbeddingModelStore.getState().load();
 
   // The save from the tab the user just left commits first.
-  useEmbeddingModelStore.getState().applySettings(settings("LAiM/bge-m3"));
+  useEmbeddingModelStore.getState().applySettings(settings("unsloth/bge-m3"));
   release();
   await reading;
 
   assert.equal(
     useEmbeddingModelStore.getState().settings?.embeddingModel,
-    "LAiM/bge-m3",
+    "unsloth/bge-m3",
     "the saved model stands, not the value the read started before it",
   );
 });
 
 test("a read that finishes first is still replaced by the save", async () => {
   reset();
-  respondWith("LAiM/bge-small-en-v1.5");
+  respondWith("unsloth/bge-small-en-v1.5");
   await useEmbeddingModelStore.getState().load();
-  useEmbeddingModelStore.getState().applySettings(settings("LAiM/bge-m3"));
+  useEmbeddingModelStore.getState().applySettings(settings("unsloth/bge-m3"));
   assert.equal(
     useEmbeddingModelStore.getState().settings?.embeddingModel,
-    "LAiM/bge-m3",
+    "unsloth/bge-m3",
   );
 });
 
@@ -129,7 +129,7 @@ test("a slow read cannot report over the one that overtook it", async () => {
   }) as typeof fetch;
   const first = useEmbeddingModelStore.getState().load();
 
-  respondWith("LAiM/bge-m3");
+  respondWith("unsloth/bge-m3");
   await useEmbeddingModelStore.getState().load();
   release();
   await first;
@@ -141,7 +141,7 @@ test("a slow read cannot report over the one that overtook it", async () => {
   );
   assert.equal(
     useEmbeddingModelStore.getState().settings?.embeddingModel,
-    "LAiM/bge-m3",
+    "unsloth/bge-m3",
   );
 });
 
@@ -171,10 +171,10 @@ test("an older save cannot land on top of a newer one", async () => {
   });
   const first = store.save(async () => {
     await firstGate;
-    return settings("LAiM/bge-small-en-v1.5");
+    return settings("unsloth/bge-small-en-v1.5");
   });
-  const second = await store.save(async () => settings("LAiM/bge-m3"));
-  respondWith("LAiM/bge-m3");
+  const second = await store.save(async () => settings("unsloth/bge-m3"));
+  respondWith("unsloth/bge-m3");
   releaseFirst();
 
   assert.ok(second);
@@ -185,7 +185,7 @@ test("an older save cannot land on top of a newer one", async () => {
   );
   assert.equal(
     useEmbeddingModelStore.getState().settings?.embeddingModel,
-    "LAiM/bge-m3",
+    "unsloth/bge-m3",
   );
 });
 
@@ -218,14 +218,14 @@ test("a superseded save is reconciled against the backend", async () => {
   const store = useEmbeddingModelStore.getState();
   // The later save fails verification, so the earlier one is the only write
   // the backend took. Request order said otherwise, so the store re-reads.
-  respondWith("LAiM/bge-m3");
+  respondWith("unsloth/bge-m3");
   let releaseFirst = (): void => undefined;
   const firstGate = new Promise<void>((resolve) => {
     releaseFirst = () => resolve();
   });
   const first = store.save(async () => {
     await firstGate;
-    return settings("LAiM/bge-m3");
+    return settings("unsloth/bge-m3");
   });
   const second = store
     .save(async () => {
@@ -240,7 +240,7 @@ test("a superseded save is reconciled against the backend", async () => {
 
   assert.equal(
     useEmbeddingModelStore.getState().settings?.embeddingModel,
-    "LAiM/bge-m3",
+    "unsloth/bge-m3",
     "the store ends on what the backend actually holds",
   );
 });
@@ -265,7 +265,7 @@ test("a lone save that fails does not trigger a re-read", async () => {
 test("a save still bumps the revision the reads check", async () => {
   reset();
   const store = useEmbeddingModelStore.getState();
-  store.applySettings(settings("LAiM/bge-m3"));
+  store.applySettings(settings("unsloth/bge-m3"));
   assert.equal(useEmbeddingModelStore.getState().revision, 1);
 });
 
@@ -277,13 +277,13 @@ test("a save with nothing overlapping it commits without a re-read", async () =>
     reads += 1;
     throw new Error("should not be read");
   }) as typeof fetch;
-  assert.ok(await store.save(async () => settings("LAiM/bge-m3")));
+  assert.ok(await store.save(async () => settings("unsloth/bge-m3")));
   await new Promise((resolve) => setTimeout(resolve, 0));
   // The ordinary path is one request, not a write followed by a read.
   assert.equal(reads, 0);
   assert.equal(
     useEmbeddingModelStore.getState().settings?.embeddingModel,
-    "LAiM/bge-m3",
+    "unsloth/bge-m3",
   );
 });
 
@@ -291,16 +291,16 @@ test("the settle flag does not carry into the next save", async () => {
   reset();
   const store = useEmbeddingModelStore.getState();
   // One overlap, reconciled, and then an ordinary save on its own.
-  respondWith("LAiM/bge-m3");
+  respondWith("unsloth/bge-m3");
   let release = (): void => undefined;
   const gate = new Promise<void>((resolve) => {
     release = () => resolve();
   });
   const first = store.save(async () => {
     await gate;
-    return settings("LAiM/bge-m3");
+    return settings("unsloth/bge-m3");
   });
-  await store.save(async () => settings("LAiM/bge-m3"));
+  await store.save(async () => settings("unsloth/bge-m3"));
   release();
   await first;
   await new Promise((resolve) => setTimeout(resolve, 0));
@@ -310,7 +310,7 @@ test("the settle flag does not carry into the next save", async () => {
     reads += 1;
     throw new Error("should not be read");
   }) as typeof fetch;
-  await store.save(async () => settings("LAiM/bge-small-en-v1.5"));
+  await store.save(async () => settings("unsloth/bge-small-en-v1.5"));
   await new Promise((resolve) => setTimeout(resolve, 0));
   assert.equal(reads, 0, "the earlier overlap was already settled");
 });

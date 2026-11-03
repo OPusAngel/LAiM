@@ -168,7 +168,7 @@ def test_an_unload_of_a_resident_model_still_logs_one_event(backend, monkeypatch
     monkeypatch.setattr(llama_cpp_module.logger, "info", lambda msg, *a, **k: seen.append(msg))
     # Not a Popen: _kill_process treats a non-terminable stand-in as loaded.
     backend._process = object()
-    backend._model_identifier = "LAiM/B-GGUF:Q4_K_M"
+    backend._model_identifier = "unsloth/B-GGUF:Q4_K_M"
 
     backend.unload_model()
 

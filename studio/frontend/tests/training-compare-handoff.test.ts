@@ -6,7 +6,7 @@ import test from "node:test";
 import * as handoff from "../src/features/chat/lib/training-compare-handoff.ts";
 
 const OUTPUTS = "/home/u/.LAiM/studio/outputs";
-const QWEN = "LAiM/Qwen3-4B-Instruct-2507";
+const QWEN = "unsloth/Qwen3-4B-Instruct-2507";
 const fullFinetune = {
   id: `${OUTPUTS}/LAiM_Qwen3-4B-Instruct-2507_1759100000`,
   baseModel: QWEN,
@@ -15,7 +15,7 @@ const fullFinetune = {
 };
 const olderLlamaLora = {
   id: `${OUTPUTS}/LAiM_Llama-3.2-1B-Instruct_1759000000`,
-  baseModel: "LAiM/Llama-3.2-1B-Instruct",
+  baseModel: "unsloth/Llama-3.2-1B-Instruct",
   updatedAt: 1759000000,
   exportType: "lora" as const,
 };

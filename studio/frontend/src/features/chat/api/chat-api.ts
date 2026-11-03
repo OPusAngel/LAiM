@@ -63,6 +63,8 @@ import {
   runBoundedVariantsRequest,
 } from "./gguf-variants-request";
 import { assertCompletedPaddedBody } from "./padded-response";
+import { translate } from "@/i18n";
+
 import {
   type LengthStopCause,
   lengthStopCause,
@@ -119,8 +121,7 @@ async function threadWriteFetch(
 export class StreamInterruptedError extends Error {
   constructor() {
     super(
-      "Response interrupted: the connection dropped before the model finished. " +
-        "Use Retry to regenerate.",
+      translate("uxChat.responseInterruptedTheConnectionafehu"),
     );
     this.name = "StreamInterruptedError";
   }
@@ -263,7 +264,7 @@ export function notifyChatProjectsUpdated(): void {
 }
 
 function parseErrorText(status: number, body: unknown): string {
-  return formatApiErrorBody(body) ?? `Request failed (${status})`;
+  return formatApiErrorBody(body) ?? translate("uxChat.requestFailedb9a7f", { p1: status });
 }
 
 /** `/api/inference/load` and `/unload` pad their body so a proxy cannot time the request out,
@@ -388,7 +389,7 @@ export async function loadModel(
   const preparedToken = await prepareHfTokenForUse(payload.hf_token);
   // Tagged so auto-load can tell a user cancellation from a backend rejection.
   if (!preparedToken.proceed)
-    throw Object.assign(new Error("Model load cancelled."), {
+    throw Object.assign(new Error(translate("uxChat.modelLoadCancelledfwwlw")), {
       LAiMUserCancelled: true,
     });
   if (options?.signal?.aborted)
@@ -419,7 +420,7 @@ export async function loadModel(
           }),
           signal: options?.signal,
         });
-        const loaded = await parseJsonOrThrow<LoadModelResponse>(response, "Model load");
+        const loaded = await parseJsonOrThrow<LoadModelResponse>(response, translate("uxChat.modelLoadqfd5m"));
         // Unconditional: absent on nearly every load, anything malformed is ignored,
         // and the model is already resident by the time this runs. Both identities are
         // passed -- a cached Hub candidate is requested by its loadId while the runtime
@@ -471,7 +472,7 @@ export async function validateModel(
 ): Promise<ValidateModelResponse> {
   const preparedToken = await prepareHfTokenForUse(payload.hf_token);
   if (!preparedToken.proceed)
-    throw Object.assign(new Error("Model load cancelled."), {
+    throw Object.assign(new Error(translate("uxChat.modelLoadCancelledfwwlw")), {
       LAiMUserCancelled: true,
     });
   options?.signal?.throwIfAborted();
@@ -590,7 +591,7 @@ export async function unloadModel(payload: UnloadModelRequest): Promise<void> {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
-  await parseJsonOrThrow<unknown>(response, "Model unload");
+  await parseJsonOrThrow<unknown>(response, translate("uxChat.modelUnload7o8u0"));
   // Only after the unload is known to have happened: a rejected one leaves the model
   // resident and the notice true. A different model's unload leaves it standing.
   dismissCarveoutAdviceForModel(payload.model_path);
@@ -1091,7 +1092,7 @@ export async function uploadChatAttachmentOriginal(
   epoch = getAuthSessionEpoch(),
 ): Promise<{ sha256: string; sizeBytes: number }> {
   const sameAccount = () => {
-    if (getAuthSessionEpoch() !== epoch) throw new Error("The account changed during the upload.");
+    if (getAuthSessionEpoch() !== epoch) throw new Error(translate("uxChat.theAccountChangedDuringb53o3"));
   };
   sameAccount();
   const form = new FormData();
@@ -1311,7 +1312,7 @@ export async function getThreadForkCounts(
   return new Map(Object.entries(data.counts ?? {}));
 }
 
-/** Thread ids whose sandbox still holds files, for a caller that never asked. */
+/** Thread ids whose workdir still holds files, for a caller that never asked. */
 export async function deleteChatThreads(
   threadIds: string[],
   args: { deleteFiles?: boolean } = {},
@@ -1326,9 +1327,9 @@ export async function deleteChatThreads(
     },
     threadIds,
   );
-  const data = await parseJsonOrThrow<{ sandboxes_kept?: string[] }>(response);
+  const data = await parseJsonOrThrow<{ workdirs_kept?: string[] }>(response);
   notifyChatHistoryUpdated();
-  return Array.isArray(data?.sandboxes_kept) ? data.sandboxes_kept : [];
+  return Array.isArray(data?.workdirs_kept) ? data.workdirs_kept : [];
 }
 
 export async function listChatProjects(
@@ -1413,7 +1414,7 @@ export async function setChatProjectWorkingFolder(
   return project;
 }
 
-/** Member thread ids whose sandbox still holds files, from the route. */
+/** Member thread ids whose workdir still holds files, from the route. */
 export async function deleteChatProject(
   projectId: string,
   args: { deleteFiles?: boolean } = {},
@@ -1431,10 +1432,10 @@ export async function deleteChatProject(
     forgetThreadReads(null);
   }
   const data = await parseJsonOrThrow<
-    ProjectRecord & { sandboxes_kept?: string[] }
+    ProjectRecord & { workdirs_kept?: string[] }
   >(response);
   notifyChatProjectsUpdated();
-  return Array.isArray(data?.sandboxes_kept) ? data.sandboxes_kept : [];
+  return Array.isArray(data?.workdirs_kept) ? data.workdirs_kept : [];
 }
 
 export async function listChatMessages(
@@ -1518,7 +1519,7 @@ export class ChatMessageProtectedError extends Error {
 
   constructor(threadId: string, messageId: string, detail?: string) {
     // Keep the server's wording: a manual edit surfaces this text to the user.
-    super(detail || `Message ${messageId} is server-managed and cannot be edited`);
+    super(detail || translate("uxChat.messageIsServerManagedjwhzy", { p1: messageId }));
     this.name = "ChatMessageProtectedError";
     this.threadId = threadId;
     this.messageId = messageId;
@@ -1597,7 +1598,7 @@ export async function countBackendChats(): Promise<number> {
   return data.count;
 }
 
-/** Thread ids whose sandbox still holds files, passed through from the route. */
+/** Thread ids whose workdir still holds files, passed through from the route. */
 export async function clearBackendChats(
   options: {
     notify?: boolean;
@@ -1605,7 +1606,7 @@ export async function clearBackendChats(
     tombstoneThreadIds?: string[];
     deleteFiles?: boolean;
   } = {},
-): Promise<{ deletedThreadIds: string[]; sandboxesKept: string[] }> {
+): Promise<{ deletedThreadIds: string[]; workdirsKept: string[] }> {
   const response = await threadWriteFetch(
     `/api/chat${options.deleteFiles ? "?delete_files=true" : ""}`,
     {
@@ -1620,7 +1621,7 @@ export async function clearBackendChats(
   );
   const data = await parseJsonOrThrow<{
     deletedThreadIds?: string[];
-    sandboxes_kept?: string[];
+    workdirs_kept?: string[];
   }>(response);
   if (options.notify !== false) {
     notifyChatHistoryUpdated();
@@ -1629,8 +1630,8 @@ export async function clearBackendChats(
     deletedThreadIds: Array.isArray(data?.deletedThreadIds)
       ? data.deletedThreadIds
       : [],
-    sandboxesKept: Array.isArray(data?.sandboxes_kept)
-      ? data.sandboxes_kept
+    workdirsKept: Array.isArray(data?.workdirs_kept)
+      ? data.workdirs_kept
       : [],
   };
 }
@@ -1945,7 +1946,7 @@ export async function* streamChatCompletions(
   }
 
   if (!response.body) {
-    throw new Error("Stream response missing body");
+    throw new Error(translate("uxChat.streamResponseMissingBodygj6ky"));
   }
 
   const reader = response.body.getReader();
@@ -2023,7 +2024,7 @@ export async function* streamChatCompletions(
           | OpenAIChatChunk
           | { type?: string; content?: string; error?: { message?: string } };
         if ("error" in parsed && parsed.error) {
-          throw new Error(parsed.error.message || "Stream error");
+          throw new Error(parsed.error.message || translate("uxChat.streamErrorryk6t"));
         }
         if ("type" in parsed && parsed.type === "skill_load") {
           yield { _toolEvent: skillLoadCardEvent(parsed) } as unknown as OpenAIChatChunk;

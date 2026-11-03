@@ -141,7 +141,7 @@ def test_empty_and_non_string_templates():
 def _backend(embedded):
     backend = llama_cpp.LlamaCppBackend.__new__(llama_cpp.LlamaCppBackend)
     backend._chat_template = embedded
-    backend._model_identifier = "LAiM/GLM-5.3-GGUF"
+    backend._model_identifier = "unsloth/GLM-5.3-GGUF"
     return backend
 
 

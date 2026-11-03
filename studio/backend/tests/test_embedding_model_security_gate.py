@@ -53,7 +53,7 @@ def client(monkeypatch):
 
     monkeypatch.setattr(embeddings, "_st_module_subdirs", lambda name, token = None: ())
     saved: dict = {}
-    monkeypatch.setattr(settings, "default_embedding_model", lambda: "LAiM/default-embed")
+    monkeypatch.setattr(settings, "default_embedding_model", lambda: "unsloth/default-embed")
     monkeypatch.setattr(settings, "validate_embedding_model", lambda v: v)
     monkeypatch.setattr(
         settings,
@@ -82,12 +82,12 @@ def client(monkeypatch):
     monkeypatch.setattr(
         settings,
         "effective_gguf_repo_for_embedding_model",
-        lambda model: f"{model or 'LAiM/default-embed'}-GGUF",
+        lambda model: f"{model or 'unsloth/default-embed'}-GGUF",
     )
     monkeypatch.setattr(
         settings,
         "default_gguf_repo",
-        lambda: "LAiM/default-embed-GGUF",
+        lambda: "unsloth/default-embed-GGUF",
     )
 
     app = FastAPI()
@@ -237,7 +237,7 @@ def test_llama_backend_skips_the_st_pickle_scan(monkeypatch):
     # On the llama-server backend the embedder loads GGUF (inert), not the ST repo's
     # pickle, so a flagged ST repo with a clean GGUF companion must not be rejected here.
     saved: dict = {}
-    monkeypatch.setattr(settings, "default_embedding_model", lambda: "LAiM/default-embed")
+    monkeypatch.setattr(settings, "default_embedding_model", lambda: "unsloth/default-embed")
     monkeypatch.setattr(settings, "validate_embedding_model", lambda v: v)
     monkeypatch.setattr(
         settings,
@@ -302,7 +302,7 @@ def test_runtime_llama_fallback_skips_the_st_pickle_scan(monkeypatch):
     monkeypatch.setattr(embeddings, "_st_module_subdirs", lambda name, token = None: ())
 
     saved: dict = {}
-    monkeypatch.setattr(settings, "default_embedding_model", lambda: "LAiM/default-embed")
+    monkeypatch.setattr(settings, "default_embedding_model", lambda: "unsloth/default-embed")
     monkeypatch.setattr(settings, "validate_embedding_model", lambda v: v)
     monkeypatch.setattr(
         settings,
@@ -392,7 +392,7 @@ def test_settings_scan_scopes_module_subdirs(monkeypatch):
 
     monkeypatch.setattr(studio_utils, "hf_env_offline", lambda: False)
     saved: dict = {}
-    monkeypatch.setattr(settings, "default_embedding_model", lambda: "LAiM/default-embed")
+    monkeypatch.setattr(settings, "default_embedding_model", lambda: "unsloth/default-embed")
     monkeypatch.setattr(settings, "validate_embedding_model", lambda v: v)
     monkeypatch.setattr(
         settings,
@@ -454,8 +454,8 @@ def test_clean_repo_saves_under_force(client, monkeypatch):
     assert r.json() == {
         "embedding_model": "acme/clean-embed",
         "embedding_gguf_repo": "acme/clean-embed-GGUF",
-        "default_embedding_model": "LAiM/default-embed",
-        "default_embedding_gguf_repo": "LAiM/default-embed-GGUF",
+        "default_embedding_model": "unsloth/default-embed",
+        "default_embedding_gguf_repo": "unsloth/default-embed-GGUF",
         "is_custom": True,
         # Nothing is held in this process, so Unload has nothing to offer.
         "loaded": False,

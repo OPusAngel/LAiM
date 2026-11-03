@@ -35,7 +35,7 @@ logger = get_logger(__name__)
 _EXTERNAL_ENCODER_FAMILIES = frozenset({"hidream-i1"})
 
 # encoder repos that always ship sharded, where a missing index means an interrupted download
-_SHARDED_ENCODER_REPOS = frozenset({"LAiM/Meta-Llama-3.1-8B-Instruct"})
+_SHARDED_ENCODER_REPOS = frozenset({"unsloth/Meta-Llama-3.1-8B-Instruct"})
 
 # what from_pretrained reads besides the weights, tiny next to them but still a download
 _ENCODER_METADATA_FILES = ("config.json", "tokenizer.json", "tokenizer_config.json")
@@ -161,7 +161,7 @@ def encoder_repo_complete(repo_id: str) -> bool:
 def _missing_external_encoder(pick: MediaModelPick) -> Optional[int]:
     """0 when this local pipeline needs nothing more, else what its outside dependency costs.
 
-    HiDream-I1 loads LAiM/Meta-Llama-3.1-8B-Instruct unconditionally, around 16 GB, which no
+    HiDream-I1 loads unsloth/Meta-Llama-3.1-8B-Instruct unconditionally, around 16 GB, which no
     amount of the pipeline being on disk accounts for. Checked against the cache directly rather
     than through the planner, which cannot be handed an absolute pipeline path.
     """

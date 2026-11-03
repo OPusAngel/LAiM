@@ -622,7 +622,7 @@ def test_embedding_guard_uses_identifier_when_pooling_is_missing():
             n_parallel = 4,
             n_batch = 4,
             n_ubatch = 2,
-            model_identifier = "LAiM/Qwen3-Embedding-4B",
+            model_identifier = "unsloth/Qwen3-Embedding-4B",
         )
         launched = route._estimate_gguf_kv_gb(
             "/x.gguf",
@@ -630,7 +630,7 @@ def test_embedding_guard_uses_identifier_when_pooling_is_missing():
             n_parallel = 2,
             n_batch = 4,
             n_ubatch = 2,
-            model_identifier = "LAiM/Qwen3-Embedding-4B",
+            model_identifier = "unsloth/Qwen3-Embedding-4B",
         )
     assert clamped == pytest.approx(launched, abs = 0.01)
 

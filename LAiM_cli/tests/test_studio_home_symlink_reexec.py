@@ -138,7 +138,7 @@ def _run_app(
     app.command(context_settings = {"allow_extra_args": True, "ignore_unknown_options": True})(
         studio_mod.run
     )
-    result = CliRunner().invoke(app, ["--model", "LAiM/Qwen3-1.7B-GGUF"], catch_exceptions = True)
+    result = CliRunner().invoke(app, ["--model", "unsloth/Qwen3-1.7B-GGUF"], catch_exceptions = True)
     return studio_mod, result, execs
 
 

@@ -244,8 +244,8 @@ def _main(
 @pytest.mark.parametrize(
     "ref, expected",
     [
-        ("LAiM/Qwen3.5-2B-MTP-GGUF:UD-Q4_K_XL", ("LAiM/Qwen3.5-2B-MTP-GGUF", "UD-Q4_K_XL")),
-        ("LAiM/Qwen3.5-2B-GGUF", ("LAiM/Qwen3.5-2B-GGUF", None)),
+        ("unsloth/Qwen3.5-2B-MTP-GGUF:UD-Q4_K_XL", ("unsloth/Qwen3.5-2B-MTP-GGUF", "UD-Q4_K_XL")),
+        ("unsloth/Qwen3.5-2B-GGUF", ("unsloth/Qwen3.5-2B-GGUF", None)),
         (r"C:\models\x.gguf", (r"C:\models\x.gguf", None)),
         ("C:/models/x.gguf", ("C:/models/x.gguf", None)),
     ],
@@ -299,18 +299,18 @@ def test_the_scenario_loads_with_the_variant_field_and_unloads_by_model_path(
         s,
         monkeypatch,
         tmp_path,
-        "LAiM/Qwen3.5-2B-MTP-GGUF:UD-Q4_K_XL",
+        "unsloth/Qwen3.5-2B-MTP-GGUF:UD-Q4_K_XL",
         {"/v1/chat/completions": (200, reply)},
         events,
     )
     assert rc == 0
     load = next(c for c in calls if c[1] == "/api/inference/load")
-    assert load[2] == {"model_path": "LAiM/Qwen3.5-2B-MTP-GGUF", "gguf_variant": "UD-Q4_K_XL"}
+    assert load[2] == {"model_path": "unsloth/Qwen3.5-2B-MTP-GGUF", "gguf_variant": "UD-Q4_K_XL"}
     unloads = [c for c in calls if c[1] == "/api/inference/unload"]
     assert len(unloads) == 2, "one eviction before the load, one unload after"
-    assert all(u[2] == {"model_path": "LAiM/Qwen3.5-2B-MTP-GGUF"} for u in unloads)
+    assert all(u[2] == {"model_path": "unsloth/Qwen3.5-2B-MTP-GGUF"} for u in unloads)
     chat = next(c for c in calls if c[1] == "/v1/chat/completions")
-    assert chat[2]["model"] == "LAiM/Qwen3.5-2B-MTP-GGUF"
+    assert chat[2]["model"] == "unsloth/Qwen3.5-2B-MTP-GGUF"
     streamed = [c for c in calls if c[0] == "STREAM"]
     assert len(streamed) == 2 and all(c[2]["stream"] is True for c in streamed)
     assert all(c[2]["tool_choice"]["function"]["name"] == "web_search" for c in streamed)
@@ -559,7 +559,7 @@ def test_the_signature_audit_covers_every_windows_family():
     body = _text(WORKFLOW)
     _has(
         body,
-        "gh release view $tag --repo LAiMai/llama.cpp --json assets",
+        "gh release view $tag --repo unslothai/llama.cpp --json assets",
         "Where-Object { $_ -like '*windows*' -and $_ -like '*.zip' }",
         'throw "no Windows assets on $tag"',
         "enumerated $($assets.Count) Windows asset(s) but inventoried $audited",
@@ -850,7 +850,7 @@ def test_the_venv_inventory_comes_from_the_running_interpreter_and_cannot_be_emp
 def test_the_readme_clones_a_durable_ref():
     body = _text(PROBE_DIR / "README.md")
     assert "--branch windows-sac-probe" not in body
-    _has(body, "git clone --depth 1 https://github.com/LAiMai/LAiM", "-SendSamples")
+    _has(body, "git clone --depth 1 https://github.com/OPusAngel/LAiM", "-SendSamples")
 
 
 def test_the_app_control_audit_keeps_its_positive_control():

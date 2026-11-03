@@ -25,7 +25,7 @@ from core.inference.video_families import detect_video_family
 
 # A plain (non-modular) family: the H3 conditioner / denoiser substitutions are exercised by their
 # own suites, and this one keeps the load on the shared path every video pick walks.
-WAN_GGUF = "LAiM/Wan2.2-TI2V-5B-GGUF"
+WAN_GGUF = "unsloth/Wan2.2-TI2V-5B-GGUF"
 WAN_BASE = "Wan-AI/Wan2.2-TI2V-5B-Diffusers"
 WAN_FILE = "wan2.2-ti2v-5b-Q4_K_M.gguf"
 
@@ -205,7 +205,7 @@ def test_an_offline_denoiser_probe_reads_the_cache_instead_of_the_hub(monkeypatc
     monkeypatch.setattr(DiffusionBackend, "_hub_file_is_cached", staticmethod(lambda *a, **k: True))
     assert (
         VideoBackend._denoiser_prequant_cached_repo(fam, "int8", "MiniMaxAI/MiniMax-H3", "fl2va")
-        == "LAiM/MiniMax-H3-FP8"
+        == "unsloth/MiniMax-H3-FP8"
     )
 
     monkeypatch.setattr(

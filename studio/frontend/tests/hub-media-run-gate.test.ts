@@ -125,7 +125,7 @@ test("an audio model the Audio page runs opens there, the rest keep their chat R
   assert.equal(
     opensAudio(
       audio({
-        hubRepoId: "LAiM/orpheus-3b-0.1-ft",
+        hubRepoId: "unsloth/orpheus-3b-0.1-ft",
         pipelineTag: "text-to-speech",
       }),
     ),
@@ -158,7 +158,7 @@ test("an audio model the Audio page runs opens there, the rest keep their chat R
   );
   assert.equal(
     opensAudio(
-      audio({ hubRepoId: "LAiM/Qwen3-8B", pipelineTag: "text-generation" }),
+      audio({ hubRepoId: "unsloth/Qwen3-8B", pipelineTag: "text-generation" }),
     ),
     false,
   );
@@ -180,7 +180,7 @@ test("an audio model the Audio page runs opens there, the rest keep their chat R
   assert.equal(
     opensAudio({
       ...mediaModel("text-to-speech", "local", "models_dir"),
-      hubRepoId: "LAiM/orpheus-3b-0.1-ft",
+      hubRepoId: "unsloth/orpheus-3b-0.1-ft",
     }),
     false,
   );
@@ -244,7 +244,7 @@ test("Run refuses an audio model neither Audio nor chat can run", () => {
   assert.equal(
     refused(
       audio({
-        hubRepoId: "LAiM/orpheus-3b-0.1-ft",
+        hubRepoId: "unsloth/orpheus-3b-0.1-ft",
         pipelineTag: "text-to-speech",
       }),
     ),
@@ -301,7 +301,7 @@ test("Run refuses an audio model neither Audio nor chat can run", () => {
   // Chat models, transcription and filesystem rows keep their chat Run.
   assert.equal(
     refused(
-      audio({ hubRepoId: "LAiM/Qwen3-8B", pipelineTag: "text-generation" }),
+      audio({ hubRepoId: "unsloth/Qwen3-8B", pipelineTag: "text-generation" }),
     ),
     false,
   );
@@ -362,8 +362,8 @@ test("an offline cached curated audio GGUF still opens Audio from its catalog ta
   );
   const model: SelectedModelView = {
     ...mediaModel(undefined, "cache"),
-    id: "LAiM/orpheus-3b-0.1-ft-GGUF",
-    hubRepoId: "LAiM/orpheus-3b-0.1-ft-GGUF",
+    id: "unsloth/orpheus-3b-0.1-ft-GGUF",
+    hubRepoId: "unsloth/orpheus-3b-0.1-ft-GGUF",
     isGguf: true,
     runtimeCanChat: true,
     // No Hub tag offline: the backend reports the generic task for a cached GGUF.
@@ -375,8 +375,8 @@ test("an offline cached curated audio GGUF still opens Audio from its catalog ta
   // A chat GGUF with the same generic task keeps its chat Run.
   const chat = {
     ...model,
-    id: "LAiM/Qwen3-8B-GGUF",
-    hubRepoId: "LAiM/Qwen3-8B-GGUF",
+    id: "unsloth/Qwen3-8B-GGUF",
+    hubRepoId: "unsloth/Qwen3-8B-GGUF",
   };
   assert.equal(hubAudioTask(chat, task), "text-generation");
   assert.equal(hubModelRunsOnAudioPage(chat, task), false);

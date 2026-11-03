@@ -14,7 +14,7 @@ _SNAPSHOT = "C:/scan-folder/models--LAiM--Muse-Glimmer-30B-GGUF/snapshots/abc"
 
 
 def _request(**kwargs):
-    kwargs.setdefault("model_path", "LAiM/Muse-Glimmer-30B-GGUF")
+    kwargs.setdefault("model_path", "unsloth/Muse-Glimmer-30B-GGUF")
     return LoadRequest(**kwargs)
 
 
@@ -23,11 +23,11 @@ def test_repo_id_resolves_to_local_scan_folder_copy(monkeypatch):
 
     def fake_resolve(wanted, **kwargs):
         seen.append(wanted)
-        return (_SNAPSHOT, "Q4_K_XL", "LAiM/Muse-Glimmer-30B-GGUF")
+        return (_SNAPSHOT, "Q4_K_XL", "unsloth/Muse-Glimmer-30B-GGUF")
 
     monkeypatch.setattr(resolver, "resolve_local_gguf", fake_resolve)
     rewritten = inf._as_local_scan_folder_request(_request(), True)
-    assert seen == ["LAiM/Muse-Glimmer-30B-GGUF"]
+    assert seen == ["unsloth/Muse-Glimmer-30B-GGUF"]
     assert rewritten.model_path == _SNAPSHOT
     assert rewritten.gguf_variant == "Q4_K_XL"
 
@@ -41,7 +41,7 @@ def test_pinned_variant_resolves_by_repo_and_quant(monkeypatch):
 
     monkeypatch.setattr(resolver, "resolve_local_gguf", fake_resolve)
     rewritten = inf._as_local_scan_folder_request(_request(gguf_variant = "Q8_0"), True)
-    assert seen == ["LAiM/Muse-Glimmer-30B-GGUF:Q8_0"]
+    assert seen == ["unsloth/Muse-Glimmer-30B-GGUF:Q8_0"]
     assert rewritten.model_path == _SNAPSHOT
     assert rewritten.gguf_variant == "Q8_0"
 
@@ -70,7 +70,7 @@ def test_resolved_variant_replaces_the_requested_one(monkeypatch):
 
     monkeypatch.setattr(resolver, "resolve_local_gguf", fake_resolve)
     rewritten = inf._as_local_scan_folder_request(_request(gguf_variant = "BF16"), True)
-    assert seen == ["LAiM/Muse-Glimmer-30B-GGUF:BF16"]
+    assert seen == ["unsloth/Muse-Glimmer-30B-GGUF:BF16"]
     assert rewritten.gguf_variant == "Q4_K_XL"
 
 
@@ -124,7 +124,7 @@ def test_native_path_lease_keeps_the_requested_id(monkeypatch):
     assert inf._as_local_scan_folder_request(original, True) is original
 
 
-_REPO = "LAiM/Tiny-Probe-GGUF"
+_REPO = "unsloth/Tiny-Probe-GGUF"
 
 
 def _cache_repo(root, files):
@@ -222,7 +222,7 @@ def test_validate_reads_the_scan_folder_copy_offline(roots, monkeypatch):
 @pytest.mark.parametrize(
     "hit",
     [
-        ("C:/lmstudio/models/LAiM/Muse-Glimmer-30B-GGUF", "Q4_K_XL", "loader"),
+        ("C:/lmstudio/models/unsloth/Muse-Glimmer-30B-GGUF", "Q4_K_XL", "loader"),
         (_SNAPSHOT, None, "loader"),
         ("C:/scan-folder/models--LAiM--Other-GGUF/snapshots/abc", "Q4_K_XL", "loader"),
     ],

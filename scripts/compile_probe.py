@@ -53,7 +53,7 @@ def _gen(pipe, prompt, *, steps, seed, width, height, guidance):
 
 def main(argv = None) -> int:
     p = argparse.ArgumentParser()
-    p.add_argument("--repo", default = "LAiM/Z-Image-Turbo-GGUF")
+    p.add_argument("--repo", default = "unsloth/Z-Image-Turbo-GGUF")
     p.add_argument("--gguf", default = "z-image-turbo-Q4_K_M.gguf")
     p.add_argument("--base-repo", default = "Tongyi-MAI/Z-Image-Turbo")
     p.add_argument("--transformer-class", default = "ZImageTransformer2DModel")

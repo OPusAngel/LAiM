@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -46,7 +47,7 @@ export function BlenderMcpSetup({ servers, disabled, onBusyChange }: {
       const rows = await listMcpBuiltins(wait);
       if (generation.current !== current) return;
       const blender = rows.find((row) => row.builtin_id === "blender");
-      if (!blender) throw new Error("Blender MCP is not available from this LAiM backend.");
+      if (!blender) throw new Error(translate("uxChat.blenderMCPIsNotpelkg"));
       setConfig(blender);
       setLoadError(null);
       if (!initialized.current) {
@@ -90,22 +91,22 @@ export function BlenderMcpSetup({ servers, disabled, onBusyChange }: {
       if (action === "test") {
         const result = await testBlenderMcp({ ...settings, consent });
         if (!mounted.current) return;
-        if (!result.ok) throw new Error(result.error ?? "MCP connection failed. Retry or check the LAiM backend.");
+        if (!result.ok) throw new Error(result.error ?? translate("uxChat.mCPConnectionFailedRetry7us6t"));
         setConnection(result.blender_ready ? "ready" : "partial");
         setMessage(`MCP connected (${result.tool_count} tools). ${result.blender_ready
-          ? "Blender ready."
-          : result.blender_error ?? "Blender is not connected. Open Setup help below."}`);
+          ? translate("uxChat.blenderReady147a9")
+          : result.blender_error ?? translate("uxChat.blenderIsNotConnected5fehp")}`);
       } else if (action === "disable" && config?.server_id) {
         await updateMcpServer(config.server_id, { isEnabled: false });
         if (!mounted.current) return;
-        setMessage("Blender tools disabled. Your Blender window remains open.");
+        setMessage(translate("uxChat.blenderToolsDisabledYourw9fzg"));
       } else {
         const updated = await updateBlenderMcp({ ...settings, is_enabled: action === "enable", consent });
         if (!mounted.current) return;
         if (updated.is_enabled) useChatRuntimeStore.getState().setMcpEnabledForChat(true);
         setConfig(updated);
         setMessage(updated.is_enabled
-          ? "Blender MCP enabled for this chat. Scene tools require a connected Blender add-on."
+          ? translate("uxChat.blenderMCPEnabledForgr1hj")
           : "Settings saved; Blender is disabled.");
       }
     } catch (err) {
@@ -121,7 +122,7 @@ export function BlenderMcpSetup({ servers, disabled, onBusyChange }: {
   }
 
   return (
-    <section className="space-y-4 rounded-xl border p-4" aria-label="Blender MCP">
+    <section className="space-y-4 rounded-xl border p-4" aria-label={translate("uxChat.blenderMCPmx44v")}>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
           <h3 className="text-sm font-medium">Blender</h3>
@@ -133,8 +134,8 @@ export function BlenderMcpSetup({ servers, disabled, onBusyChange }: {
             }`}>
               <span aria-hidden="true" className={`size-2 shrink-0 rounded-full bg-current ${connection === "checking" ? "motion-safe:animate-pulse" : ""}`} />
               {connection === "ready" ? "Connected"
-                : connection === "partial" ? "MCP only"
-                  : connection === "failed" ? "Connection failed" : "Testing…"}
+                : connection === "partial" ? translate("uxChat.mCPOnlyctzv4")
+                  : connection === "failed" ? translate("uxChat.connectionFailed4qy2y") : "Testing…"}
             </span>
           )}
         </div>
@@ -142,64 +143,62 @@ export function BlenderMcpSetup({ servers, disabled, onBusyChange }: {
           {!config ? "Loading…" : config.is_enabled ? "Enabled" : !config.available ? "Unavailable" : "Disabled"}
         </span>
       </div>
-      {!config?.is_enabled && <p className="text-sm leading-relaxed text-muted-foreground">
-        LAiM downloads and sets up MCP on first use. Internet is needed once; the Blender add-on is installed separately.
-      </p>}
-      {duplicate && <p className="text-xs leading-relaxed text-amber-600">A custom Blender server also exists. Disable it in Manage MCP servers if you prefer LAiM’s managed setup.</p>}
+      {!config?.is_enabled && <p className="text-sm leading-relaxed text-muted-foreground">{translate("uxChat.lAiMDownloadsAndSetsz3gw0")}</p>}
+      {duplicate && <p className="text-xs leading-relaxed text-amber-600">{translate("uxChat.aCustomBlenderServere26xw")}</p>}
       {config && !config.is_enabled && (
         <div className="flex items-start gap-3">
           <Checkbox id="blender-mcp-consent" className="mt-0.5" checked={consent} disabled={locked} onCheckedChange={(checked) => setConsent(checked === true)} />
           <Label htmlFor="blender-mcp-consent" className="text-xs font-normal leading-relaxed">
-            Allow unsandboxed Python, scene changes and background Blender tool processes. Results may be sent to your model provider. Cancelling may not undo changes.
+            {translate("uxCopy.allowUnrestrictedPythonScenev76n1")}
           </Label>
         </div>
       )}
       <div className="flex flex-wrap items-center gap-2">
         {config && !config.is_enabled && (
-          <Button size="sm" disabled={locked || !config.available || !validPort || !consent} onClick={() => void act("enable")}>Enable Blender MCP</Button>
+          <Button size="sm" disabled={locked || !config.available || !validPort || !consent} onClick={() => void act("enable")}>{translate("uxCopy.enableBlenderMCP1grqd")}</Button>
         )}
-        <Button size="sm" variant="outline" disabled={locked || !config?.available || !validPort || (!config.is_enabled && !consent)} onClick={() => void act("test")}>Test connection</Button>
+        <Button size="sm" variant="outline" disabled={locked || !config?.available || !validPort || (!config.is_enabled && !consent)} onClick={() => void act("test")}>{translate("uxChat.testConnectionjgzq1")}</Button>
         {config?.is_enabled && <Button size="sm" variant="outline" disabled={locked} onClick={() => void act("disable")}>Disable</Button>}
-        {busy && <span role="status" className="inline-flex items-center gap-2 text-xs text-muted-foreground"><Spinner />Setting up / checking MCP…</span>}
+        {busy && <span role="status" className="inline-flex items-center gap-2 text-xs text-muted-foreground"><Spinner />{translate("uxChat.settingUpCheckingMCP718kq")}</span>}
       </div>
       <Collapsible className="border-t pt-3">
         <CollapsibleTrigger className="group flex items-center gap-1 rounded-md py-1 text-xs text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-          {config?.server_id ? "Setup help" : "Set up Blender"}
+          {config?.server_id ? translate("uxChat.setupHelp3mpru") : translate("uxChat.setUpBlender7nhmy")}
           <ChevronDown aria-hidden="true" className="size-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180 motion-reduce:transition-none" />
         </CollapsibleTrigger>
         <CollapsibleContent className="[--duration:200ms] motion-reduce:animate-none">
         <div className="space-y-4 pt-4 text-sm leading-relaxed text-muted-foreground">
-          <p>Use Blender {config?.min_blender_version ?? "5.1.0"}+ on the LAiM backend machine.</p>
-          <Button size="sm" variant="outline" onClick={() => openLink("https://www.blender.org/lab/mcp-server/")}>Download Blender add-on</Button>
+          <p>{translate("uxChat.useBlenderOnThe66fjk", { p1: config?.min_blender_version ?? "5.1.0" })}</p>
+          <Button size="sm" variant="outline" onClick={() => openLink("https://www.blender.org/lab/mcp-server/")}>{translate("uxChat.downloadBlenderAddOnu38n4")}</Button>
           <ol className="list-decimal space-y-3 pl-5">
-            <li>In Blender, enable <strong className="font-medium text-foreground">Online Access</strong> in Preferences → System.</li>
-            <li>Drag the website’s install button into Blender to add the <strong className="font-medium text-foreground">Blender Lab</strong> repository.</li>
-            <li>Drag it in again and confirm the add-on installation. Or, after adding the repository, search <strong className="font-medium text-foreground">MCP</strong> in Preferences → Get Extensions.</li>
+            <li>{translate("uxChat.inBlenderEnablejf214")}<strong className="font-medium text-foreground">{translate("uxChat.onlineAccessctio7")}</strong>{translate("uxChat.inPreferencesSystem8t0ri")}</li>
+            <li>{translate("uxChat.dragTheWebsiteSx8u6v")}<strong className="font-medium text-foreground">{translate("uxChat.blenderLabpe8vq")}</strong>{translate("uxChat.repositorypdqym")}</li>
+            <li>{translate("uxCopy.dragItInAgainqv98p")} <strong className="font-medium text-foreground">MCP</strong>{translate("uxChat.inPreferencesGetExtensionsb14c7")}</li>
           </ol>
-          <p>Enable the add-on, keep Blender open, then test the connection above.</p>
+          <p>{translate("uxCopy.enableTheAddOnjiett")}</p>
         </div>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="border-t pt-3">
         <CollapsibleTrigger className="group flex w-full items-center justify-between rounded-md py-1 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-          Advanced settings
+          {translate("studio.preview.advancedSettings")}
           <ChevronDown aria-hidden="true" className="size-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180 motion-reduce:transition-none" />
         </CollapsibleTrigger>
         <CollapsibleContent className="[--duration:200ms] motion-reduce:animate-none">
         <div className="space-y-4 pt-4">
-          <p className="text-xs leading-relaxed text-muted-foreground">Loopback only (127.0.0.1). Match the add-on’s port. LAiM needs Python 3.10+.</p>
+          <p className="text-xs leading-relaxed text-muted-foreground">{translate("uxChat.loopbackOnly1270hjh42")}</p>
           <div className="grid gap-3 sm:grid-cols-[100px_1fr]">
             <div className="space-y-1">
               <Label htmlFor="blender-mcp-port">Port</Label>
               <Input id="blender-mcp-port" inputMode="numeric" value={port} disabled={locked || !config} onChange={(event) => { setPort(event.target.value); setMessage(null); setConnection(null); }} />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="blender-mcp-path">Blender executable (optional)</Label>
-              <Input id="blender-mcp-path" value={blenderPath} disabled={locked || !config} placeholder="Auto-detect Blender" onChange={(event) => { setBlenderPath(event.target.value); setMessage(null); setConnection(null); }} />
+              <Label htmlFor="blender-mcp-path">{translate("uxChat.blenderExecutableOptionalzbs21")}</Label>
+              <Input id="blender-mcp-path" value={blenderPath} disabled={locked || !config} placeholder={translate("uxChat.autoDetectBlender1qi94")} onChange={(event) => { setBlenderPath(event.target.value); setMessage(null); setConnection(null); }} />
             </div>
           </div>
-          <Button size="sm" variant="outline" disabled={locked || !config || !validPort} onClick={() => void act("save")}>Save &amp; disable</Button>
+          <Button size="sm" variant="outline" disabled={locked || !config || !validPort} onClick={() => void act("save")}>{translate("uxChat.saveDisable7ozo2")}</Button>
         </div>
         </CollapsibleContent>
       </Collapsible>

@@ -3,7 +3,7 @@
 
 import { SectionCard } from "@/components/section-card";
 import { authFetch } from "@/features/auth";
-import { useT } from "@/i18n";
+import { translate, useT } from "@/i18n";
 import { cn } from "@/lib/utils";
 import { RamMemoryIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -117,9 +117,7 @@ function VramBar({
     <div className="flex flex-col gap-1">
       <div className="flex justify-between text-ui-11 text-muted-foreground">
         <span>{label}</span>
-        <span className="font-mono">
-          {(used / GIB).toFixed(1)} / {((budget ?? total) / GIB).toFixed(1)} GiB
-        </span>
+        <span className="font-mono">{translate("uxStudio.giB30dmf", { p1: (used / GIB).toFixed(1), p2: ((budget ?? total) / GIB).toFixed(1) })}</span>
       </div>
       <div className="relative h-2 overflow-hidden rounded-full bg-muted">
         <div

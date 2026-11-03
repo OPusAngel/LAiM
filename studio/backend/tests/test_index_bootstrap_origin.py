@@ -100,7 +100,7 @@ def test_is_same_origin_request_scheme_case_insensitive():
 
 
 def test_is_same_origin_request_null_origin_is_cross_origin():
-    """Sandboxed iframes / file:// pages send ``Origin: null``; cross-origin."""
+    """Workdired iframes / file:// pages send ``Origin: null``; cross-origin."""
     from main import _is_same_origin_request
 
     req = _build_request("example.com", origin = "null")

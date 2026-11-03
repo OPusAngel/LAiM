@@ -19,7 +19,7 @@ const {
   runBoundedVariantsRequest,
 } = await import("../src/features/chat/api/gguf-variants-request.ts");
 
-const REPO = "LAiM/Qwen3-8B-GGUF";
+const REPO = "unsloth/Qwen3-8B-GGUF";
 
 test("every listing carries a signal, so an unanswered one can still be given up on", () => {
   const abort = ggufVariantsAbort();

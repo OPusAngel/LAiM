@@ -101,7 +101,7 @@ test("the model and exports never see the envelope or the wrapper", () => {
 test("Always allow shares the chat adapter's approval scope", () => {
   assert.match(
     read("features/chat/api/chat-adapter.ts"),
-    /toolConfirmationScopeId = resolvedThreadId\s*\? `\$\{sandboxSessionId \|\| "_default"\}:\$\{resolvedThreadId\}`\s*: sandboxSessionId \|\| "_default"/,
+    /toolConfirmationScopeId = resolvedThreadId\s*\? `\$\{workdirSessionId \|\| "_default"\}:\$\{resolvedThreadId\}`\s*: workdirSessionId \|\| "_default"/,
   );
   assert.equal(toolApprovalScope("project-p", "t-1"), "project-p:t-1");
   assert.equal(toolApprovalScope(undefined, "t-1"), "_default:t-1");

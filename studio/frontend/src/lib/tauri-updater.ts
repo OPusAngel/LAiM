@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
+
 export interface DesktopUpdateMetadata {
   currentVersion: string;
   version: string;
@@ -75,7 +77,7 @@ export async function downloadDesktopUpdate(
     await invoke("download_desktop_update");
     const status = await desktopUpdateBundleStatus();
     if (!status.downloaded || !sameUpdateVersion(status.version, expectedVersion)) {
-      throw new Error(`Desktop update ${expectedVersion} was not downloaded.`);
+      throw new Error(translate("uxFeatures.desktopUpdateWasNotmgnik", { p1: expectedVersion }));
     }
     onProgress(100);
   } finally {

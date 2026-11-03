@@ -3249,7 +3249,7 @@ def test_default_model_download_is_visible_and_cancellable():
 def test_default_chat_model_is_gemma_4_e2b():
     """The empty-device default, in one place so it cannot drift."""
     src = _read("features/chat/api/chat-adapter.ts")
-    assert 'const DEFAULT_CHAT_MODEL_REPO = "LAiM/gemma-4-E2B-it-GGUF";' in src
+    assert 'const DEFAULT_CHAT_MODEL_REPO = "unsloth/gemma-4-E2B-it-GGUF";' in src
     assert 'const DEFAULT_CHAT_MODEL_VARIANT = "UD-Q4_K_XL";' in src
     assert 'const DEFAULT_CHAT_MODEL_LABEL = "Gemma 4 E2B";' in src
     assert "Qwen3.5-4B-MTP-GGUF" not in src

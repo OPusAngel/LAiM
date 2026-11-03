@@ -10,7 +10,7 @@ _BACKEND = Path(__file__).resolve().parent.parent
 if str(_BACKEND) not in sys.path:
     sys.path.insert(0, str(_BACKEND))
 
-MODEL = "LAiM/gemma-4-E2B-it"
+MODEL = "unsloth/gemma-4-E2B-it"
 NATIVE = (_BACKEND / "assets" / "chat_templates" / "gemma-4-edge.jinja").read_text(encoding = "utf-8")
 RESULT = "Estonia won 0 gold, 1 silver and 0 bronze medals."
 WEB_SEARCH = {

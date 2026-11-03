@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import type { ReactNode } from "react";
 import {
   AlertDialog,
@@ -110,7 +111,7 @@ export function ModelRunActionButton({
   return (
     <button
       type="button"
-      aria-label={loading ? `${label}. Opening configuration.` : label}
+      aria-label={loading ? translate("uxHub.openingConfigurationgqhne", { p1: label }) : label}
       aria-busy={loading}
       disabled={loading}
       onClick={onClick}
@@ -118,9 +119,7 @@ export function ModelRunActionButton({
     >
       {loading ? (
         <>
-          <Spinner />
-          Opening…
-        </>
+          <Spinner />{translate("uxHub.openingkpkbc")}</>
       ) : (
         <>
           <HugeiconsIcon icon={PlayIcon} strokeWidth={1.75} />
@@ -158,7 +157,7 @@ export function CardDeleteButton({
         </button>
       </TooltipTrigger>
       <TooltipContent side="top" sideOffset={4}>
-        Delete from device
+        {translate("uxHub.deleteFromDevice171k1")}
       </TooltipContent>
     </Tooltip>
   );
@@ -196,11 +195,11 @@ export function CardUpdateButton({
               strokeWidth={2}
               className="size-3.5"
             />
-            Update
+            {translate("settings.about.updates")}
           </button>
         </TooltipTrigger>
         <TooltipContent side="top" sideOffset={4}>
-          A newer version is available on Hugging Face
+          {translate("uxHub.aNewerVersionIs5ptgg")}
         </TooltipContent>
       </Tooltip>
     );
@@ -225,7 +224,7 @@ export function CardUpdateButton({
         </button>
       </TooltipTrigger>
       <TooltipContent side="top" sideOffset={4}>
-        Update from Hugging Face
+        {translate("uxHub.updateFromHuggingFaceitu5y")}
       </TooltipContent>
     </Tooltip>
   );
@@ -274,9 +273,7 @@ export function DownloadActionButton({
     >
       {cancelling ? (
         <span className="inline-flex items-center gap-2 text-muted-foreground">
-          <Spinner />
-          Cancelling…
-        </span>
+          <Spinner />{translate("uxHub.cancellingmpxju")}</span>
       ) : downloading ? (
         <>
           <DownloadStopIndicator mode={stopMode} />
@@ -284,9 +281,7 @@ export function DownloadActionButton({
         </>
       ) : loading ? (
         <>
-          <Spinner />
-          Loading…
-        </>
+          <Spinner />{translate("uxHub.loadingkapgw")}</>
       ) : (
         <>
           <HugeiconsIcon icon={Download01Icon} strokeWidth={1.75} />

@@ -10,6 +10,8 @@ import {
 } from "../stores/stop-running-chats-dialog-store";
 import { listStoredChatThreads } from "./chat-history-storage";
 import { listLocalPreStreamRunReservations } from "./pre-stream-run-reservation";
+import { translate } from "@/i18n";
+
 
 export interface StopRunningChatsDecision {
   /** False when the user chose to keep generating; the caller must not load. */
@@ -38,7 +40,7 @@ export function getLocalPromptQueueThreadIds(): string[] {
  *  runs and return the pending queue targets for the caller to stop after preflight.
  *  External-provider chats and queues are left out of both. */
 export async function confirmStopRunningChatsIfNeeded(
-  action = "Loading a different model",
+  action = translate("uxChat.loadingADifferentModelnr3pm"),
   effect: StopRunningChatsEffect = "reload",
   /** Only this model's chats, from the backend: a tab cannot tell which model a local run is on. */
   model?: string,
@@ -145,7 +147,7 @@ export async function confirmStopRunningChatsIfNeeded(
       const key = thread?.pairId ?? id;
       if (seen.has(key)) continue;
       seen.add(key);
-      titles.push(thread?.title || "Untitled chat");
+      titles.push(thread?.title || translate("uxChat.untitledChatm2e6l"));
     }
     count = Math.max(seen.size, count - (running.length - seen.size));
   } catch {

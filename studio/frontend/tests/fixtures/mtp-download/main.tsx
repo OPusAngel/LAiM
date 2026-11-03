@@ -29,7 +29,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./styles.css";
 
-const REPO_ID = "LAiM/Qwen3.8-Flash-Next-GGUF";
+const REPO_ID = "unsloth/Qwen3.8-Flash-Next-GGUF";
 
 type Variant = {
   filename: string;

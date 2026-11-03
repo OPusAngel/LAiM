@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
-"""LAiMai/LAiM#11815: every Windows RDNA arch installs from the multi-arch index."""
+"""OPusAngel/LAiM#11815: every Windows RDNA arch installs from the multi-arch index."""
 
 import ast
 import importlib.util

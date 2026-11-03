@@ -1,19 +1,21 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { ReadMore, type TourStep } from "@/features/tour";
 
 export const studioDatasetStep: TourStep = {
   id: "dataset",
   target: "studio-dataset",
-  title: "Dataset",
-  body: (
+  get title() {
+    return translate("studio.wizard.datasetTitle");
+  },
+  get body() {
+    return (
     <>
-      Search the Hub, or upload PDF, DOCX, JSONL, JSON, CSV or Parquet. Preview
-      a few rows before you start, since formatting matters more than size. We
-      map the columns for you and ask only when the format is unclear. No
-      dataset yet? Build one on the Recipes page.{" "}
+      {translate("uxTour.searchTheHubOr1hf31")}
       <ReadMore href="https://LAiM.ai/docs/get-started/fine-tuning-llms-guide/datasets-guide" />
     </>
-  ),
+  );
+  },
 };

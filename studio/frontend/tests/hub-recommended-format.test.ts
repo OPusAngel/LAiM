@@ -12,14 +12,14 @@ import {
 } from "../src/features/hub/lib/format-filters.ts";
 import { readSrcAsync } from "./helpers/kit.ts";
 
-const gguf = { id: "LAiM/Qwen3.6-27B-GGUF", isGguf: true };
-const fp8 = { id: "LAiM/Qwen3.6-27B-FP8", isGguf: false };
+const gguf = { id: "unsloth/Qwen3.6-27B-GGUF", isGguf: true };
+const fp8 = { id: "unsloth/Qwen3.6-27B-FP8", isGguf: false };
 const fp8Dynamic = {
   id: "RedHatAI/Llama-3.3-70B-Instruct-FP8-dynamic",
   isGguf: false,
 };
-const nvfp4 = { id: "LAiM/Qwen3.6-27B-NVFP4", isGguf: false };
-const bf16 = { id: "LAiM/Qwen3.6-27B", isGguf: false };
+const nvfp4 = { id: "unsloth/Qwen3.6-27B-NVFP4", isGguf: false };
+const bf16 = { id: "unsloth/Qwen3.6-27B", isGguf: false };
 
 test("checkpoint quant format comes from the repo name or the fp8 quant config", () => {
   assert.equal(checkpointQuantFormat(fp8), "fp8");
@@ -46,7 +46,7 @@ test("checkpoint quant format comes from the repo name or the fp8 quant config",
   assert.equal(checkpointQuantFormat({ ...fp8, quantMethod: "gptq" }), null);
   // A GGUF repo named after an FP8 base is still a GGUF.
   assert.equal(
-    checkpointQuantFormat({ id: "LAiM/X-FP8-GGUF", isGguf: true }),
+    checkpointQuantFormat({ id: "unsloth/X-FP8-GGUF", isGguf: true }),
     null,
   );
 });
@@ -71,7 +71,7 @@ test("Recommended browsing lists checkpoints only past 30 likes", async () => {
   assert.equal(hasRecommendedCheckpointLikes({ ...fp8, likes: 31 }), true);
   // Safetensors repo cross-tagged "gguf" for a stray .gguf file (Nemotron-3.5-Bolt-74B-A9B).
   const crossTagged = {
-    id: "LAiM/NVIDIA-Nemotron-3.5-Bolt-74B-A9B",
+    id: "unsloth/NVIDIA-Nemotron-3.5-Bolt-74B-A9B",
     isGguf: true,
     tags: ["transformers", "safetensors", "gguf"],
   };
@@ -126,7 +126,7 @@ test("the chat picker lists FP8 / NVFP4 checkpoints the GPU runs, whatever their
   assert.equal(isCapableCheckpointQuant(fp8.id, undefined, []), false);
   assert.equal(isCapableCheckpointQuant(nvfp4.id, undefined, ["fp8"]), false);
   assert.equal(
-    isCapableCheckpointQuant("LAiM/X-FP8-GGUF", undefined, ["fp8"]),
+    isCapableCheckpointQuant("unsloth/X-FP8-GGUF", undefined, ["fp8"]),
     false,
   );
   // The listing's GGUF verdict wins over an id without a -GGUF suffix.

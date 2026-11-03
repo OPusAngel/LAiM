@@ -23,9 +23,9 @@ test("no offer, or an offer naming no engine this build knows, never opens the d
 });
 
 test("choosing the engine resumes the load with it; declining resumes with null", async () => {
-  const chosen = confirmManagedEngineIfNeeded("LAiM/Qwen3.8-27B-NVFP4", OFFER);
+  const chosen = confirmManagedEngineIfNeeded("unsloth/Qwen3.8-27B-NVFP4", OFFER);
   assert.equal(store().open, true);
-  assert.equal(store().modelName, "LAiM/Qwen3.8-27B-NVFP4");
+  assert.equal(store().modelName, "unsloth/Qwen3.8-27B-NVFP4");
   assert.deepEqual(store().offer, OFFER);
   store().resolve("vllm");
   assert.equal(await chosen, "vllm");

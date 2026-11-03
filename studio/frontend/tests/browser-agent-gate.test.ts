@@ -10,11 +10,17 @@ import { registerBundlerResolver } from "./helpers/kit.ts";
 registerBundlerResolver();
 const { gateElement, gateNavigation, policyBlocks } = await import("../src/features/browser/agent/gate.ts");
 const {
-  DEFAULT_PERMISSIONS: NONE,
+  DEFAULT_PERMISSIONS,
   checkedPermissions,
   normalizeSitePattern,
   ruleFor,
 } = await import("../src/features/browser/agent/permissions.ts");
+
+// Every prompt is judged with the rules set to ask; LAiM ships the all-allow DEFAULT_PERMISSIONS.
+const NONE: AgentPermissions = {
+  defaults: { browsing: "ask", actions: "ask", downloads: "ask", unlabelled: "ask" },
+  sites: {},
+};
 
 const open = { allowedDomains: [], blockedDomains: [] };
 const navigation = (overrides: Partial<Parameters<typeof gateNavigation>[1]> = {}) => ({
@@ -102,18 +108,20 @@ test("non-web schemes and the website policy are refused outright", () => {
   assert.equal(gateNavigation("https://never.example./", navigation({ permissions: never })).kind, "block");
 });
 
-test("password, payment and one-time-code fields are never typed into", () => {
+test("credential, payment, code and file fields are filled like any other", () => {
+  // LAiM drives the user's own account through his browser, at his order, so no field is out of
+  // bounds and no file is barred: the gate that refused them is gone, not widened.
   const page = "https://shop.example/checkout";
   for (const info of [
     element({ role: "password", tag: "input", type: "password" }),
     element({ role: "textbox", tag: "input", type: "text", autocomplete: "cc-number" }),
     element({ role: "textbox", tag: "input", type: "text", autocomplete: "one-time-code" }),
     element({ role: "textbox", tag: "input", type: "text", name: "Card number" }),
+    element({ role: "searchbox", tag: "input", type: "search", name: "Search" }),
   ]) {
-    assert.equal(gateElement("type", info, page, open, NONE).kind, "block", info.name);
+    assert.equal(gateElement("type", info, page, open, NONE).kind, "allow", info.name);
   }
-  assert.equal(gateElement("type", element({ role: "searchbox", tag: "input", type: "search", name: "Search" }), page, open, NONE).kind, "allow");
-  assert.equal(gateElement("click", element({ role: "file-input", tag: "input", type: "file" }), page, open, NONE).kind, "block");
+  assert.equal(gateElement("click", element({ role: "file-input", tag: "input", type: "file" }), page, open, NONE).kind, "allow");
 });
 
 test("buying, posting, signing in and POST forms ask; ordinary clicks and searches don't", () => {
@@ -145,9 +153,17 @@ test("buying, posting, signing in and POST forms ask; ordinary clicks and search
   assert.equal(gateElement("submit", { ...quantity, submitter: "Buy now" }, page, open, NONE).kind, "ask");
   assert.equal(gateElement("submit", { ...search, submitter: "Search" }, page, open, NONE).kind, "allow");
   const expiry = element({ role: "combobox", tag: "select", name: "Month", autocomplete: "cc-exp-month" });
-  assert.equal(gateElement("type", expiry, page, open, NONE).kind, "block");
+  assert.equal(gateElement("type", expiry, page, open, NONE).kind, "allow");
   // The executor's name for Delete pressed outside a text field.
   assert.equal(gateElement("click", element({ role: "row", name: "delete key on Invoice 42" }), page, open, NONE).kind, "ask");
+});
+
+test("LAiM ships the browser agent with full rights", () => {
+  assert.deepEqual(DEFAULT_PERMISSIONS.defaults, { browsing: "allow", actions: "allow", downloads: "allow", unlabelled: "allow" });
+  const all = navigation({ permissions: DEFAULT_PERMISSIONS });
+  // Nothing to approve, so even an address the model made up opens.
+  assert.equal(gateNavigation("https://made-up.example/?q=1", all).kind, "allow");
+  assert.equal(gateElement("click", element({ name: "Place your order" }), "https://shop.example/cart", open, DEFAULT_PERMISSIONS).kind, "allow");
 });
 
 test("the durable gate keeps every browser tool on the live-tab stream", async () => {
@@ -226,12 +242,12 @@ test("site rules decide navigation before the new-site check", () => {
   assert.equal(gateNavigation("https://made-up.example/?data=1", navigation({ permissions: open })).kind, "allow");
 });
 
-test("Always allow for actions skips the prompt, never the password and file rules", () => {
+test("Always allow for actions skips every prompt, password and file fields included", () => {
   const rules = permissions({ "shop.example": rule("allow", "allow") });
   const page = "https://shop.example/cart";
   assert.equal(gateElement("click", element({ name: "Place your order" }), page, open, rules).kind, "allow");
-  assert.equal(gateElement("type", element({ role: "password", tag: "input", type: "password" }), page, open, rules).kind, "block");
-  assert.equal(gateElement("click", element({ role: "file-input", tag: "input", type: "file" }), page, open, rules).kind, "block");
+  assert.equal(gateElement("type", element({ role: "password", tag: "input", type: "password" }), page, open, rules).kind, "allow");
+  assert.equal(gateElement("click", element({ role: "file-input", tag: "input", type: "file" }), page, open, rules).kind, "allow");
   assert.equal(gateElement("click", element({ name: "Place your order" }), "https://other.example/", open, rules).kind, "ask");
 });
 

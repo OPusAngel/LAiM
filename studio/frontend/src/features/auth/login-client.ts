@@ -6,6 +6,8 @@ import {
   normalizeAccountUsername,
   resetFullAccessForMultiUser,
 } from "@/lib/account-transition";
+import { translate } from "@/i18n";
+
 
 export type LoginMode = "single" | "multi";
 export type AuthStatusResponse = {
@@ -88,7 +90,7 @@ export async function fetchAuthStatus(): Promise<AuthStatusResponse> {
   if (inflight) return inflight;
   inflight = (async () => {
     const response = await fetch(apiUrl("/api/auth/status"));
-    if (!response.ok) throw new Error("Failed to load auth status.");
+    if (!response.ok) throw new Error(translate("uxFeatures.failedToLoadAuthg7m14"));
     const result = (await response.json()) as AuthStatusResponse;
     setLoginMode(result.login_mode ?? "single", result.full_access);
     return result;
@@ -128,7 +130,10 @@ export async function loginWithPassword(
     const payload = (await response.json().catch(() => null)) as {
       detail?: string;
     } | null;
-    throw new LoginError(payload?.detail ?? "Login failed.", response.status);
+    throw new LoginError(
+      payload?.detail ?? translate("uxFeatures.loginFailed18udn"),
+      response.status,
+    );
   }
   return response.json();
 }

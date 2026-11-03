@@ -24,7 +24,7 @@ logger = get_logger(__name__)
 HIDREAM_FAMILY_NAME = "hidream-i1"
 
 # Open mirror of the gated meta-llama/Meta-Llama-3.1-8B-Instruct the pipeline expects.
-HIDREAM_LLAMA_REPO = "LAiM/Meta-Llama-3.1-8B-Instruct"
+HIDREAM_LLAMA_REPO = "unsloth/Meta-Llama-3.1-8B-Instruct"
 HIDREAM_LLAMA_BF16_BYTES = 16_060_556_376
 
 

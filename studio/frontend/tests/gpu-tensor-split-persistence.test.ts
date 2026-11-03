@@ -22,7 +22,7 @@ const { fromApiOverride, toApiOverride } = await import(
   "../src/features/model-picker/api/model-overrides.ts"
 );
 
-const MODEL = "LAiM/split-GGUF";
+const MODEL = "unsloth/split-GGUF";
 const VARIANT = "Q4_K_M";
 const configured = () => ({
   ...DEFAULT_PER_MODEL_CONFIG,

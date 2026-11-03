@@ -707,7 +707,7 @@ def _dedup_key(model: str):
 
     Falling back on a string is only for what cannot be stat'd: a bare repo id, or a path that
     has gone away since the scan. A repo id keeps the case-insensitive treatment, since the Hub
-    resolves ``LAiM/Qwen3`` and ``LAiM/qwen3`` to one repo and the cache folds them into
+    resolves ``unsloth/Qwen3`` and ``unsloth/qwen3`` to one repo and the cache folds them into
     one directory; a vanished path uses ``normcase``, which at worst leaves two rows for a model
     that is not loadable from either of them.
     """

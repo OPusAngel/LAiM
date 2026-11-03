@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { SectionCard } from "@/components/section-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -98,14 +99,14 @@ export function ImageLoraExportCard({ preselect }: { preselect?: string }) {
   return (
     <SectionCard
       icon={<HugeiconsIcon icon={ImageAdd02Icon} className="size-5" />}
-      title="Export an image LoRA"
+      title={translate("uxExport.exportAnImageLoRAbuoxx")}
       description="Save a copy of an image generation LoRA you trained (or added) on the Images page: the .safetensors adapter plus its .json metadata. Any LAiM install lists it again from a custom models folder."
       className="mt-6"
     >
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-1.5">
           <label htmlFor="image-lora-id" className="text-sm font-medium">
-            Image LoRA
+            {translate("uxExport.imageLoRAgrhea")}
           </label>
           <Select value={loraId} onValueChange={setLoraId}>
             <SelectTrigger id="image-lora-id" className="w-full">
@@ -114,8 +115,8 @@ export function ImageLoraExportCard({ preselect }: { preselect?: string }) {
                   loras === null
                     ? "Loading…"
                     : loras.length === 0
-                      ? "No image LoRAs found"
-                      : "Select an image LoRA…"
+                      ? translate("uxExport.noImageLoRAsFoundvyacn")
+                      : translate("uxExport.selectAnImageLoRAuzt95")
                 }
               />
             </SelectTrigger>
@@ -135,7 +136,7 @@ export function ImageLoraExportCard({ preselect }: { preselect?: string }) {
         </div>
         <div className="space-y-1.5">
           <label htmlFor="image-lora-save" className="text-sm font-medium">
-            Save directory
+            {translate("uxExport.saveDirectory8v00u")}
           </label>
           <Input
             id="image-lora-save"
@@ -152,7 +153,7 @@ export function ImageLoraExportCard({ preselect }: { preselect?: string }) {
               : "text-xs text-muted-foreground"
           }
         >
-          {result?.text ?? "A plain file copy: no model load or GPU needed."}
+          {result?.text ?? translate("uxExport.aPlainFileCopyw5vb9")}
         </p>
         <Button disabled={!canExport} onClick={handleExport}>
           {running && <Spinner />}

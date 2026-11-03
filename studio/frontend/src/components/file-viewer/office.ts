@@ -2,6 +2,8 @@
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { Inflate, type Unzipped, inflateSync, strFromU8, unzipSync } from "fflate";
+import { translate } from "@/i18n";
+
 
 
 const MAX_UNPACKED_BYTES = 200 * 1024 * 1024;
@@ -62,7 +64,7 @@ function zipIndex(bytes: Uint8Array, view: DataView): Map<string, ZipEntry> | nu
     at = u64(record + 48);
     if (!Number.isSafeInteger(count) || !Number.isSafeInteger(at)) return null;
   }
-  if (count > MAX_ZIP_ENTRIES) throw new Error("File is too large to preview.");
+  if (count > MAX_ZIP_ENTRIES) throw new Error(translate("uxComponents.fileIsTooLargem6kpj"));
   const utf8 = new TextDecoder();
   const index = new Map<string, ZipEntry>();
   for (let i = 0; i < count; i++) {
@@ -103,12 +105,12 @@ function zipIndex(bytes: Uint8Array, view: DataView): Map<string, ZipEntry> | nu
 
 function inflateEntry(bytes: Uint8Array, view: DataView, entry: ZipEntry): Uint8Array<ArrayBuffer> {
   const at = entry.offset;
-  if (view.getUint32(at, true) !== 0x04034b50) throw new Error("Not a valid ZIP archive.");
+  if (view.getUint32(at, true) !== 0x04034b50) throw new Error(translate("uxComponents.notAValidZIPqhd42"));
   const start = at + 30 + view.getUint16(at + 26, true) + view.getUint16(at + 28, true);
   const data = bytes.subarray(start, start + entry.size);
   if (entry.method === 0) return data.slice();
   if (entry.method === 8) return inflateSync(data, { out: new Uint8Array(entry.originalSize) });
-  throw new Error(`Unsupported ZIP compression method ${entry.method}.`);
+  throw new Error(translate("uxComponents.unsupportedZIPCompressionMethodmge4h", { p1: entry.method }));
 }
 
 type Reader = ((names: Iterable<string>, limit?: number) => Unzipped) & {
@@ -121,7 +123,7 @@ function archive(bytes: Uint8Array): Reader {
   let total = 0;
   const charge = (size: number) => {
     total += size;
-    if (total > MAX_UNPACKED_BYTES) throw new Error("File is too large to preview.");
+    if (total > MAX_UNPACKED_BYTES) throw new Error(translate("uxComponents.fileIsTooLargem6kpj"));
   };
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   const index = zipIndex(bytes, view);
@@ -142,7 +144,7 @@ function archive(bytes: Uint8Array): Reader {
       return sizes.get(name);
     };
     const head = (name: string, max: number) => {
-      if ((size(name) ?? 0) > max) throw new Error("File is too large to preview.");
+      if ((size(name) ?? 0) > max) throw new Error(translate("uxComponents.fileIsTooLargem6kpj"));
       return read([name])[name];
     };
     const open = (name: string, max: number): Growing | undefined => {
@@ -184,7 +186,7 @@ export interface Growing {
 
 function growing(bytes: Uint8Array, view: DataView, entry: ZipEntry, max: number, charge: (size: number) => void): Growing {
   const at = entry.offset;
-  if (view.getUint32(at, true) !== 0x04034b50) throw new Error("Not a valid ZIP archive.");
+  if (view.getUint32(at, true) !== 0x04034b50) throw new Error(translate("uxComponents.notAValidZIPqhd42"));
   const start = at + 30 + view.getUint16(at + 26, true) + view.getUint16(at + 28, true);
   const data = bytes.subarray(start, start + entry.size);
   if (entry.method === 0) {
@@ -192,7 +194,7 @@ function growing(bytes: Uint8Array, view: DataView, entry: ZipEntry, max: number
     charge(whole.length);
     return { data: whole, done: true, cut: data.length > max, grow() {} };
   }
-  if (entry.method !== 8) throw new Error(`Unsupported ZIP compression method ${entry.method}.`);
+  if (entry.method !== 8) throw new Error(translate("uxComponents.unsupportedZIPCompressionMethodmge4h", { p1: entry.method }));
   let buffer = new Uint8Array(Math.min(max, 1 << 20));
   let length = 0;
   let from = 0;
@@ -1114,10 +1116,10 @@ function styleSections(bytes: Uint8Array | undefined): { doc: Document | null; c
 export function readXlsx(bytes: Uint8Array, limits: SheetLimits = FULL_SHEET_LIMITS): Sheet[] {
   const read = archive(bytes);
   const main = mainPart(read, "xl/workbook.xml");
-  if ((read.size(main) ?? 0) > MAX_XML_PART_BYTES) throw new Error("File is too large to preview.");
+  if ((read.size(main) ?? 0) > MAX_XML_PART_BYTES) throw new Error(translate("uxComponents.fileIsTooLargem6kpj"));
   const head = read([main, relsPath(main)], MAX_XML_PART_BYTES);
   const workbook = xml(head, main);
-  if (!workbook) throw new Error("Not a valid XLSX workbook.");
+  if (!workbook) throw new Error(translate("uxComponents.notAValidXLSX3si4g"));
   const rels = relationshipList(head, main);
   const partOf = (type: string, fallback: string) => rels.find((rel) => rel.type.endsWith(`/${type}`))?.path ?? fallback;
   const stringsPath = partOf("sharedStrings", "xl/sharedStrings.xml");
@@ -1505,10 +1507,10 @@ function degrees(xfrm: Element | undefined): number {
 export function readPptx(bytes: Uint8Array, { images = true, maxSlides = MAX_SLIDES } = {}): Deck {
   const read = archive(bytes);
   const main = mainPart(read, "ppt/presentation.xml");
-  if ((read.size(main) ?? 0) > MAX_XML_PART_BYTES) throw new Error("File is too large to preview.");
+  if ((read.size(main) ?? 0) > MAX_XML_PART_BYTES) throw new Error(translate("uxComponents.fileIsTooLargem6kpj"));
   const head = read([main, relsPath(main)], MAX_XML_PART_BYTES);
   const presentation = xml(head, main);
-  if (!presentation) throw new Error("Not a valid PPTX presentation.");
+  if (!presentation) throw new Error(translate("uxComponents.notAValidPPTX0b5w6"));
   const size = first(presentation, "sldSz");
   const cx = Number(size?.getAttribute("cx")) || 12192000;
   const cy = Number(size?.getAttribute("cy")) || 6858000;

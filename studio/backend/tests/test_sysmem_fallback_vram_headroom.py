@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # Copyright 2026-present the LAiM AI Inc. team. All rights reserved.
 
-"""Windows sysmem-fallback headroom in the VRAM budget (LAiMai/LAiM#11349)."""
+"""Windows sysmem-fallback headroom in the VRAM budget (OPusAngel/LAiM#11349)."""
 
 import sys
 

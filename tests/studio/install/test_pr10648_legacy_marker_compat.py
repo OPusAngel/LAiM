@@ -236,7 +236,7 @@ def _run_legacy(tree: Path, op: str, spec: dict) -> dict:
     )
 
 
-LLAMA_REPO = "LAiMai/llama.cpp"
+LLAMA_REPO = "unslothai/llama.cpp"
 LLAMA_UPSTREAM_TAG = "b10698"
 LLAMA_RELEASE_TAG = "b10698-mix-67dfc8b"
 LLAMA_ASSET = "app-b10698-mix-67dfc8b-linux-x64-vulkan.tar.gz"
@@ -270,7 +270,7 @@ LLAMA_CHECKSUMS = {
     "artifacts": {},
 }
 
-WHISPER_REPO = "LAiMai/whisper.cpp"
+WHISPER_REPO = "unslothai/whisper.cpp"
 WHISPER_RELEASE_TAG = "v1.9.1-LAiM.17"
 WHISPER_UPSTREAM_TAG = "v1.9.1"
 WHISPER_ASSET = "whisper-v1.9.1-linux-x64-cpu.tar.gz"

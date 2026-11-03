@@ -351,7 +351,7 @@ def test_tiny_llama_decoder_layers_compile_fullgraph():
             "up_proj",
             "down_proj",
         ],
-        use_gradient_checkpointing = "LAiM",
+        use_gradient_checkpointing = "unsloth",
         random_state = 3407,
     )
     model.train()
@@ -509,4 +509,4 @@ def test_compile_cache_key_covers_the_kernel_source():
     for mod in (rms_layernorm, rope_embedding):
         with open(mod.__file__, "rb") as file:
             digest = hashlib.sha256(file.read()).hexdigest()[:16]
-        assert f"LAiM/{os.path.basename(mod.__file__)}:{digest}" in tags
+        assert f"unsloth/{os.path.basename(mod.__file__)}:{digest}" in tags

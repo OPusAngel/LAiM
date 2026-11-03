@@ -5,6 +5,7 @@
 // bnb-4bit repos, official BF16 pipelines), and a deterministic router picking the best artifact
 // for the device. Pure helpers, no React/DOM deps. See model-catalog.check.ts.
 
+import { translate } from "@/i18n";
 import { normalizeDenseQuantSchemes } from "../../../../lib/dense-quant-schemes.ts";
 import {
   AUDIO_CPP_MODELS,
@@ -73,7 +74,7 @@ export interface ModelArtifact {
 }
 
 export interface CatalogGroup {
-  /** Canonical display id, owner spelled once ("LAiM/Qwen-Image-2512"). */
+  /** Canonical display id, owner spelled once ("unsloth/Qwen-Image-2512"). */
   canonicalId: string;
   displayName: string;
   /** Row meta line ("Text-to-image", "Image editing", "Text-to-video with audio"). */
@@ -152,7 +153,7 @@ const bf16Mirror = (
   approxSizeGb?: number,
   extra?: Partial<ModelArtifact>,
 ): ModelArtifact =>
-  bf16Pipeline(`LAiM/${upstreamRepoId.split("/")[1]}`, approxSizeGb, {
+  bf16Pipeline(`unsloth/${upstreamRepoId.split("/")[1]}`, approxSizeGb, {
     upstreamRepoId,
     ...extra,
   });
@@ -190,9 +191,9 @@ function audioGgufDescription(model: AudioCppModel): string {
   }
   const clones = workflows.includes("clone");
   const converts = workflows.includes("convert");
-  if (clones && converts) return "Voice cloning and conversion";
-  if (converts) return "Voice conversion";
-  if (clones) return "Voice cloning";
+  if (clones && converts) return translate("uxModelpicker.voiceCloningAndConversionjbkjn");
+  if (converts) return translate("uxModelpicker.voiceConversion2pspu");
+  if (clones) return translate("uxModelpicker.voiceCloningslqfo");
   return AUDIO_GGUF_DESCRIPTIONS[model.task];
 }
 
@@ -214,122 +215,138 @@ const audioGgufGroups = (tasks: readonly AudioCppTask[]): CatalogGroup[] =>
 
 export const IMAGE_CATALOG: CatalogGroup[] = [
   {
-    canonicalId: "LAiM/Z-Image-Turbo",
+    canonicalId: "unsloth/Z-Image-Turbo",
     displayName: "Z-Image-Turbo",
-    description: "Text-to-image",
+    get description() {
+      return translate("uxModelpicker.textToImage1g3md");
+    },
     scope: "image",
     artifacts: [
       // Resident bf16 GiB, not the Hub's fp32 DiT: 11.5 DiT + 7.5 Qwen3-4B + 0.2 VAE.
       bf16Mirror("Tongyi-MAI/Z-Image-Turbo", 19.1, {
         totalParams: 6154908736,
-        prequantRepo: "LAiM/Z-Image-Turbo-FP8",
+        prequantRepo: "unsloth/Z-Image-Turbo-FP8",
         prequantSizeGb: { fp8: 5.86, int8: 5.86 },
       }),
-      bnb4bit("LAiM/Z-Image-Turbo-LAiM-bnb-4bit", 8, { totalParams: 3210823936 }),
-      gguf("LAiM/Z-Image-Turbo-GGUF"),
+      bnb4bit("unsloth/Z-Image-Turbo-unsloth-bnb-4bit", 8, { totalParams: 3210823936 }),
+      gguf("unsloth/Z-Image-Turbo-GGUF"),
     ],
   },
   {
-    canonicalId: "LAiM/Z-Image",
+    canonicalId: "unsloth/Z-Image",
     displayName: "Z-Image",
-    description: "Text-to-image",
+    get description() {
+      return translate("uxModelpicker.textToImage1g3md");
+    },
     scope: "image",
-    artifacts: [gguf("LAiM/Z-Image-GGUF")],
+    artifacts: [gguf("unsloth/Z-Image-GGUF")],
   },
   {
-    canonicalId: "LAiM/Qwen-Image-2.1",
+    canonicalId: "unsloth/Qwen-Image-2.1",
     displayName: "Qwen-Image 2.1",
     // One pipeline for text-to-image and editing (`unified_edit`); the Images page follows the engine's status.
-    description: "Text-to-image and image editing",
+    get description() {
+      return translate("uxModelpicker.textToImageAnd1v3sq");
+    },
     scope: "image",
     // Same reason as the 2512 row below: the int8 half of the prequant repo is reached through
     // prequant_variant_repos and has no artifact row, so alias it to keep a pasted id finding it.
-    aliases: ["LAiM/Qwen-Image-2.1-FP8"],
+    aliases: ["unsloth/Qwen-Image-2.1-FP8"],
     pinToTop: true,
     artifacts: [
       bf16Mirror("Qwen/Qwen-Image-2.1", 33, {
         totalParams: 7115124736,
-        prequantRepo: "LAiM/Qwen-Image-2.1-FP8",
+        prequantRepo: "unsloth/Qwen-Image-2.1-FP8",
         prequantSizeGb: { fp8: 7.12, int8: 7.26 },
       }),
-      gguf("LAiM/Qwen-Image-2.1-GGUF"),
+      gguf("unsloth/Qwen-Image-2.1-GGUF"),
     ],
   },
   {
     // A different denoiser with its own FP8/INT8 checkpoints; no LAiM mirror, so the vendor pipeline is the row.
     canonicalId: "Qwen/Qwen-Image-2.1-Turbo",
     displayName: "Qwen-Image 2.1 Turbo",
-    description: "Text-to-image and image editing in 8 steps",
+    get description() {
+      return translate("uxModelpicker.textToImageAndhxdis");
+    },
     scope: "image",
     // Same reason as 2.1's alias: the int8 half of the prequant repo has no artifact row.
-    aliases: ["LAiM/Qwen-Image-2.1-Turbo-FP8"],
+    aliases: ["unsloth/Qwen-Image-2.1-Turbo-FP8"],
     // Right after 2.1's group, so its "Fast FP8" row sits directly under 2.1's at the top.
     pinToTop: true,
     artifacts: [
       bf16Pipeline("Qwen/Qwen-Image-2.1-Turbo", 33, {
         totalParams: 7115124736,
-        prequantRepo: "LAiM/Qwen-Image-2.1-Turbo-FP8",
+        prequantRepo: "unsloth/Qwen-Image-2.1-Turbo-FP8",
         prequantSizeGb: { fp8: 7.12, int8: 7.26 },
       }),
-      gguf("LAiM/Qwen-Image-2.1-Turbo-GGUF"),
+      gguf("unsloth/Qwen-Image-2.1-Turbo-GGUF"),
     ],
   },
   {
-    canonicalId: "LAiM/Qwen-Image-2512",
+    canonicalId: "unsloth/Qwen-Image-2512",
     displayName: "Qwen-Image 2512",
-    description: "Text-to-image",
+    get description() {
+      return translate("uxModelpicker.textToImage1g3md");
+    },
     scope: "image",
     // The backend reaches the prequant repo's int8 half through prequant_variant_repos. It has no
     // artifact row here, so alias it to keep a pasted id finding it.
-    aliases: ["LAiM/Qwen-Image-2512-FP8"],
+    aliases: ["unsloth/Qwen-Image-2512-FP8"],
     artifacts: [
       bf16Mirror("Qwen/Qwen-Image-2512", 54, {
         totalParams: 20430401088,
-        prequantRepo: "LAiM/Qwen-Image-2512-FP8",
+        prequantRepo: "unsloth/Qwen-Image-2512-FP8",
         prequantSizeGb: { fp8: 19.06, int8: 25.4 },
       }),
       // No FP8 row: that repo holds torch prequant .pt checkpoints, not a single-file .safetensors;
       // the backend seeds them through the row above.
-      bnb4bit("LAiM/Qwen-Image-2512-LAiM-bnb-4bit", 14, { totalParams: 10850871408 }),
-      gguf("LAiM/Qwen-Image-2512-GGUF"),
+      bnb4bit("unsloth/Qwen-Image-2512-unsloth-bnb-4bit", 14, { totalParams: 10850871408 }),
+      gguf("unsloth/Qwen-Image-2512-GGUF"),
     ],
   },
   {
-    canonicalId: "LAiM/Qwen-Image",
+    canonicalId: "unsloth/Qwen-Image",
     displayName: "Qwen-Image",
-    description: "Text-to-image",
+    get description() {
+      return translate("uxModelpicker.textToImage1g3md");
+    },
     scope: "image",
     artifacts: [
       bf16Mirror("Qwen/Qwen-Image", 54, {
         totalParams: 20430401088,
-        prequantRepo: "LAiM/Qwen-Image-FP8",
+        prequantRepo: "unsloth/Qwen-Image-FP8",
         prequantSizeGb: { fp8: 19.06, int8: 31.73 },
       }),
-      gguf("LAiM/Qwen-Image-GGUF"),
+      gguf("unsloth/Qwen-Image-GGUF"),
     ],
   },
   {
-    canonicalId: "LAiM/FLUX.1-schnell",
+    canonicalId: "unsloth/FLUX.1-schnell",
     displayName: "FLUX.1 schnell",
-    description: "Text-to-image",
+    get description() {
+      return translate("uxModelpicker.textToImage1g3md");
+    },
     scope: "image",
     artifacts: [
       bf16Mirror("black-forest-labs/FLUX.1-schnell", 32, {
         totalParams: 11891178560,
-        prequantRepo: "LAiM/FLUX.1-schnell-FP8",
+        prequantRepo: "unsloth/FLUX.1-schnell-FP8",
         prequantSizeGb: { fp8: 11.09, int8: 14.13 },
       }),
-      gguf("LAiM/FLUX.1-schnell-GGUF"),
+      gguf("unsloth/FLUX.1-schnell-GGUF"),
     ],
   },
   {
-    canonicalId: "LAiM/FLUX.1-dev",
+    canonicalId: "unsloth/FLUX.1-dev",
     displayName: "FLUX.1 dev",
-    description: "Text-to-image",
+    get description() {
+      return translate("uxModelpicker.textToImage1g3md");
+    },
     scope: "image",
     artifacts: [
       bf16Mirror("black-forest-labs/FLUX.1-dev", 32, { totalParams: 11901408320 }),
-      gguf("LAiM/FLUX.1-dev-GGUF"),
+      gguf("unsloth/FLUX.1-dev-GGUF"),
     ],
   },
   {
@@ -337,7 +354,9 @@ export const IMAGE_CATALOG: CatalogGroup[] = [
     // flux.1 family. QuantStack publishes the open GGUF quants.
     canonicalId: "black-forest-labs/FLUX.1-Krea-dev",
     displayName: "FLUX.1 Krea dev",
-    description: "Text-to-image",
+    get description() {
+      return translate("uxModelpicker.textToImage1g3md");
+    },
     scope: "image",
     artifacts: [
       bf16Mirror("black-forest-labs/FLUX.1-Krea-dev", 32, { totalParams: 11901408320 }),
@@ -345,48 +364,58 @@ export const IMAGE_CATALOG: CatalogGroup[] = [
     ],
   },
   {
-    canonicalId: "LAiM/FLUX.2-klein-4B",
+    canonicalId: "unsloth/FLUX.2-klein-4B",
     displayName: "FLUX.2 klein 4B",
-    description: "Text-to-image",
+    get description() {
+      return translate("uxModelpicker.textToImage1g3md");
+    },
     scope: "image",
-    artifacts: [gguf("LAiM/FLUX.2-klein-4B-GGUF")],
+    artifacts: [gguf("unsloth/FLUX.2-klein-4B-GGUF")],
   },
   {
-    canonicalId: "LAiM/FLUX.2-klein-9B",
+    canonicalId: "unsloth/FLUX.2-klein-9B",
     displayName: "FLUX.2 klein 9B",
-    description: "Text-to-image",
+    get description() {
+      return translate("uxModelpicker.textToImage1g3md");
+    },
     scope: "image",
-    artifacts: [gguf("LAiM/FLUX.2-klein-9B-GGUF")],
+    artifacts: [gguf("unsloth/FLUX.2-klein-9B-GGUF")],
   },
   {
-    canonicalId: "LAiM/Qwen-Image-Edit-2511",
+    canonicalId: "unsloth/Qwen-Image-Edit-2511",
     displayName: "Qwen-Image-Edit 2511",
-    description: "Image editing",
+    get description() {
+      return translate("uxModelpicker.imageEditing4ycby");
+    },
     scope: "image",
     artifacts: [
       bf16Mirror("Qwen/Qwen-Image-Edit-2511", 54, { totalParams: 20430401088 }),
-      gguf("LAiM/Qwen-Image-Edit-2511-GGUF"),
+      gguf("unsloth/Qwen-Image-Edit-2511-GGUF"),
     ],
   },
   {
-    canonicalId: "LAiM/FLUX.1-Kontext-dev",
+    canonicalId: "unsloth/FLUX.1-Kontext-dev",
     displayName: "FLUX.1 Kontext dev",
-    description: "Image editing",
+    get description() {
+      return translate("uxModelpicker.imageEditing4ycby");
+    },
     scope: "image",
     artifacts: [
       bf16Mirror("black-forest-labs/FLUX.1-Kontext-dev", 32, { totalParams: 11901408320 }),
-      gguf("LAiM/FLUX.1-Kontext-dev-GGUF"),
+      gguf("unsloth/FLUX.1-Kontext-dev-GGUF"),
     ],
   },
   {
     canonicalId: "krea/Krea-2-Turbo",
     displayName: "Krea 2 Turbo",
-    description: "Text-to-image",
+    get description() {
+      return translate("uxModelpicker.textToImage1g3md");
+    },
     scope: "image",
     artifacts: [
       bf16Mirror("krea/Krea-2-Turbo", 18, {
         totalParams: 12820073036,
-        prequantRepo: "LAiM/Krea-2-Turbo-FP8",
+        prequantRepo: "unsloth/Krea-2-Turbo-FP8",
         prequantSizeGb: { fp8: 11.95, int8: 12.19 },
       }),
     ],
@@ -396,7 +425,9 @@ export const IMAGE_CATALOG: CatalogGroup[] = [
     // ungated. No upstream GGUF quants, so the official pipeline is the only artifact.
     canonicalId: "Alpha-VLLM/Lumina-Image-2.0",
     displayName: "Lumina Image 2.0",
-    description: "Text-to-image",
+    get description() {
+      return translate("uxModelpicker.textToImage1g3md");
+    },
     scope: "image",
     artifacts: [bf16Mirror("Alpha-VLLM/Lumina-Image-2.0", 11, { totalParams: 2609769152 })],
   },
@@ -409,7 +440,9 @@ export const IMAGE_CATALOG: CatalogGroup[] = [
     // still fits the 61.6 GB budget, so the group stays visible; only the quant ladder is gone.
     canonicalId: "hunyuanvideo-community/HunyuanImage-2.1-Diffusers",
     displayName: "HunyuanImage 2.1",
-    description: "Text-to-image",
+    get description() {
+      return translate("uxModelpicker.textToImage1g3md");
+    },
     scope: "image",
     artifacts: [
       bf16Pipeline("hunyuanvideo-community/HunyuanImage-2.1-Diffusers", 50, { totalParams: 17425795520 }),
@@ -421,28 +454,35 @@ export const IMAGE_CATALOG: CatalogGroup[] = [
     // datacenter pick. Full is the undistilled base; Dev and Fast are its distillations.
     canonicalId: "HiDream-ai/HiDream-I1-Full",
     displayName: "HiDream I1",
-    description: "Text-to-image",
-    scope: "image",
-    artifacts: [
+    get description() {
+      return translate("uxModelpicker.textToImage1g3md");
+    },
+    scope: "image", get artifacts() { return [
       bf16Mirror("HiDream-ai/HiDream-I1-Full", 63, { totalParams: 17105733184 }),
       bf16Mirror("HiDream-ai/HiDream-I1-Dev", 63, {
-        label: "BF16 - Dev (distilled)",
+        get label() {
+          return translate("uxModelpicker.bF16DevDistilled16ynd");
+        },
         keywords: ["bf16", "dev", "distilled"],
         totalParams: 17105733184,
       }),
       bf16Mirror("HiDream-ai/HiDream-I1-Fast", 63, {
-        label: "BF16 - Fast (distilled)",
+        get label() {
+          return translate("uxModelpicker.bF16FastDistilled1abuh");
+        },
         keywords: ["bf16", "fast", "distilled"],
         totalParams: 17105733184,
       }),
-    ],
+    ]; },
   },
   {
     // No bf16 repo exists for Ideogram 4: -fp8 stores its two DiTs as raw float8 (~46 GB after the
     // bf16 cast); -nf4-diffusers is the bnb-4bit export (~11 GB).
     canonicalId: "ideogram-ai/ideogram-4",
     displayName: "Ideogram 4",
-    description: "Text-to-image",
+    get description() {
+      return translate("uxModelpicker.textToImage1g3md");
+    },
     scope: "image",
     artifacts: [
       // Both Ideogram repos are gated on the Hub, so neither can be auto-routed anonymously.
@@ -454,30 +494,36 @@ export const IMAGE_CATALOG: CatalogGroup[] = [
   {
     canonicalId: "stabilityai/sdxl-turbo",
     displayName: "SDXL Turbo",
-    description: "Text-to-image",
-    scope: "image",
-    artifacts: [
+    get description() {
+      return translate("uxModelpicker.textToImage1g3md");
+    },
+    scope: "image", get artifacts() { return [
       // SDXL uses a UNet rather than a transformer.
       bf16Mirror("stabilityai/sdxl-turbo", 8, {
-        label: "Safetensors",
+        get label() {
+          return translate("uxHub.safetensors1cksa");
+        },
         totalParams: 2567463684,
         denseQuantable: false,
       }),
-    ],
+    ]; },
   },
   {
     canonicalId: "stabilityai/stable-diffusion-xl-base-1.0",
     displayName: "SDXL Base 1.0",
-    description: "Text-to-image",
-    scope: "image",
-    artifacts: [
+    get description() {
+      return translate("uxModelpicker.textToImage1g3md");
+    },
+    scope: "image", get artifacts() { return [
       // SDXL uses a UNet rather than a transformer.
       bf16Mirror("stabilityai/stable-diffusion-xl-base-1.0", 8, {
-        label: "Safetensors",
+        get label() {
+          return translate("uxHub.safetensors1cksa");
+        },
         totalParams: 2567463684,
         denseQuantable: false,
       }),
-    ],
+    ]; },
   },
 ];
 
@@ -500,7 +546,9 @@ export const VIDEO_CATALOG: CatalogGroup[] = [
   {
     canonicalId: "MiniMaxAI/MiniMax-H3",
     displayName: "MiniMax H3",
-    description: "Text, image and reference to video with synchronized audio",
+    get description() {
+      return translate("uxModelpicker.textImageAndReference1s3az");
+    },
     scope: "video",
     aliases: ["Comfy-Org/MiniMax-H3"],
     capabilities: { audio: true },
@@ -521,7 +569,7 @@ export const VIDEO_CATALOG: CatalogGroup[] = [
       }),
       // One official bundle for both denoiser partitions. The GGUF lister labels every variant, so both
       // stay explicit under one repo id.
-      gguf("LAiM/MiniMax-H3-GGUF", {
+      gguf("unsloth/MiniMax-H3-GGUF", {
         label: "GGUF",
         keywords: [
           "gguf",
@@ -539,12 +587,14 @@ export const VIDEO_CATALOG: CatalogGroup[] = [
     // The distilled 2.3 release: Lightricks' own bf16/fp8 single-file DiT checkpoints (loaded against
     // the already-trusted LTX-2 base for the VAE / Gemma3 encoder) plus the GGUF quants. The
     // single-file ones keep the ~50 GB encoder in bf16, so consumer GPUs route to GGUF.
-    // Keyed on an artifact that exists: LAiM/LTX-2.3 was never published (404), and an `LAiM/*`
+    // Keyed on an artifact that exists: LAiM/LTX-2.3 was never published (404), and an `unsloth/*`
     // id that is not an artifact clears both owner guards, so such a pick reached the fall-through,
     // loaded as a pipeline and died at the Hub. Lightricks/LTX-2.3 IS an artifact below.
     canonicalId: "Lightricks/LTX-2.3",
     displayName: "LTX 2.3 distilled",
-    description: "Text-to-video with audio",
+    get description() {
+      return translate("uxModelpicker.textToVideoWith1012j");
+    },
     scope: "video",
     capabilities: { audio: true },
     artifacts: [
@@ -556,24 +606,27 @@ export const VIDEO_CATALOG: CatalogGroup[] = [
       // No FP8 artifact: the LTX-2.3 loader refuses the official scaled-FP8 single file (it carries
       // .weight_scale/.input_scale), so a click would start a ~76 GB download that always fails.
       // 21.0B is what the Hub reports, and carrying it keeps the row identical when offline.
-      gguf("LAiM/LTX-2.3-GGUF", { totalParams: 21_005_004_544 }),
+      gguf("unsloth/LTX-2.3-GGUF", { totalParams: 21_005_004_544 }),
     ],
   },
   {
     // LTX-2.5 distilled: the Diffusers pack (its Gemma 4 encoder runs in Studio's transformers 5.10 sidecar) plus
     // the official split single-file DiT, which loads against the companion files beside it in the same repo. The
-    // pack's fp8 / int8 loads seed the hosted LAiM/LTX-2.5-FP8 DiT (backend prequant_variant_repos); the alias
+    // pack's fp8 / int8 loads seed the hosted unsloth/LTX-2.5-FP8 DiT (backend prequant_variant_repos); the alias
     // keeps a pasted prequant repo id finding this group. Video rows carry no prequantRepo (image-only field).
     canonicalId: "Lightricks/LTX-2.5-Diffusers",
     displayName: "LTX 2.5 distilled",
-    description: "Text- and image-to-video with audio",
+    get description() {
+      return translate("uxModelpicker.textAndImageTo85ek3");
+    },
     scope: "video",
-    aliases: ["LAiM/LTX-2.5-FP8"],
-    capabilities: { audio: true },
-    artifacts: [
+    aliases: ["unsloth/LTX-2.5-FP8"],
+    capabilities: { audio: true }, artifacts: [
       // Both repos are gated on the Hub (license + token).
       bf16Pipeline("Lightricks/LTX-2.5-Diffusers", 75, {
-        label: "BF16 - Diffusers",
+        get label() {
+          return translate("uxModelpicker.bF16Diffuserswfs5v");
+        },
         gated: true,
         offloadFitTiers: LTX25_OFFLOAD_TIERS,
         // The DiT's 37,975,718,400 bf16 bytes (transformer/ shard index).
@@ -583,16 +636,18 @@ export const VIDEO_CATALOG: CatalogGroup[] = [
         "Lightricks/LTX-2.5",
         "diffusion_models/ltx-2.5-22b-distilled-transformer-bf16.safetensors",
         75,
-        { label: "BF16 - Single file", gated: true, offloadFitTiers: LTX25_SINGLE_FILE_OFFLOAD_TIERS },
+        { get label() { return translate("uxModelpicker.bF16SingleFilefx3cz"); }, gated: true, offloadFitTiers: LTX25_SINGLE_FILE_OFFLOAD_TIERS },
       ),
       // 21.0B is every tensor of the single-file DiT the quants are cut from.
-      gguf("LAiM/LTX-2.5-GGUF", { totalParams: 21_004_025_600 }),
+      gguf("unsloth/LTX-2.5-GGUF", { totalParams: 21_004_025_600 }),
     ],
   },
   {
     canonicalId: "Lightricks/LTX-2",
     displayName: "LTX 2 (base)",
-    description: "Text-to-video with audio",
+    get description() {
+      return translate("uxModelpicker.textToVideoWith1012j");
+    },
     scope: "video",
     capabilities: { audio: true },
     artifacts: [bf16Pipeline("Lightricks/LTX-2", 90, { totalParams: 18876174592 })],
@@ -600,50 +655,63 @@ export const VIDEO_CATALOG: CatalogGroup[] = [
   {
     canonicalId: "Wan-AI/Wan2.2-TI2V-5B",
     displayName: "Wan 2.2 TI2V 5B",
-    description: "Text-to-video 720p",
+    get description() {
+      return translate("uxModelpicker.textToVideo720ppaioz");
+    },
     scope: "video",
     artifacts: [bf16Pipeline("Wan-AI/Wan2.2-TI2V-5B-Diffusers", 30, { totalParams: 4999787712 })],
   },
   {
     canonicalId: "Wan-AI/Wan2.2-T2V-A14B",
     displayName: "Wan 2.2 T2V A14B (MoE)",
-    description: "Text-to-video, dual-expert",
+    get description() {
+      return translate("uxModelpicker.textToVideoDual1q32x");
+    },
     scope: "video",
     artifacts: [bf16Pipeline("Wan-AI/Wan2.2-T2V-A14B-Diffusers", 114, { totalParams: 14288491584 })],
   },
   {
     canonicalId: "Wan-AI/Wan2.1-T2V-1.3B",
     displayName: "Wan 2.1 T2V 1.3B",
-    description: "Text-to-video 480p, small",
+    get description() {
+      return translate("uxModelpicker.textToVideo480p1ntb8");
+    },
     scope: "video",
     artifacts: [bf16Pipeline("Wan-AI/Wan2.1-T2V-1.3B-Diffusers", 15, { totalParams: 1418996800 })],
   },
   {
     canonicalId: "Wan-AI/Wan2.1-T2V-14B",
     displayName: "Wan 2.1 T2V 14B",
-    description: "Text-to-video 480p / 720p",
+    get description() {
+      return translate("uxModelpicker.textToVideo480p9upyo");
+    },
     scope: "video",
     artifacts: [bf16Pipeline("Wan-AI/Wan2.1-T2V-14B-Diffusers", 41, { totalParams: 14288491584 })],
   },
   {
     canonicalId: "hunyuanvideo-community/HunyuanVideo-1.5",
     displayName: "HunyuanVideo 1.5",
-    description: "Text-to-video",
-    scope: "video",
-    artifacts: [
+    get description() {
+      return translate("uxModelpicker.textToVideo1kdbm");
+    },
+    scope: "video", get artifacts() { return [
       // Highest-quality first: pickDefaultArtifact sorts only by FORMAT, so these two bf16 artifacts
       // keep catalog order and the fit loop takes the first that fits (an 80 GB card gets 720p).
       bf16Pipeline("hunyuanvideo-community/HunyuanVideo-1.5-Diffusers-720p_t2v", 52, {
-        label: "BF16 - 720p",
+        get label() {
+          return translate("uxModelpicker.bF16720p19v7k");
+        },
         keywords: ["bf16", "720p"],
         totalParams: 8326608160,
       }),
       bf16Pipeline("hunyuanvideo-community/HunyuanVideo-1.5-Diffusers-480p_t2v", 40, {
-        label: "BF16 - 480p",
+        get label() {
+          return translate("uxModelpicker.bF16480ph0q7r");
+        },
         keywords: ["bf16", "480p"],
         totalParams: 8326608160,
       }),
-    ],
+    ]; },
   },
 ];
 
@@ -653,100 +721,116 @@ export const VIDEO_CATALOG: CatalogGroup[] = [
 // stt-model-catalog.ts, so their sizes are informational only.
 export const AUDIO_CATALOG: CatalogGroup[] = [
   {
-    canonicalId: "LAiM/orpheus-3b-0.1-ft",
+    canonicalId: "unsloth/orpheus-3b-0.1-ft",
     displayName: "Orpheus TTS 3B",
-    description: "Text-to-speech",
+    get description() {
+      return translate("uxModelpicker.textToSpeechgt3hh");
+    },
     scope: "audio",
-    task: "tts",
-    artifacts: [
-      bf16Pipeline("LAiM/orpheus-3b-0.1-ft", 7, { label: "Safetensors" }),
-      gguf("LAiM/orpheus-3b-0.1-ft-GGUF"),
-    ],
+    task: "tts", get artifacts() { return [
+      bf16Pipeline("unsloth/orpheus-3b-0.1-ft", 7, { get label() { return translate("uxHub.safetensors1cksa"); } }),
+      gguf("unsloth/orpheus-3b-0.1-ft-GGUF"),
+    ]; },
   },
   {
-    canonicalId: "LAiM/csm-1b",
+    canonicalId: "unsloth/csm-1b",
     displayName: "Sesame CSM 1B",
-    description: "Text-to-speech",
+    get description() {
+      return translate("uxModelpicker.textToSpeechgt3hh");
+    },
     scope: "audio",
     task: "tts",
     // No GGUF artifact: the llama.cpp TTS path has no csm decode, so CSM runs transformers-only.
-    artifacts: [bf16Pipeline("LAiM/csm-1b", 6, { label: "Safetensors" })],
+    artifacts: [bf16Pipeline("unsloth/csm-1b", 6, { get label() { return translate("uxHub.safetensors1cksa"); } })],
   },
   {
-    canonicalId: "LAiM/Spark-TTS-0.5B",
+    canonicalId: "unsloth/Spark-TTS-0.5B",
     displayName: "Spark TTS 0.5B",
-    description: "Text-to-speech",
+    get description() {
+      return translate("uxModelpicker.textToSpeechgt3hh");
+    },
     scope: "audio",
-    task: "tts",
-    artifacts: [bf16Pipeline("LAiM/Spark-TTS-0.5B", 3, { label: "Safetensors" })],
+    task: "tts", get artifacts() { return [bf16Pipeline("unsloth/Spark-TTS-0.5B", 3, { get label() { return translate("uxHub.safetensors1cksa"); } })]; },
   },
   {
-    canonicalId: "LAiM/Llama-OuteTTS-1.0-1B",
+    canonicalId: "unsloth/Llama-OuteTTS-1.0-1B",
     displayName: "Oute TTS 1B",
-    description: "Text-to-speech",
+    get description() {
+      return translate("uxModelpicker.textToSpeechgt3hh");
+    },
     scope: "audio",
-    task: "tts",
-    artifacts: [
-      bf16Pipeline("LAiM/Llama-OuteTTS-1.0-1B", 4, { label: "Safetensors" }),
-    ],
+    task: "tts", get artifacts() { return [
+      bf16Pipeline("unsloth/Llama-OuteTTS-1.0-1B", 4, { get label() { return translate("uxHub.safetensors1cksa"); } }),
+    ]; },
   },
   {
     canonicalId: "bosonai/higgs-tts-2-3b-base",
     displayName: "Higgs TTS 2 3B",
-    description: "Text-to-speech",
+    get description() {
+      return translate("uxModelpicker.textToSpeechgt3hh");
+    },
     scope: "audio",
-    task: "tts",
-    artifacts: [
+    task: "tts", get artifacts() { return [
       bf16Pipeline("bosonai/higgs-tts-2-3b-base", 12, {
-        label: "Safetensors",
+        get label() {
+          return translate("uxHub.safetensors1cksa");
+        },
       }),
-    ],
+    ]; },
   },
   {
     canonicalId: "OpenMOSS-Team/MOSS-TTS-Local-Transformer-v1.5",
     displayName: "MOSS TTS Local v1.5",
-    description: "48 kHz stereo text-to-speech",
+    get description() { return translate("uxModelpicker.48KHzStereoTextk6m1l"); },
     scope: "audio",
-    task: "tts",
-    artifacts: [
+    task: "tts", get artifacts() { return [
       bf16Pipeline("OpenMOSS-Team/MOSS-TTS-Local-Transformer-v1.5", 10, {
-        label: "Safetensors",
+        get label() {
+          return translate("uxHub.safetensors1cksa");
+        },
       }),
-    ],
+    ]; },
   },
   {
     canonicalId: "OpenMOSS-Team/MOSS-TTS-Nano-100M",
     displayName: "MOSS TTS Nano 100M",
-    description: "CPU-friendly text-to-speech",
+    get description() { return translate("uxModelpicker.cPUFriendlyTextTojqgt1"); },
     scope: "audio",
-    task: "tts",
-    artifacts: [
+    task: "tts", get artifacts() { return [
       bf16Pipeline("OpenMOSS-Team/MOSS-TTS-Nano-100M", 1, {
-        label: "Safetensors",
+        get label() {
+          return translate("uxHub.safetensors1cksa");
+        },
       }),
-    ],
+    ]; },
   },
   {
     canonicalId: "multimodalart/higgs-audio-v3-tts-4b-transformers",
     displayName: "Higgs Audio v3 TTS 4B",
-    description: "Text-to-speech",
+    get description() {
+      return translate("uxModelpicker.textToSpeechgt3hh");
+    },
     scope: "audio",
-    task: "tts",
-    artifacts: [
+    task: "tts", get artifacts() { return [
       bf16Pipeline("multimodalart/higgs-audio-v3-tts-4b-transformers", 10, {
-        label: "Safetensors",
+        get label() {
+          return translate("uxHub.safetensors1cksa");
+        },
       }),
-    ],
+    ]; },
   },
   {
     canonicalId: "MiniMaxAI/MiniMax-Music3",
     displayName: "MiniMax Music 3",
-    description: "Lyrics-to-music · NVIDIA CUDA",
+    get description() {
+      return translate("uxModelpicker.lyricsToMusicNVIDIA13e9o");
+    },
     scope: "audio",
-    task: "tts",
-    artifacts: [
+    task: "tts", artifacts: [
       bf16Pipeline("MiniMaxAI/MiniMax-Music3", 67, {
-        label: "Diffusers",
+        get label() {
+          return translate("uxModelpicker.diffusers2cvgg");
+        },
         // 67 GB is the repository/download footprint, not resident VRAM: the publisher's ModularPipeline
         // path loads in BF16 on a 24 GB CUDA GPU.
         offloadFitTiers: [{ gpuGb: 24, systemRamGb: 0 }],
@@ -756,72 +840,81 @@ export const AUDIO_CATALOG: CatalogGroup[] = [
   ...audioGgufGroups(["tts", "music", "sep"]),
   // Llasa is deliberately absent: it speaks XCodec2 (65,536 <|s_N|> tokens), which is in neither
   // _AUDIO_TOKEN_PATTERNS nor AudioCodecManager, so a curated row loaded then failed at generation.
-  // Training still works (LAiM_Llasa-3B.yaml). Re-add both rows with an xcodec2 decoder.
+  // Training still works (unsloth_Llasa-3B.yaml). Re-add both rows with an xcodec2 decoder.
   {
-    canonicalId: "LAiMai/Qwen3-ASR-0.6B-GGUF",
+    canonicalId: "unslothai/Qwen3-ASR-0.6B-GGUF",
     displayName: "Qwen3-ASR 0.6B",
-    description: "Speech-to-text",
+    get description() {
+      return translate("uxAudio.speechToText7hkx0");
+    },
     scope: "audio",
     task: "stt",
     artifacts: [
-      gguf("LAiMai/Qwen3-ASR-0.6B-GGUF", { deviceQuant: "Q8_0" }),
+      gguf("unslothai/Qwen3-ASR-0.6B-GGUF", { deviceQuant: "Q8_0" }),
     ],
   },
   {
-    canonicalId: "LAiMai/Qwen3-ASR-1.7B-GGUF",
+    canonicalId: "unslothai/Qwen3-ASR-1.7B-GGUF",
     displayName: "Qwen3-ASR 1.7B",
-    description: "Speech-to-text",
+    get description() {
+      return translate("uxAudio.speechToText7hkx0");
+    },
     scope: "audio",
     task: "stt",
     artifacts: [
-      gguf("LAiMai/Qwen3-ASR-1.7B-GGUF", { deviceQuant: "Q8_0" }),
+      gguf("unslothai/Qwen3-ASR-1.7B-GGUF", { deviceQuant: "Q8_0" }),
     ],
   },
   {
-    canonicalId: "LAiM/whisper-large-v3-turbo",
+    canonicalId: "unsloth/whisper-large-v3-turbo",
     displayName: "Whisper Large v3 Turbo",
-    description: "Speech-to-text",
+    get description() {
+      return translate("uxAudio.speechToText7hkx0");
+    },
     scope: "audio",
-    task: "stt",
-    artifacts: [
-      bf16Pipeline("LAiM/whisper-large-v3-turbo", 2, { label: "Safetensors" }),
-    ],
+    task: "stt", get artifacts() { return [
+      bf16Pipeline("unsloth/whisper-large-v3-turbo", 2, { get label() { return translate("uxHub.safetensors1cksa"); } }),
+    ]; },
   },
   {
-    canonicalId: "LAiM/whisper-large-v3",
+    canonicalId: "unsloth/whisper-large-v3",
     displayName: "Whisper Large v3",
-    description: "Speech-to-text",
+    get description() {
+      return translate("uxAudio.speechToText7hkx0");
+    },
     scope: "audio",
-    task: "stt",
-    artifacts: [
-      bf16Pipeline("LAiM/whisper-large-v3", 4, { label: "Safetensors" }),
-    ],
+    task: "stt", get artifacts() { return [
+      bf16Pipeline("unsloth/whisper-large-v3", 4, { get label() { return translate("uxHub.safetensors1cksa"); } }),
+    ]; },
   },
   {
-    canonicalId: "LAiM/whisper-small",
+    canonicalId: "unsloth/whisper-small",
     displayName: "Whisper Small",
-    description: "Speech-to-text",
+    get description() {
+      return translate("uxAudio.speechToText7hkx0");
+    },
     scope: "audio",
-    task: "stt",
-    artifacts: [bf16Pipeline("LAiM/whisper-small", 1, { label: "Safetensors" })],
+    task: "stt", get artifacts() { return [bf16Pipeline("unsloth/whisper-small", 1, { get label() { return translate("uxHub.safetensors1cksa"); } })]; },
   },
   // Both sidecars carry tiny/base (GGML_STT_REPOS, STT_MODEL_REPOS) and Voice settings lists them;
   // only this picker was missing them.
   {
-    canonicalId: "LAiM/whisper-base",
+    canonicalId: "unsloth/whisper-base",
     displayName: "Whisper Base",
-    description: "Speech-to-text",
+    get description() {
+      return translate("uxAudio.speechToText7hkx0");
+    },
     scope: "audio",
-    task: "stt",
-    artifacts: [bf16Pipeline("LAiM/whisper-base", 1, { label: "Safetensors" })],
+    task: "stt", get artifacts() { return [bf16Pipeline("unsloth/whisper-base", 1, { get label() { return translate("uxHub.safetensors1cksa"); } })]; },
   },
   {
-    canonicalId: "LAiM/whisper-tiny",
+    canonicalId: "unsloth/whisper-tiny",
     displayName: "Whisper Tiny",
-    description: "Speech-to-text",
+    get description() {
+      return translate("uxAudio.speechToText7hkx0");
+    },
     scope: "audio",
-    task: "stt",
-    artifacts: [bf16Pipeline("LAiM/whisper-tiny", 1, { label: "Safetensors" })],
+    task: "stt", get artifacts() { return [bf16Pipeline("unsloth/whisper-tiny", 1, { get label() { return translate("uxHub.safetensors1cksa"); } })]; },
   },
   ...audioGgufGroups(["asr"]),
 ];
@@ -830,7 +923,7 @@ export const AUDIO_CATALOG: CatalogGroup[] = [
 // Artifact/format suffixes stripped (repeatedly, longest-first) off the NAME part of a repo id.
 // Owner is preserved: cross-owner merges happen only via the alias tables above.
 const ARTIFACT_SUFFIXES = [
-  "-LAiM-bnb-4bit",
+  "-unsloth-bnb-4bit",
   "-nf4-diffusers",
   "-bnb-4bit",
   "-bnb4bit",
@@ -847,7 +940,7 @@ const ARTIFACT_SUFFIXES = [
 ] as const;
 
 /** Owner-preserving generic key: lowercase, artifact suffixes stripped off the name.
- *  "LAiM/Qwen-Image-2512-GGUF" to "LAiM/qwen-image-2512". */
+ *  "unsloth/Qwen-Image-2512-GGUF" to "unsloth/qwen-image-2512". */
 export function canonicalKeyFor(repoId: string): string {
   const lowered = repoId.trim().toLowerCase();
   const slash = lowered.indexOf("/");

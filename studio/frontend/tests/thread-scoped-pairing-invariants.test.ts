@@ -478,7 +478,7 @@ test("the replay cannot block the session's writes forever", () => {
 test("a fork stops when the chat's settings could not be saved", () => {
   const merge = slice(store, "async function mergeThreadScopedSettingsIntoRow", "\n}");
   assert.match(merge, /throw error;/);
-  assert.match(composer, /Could not fork this chat/);
+  assert.match(composer, /translate\("uxComponents\.couldNotForkThis1b4i1"\)/);
 });
 
 test("an unsaved chat's edit reaches the installation defaults without a round trip", () => {
@@ -514,7 +514,7 @@ test("a run whose pairing never settled is refused, not run on another chat's se
   assert.match(wait, /resolve\(false\)/);
   const adapter = readText("../src/features/chat/api/chat-adapter.ts");
   assert.match(adapter, /if \(!\(await awaitThreadScopedPairing\(runThreadId\)\)\) \{/);
-  assert.match(adapter, /the message was not sent/);
+  assert.match(adapter, /translate\("uxChat\.thisChatSSettingsdmuke"\)/);
 });
 
 test("the pairing wait outlasts the read it is waiting for", () => {

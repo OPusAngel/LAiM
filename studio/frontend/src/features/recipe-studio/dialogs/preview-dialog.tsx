@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -235,12 +236,12 @@ function ValidationResultPanel({
                 : "text-destructive",
             )}
           >
-            {validateResult.valid ? "Ready to run" : "Fix these issues first"}
+            {validateResult.valid ? translate("uxRecipestudio.readyToRunzoihd") : translate("uxRecipestudio.fixTheseIssuesFirstfd92q")}
           </p>
           <p className="text-xs text-muted-foreground">
             {validateResult.valid
-              ? "Everything checks out. Start the run when you're ready."
-              : "Update the recipe, then check it again."}
+              ? translate("uxRecipestudio.everythingChecksOutStart4h2zx")
+              : translate("uxRecipestudio.updateTheRecipeThenj5gaw")}
           </p>
         </div>
       </div>
@@ -292,14 +293,14 @@ function RunDialogBody({
   onClose,
 }: RunDialogBodyProps): ReactElement {
   const [advancedOpen, setAdvancedOpen] = useState(false);
-  const kindLabel = kind === "preview" ? "Test run" : "Full run";
+  const kindLabel = kind === "preview" ? translate("uxRecipestudio.testRunnq352") : translate("uxRecipestudio.fullRunnkju4");
   const normalizedFullRunName = fullRunName.trim();
   const isFullRunNameMissing =
     kind === "full" && normalizedFullRunName.length === 0;
   const rowHint =
     kind === "preview"
-      ? "How many sample rows to generate for a quick check."
-      : "How many rows to generate in total.";
+      ? translate("uxRecipestudio.howManySampleRows4e8g3")
+      : translate("uxRecipestudio.howManyRowsToc5279");
 
   const [rowsDraft, setRowsDraft] = useState(String(rows));
   const [batchSizeDraft, setBatchSizeDraft] = useState(
@@ -331,14 +332,14 @@ function RunDialogBody({
       <DialogHeader className="space-y-2">
         <DialogTitle>{kindLabel}</DialogTitle>
         <p className="text-sm text-muted-foreground">
-          Choose a quick test or a full run. Advanced settings are optional.
+          {translate("uxRecipestudio.chooseAQuickTest1juzz")}
         </p>
       </DialogHeader>
 
       <div className="grid gap-1.5">
         <FieldLabel
-          label="Run type"
-          hint="Start with a quick check or generate the full dataset."
+          label={translate("uxRecipestudio.runType17u8e")}
+          hint={translate("uxRecipestudio.startWithAQuickfgh5v")}
         />
         <div className="grid grid-cols-2 gap-2">
           <Button
@@ -347,46 +348,42 @@ function RunDialogBody({
             className="corner-squircle min-h-10 justify-center whitespace-normal px-3 text-center"
             aria-pressed={kind === "preview"}
             onClick={() => onKindChange("preview")}
-          >
-            Test run
-          </Button>
+          >{translate("uxRecipestudio.testRun1uhi9")}</Button>
           <Button
             type="button"
             variant={kind === "full" ? "default" : "outline"}
             className="corner-squircle min-h-10 justify-center whitespace-normal px-3 text-center"
             aria-pressed={kind === "full"}
             onClick={() => onKindChange("full")}
-          >
-            Full run
-          </Button>
+          >{translate("uxRecipestudio.fullRunyvm9q")}</Button>
         </div>
       </div>
 
       {kind === "full" && (
         <div className="grid gap-1.5">
           <FieldLabel
-            label="Run name"
+            label={translate("shell.dialog.renameRun.placeholder")}
             htmlFor="run-name"
-            hint="Name shown in your run history."
+            hint={translate("uxRecipestudio.nameShownInYour1nbj9")}
           />
           <Input
             id="run-name"
             type="text"
             value={fullRunName}
             onChange={(event) => onFullRunNameChange(event.target.value)}
-            placeholder="Sprint dataset v2"
+            placeholder={translate("uxRecipestudio.sprintDatasetV21xkid")}
             aria-invalid={isFullRunNameMissing}
           />
           {isFullRunNameMissing ? (
             <p className="text-xs text-destructive">
-              Give this full run a name before you start.
+              {translate("uxRecipestudio.giveThisFullRun1xsil")}
             </p>
           ) : null}
         </div>
       )}
 
       <div className="grid gap-1.5">
-        <FieldLabel label="Records" htmlFor="run-rows" hint={rowHint} />
+        <FieldLabel label={translate("uxRecipestudio.recordsorgbi")} htmlFor="run-rows" hint={rowHint} />
         <Input
           id="run-rows"
           type="text"
@@ -420,21 +417,21 @@ function RunDialogBody({
               )}
             />
             {advancedOpen
-              ? "Hide advanced run settings"
-              : "Show advanced run settings"}
+              ? translate("uxRecipestudio.hideAdvancedRunSettingstrtkn")
+              : translate("uxRecipestudio.showAdvancedRunSettingsfs6zv")}
           </button>
         </CollapsibleTrigger>
         <CollapsibleContent className="mt-3 space-y-4">
           {kind === "full" && (
             <AdvancedSettingsSection
-              title="Batching"
-              description="Use batches when you want to split a larger run into smaller pieces."
+              title={translate("uxRecipestudio.batchingwswag")}
+              description={translate("uxRecipestudio.useBatchesWhenYoucsc39")}
             >
               <div className="flex items-center justify-between gap-3 text-sm">
                 <div className="space-y-0.5">
-                  <span className="font-medium">Enable batching</span>
+                  <span className="font-medium">{translate("uxRecipestudio.enableBatchingjhjvf")}</span>
                   <p className="text-xs text-muted-foreground">
-                    Split a larger run into smaller chunks.
+                    {translate("uxRecipestudio.splitALargerRunybk7r")}
                   </p>
                 </div>
                 <Switch
@@ -446,20 +443,20 @@ function RunDialogBody({
               </div>
               {rows >= 1000 && !settings.batchEnabled ? (
                 <p className="text-xs text-muted-foreground">
-                  Larger runs are usually easier to manage in batches.
+                  {translate("uxRecipestudio.largerRunsAreUsually148pt")}
                 </p>
               ) : null}
             </AdvancedSettingsSection>
           )}
           <AdvancedSettingsSection
-            title="Throughput"
-            description="Control how much work runs at the same time."
+            title={translate("uxRecipestudio.throughput2uuq3")}
+            description={translate("uxRecipestudio.controlHowMuchWork1n9d5")}
           >
             <div className="grid gap-4 md:grid-cols-2">
               <DraftInputField
                 id="run-llm-parallel"
-                label="AI requests at once"
-                hint="Leave empty to use each saved model's own setting."
+                label={translate("uxRecipestudio.aIRequestsAtOnce1l3o0")}
+                hint={translate("uxRecipestudio.leaveEmptyToUse1sci2")}
                 inputMode="numeric"
                 value={llmParallelDraft}
                 onChange={setLlmParallelDraft}
@@ -483,12 +480,12 @@ function RunDialogBody({
                   onSettingsChange({ llmParallelRequests: next });
                   setLlmParallelDraft(String(next));
                 }}
-                placeholder="Use saved model setting"
+                placeholder={translate("uxRecipestudio.useSavedModelSetting1y23w")}
               />
               <DraftInputField
                 id="run-non-inference-workers"
-                label="CPU workers"
-                hint="Used for steps like source data, generated fields, and formulas."
+                label={translate("uxRecipestudio.cPUWorkers7zdyz")}
+                hint={translate("uxRecipestudio.usedForStepsLike6zw0q")}
                 inputMode="numeric"
                 value={workersDraft}
                 onChange={setWorkersDraft}
@@ -507,8 +504,8 @@ function RunDialogBody({
                 <>
                   <DraftInputField
                     id="run-batch-size"
-                    label="Batch size"
-                    hint="How many rows to generate in each batch."
+                    label={translate("studio.progress.batchSize")}
+                    hint={translate("uxRecipestudio.howManyRowsTo124bt")}
                     inputMode="numeric"
                     value={batchSizeDraft}
                     onChange={setBatchSizeDraft}
@@ -525,9 +522,9 @@ function RunDialogBody({
                   />
                   <div className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-background/60 px-3 py-2 text-sm text-foreground">
                     <div className="space-y-0.5">
-                      <p className="font-medium">Merge batches into one file</p>
+                      <p className="font-medium">{translate("uxCopy.mergeBatchesIntoOnecui26")}</p>
                       <p className="text-xs text-muted-foreground">
-                        Combine every batch output into one final file.
+                        {translate("uxRecipestudio.combineEveryBatchOutput19obt")}
                       </p>
                     </div>
                     <Switch
@@ -542,14 +539,14 @@ function RunDialogBody({
             </div>
           </AdvancedSettingsSection>
           <AdvancedSettingsSection
-            title="Retries and recovery"
-            description="Choose how hard the run should try before it gives up."
+            title={translate("uxRecipestudio.retriesAndRecovery16qr3")}
+            description={translate("uxRecipestudio.chooseHowHardThe1564j")}
           >
             <div className="grid gap-4 md:grid-cols-2">
               <DraftInputField
                 id="run-shutdown-window"
-                label="Failure check window"
-                hint="How many recent attempts to inspect before stopping early."
+                label={translate("uxRecipestudio.failureCheckWindowq3alt")}
+                hint={translate("uxRecipestudio.howManyRecentAttempts80u3n")}
                 inputMode="numeric"
                 value={windowDraft}
                 onChange={setWindowDraft}
@@ -566,8 +563,8 @@ function RunDialogBody({
               />
               <DraftInputField
                 id="run-shutdown-rate"
-                label="Stop after too many failures"
-                hint="Example: 0.5 stops when about half of recent attempts fail."
+                label={translate("uxRecipestudio.stopAfterTooMany38idj")}
+                hint={translate("uxRecipestudio.example05Stops12x05")}
                 inputMode="decimal"
                 value={shutdownRateDraft}
                 onChange={setShutdownRateDraft}
@@ -584,8 +581,8 @@ function RunDialogBody({
               />
               <DraftInputField
                 id="run-max-restarts"
-                label="Full retries"
-                hint="How many times to retry when a model answer fails checks."
+                label={translate("uxRecipestudio.fullRetries1bxcf")}
+                hint={translate("uxRecipestudio.howManyTimesToqarf2")}
                 inputMode="numeric"
                 value={restartsDraft}
                 onChange={setRestartsDraft}
@@ -603,8 +600,8 @@ function RunDialogBody({
               />
               <DraftInputField
                 id="run-correction-steps"
-                label="Correction attempts"
-                hint="How many follow-up fixes to try before starting over."
+                label={translate("uxRecipestudio.correctionAttemptslmm20")}
+                hint={translate("uxRecipestudio.howManyFollowUp16ueo")}
                 inputMode="numeric"
                 value={correctionsDraft}
                 onChange={setCorrectionsDraft}
@@ -624,10 +621,9 @@ function RunDialogBody({
               />
               <div className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-background/60 px-3 py-2 text-sm text-foreground md:col-span-2">
                 <div className="space-y-0.5">
-                  <p className="font-medium">Keep running through failures</p>
+                  <p className="font-medium">{translate("uxCopy.keepRunningThroughFailures1918w")}</p>
                   <p className="text-xs text-muted-foreground">
-                    Useful for longer runs when you want as many rows as
-                    possible.
+                    {translate("uxCopy.usefulForLongerRunsww1uu")}
                   </p>
                 </div>
                 <Switch
@@ -658,7 +654,7 @@ function RunDialogBody({
                 variant="outline"
                 className="rounded-full text-ui-10 text-destructive"
               >
-                Before you run
+                {translate("uxCopy.beforeYouRun1d8ui")}
               </Badge>
             </div>
             {errors.map((error) => (
@@ -690,7 +686,7 @@ function RunDialogBody({
           className="corner-squircle border-border/70 bg-card/70"
         >
           <HugeiconsIcon icon={TestTube01Icon} className="size-3.5" />
-          {validateLoading ? "Checking..." : "Check recipe"}
+          {validateLoading ? translate("uxExport.checkingEllipsisuluh9") : translate("uxRecipestudio.checkRecipeiomi0")}
         </Button>
         <Button
           type="button"
@@ -699,7 +695,7 @@ function RunDialogBody({
           className="corner-squircle"
         >
           <HugeiconsIcon icon={CookBookIcon} className="size-3.5" />
-          {loading ? "Starting..." : `Start ${kindLabel.toLowerCase()}`}
+          {loading ? translate("uxExport.startingEllipsisyzn1n") : translate("uxRecipestudio.startspe9d", { p1: kindLabel.toLowerCase() })}
         </Button>
       </DialogFooter>
     </>

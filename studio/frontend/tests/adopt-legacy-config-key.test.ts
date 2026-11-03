@@ -24,7 +24,7 @@ const {
 // A snapshot path is what an older release keyed a repo cached outside the active HF cache
 // by; the repo id is what it is keyed by now.
 const LEGACY_ID = "/home/u/.cache/models/snapshots/2f1c9ab";
-const MODEL_ID = "LAiM/Repo-GGUF";
+const MODEL_ID = "unsloth/Repo-GGUF";
 
 function config(
   maxSeqLength: number,

@@ -12,6 +12,8 @@ import {
   listNpuDownloads,
   listNpuModels,
 } from "./api";
+import { translate } from "@/i18n";
+
 
 interface NpuCatalogState {
   models: NpuModel[] | null;
@@ -132,7 +134,7 @@ export function followNpuDownload(
       if (advance(event.percent)) streamed = true;
     };
     const fail = (description: string): false => {
-      toast.error(`Could not download ${id}`, { description });
+      toast.error(translate("uxFeatures.couldNotDownloadeza7l", { p1: id }), { description });
       return false;
     };
     let stalledReconnects = 0;

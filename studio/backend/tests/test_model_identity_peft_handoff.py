@@ -27,7 +27,7 @@ from types import SimpleNamespace
 from utils.models.model_identity import restore_hf_cache_repo_identity
 
 
-_REPO = "LAiM/Llama-3.2-1B-Instruct"
+_REPO = "unsloth/Llama-3.2-1B-Instruct"
 _SNAPSHOT = (
     "/home/user/.cache/huggingface/hub/"
     "models--LAiM--Llama-3.2-1B-Instruct/snapshots/0123456789abcdef"

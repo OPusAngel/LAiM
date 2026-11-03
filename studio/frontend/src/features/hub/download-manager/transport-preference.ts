@@ -17,6 +17,8 @@ import {
   isTransportMode,
   pickTransportMode,
 } from "./constants";
+import { translate } from "@/i18n";
+
 export type { TransportMode } from "./constants";
 
 /** This browser's own override. Exported because it outranks the install-wide setting, so
@@ -163,8 +165,8 @@ export function useTransportMode(): [
       // save is a mismatch and no save at all is a click that did nothing.
       toast.error(
         savedLocally
-          ? "Saved for this browser, but not for this install."
-          : "Couldn't save the download transport preference.",
+          ? translate("uxHub.savedForThisBrowserv0jb5")
+          : translate("uxHub.couldnTSaveThex6nqb"),
       );
     });
   }, []);

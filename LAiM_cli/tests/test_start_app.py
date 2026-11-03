@@ -20,7 +20,7 @@ from typer.testing import CliRunner
 import LAiM_cli.commands.start as start
 
 BASE = "http://127.0.0.1:8888"
-MODEL = {"id": "LAiM/gemma-4-E2B-it-GGUF", "context_length": 32768}
+MODEL = {"id": "unsloth/gemma-4-E2B-it-GGUF", "context_length": 32768}
 CLI_KEY = "sk-LAiM-c11c11c11c11"
 APP_KEY = "sk-LAiM-a99a99a99a99"
 
@@ -365,7 +365,7 @@ def test_openclaw_app_adds_LAiM_and_joins_an_existing_allowlist(studio):
 
     assert result.exit_code == 0, result.output
     data = json.loads(config.read_text())
-    ref = f"LAiM/{MODEL['id']}"
+    ref = f"unsloth/{MODEL['id']}"
     defaults = data["agents"]["defaults"]
     assert defaults["model"] == user["agents"]["defaults"]["model"]
     assert defaults["modelPolicy"] == {"allow": ["openai/*", ref]}
@@ -639,7 +639,7 @@ def test_vscode_adds_LAiM_and_keeps_the_users_groups(studio, monkeypatch):
 def test_vscode_replaces_its_own_group_for_another_model(studio, monkeypatch):
     config = _vscode_config(studio, monkeypatch)
     assert CliRunner().invoke(start.start_app, ["vscode"]).exit_code == 0
-    other = {"id": "LAiM/Qwen3.5-4B-GGUF", "context_length": 65536}
+    other = {"id": "unsloth/Qwen3.5-4B-GGUF", "context_length": 65536}
     monkeypatch.setitem(MODEL, "id", other["id"])
     monkeypatch.setitem(MODEL, "context_length", other["context_length"])
 
@@ -722,7 +722,7 @@ def test_vscode_uses_insiders_only_without_stable(monkeypatch, tmp_path):
         ),
         (
             {
-                "model_identifier": "LAiM/other-GGUF",
+                "model_identifier": "unsloth/other-GGUF",
                 "is_vision": True,
                 "supports_reasoning": True,
             },
@@ -772,14 +772,14 @@ def test_vscode_keeps_what_the_user_put_in_an_LAiM_group(studio, monkeypatch):
     )
     assert CliRunner().invoke(start.start_app, ["vscode"]).exit_code == 0
     first = MODEL["id"]
-    monkeypatch.setitem(MODEL, "id", "LAiM/Qwen3.5-4B-GGUF")
+    monkeypatch.setitem(MODEL, "id", "unsloth/Qwen3.5-4B-GGUF")
 
     assert CliRunner().invoke(start.start_app, ["vscode"]).exit_code == 0
 
     (group,) = json.loads(config.read_text())
     assert group["apiType"] == "responses"
     ids = [m["id"] for m in group["models"]]
-    assert ids == ["my/finetune", "LAiM/Qwen3.5-4B-GGUF"] and first not in ids
+    assert ids == ["my/finetune", "unsloth/Qwen3.5-4B-GGUF"] and first not in ids
     assert group["models"][0] == mine
     assert group["models"][1]["apiType"] == "chat-completions"
 

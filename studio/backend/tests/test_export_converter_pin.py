@@ -3,8 +3,8 @@
 
 """The GGUF converter pin is LAiM's own routing, so it is scoped to one conversion.
 
-Setting LAiM_LLAMA_CPP_SCRIPTS_DIR and leaving it there cost two controls that live
-in LAiM_zoo: the variable outranks LAiM_LLAMA_CPP_CONVERTER_TAG, so the escape
+Setting UNSLOTH_LLAMA_CPP_SCRIPTS_DIR and leaving it there cost two controls that live
+in LAiM_zoo: the variable outranks UNSLOTH_LLAMA_CPP_CONVERTER_TAG, so the escape
 hatch the unsupported-architecture message names did nothing for a Studio export, and
 trust is read off the variable, so a converter Studio had just downloaded looked
 user-pinned and LAiM_CONVERTER_SCAN_STRICT stopped failing exports."""
@@ -30,8 +30,8 @@ from test_export_absolute_paths import (  # noqa: E402
     _load_module,
 )
 
-_SCRIPTS_DIR = "LAiM_LLAMA_CPP_SCRIPTS_DIR"
-_CONVERTER_TAG = "LAiM_LLAMA_CPP_CONVERTER_TAG"
+_SCRIPTS_DIR = "UNSLOTH_LLAMA_CPP_SCRIPTS_DIR"
+_CONVERTER_TAG = "UNSLOTH_LLAMA_CPP_CONVERTER_TAG"
 
 
 def _export_mod(monkeypatch, *, mlx = False):
@@ -121,7 +121,7 @@ def test_pin_goes_through_the_internal_helper(monkeypatch):
 
 
 def test_a_converter_tag_is_left_in_force(monkeypatch):
-    """The pin outranks the tag, so pinning at all made `LAiM_LLAMA_CPP_CONVERTER_TAG=b9999`
+    """The pin outranks the tag, so pinning at all made `UNSLOTH_LLAMA_CPP_CONVERTER_TAG=b9999`
     a knob that changes nothing."""
     mod = _export_mod(monkeypatch)
     _llama_cpp, calls = _zoo(monkeypatch)

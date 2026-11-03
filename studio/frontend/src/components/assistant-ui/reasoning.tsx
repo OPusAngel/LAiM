@@ -85,6 +85,8 @@ import {
 import { shallow } from "zustand/shallow";
 import { partsHaveRenderableRenderHtmlTool } from "@/components/assistant-ui/message-derived";
 import { useMessageMemo } from "@/components/assistant-ui/use-message-memo";
+import { translate } from "@/i18n";
+
 const ANIMATION_DURATION = 200;
 
 function selectionIntersectsElement(
@@ -227,7 +229,7 @@ function ReasoningTrigger({
         {active ? (
           <span>Thinking</span>
         ) : (
-          <span>Worked for {formatWorkedFor(duration ?? 0)}</span>
+          <span>{translate("uxComponents.workedForx7205", { p1: formatWorkedFor(duration ?? 0) })}</span>
         )}
         {active && (
           <span
@@ -391,7 +393,7 @@ function ReasoningCopyButton({
 
   return (
     <IconActionButton
-      label={copied ? "Copied" : "Copy reasoning"}
+      label={copied ? translate("uxComponents.copiedShortw5fsh") : translate("uxComponents.copyReasoningpneh0")}
       onClick={handleCopy}
     >
       {copied ? (
@@ -610,7 +612,7 @@ function ReasoningTail({
           onClick={() => onExpandedChange(!expanded)}
           className="mt-2 inline-flex cursor-pointer items-center gap-1.5 font-medium text-muted-foreground text-xs transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         >
-          {expanded ? "Collapse thinking" : "Expand thinking"}
+          {expanded ? translate("uxComponents.collapseThinking2k5q6") : translate("uxComponents.expandThinkingi11jn")}
           <ChevronDownIcon
             aria-hidden={true}
             className={cn(

@@ -66,7 +66,7 @@ test("gradient_checkpointing only ever maps to a value the picker can show", () 
     false,
     "true",
     "none",
-    "LAiM",
+    "unsloth",
     "mlx",
     "None",
     "TRUE",
@@ -87,7 +87,7 @@ test("gradient_checkpointing only ever maps to a value the picker can show", () 
       }).gradientCheckpointing;
       if (mapped !== undefined) {
         assert.ok(
-          ["none", "true", "LAiM", "mlx"].includes(mapped as string),
+          ["none", "true", "unsloth", "mlx"].includes(mapped as string),
           `${deviceType}: ${JSON.stringify(value)} mapped to ${String(mapped)}`,
         );
       }
@@ -98,10 +98,10 @@ test("gradient_checkpointing only ever maps to a value the picker can show", () 
   }
 });
 
-test("LAiM GC is still never selected on a Mac", () => {
+test("Unsloth GC is still never selected on a Mac", () => {
   setDeviceType("mac");
   assert.equal(
-    patchFor({ gradient_checkpointing: "LAiM" }).gradientCheckpointing,
+    patchFor({ gradient_checkpointing: "unsloth" }).gradientCheckpointing,
     "mlx",
   );
   // The boolean path must not sneak past that remap either.

@@ -26,12 +26,17 @@ _CTX = mp.get_context("spawn")
 FIRST_REQUEST_TIMEOUT_S = 300.0
 REQUEST_TIMEOUT_S = 60.0
 # Applied in the child before anything imports torch: a CUDA context alone costs hundreds of MB of
-# VRAM, and the preview only tokenizes. LAiM_ALLOW_CPU lets LAiM's chat templates import there.
+# VRAM, and the preview only tokenizes. UNSLOTH_ALLOW_CPU lets LAiM's chat templates import there.
 _NO_ACCELERATOR_ENV = {
     "CUDA_VISIBLE_DEVICES": "",
     "HIP_VISIBLE_DEVICES": "",
-    "LAiM_ALLOW_CPU": "1",
+    "UNSLOTH_ALLOW_CPU": "1",
 }
+# The preview child imports LAiM, which reads this switch under its own spelling.
+from core.library_env import mirror_library_env as _mirror_library_env
+
+_mirror_library_env(_NO_ACCELERATOR_ENV)
+del _mirror_library_env
 
 
 class TokenPreviewError(RuntimeError):

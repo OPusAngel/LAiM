@@ -1,6 +1,6 @@
-# Model defaults for LAiM/Ministral-3-3B-Instruct-2512
+# Model defaults for unsloth/Ministral-3-3B-Instruct-2512
 # Based on Ministral_3_VL_(3B)_Vision.ipynb
-# Also applies to: LAiM/Ministral-3-3B-Instruct-2512
+# Also applies to: unsloth/Ministral-3-3B-Instruct-2512
 # added inference parameters from LAiM guides
 
 training:
@@ -17,7 +17,7 @@ training:
   random_seed: 3407
   packing: false
   train_on_completions: true
-  gradient_checkpointing: "LAiM"
+  gradient_checkpointing: "unsloth"
   optim: "adamw_8bit"
   lr_scheduler_type: "linear"
 

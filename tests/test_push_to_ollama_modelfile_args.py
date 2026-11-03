@@ -13,7 +13,7 @@ _TESTS = os.path.dirname(__file__)
 _SAVE = os.path.join(_TESTS, os.pardir, "LAiM", "save.py")
 _MAPPERS = os.path.join(_TESTS, os.pardir, "LAiM", "ollama_template_mappers.py")
 
-MAPPED = "LAiM/llama-3-8b-Instruct"
+MAPPED = "unsloth/llama-3-8b-Instruct"
 UNMAPPED = "some/unmapped-model"
 
 

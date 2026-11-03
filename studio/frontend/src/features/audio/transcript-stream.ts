@@ -2,6 +2,8 @@
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import type { TranscriptDetails } from "./transcript-model.ts";
+import { translate } from "@/i18n";
+
 
 type TranscriptTiming = Partial<
   Pick<TranscriptDetails, "segments" | "words" | "speakers" | "source">
@@ -59,7 +61,7 @@ export async function readTranscriptStream(
       }
       if (done)
         throw new Error(
-          "The transcription connection ended before the result arrived.",
+          translate("uxAudio.theTranscriptionConnectionEndedbpre5"),
         );
     }
   } finally {

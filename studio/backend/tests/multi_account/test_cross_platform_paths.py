@@ -29,7 +29,7 @@ LEAVES = (
     r"outputs\Llama-3.1-8B-Instruct\checkpoint-10000\adapter_model.safetensors",
     r"exports\Llama-3.1-8B-Instruct-Q4_K_M.gguf",
     r"rag\documents\0123456789abcdef0123456789abcdef\quarterly-research-report.pdf",
-    r"sandbox\0123456789abcdef0123456789abcdef\workspace\analysis\results.csv",
+    r"workdir\0123456789abcdef0123456789abcdef\workspace\analysis\results.csv",
     r"assets\datasets\0123456789abcdef0123456789abcdef\training-data.jsonl",
 )
 

@@ -169,7 +169,7 @@ def test_a_caller_supplied_max_memory_does_not_collide_with_the_measured_one():
     ns = _build(free = {0: 10 * 2**30, 1: 10 * 2**30}, planner = planner)
     resolved = ns["resolve_LAiM_device_map"](
         "LAiM",
-        "LAiM/Qwen3-0.6B",
+        "unsloth/Qwen3-0.6B",
         planner_kwargs = {"max_memory": {0: 4 * 2**30, 1: 10 * 2**30}, "retained_rows": 128},
     )
     assert resolved == _Plan.device_map, "the plan was lost to a TypeError"
@@ -186,7 +186,7 @@ def test_a_cap_above_free_memory_does_not_raise_the_budget():
     ns = _build(free = {0: 2 * 2**30, 1: 2 * 2**30}, planner = planner)
     ns["resolve_LAiM_device_map"](
         "LAiM",
-        "LAiM/Qwen3-0.6B",
+        "unsloth/Qwen3-0.6B",
         planner_kwargs = {"max_memory": {0: 99 * 2**30, 1: 99 * 2**30}},
     )
     assert planner.calls[0][1]["max_memory"][0] == 2 * 2**30
@@ -204,7 +204,7 @@ def test_the_cap_is_read_the_way_accelerate_reads_it(written, expected):
     ns = _build(free = {0: 8 * 2**30, 1: 8 * 2**30}, planner = planner)
     ns["resolve_LAiM_device_map"](
         "LAiM",
-        "LAiM/Qwen3-0.6B",
+        "unsloth/Qwen3-0.6B",
         planner_kwargs = {"max_memory": {0: written, 1: written}},
     )
     assert planner.calls[0][1]["max_memory"][0] == min(expected, 8 * 2**30)
@@ -290,7 +290,7 @@ def test_an_unreadable_cap_leaves_the_measured_value_rather_than_dropping_the_de
     ns = _build(free = {0: 8 * 2**30, 1: 8 * 2**30}, planner = planner)
     ns["resolve_LAiM_device_map"](
         "LAiM",
-        "LAiM/Qwen3-0.6B",
+        "unsloth/Qwen3-0.6B",
         planner_kwargs = {"max_memory": {0: "not a size", 1: "not a size"}},
     )
     assert planner.calls[0][1]["max_memory"][0] == 8 * 2**30
@@ -304,7 +304,7 @@ def test_the_callers_kwargs_dict_is_not_mutated():
     caller_kwargs = {"max_memory": {0: 4 * 2**30, 1: 4 * 2**30}, "retained_rows": 8}
     ns["resolve_LAiM_device_map"](
         "LAiM",
-        "LAiM/Qwen3-0.6B",
+        "unsloth/Qwen3-0.6B",
         planner_kwargs = caller_kwargs,
     )
     assert caller_kwargs == {"max_memory": {0: 4 * 2**30, 1: 4 * 2**30}, "retained_rows": 8}
@@ -343,7 +343,7 @@ def test_the_caller_max_memory_keys_are_the_devices_the_load_may_use():
     )
     ns["resolve_LAiM_device_map"](
         "LAiM",
-        "LAiM/Qwen3-0.6B",
+        "unsloth/Qwen3-0.6B",
         planner_kwargs = {"max_memory": {0: "12GiB", 1: "12GiB"}},
     )
     assert sorted(planner.calls[0][1]["max_memory"]) == [0, 1]
@@ -357,7 +357,7 @@ def test_a_device_the_caller_names_but_we_cannot_measure_survives():
     ns = _build(free = {0: 8 * 2**30, 1: 8 * 2**30}, planner = planner)
     ns["resolve_LAiM_device_map"](
         "LAiM",
-        "LAiM/Qwen3-0.6B",
+        "unsloth/Qwen3-0.6B",
         planner_kwargs = {
             "max_memory": {0: "4GiB", 1: "4GiB", "cpu": "30GiB", "disk": "unreadable"},
         },
@@ -375,7 +375,7 @@ def test_an_empty_max_memory_is_not_a_request_to_use_no_devices():
     ns = _build(free = {0: 8 * 2**30, 1: 8 * 2**30}, planner = planner)
     ns["resolve_LAiM_device_map"](
         "LAiM",
-        "LAiM/Qwen3-0.6B",
+        "unsloth/Qwen3-0.6B",
         planner_kwargs = {"max_memory": {}},
     )
     assert sorted(planner.calls[0][1]["max_memory"]) == [0, 1]
@@ -444,7 +444,7 @@ def test_gpus_the_caller_withheld_are_never_probed():
     ns = _build(devices = 4, free = {i: 16 * 2**30 for i in range(4)}, planner = planner)
     ns["resolve_LAiM_device_map"](
         "LAiM",
-        "LAiM/Qwen3-0.6B",
+        "unsloth/Qwen3-0.6B",
         planner_kwargs = {"max_memory": {0: "12GiB", 1: "12GiB"}},
     )
     assert sorted(ns["_cuda"].probed) == [0, 1]
@@ -463,7 +463,7 @@ def test_a_refusing_card_outside_the_requested_set_does_not_cost_the_plan():
     )
     resolved = ns["resolve_LAiM_device_map"](
         "LAiM",
-        "LAiM/Qwen3-0.6B",
+        "unsloth/Qwen3-0.6B",
         planner_kwargs = {"max_memory": {0: "12GiB", 1: "12GiB"}},
     )
     assert resolved == _Plan.device_map
@@ -480,7 +480,7 @@ def test_a_refusing_card_inside_the_requested_set_still_falls_back():
     )
     resolved = ns["resolve_LAiM_device_map"](
         "LAiM",
-        "LAiM/Qwen3-0.6B",
+        "unsloth/Qwen3-0.6B",
         planner_kwargs = {"max_memory": {0: "12GiB", 1: "12GiB"}},
     )
     assert resolved == "sequential"
@@ -492,7 +492,7 @@ def test_restricting_to_one_gpu_is_not_a_multi_gpu_plan():
     ns = _build(devices = 4, free = {i: 16 * 2**30 for i in range(4)}, planner = planner)
     resolved = ns["resolve_LAiM_device_map"](
         "LAiM",
-        "LAiM/Qwen3-0.6B",
+        "unsloth/Qwen3-0.6B",
         planner_kwargs = {"max_memory": {0: "12GiB"}},
     )
     assert resolved == "sequential"

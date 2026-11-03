@@ -3,6 +3,8 @@
 
 import { authFetch } from "@/features/auth";
 import { readFastApiError } from "@/lib/format-fastapi-error";
+import { translate } from "@/i18n";
+
 
 interface ApiChatPreferences {
   // biome-ignore lint/style/useNamingConvention: API schema
@@ -17,7 +19,7 @@ function fromApi(settings: unknown): ChatPreferences {
   const value = (settings as Partial<ApiChatPreferences> | null)
     ?.show_model_disclaimer;
   if (typeof value !== "boolean") {
-    throw new Error("Invalid chat preferences response");
+    throw new Error(translate("uxChat.invalidChatPreferencesResponse5l8lw"));
   }
   return { showModelDisclaimer: value };
 }
@@ -29,7 +31,7 @@ async function requestPreferences(
   const res = await authFetch(path, init);
   if (!res.ok) {
     throw new Error(
-      await readFastApiError(res, "Could not load chat preferences"),
+      await readFastApiError(res, translate("uxChat.couldNotLoadChatlab8i")),
     );
   }
   return fromApi(await res.json());

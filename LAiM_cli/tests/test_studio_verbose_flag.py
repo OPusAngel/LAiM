@@ -16,7 +16,7 @@ if str(_REPO_ROOT) not in sys.path:
 
 _DEDUP = "LAiM_STUDIO_ACCESS_LOG_DEDUP_MS"
 _POLL = "LAiM_STUDIO_ACCESS_LOG_POLL_DEDUP_MS"
-_BASE = ["--model", "LAiM/Qwen3-1.7B-GGUF"]
+_BASE = ["--model", "unsloth/Qwen3-1.7B-GGUF"]
 
 
 def _studio():

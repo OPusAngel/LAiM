@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { toast } from "@/lib/toast";
 import {
   clearExtraArgsEditForDraft,
@@ -55,10 +56,10 @@ export function scheduleRunConfigImport({
     }
     if (!hydrated) {
       runConfigInbox.take(pending.id, key);
-      toast.error("Could not import run settings", {
+      toast.error(translate("uxModelpicker.couldNotImportRun1d6fg"), {
         id: pending.id,
         description:
-          "Saved model settings are unavailable. Close the editor and reopen this link to retry.",
+          translate("uxModelpicker.savedModelSettingsAreghvmh"),
       });
       return;
     }
@@ -81,9 +82,9 @@ export function scheduleRunConfigImport({
       mergeSharedRunConfig(current, patch),
     );
     onImport({ changes, model: pending.value.model, ggufVariant });
-    toast.success("Settings imported from link", {
+    toast.success(translate("uxModelpicker.settingsImportedFromLinkwgg8t"), {
       id: pending.id,
-      description: "Review before loading.",
+      description: translate("uxModelpicker.reviewBeforeLoadingve0xi"),
     });
   });
   return () => {

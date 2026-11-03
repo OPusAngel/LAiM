@@ -3,6 +3,7 @@
 
 import { AUDIO_PICKER_ACCEPT, isAudioAttachmentFile } from "../../lib/audio-utils.ts";
 import { VIDEO_ACCEPT, isVideoFile } from "../../lib/video-utils.ts";
+import { translate } from "@/i18n";
 
 /** MiniMax-H3's combined budget across picture, video and standalone-audio references. */
 export const MAX_H3_REFERENCES = 12;
@@ -78,11 +79,15 @@ export function referenceFileRejection(
   const named = { type: file.type, name: file.name ?? "" };
   const matches = kind === "video" ? isVideoFile(named) : isAudioAttachmentFile(named);
   if (!matches) {
-    return `Please choose ${kind === "video" ? "a video" : "an audio"} file`;
+    return kind === "video"
+      ? translate("uxVideo.pleaseChooseVideoFilekd2wm")
+      : translate("uxVideo.pleaseChooseAudioFileq7rtb");
   }
   if (file.size > MAX_REFERENCE_BYTES[kind]) {
     const limitMb = Math.round(MAX_REFERENCE_BYTES[kind] / (1024 * 1024));
-    return `This ${kind} is too large (limit ${limitMb} MB)`;
+    return kind === "video"
+      ? translate("uxVideo.thisVideoTooLargeVn5hx", { p1: limitMb })
+      : translate("uxVideo.thisAudioTooLargeZb3ka", { p1: limitMb });
   }
   return null;
 }
@@ -108,7 +113,12 @@ export function readReferenceFile(
   const reader = new FileReader();
   reader.onload = () =>
     handlers.onLoaded(typeof reader.result === "string" ? reader.result : null);
-  reader.onerror = () => handlers.onError(`Could not read the ${kind} file`);
+  reader.onerror = () =>
+    handlers.onError(
+      kind === "video"
+        ? translate("uxVideo.couldNotReadVideoFilenk8kx")
+        : translate("uxVideo.couldNotReadAudioFilebr6m2"),
+    );
   reader.readAsDataURL(file);
 }
 

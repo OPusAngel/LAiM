@@ -326,20 +326,20 @@ def _run_hook(model = "some/model", **kwargs):
 def test_flag_off_never_loads(monkeypatch):
     backend, rec = _wired(
         monkeypatch,
-        _FakeBackend("LAiM/A-GGUF"),
-        ("LAiM/B-GGUF", None, "LAiM/B-GGUF"),
+        _FakeBackend("unsloth/A-GGUF"),
+        ("unsloth/B-GGUF", None, "unsloth/B-GGUF"),
         enabled = False,
     )
     # Off means no load, but A must not answer as B either: say why instead.
     with pytest.raises(HTTPException) as excinfo:
-        _run_hook("LAiM/B-GGUF")
+        _run_hook("unsloth/B-GGUF")
     assert excinfo.value.status_code == 404
     assert "Switch model by request" in str(excinfo.value.detail)
     assert rec.calls == []
 
 
 def test_unknown_model_falls_through(monkeypatch):
-    backend, rec = _wired(monkeypatch, _FakeBackend("LAiM/A-GGUF"), None)
+    backend, rec = _wired(monkeypatch, _FakeBackend("unsloth/A-GGUF"), None)
     _run_hook("gpt-4o-mini")
     assert rec.calls == []
 
@@ -347,27 +347,27 @@ def test_unknown_model_falls_through(monkeypatch):
 def test_already_loaded_does_not_reload(monkeypatch):
     # Case-insensitive match against the loaded identifier.
     backend, rec = _wired(
-        monkeypatch, _FakeBackend("LAiM/A-GGUF"), ("LAiM/a-gguf", None, "LAiM/a-gguf")
+        monkeypatch, _FakeBackend("unsloth/A-GGUF"), ("unsloth/a-gguf", None, "unsloth/a-gguf")
     )
-    _run_hook("LAiM/A-GGUF")
+    _run_hook("unsloth/A-GGUF")
     assert rec.calls == []
 
 
 def test_known_unloaded_model_switches_once(monkeypatch):
     backend, rec = _wired(
-        monkeypatch, _FakeBackend("LAiM/A-GGUF"), ("LAiM/B-GGUF", "Q4_K_M", "LAiM/B-GGUF")
+        monkeypatch, _FakeBackend("unsloth/A-GGUF"), ("unsloth/B-GGUF", "Q4_K_M", "unsloth/B-GGUF")
     )
-    _run_hook("LAiM/B-GGUF:Q4_K_M")
+    _run_hook("unsloth/B-GGUF:Q4_K_M")
     assert len(rec.calls) == 1
     req = rec.calls[0]
     assert isinstance(req, LoadRequest)
-    assert req.model_path == "LAiM/B-GGUF"
+    assert req.model_path == "unsloth/B-GGUF"
     assert req.gguf_variant == "Q4_K_M"
-    assert backend.model_identifier == "LAiM/B-GGUF"
+    assert backend.model_identifier == "unsloth/B-GGUF"
 
 
 def test_a_late_cancel_keeps_the_completed_switch_metadata(monkeypatch):
-    backend = _FakeBackend("LAiM/A-GGUF")
+    backend = _FakeBackend("unsloth/A-GGUF")
     cancel_event = threading.Event()
     calls = []
 
@@ -385,7 +385,7 @@ def test_a_late_cancel_keeps_the_completed_switch_metadata(monkeypatch):
 
     _wire_on(
         monkeypatch,
-        resolves_to = ("/models/B.gguf", "Q4_K_M", "LAiM/B-GGUF"),
+        resolves_to = ("/models/B.gguf", "Q4_K_M", "unsloth/B-GGUF"),
         backend = backend,
         recorder = _load,
     )
@@ -397,13 +397,13 @@ def test_a_late_cancel_keeps_the_completed_switch_metadata(monkeypatch):
         with pytest.raises(HTTPException) as exc:
             asyncio.run(
                 inference_route._maybe_auto_switch_model(
-                    "LAiM/B-GGUF", request, "tester", claim_resident = False
+                    "unsloth/B-GGUF", request, "tester", claim_resident = False
                 )
             )
 
         assert exc.value.status_code == 409
         assert len(calls) == 1
-        assert backend._openai_advertised_id == "LAiM/B-GGUF"
+        assert backend._openai_advertised_id == "unsloth/B-GGUF"
         assert backend._loaded_by_user_action is False
         assert inference_route._is_preview_resident("/models/B.gguf")
     finally:
@@ -412,7 +412,7 @@ def test_a_late_cancel_keeps_the_completed_switch_metadata(monkeypatch):
 
 def test_resident_model_skips_the_filesystem_resolver(monkeypatch):
     backend, rec = _wired(
-        monkeypatch, _FakeBackend("LAiM/Muse-Glimmer-30B-GGUF", "UD-Q4_K_XL"), None
+        monkeypatch, _FakeBackend("unsloth/Muse-Glimmer-30B-GGUF", "UD-Q4_K_XL"), None
     )
     warmed = []
     monkeypatch.setattr(resolver, "warm_index_soon", lambda: warmed.append(1))
@@ -421,19 +421,19 @@ def test_resident_model_skips_the_filesystem_resolver(monkeypatch):
         raise AssertionError("the resident model must not touch the filesystem index")
 
     monkeypatch.setattr(resolver, "resolve_local_gguf", _unexpected_resolve)
-    _run_hook("LAiM/Muse-Glimmer-30B-GGUF")
+    _run_hook("unsloth/Muse-Glimmer-30B-GGUF")
     assert rec.calls == []
     assert warmed == [1]
 
 
 def test_auto_switch_reads_an_additions_only_snapshot_without_rebuilding_it(monkeypatch):
     real_resolve = resolver.resolve_local_gguf
-    backend, rec = _wired(monkeypatch, _FakeBackend("LAiM/A-GGUF", "Q4_K_M"), None)
+    backend, rec = _wired(monkeypatch, _FakeBackend("unsloth/A-GGUF", "Q4_K_M"), None)
     calls = []
     warmed = []
 
-    entry = resolver._LocalGgufEntry("LAiM/B-GGUF", "/models/LAiM/B-GGUF", ("Q4_K_M",))
-    monkeypatch.setattr(resolver, "_scan", (time.monotonic(), {"LAiM/b-gguf": entry}))
+    entry = resolver._LocalGgufEntry("unsloth/B-GGUF", "/models/LAiM/B-GGUF", ("Q4_K_M",))
+    monkeypatch.setattr(resolver, "_scan", (time.monotonic(), {"unsloth/b-gguf": entry}))
     resolver.invalidate_index(additions_only = True)
     assert resolver._scan[0] < 0.0  # additions-only: the time of the invalidation
     assert resolver.index_is_built() is False
@@ -447,11 +447,11 @@ def test_auto_switch_reads_an_additions_only_snapshot_without_rebuilding_it(monk
 
     async def _accept_loaded_target(*_args, **_kwargs):
         assert backend.model_identifier == "/models/LAiM/B-GGUF"
-        assert backend._openai_advertised_id == "LAiM/B-GGUF"
+        assert backend._openai_advertised_id == "unsloth/B-GGUF"
 
     monkeypatch.setattr(inference_route, "_reject_unservable_model", _accept_loaded_target)
 
-    _run_hook("LAiM/B-GGUF:Q4_K_M")
+    _run_hook("unsloth/B-GGUF:Q4_K_M")
 
     assert calls == []
     assert warmed == [1]
@@ -461,7 +461,7 @@ def test_auto_switch_reads_an_additions_only_snapshot_without_rebuilding_it(monk
 def test_non_additive_invalidation_keeps_unservable_check_cold(monkeypatch):
     real_resolve = resolver.resolve_local_gguf
     backend, rec = _wired(
-        monkeypatch, _FakeBackend("LAiM/A-GGUF", "Q4_K_M"), None, enabled = False
+        monkeypatch, _FakeBackend("unsloth/A-GGUF", "Q4_K_M"), None, enabled = False
     )
     monkeypatch.setattr(resolver, "resolve_local_gguf", real_resolve)
     monkeypatch.setattr(
@@ -470,19 +470,19 @@ def test_non_additive_invalidation_keeps_unservable_check_cold(monkeypatch):
         lambda: SimpleNamespace(active_model_name = None),
     )
 
-    old = resolver._LocalGgufEntry("LAiM/A-GGUF", "/models/LAiM/A-GGUF", ("Q4_K_M",))
-    added = resolver._LocalGgufEntry("LAiM/B-GGUF", "/models/LAiM/B-GGUF", ("Q4_K_M",))
-    resolver._scan = (time.monotonic(), {"LAiM/a-gguf": old})
+    old = resolver._LocalGgufEntry("unsloth/A-GGUF", "/models/LAiM/A-GGUF", ("Q4_K_M",))
+    added = resolver._LocalGgufEntry("unsloth/B-GGUF", "/models/LAiM/B-GGUF", ("Q4_K_M",))
+    resolver._scan = (time.monotonic(), {"unsloth/a-gguf": old})
     resolver.invalidate_index()
     assert resolver.index_is_built() is False
     monkeypatch.setattr(
         resolver,
         "_build_index",
-        lambda: {"LAiM/a-gguf": old, "LAiM/b-gguf": added},
+        lambda: {"unsloth/a-gguf": old, "unsloth/b-gguf": added},
     )
 
     with pytest.raises(HTTPException) as excinfo:
-        _run_hook("LAiM/B-GGUF")
+        _run_hook("unsloth/B-GGUF")
 
     assert excinfo.value.status_code == 404
     assert "Switch model by request" in str(excinfo.value.detail)
@@ -491,11 +491,11 @@ def test_non_additive_invalidation_keeps_unservable_check_cold(monkeypatch):
 
 def test_an_expired_positive_hit_refreshes_before_switching(monkeypatch):
     real_resolve = resolver.resolve_local_gguf
-    backend, rec = _wired(monkeypatch, _FakeBackend("LAiM/A-GGUF", "Q4_K_M"), None)
+    backend, rec = _wired(monkeypatch, _FakeBackend("unsloth/A-GGUF", "Q4_K_M"), None)
     removed = resolver._LocalGgufEntry(
-        "LAiM/B-GGUF", "/removed-root/LAiM/B-GGUF", ("Q4_K_M",)
+        "unsloth/B-GGUF", "/removed-root/LAiM/B-GGUF", ("Q4_K_M",)
     )
-    monkeypatch.setattr(resolver, "_scan", (1.0, {"LAiM/b-gguf": removed}))
+    monkeypatch.setattr(resolver, "_scan", (1.0, {"unsloth/b-gguf": removed}))
     scans = []
     calls = []
     monkeypatch.setattr(resolver, "_build_index", lambda: scans.append(1) or {})
@@ -512,33 +512,33 @@ def test_an_expired_positive_hit_refreshes_before_switching(monkeypatch):
     # re-resolve that does not rescan, and the resident model left alone -- is unchanged, so the
     # refusal is asserted alongside it instead of the test being weakened to swallow it.
     with pytest.raises(HTTPException) as excinfo:
-        _run_hook("LAiM/B-GGUF")
+        _run_hook("unsloth/B-GGUF")
 
     assert excinfo.value.status_code == 404
     # The third call is the refusal wording asking what the RESIDENT model is; like the second it
     # passes allow_scan = False, which is why the rescan count below is still one.
     assert calls == [
-        ("LAiM/B-GGUF", {"include_companion_scope": True}),
-        ("LAiM/B-GGUF", {"allow_scan": False}),
-        ("LAiM/A-GGUF:Q4_K_M", {"allow_scan": False}),
+        ("unsloth/B-GGUF", {"include_companion_scope": True}),
+        ("unsloth/B-GGUF", {"allow_scan": False}),
+        ("unsloth/A-GGUF:Q4_K_M", {"allow_scan": False}),
     ]
     assert scans == [1]
     assert rec.calls == []
-    assert backend.model_identifier == "LAiM/A-GGUF"
+    assert backend.model_identifier == "unsloth/A-GGUF"
 
 
 def test_a_stale_miss_refreshes_before_the_resident_model_can_answer(monkeypatch):
     real_resolve = resolver.resolve_local_gguf
-    backend, rec = _wired(monkeypatch, _FakeBackend("LAiM/A-GGUF", "Q4_K_M"), None)
-    old = resolver._LocalGgufEntry("LAiM/A-GGUF", "/models/LAiM/A-GGUF", ("Q4_K_M",))
-    added = resolver._LocalGgufEntry("LAiM/B-GGUF", "/models/LAiM/B-GGUF", ("Q4_K_M",))
-    monkeypatch.setattr(resolver, "_scan", (1.0, {"LAiM/a-gguf": old}))
+    backend, rec = _wired(monkeypatch, _FakeBackend("unsloth/A-GGUF", "Q4_K_M"), None)
+    old = resolver._LocalGgufEntry("unsloth/A-GGUF", "/models/LAiM/A-GGUF", ("Q4_K_M",))
+    added = resolver._LocalGgufEntry("unsloth/B-GGUF", "/models/LAiM/B-GGUF", ("Q4_K_M",))
+    monkeypatch.setattr(resolver, "_scan", (1.0, {"unsloth/a-gguf": old}))
     scans = []
     calls = []
     monkeypatch.setattr(
         resolver,
         "_build_index",
-        lambda: scans.append(1) or {"LAiM/a-gguf": old, "LAiM/b-gguf": added},
+        lambda: scans.append(1) or {"unsloth/a-gguf": old, "unsloth/b-gguf": added},
     )
 
     def _resolve(name, **kwargs):
@@ -549,26 +549,26 @@ def test_a_stale_miss_refreshes_before_the_resident_model_can_answer(monkeypatch
 
     async def _accept_loaded_target(*_args, **_kwargs):
         assert backend.model_identifier == "/models/LAiM/B-GGUF"
-        assert backend._openai_advertised_id == "LAiM/B-GGUF"
+        assert backend._openai_advertised_id == "unsloth/B-GGUF"
 
     monkeypatch.setattr(inference_route, "_reject_unservable_model", _accept_loaded_target)
 
-    _run_hook("LAiM/B-GGUF")
+    _run_hook("unsloth/B-GGUF")
 
-    assert calls == [("LAiM/B-GGUF", {"include_companion_scope": True})]
+    assert calls == [("unsloth/B-GGUF", {"include_companion_scope": True})]
     assert scans == [1]
     assert len(rec.calls) == 1
 
 
 def test_concurrent_same_target_loads_once(monkeypatch):
     backend, rec = _wired(
-        monkeypatch, _FakeBackend(None), ("LAiM/B-GGUF", None, "LAiM/B-GGUF")
+        monkeypatch, _FakeBackend(None), ("unsloth/B-GGUF", None, "unsloth/B-GGUF")
     )
 
     async def _race():
         await asyncio.gather(
-            inference_route._maybe_auto_switch_model("LAiM/B-GGUF", object(), "t"),
-            inference_route._maybe_auto_switch_model("LAiM/B-GGUF", object(), "t"),
+            inference_route._maybe_auto_switch_model("unsloth/B-GGUF", object(), "t"),
+            inference_route._maybe_auto_switch_model("unsloth/B-GGUF", object(), "t"),
         )
 
     asyncio.run(_race())
@@ -578,36 +578,36 @@ def test_concurrent_same_target_loads_once(monkeypatch):
 def test_load_failure_propagates(monkeypatch):
     backend, rec = _wired(
         monkeypatch,
-        _FakeBackend("LAiM/A-GGUF"),
-        ("LAiM/B-GGUF", None, "LAiM/B-GGUF"),
+        _FakeBackend("unsloth/A-GGUF"),
+        ("unsloth/B-GGUF", None, "unsloth/B-GGUF"),
         fail = True,
     )
     with pytest.raises(HTTPException):
-        _run_hook("LAiM/B-GGUF")
+        _run_hook("unsloth/B-GGUF")
 
 
 def test_same_repo_different_variant_switches(monkeypatch):
     # Q4_K_M loaded, Q8_0 requested: a different quant must trigger a reload.
     backend, rec = _wired(
         monkeypatch,
-        _FakeBackend("LAiM/B-GGUF", hf_variant = "Q4_K_M"),
-        ("LAiM/B-GGUF", "Q8_0", "LAiM/B-GGUF"),
+        _FakeBackend("unsloth/B-GGUF", hf_variant = "Q4_K_M"),
+        ("unsloth/B-GGUF", "Q8_0", "unsloth/B-GGUF"),
     )
-    _run_hook("LAiM/B-GGUF:Q8_0")
+    _run_hook("unsloth/B-GGUF:Q8_0")
     assert len(rec.calls) == 1
     assert rec.calls[0].gguf_variant == "Q8_0"
 
 
 def test_same_repo_same_variant_does_not_reload(monkeypatch):
-    backend = _FakeBackend("LAiM/B-GGUF", hf_variant = "Q4_K_M")
+    backend = _FakeBackend("unsloth/B-GGUF", hf_variant = "Q4_K_M")
     rec = _LoadRecorder(backend)
     _wire_on(
         monkeypatch,
-        resolves_to = ("LAiM/B-GGUF", "q4_k_m", "LAiM/B-GGUF"),  # case-insensitive
+        resolves_to = ("unsloth/B-GGUF", "q4_k_m", "unsloth/B-GGUF"),  # case-insensitive
         backend = backend,
         recorder = rec,
     )
-    _run_hook("LAiM/B-GGUF:Q4_K_M")
+    _run_hook("unsloth/B-GGUF:Q4_K_M")
     assert rec.calls == []
 
 
@@ -1029,7 +1029,7 @@ def test_a_bundle_repos_mirror_is_not_emptied_by_the_h3_filter(tmp_path):
         (snapshot / "m-Q4_K_M.gguf").write_bytes(b"\0" * 4096)
         (snapshot / "m-Q8_0.gguf").write_bytes(b"\0" * 8192)
         entry = resolver._local_gguf_entry(
-            f"LAiM/{name}", SimpleNamespace(path = str(snapshot.parent.parent))
+            f"unsloth/{name}", SimpleNamespace(path = str(snapshot.parent.parent))
         )
         assert entry is not None, f"{name} disappeared from the index"
         assert set(entry.variants) == {"Q4_K_M", "Q8_0"}, name
@@ -1099,23 +1099,23 @@ def test_resolver_matches_and_splits_variant(monkeypatch):
     monkeypatch.setattr(
         resolver,
         "_build_index",
-        lambda: {"LAiM/b-gguf": _entry("LAiM/B-GGUF", "UD-Q5_K_XL", "Q4_K_M")},
+        lambda: {"unsloth/b-gguf": _entry("unsloth/B-GGUF", "UD-Q5_K_XL", "Q4_K_M")},
     )
     resolver._scan = (0.0, {})  # force a rescan
     # A requested variant present on disk resolves (case-insensitive).
-    assert resolver.resolve_local_gguf("LAiM/B-GGUF:ud-q5_k_xl") == (
-        "LAiM/B-GGUF",
+    assert resolver.resolve_local_gguf("unsloth/B-GGUF:ud-q5_k_xl") == (
+        "unsloth/B-GGUF",
         "UD-Q5_K_XL",
-        "LAiM/B-GGUF",
+        "unsloth/B-GGUF",
     )
     # A bare id resolves to a concrete local quant, never a remote one.
-    assert resolver.resolve_local_gguf("LAiM/B-GGUF") == (
-        "LAiM/B-GGUF",
+    assert resolver.resolve_local_gguf("unsloth/B-GGUF") == (
+        "unsloth/B-GGUF",
         "UD-Q5_K_XL",
-        "LAiM/B-GGUF",
+        "unsloth/B-GGUF",
     )
     # A variant that is not on disk must not resolve (no remote download).
-    assert resolver.resolve_local_gguf("LAiM/B-GGUF:Q8_0") is None
+    assert resolver.resolve_local_gguf("unsloth/B-GGUF:Q8_0") is None
     assert resolver.resolve_local_gguf("totally/unknown") is None
     assert resolver.resolve_local_gguf("") is None
 
@@ -1129,7 +1129,7 @@ def test_resolver_failsafe_on_internal_error(monkeypatch):
 
     monkeypatch.setattr(resolver, "_build_index", boom)
     resolver._scan = (0.0, {})
-    assert resolver.resolve_local_gguf("LAiM/B-GGUF") is None
+    assert resolver.resolve_local_gguf("unsloth/B-GGUF") is None
 
 
 def test_resolver_nonstring_model_is_failsafe():
@@ -1145,15 +1145,15 @@ def test_describe_local_miss_separates_missing_repo_from_missing_quant(monkeypat
     monkeypatch.setattr(
         resolver,
         "_build_index",
-        lambda: {"LAiM/b-gguf": _entry("LAiM/B-GGUF", "UD-Q5_K_XL", "Q4_K_M")},
+        lambda: {"unsloth/b-gguf": _entry("unsloth/B-GGUF", "UD-Q5_K_XL", "Q4_K_M")},
     )
     resolver._scan = (0.0, {})
-    assert resolver.describe_local_miss("LAiM/B-GGUF:Q8_0") == (
+    assert resolver.describe_local_miss("unsloth/B-GGUF:Q8_0") == (
         resolver.MISS_VARIANT_NOT_FOUND,
         ("UD-Q5_K_XL", "Q4_K_M"),
     )
     # Split the same way resolve_local_gguf does, so the two never disagree.
-    assert resolver.describe_local_miss("LAiM/b-gguf:q8_0")[0] == (
+    assert resolver.describe_local_miss("unsloth/b-gguf:q8_0")[0] == (
         resolver.MISS_VARIANT_NOT_FOUND
     )
     # Unknown repo, and a bare id with no ":VARIANT" to blame.
@@ -1161,7 +1161,7 @@ def test_describe_local_miss_separates_missing_repo_from_missing_quant(monkeypat
         resolver.MISS_MODEL_NOT_FOUND,
         (),
     )
-    assert resolver.describe_local_miss("LAiM/B-GGUF") == (resolver.MISS_MODEL_NOT_FOUND, ())
+    assert resolver.describe_local_miss("unsloth/B-GGUF") == (resolver.MISS_MODEL_NOT_FOUND, ())
 
 
 def test_describe_local_miss_is_failsafe(monkeypatch):
@@ -1171,7 +1171,7 @@ def test_describe_local_miss_is_failsafe(monkeypatch):
 
     monkeypatch.setattr(resolver, "_build_index", boom)
     resolver._scan = (0.0, {})
-    assert resolver.describe_local_miss("LAiM/B-GGUF:Q8_0") == (
+    assert resolver.describe_local_miss("unsloth/B-GGUF:Q8_0") == (
         resolver.MISS_MODEL_NOT_FOUND,
         (),
     )
@@ -1213,7 +1213,7 @@ def test_idle_loop_does_not_unload_freshly_loaded_model(monkeypatch):
     kw._last_active = time.monotonic() - 3600
 
     unloads = []
-    backend = _FakeBackend("LAiM/Fresh-GGUF")
+    backend = _FakeBackend("unsloth/Fresh-GGUF")
     backend.unload_model = lambda: unloads.append(1)
     monkeypatch.setattr(inference_route, "get_llama_cpp_backend", lambda: backend)
 
@@ -1243,7 +1243,7 @@ def test_idle_loop_unloads_after_ttl_and_stashes_for_reload(monkeypatch):
     kw._last_unloaded_model = None
 
     unloads = []
-    backend = _FakeBackend("LAiM/Idle-GGUF", hf_variant = "Q4_K_M")
+    backend = _FakeBackend("unsloth/Idle-GGUF", hf_variant = "Q4_K_M")
 
     def _unload():
         unloads.append(1)
@@ -1275,7 +1275,7 @@ def test_idle_loop_unloads_after_ttl_and_stashes_for_reload(monkeypatch):
     asyncio.run(_drive())
     assert unloads == [1]  # freed once, not repeatedly
     stash = kw.get_last_unloaded_model()
-    assert stash is not None and stash[0] == "LAiM/Idle-GGUF" and stash[1] == "Q4_K_M"
+    assert stash is not None and stash[0] == "unsloth/Idle-GGUF" and stash[1] == "Q4_K_M"
 
 
 def test_a_request_landing_during_the_pin_read_is_not_unloaded_out_from_under(monkeypatch):
@@ -1307,7 +1307,7 @@ def test_a_request_landing_during_the_pin_read_is_not_unloaded_out_from_under(mo
     monkeypatch.setattr(settings, "get_auto_unload_api_only", _api_only_while_a_request_lands)
 
     unloads = []
-    backend = _FakeBackend("LAiM/Idle-GGUF", hf_variant = "Q4_K_M")
+    backend = _FakeBackend("unsloth/Idle-GGUF", hf_variant = "Q4_K_M")
     backend.unload_model = lambda: unloads.append(1)
     monkeypatch.setattr(inference_route, "get_llama_cpp_backend", lambda: backend)
 
@@ -1337,7 +1337,7 @@ def test_idle_loop_deletes_saved_kv_when_unload_fails(monkeypatch, tmp_path):
     _reset_keepwarm()
 
     saved = tmp_path / "resume-abc-slot0.bin"
-    backend = _FakeBackend("LAiM/Idle-GGUF")
+    backend = _FakeBackend("unsloth/Idle-GGUF")
     manifests = []
 
     def _save(should_abort = None):
@@ -1461,7 +1461,7 @@ def test_idle_loop_does_not_unload_while_request_inflight(monkeypatch):
     monkeypatch.setattr(kw, "_last_active", time.monotonic() - 3600)
 
     unloads = []
-    backend = _FakeBackend("LAiM/Active-GGUF")
+    backend = _FakeBackend("unsloth/Active-GGUF")
     backend.unload_model = lambda: unloads.append(1)
     monkeypatch.setattr(inference_route, "get_llama_cpp_backend", lambda: backend)
 
@@ -1484,7 +1484,7 @@ def test_idle_loop_does_not_unload_while_request_inflight(monkeypatch):
 def test_auto_switch_applies_model_override(monkeypatch):
     # A configured model loads with its saved launch flags, not bare defaults.
     backend, rec = _wired(
-        monkeypatch, _FakeBackend(None), ("LAiM/B-GGUF", "Q4_K_M", "LAiM/B-GGUF")
+        monkeypatch, _FakeBackend(None), ("unsloth/B-GGUF", "Q4_K_M", "unsloth/B-GGUF")
     )
     monkeypatch.setattr(
         settings,
@@ -1492,10 +1492,10 @@ def test_auto_switch_applies_model_override(monkeypatch):
         lambda model_id: {"llama_extra_args": ["--n-gpu-layers", "20"], "max_seq_length": 4096},
     )
 
-    _run_hook("LAiM/B-GGUF")
+    _run_hook("unsloth/B-GGUF")
     assert len(rec.calls) == 1
     req = rec.calls[0]
-    assert req.model_path == "LAiM/B-GGUF"
+    assert req.model_path == "unsloth/B-GGUF"
     assert req.gguf_variant == "Q4_K_M"
     assert req.llama_extra_args == ["--n-gpu-layers", "20"]
     assert req.max_seq_length == 4096
@@ -1504,13 +1504,13 @@ def test_auto_switch_applies_model_override(monkeypatch):
 def test_auto_switch_applies_partial_override(monkeypatch):
     # Only llama_extra_args is configured: it is applied, max_seq_length stays default.
     backend, rec = _wired(
-        monkeypatch, _FakeBackend(None), ("LAiM/B-GGUF", "Q4_K_M", "LAiM/B-GGUF")
+        monkeypatch, _FakeBackend(None), ("unsloth/B-GGUF", "Q4_K_M", "unsloth/B-GGUF")
     )
     monkeypatch.setattr(
         settings, "get_model_override", lambda model_id: {"llama_extra_args": ["--flash-attn"]}
     )
 
-    _run_hook("LAiM/B-GGUF")
+    _run_hook("unsloth/B-GGUF")
     req = rec.calls[0]
     assert req.llama_extra_args == ["--flash-attn"]
     assert req.max_seq_length == 0  # untouched default
@@ -1522,7 +1522,7 @@ def test_auto_switch_applies_reasoning_budget_override(monkeypatch):
     _wire(
         monkeypatch,
         enabled = True,
-        resolves_to = ("LAiM/B-GGUF", "Q4_K_M", "LAiM/B-GGUF"),
+        resolves_to = ("unsloth/B-GGUF", "Q4_K_M", "unsloth/B-GGUF"),
         backend = backend,
         recorder = rec,
     )
@@ -1535,7 +1535,7 @@ def test_auto_switch_applies_reasoning_budget_override(monkeypatch):
         },
     )
 
-    _run_hook("LAiM/B-GGUF")
+    _run_hook("unsloth/B-GGUF")
     req = rec.calls[0]
     assert req.reasoning_budget == 2048
     assert req.reasoning_budget_message == "Conclude now"
@@ -1604,15 +1604,15 @@ def test_model_override_roundtrip(monkeypatch):
     _mock_override_store(monkeypatch)
 
     settings.set_model_override(
-        "LAiM/B-GGUF", llama_extra_args = ["--n-gpu-layers", "20"], max_seq_length = 4096
+        "unsloth/B-GGUF", llama_extra_args = ["--n-gpu-layers", "20"], max_seq_length = 4096
     )
-    assert settings.get_model_override("LAiM/B-GGUF") == {
+    assert settings.get_model_override("unsloth/B-GGUF") == {
         "llama_extra_args": ["--n-gpu-layers", "20"],
         "max_seq_length": 4096,
     }
     # An override with no fields removes the entry rather than storing an empty one.
-    settings.set_model_override("LAiM/B-GGUF", llama_extra_args = [], max_seq_length = None)
-    assert settings.get_model_override("LAiM/B-GGUF") == {}
+    settings.set_model_override("unsloth/B-GGUF", llama_extra_args = [], max_seq_length = None)
+    assert settings.get_model_override("unsloth/B-GGUF") == {}
     assert settings.get_model_overrides() == {}
 
 
@@ -1620,17 +1620,17 @@ def test_reasoning_budget_override_route_roundtrip(monkeypatch):
     _mock_override_store(monkeypatch)
 
     response = _put(
-        "LAiM/B-GGUF",
+        "unsloth/B-GGUF",
         reasoning_budget = 2048,
         reasoning_budget_message = "Conclude now",
     )
 
-    assert response.overrides["LAiM/B-GGUF"] == {
+    assert response.overrides["unsloth/B-GGUF"] == {
         "reasoning_budget": 2048,
         "reasoning_budget_message": "Conclude now",
     }
     assert settings.model_override_load_kwargs(
-        response.overrides["LAiM/B-GGUF"], is_gguf = True
+        response.overrides["unsloth/B-GGUF"], is_gguf = True
     ) == {
         "reasoning_budget": 2048,
         "reasoning_budget_message": "Conclude now",
@@ -1648,9 +1648,9 @@ def test_reasoning_resets_strip_only_matching_carried_flags(monkeypatch):
         "40",
     ]
     for suffix in ("budget", "message", "both", "fill"):
-        _put(f"LAiM/B-GGUF:{suffix}", llama_extra_args = extras)
+        _put(f"unsloth/B-GGUF:{suffix}", llama_extra_args = extras)
 
-    budget = _put("LAiM/B-GGUF:budget", reasoning_budget = -1).overrides["LAiM/B-GGUF:budget"]
+    budget = _put("unsloth/B-GGUF:budget", reasoning_budget = -1).overrides["unsloth/B-GGUF:budget"]
     assert budget["llama_extra_args"] == [
         "--reasoning-budget-message",
         "Conclude now",
@@ -1659,17 +1659,17 @@ def test_reasoning_resets_strip_only_matching_carried_flags(monkeypatch):
     ]
     assert budget["reasoning_budget"] == -1
 
-    message = _put("LAiM/B-GGUF:message", reasoning_budget_message = "").overrides[
-        "LAiM/B-GGUF:message"
+    message = _put("unsloth/B-GGUF:message", reasoning_budget_message = "").overrides[
+        "unsloth/B-GGUF:message"
     ]
     assert message["llama_extra_args"] == ["--reasoning-budget", "2048", "--top-k", "40"]
     assert message["reasoning_budget_message"] == ""
 
     both = _put(
-        "LAiM/B-GGUF:both",
+        "unsloth/B-GGUF:both",
         reasoning_budget = -1,
         reasoning_budget_message = "",
-    ).overrides["LAiM/B-GGUF:both"]
+    ).overrides["unsloth/B-GGUF:both"]
     assert both["llama_extra_args"] == ["--top-k", "40"]
     assert settings.model_override_load_kwargs(both, is_gguf = True) == {
         "llama_extra_args": ["--top-k", "40"],
@@ -1678,11 +1678,11 @@ def test_reasoning_resets_strip_only_matching_carried_flags(monkeypatch):
     }
 
     filled = _put(
-        "LAiM/B-GGUF:fill",
+        "unsloth/B-GGUF:fill",
         reasoning_budget = -1,
         reasoning_budget_message = "",
         fill_absent_fields = True,
-    ).overrides["LAiM/B-GGUF:fill"]
+    ).overrides["unsloth/B-GGUF:fill"]
     assert filled["llama_extra_args"] == extras
     assert "reasoning_budget" not in filled
     assert "reasoning_budget_message" not in filled
@@ -1691,12 +1691,12 @@ def test_reasoning_resets_strip_only_matching_carried_flags(monkeypatch):
 def test_reasoning_reset_tombstone_blocks_bare_and_legacy_fallbacks(monkeypatch):
     _mock_override_store(monkeypatch)
 
-    _put("LAiM/B-GGUF", llama_extra_args = ["--reasoning-budget", "2048"])
-    qualified = _put("LAiM/B-GGUF:Q4_K_M", reasoning_budget = -1).overrides
-    assert qualified["LAiM/B-GGUF:Q4_K_M"] == {"reasoning_budget": -1}
-    assert qualified["LAiM/B-GGUF"]["llama_extra_args"] == ["--reasoning-budget", "2048"]
+    _put("unsloth/B-GGUF", llama_extra_args = ["--reasoning-budget", "2048"])
+    qualified = _put("unsloth/B-GGUF:Q4_K_M", reasoning_budget = -1).overrides
+    assert qualified["unsloth/B-GGUF:Q4_K_M"] == {"reasoning_budget": -1}
+    assert qualified["unsloth/B-GGUF"]["llama_extra_args"] == ["--reasoning-budget", "2048"]
     assert settings.model_override_load_kwargs(
-        settings.get_model_override("LAiM/B-GGUF:Q4_K_M"), is_gguf = True
+        settings.get_model_override("unsloth/B-GGUF:Q4_K_M"), is_gguf = True
     ) == {"reasoning_budget": -1}
 
     path = "/tmp/model-Q4_K_M.gguf"
@@ -1715,7 +1715,7 @@ def test_reasoning_budget_override_rejects_unsafe_argv(message):
 
     with pytest.raises(pydantic.ValidationError):
         settings_route.ModelOverridePayload(
-            model_id = "LAiM/B-GGUF", reasoning_budget_message = message
+            model_id = "unsloth/B-GGUF", reasoning_budget_message = message
         )
     assert settings.normalize_model_override({"reasoning_budget_message": message}) == {}
 
@@ -1739,7 +1739,7 @@ def test_unsafe_passthrough_is_rejected_before_backend_lookup(monkeypatch, messa
         lambda: pytest.fail("backend lookup happened before argument rejection"),
     )
     request = LoadRequest(
-        model_path = "LAiM/B-GGUF",
+        model_path = "unsloth/B-GGUF",
         llama_extra_args = ["--reasoning-budget-message", message],
     )
 
@@ -1754,7 +1754,7 @@ def test_override_route_rejects_managed_flag_and_removes(monkeypatch):
 
     # A managed/denylisted llama-server flag is rejected with 400, not 500.
     bad = settings_route.ModelOverridePayload(
-        model_id = "LAiM/B-GGUF", llama_extra_args = ["--port", "1234"]
+        model_id = "unsloth/B-GGUF", llama_extra_args = ["--port", "1234"]
     )
     with pytest.raises(HTTPException) as excinfo:
         settings_route.update_openai_auto_switch_override(bad, "tester")
@@ -1762,15 +1762,15 @@ def test_override_route_rejects_managed_flag_and_removes(monkeypatch):
 
     # A valid override is stored, then an empty payload removes it through the route.
     ok = settings_route.ModelOverridePayload(
-        model_id = "LAiM/B-GGUF", llama_extra_args = ["--flash-attn"], max_seq_length = 4096
+        model_id = "unsloth/B-GGUF", llama_extra_args = ["--flash-attn"], max_seq_length = 4096
     )
     resp = settings_route.update_openai_auto_switch_override(ok, "tester")
-    assert resp.overrides["LAiM/B-GGUF"]["max_seq_length"] == 4096
-    assert "llama_extra_args" in resp.overrides["LAiM/B-GGUF"]
+    assert resp.overrides["unsloth/B-GGUF"]["max_seq_length"] == 4096
+    assert "llama_extra_args" in resp.overrides["unsloth/B-GGUF"]
 
-    empty = settings_route.ModelOverridePayload(model_id = "LAiM/B-GGUF")
+    empty = settings_route.ModelOverridePayload(model_id = "unsloth/B-GGUF")
     resp2 = settings_route.update_openai_auto_switch_override(empty, "tester")
-    assert "LAiM/B-GGUF" not in resp2.overrides
+    assert "unsloth/B-GGUF" not in resp2.overrides
 
 
 def test_override_route_stores_llama_server_tuning(override_store):
@@ -1782,7 +1782,7 @@ def test_override_route_stores_llama_server_tuning(override_store):
     else -- and the panel, which hydrates from this row, reads it back as unset.
     """
     _put(
-        "LAiM/B-GGUF",
+        "unsloth/B-GGUF",
         load_mode = "mmap+mlock",
         speculative_type = "dspark",
         spec_draft_cache_type = "q8_0",
@@ -1790,7 +1790,7 @@ def test_override_route_stores_llama_server_tuning(override_store):
         ctx_checkpoints = 0,
         cache_ram = -1,
     )
-    stored = settings.get_model_override("LAiM/B-GGUF")
+    stored = settings.get_model_override("unsloth/B-GGUF")
     assert stored["load_mode"] == "mmap+mlock"
     assert stored["spec_draft_cache_type"] == "q8_0"
     assert stored["ctx_checkpoints"] == 0
@@ -1809,8 +1809,8 @@ def test_override_route_keeps_a_row_holding_only_tuning(override_store):
     ``is_removal`` counts what the payload carries, so a field it did not declare
     would read as "nothing set" and delete the model's row instead of writing it.
     """
-    _put("LAiM/B-GGUF", cache_ram = 0)
-    assert settings.get_model_override("LAiM/B-GGUF") == {"cache_ram": 0}
+    _put("unsloth/B-GGUF", cache_ram = 0)
+    assert settings.get_model_override("unsloth/B-GGUF") == {"cache_ram": 0}
 
 
 def test_model_override_rejects_zero_max_seq_length():
@@ -1878,15 +1878,15 @@ def test_v1_models_retrieve_is_case_insensitive(monkeypatch):
 
     async def _catalog():
         return [
-            {"id": "LAiM/A-GGUF", "object": "model", "created": 1, "owned_by": "local"},
-            {"id": "LAiM/B-GGUF", "object": "model", "created": 1, "owned_by": "local"},
+            {"id": "unsloth/A-GGUF", "object": "model", "created": 1, "owned_by": "local"},
+            {"id": "unsloth/B-GGUF", "object": "model", "created": 1, "owned_by": "local"},
         ]
 
     monkeypatch.setattr(inference_route, "_openai_catalog_objects", _catalog)
 
     # A catalog id retrieved with different casing still resolves.
-    obj = asyncio.run(inference_route.openai_retrieve_model("LAiM/a-gguf", "tester"))
-    assert obj["id"] == "LAiM/A-GGUF"
+    obj = asyncio.run(inference_route.openai_retrieve_model("unsloth/a-gguf", "tester"))
+    assert obj["id"] == "unsloth/A-GGUF"
     # A truly unknown id still 404s.
     with pytest.raises(HTTPException) as unknown:
         asyncio.run(inference_route.openai_retrieve_model("totally/unknown", "tester"))
@@ -1921,7 +1921,7 @@ def test_index_excludes_hidden_models(tmp_path, monkeypatch):
             SimpleNamespace(
                 id = str(embedder),
                 path = str(embedder),
-                model_id = "LAiM/bge-small-en-v1.5-GGUF",
+                model_id = "unsloth/bge-small-en-v1.5-GGUF",
                 display_name = "embedding-Q8_0",
             ),
             SimpleNamespace(
@@ -1939,7 +1939,7 @@ def test_index_excludes_hidden_models(tmp_path, monkeypatch):
     index = resolver._index()
     assert "org/normal-gguf" in index  # keys are normalized to lowercase
     assert "ggml-org/models" not in index
-    assert "LAiM/bge-small-en-v1.5-gguf" not in index
+    assert "unsloth/bge-small-en-v1.5-gguf" not in index
     assert str(local_default_embedder).lower() not in index
     # And the hidden probe cannot be auto-switched to by name.
     resolver._scan = (0.0, {})
@@ -1975,14 +1975,14 @@ def test_bare_id_tolerates_any_loaded_variant(monkeypatch):
     # picks the largest local quant, Q8_0) must NOT reload a different quant.
     backend, rec = _wired(
         monkeypatch,
-        _FakeBackend("LAiM/B-GGUF", hf_variant = "Q4_K_M"),
-        ("LAiM/B-GGUF", "Q8_0", "LAiM/B-GGUF"),
+        _FakeBackend("unsloth/B-GGUF", hf_variant = "Q4_K_M"),
+        ("unsloth/B-GGUF", "Q8_0", "unsloth/B-GGUF"),
     )
-    _run_hook("LAiM/B-GGUF")  # bare, no :VARIANT
+    _run_hook("unsloth/B-GGUF")  # bare, no :VARIANT
     assert rec.calls == []
     # An explicit :VARIANT request still honors the quant (reloads to Q8_0).
-    _, rec2 = _wired(monkeypatch, backend, ("LAiM/B-GGUF", "Q8_0", "LAiM/B-GGUF"))
-    _run_hook("LAiM/B-GGUF:Q8_0")
+    _, rec2 = _wired(monkeypatch, backend, ("unsloth/B-GGUF", "Q8_0", "unsloth/B-GGUF"))
+    _run_hook("unsloth/B-GGUF:Q8_0")
     assert len(rec2.calls) == 1
 
 
@@ -2067,7 +2067,7 @@ def test_non_string_model_falls_through_without_error(monkeypatch):
     # exists from idle-unload.
 
     backend, rec = _wired(monkeypatch, _FakeBackend(None), None)
-    monkeypatch.setattr(kw, "_last_unloaded_model", ("LAiM/A-GGUF", None))
+    monkeypatch.setattr(kw, "_last_unloaded_model", ("unsloth/A-GGUF", None))
     asyncio.run(inference_route._maybe_auto_switch_model(123, object(), "tester"))
     assert rec.calls == []  # no load, no TypeError
 
@@ -2089,10 +2089,10 @@ def test_alias_reloads_model_freed_by_idle_unload_with_quant(monkeypatch):
     rec = _LoadRecorder(backend)
     _wire(monkeypatch, enabled = True, resolves_to = None, backend = backend, recorder = rec)
     monkeypatch.setattr(kw, "_inflight", 0)
-    monkeypatch.setattr(kw, "_last_unloaded_model", ("LAiM/A-GGUF", "Q4_K_M"))
+    monkeypatch.setattr(kw, "_last_unloaded_model", ("unsloth/A-GGUF", "Q4_K_M"))
     _run_hook("gpt-4o-mini")
     assert len(rec.calls) == 1
-    assert rec.calls[0].model_path == "LAiM/A-GGUF"
+    assert rec.calls[0].model_path == "unsloth/A-GGUF"
     assert rec.calls[0].gguf_variant == "Q4_K_M"  # exact freed quant restored
 
 
@@ -2100,8 +2100,8 @@ def test_alias_does_not_reload_when_model_already_loaded(monkeypatch):
     # The reload only triggers on an empty backend; with something loaded, an
     # unknown name still falls through (drop-in) without resurrecting the stash.
 
-    backend, rec = _wired(monkeypatch, _FakeBackend("LAiM/B-GGUF"), None)
-    monkeypatch.setattr(kw, "_last_unloaded_model", ("LAiM/A-GGUF", None))
+    backend, rec = _wired(monkeypatch, _FakeBackend("unsloth/B-GGUF"), None)
+    monkeypatch.setattr(kw, "_last_unloaded_model", ("unsloth/A-GGUF", None))
     _run_hook("gpt-4o-mini")
     assert rec.calls == []
 
@@ -2253,7 +2253,7 @@ def test_completions_list_body_is_400_not_500(monkeypatch):
     # A valid JSON non-dict body (e.g. a list) on a loaded backend is a clean 400,
     # not a 500 from body.get(...).
 
-    backend = _FakeBackend("LAiM/A-GGUF")  # loaded
+    backend = _FakeBackend("unsloth/A-GGUF")  # loaded
     _wire(
         monkeypatch,
         enabled = False,
@@ -2267,7 +2267,7 @@ def test_completions_list_body_is_400_not_500(monkeypatch):
 
 
 def test_embeddings_list_body_is_400_not_500(monkeypatch):
-    backend, rec = _wired(monkeypatch, _FakeBackend("LAiM/A-GGUF"), None, enabled = False)
+    backend, rec = _wired(monkeypatch, _FakeBackend("unsloth/A-GGUF"), None, enabled = False)
     with pytest.raises(HTTPException) as exc:
         asyncio.run(inference_route.openai_embeddings(_json_body_request([]), "tester"))
     assert exc.value.status_code == 400
@@ -2422,9 +2422,9 @@ def test_hf_cache_entry_skips_newer_companion_only_snapshot(tmp_path):
     # The generic cache resolver correctly picks the latest revision; GGUF
     # discovery needs the stronger rule because this revision has no weights.
     assert Path(resolver._resolve_load_dir(repo)) == newer.parent.resolve()
-    info = SimpleNamespace(id = "LAiM/Qwen3.8-Flash-Next-GGUF", path = str(repo), source = "hf_cache")
+    info = SimpleNamespace(id = "unsloth/Qwen3.8-Flash-Next-GGUF", path = str(repo), source = "hf_cache")
     entry = resolver._local_gguf_entry(
-        "LAiM/Qwen3.8-Flash-Next-GGUF",
+        "unsloth/Qwen3.8-Flash-Next-GGUF",
         info,
     )
 
@@ -3556,7 +3556,7 @@ def test_authenticated_via_api_key_detects_key_vs_session():
 def _training_request():
     from models.training import TrainingStartRequest
     return TrainingStartRequest(
-        model_name = "LAiM/test", training_type = "LoRA/QLoRA", format_type = "alpaca"
+        model_name = "unsloth/test", training_type = "LoRA/QLoRA", format_type = "alpaca"
     )
 
 
@@ -3684,7 +3684,7 @@ def test_stash_reload_skipped_while_LAiM_model_active(monkeypatch):
     monkeypatch.setattr(
         inference_route,
         "get_inference_backend",
-        lambda: SimpleNamespace(active_model_name = "LAiM/Qwen3-8B"),
+        lambda: SimpleNamespace(active_model_name = "unsloth/Qwen3-8B"),
     )
     _run_hook("gpt-4o-mini")
     assert rec.calls == []  # stale GGUF not reloaded over the active LAiM model
@@ -5848,7 +5848,7 @@ def test_chat_count_tokens_still_counts_without_audio(monkeypatch):
 def test_chat_count_tokens_refuses_an_empty_prompt(monkeypatch):
     """#8882: an empty conversation renders the generation marker alone.
 
-    LAiM/Phi-4-mini-instruct-GGUF Q4_K_M renders "<|assistant|>" for an empty message list, one
+    unsloth/Phi-4-mini-instruct-GGUF Q4_K_M renders "<|assistant|>" for an empty message list, one
     token, and the header reported it as usage on a chat nobody had started.
     """
     switched, counted = _count_tokens_backend(monkeypatch, count = 1)
@@ -6641,7 +6641,7 @@ def _chat_error(payload):
 def test_chat_mistyped_gguf_repo_404s_before_vision_guard(monkeypatch):
     # #8376: image request with a mistyped GGUF id must 404, not 400 on the loaded model.
 
-    backend, rec = _wired(monkeypatch, _FakeBackend("LAiM/text-only-GGUF", "UD-Q4_K_XL"), None)
+    backend, rec = _wired(monkeypatch, _FakeBackend("unsloth/text-only-GGUF", "UD-Q4_K_XL"), None)
     monkeypatch.setattr(
         "utils.openai_auto_switch_settings.get_openai_auto_download_enabled", lambda: False
     )
@@ -6650,7 +6650,7 @@ def test_chat_mistyped_gguf_repo_404s_before_vision_guard(monkeypatch):
         "describe_local_miss",
         lambda _m: (resolver.MISS_MODEL_NOT_FOUND, ()),
     )
-    payload = _chat_request_b(model = "LAiM/typo-vision-GGUF", image_base64 = "aGVsbG8=")
+    payload = _chat_request_b(model = "unsloth/typo-vision-GGUF", image_base64 = "aGVsbG8=")
     request = type("_R", (), {"url": type("_U", (), {"path": "/v1/chat/completions"})()})()
     with pytest.raises(HTTPException) as exc:
         asyncio.run(inference_route.openai_chat_completions(payload, request, "tester"))
@@ -6663,9 +6663,9 @@ def test_chat_names_undownloaded_model_404s_with_available_ids(monkeypatch):
     # The reported bug: the model is not here, so the switch did nothing and /inference/load
     # cannot fix it. Name it and list what can serve.
     _wire_unloaded_chat(monkeypatch, enabled = True)
-    status, detail = _chat_error(_chat_request(model = "LAiM/gemma-4-E4B-it-GGUF:UD-Q5_K_XL"))
+    status, detail = _chat_error(_chat_request(model = "unsloth/gemma-4-E4B-it-GGUF:UD-Q5_K_XL"))
     assert status == 404
-    assert "LAiM/gemma-4-E4B-it-GGUF:UD-Q5_K_XL" in detail
+    assert "unsloth/gemma-4-E4B-it-GGUF:UD-Q5_K_XL" in detail
     assert "org/A-GGUF, org/B-GGUF" in detail
     assert "GET /v1/models" in detail
     assert "POST /inference/load" not in detail
@@ -6826,7 +6826,7 @@ def test_chat_undownloaded_model_uses_the_openai_envelope(monkeypatch):
 def test_completions_keeps_the_generic_error_for_the_resident_non_gguf_model(monkeypatch):
     # Same contradiction on the raw-body surface, via _auto_switch_from_request_body.
 
-    resident = "LAiM/Llama-3.2-1B-Instruct"
+    resident = "unsloth/Llama-3.2-1B-Instruct"
     _wire_unloaded_chat(monkeypatch, enabled = True, catalog = (resident,))
     monkeypatch.setattr(
         inference_route,
@@ -6849,7 +6849,7 @@ def test_completions_keeps_the_generic_error_for_the_resident_non_gguf_model(mon
 
 def _seed_kv_manifest(
     tmp_path,
-    identity = ("LAiM/A-GGUF", "Q4_K_M", "LAiM/A-GGUF"),
+    identity = ("unsloth/A-GGUF", "Q4_K_M", "unsloth/A-GGUF"),
     gguf = None,
 ):
     if gguf is None:
@@ -6910,7 +6910,7 @@ def test_idle_unload_saves_slots_before_unload_and_stashes_manifest(monkeypatch,
     _reset_keepwarm()
 
     events = []
-    backend = _FakeBackend("LAiM/Idle-GGUF", hf_variant = "Q4_K_M")
+    backend = _FakeBackend("unsloth/Idle-GGUF", hf_variant = "Q4_K_M")
     manifest = {
         "dir": str(tmp_path),
         "binary": ("bin", 1),
@@ -6933,10 +6933,10 @@ def test_idle_unload_saves_slots_before_unload_and_stashes_manifest(monkeypatch,
     _drive_idle_loop(kw, until = lambda: events == ["save", "unload"] and kw._kv_resume)
     # KV must be saved while the server is still alive, then exactly one unload.
     assert events == ["save", "unload"]
-    assert kw.get_last_unloaded_model()[:2] == ("LAiM/Idle-GGUF", "Q4_K_M")
+    assert kw.get_last_unloaded_model()[:2] == ("unsloth/Idle-GGUF", "Q4_K_M")
     resume = kw.take_kv_resume()
     assert resume is not None
-    assert resume["identity"][:2] == ("LAiM/Idle-GGUF", "Q4_K_M")
+    assert resume["identity"][:2] == ("unsloth/Idle-GGUF", "Q4_K_M")
     assert resume["slots"][0]["filename"] == "f.bin"
 
 
@@ -6947,7 +6947,7 @@ def test_idle_save_failure_still_unloads_plain(monkeypatch):
     _reset_keepwarm()
 
     unloads = []
-    backend = _FakeBackend("LAiM/Idle-GGUF", hf_variant = "Q4_K_M")
+    backend = _FakeBackend("unsloth/Idle-GGUF", hf_variant = "Q4_K_M")
 
     def _save(should_abort = None):
         raise RuntimeError("slot save exploded")
@@ -6973,7 +6973,7 @@ def test_keep_kv_setting_off_skips_save(monkeypatch):
     _reset_keepwarm()
 
     saves, unloads = [], []
-    backend = _FakeBackend("LAiM/Idle-GGUF")
+    backend = _FakeBackend("unsloth/Idle-GGUF")
 
     def _unload():
         unloads.append(1)
@@ -6997,7 +6997,7 @@ def test_keep_kv_disabled_mid_save_discards_manifest(monkeypatch, tmp_path):
     _reset_keepwarm()
 
     unloads = []
-    backend = _FakeBackend("LAiM/Idle-GGUF", hf_variant = "Q4_K_M")
+    backend = _FakeBackend("unsloth/Idle-GGUF", hf_variant = "Q4_K_M")
     state_file = tmp_path / "resume-mid-slot0.bin"
     state_file.write_bytes(b"kv")
     manifest = {
@@ -7032,7 +7032,7 @@ def test_idle_ttl_disabled_mid_save_skips_unload(monkeypatch, tmp_path):
     _reset_keepwarm()
 
     unloads = []
-    backend = _FakeBackend("LAiM/Idle-GGUF", hf_variant = "Q4_K_M")
+    backend = _FakeBackend("unsloth/Idle-GGUF", hf_variant = "Q4_K_M")
     state_file = tmp_path / "resume-mid-slot0.bin"
     state_file.write_bytes(b"kv")
     manifest = {
@@ -7084,7 +7084,7 @@ def test_no_restore_when_different_model_loads(monkeypatch, tmp_path):
     rec = _LoadRecorder(backend)
     _wire_on(
         monkeypatch,
-        resolves_to = ("LAiM/B-GGUF", None, "LAiM/B-GGUF"),
+        resolves_to = ("unsloth/B-GGUF", None, "unsloth/B-GGUF"),
         backend = backend,
         recorder = rec,
     )
@@ -7092,7 +7092,7 @@ def test_no_restore_when_different_model_loads(monkeypatch, tmp_path):
     state_file, manifest = _seed_kv_manifest(tmp_path)  # manifest is for model A
     monkeypatch.setattr(kw, "_kv_resume", manifest)
 
-    _run_hook("LAiM/B-GGUF")
+    _run_hook("unsloth/B-GGUF")
     assert len(rec.calls) == 1
     assert restored == []  # different model: never restored
     assert not state_file.exists()  # but the stale files are gone
@@ -7101,7 +7101,7 @@ def test_no_restore_when_different_model_loads(monkeypatch, tmp_path):
 
 def test_restore_skipped_when_binary_changed(monkeypatch, tmp_path):
     state_file, manifest = _seed_kv_manifest(tmp_path)
-    backend = _FakeBackend("LAiM/A-GGUF", hf_variant = "Q4_K_M")
+    backend = _FakeBackend("unsloth/A-GGUF", hf_variant = "Q4_K_M")
     backend._gguf_path = manifest["gguf"]
     backend._slot_save_binary = ("/bin/llama-server", 222)  # newer mtime
     restored = []
@@ -7114,7 +7114,7 @@ def test_restore_skipped_when_binary_changed(monkeypatch, tmp_path):
 
 def test_restore_skipped_when_launch_config_changed(tmp_path):
     state_file, manifest = _seed_kv_manifest(tmp_path)
-    backend = _FakeBackend("LAiM/A-GGUF", hf_variant = "Q4_K_M")
+    backend = _FakeBackend("unsloth/A-GGUF", hf_variant = "Q4_K_M")
     backend._gguf_path = manifest["gguf"]
     backend._slot_save_binary = ("/bin/llama-server", 111)
     backend._slot_launch_fingerprint = lambda: (("--rope-freq-scale", "0.5"), None, None, 1)
@@ -7130,7 +7130,7 @@ def test_restore_skipped_when_gguf_rewritten_in_place(tmp_path):
     state_file, manifest = _seed_kv_manifest(tmp_path)
     with open(manifest["gguf"], "wb") as fh:
         fh.write(b"different weights")  # same path, new content
-    backend = _FakeBackend("LAiM/A-GGUF", hf_variant = "Q4_K_M")
+    backend = _FakeBackend("unsloth/A-GGUF", hf_variant = "Q4_K_M")
     backend._gguf_path = manifest["gguf"]
     backend._slot_save_binary = ("/bin/llama-server", 111)
     restored = []
@@ -7168,7 +7168,7 @@ def test_new_idle_save_purges_previous_manifest_files(tmp_path):
     new_file.write_bytes(b"kv2")
     kw._set_kv_resume(
         {
-            "identity": ("LAiM/B-GGUF", None, "LAiM/B-GGUF"),
+            "identity": ("unsloth/B-GGUF", None, "unsloth/B-GGUF"),
             "dir": str(tmp_path),
             "binary": ("/bin/llama-server", 111),
             "slots": [{"id": 0, "filename": new_file.name, "n_saved": 7}],
@@ -7216,11 +7216,11 @@ def test_stale_stash_cleanup_waits_for_lifecycle_gate(monkeypatch, tmp_path):
     kw._inflight = 0
     kw._pending = 0
     kw._last_active = time.monotonic()
-    backend = _FakeBackend("LAiM/New-GGUF")
+    backend = _FakeBackend("unsloth/New-GGUF")
     monkeypatch.setattr(inference_route, "get_llama_cpp_backend", lambda: backend)
     state_file, manifest = _seed_kv_manifest(tmp_path)
     kw._kv_resume = manifest
-    kw._last_unloaded_model = ("LAiM/A-GGUF", "Q4_K_M")
+    kw._last_unloaded_model = ("unsloth/A-GGUF", "Q4_K_M")
 
     assert kw._lifecycle_lock.acquire(blocking = False)  # simulate in-flight reload
     try:
@@ -7303,7 +7303,7 @@ def test_restore_matches_gguf_realpath_across_naming(tmp_path):
     restored = []
     backend.restore_slots_for_resume = lambda manifest: restored.append(manifest)
     state_file, manifest = _seed_kv_manifest(
-        tmp_path, identity = ("LAiM/A-GGUF", None, "LAiM/A-GGUF"), gguf = str(blob)
+        tmp_path, identity = ("unsloth/A-GGUF", None, "unsloth/A-GGUF"), gguf = str(blob)
     )
 
     kw.restore_kv_resume(backend, manifest)
@@ -7527,7 +7527,7 @@ def test_model_override_load_kwargs_gates_gpu_placement_on_gguf():
 
     # Every key must be a real LoadRequest field, or the load raises TypeError when
     # the user's request arrives.
-    LoadRequest(model_path = "LAiM/B-GGUF", **gguf)
+    LoadRequest(model_path = "unsloth/B-GGUF", **gguf)
 
 
 @pytest.mark.parametrize("engine", ["vllm", "sglang"])
@@ -7542,7 +7542,7 @@ def test_optional_engine_override_preserves_precision_and_gpu_order(engine, mode
         },
         is_gguf = False,
     )
-    request = LoadRequest(model_path = "LAiM/Qwen2.5-0.5B-Instruct", **kwargs)
+    request = LoadRequest(model_path = "unsloth/Qwen2.5-0.5B-Instruct", **kwargs)
     assert request.engine == engine
     assert request.engine_precision == "int4"
     assert request.engine_parallelism == mode
@@ -7556,17 +7556,17 @@ def test_a_carried_ctx_flag_cannot_outrank_a_freshly_saved_context(monkeypatch):
     # holding both. Sent together they reach llama-server with the extras appended last,
     # and its parser takes the final -c, so the stale flag would pin the old context.
     _mock_override_store(monkeypatch)
-    _put("LAiM/B-GGUF:Q4_K_M", llama_extra_args = ["--ctx-size", "8192", "--top-k", "40"])
-    saved = _put("LAiM/B-GGUF:Q4_K_M", max_seq_length = 32768)
-    entry = saved.overrides["LAiM/B-GGUF:Q4_K_M"]
+    _put("unsloth/B-GGUF:Q4_K_M", llama_extra_args = ["--ctx-size", "8192", "--top-k", "40"])
+    saved = _put("unsloth/B-GGUF:Q4_K_M", max_seq_length = 32768)
+    entry = saved.overrides["unsloth/B-GGUF:Q4_K_M"]
     assert entry["max_seq_length"] == 32768
     assert entry["llama_extra_args"] == ["--ctx-size", "8192", "--top-k", "40"]
 
     backend, rec = _wired(
-        monkeypatch, _FakeBackend(None), ("LAiM/B-GGUF", "Q4_K_M", "LAiM/B-GGUF")
+        monkeypatch, _FakeBackend(None), ("unsloth/B-GGUF", "Q4_K_M", "unsloth/B-GGUF")
     )
 
-    _run_hook("LAiM/B-GGUF")
+    _run_hook("unsloth/B-GGUF")
     request = rec.calls[0]
     assert request.max_seq_length == 32768
     # The shadowing flag goes; the sampling flag beside it is nobody's first-class field.
@@ -7577,7 +7577,7 @@ def test_a_matching_explicit_ctx_flag_survives_auto_switch(monkeypatch):
     """A matching stored flag is the opt-in that bypasses the VRAM-fit ceiling."""
     _mock_override_store(monkeypatch)
     _put(
-        "LAiM/B-GGUF:Q4_K_M",
+        "unsloth/B-GGUF:Q4_K_M",
         llama_extra_args = ["--ctx-size", "100352", "--spec-draft-n-max", "3"],
         custom_context_length = 100352,
         speculative_type = "mtp",
@@ -7585,10 +7585,10 @@ def test_a_matching_explicit_ctx_flag_survives_auto_switch(monkeypatch):
     )
 
     backend, rec = _wired(
-        monkeypatch, _FakeBackend(None), ("LAiM/B-GGUF", "Q4_K_M", "LAiM/B-GGUF")
+        monkeypatch, _FakeBackend(None), ("unsloth/B-GGUF", "Q4_K_M", "unsloth/B-GGUF")
     )
 
-    _run_hook("LAiM/B-GGUF")
+    _run_hook("unsloth/B-GGUF")
     request = rec.calls[0]
     assert request.max_seq_length == 100352
     # The matching context opt-in survives. The redundant speculative flag is
@@ -7602,18 +7602,18 @@ def test_a_ctx_flag_saved_from_the_picker_reaches_an_api_load(monkeypatch):
     of stripping the flag as a stale shadow of the slider."""
     _mock_override_store(monkeypatch)
     saved = _put(
-        "LAiM/B-GGUF:Q4_K_M",
+        "unsloth/B-GGUF:Q4_K_M",
         llama_extra_args = ["-c", "300000", "--rope-scaling", "yarn"],
         custom_context_length = 262144,
     )
-    entry = saved.overrides["LAiM/B-GGUF:Q4_K_M"]
+    entry = saved.overrides["unsloth/B-GGUF:Q4_K_M"]
     assert entry["custom_context_length"] == 300000
     assert entry["llama_extra_args"] == ["-c", "300000", "--rope-scaling", "yarn"]
 
     backend, rec = _wired(
-        monkeypatch, _FakeBackend(None), ("LAiM/B-GGUF", "Q4_K_M", "LAiM/B-GGUF")
+        monkeypatch, _FakeBackend(None), ("unsloth/B-GGUF", "Q4_K_M", "unsloth/B-GGUF")
     )
-    _run_hook("LAiM/B-GGUF")
+    _run_hook("unsloth/B-GGUF")
     request = rec.calls[0]
     assert request.max_seq_length == 300000
     assert request.llama_extra_args == ["-c", "300000", "--rope-scaling", "yarn"]
@@ -7642,8 +7642,8 @@ def test_a_saved_ctx_flag_sets_only_the_context_fields_sent(
     monkeypatch, extra_args, fields, expected
 ):
     _mock_override_store(monkeypatch)
-    saved = _put("LAiM/B-GGUF:Q4_K_M", llama_extra_args = extra_args, **fields)
-    entry = saved.overrides["LAiM/B-GGUF:Q4_K_M"]
+    saved = _put("unsloth/B-GGUF:Q4_K_M", llama_extra_args = extra_args, **fields)
+    entry = saved.overrides["unsloth/B-GGUF:Q4_K_M"]
     stored = {
         key: entry[key] for key in ("max_seq_length", "custom_context_length") if key in entry
     }
@@ -7653,7 +7653,7 @@ def test_a_saved_ctx_flag_sets_only_the_context_fields_sent(
 @pytest.mark.parametrize("engine", ["vllm", "sglang"])
 def test_context_save_preserves_managed_engine_settings(monkeypatch, engine):
     _mock_override_store(monkeypatch)
-    model = "LAiM/model"
+    model = "unsloth/model"
     _put(model, engine = engine, engine_parallelism = "pipeline", engine_precision = "fp8")
     saved = _put(model, llama_extra_args = ["-c", "65536"], custom_context_length = 4096)
     entry = saved.overrides[model]
@@ -7667,14 +7667,14 @@ def test_a_fill_keeps_the_sent_context_when_it_does_not_store_the_flag(monkeypat
     """A fill (the localStorage migration) keeps a stored row's flags, so a -c in its payload is
     not what any load will run with and must not rewrite the context."""
     _mock_override_store(monkeypatch)
-    _put("LAiM/B-GGUF:Q4_K_M", llama_extra_args = ["--top-k", "7"])
+    _put("unsloth/B-GGUF:Q4_K_M", llama_extra_args = ["--top-k", "7"])
     saved = _put(
-        "LAiM/B-GGUF:Q4_K_M",
+        "unsloth/B-GGUF:Q4_K_M",
         llama_extra_args = ["-c", "65536"],
         custom_context_length = 4096,
         fill_absent_fields = True,
     )
-    entry = saved.overrides["LAiM/B-GGUF:Q4_K_M"]
+    entry = saved.overrides["unsloth/B-GGUF:Q4_K_M"]
     assert entry["llama_extra_args"] == ["--top-k", "7"]
     assert entry["custom_context_length"] == 4096
 
@@ -7765,11 +7765,11 @@ def test_load_kwargs_strip_only_the_shadow_groups_the_override_supplies():
 def test_saved_parallel_slots_reach_an_api_load(monkeypatch):
     # Parallel decode slots are a per-model setting the picker sends on every GGUF load.
     backend, rec = _wired(
-        monkeypatch, _FakeBackend(None), ("LAiM/B-GGUF", "Q4_K_M", "LAiM/B-GGUF")
+        monkeypatch, _FakeBackend(None), ("unsloth/B-GGUF", "Q4_K_M", "unsloth/B-GGUF")
     )
     monkeypatch.setattr(settings, "get_model_override", lambda mid: {"n_parallel": 8})
 
-    _run_hook("LAiM/B-GGUF")
+    _run_hook("unsloth/B-GGUF")
     assert rec.calls[0].n_parallel == 8
 
 
@@ -7787,45 +7787,45 @@ def test_parallel_slots_are_stored_and_reach_either_backend():
     for flag in ("n_batch", "n_ubatch"):
         stored = settings.normalize_model_override({flag: 512})
         assert flag not in settings.model_override_load_kwargs(stored, is_gguf = False)
-    LoadRequest(model_path = "LAiM/B-GGUF", **gguf)
-    LoadRequest(model_path = "LAiM/B", **safetensors)
+    LoadRequest(model_path = "unsloth/B-GGUF", **gguf)
+    LoadRequest(model_path = "unsloth/B", **safetensors)
 
 
 def test_override_route_persists_parallel_slots(override_store):
     # The picker's mirror must carry the field, or a slot-count-only change saves as empty.
-    resp = _put("LAiM/B-GGUF:Q4_K_M", n_parallel = 8)
-    assert resp.overrides["LAiM/B-GGUF:Q4_K_M"] == {"n_parallel": 8}
+    resp = _put("unsloth/B-GGUF:Q4_K_M", n_parallel = 8)
+    assert resp.overrides["unsloth/B-GGUF:Q4_K_M"] == {"n_parallel": 8}
 
 
 def test_eviction_cleanup_clears_mirrored_fields_but_keeps_launch_flags(override_store):
     # Evicting a local entry for storage budget is not a forget, so cleanup sends remove=false.
     settings.set_model_override(
-        "LAiM/B-GGUF:Q4_K_M",
+        "unsloth/B-GGUF:Q4_K_M",
         llama_extra_args = ["--flash-attn"],
         custom_context_length = 32768,
         kv_cache_dtype = "q8_0",
     )
-    resp = _put("LAiM/B-GGUF:Q4_K_M", remove = False)
-    assert resp.overrides["LAiM/B-GGUF:Q4_K_M"] == {"llama_extra_args": ["--flash-attn"]}
+    resp = _put("unsloth/B-GGUF:Q4_K_M", remove = False)
+    assert resp.overrides["unsloth/B-GGUF:Q4_K_M"] == {"llama_extra_args": ["--flash-attn"]}
 
     # Nothing server-owned left, so the row goes rather than lingering empty.
-    settings.set_model_override("LAiM/C-GGUF:Q4_K_M", custom_context_length = 32768)
-    gone = _put("LAiM/C-GGUF:Q4_K_M", remove = False)
-    assert "LAiM/C-GGUF:Q4_K_M" not in gone.overrides
+    settings.set_model_override("unsloth/C-GGUF:Q4_K_M", custom_context_length = 32768)
+    gone = _put("unsloth/C-GGUF:Q4_K_M", remove = False)
+    assert "unsloth/C-GGUF:Q4_K_M" not in gone.overrides
 
 
 def test_auto_switch_prefers_variant_qualified_override(monkeypatch):
     # Settings are per quant; the bare repo id is only the fallback.
     backend, rec = _wired(
-        monkeypatch, _FakeBackend(None), ("LAiM/B-GGUF", "Q4_K_M", "LAiM/B-GGUF")
+        monkeypatch, _FakeBackend(None), ("unsloth/B-GGUF", "Q4_K_M", "unsloth/B-GGUF")
     )
     stored = {
-        "LAiM/B-GGUF": {"max_seq_length": 1024},
-        "LAiM/B-GGUF:Q4_K_M": {"max_seq_length": 8192, "gpu_layers": 20},
+        "unsloth/B-GGUF": {"max_seq_length": 1024},
+        "unsloth/B-GGUF:Q4_K_M": {"max_seq_length": 8192, "gpu_layers": 20},
     }
     monkeypatch.setattr(settings, "get_model_override", lambda mid: stored.get(mid, {}))
 
-    _run_hook("LAiM/B-GGUF")
+    _run_hook("unsloth/B-GGUF")
     req = rec.calls[0]
     assert req.max_seq_length == 8192
     assert req.gpu_layers == 20
@@ -7833,26 +7833,26 @@ def test_auto_switch_prefers_variant_qualified_override(monkeypatch):
 
 def test_auto_switch_falls_back_to_bare_repo_override(monkeypatch):
     backend, rec = _wired(
-        monkeypatch, _FakeBackend(None), ("LAiM/B-GGUF", "Q4_K_M", "LAiM/B-GGUF")
+        monkeypatch, _FakeBackend(None), ("unsloth/B-GGUF", "Q4_K_M", "unsloth/B-GGUF")
     )
-    stored = {"LAiM/B-GGUF": {"max_seq_length": 1024}}
+    stored = {"unsloth/B-GGUF": {"max_seq_length": 1024}}
     monkeypatch.setattr(settings, "get_model_override", lambda mid: stored.get(mid, {}))
 
-    _run_hook("LAiM/B-GGUF")
+    _run_hook("unsloth/B-GGUF")
     assert rec.calls[0].max_seq_length == 1024
 
 
 def test_override_route_preserves_launch_flags_across_a_settings_only_update(override_store):
     # The settings page has no control for llama_extra_args, so it omits the field.
-    _put("LAiM/B-GGUF", llama_extra_args = ["--flash-attn"])
-    resp = _put("LAiM/B-GGUF", max_seq_length = 4096)
-    entry = resp.overrides["LAiM/B-GGUF"]
+    _put("unsloth/B-GGUF", llama_extra_args = ["--flash-attn"])
+    resp = _put("unsloth/B-GGUF", max_seq_length = 4096)
+    entry = resp.overrides["unsloth/B-GGUF"]
     assert entry["llama_extra_args"] == ["--flash-attn"]
     assert entry["max_seq_length"] == 4096
 
     # An explicit empty list is the UI's "forget", and with no fields left the entry goes.
-    gone = _put("LAiM/B-GGUF", llama_extra_args = [])
-    assert "LAiM/B-GGUF" not in gone.overrides
+    gone = _put("unsloth/B-GGUF", llama_extra_args = [])
+    assert "unsloth/B-GGUF" not in gone.overrides
 
 
 def test_override_found_under_a_concrete_path_with_variant(monkeypatch):
@@ -7860,12 +7860,12 @@ def test_override_found_under_a_concrete_path_with_variant(monkeypatch):
     backend, rec = _wired(
         monkeypatch,
         _FakeBackend(None),
-        ("/models/local/Qwen3-8B-Q4_K_M.gguf", "Q4_K_M", "LAiM/Qwen3-8B-GGUF"),
+        ("/models/local/Qwen3-8B-Q4_K_M.gguf", "Q4_K_M", "unsloth/Qwen3-8B-GGUF"),
     )
     stored = {"/models/local/Qwen3-8B-Q4_K_M.gguf:Q4_K_M": {"max_seq_length": 8192}}
     monkeypatch.setattr(settings, "get_model_override", lambda mid: stored.get(mid, {}))
 
-    _run_hook("LAiM/Qwen3-8B-GGUF")
+    _run_hook("unsloth/Qwen3-8B-GGUF")
     assert rec.calls[0].max_seq_length == 8192
 
 
@@ -7873,24 +7873,24 @@ def test_path_qualified_override_beats_repo_qualified(monkeypatch):
     # Most specific first: the settings page keys a local row by the path being loaded,
     # while the repo id is only the advertised alias. The row the user edited wins.
     backend, rec = _wired(
-        monkeypatch, _FakeBackend(None), ("/models/local/x.gguf", "Q4_K_M", "LAiM/B-GGUF")
+        monkeypatch, _FakeBackend(None), ("/models/local/x.gguf", "Q4_K_M", "unsloth/B-GGUF")
     )
     stored = {
-        "LAiM/B-GGUF:Q4_K_M": {"max_seq_length": 8192},
+        "unsloth/B-GGUF:Q4_K_M": {"max_seq_length": 8192},
         "/models/local/x.gguf:Q4_K_M": {"max_seq_length": 1024},
     }
     monkeypatch.setattr(settings, "get_model_override", lambda mid: stored.get(mid, {}))
 
-    _run_hook("LAiM/B-GGUF")
+    _run_hook("unsloth/B-GGUF")
     assert rec.calls[0].max_seq_length == 1024
 
 
 def test_first_quant_save_keeps_legacy_bare_repo_launch_flags(override_store):
     # Flags predating per-quant settings live under the bare repo id.
-    settings.set_model_override("LAiM/B-GGUF", llama_extra_args = ["--flash-attn"])
+    settings.set_model_override("unsloth/B-GGUF", llama_extra_args = ["--flash-attn"])
 
-    resp = _put("LAiM/B-GGUF:Q4_K_M", max_seq_length = 4096)
-    entry = resp.overrides["LAiM/B-GGUF:Q4_K_M"]
+    resp = _put("unsloth/B-GGUF:Q4_K_M", max_seq_length = 4096)
+    entry = resp.overrides["unsloth/B-GGUF:Q4_K_M"]
     assert entry["max_seq_length"] == 4096
     assert entry["llama_extra_args"] == ["--flash-attn"]
 
@@ -7926,16 +7926,16 @@ def test_a_repo_save_retires_the_legacy_snapshot_path_entry(monkeypatch):
     _mock_override_store(monkeypatch)
     settings.set_model_override(f"{_LEGACY_SNAPSHOT}:Q4_K_M", max_seq_length = 4096)
 
-    resp = _put("LAiM/B-GGUF:Q4_K_M", max_seq_length = 32768)
-    assert resp.overrides["LAiM/B-GGUF:Q4_K_M"]["max_seq_length"] == 32768
+    resp = _put("unsloth/B-GGUF:Q4_K_M", max_seq_length = 32768)
+    assert resp.overrides["unsloth/B-GGUF:Q4_K_M"]["max_seq_length"] == 32768
     assert f"{_LEGACY_SNAPSHOT}:Q4_K_M" not in resp.overrides
 
     # End to end: the load the request triggers carries the saved value, not the retired one.
     backend, rec = _wired(
-        monkeypatch, _FakeBackend(None), (_LEGACY_SNAPSHOT, "Q4_K_M", "LAiM/B-GGUF")
+        monkeypatch, _FakeBackend(None), (_LEGACY_SNAPSHOT, "Q4_K_M", "unsloth/B-GGUF")
     )
 
-    _run_hook("LAiM/B-GGUF:Q4_K_M")
+    _run_hook("unsloth/B-GGUF:Q4_K_M")
     assert rec.calls[0].max_seq_length == 32768
 
 
@@ -7948,8 +7948,8 @@ def test_the_retired_snapshot_path_entry_hands_over_its_launch_flags(override_st
         max_seq_length = 4096,
     )
 
-    resp = _put("LAiM/B-GGUF:Q4_K_M", max_seq_length = 32768)
-    entry = resp.overrides["LAiM/B-GGUF:Q4_K_M"]
+    resp = _put("unsloth/B-GGUF:Q4_K_M", max_seq_length = 32768)
+    entry = resp.overrides["unsloth/B-GGUF:Q4_K_M"]
     assert entry["llama_extra_args"] == ["--flash-attn"]
     assert entry["max_seq_length"] == 32768
     assert f"{_LEGACY_SNAPSHOT}:Q4_K_M" not in resp.overrides
@@ -7977,31 +7977,31 @@ def test_a_standalone_gguf_save_keeps_its_filename_label_launch_flags(override_s
 def test_a_snapshot_path_save_retires_the_repo_id_entry(override_store):
     # The same rule the other way round: a row the picker still keys by its path (an inactive
     # cache reached as a local row) must not be shadowed, so the last spelling saved survives.
-    settings.set_model_override("LAiM/B-GGUF:Q4_K_M", max_seq_length = 32768)
+    settings.set_model_override("unsloth/B-GGUF:Q4_K_M", max_seq_length = 32768)
 
     resp = _put(f"{_LEGACY_SNAPSHOT}:Q4_K_M", max_seq_length = 4096)
     assert resp.overrides[f"{_LEGACY_SNAPSHOT}:Q4_K_M"]["max_seq_length"] == 4096
-    assert "LAiM/B-GGUF:Q4_K_M" not in resp.overrides
+    assert "unsloth/B-GGUF:Q4_K_M" not in resp.overrides
 
 
 def test_forgetting_a_cached_repo_also_clears_its_snapshot_path_entry(override_store):
     # Clearing only the repo id would leave the path entry applying what was forgotten.
     settings.set_model_override(f"{_LEGACY_SNAPSHOT}:Q4_K_M", max_seq_length = 4096)
-    settings.set_model_override("LAiM/B-GGUF:Q4_K_M", max_seq_length = 32768)
+    settings.set_model_override("unsloth/B-GGUF:Q4_K_M", max_seq_length = 32768)
 
-    resp = _put("LAiM/B-GGUF:Q4_K_M", remove = True, llama_extra_args = [])
+    resp = _put("unsloth/B-GGUF:Q4_K_M", remove = True, llama_extra_args = [])
     assert resp.overrides == {}
 
 
 def test_a_remove_reports_every_key_it_cleared(override_store):
-    settings.set_model_override("LAiM/B-GGUF", max_seq_length = 2048)
-    settings.set_model_override("LAiM/B-GGUF:Q4_K_M", max_seq_length = 32768)
+    settings.set_model_override("unsloth/B-GGUF", max_seq_length = 2048)
+    settings.set_model_override("unsloth/B-GGUF:Q4_K_M", max_seq_length = 32768)
     settings.set_model_override(f"{_LEGACY_SNAPSHOT}:Q4_K_M", max_seq_length = 4096)
 
-    resp = _put("LAiM/B-GGUF:Q4_K_M", remove = True, llama_extra_args = [])
+    resp = _put("unsloth/B-GGUF:Q4_K_M", remove = True, llama_extra_args = [])
     assert resp.removed_keys == [
-        "LAiM/B-GGUF:Q4_K_M",
-        "LAiM/B-GGUF",
+        "unsloth/B-GGUF:Q4_K_M",
+        "unsloth/B-GGUF",
         f"{_LEGACY_SNAPSHOT}:Q4_K_M",
     ]
     assert resp.overrides == {}
@@ -8019,17 +8019,17 @@ def test_a_remove_reports_the_legacy_label_of_a_loose_gguf(override_store):
 
 
 def test_a_remove_leaves_the_bare_row_for_a_remaining_quant_and_says_so(override_store):
-    settings.set_model_override("LAiM/B-GGUF", max_seq_length = 2048)
-    settings.set_model_override("LAiM/B-GGUF:Q4_K_M", max_seq_length = 32768)
-    settings.set_model_override("LAiM/B-GGUF:Q8_0", max_seq_length = 16384)
+    settings.set_model_override("unsloth/B-GGUF", max_seq_length = 2048)
+    settings.set_model_override("unsloth/B-GGUF:Q4_K_M", max_seq_length = 32768)
+    settings.set_model_override("unsloth/B-GGUF:Q8_0", max_seq_length = 16384)
 
-    resp = _put("LAiM/B-GGUF:Q4_K_M", remove = True, llama_extra_args = [])
-    assert resp.removed_keys == ["LAiM/B-GGUF:Q4_K_M"]
-    assert set(resp.overrides) == {"LAiM/B-GGUF", "LAiM/B-GGUF:Q8_0"}
+    resp = _put("unsloth/B-GGUF:Q4_K_M", remove = True, llama_extra_args = [])
+    assert resp.removed_keys == ["unsloth/B-GGUF:Q4_K_M"]
+    assert set(resp.overrides) == {"unsloth/B-GGUF", "unsloth/B-GGUF:Q8_0"}
 
 
 def test_a_save_reports_no_removed_keys(override_store):
-    resp = _put("LAiM/B-GGUF:Q4_K_M", max_seq_length = 8192)
+    resp = _put("unsloth/B-GGUF:Q4_K_M", max_seq_length = 8192)
     assert resp.removed_keys == []
 
 
@@ -8037,7 +8037,7 @@ def test_a_fill_reports_no_removed_keys(override_store):
     # A fill retires nothing, and the browser deletes whatever a response reports.
     settings.set_model_override(f"{_LEGACY_SNAPSHOT}:Q4_K_M", max_seq_length = 4096)
 
-    resp = _put("LAiM/B-GGUF:Q4_K_M", max_seq_length = 32768, fill_absent_fields = True)
+    resp = _put("unsloth/B-GGUF:Q4_K_M", max_seq_length = 32768, fill_absent_fields = True)
     assert resp.removed_keys == []
 
 
@@ -8048,7 +8048,7 @@ def test_retiring_a_spelling_leaves_every_other_entry_alone(override_store):
     settings.set_model_override(f"{_LEGACY_SNAPSHOT}:Q8_0", max_seq_length = 2048)
     settings.set_model_override(_LEGACY_SNAPSHOT, max_seq_length = 4096)
 
-    resp = _put("LAiM/B-GGUF:Q4_K_M", max_seq_length = 32768)
+    resp = _put("unsloth/B-GGUF:Q4_K_M", max_seq_length = 32768)
     assert resp.overrides["/models/local/x.gguf:Q4_K_M"]["max_seq_length"] == 1024
     assert resp.overrides[f"{_LEGACY_SNAPSHOT}:Q8_0"]["max_seq_length"] == 2048
     assert resp.overrides[_LEGACY_SNAPSHOT]["max_seq_length"] == 4096
@@ -8057,16 +8057,16 @@ def test_retiring_a_spelling_leaves_every_other_entry_alone(override_store):
 def test_a_fill_never_labels_the_server_s_gpu_pin_with_this_browser_s_index_space(override_store):
     # Two browsers against one server: the stored pin is physical and this backfill offers
     # Vulkan ordinals, so the qualifier cannot arrive without its ids.
-    settings.set_model_override("LAiM/B-GGUF:Q4_K_M", gpu_ids = [0, 1])
+    settings.set_model_override("unsloth/B-GGUF:Q4_K_M", gpu_ids = [0, 1])
 
     resp = _put(
-        "LAiM/B-GGUF:Q4_K_M",
+        "unsloth/B-GGUF:Q4_K_M",
         gpu_ids = [2],
         gpu_index_kind = "vulkan",
         max_seq_length = 32768,
         fill_absent_fields = True,
     )
-    entry = resp.overrides["LAiM/B-GGUF:Q4_K_M"]
+    entry = resp.overrides["unsloth/B-GGUF:Q4_K_M"]
     assert entry["gpu_ids"] == [0, 1]
     assert "gpu_index_kind" not in entry
     assert settings.stored_gpu_index_kind(entry) == "physical"
@@ -8078,9 +8078,9 @@ def test_the_one_time_fill_retires_nothing(override_store):
     # of one row must not have its own first write deleted by its second.
     settings.set_model_override(f"{_LEGACY_SNAPSHOT}:Q4_K_M", max_seq_length = 4096)
 
-    resp = _put("LAiM/B-GGUF:Q4_K_M", max_seq_length = 32768, fill_absent_fields = True)
+    resp = _put("unsloth/B-GGUF:Q4_K_M", max_seq_length = 32768, fill_absent_fields = True)
     assert resp.overrides[f"{_LEGACY_SNAPSHOT}:Q4_K_M"]["max_seq_length"] == 4096
-    assert resp.overrides["LAiM/B-GGUF:Q4_K_M"]["max_seq_length"] == 32768
+    assert resp.overrides["unsloth/B-GGUF:Q4_K_M"]["max_seq_length"] == 32768
 
 
 def test_a_fill_never_creates_a_snapshot_path_key_over_a_repo_id_entry(override_store):
@@ -8089,7 +8089,7 @@ def test_a_fill_never_creates_a_snapshot_path_key_over_a_repo_id_entry(override_
     # load path before the advertised repo id, so an upgraded browser's pre-upgrade copy would
     # shadow the newer server config on every API load. Fill into the entry that is already
     # there instead: nothing outranks it and the fields it lacks still arrive.
-    settings.set_model_override("LAiM/B-GGUF:Q4_K_M", max_seq_length = 32768)
+    settings.set_model_override("unsloth/B-GGUF:Q4_K_M", max_seq_length = 32768)
 
     resp = _put(
         f"{_LEGACY_SNAPSHOT}:Q4_K_M",
@@ -8098,7 +8098,7 @@ def test_a_fill_never_creates_a_snapshot_path_key_over_a_repo_id_entry(override_
         fill_absent_fields = True,
     )
     assert f"{_LEGACY_SNAPSHOT}:Q4_K_M" not in resp.overrides
-    entry = resp.overrides["LAiM/B-GGUF:Q4_K_M"]
+    entry = resp.overrides["unsloth/B-GGUF:Q4_K_M"]
     assert entry["max_seq_length"] == 32768
     assert entry["kv_cache_dtype"] == "q8_0"
 
@@ -8106,7 +8106,7 @@ def test_a_fill_never_creates_a_snapshot_path_key_over_a_repo_id_entry(override_
 def test_stale_gpu_ids_are_dropped_not_fatal(monkeypatch):
     # A two-GPU pin on a one-GPU box used to 400 the load; one dead field degrades to defaults.
     backend, rec = _wired(
-        monkeypatch, _FakeBackend(None), ("LAiM/B-GGUF", "Q4_K_M", "LAiM/B-GGUF")
+        monkeypatch, _FakeBackend(None), ("unsloth/B-GGUF", "Q4_K_M", "unsloth/B-GGUF")
     )
     monkeypatch.setattr(
         settings,
@@ -8119,7 +8119,7 @@ def test_stale_gpu_ids_are_dropped_not_fatal(monkeypatch):
 
     monkeypatch.setattr(inference_route, "_override_gpu_ids_still_resolve", _unusable)
 
-    _run_hook("LAiM/B-GGUF")
+    _run_hook("unsloth/B-GGUF")
     req = rec.calls[0]
     assert not req.gpu_ids
     assert req.tensor_split is None
@@ -8129,7 +8129,7 @@ def test_stale_gpu_ids_are_dropped_not_fatal(monkeypatch):
 
 def test_usable_gpu_ids_are_kept(monkeypatch):
     backend, rec = _wired(
-        monkeypatch, _FakeBackend(None), ("LAiM/B-GGUF", "Q4_K_M", "LAiM/B-GGUF")
+        monkeypatch, _FakeBackend(None), ("unsloth/B-GGUF", "Q4_K_M", "unsloth/B-GGUF")
     )
     monkeypatch.setattr(
         settings, "get_model_override", lambda mid: {"gpu_ids": [0, 1], "tensor_split": [3, 1]}
@@ -8137,7 +8137,7 @@ def test_usable_gpu_ids_are_kept(monkeypatch):
 
     monkeypatch.setattr(inference_route, "_override_gpu_ids_still_resolve", _usable)
 
-    _run_hook("LAiM/B-GGUF")
+    _run_hook("unsloth/B-GGUF")
     assert rec.calls[0].gpu_ids == [0, 1]
     assert rec.calls[0].tensor_split == [3, 1]
 
@@ -8224,36 +8224,36 @@ def test_a_rocm_pin_survives_while_the_backend_is_still_rocm(monkeypatch):
 
 def test_default_save_preserves_flags_instead_of_removing(override_store):
     # All-default values send no fields, shape-identical to a removal; guessing wrong wipes flags.
-    settings.set_model_override("LAiM/B-GGUF", llama_extra_args = ["--flash-attn"])
+    settings.set_model_override("unsloth/B-GGUF", llama_extra_args = ["--flash-attn"])
 
-    resp = _put("LAiM/B-GGUF", remove = False)
-    assert resp.overrides["LAiM/B-GGUF"]["llama_extra_args"] == ["--flash-attn"]
+    resp = _put("unsloth/B-GGUF", remove = False)
+    assert resp.overrides["unsloth/B-GGUF"]["llama_extra_args"] == ["--flash-attn"]
 
 
 def test_explicit_remove_still_clears_everything(override_store):
     settings.set_model_override(
-        "LAiM/B-GGUF", llama_extra_args = ["--flash-attn"], max_seq_length = 4096
+        "unsloth/B-GGUF", llama_extra_args = ["--flash-attn"], max_seq_length = 4096
     )
-    resp = _put("LAiM/B-GGUF", remove = True, llama_extra_args = [])
-    assert "LAiM/B-GGUF" not in resp.overrides
+    resp = _put("unsloth/B-GGUF", remove = True, llama_extra_args = [])
+    assert "unsloth/B-GGUF" not in resp.overrides
 
 
 def test_bare_payload_without_remove_flag_still_removes(override_store):
     # The original contract, kept for any caller that predates the flag.
-    settings.set_model_override("LAiM/B-GGUF", max_seq_length = 4096)
-    resp = _put("LAiM/B-GGUF")
-    assert "LAiM/B-GGUF" not in resp.overrides
+    settings.set_model_override("unsloth/B-GGUF", max_seq_length = 4096)
+    resp = _put("unsloth/B-GGUF")
+    assert "unsloth/B-GGUF" not in resp.overrides
 
 
 def test_remove_false_with_real_fields_saves_normally(override_store):
-    resp = _put("LAiM/B-GGUF", remove = False, max_seq_length = 8192)
-    assert resp.overrides["LAiM/B-GGUF"]["max_seq_length"] == 8192
+    resp = _put("unsloth/B-GGUF", remove = False, max_seq_length = 8192)
+    assert resp.overrides["unsloth/B-GGUF"]["max_seq_length"] == 8192
 
 
 def test_override_lookup_falls_back_to_case_insensitive(override_store):
     # The browser lowercases ids while the resolver asks for the repo's real casing.
-    settings.set_model_override("LAiM/qwen3-8b-gguf:q4_k_m", max_seq_length = 8192)
-    got = settings.get_model_override("LAiM/Qwen3-8B-GGUF:Q4_K_M")
+    settings.set_model_override("unsloth/qwen3-8b-gguf:q4_k_m", max_seq_length = 8192)
+    got = settings.get_model_override("unsloth/Qwen3-8B-GGUF:Q4_K_M")
     assert got["max_seq_length"] == 8192
 
 
@@ -8328,22 +8328,22 @@ def test_an_ambiguous_windows_case_fallback_still_matches_nothing(override_store
 
 def test_case_fallback_still_covers_repo_ids(override_store):
     # The migration case this fallback exists for.
-    settings.set_model_override("LAiM/qwen3-8b-gguf:q4_k_m", max_seq_length = 8192)
-    assert settings.get_model_override("LAiM/Qwen3-8B-GGUF:Q4_K_M")["max_seq_length"] == 8192
+    settings.set_model_override("unsloth/qwen3-8b-gguf:q4_k_m", max_seq_length = 8192)
+    assert settings.get_model_override("unsloth/Qwen3-8B-GGUF:Q4_K_M")["max_seq_length"] == 8192
 
 
 def test_explicit_remove_is_not_blocked_by_stale_invalid_flags(override_store):
     # remove is the operation discriminator: a rejected flag must not turn a forget into a 400.
-    settings.set_model_override("LAiM/B-GGUF", max_seq_length = 4096)
-    resp = _put("LAiM/B-GGUF", remove = True, llama_extra_args = ["--port", "1234"])
-    assert "LAiM/B-GGUF" not in resp.overrides
+    settings.set_model_override("unsloth/B-GGUF", max_seq_length = 4096)
+    resp = _put("unsloth/B-GGUF", remove = True, llama_extra_args = ["--port", "1234"])
+    assert "unsloth/B-GGUF" not in resp.overrides
 
 
 def test_explicit_remove_wins_over_config_fields_in_the_same_payload(override_store):
     # remove is the operation discriminator: a stale field beside it must not make it an update.
-    settings.set_model_override("LAiM/B-GGUF", max_seq_length = 4096)
-    resp = _put("LAiM/B-GGUF", remove = True, max_seq_length = 8192, tensor_parallel = True)
-    assert "LAiM/B-GGUF" not in resp.overrides
+    settings.set_model_override("unsloth/B-GGUF", max_seq_length = 4096)
+    resp = _put("unsloth/B-GGUF", remove = True, max_seq_length = 8192, tensor_parallel = True)
+    assert "unsloth/B-GGUF" not in resp.overrides
 
 
 def test_posix_colon_in_a_path_is_not_treated_as_a_quant(override_store):
@@ -8362,9 +8362,9 @@ def test_unknown_quant_label_on_a_gguf_still_carries_flags_over(override_store):
 
 def test_bpw_qualified_variants_still_carry_flags_over(override_store):
     # model_config.py keeps a bits-per-weight modifier on the label, and that form reaches keys.
-    settings.set_model_override("LAiM/Repo-GGUF", llama_extra_args = ["--flash-attn"])
-    resp = _put("LAiM/Repo-GGUF:IQ4_XS-3.53bpw", max_seq_length = 4096)
-    assert resp.overrides["LAiM/Repo-GGUF:IQ4_XS-3.53bpw"]["llama_extra_args"] == [
+    settings.set_model_override("unsloth/Repo-GGUF", llama_extra_args = ["--flash-attn"])
+    resp = _put("unsloth/Repo-GGUF:IQ4_XS-3.53bpw", max_seq_length = 4096)
+    assert resp.overrides["unsloth/Repo-GGUF:IQ4_XS-3.53bpw"]["llama_extra_args"] == [
         "--flash-attn"
     ]
 
@@ -8415,7 +8415,7 @@ def test_load_retries_without_gpu_ids_when_the_loader_rejects_the_pin(monkeypatc
     # The pre-flight check can't mirror every loader rule, and a stale pin must not block a load.
 
     backend, rec = _wired(
-        monkeypatch, _FakeBackend(None), ("LAiM/B-GGUF", "Q4_K_M", "LAiM/B-GGUF")
+        monkeypatch, _FakeBackend(None), ("unsloth/B-GGUF", "Q4_K_M", "unsloth/B-GGUF")
     )
     monkeypatch.setattr(
         settings,
@@ -8438,7 +8438,7 @@ def test_load_retries_without_gpu_ids_when_the_loader_rejects_the_pin(monkeypatc
 
     monkeypatch.setattr(inference_route, "_load_model_impl", _load)
 
-    _run_hook("LAiM/B-GGUF")
+    _run_hook("unsloth/B-GGUF")
     assert calls["n"] == 2
     served = rec.calls[-1]
     assert not served.gpu_ids
@@ -8448,7 +8448,7 @@ def test_load_retries_without_gpu_ids_when_the_loader_rejects_the_pin(monkeypatc
 
 def test_a_non_gpu_load_failure_is_not_retried(monkeypatch):
     backend, rec = _wired(
-        monkeypatch, _FakeBackend(None), ("LAiM/B-GGUF", "Q4_K_M", "LAiM/B-GGUF")
+        monkeypatch, _FakeBackend(None), ("unsloth/B-GGUF", "Q4_K_M", "unsloth/B-GGUF")
     )
     monkeypatch.setattr(settings, "get_model_override", lambda mid: {"gpu_ids": [0]})
 
@@ -8463,26 +8463,26 @@ def test_a_non_gpu_load_failure_is_not_retried(monkeypatch):
     monkeypatch.setattr(inference_route, "_load_model_impl", _load)
 
     with pytest.raises(HTTPException):
-        _run_hook("LAiM/B-GGUF")
+        _run_hook("unsloth/B-GGUF")
     assert calls["n"] == 1
 
 
 def test_removal_clears_the_entry_a_load_would_actually_resolve(override_store):
     # A forget can carry a different casing; removing only the literal key leaves a live entry.
-    settings.set_model_override("LAiM/B-GGUF:Q4_K_M", max_seq_length = 8192)
-    assert settings.get_model_override("LAiM/b-gguf:q4_k_m")["max_seq_length"] == 8192
+    settings.set_model_override("unsloth/B-GGUF:Q4_K_M", max_seq_length = 8192)
+    assert settings.get_model_override("unsloth/b-gguf:q4_k_m")["max_seq_length"] == 8192
 
-    _put("LAiM/b-gguf:q4_k_m", remove = True)
+    _put("unsloth/b-gguf:q4_k_m", remove = True)
     assert settings.get_model_overrides() == {}
-    assert settings.get_model_override("LAiM/B-GGUF:Q4_K_M") == {}
+    assert settings.get_model_override("unsloth/B-GGUF:Q4_K_M") == {}
 
 
 def test_save_updates_the_existing_case_variant_instead_of_forking_it(override_store):
     # The backfill stores lowercase keys while a later UI save carries the catalog's casing.
-    settings.set_model_override("LAiM/b-gguf:q4_k_m", max_seq_length = 8192)
-    _put("LAiM/B-GGUF:Q4_K_M", max_seq_length = 4096)
-    assert list(settings.get_model_overrides()) == ["LAiM/b-gguf:q4_k_m"]
-    assert settings.get_model_override("LAiM/B-GGUF:Q4_K_M")["max_seq_length"] == 4096
+    settings.set_model_override("unsloth/b-gguf:q4_k_m", max_seq_length = 8192)
+    _put("unsloth/B-GGUF:Q4_K_M", max_seq_length = 4096)
+    assert list(settings.get_model_overrides()) == ["unsloth/b-gguf:q4_k_m"]
+    assert settings.get_model_override("unsloth/B-GGUF:Q4_K_M")["max_seq_length"] == 4096
 
 
 def test_removal_of_a_path_still_only_touches_the_exact_key(override_store):
@@ -8507,35 +8507,35 @@ def test_forget_clears_the_bare_repo_entry_the_quant_inherited_from(override_sto
     # A save under repo:QUANT copies the flags off a legacy bare entry and leaves it in place,
     # and the loader falls back to it, so clearing only the qualified key hands them back.
     settings.set_model_override(
-        "LAiM/B-GGUF",
+        "unsloth/B-GGUF",
         llama_extra_args = ["--flash-attn"],
         max_seq_length = 8192,
     )
-    _put("LAiM/B-GGUF:Q4_K_M", max_seq_length = 4096)
-    _put("LAiM/B-GGUF:Q4_K_M", remove = True)
-    assert settings.get_model_override("LAiM/B-GGUF") == {}
+    _put("unsloth/B-GGUF:Q4_K_M", max_seq_length = 4096)
+    _put("unsloth/B-GGUF:Q4_K_M", remove = True)
+    assert settings.get_model_override("unsloth/B-GGUF") == {}
     assert settings.get_model_overrides() == {}
 
 
 def test_forget_keeps_a_bare_entry_another_quant_still_has_settings_under(override_store):
     # The bare entry backs every quant with no entry of its own, so forgetting Q4 must not
     # strip it while Q8 is still there: this forget is not the last word on the model.
-    settings.set_model_override("LAiM/B-GGUF", max_seq_length = 8192)
-    settings.set_model_override("LAiM/B-GGUF:Q8_0", max_seq_length = 2048)
-    _put("LAiM/B-GGUF:Q4_K_M", max_seq_length = 4096)
-    _put("LAiM/B-GGUF:Q4_K_M", remove = True)
-    assert settings.get_model_override("LAiM/B-GGUF") == {"max_seq_length": 8192}
-    assert settings.get_model_override("LAiM/B-GGUF:Q8_0") == {"max_seq_length": 2048}
+    settings.set_model_override("unsloth/B-GGUF", max_seq_length = 8192)
+    settings.set_model_override("unsloth/B-GGUF:Q8_0", max_seq_length = 2048)
+    _put("unsloth/B-GGUF:Q4_K_M", max_seq_length = 4096)
+    _put("unsloth/B-GGUF:Q4_K_M", remove = True)
+    assert settings.get_model_override("unsloth/B-GGUF") == {"max_seq_length": 8192}
+    assert settings.get_model_override("unsloth/B-GGUF:Q8_0") == {"max_seq_length": 2048}
 
 
 def test_forget_clears_every_spelling_of_one_model(override_store):
     # Two spellings of one repo can coexist; clearing only the named one makes the survivor
     # the sole fold match, so the next load reapplies what was just forgotten.
-    settings.set_model_override("LAiM/B-GGUF:Q4_K_M", max_seq_length = 8192)
-    settings.set_model_override("LAiM/b-gguf:q4_k_m", max_seq_length = 8192)
-    _put("LAiM/B-GGUF:Q4_K_M", remove = True)
+    settings.set_model_override("unsloth/B-GGUF:Q4_K_M", max_seq_length = 8192)
+    settings.set_model_override("unsloth/b-gguf:q4_k_m", max_seq_length = 8192)
+    _put("unsloth/B-GGUF:Q4_K_M", remove = True)
     assert settings.get_model_overrides() == {}
-    assert settings.get_model_override("LAiM/B-GGUF:Q4_K_M") == {}
+    assert settings.get_model_override("unsloth/B-GGUF:Q4_K_M") == {}
 
 
 def test_forget_of_one_windows_spelling_clears_the_other(override_store):
@@ -8563,9 +8563,9 @@ def test_forget_leaves_another_file_own_derived_key_alone(override_store):
 
 def test_forget_of_a_repo_quant_key_derives_nothing(override_store):
     # Only a bare .gguf path derives a label.
-    settings.set_model_override("LAiM/b-gguf:q4_k_m", max_seq_length = 8192)
-    _put("LAiM/B-GGUF", remove = True)
-    assert settings.get_model_override("LAiM/b-gguf:q4_k_m")["max_seq_length"] == 8192
+    settings.set_model_override("unsloth/b-gguf:q4_k_m", max_seq_length = 8192)
+    _put("unsloth/B-GGUF", remove = True)
+    assert settings.get_model_override("unsloth/b-gguf:q4_k_m")["max_seq_length"] == 8192
 
 
 def test_a_tag_that_names_no_quant_resolves_to_the_repo(monkeypatch):
@@ -8902,9 +8902,9 @@ def test_two_local_paths_differing_only_in_case_are_not_the_same_model(monkeypat
     same = os.path.normcase("A") == os.path.normcase("a")
     assert inference_route._loaded_satisfies("/srv/models/foo.gguf") is same
 
-    alias = _FakeBackend(loaded_id = "LAiM/Qwen3-4B-GGUF")
+    alias = _FakeBackend(loaded_id = "unsloth/Qwen3-4B-GGUF")
     monkeypatch.setattr(inference_route, "get_llama_cpp_backend", lambda: alias)
-    assert inference_route._loaded_satisfies("LAiM/qwen3-4b-gguf") is True
+    assert inference_route._loaded_satisfies("unsloth/qwen3-4b-gguf") is True
 
 
 def test_a_cold_index_does_not_answer_a_build_stem_with_the_resident_sibling(monkeypatch):
@@ -8954,22 +8954,22 @@ def test_fill_absent_fields_put_never_replaces_a_newer_server_value(override_sto
     overwritten by this browser's older copy. fill_absent_fields writes only what
     the entry lacks, so every value already on the server wins."""
     # The other tab's save lands first.
-    newer = settings_route.ModelOverridePayload(model_id = "LAiM/B-GGUF", max_seq_length = 8192)
+    newer = settings_route.ModelOverridePayload(model_id = "unsloth/B-GGUF", max_seq_length = 8192)
     settings_route.update_openai_auto_switch_override(newer, "tester")
 
     # The backfill's write, carrying this browser's older localStorage value.
     backfill = settings_route.ModelOverridePayload(
-        model_id = "LAiM/B-GGUF", max_seq_length = 2048, fill_absent_fields = True
+        model_id = "unsloth/B-GGUF", max_seq_length = 2048, fill_absent_fields = True
     )
     resp = settings_route.update_openai_auto_switch_override(backfill, "tester")
-    assert resp.overrides["LAiM/B-GGUF"]["max_seq_length"] == 8192
+    assert resp.overrides["unsloth/B-GGUF"]["max_seq_length"] == 8192
 
     # With nothing stored it still creates, or the migration would never run.
     fresh = settings_route.ModelOverridePayload(
-        model_id = "LAiM/C-GGUF", max_seq_length = 2048, fill_absent_fields = True
+        model_id = "unsloth/C-GGUF", max_seq_length = 2048, fill_absent_fields = True
     )
     resp2 = settings_route.update_openai_auto_switch_override(fresh, "tester")
-    assert resp2.overrides["LAiM/C-GGUF"]["max_seq_length"] == 2048
+    assert resp2.overrides["unsloth/C-GGUF"]["max_seq_length"] == 2048
 
 
 def test_fill_absent_fields_carries_the_browser_only_settings_into_a_legacy_entry(monkeypatch):
@@ -8980,15 +8980,15 @@ def test_fill_absent_fields_carries_the_browser_only_settings_into_a_legacy_entr
     store = _mock_override_store(monkeypatch)
 
     legacy = settings_route.ModelOverridePayload(
-        model_id = "LAiM/B-GGUF:Q4_K_M",
+        model_id = "unsloth/B-GGUF:Q4_K_M",
         llama_extra_args = ["--flash-attn"],
         max_seq_length = 8192,
     )
     settings_route.update_openai_auto_switch_override(legacy, "tester")
-    store[settings.MODEL_OVERRIDES_SETTING_KEY]["LAiM/B-GGUF:Q4_K_M"]["mlx_kv_bits"] = 8
+    store[settings.MODEL_OVERRIDES_SETTING_KEY]["unsloth/B-GGUF:Q4_K_M"]["mlx_kv_bits"] = 8
 
     backfill = settings_route.ModelOverridePayload(
-        model_id = "LAiM/B-GGUF:Q4_K_M",
+        model_id = "unsloth/B-GGUF:Q4_K_M",
         # A field the server already has, plus the ones only the browser holds.
         max_seq_length = 2048,
         custom_context_length = 32768,
@@ -8999,7 +8999,7 @@ def test_fill_absent_fields_carries_the_browser_only_settings_into_a_legacy_entr
         fill_absent_fields = True,
     )
     resp = settings_route.update_openai_auto_switch_override(backfill, "tester")
-    entry = resp.overrides["LAiM/B-GGUF:Q4_K_M"]
+    entry = resp.overrides["unsloth/B-GGUF:Q4_K_M"]
     # The server's own values survive untouched.
     assert entry["max_seq_length"] == 8192
     assert entry["llama_extra_args"] == ["--flash-attn"]
@@ -9010,42 +9010,42 @@ def test_fill_absent_fields_carries_the_browser_only_settings_into_a_legacy_entr
     assert entry["gpu_ids"] == [0, 1]
     assert settings.model_override_load_kwargs(entry, is_gguf = False)["mlx_kv_quant"] == "8"
     # One entry, not two: the fill resolves onto the key a load reads.
-    assert list(store[settings.MODEL_OVERRIDES_SETTING_KEY]) == ["LAiM/B-GGUF:Q4_K_M"]
+    assert list(store[settings.MODEL_OVERRIDES_SETTING_KEY]) == ["unsloth/B-GGUF:Q4_K_M"]
 
     # An ordinary save is still a replacement, or an edit could never clear a field.
     edit = settings_route.ModelOverridePayload(
-        model_id = "LAiM/B-GGUF:Q4_K_M", max_seq_length = 4096
+        model_id = "unsloth/B-GGUF:Q4_K_M", max_seq_length = 4096
     )
     resp2 = settings_route.update_openai_auto_switch_override(edit, "tester")
-    assert resp2.overrides["LAiM/B-GGUF:Q4_K_M"]["max_seq_length"] == 4096
-    assert "kv_cache_dtype" not in resp2.overrides["LAiM/B-GGUF:Q4_K_M"]
+    assert resp2.overrides["unsloth/B-GGUF:Q4_K_M"]["max_seq_length"] == 4096
+    assert "kv_cache_dtype" not in resp2.overrides["unsloth/B-GGUF:Q4_K_M"]
 
 
 def test_fill_absent_fields_matches_a_legacy_casing_and_never_deletes(override_store):
     """The stored key can carry the casing an older install typed, and it must not
     be duplicated or emptied by a fill for the folded spelling."""
     stored = settings_route.ModelOverridePayload(
-        model_id = "LAiM/B-GGUF:Q4_K_M", max_seq_length = 8192
+        model_id = "unsloth/B-GGUF:Q4_K_M", max_seq_length = 8192
     )
     settings_route.update_openai_auto_switch_override(stored, "tester")
 
     folded = settings_route.ModelOverridePayload(
-        model_id = "LAiM/b-gguf:q4_k_m", max_seq_length = 2048, fill_absent_fields = True
+        model_id = "unsloth/b-gguf:q4_k_m", max_seq_length = 2048, fill_absent_fields = True
     )
     resp = settings_route.update_openai_auto_switch_override(folded, "tester")
-    assert list(resp.overrides) == ["LAiM/B-GGUF:Q4_K_M"]
-    assert resp.overrides["LAiM/B-GGUF:Q4_K_M"]["max_seq_length"] == 8192
+    assert list(resp.overrides) == ["unsloth/B-GGUF:Q4_K_M"]
+    assert resp.overrides["unsloth/B-GGUF:Q4_K_M"]["max_seq_length"] == 8192
 
     # An all-default fill is a no-op, not the "empty payload means forget" path.
     empty = settings_route.ModelOverridePayload(
-        model_id = "LAiM/B-GGUF:Q4_K_M", fill_absent_fields = True
+        model_id = "unsloth/B-GGUF:Q4_K_M", fill_absent_fields = True
     )
     resp2 = settings_route.update_openai_auto_switch_override(empty, "tester")
-    assert resp2.overrides["LAiM/B-GGUF:Q4_K_M"]["max_seq_length"] == 8192
+    assert resp2.overrides["unsloth/B-GGUF:Q4_K_M"]["max_seq_length"] == 8192
 
     # A fill that is also a delete has no meaning.
     with pytest.raises(HTTPException) as excinfo:
-        _put("LAiM/B-GGUF:Q4_K_M", remove = True, fill_absent_fields = True)
+        _put("unsloth/B-GGUF:Q4_K_M", remove = True, fill_absent_fields = True)
     assert excinfo.value.status_code == 400
 
 
@@ -9053,11 +9053,11 @@ def test_fill_absent_fields_does_not_break_the_empty_payload_removal(override_st
     """fill_absent_fields is a write mode, not a saved field: leaving it in the dumped
     payload would make every request look non-empty and silently retire the legacy
     "a payload carrying only model_id forgets this model" contract."""
-    stored = settings_route.ModelOverridePayload(model_id = "LAiM/B-GGUF", max_seq_length = 4096)
+    stored = settings_route.ModelOverridePayload(model_id = "unsloth/B-GGUF", max_seq_length = 4096)
     settings_route.update_openai_auto_switch_override(stored, "tester")
-    empty = settings_route.ModelOverridePayload(model_id = "LAiM/B-GGUF")
+    empty = settings_route.ModelOverridePayload(model_id = "unsloth/B-GGUF")
     resp = settings_route.update_openai_auto_switch_override(empty, "tester")
-    assert "LAiM/B-GGUF" not in resp.overrides
+    assert "unsloth/B-GGUF" not in resp.overrides
 
 
 def test_map_entry_fill_reads_and_writes_in_one_transaction(tmp_path, monkeypatch):
@@ -9303,7 +9303,7 @@ def test_a_cached_repo_still_resolves_by_its_repo_id(monkeypatch):
     """The Hub keys a cached repo row by its repo id, which is the advertised id,
     and no path entry exists for it, so it still resolves on the second try."""
     snapshot = "/mnt/old-cache/models--LAiM--Qwen3-8B-GGUF/snapshots/abc123"
-    repo = "LAiM/Qwen3-8B-GGUF"
+    repo = "unsloth/Qwen3-8B-GGUF"
     req = _switch_with_overrides(
         monkeypatch,
         resolves_to = (snapshot, "Q4_K_M", repo),
@@ -9331,7 +9331,7 @@ def test_a_fill_does_not_replay_a_stored_flag_through_validation(monkeypatch):
     from core.inference import llama_server_args
 
     store = _mock_override_store(monkeypatch)
-    settings.set_model_override("LAiM/B-GGUF:Q4_K_M", llama_extra_args = ["--flash-attn"])
+    settings.set_model_override("unsloth/B-GGUF:Q4_K_M", llama_extra_args = ["--flash-attn"])
 
     # The flag is refused from now on, as a later release's denylist would.
     real_validate = llama_server_args.validate_extra_args
@@ -9344,17 +9344,17 @@ def test_a_fill_does_not_replay_a_stored_flag_through_validation(monkeypatch):
     monkeypatch.setattr(llama_server_args, "validate_extra_args", _reject_flash_attn)
 
     fill = settings_route.ModelOverridePayload(
-        model_id = "LAiM/B-GGUF:Q4_K_M", custom_context_length = 32768, fill_absent_fields = True
+        model_id = "unsloth/B-GGUF:Q4_K_M", custom_context_length = 32768, fill_absent_fields = True
     )
     resp = settings_route.update_openai_auto_switch_override(fill, "tester")
-    entry = resp.overrides["LAiM/B-GGUF:Q4_K_M"]
+    entry = resp.overrides["unsloth/B-GGUF:Q4_K_M"]
     assert entry["llama_extra_args"] == ["--flash-attn"]
     assert entry["custom_context_length"] == 32768
-    assert list(store[settings.MODEL_OVERRIDES_SETTING_KEY]) == ["LAiM/B-GGUF:Q4_K_M"]
+    assert list(store[settings.MODEL_OVERRIDES_SETTING_KEY]) == ["unsloth/B-GGUF:Q4_K_M"]
 
     # An ordinary save still validates what it is handed.
     with pytest.raises(HTTPException) as excinfo:
-        _put("LAiM/C-GGUF", llama_extra_args = ["--flash-attn"])
+        _put("unsloth/C-GGUF", llama_extra_args = ["--flash-attn"])
     assert excinfo.value.status_code == 400
 
 
@@ -9379,11 +9379,11 @@ def test_override_payload_rejects_booleans_for_numeric_fields():
         ("gpu_ids", [0, False, 2]),
     ):
         with pytest.raises(ValidationError):
-            ModelOverridePayload(model_id = "LAiM/x-GGUF:Q4_K_M", **{field: value})
+            ModelOverridePayload(model_id = "unsloth/x-GGUF:Q4_K_M", **{field: value})
 
     # Only bools are rejected: real values, including real booleans, still validate.
     ok = ModelOverridePayload(
-        model_id = "LAiM/x-GGUF:Q4_K_M",
+        model_id = "unsloth/x-GGUF:Q4_K_M",
         max_seq_length = 4096,
         gpu_layers = -1,
         n_cpu_moe = 0,
@@ -9411,7 +9411,7 @@ def test_two_spellings_of_one_cached_quant_do_not_delete_each_others_save(monkey
     cleanup runs and then retire each other's row. Both calls return 200 and nothing is
     stored. Whichever runs second must retire the first instead."""
     _mock_override_store(monkeypatch)
-    repo = "LAiM/Qwen3-8B-GGUF:Q4_K_M"
+    repo = "unsloth/Qwen3-8B-GGUF:Q4_K_M"
     snapshot = "/mnt/old-cache/models--LAiM--Qwen3-8B-GGUF/snapshots/abc123:Q4_K_M"
 
     ready = threading.Barrier(2)
@@ -9487,7 +9487,7 @@ def test_mlx_kv_quant_survives_the_whole_override_projection():
     both = {"mlx_kv_quant": "auto", "mlx_kv_bits": 4}
     assert settings.normalize_model_override(both) == {}
     assert settings.model_override_load_kwargs(both, is_gguf = False) == {}
-    assert LoadRequest(model_path = "LAiM/A", **both).mlx_kv_quant == "auto"
+    assert LoadRequest(model_path = "unsloth/A", **both).mlx_kv_quant == "auto"
 
     def _folded(**kw):
         payload = settings_route.ModelOverridePayload(model_id = "m", **kw)
@@ -9501,7 +9501,7 @@ def test_mlx_kv_quant_survives_the_whole_override_projection():
     for is_gguf in (True, False):
         kwargs = settings.model_override_load_kwargs({"mlx_kv_quant": "tq-4"}, is_gguf = is_gguf)
         assert kwargs["mlx_kv_quant"] == "tq-4"
-        assert LoadRequest(model_path = "LAiM/A", **kwargs).mlx_kv_quant == "tq-4"
+        assert LoadRequest(model_path = "unsloth/A", **kwargs).mlx_kv_quant == "tq-4"
 
 
 def test_mlx_int8_prefill_is_stored_only_when_on_and_reaches_the_load(monkeypatch):
@@ -9519,7 +9519,7 @@ def test_mlx_int8_prefill_is_stored_only_when_on_and_reaches_the_load(monkeypatc
 def _idle_backend(kw, monkeypatch, *, user_loaded):
     """A loaded, long-idle GGUF backend wired into the idle loop."""
     _reset_keepwarm()
-    backend = _FakeBackend("LAiM/Idle-GGUF", hf_variant = "Q4_K_M")
+    backend = _FakeBackend("unsloth/Idle-GGUF", hf_variant = "Q4_K_M")
     backend._loaded_by_user_action = user_loaded
 
     def _unload():
@@ -9583,11 +9583,11 @@ def test_an_idle_restored_model_is_api_provenance(monkeypatch):
     rec = _LoadRecorder(backend)
     _wire_on(
         monkeypatch,
-        resolves_to = ("LAiM/B-GGUF", None, "LAiM/B-GGUF"),
+        resolves_to = ("unsloth/B-GGUF", None, "unsloth/B-GGUF"),
         backend = backend,
         recorder = rec,
     )
-    _run_hook("LAiM/B-GGUF")
+    _run_hook("unsloth/B-GGUF")
     assert rec.calls and backend._loaded_by_user_action is False
 
     backend.unload_model = lambda: setattr(backend, "is_loaded", False)
@@ -9614,7 +9614,7 @@ def test_unload_clears_the_user_load_flag():
 
 
 def test_the_load_route_pins_and_other_load_surfaces_do_not(monkeypatch):
-    backend = _FakeBackend("LAiM/A-GGUF")
+    backend = _FakeBackend("unsloth/A-GGUF")
     backend._loaded_by_user_action = False
     monkeypatch.setattr(inference_route, "get_llama_cpp_backend", lambda: backend)
 
@@ -9622,7 +9622,7 @@ def test_the_load_route_pins_and_other_load_surfaces_do_not(monkeypatch):
         return None  # the dedupe path returns without touching the backend
 
     monkeypatch.setattr(inference_route, "_load_model_impl", _already_loaded)
-    request = LoadRequest(model_path = "LAiM/A-GGUF")
+    request = LoadRequest(model_path = "unsloth/A-GGUF")
 
     # An explicit UI load pins, including when it deduped onto the resident model.
     asyncio.run(inference_route.load_model_gated(request, object(), "tester", user_initiated = True))
@@ -9748,7 +9748,7 @@ def _counted_scans(monkeypatch, index = None):
 @pytest.mark.parametrize(
     "loaded, requested",
     [
-        ("LAiM/A-GGUF", "claude-haiku-4-5"),
+        ("unsloth/A-GGUF", "claude-haiku-4-5"),
         ("/elsewhere/unscanned.gguf", "/elsewhere/unscanned.gguf"),
         ("/elsewhere/unscanned.gguf", "unscanned"),
     ],
@@ -9854,25 +9854,25 @@ def test_an_oversized_name_is_not_remembered(monkeypatch):
 # index, so it must never say yes where the pre-existing resident check says no.
 # Anything it accepts, main would have accepted too: a miss only costs the scan.
 _IDENTITIES = [
-    "LAiM/Muse-GGUF",
+    "unsloth/Muse-GGUF",
     "/srv/models/LAiM--Muse-GGUF",
     "/srv/models/Muse.gguf",
     None,
 ]
 _REQUESTS = [
-    "LAiM/Muse-GGUF",
-    "LAiM/muse-gguf",
-    "LAiM/Muse-GGUF:Q4_K_M",
-    "LAiM/Muse-GGUF:Q8_0",
-    "LAiM/Muse-GGUF:latest",
-    "LAiM/Other-GGUF",
+    "unsloth/Muse-GGUF",
+    "unsloth/muse-gguf",
+    "unsloth/Muse-GGUF:Q4_K_M",
+    "unsloth/Muse-GGUF:Q8_0",
+    "unsloth/Muse-GGUF:latest",
+    "unsloth/Other-GGUF",
     "/srv/models/Muse.gguf",
     "/srv/models/MUSE.gguf",
     "muse.gguf",
     "../../etc/passwd",
-    "LAiM/",
+    "unsloth/",
     ":Q4_K_M",
-    "LAiM/Muse GGUF",
+    "unsloth/Muse GGUF",
 ]
 
 
@@ -9892,10 +9892,10 @@ def test_the_resident_shortcut_never_answers_where_the_full_check_would_not(
 
 
 def test_the_resident_shortcut_refuses_an_explicit_quant_mismatch(monkeypatch):
-    backend = _FakeBackend("LAiM/Muse-GGUF", hf_variant = "Q4_K_M")
+    backend = _FakeBackend("unsloth/Muse-GGUF", hf_variant = "Q4_K_M")
     monkeypatch.setattr(inference_route, "get_llama_cpp_backend", lambda: backend)
-    assert inference_route._loaded_identity_satisfies("LAiM/Muse-GGUF:Q8_0") is False
-    assert inference_route._loaded_identity_satisfies("LAiM/Muse-GGUF:Q4_K_M") is True
+    assert inference_route._loaded_identity_satisfies("unsloth/Muse-GGUF:Q8_0") is False
+    assert inference_route._loaded_identity_satisfies("unsloth/Muse-GGUF:Q4_K_M") is True
 
 
 def test_clearing_the_box_for_a_quant_survives_the_next_load(override_store):
@@ -9903,18 +9903,18 @@ def test_clearing_the_box_for_a_quant_survives_the_next_load(override_store):
     # and leaves the bare entry standing. Clearing the box then writes an empty list,
     # an entry with nothing usable left is not stored, and the next load falls through
     # to the bare key: the box comes up empty and the server still runs them.
-    settings.set_model_override("LAiM/B-GGUF", llama_extra_args = ["--numa", "distribute"])
-    carried = _put("LAiM/B-GGUF:Q4_K_M", max_seq_length = 4096)
-    assert carried.overrides["LAiM/B-GGUF:Q4_K_M"]["llama_extra_args"] == [
+    settings.set_model_override("unsloth/B-GGUF", llama_extra_args = ["--numa", "distribute"])
+    carried = _put("unsloth/B-GGUF:Q4_K_M", max_seq_length = 4096)
+    assert carried.overrides["unsloth/B-GGUF:Q4_K_M"]["llama_extra_args"] == [
         "--numa",
         "distribute",
     ]
 
-    cleared = _put("LAiM/B-GGUF:Q4_K_M", llama_extra_args = [], remove = False)
+    cleared = _put("unsloth/B-GGUF:Q4_K_M", llama_extra_args = [], remove = False)
     # The row survives the all-default save, saying explicitly that this quant has
     # none, which is what stops the lookup before it reaches the bare key.
-    assert cleared.overrides["LAiM/B-GGUF:Q4_K_M"] == {"llama_extra_args": []}
-    _key, resolved = settings.resolve_override_for_load("LAiM/B-GGUF", variant = "Q4_K_M")
+    assert cleared.overrides["unsloth/B-GGUF:Q4_K_M"] == {"llama_extra_args": []}
+    _key, resolved = settings.resolve_override_for_load("unsloth/B-GGUF", variant = "Q4_K_M")
     assert not resolved.get("llama_extra_args")
 
 
@@ -9923,15 +9923,15 @@ def test_the_clear_leaves_the_legacy_row_for_the_quants_still_reading_it(overrid
     # clearing Q4's box must not take Q6's flags with it. Only the row the user
     # edited changes.
     settings.set_model_override(
-        "LAiM/B-GGUF",
+        "unsloth/B-GGUF",
         llama_extra_args = ["--numa", "distribute"],
         max_seq_length = 4096,
     )
-    _put("LAiM/B-GGUF:Q4_K_M", llama_extra_args = [], remove = False)
-    bare = settings.get_model_override("LAiM/B-GGUF")
+    _put("unsloth/B-GGUF:Q4_K_M", llama_extra_args = [], remove = False)
+    bare = settings.get_model_override("unsloth/B-GGUF")
     assert bare["llama_extra_args"] == ["--numa", "distribute"]
     assert bare["max_seq_length"] == 4096
-    _key, sibling = settings.resolve_override_for_load("LAiM/B-GGUF", variant = "Q6_K")
+    _key, sibling = settings.resolve_override_for_load("unsloth/B-GGUF", variant = "Q6_K")
     assert sibling["llama_extra_args"] == ["--numa", "distribute"]
 
 
@@ -9939,12 +9939,12 @@ def test_the_clear_holds_when_another_quant_has_a_row_of_its_own(override_store)
     # The first fix stripped the bare row and was gated on no sibling row existing,
     # which is the wrong question: a sibling with a row of its own never reads the
     # bare one, so the gate only stopped the clear from working at all.
-    settings.set_model_override("LAiM/B-GGUF", llama_extra_args = ["--numa", "distribute"])
-    settings.set_model_override("LAiM/B-GGUF:Q8_0", max_seq_length = 4096)
-    _put("LAiM/B-GGUF:Q4_K_M", llama_extra_args = [], remove = False)
-    _key, resolved = settings.resolve_override_for_load("LAiM/B-GGUF", variant = "Q4_K_M")
+    settings.set_model_override("unsloth/B-GGUF", llama_extra_args = ["--numa", "distribute"])
+    settings.set_model_override("unsloth/B-GGUF:Q8_0", max_seq_length = 4096)
+    _put("unsloth/B-GGUF:Q4_K_M", llama_extra_args = [], remove = False)
+    _key, resolved = settings.resolve_override_for_load("unsloth/B-GGUF", variant = "Q4_K_M")
     assert not resolved.get("llama_extra_args")
-    assert settings.get_model_override("LAiM/B-GGUF")["llama_extra_args"] == [
+    assert settings.get_model_override("unsloth/B-GGUF")["llama_extra_args"] == [
         "--numa",
         "distribute",
     ]
@@ -9953,26 +9953,26 @@ def test_the_clear_holds_when_another_quant_has_a_row_of_its_own(override_store)
 def test_a_clear_with_no_fallback_behind_it_stores_nothing(override_store):
     # Nothing would answer for this model anyway, so the row goes as it always has:
     # the tombstone exists to stop a fallback, not to leave a row per cleared box.
-    settings.set_model_override("LAiM/B-GGUF:Q4_K_M", llama_extra_args = ["--numa", "distribute"])
-    cleared = _put("LAiM/B-GGUF:Q4_K_M", llama_extra_args = [], remove = False)
-    assert "LAiM/B-GGUF:Q4_K_M" not in cleared.overrides
+    settings.set_model_override("unsloth/B-GGUF:Q4_K_M", llama_extra_args = ["--numa", "distribute"])
+    cleared = _put("unsloth/B-GGUF:Q4_K_M", llama_extra_args = [], remove = False)
+    assert "unsloth/B-GGUF:Q4_K_M" not in cleared.overrides
 
 
 def test_an_explicit_forget_still_removes_the_row(override_store):
     # remove = True is the other operation, and it must not leave a tombstone behind
     # for the picker to read as a saved setting.
-    settings.set_model_override("LAiM/B-GGUF", llama_extra_args = ["--numa", "distribute"])
-    settings.set_model_override("LAiM/B-GGUF:Q4_K_M", llama_extra_args = ["--top-k", "20"])
-    forgotten = _put("LAiM/B-GGUF:Q4_K_M", llama_extra_args = [], remove = True)
-    assert "LAiM/B-GGUF:Q4_K_M" not in forgotten.overrides
+    settings.set_model_override("unsloth/B-GGUF", llama_extra_args = ["--numa", "distribute"])
+    settings.set_model_override("unsloth/B-GGUF:Q4_K_M", llama_extra_args = ["--top-k", "20"])
+    forgotten = _put("unsloth/B-GGUF:Q4_K_M", llama_extra_args = [], remove = True)
+    assert "unsloth/B-GGUF:Q4_K_M" not in forgotten.overrides
 
 
 def test_a_save_that_did_not_touch_the_box_leaves_the_fallback(override_store):
     # Omitting the field is how every save that never opened the editor behaves, and
     # it means "keep them", not "clear them".
-    settings.set_model_override("LAiM/B-GGUF", llama_extra_args = ["--numa", "distribute"])
-    _put("LAiM/B-GGUF:Q4_K_M", max_seq_length = 4096)
-    assert settings.get_model_override("LAiM/B-GGUF")["llama_extra_args"] == [
+    settings.set_model_override("unsloth/B-GGUF", llama_extra_args = ["--numa", "distribute"])
+    _put("unsloth/B-GGUF:Q4_K_M", max_seq_length = 4096)
+    assert settings.get_model_override("unsloth/B-GGUF")["llama_extra_args"] == [
         "--numa",
         "distribute",
     ]
@@ -9981,14 +9981,14 @@ def test_a_save_that_did_not_touch_the_box_leaves_the_fallback(override_store):
 def test_a_fill_pass_never_clears_a_fallback(override_store):
     # The migration writes only what is missing, and mirrors both spellings of a model;
     # clearing from it would delete flags it is supposed to be preserving.
-    settings.set_model_override("LAiM/B-GGUF", llama_extra_args = ["--numa", "distribute"])
+    settings.set_model_override("unsloth/B-GGUF", llama_extra_args = ["--numa", "distribute"])
     _put(
-        "LAiM/B-GGUF:Q4_K_M",
+        "unsloth/B-GGUF:Q4_K_M",
         llama_extra_args = [],
         remove = False,
         fill_absent_fields = True,
     )
-    assert settings.get_model_override("LAiM/B-GGUF")["llama_extra_args"] == [
+    assert settings.get_model_override("unsloth/B-GGUF")["llama_extra_args"] == [
         "--numa",
         "distribute",
     ]
@@ -10003,18 +10003,18 @@ def test_clearing_one_quant_stops_the_legacy_repo_row_from_answering(monkeypatch
     # cleared box is kept as an explicit empty list instead: a row that resolves, and
     # supplies no arguments.
     _mock_override_store(monkeypatch)
-    settings.set_model_override("LAiM/B-GGUF", llama_extra_args = ["--top-k", "40"])
-    _put("LAiM/B-GGUF:Q4_K_M", llama_extra_args = [])
+    settings.set_model_override("unsloth/B-GGUF", llama_extra_args = ["--top-k", "40"])
+    _put("unsloth/B-GGUF:Q4_K_M", llama_extra_args = [])
 
-    assert settings.get_model_override("LAiM/B-GGUF:Q4_K_M") == {"llama_extra_args": []}
-    key, override = settings.resolve_override_for_load("LAiM/B-GGUF", None, "Q4_K_M")
-    assert key == "LAiM/B-GGUF:Q4_K_M"
+    assert settings.get_model_override("unsloth/B-GGUF:Q4_K_M") == {"llama_extra_args": []}
+    key, override = settings.resolve_override_for_load("unsloth/B-GGUF", None, "Q4_K_M")
+    assert key == "unsloth/B-GGUF:Q4_K_M"
     assert override.get("llama_extra_args") == []
     # And the bare row is untouched, because it is still the fallback for every other
     # quant of this repo that has no row of its own.
-    assert settings.get_model_override("LAiM/B-GGUF")["llama_extra_args"] == ["--top-k", "40"]
-    other_key, other = settings.resolve_override_for_load("LAiM/B-GGUF", None, "Q8_0")
-    assert other_key == "LAiM/B-GGUF"
+    assert settings.get_model_override("unsloth/B-GGUF")["llama_extra_args"] == ["--top-k", "40"]
+    other_key, other = settings.resolve_override_for_load("unsloth/B-GGUF", None, "Q8_0")
+    assert other_key == "unsloth/B-GGUF"
     assert other["llama_extra_args"] == ["--top-k", "40"]
 
 
@@ -10023,8 +10023,8 @@ def test_an_empty_save_with_nothing_to_suppress_still_stores_nothing(monkeypatch
     # "no launch flags" and "nothing stored" are the same thing, and writing an empty
     # row would leave an entry the settings page then lists as configured.
     _mock_override_store(monkeypatch)
-    _put("LAiM/B-GGUF:Q4_K_M", llama_extra_args = [])
-    assert settings.get_model_override("LAiM/B-GGUF:Q4_K_M") == {}
+    _put("unsloth/B-GGUF:Q4_K_M", llama_extra_args = [])
+    assert settings.get_model_override("unsloth/B-GGUF:Q4_K_M") == {}
     assert settings.get_model_overrides() == {}
 
 
@@ -10033,10 +10033,10 @@ def test_a_fill_never_writes_the_tombstone(monkeypatch):
     # absence of a request, not a clear: writing a row for it would suppress the
     # fallback the user never asked to be rid of.
     _mock_override_store(monkeypatch)
-    settings.set_model_override("LAiM/B-GGUF", llama_extra_args = ["--top-k", "40"])
-    _put("LAiM/B-GGUF:Q4_K_M", llama_extra_args = [], fill_absent_fields = True)
-    assert "llama_extra_args" not in settings.get_model_override("LAiM/B-GGUF:Q4_K_M")
-    key, override = settings.resolve_override_for_load("LAiM/B-GGUF", None, "Q4_K_M")
+    settings.set_model_override("unsloth/B-GGUF", llama_extra_args = ["--top-k", "40"])
+    _put("unsloth/B-GGUF:Q4_K_M", llama_extra_args = [], fill_absent_fields = True)
+    assert "llama_extra_args" not in settings.get_model_override("unsloth/B-GGUF:Q4_K_M")
+    key, override = settings.resolve_override_for_load("unsloth/B-GGUF", None, "Q4_K_M")
     assert override.get("llama_extra_args") == ["--top-k", "40"]
 
 
@@ -10334,7 +10334,7 @@ def _complete_minimax_pipeline(root):
 
 
 @pytest.mark.parametrize(
-    "repo", ["LAiM/Spark-TTS-0.5B", "SparkAudio/Spark-TTS-0.5B", "org/custom-voice"]
+    "repo", ["unsloth/Spark-TTS-0.5B", "SparkAudio/Spark-TTS-0.5B", "org/custom-voice"]
 )
 def test_a_downloaded_spark_repository_resolves_to_its_llm_checkpoint(tmp_path, repo):
     snapshot = tmp_path / "models--LAiM--Spark-TTS-0.5B" / "snapshots" / "revision"
@@ -10487,26 +10487,26 @@ def test_auto_switch_loads_an_unloaded_mlx_model(monkeypatch):
 
     _wire_on(
         monkeypatch,
-        resolves_to = ("/srv/models/Qwen3-MLX", None, "LAiM/Qwen3-MLX"),
+        resolves_to = ("/srv/models/Qwen3-MLX", None, "unsloth/Qwen3-MLX"),
         backend = llama,
         recorder = _load,
     )
     monkeypatch.setattr(inference_route, "get_inference_backend", lambda: orchestrator)
     entry = resolver._LocalGgufEntry(
-        "LAiM/Qwen3-MLX", "/srv/models/Qwen3-MLX", (), is_gguf = False
+        "unsloth/Qwen3-MLX", "/srv/models/Qwen3-MLX", (), is_gguf = False
     )
-    monkeypatch.setattr(resolver, "_scan", (time.monotonic(), {"LAiM/qwen3-mlx": entry}))
-    settings.set_model_override("LAiM/Qwen3-MLX", n_parallel = 8)
+    monkeypatch.setattr(resolver, "_scan", (time.monotonic(), {"unsloth/qwen3-mlx": entry}))
+    settings.set_model_override("unsloth/Qwen3-MLX", n_parallel = 8)
 
-    _run_hook("LAiM/Qwen3-MLX")
+    _run_hook("unsloth/Qwen3-MLX")
 
     assert [c.model_path for c in calls] == ["/srv/models/Qwen3-MLX"]
     assert calls[0].gguf_variant is None
     assert calls[0].n_parallel == 8
     # The alias lands on the orchestrator, leaving the llama.cpp backend untouched.
-    assert orchestrator._openai_advertised_id == "LAiM/Qwen3-MLX"
+    assert orchestrator._openai_advertised_id == "unsloth/Qwen3-MLX"
     assert getattr(llama, "_openai_advertised_id", None) is None
-    assert inference_route._openai_model_objects()[0]["id"] == "LAiM/Qwen3-MLX"
+    assert inference_route._openai_model_objects()[0]["id"] == "unsloth/Qwen3-MLX"
 
 
 def test_auto_switch_does_not_reload_a_resident_mlx_model(monkeypatch):
@@ -10516,7 +10516,7 @@ def test_auto_switch_does_not_reload_a_resident_mlx_model(monkeypatch):
     class _FakeOrchestrator:
         active_model_name = "/srv/models/Qwen3-MLX"
         models: dict = {}
-        _openai_advertised_id = "LAiM/Qwen3-MLX"
+        _openai_advertised_id = "unsloth/Qwen3-MLX"
 
     calls = []
 
@@ -10526,19 +10526,19 @@ def test_auto_switch_does_not_reload_a_resident_mlx_model(monkeypatch):
 
     _wire_on(
         monkeypatch,
-        resolves_to = ("/srv/models/Qwen3-MLX", None, "LAiM/Qwen3-MLX"),
+        resolves_to = ("/srv/models/Qwen3-MLX", None, "unsloth/Qwen3-MLX"),
         backend = llama,
         recorder = _load,
     )
     monkeypatch.setattr(inference_route, "get_inference_backend", lambda: _FakeOrchestrator())
     entry = resolver._LocalGgufEntry(
-        "LAiM/Qwen3-MLX", "/srv/models/Qwen3-MLX", (), is_gguf = False
+        "unsloth/Qwen3-MLX", "/srv/models/Qwen3-MLX", (), is_gguf = False
     )
-    monkeypatch.setattr(resolver, "_scan", (time.monotonic(), {"LAiM/qwen3-mlx": entry}))
+    monkeypatch.setattr(resolver, "_scan", (time.monotonic(), {"unsloth/qwen3-mlx": entry}))
 
-    assert inference_route._loaded_satisfies("LAiM/Qwen3-MLX") is True
-    assert inference_route._loaded_identity_satisfies("LAiM/Qwen3-MLX") is True
-    _run_hook("LAiM/Qwen3-MLX")
+    assert inference_route._loaded_satisfies("unsloth/Qwen3-MLX") is True
+    assert inference_route._loaded_identity_satisfies("unsloth/Qwen3-MLX") is True
+    _run_hook("unsloth/Qwen3-MLX")
     assert calls == []
 
 
@@ -10547,7 +10547,7 @@ def test_a_resident_mlx_alias_counts_as_a_namespaced_identity(monkeypatch):
     # answered by the resident MLX model instead of refused.
     class _FakeOrchestrator:
         active_model_name = "/srv/models/Qwen3-MLX"
-        _openai_advertised_id = "LAiM/Qwen3-MLX"
+        _openai_advertised_id = "unsloth/Qwen3-MLX"
 
     monkeypatch.setattr(inference_route, "get_llama_cpp_backend", lambda: _FakeBackend(None))
     monkeypatch.setattr(inference_route, "get_inference_backend", lambda: _FakeOrchestrator())
@@ -10572,20 +10572,20 @@ def test_a_gguf_only_endpoint_refuses_a_non_gguf_target_before_loading(monkeypat
 
     _wire_on(
         monkeypatch,
-        resolves_to = ("/srv/models/Qwen3-MLX", None, "LAiM/Qwen3-MLX"),
+        resolves_to = ("/srv/models/Qwen3-MLX", None, "unsloth/Qwen3-MLX"),
         backend = llama,
         recorder = _load,
     )
     monkeypatch.setattr(inference_route, "get_inference_backend", lambda: _FakeOrchestrator())
     entry = resolver._LocalGgufEntry(
-        "LAiM/Qwen3-MLX", "/srv/models/Qwen3-MLX", (), is_gguf = False
+        "unsloth/Qwen3-MLX", "/srv/models/Qwen3-MLX", (), is_gguf = False
     )
-    monkeypatch.setattr(resolver, "_scan", (time.monotonic(), {"LAiM/qwen3-mlx": entry}))
+    monkeypatch.setattr(resolver, "_scan", (time.monotonic(), {"unsloth/qwen3-mlx": entry}))
 
     with pytest.raises(HTTPException) as excinfo:
         asyncio.run(
             inference_route._maybe_auto_switch_model(
-                "LAiM/Qwen3-MLX", object(), "tester", gguf_only = True
+                "unsloth/Qwen3-MLX", object(), "tester", gguf_only = True
             )
         )
     assert excinfo.value.status_code == 400
@@ -11243,7 +11243,7 @@ def test_a_stale_alias_after_unload_is_not_a_resident_identity(monkeypatch):
     # org/model request look like a mismatch against a model that is no longer loaded.
     class _FakeOrchestrator:
         active_model_name = None
-        _openai_advertised_id = "LAiM/Qwen3-MLX"
+        _openai_advertised_id = "unsloth/Qwen3-MLX"
 
     monkeypatch.setattr(inference_route, "get_llama_cpp_backend", lambda: _FakeBackend(None))
     monkeypatch.setattr(inference_route, "get_inference_backend", lambda: _FakeOrchestrator())
@@ -12239,7 +12239,7 @@ def test_speech_probe_refuses_remote_code(monkeypatch, audio_type, allowed):
 
 
 def test_chat_withheld_model_named_by_its_advertised_alias(monkeypatch):
-    # _stt_model_objects advertises "tiny" while the catalog row is LAiM/whisper-tiny, so a
+    # _stt_model_objects advertises "tiny" while the catalog row is unsloth/whisper-tiny, so a
     # request naming what GET /v1/models showed must read as downloaded, not as absent.
     _wire_withheld_chat(
         monkeypatch,
@@ -12247,7 +12247,7 @@ def test_chat_withheld_model_named_by_its_advertised_alias(monkeypatch):
             {"id": "org/A-GGUF"},
             {"id": "tiny", "task": "automatic-speech-recognition"},
         ],
-        downloaded = ("org/A-GGUF", "LAiM/whisper-tiny"),
+        downloaded = ("org/A-GGUF", "unsloth/whisper-tiny"),
     )
     status, detail = _chat_error(_chat_request(model = "tiny"))
     assert status == 404
@@ -12335,7 +12335,7 @@ def test_a_stale_idle_reload_stash_diverts_a_refusal_into_a_reload(monkeypatch):
             {"id": "org/A-GGUF"},
             {"id": "tiny", "task": "automatic-speech-recognition"},
         ],
-        downloaded = ("org/A-GGUF", "LAiM/whisper-tiny"),
+        downloaded = ("org/A-GGUF", "unsloth/whisper-tiny"),
     )
 
     def _load_model(config = None, **_kw):
@@ -12351,7 +12351,7 @@ def test_a_stale_idle_reload_stash_diverts_a_refusal_into_a_reload(monkeypatch):
             {"active_model_name": None, "models": {}, "load_model": staticmethod(_load_model)},
         )(),
     )
-    kw._last_unloaded_model = ("LAiM/Idle-GGUF", "Q4_K_M", "LAiM/Idle-GGUF")
+    kw._last_unloaded_model = ("unsloth/Idle-GGUF", "Q4_K_M", "unsloth/Idle-GGUF")
     # Fictional repo, blocked Hub: answer "no GGUF" so resolution still reaches the double (#11551).
     import utils.models.model_config as model_config
 
@@ -12393,14 +12393,14 @@ def test_the_idle_reload_stash_is_cleared_around_every_test(tmp_path):
         return {"dir": str(tmp_path), "slots": [{"id": 0, "filename": name, "n_saved": 42}]}, slot
 
     run = fixture.__wrapped__()
-    kw._last_unloaded_model = ("LAiM/Idle-GGUF", "Q4_K_M", "LAiM/Idle-GGUF")
+    kw._last_unloaded_model = ("unsloth/Idle-GGUF", "Q4_K_M", "unsloth/Idle-GGUF")
     kw._kv_resume, before = _saved("before.bin")
     next(run)
     assert kw._last_unloaded_model is None, "the stash was not cleared before the test body"
     assert kw._kv_resume is None, "the KV manifest was not cleared before the test body"
     assert not before.exists(), "the KV slot file outlived the manifest that named it"
 
-    kw._last_unloaded_model = ("LAiM/Idle-GGUF", "Q4_K_M", "LAiM/Idle-GGUF")
+    kw._last_unloaded_model = ("unsloth/Idle-GGUF", "Q4_K_M", "unsloth/Idle-GGUF")
     kw._kv_resume, after = _saved("after.bin")
     next(run, None)
     assert kw._last_unloaded_model is None, "the stash was not cleared after the test body"
@@ -12566,13 +12566,13 @@ _NPU_MODEL = "lemonade:qwen3-0.6b-FLM"
 
 def test_an_npu_model_named_by_a_request_switches_when_on(monkeypatch):
     # The GGUF resolver cannot find an NPU id, so this used to 404 even with the switch on.
-    backend, rec = _wired(monkeypatch, _FakeBackend("LAiM/A-GGUF"), None)
+    backend, rec = _wired(monkeypatch, _FakeBackend("unsloth/A-GGUF"), None)
     _run_hook(_NPU_MODEL, serves_npu = True)
     assert [call.model_path for call in rec.calls] == [_NPU_MODEL]
 
 
 def test_an_npu_switch_loads_with_the_saved_context_length(monkeypatch):
-    backend, rec = _wired(monkeypatch, _FakeBackend("LAiM/A-GGUF"), None)
+    backend, rec = _wired(monkeypatch, _FakeBackend("unsloth/A-GGUF"), None)
     monkeypatch.setattr(
         settings,
         "get_model_override",
@@ -12585,7 +12585,7 @@ def test_an_npu_switch_loads_with_the_saved_context_length(monkeypatch):
 def test_a_deferred_npu_switch_leaves_the_model_preview_owned(monkeypatch):
     # Chat defers its claim and can still reject after the switch (n > 1 on the NPU); unmarked, the
     # NPU model then read as Studio-owned and every public preview got 503.
-    _wired(monkeypatch, _FakeBackend("LAiM/A-GGUF"), None)
+    _wired(monkeypatch, _FakeBackend("unsloth/A-GGUF"), None)
     monkeypatch.setattr(inference_route, "_preview_resident_ident", None)
     asyncio.run(
         inference_route._maybe_auto_switch_model(
@@ -12597,7 +12597,7 @@ def test_a_deferred_npu_switch_leaves_the_model_preview_owned(monkeypatch):
 
 def test_an_npu_switch_keeps_the_setting_read_on_entry(monkeypatch):
     # Turned off mid-request, a second read loaded nothing and the resident GGUF answered instead.
-    _, rec = _wired(monkeypatch, _FakeBackend("LAiM/A-GGUF"), None)
+    _, rec = _wired(monkeypatch, _FakeBackend("unsloth/A-GGUF"), None)
     state = {"on": True}
     monkeypatch.setattr(settings, "get_openai_auto_switch_enabled", lambda: state["on"])
     refuse = inference_route._refuse_unservable_npu_switch
@@ -12612,7 +12612,7 @@ def test_an_npu_switch_keeps_the_setting_read_on_entry(monkeypatch):
 
 
 def test_an_npu_model_named_with_the_switch_off_says_how_to_load_it(monkeypatch):
-    backend, rec = _wired(monkeypatch, _FakeBackend("LAiM/A-GGUF"), None, enabled = False)
+    backend, rec = _wired(monkeypatch, _FakeBackend("unsloth/A-GGUF"), None, enabled = False)
     with pytest.raises(HTTPException) as excinfo:
         _run_hook(_NPU_MODEL)
     assert excinfo.value.status_code == 404
@@ -12621,7 +12621,7 @@ def test_an_npu_model_named_with_the_switch_off_says_how_to_load_it(monkeypatch)
 
 
 def test_a_resident_npu_model_is_not_reloaded(monkeypatch):
-    backend, rec = _wired(monkeypatch, _FakeBackend("LAiM/A-GGUF"), None)
+    backend, rec = _wired(monkeypatch, _FakeBackend("unsloth/A-GGUF"), None)
     monkeypatch.setattr(inference_route, "_loaded_satisfies", lambda model: model == _NPU_MODEL)
     _run_hook(_NPU_MODEL, serves_npu = True)
     assert rec.calls == []
@@ -12698,7 +12698,7 @@ def _npu_catalog_entry(
 )
 def test_a_request_the_npu_model_cannot_serve_never_switches(monkeypatch, kwargs, words):
     # Loading first evicted the resident GGUF, then the endpoint failed on the NPU model anyway.
-    backend, rec = _wired(monkeypatch, _FakeBackend("LAiM/A-GGUF"), None)
+    backend, rec = _wired(monkeypatch, _FakeBackend("unsloth/A-GGUF"), None)
     _npu_catalog_entry(monkeypatch, vision = False)
     with pytest.raises(HTTPException) as excinfo:
         asyncio.run(
@@ -12709,7 +12709,7 @@ def test_a_request_the_npu_model_cannot_serve_never_switches(monkeypatch, kwargs
     assert excinfo.value.status_code == 400
     assert words in str(excinfo.value.detail)
     assert rec.calls == []
-    assert backend.model_identifier == "LAiM/A-GGUF"
+    assert backend.model_identifier == "unsloth/A-GGUF"
 
 
 @pytest.mark.parametrize(
@@ -12724,7 +12724,7 @@ def test_a_request_the_npu_model_cannot_serve_never_switches(monkeypatch, kwargs
 )
 def test_a_chat_request_the_npu_model_would_refuse_never_switches(monkeypatch, fields, param):
     # NPU chat checked these only after the switch had already evicted the resident GGUF.
-    backend, rec = _wired(monkeypatch, _FakeBackend("LAiM/A-GGUF"), None)
+    backend, rec = _wired(monkeypatch, _FakeBackend("unsloth/A-GGUF"), None)
     _npu_catalog_entry(monkeypatch, vision = False, tools = False)
     payload = _chat_request(model = _NPU_MODEL, **fields)
     with pytest.raises(HTTPException) as excinfo:
@@ -12732,7 +12732,7 @@ def test_a_chat_request_the_npu_model_would_refuse_never_switches(monkeypatch, f
     assert excinfo.value.status_code == 400
     assert param in str(excinfo.value.detail)
     assert rec.calls == []
-    assert backend.model_identifier == "LAiM/A-GGUF"
+    assert backend.model_identifier == "unsloth/A-GGUF"
 
 
 @pytest.mark.parametrize("route", ["/v1/responses", "/v1/messages"])
@@ -12742,7 +12742,7 @@ def test_a_route_the_npu_model_cannot_serve_never_switches_to_it(monkeypatch, ro
 
     from models.inference import AnthropicMessagesRequest
 
-    backend, rec = _wired(monkeypatch, _FakeBackend("LAiM/A-GGUF"), None)
+    backend, rec = _wired(monkeypatch, _FakeBackend("unsloth/A-GGUF"), None)
     _npu_catalog_entry(monkeypatch, vision = True, tools = True)
     request = Request({"type": "http", "headers": [], "path": route, "method": "POST"})
     if route == "/v1/responses":
@@ -12756,14 +12756,14 @@ def test_a_route_the_npu_model_cannot_serve_never_switches_to_it(monkeypatch, ro
     with pytest.raises(Exception) as excinfo:
         asyncio.run(call)
     assert rec.calls == []
-    assert backend.model_identifier == "LAiM/A-GGUF"
+    assert backend.model_identifier == "unsloth/A-GGUF"
     assert isinstance(excinfo.value, HTTPException) and excinfo.value.status_code == 400
     assert "serves /v1/chat/completions only" in str(excinfo.value.detail)
 
 
 def test_an_mcp_image_request_never_switches_to_an_npu_model(monkeypatch):
     # NPU chat runs no MCP tool loop, so it refused the image only after evicting the GGUF.
-    backend, rec = _wired(monkeypatch, _FakeBackend("LAiM/A-GGUF"), None)
+    backend, rec = _wired(monkeypatch, _FakeBackend("unsloth/A-GGUF"), None)
     _npu_catalog_entry(monkeypatch, vision = True, tools = True)
 
     async def _an_mcp_image(*_args):
@@ -12776,11 +12776,11 @@ def test_an_mcp_image_request_never_switches_to_an_npu_model(monkeypatch):
     assert excinfo.value.status_code == 400
     assert "MCP" in str(excinfo.value.detail)
     assert rec.calls == []
-    assert backend.model_identifier == "LAiM/A-GGUF"
+    assert backend.model_identifier == "unsloth/A-GGUF"
 
 
 def test_an_image_request_switches_to_a_vision_npu_model(monkeypatch):
-    backend, rec = _wired(monkeypatch, _FakeBackend("LAiM/A-GGUF"), None)
+    backend, rec = _wired(monkeypatch, _FakeBackend("unsloth/A-GGUF"), None)
     _npu_catalog_entry(monkeypatch, vision = True)
     asyncio.run(
         inference_route._maybe_auto_switch_model(
@@ -12791,7 +12791,7 @@ def test_an_image_request_switches_to_a_vision_npu_model(monkeypatch):
 
 
 def test_a_cancelled_request_never_switches_to_an_npu_model(monkeypatch):
-    backend, rec = _wired(monkeypatch, _FakeBackend("LAiM/A-GGUF"), None)
+    backend, rec = _wired(monkeypatch, _FakeBackend("unsloth/A-GGUF"), None)
     cancel = threading.Event()
     cancel.set()
     request = SimpleNamespace(state = SimpleNamespace(generation_cancel_event = cancel))
@@ -12805,7 +12805,7 @@ def test_a_cancelled_request_never_switches_to_an_npu_model(monkeypatch):
 
 def test_a_tool_result_image_never_switches_to_a_text_only_npu_model(monkeypatch):
     # A text-only GGUF reads a tool-result image as a note; NPU chat rejects it after the load.
-    backend, rec = _wired(monkeypatch, _FakeBackend("LAiM/A-GGUF"), None)
+    backend, rec = _wired(monkeypatch, _FakeBackend("unsloth/A-GGUF"), None)
     _npu_catalog_entry(monkeypatch, vision = False)
     with pytest.raises(HTTPException) as excinfo:
         asyncio.run(
@@ -12824,7 +12824,7 @@ def test_a_tool_result_image_never_switches_to_a_text_only_npu_model(monkeypatch
 
 def test_an_npu_switch_counts_as_a_queued_switch_while_it_loads(monkeypatch):
     # Uncounted, a GGUF switch waiting on the lock this one holds kept its drain from finishing.
-    _wired(monkeypatch, _FakeBackend("LAiM/A-GGUF"), None)
+    _wired(monkeypatch, _FakeBackend("unsloth/A-GGUF"), None)
     seen = []
 
     async def _load(*_args, **_kwargs):

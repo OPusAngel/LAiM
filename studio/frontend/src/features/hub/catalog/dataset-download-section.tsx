@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   Tooltip,
   TooltipContent,
@@ -48,7 +49,7 @@ export function DatasetDownloadSection({
   const { deleting, runDelete } = useCardDelete({
     action: () => deleteCachedDataset(repoId, cachePath ?? undefined),
     resourceName: "dataset",
-    successMessage: () => `Deleted ${repoId}`,
+    successMessage: () => translate("uxHub.deletedpyid0", { p1: repoId }),
     onSuccess: () => {
       setDeleteOpen(false);
       onChange?.();
@@ -107,13 +108,11 @@ export function DatasetDownloadSection({
           onOpenChange={(o) => {
             if (!o && !deleting) setDeleteOpen(false);
           }}
-          title="Delete cached dataset?"
+          title={translate("uxHub.deleteCachedDatasetbtskb")}
           deleting={deleting}
           onConfirm={() => void runDelete()}
           description={
-            <>
-              This will remove{" "}
-              <span className="font-medium text-foreground">{repoId}</span> and
+            <>{translate("uxHub.thisWillRemovebmxmc", { p1: " " })}<span className="font-medium text-foreground">{repoId}</span> and
               its downloaded files
               {totalBytes && totalBytes > 0
                 ? ` (${formatBytes(totalBytes)})`
@@ -126,12 +125,12 @@ export function DatasetDownloadSection({
     >
       <div className="relative flex h-9 min-w-0 flex-1 items-center pl-3 pr-2">
         <span className="flex items-center gap-1.5 text-ui-12 text-muted-foreground">
-          {isDownloaded && <DotTag tone="success" label="On device" />}
+          {isDownloaded && <DotTag tone="success" label={translate("settings.general.rag.onDevice")} />}
           {!isDownloaded && isPartial && !downloading && (
             <Tooltip>
               <TooltipTrigger asChild>
                 <span className="inline-flex">
-                  <DotTag tone="warning" label="Partial" />
+                  <DotTag tone="warning" label={translate("uxHub.partialxcezp")} />
                 </span>
               </TooltipTrigger>
               <TooltipContent side="top" sideOffset={4}>
@@ -147,7 +146,7 @@ export function DatasetDownloadSection({
         <div className="ml-auto flex items-center gap-0.5">
           {canDelete && (
             <CardDeleteButton
-              label={`Delete ${repoId}`}
+              label={translate("uxHub.deletevau21", { p1: repoId })}
               onClick={() => setDeleteOpen(true)}
             />
           )}

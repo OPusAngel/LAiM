@@ -194,7 +194,7 @@ def test_bnb_moe_loads_are_refused_without_load_in_4bit():
         )
 
     assert refused(True, "google/gemma-4-26B-A4B-it", None)
-    assert refused(False, "LAiM/gemma-4-26B-A4B-it-bnb-4bit", None)
+    assert refused(False, "unsloth/gemma-4-26B-A4B-it-bnb-4bit", None)
     assert refused(False, "someone/gemma-4-26b-moe-4bit", "bitsandbytes")
     assert refused(False, "Qwen/Qwen3.6-35B-A3B", "bitsandbytes", QWEN3_5_MOE, ("qwen3_5_moe",))
     # load_vllm has no 8-bit mode, so the experts would silently load in 16-bit.
@@ -203,7 +203,7 @@ def test_bnb_moe_loads_are_refused_without_load_in_4bit():
     )
     assert not refused(False, "google/gemma-4-26B-A4B-it", None)
     assert not refused(False, "Qwen/Qwen3.6-35B-A3B-FP8", "fp8", QWEN3_5_MOE, ("qwen3_5_moe",))
-    assert not refused(False, "LAiM/gemma-4-E2B-it-bnb-4bit", "bitsandbytes", GEMMA4_DENSE)
+    assert not refused(False, "unsloth/gemma-4-E2B-it-bnb-4bit", "bitsandbytes", GEMMA4_DENSE)
 
 
 def test_bnb_refusal_covers_text_sparse_moe():
@@ -221,7 +221,7 @@ def test_bnb_refusal_covers_text_sparse_moe():
                 gate,
                 load_in_4bit = load_in_4bit,
                 load_in_8bit = False,
-                model_name = "LAiM/Qwen3-30B-A3B-Instruct-2507",
+                model_name = "unsloth/Qwen3-30B-A3B-Instruct-2507",
                 get_quant_type = lambda config: method,
                 model_config = config,
                 model_types = list(model_types),

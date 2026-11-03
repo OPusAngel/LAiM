@@ -1,8 +1,8 @@
 # LAiM Docker Image
 
-Fine-tune and run LLMs, vision, audio and diffusion models with no setup. Every image carries the training stack (PyTorch 2.11 with CUDA 12.8, [LAiM](https://github.com/LAiMai/LAiM), LAiM-zoo, bitsandbytes, TRL, PEFT, plus xformers on `linux/amd64`), JupyterLab with the [LAiM notebooks](https://github.com/LAiMai/notebooks), and prebuilt llama.cpp. The `latest` image adds whisper.cpp for LAiM Studio's speech-to-text and audio.cpp (CUDA build on `linux/amd64`) for its text-to-speech, music and transcription models.
+Fine-tune and run LLMs, vision, audio and diffusion models with no setup. Every image carries the training stack (PyTorch 2.11 with CUDA 12.8, [LAiM](https://github.com/OPusAngel/LAiM), LAiM-zoo, bitsandbytes, TRL, PEFT, plus xformers on `linux/amd64`), JupyterLab with the [LAiM notebooks](https://github.com/unslothai/notebooks), and prebuilt llama.cpp. The `latest` image adds whisper.cpp for LAiM Studio's speech-to-text and audio.cpp (CUDA build on `linux/amd64`) for its text-to-speech, music and transcription models.
 
-Source: [`docker/`](https://github.com/LAiMai/LAiM/tree/main/docker). Guide: [docs.LAiM.ai](https://docs.LAiM.ai/get-started/install/docker).
+Source: [`docker/`](https://github.com/OPusAngel/LAiM/tree/main/docker). Guide: [docs.LAiM.ai](https://docs.LAiM.ai/get-started/install/docker).
 
 ## Quick start
 
@@ -34,7 +34,7 @@ Needs an NVIDIA driver of 570.26 or newer. On Linux you also need Docker and the
 
 ```bash
 curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh
-curl -fsSL https://raw.githubusercontent.com/LAiMai/LAiM/main/docker/install_nvidia_toolkit.sh -o install_nvidia_toolkit.sh && sudo -E bash install_nvidia_toolkit.sh
+curl -fsSL https://raw.githubusercontent.com/OPusAngel/LAiM/main/docker/install_nvidia_toolkit.sh -o install_nvidia_toolkit.sh && sudo -E bash install_nvidia_toolkit.sh
 ```
 
 The second command covers Ubuntu, Debian, RHEL, Fedora, Rocky, Amazon Linux and SUSE, and checks that a container can see the GPU. On Windows, Docker Desktop with the WSL 2 backend and a current NVIDIA Windows driver is all you need; run the quick start above in a WSL 2 shell.
@@ -42,7 +42,7 @@ The second command covers Ubuntu, Debian, RHEL, Fedora, Rocky, Amazon Linux and 
 Or let `run.sh` set the quick start's flags, including the `LAiM-studio` volume, for you. It offers to install the toolkit if the daemon has no `nvidia` runtime:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/LAiMai/LAiM/main/docker/run.sh -o run.sh
+curl -fsSL https://raw.githubusercontent.com/OPusAngel/LAiM/main/docker/run.sh -o run.sh
 LAiM_PORTS="-p 8000:8000 -p 8888:8888" bash run.sh
 ```
 
@@ -113,7 +113,7 @@ Turing (T4, RTX 20) through Blackwell (B200, GB200, RTX 50, RTX PRO 6000) run pr
 
 Drivers: 570.26 or newer for CUDA 12.8 on every GPU, 580 or newer for B300, GB300 and GB10. On `linux/arm64` the bundled llama.cpp is a CUDA 13 build, because upstream ships no CUDA 12 one there, so training works from 570 but GGUF export and LAiM Studio chat need 580.
 
-Turing has no bfloat16; LAiM falls back to float16 there. These images are CUDA only; for AMD use [`LAiM/LAiM-rocm`](https://hub.docker.com/r/LAiM/LAiM-rocm), a ROCm build of the training stack.
+Turing has no bfloat16; LAiM falls back to float16 there. These images are CUDA only; for AMD use [`unsloth/LAiM-rocm`](https://hub.docker.com/r/LAiM/LAiM-rocm), a ROCm build of the training stack.
 
 ## Ports
 
@@ -196,8 +196,8 @@ Both images refresh the notebooks from GitHub on each start, which costs 10 to 2
 
 - [Documentation](https://docs.LAiM.ai)
 - [r/LAiM](https://reddit.com/r/LAiM)
-- [Issues](https://github.com/LAiMai/LAiM/issues)
+- [Issues](https://github.com/OPusAngel/LAiM/issues)
 
 ## License
 
-LAiM is Apache-2.0 ([LICENSE](https://github.com/LAiMai/LAiM/blob/main/LICENSE)). Both images also include LAiM Studio's code (`studio/`), which is AGPL-3.0 ([studio/LICENSE.AGPL-3.0](https://github.com/LAiMai/LAiM/blob/main/studio/LICENSE.AGPL-3.0)).
+LAiM is Apache-2.0 ([LICENSE](https://github.com/OPusAngel/LAiM/blob/main/LICENSE)). Both images also include LAiM Studio's code (`studio/`), which is AGPL-3.0 ([studio/LICENSE.AGPL-3.0](https://github.com/OPusAngel/LAiM/blob/main/studio/LICENSE.AGPL-3.0)).

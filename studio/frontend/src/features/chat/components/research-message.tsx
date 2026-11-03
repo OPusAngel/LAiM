@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import { translate } from "@/i18n";
 import type { Citation } from "@/components/assistant-ui/citation-utils";
 import { DocumentSourcesGroup } from "@/components/assistant-ui/rag-sources";
 import {
@@ -75,8 +76,7 @@ export function ResearchMessage(): ReactElement | null {
     }
     return (
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Spinner /> Loading research…
-      </div>
+        <Spinner />{translate("uxChat.loadingResearchq12dn")}</div>
     );
   }
 
@@ -118,10 +118,10 @@ export function ResearchMessage(): ReactElement | null {
           </span>
           <span>
             {failed
-              ? `Deep research failed · ${sourceCount} sources`
-              : `Deep research completed · ${sourceCount} sources`}
+              ? translate("uxChat.deepResearchFailedSources9shmf", { p1: sourceCount })
+              : translate("uxChat.deepResearchCompletedSourcesbs75t", { p1: sourceCount })}
           </span>
-          <span className="text-primary">View activity</span>
+          <span className="text-primary">{translate("uxChat.viewActivitylsnxg")}</span>
         </button>
         <MarkdownPreview
           markdown={run.report}
@@ -130,7 +130,7 @@ export function ResearchMessage(): ReactElement | null {
         />
         <SourcesGroup sources={sources} allowRemoteIcons={false} />
         <DocumentSourcesGroup sources={documentSources} />
-        <DocumentSourcesGroup sources={mcpSources} label="MCP Sources" />
+        <DocumentSourcesGroup sources={mcpSources} label={translate("uxChat.mCPSourcesuazfi")} />
       </div>
     );
   }
@@ -142,7 +142,7 @@ export function ResearchMessage(): ReactElement | null {
   const liveDetail =
     runningResearchActivityTitle(session?.activities) ??
     run.plan?.title ??
-    "Building a rigorous research plan…";
+    translate("uxChat.buildingARigorousResearch1d3sz");
   return (
     <div
       className={cn(
@@ -169,11 +169,11 @@ export function ResearchMessage(): ReactElement | null {
         <div className="min-w-0 flex-1">
           <p className="font-heading text-sm font-medium">
             {failed
-              ? "Research could not be completed"
+              ? translate("uxChat.researchCouldNotBecb8j1")
               : cancelled
-                ? "Research stopped"
+                ? translate("uxChat.researchStoppedvbv8d")
                 : needsApproval
-                  ? "Your research plan is ready"
+                  ? translate("uxChat.yourResearchPlanIskx00d")
                   : researchStatusLabel(run.status)}
           </p>
           <p className="mt-1 text-ui-12p5 leading-relaxed text-muted-foreground">
@@ -182,9 +182,9 @@ export function ResearchMessage(): ReactElement | null {
               : failed
                 ? run.error
                 : needsApproval
-                  ? "Review the approach before the agent starts gathering evidence."
+                  ? translate("uxChat.reviewTheApproachBeforew75ix")
                   : cancelled
-                    ? "The activity gathered so far is still available."
+                    ? translate("uxChat.theActivityGatheredSojg66p")
                     : liveDetail}
           </p>
           <Button
@@ -193,7 +193,7 @@ export function ResearchMessage(): ReactElement | null {
             className="mt-3"
             onClick={() => openResearchRun(run)}
           >
-            {needsApproval ? "Review plan" : "View activity"}
+            {needsApproval ? translate("uxChat.reviewPlanu1wqm") : translate("uxChat.viewActivity1d0x7")}
           </Button>
         </div>
       </div>

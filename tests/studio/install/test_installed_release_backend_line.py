@@ -55,11 +55,11 @@ requires_bash = pytest.mark.skipif(
 STRICT_MODES = ["off", "1.0", "2.0", "3.0", "Latest"]
 
 _BASE_MARKER = {
-    "published_repo": "LAiMai/llama.cpp",
+    "published_repo": "unslothai/llama.cpp",
     "release_tag": "b10715-mix-86bd2d3",
     "tag": "b10715",
 }
-_BASE_LINE = "installed release: LAiMai/llama.cpp@b10715-mix-86bd2d3 (tag b10715)"
+_BASE_LINE = "installed release: unslothai/llama.cpp@b10715-mix-86bd2d3 (tag b10715)"
 
 
 def _marker(**overrides):
@@ -132,8 +132,8 @@ _CASES = [
     ("backend_key_mixed_case", _marker(Backend = "vulkan"), _BASE_LINE),
     (
         "no_tag_key",
-        json.dumps({"published_repo": "LAiMai/llama.cpp", "release_tag": "b10715-mix"}),
-        "installed release: LAiMai/llama.cpp@b10715-mix",
+        json.dumps({"published_repo": "unslothai/llama.cpp", "release_tag": "b10715-mix"}),
+        "installed release: unslothai/llama.cpp@b10715-mix",
     ),
     (
         "tag_equals_release_tag",
@@ -144,7 +144,7 @@ _CASES = [
         "upstream_binary_source",
         json.dumps(
             {
-                "published_repo": "LAiMai/LAiM",
+                "published_repo": "OPusAngel/LAiM",
                 "release_tag": "b10715-mix",
                 "tag": "b10715",
                 "source": "ggml-org",
@@ -153,7 +153,7 @@ _CASES = [
                 "backend": "cpu",
             }
         ),
-        "installed release: LAiMai/LAiM@b10715-mix + ggml-org@b10715 -- cpu backend",
+        "installed release: OPusAngel/LAiM@b10715-mix + ggml-org@b10715 -- cpu backend",
     ),
     ("missing_published_repo", json.dumps({"release_tag": "b1", "backend": "rocm"}), ""),
     ("missing_release_tag", json.dumps({"published_repo": "r/l", "backend": "rocm"}), ""),
@@ -173,10 +173,10 @@ _IDS = [case[0] for case in _CASES]
 
 # setup.sh has a '+ <source>@<binary_tag>' branch setup.ps1 lacks.
 _PS1_EXPECTED_OVERRIDES = {
-    "upstream_binary_source": "installed release: LAiMai/LAiM@b10715-mix (tag b10715) -- cpu backend",
+    "upstream_binary_source": "installed release: OPusAngel/LAiM@b10715-mix (tag b10715) -- cpu backend",
 }
 _HISTORICAL_PS1_OVERRIDES = {
-    "2026_05_30_61df3aaef": "installed release: LAiMai/llama.cpp@b5300-mix (tag b5300)",
+    "2026_05_30_61df3aaef": "installed release: unslothai/llama.cpp@b5300-mix (tag b5300)",
 }
 _KNOWN_TWIN_DIVERGENCES = frozenset(_PS1_EXPECTED_OVERRIDES) | frozenset(_HISTORICAL_PS1_OVERRIDES)
 
@@ -399,7 +399,7 @@ _HISTORICAL_MARKERS = {
             "requested_tag": "b4100",
             "tag": "b4100",
             "release_tag": "b4100-mix",
-            "published_repo": "LAiMai/llama.cpp",
+            "published_repo": "unslothai/llama.cpp",
             "asset": "linux-cuda",
             "asset_sha256": "0" * 64,
             "source": "LAiM",
@@ -412,14 +412,14 @@ _HISTORICAL_MARKERS = {
             "prebuilt_fallback_used": False,
             "installed_at_utc": "2026-04-01T00:00:00Z",
         },
-        "installed release: LAiMai/llama.cpp@b4100-mix (tag b4100)",
+        "installed release: unslothai/llama.cpp@b4100-mix (tag b4100)",
     ),
     "2026_04_02_1ce8a8e7c": (
         {
             "requested_tag": "b4200",
             "tag": "b4200",
             "release_tag": "b4200-mix",
-            "published_repo": "LAiMai/llama.cpp",
+            "published_repo": "unslothai/llama.cpp",
             "asset": "linux-vulkan",
             "source_asset": "src.tar.gz",
             "source_commit_short": "aaaaaaa",
@@ -430,115 +430,115 @@ _HISTORICAL_MARKERS = {
             "resolved_source_ref": "b4200",
             "installed_at_utc": "2026-04-02T00:00:00Z",
         },
-        "installed release: LAiMai/llama.cpp@b4200-mix (tag b4200)",
+        "installed release: unslothai/llama.cpp@b4200-mix (tag b4200)",
     ),
     "2026_05_30_61df3aaef": (
         {
             "tag": "b5300",
             "release_tag": "b5300-mix",
-            "published_repo": "LAiMai/llama.cpp",
+            "published_repo": "unslothai/llama.cpp",
             "source": "ggml-org",
             "binary_repo": "ggml-org/llama.cpp",
             "binary_release_tag": "b5300",
             "installed_at_utc": "2026-05-30T00:00:00Z",
         },
-        "installed release: LAiMai/llama.cpp@b5300-mix + ggml-org@b5300",
+        "installed release: unslothai/llama.cpp@b5300-mix + ggml-org@b5300",
     ),
     "2026_07_20_cf912cbd8": (
         {
             "tag": "b6900",
             "release_tag": "b6900-mix",
-            "published_repo": "LAiMai/llama.cpp",
+            "published_repo": "unslothai/llama.cpp",
             "force_cpu": True,
             "asset": "linux-cpu",
             "installed_at_utc": "2026-07-20T00:00:00Z",
         },
-        "installed release: LAiMai/llama.cpp@b6900-mix (tag b6900)",
+        "installed release: unslothai/llama.cpp@b6900-mix (tag b6900)",
     ),
     # llama_backend is the pre-#8520 field, not the key the printer reads.
     "2026_07_27_7917c7828": (
         {
             "tag": "b7100",
             "release_tag": "b7100-mix",
-            "published_repo": "LAiMai/llama.cpp",
+            "published_repo": "unslothai/llama.cpp",
             "llama_backend": "vulkan",
             "installed_at_utc": "2026-07-27T00:00:00Z",
         },
-        "installed release: LAiMai/llama.cpp@b7100-mix (tag b7100)",
+        "installed release: unslothai/llama.cpp@b7100-mix (tag b7100)",
     ),
     "2026_08_04_9b452cb3b": (
         {
             "tag": "b7400",
             "release_tag": "b7400-mix",
-            "published_repo": "LAiMai/llama.cpp",
+            "published_repo": "unslothai/llama.cpp",
             "ggml_tree": "abc123",
             "installed_at_utc": "2026-08-04T00:00:00Z",
         },
-        "installed release: LAiMai/llama.cpp@b7400-mix (tag b7400)",
+        "installed release: unslothai/llama.cpp@b7400-mix (tag b7400)",
     ),
     "2026_08_08_738413ab0": (
         {
             "tag": "b7600",
             "release_tag": "b7600-mix",
-            "published_repo": "LAiMai/llama.cpp",
+            "published_repo": "unslothai/llama.cpp",
             "llama_backend": "auto",
             "rocm_gfx": "gfx1151",
             "installed_at_utc": "2026-08-08T00:00:00Z",
         },
-        "installed release: LAiMai/llama.cpp@b7600-mix (tag b7600)",
+        "installed release: unslothai/llama.cpp@b7600-mix (tag b7600)",
     ),
     "2026_08_13_5426a78c3": (
         {
             "tag": "b7900",
             "release_tag": "b7900-mix",
-            "published_repo": "LAiMai/llama.cpp",
+            "published_repo": "unslothai/llama.cpp",
             "backend": "vulkan",
             "backend_request": "auto",
             "installed_at_utc": "2026-08-13T00:00:00Z",
         },
-        "installed release: LAiMai/llama.cpp@b7900-mix (tag b7900) -- vulkan backend",
+        "installed release: unslothai/llama.cpp@b7900-mix (tag b7900) -- vulkan backend",
     ),
     # backend_for_install_kind() returns None for an unknown kind, landing as JSON null.
     "backend_written_as_null": (
         {
             "tag": "b7900",
             "release_tag": "b7900-mix",
-            "published_repo": "LAiMai/llama.cpp",
+            "published_repo": "unslothai/llama.cpp",
             "backend": None,
             "backend_request": "auto",
             "installed_at_utc": "2026-08-13T00:00:00Z",
         },
-        "installed release: LAiMai/llama.cpp@b7900-mix (tag b7900)",
+        "installed release: unslothai/llama.cpp@b7900-mix (tag b7900)",
     ),
     "2026_08_13_5a3e9fc7a": (
         {
             "tag": "b8000",
             "release_tag": "b8000-mix",
-            "published_repo": "LAiMai/llama.cpp",
+            "published_repo": "unslothai/llama.cpp",
             "backend": "rocm",
             "gfx_target": "gfx1151",
             "mapped_targets": ["gfx1151", "gfx1200"],
             "installed_at_utc": "2026-08-13T00:00:00Z",
         },
-        "installed release: LAiMai/llama.cpp@b8000-mix (tag b8000) -- rocm backend",
+        "installed release: unslothai/llama.cpp@b8000-mix (tag b8000) -- rocm backend",
     ),
     "2026_08_18_9d1dcfe58": (
         {
             "tag": "b8300",
             "release_tag": "b8300-mix",
-            "published_repo": "LAiMai/llama.cpp",
+            "published_repo": "unslothai/llama.cpp",
             "backend": "cuda",
             "supported_sms": ["90", "100"],
             "installed_at_utc": "2026-08-18T00:00:00Z",
         },
-        "installed release: LAiMai/llama.cpp@b8300-mix (tag b8300) -- cuda backend",
+        "installed release: unslothai/llama.cpp@b8300-mix (tag b8300) -- cuda backend",
     ),
     "2026_08_31_1400031e2_current": (
         {
             "requested_tag": "b10715",
             "tag": "b10715",
             "release_tag": "b10715-mix-86bd2d3",
-            "published_repo": "LAiMai/llama.cpp",
+            "published_repo": "unslothai/llama.cpp",
             "asset": "windows-vulkan",
             "force_cpu": False,
             "llama_backend": "vulkan",
@@ -547,7 +547,7 @@ _HISTORICAL_MARKERS = {
             "asset_sha256": "0" * 64,
             "runtime_asset": "runtime.zip",
             "source": "LAiM",
-            "binary_repo": "LAiMai/llama.cpp",
+            "binary_repo": "unslothai/llama.cpp",
             "binary_release_tag": "b10715-mix",
             "source_asset": "src.tar.gz",
             "source_sha256": "1" * 64,
@@ -569,7 +569,7 @@ _HISTORICAL_MARKERS = {
             "prebuilt_fallback_used": False,
             "installed_at_utc": "2026-08-31T00:00:00Z",
         },
-        "installed release: LAiMai/llama.cpp@b10715-mix-86bd2d3 (tag b10715) -- vulkan backend",
+        "installed release: unslothai/llama.cpp@b10715-mix-86bd2d3 (tag b10715) -- vulkan backend",
     ),
 }
 
@@ -641,7 +641,7 @@ def test_the_upstream_source_branch_is_a_known_pre_existing_divergence(marker_di
     """
     raw = json.dumps(
         {
-            "published_repo": "LAiMai/LAiM",
+            "published_repo": "OPusAngel/LAiM",
             "release_tag": "b10715-mix",
             "tag": "b10715",
             "source": "ggml-org",
@@ -654,10 +654,10 @@ def test_the_upstream_source_branch_is_a_known_pre_existing_divergence(marker_di
     ps1 = _run_ps1_printer(install_dir, "Latest")
     sh = _run_sh_printer(install_dir, tmp_path)
     assert ps1.stdout == (
-        "installed release: LAiMai/LAiM@b10715-mix (tag b10715) -- cpu backend"
+        "installed release: OPusAngel/LAiM@b10715-mix (tag b10715) -- cpu backend"
     )
     assert sh.stdout.rstrip("\n") == (
-        "installed release: LAiMai/LAiM@b10715-mix + ggml-org@b10715 -- cpu backend"
+        "installed release: OPusAngel/LAiM@b10715-mix + ggml-org@b10715 -- cpu backend"
     )
     assert ps1.stdout.endswith(" -- cpu backend")
     assert sh.stdout.rstrip("\n").endswith(" -- cpu backend")

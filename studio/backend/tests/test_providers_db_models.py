@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
-"""Unit tests for provider model persistence (LAiMai/LAiM#7281)."""
+"""Unit tests for provider model persistence (OPusAngel/LAiM#7281)."""
 
 from __future__ import annotations
 

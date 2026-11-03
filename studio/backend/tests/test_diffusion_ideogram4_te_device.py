@@ -52,7 +52,7 @@ def _load_with_stubs(monkeypatch):
         ),
     )
     monkeypatch.setitem(__import__("sys").modules, "diffusers", fake_diffusers)
-    return ide.load_ideogram4_pipeline("LAiM/ideogram-4-fp8", torch.bfloat16)
+    return ide.load_ideogram4_pipeline("unsloth/ideogram-4-fp8", torch.bfloat16)
 
 
 def test_streamed_text_encoder_states_land_on_the_mask_device(monkeypatch):

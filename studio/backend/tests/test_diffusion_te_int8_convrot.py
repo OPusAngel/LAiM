@@ -32,7 +32,7 @@ GROUP = 256
 HIDDEN, VOCAB = 256, 64
 BASE = "Qwen/Qwen-Image-2.1"
 REPO, INT8_NAME = (
-    "LAiM/Qwen-Image-2.1-FP8",
+    "unsloth/Qwen-Image-2.1-FP8",
     "Qwen-Image-2.1-text_encoder-INT8-ConvRot.safetensors",
 )
 FP8_NAME = "Qwen-Image-2.1-text_encoder-FP8.safetensors"

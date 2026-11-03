@@ -102,7 +102,7 @@ def test_disk_space_refusal_reports_decimal_gigabytes(monkeypatch, tmp_path, cap
     q8 = SimpleNamespace(size = 1_834_426_944, sha256 = "a" * 64)
 
     with pytest.raises(SystemExit) as exit_info:
-        hf_download._preflight_disk_space("model", "LAiM/Qwen3-1.7B-GGUF", [q8])
+        hf_download._preflight_disk_space("model", "unsloth/Qwen3-1.7B-GGUF", [q8])
     assert exit_info.value.code == 1
     err = capsys.readouterr().err
     assert "need about 1.8 GB free" in err

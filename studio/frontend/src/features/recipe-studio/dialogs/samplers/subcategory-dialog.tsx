@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   Select,
   SelectContent,
@@ -76,9 +77,9 @@ export function SubcategoryDialog({
       <div className="space-y-3">
         <div className="grid gap-1.5">
           <FieldLabel
-            label="Parent category column"
+            label={translate("uxRecipestudio.parentCategoryColumn1hm65")}
             htmlFor={parentSelectId}
-            hint="Category column this block maps from."
+            hint={translate("uxRecipestudio.categoryColumnThisBlock1d8nz")}
           />
           <Select
             value={config.subcategory_parent ?? ""}
@@ -90,7 +91,7 @@ export function SubcategoryDialog({
             }}
           >
             <SelectTrigger className="nodrag w-full" id={parentSelectId}>
-              <SelectValue placeholder="Select category column" />
+              <SelectValue placeholder={translate("uxRecipestudio.selectCategoryColumn1ovqm")} />
             </SelectTrigger>
             <SelectContent>
               {categoryOptions.map((option) => (
@@ -101,7 +102,7 @@ export function SubcategoryDialog({
             </SelectContent>
           </Select>
           <p className="text-xs text-muted-foreground">
-            Map each parent category value to its subcategory options below.
+            {translate("uxRecipestudio.mapEachParentCategory33q56")}
           </p>
         </div>
         {categoryValues.length > 0 && (
@@ -112,9 +113,7 @@ export function SubcategoryDialog({
                   <p className="text-sm font-semibold text-foreground">
                     {value}
                   </p>
-                  <span className="text-xs text-muted-foreground">
-                    {mapping[value]?.length ?? 0} subvalues
-                  </span>
+                  <span className="text-xs text-muted-foreground">{translate("uxRecipestudio.subvaluesniyu0", { p1: mapping[value]?.length ?? 0 })}</span>
                 </div>
                 <ChipInput
                   values={mapping[value] ?? []}
@@ -132,11 +131,11 @@ export function SubcategoryDialog({
                     next[value] = list;
                     updateField("subcategory_mapping", next);
                   }}
-                  placeholder="Type subcategory and press Enter"
+                  placeholder={translate("uxRecipestudio.typeSubcategoryAndPress3stms")}
                 />
                 {(mapping[value] ?? []).length === 0 && (
                   <p className="mt-2 text-xs text-rose-500">
-                    Add at least 1 subcategory.
+                    {translate("uxRecipestudio.addAtLeast16gxfu")}
                   </p>
                 )}
               </div>

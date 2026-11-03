@@ -259,7 +259,7 @@ def test_every_error_reader_names_a_repo_missing_on_modelscope(hub, monkeypatch)
     wrapped.__cause__, wrapped.__context__ = Exception("unrelated"), missing.value
     assert modelscope_missing(wrapped) == sentence
     wrapped.__cause__, wrapped.__context__ = missing.value, None
-    assert format_error_message(wrapped, "LAiM/orpheus-3b-0.1-ft") == sentence
+    assert format_error_message(wrapped, "unsloth/orpheus-3b-0.1-ft") == sentence
     assert download_registry.humanize_worker_error(f"Error: {missing.value}") == sentence
     lost = DatasetNotFoundError("Dataset 'org/ds' doesn't exist on the Hub")
     monkeypatch.delenv("LAiM_STUDIO_HUB_SOURCE", raising = False)

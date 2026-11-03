@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import type { ReactElement } from "react";
@@ -29,9 +30,9 @@ export function MarkdownNoteDialog({
       <NameField value={config.name} onChange={(value) => onUpdate({ name: value })} />
       <div className="grid gap-3">
         <FieldLabel
-          label="Note style"
+          label={translate("uxRecipestudio.noteStyleoarn6")}
           htmlFor={colorId}
-          hint="Pick a color and opacity for this note block."
+          hint={translate("uxRecipestudio.pickAColorAndo6t9g")}
         />
         <div className="flex items-center gap-3">
           <input
@@ -60,14 +61,14 @@ export function MarkdownNoteDialog({
       </div>
       <div className="grid gap-1.5">
         <FieldLabel
-          label="Markdown"
+          label={translate("uxRecipestudio.markdown1wcdz")}
           htmlFor={markdownId}
-          hint="UI-only note. Not sent to backend payload recipe."
+          hint={translate("uxRecipestudio.uIOnlyNoteNot1w4zq")}
         />
         <Textarea
           id={markdownId}
           className="corner-squircle nodrag min-h-[calc(180px*var(--ui-space-scale,1))]"
-          placeholder="## Note"
+          placeholder={translate("uxRecipestudio.notetxdqn")}
           value={config.markdown}
           onChange={(event) => onUpdate({ markdown: event.target.value })}
         />

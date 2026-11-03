@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { toast } from "@/lib/toast";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AudioApiError, runAudio } from "../api";
@@ -286,7 +287,7 @@ export function useConvertGeneration({
     clear: () => void,
   ): GenerateBlocker["actions"] => [
     {
-      label: "Add it again",
+      label: translate("uxAudio.addItAgain1rlob"),
       onClick: () => {
         clear();
         handle.current?.browse();
@@ -302,10 +303,10 @@ export function useConvertGeneration({
     switch (kind) {
       case "source":
       case "source-error":
-        return focusAction("Add a recording", sourceHandle);
+        return focusAction(translate("uxAudio.addARecordingkkmy3"), sourceHandle);
       case "target":
       case "target-error":
-        return focusAction("Add the target voice", targetHandle);
+        return focusAction(translate("uxAudio.addTheTargetVoiceynfqc"), targetHandle);
       case "source-expired":
         return againAction(sourceHandle, () =>
           useAudioConvertStore.getState().setSource(null),
@@ -317,11 +318,11 @@ export function useConvertGeneration({
       case "source-text":
         return [
           {
-            label: "Transcribe it",
+            label: translate("uxAudio.transcribeItk36kg"),
             onClick: () => void transcriber.transcribe(source),
           },
           {
-            label: "type it",
+            get label() { return translate("uxAudio.typeItuah3c"); },
             onClick: () =>
               document.getElementById(CONVERT_SOURCE_TEXT_FIELD_ID)?.focus(),
           },
@@ -457,7 +458,7 @@ export function useConvertGeneration({
             ? REFERENCE_EXPIRED_MESSAGE
             : error instanceof Error
               ? error.message
-              : "Voice conversion failed.";
+              : translate("uxAudio.voiceConversionFailed5bv80");
         setGenerationError(message);
         if (gone.length === 0) toast.error(message);
         await refreshStatus();

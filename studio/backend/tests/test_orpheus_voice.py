@@ -56,7 +56,7 @@ def test_transformers_orpheus_prompt_carries_the_voice(monkeypatch):
     import threading
 
     backend._generation_lock = threading.Lock()
-    backend.active_model_name = "LAiM/orpheus-3b-0.1-ft"
+    backend.active_model_name = "unsloth/orpheus-3b-0.1-ft"
     backend.models = {
         backend.active_model_name: {"audio_type": "snac", "model": object(), "tokenizer": None}
     }

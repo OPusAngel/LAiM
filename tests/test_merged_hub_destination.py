@@ -40,7 +40,7 @@ class FullModel:
 
 @pytest.fixture
 def saving(monkeypatch, tmp_path):
-    source = Path(__file__).resolve().parents[1] / "LAiM/save.py"
+    source = Path(__file__).resolve().parents[1] / "unsloth/save.py"
     tree = ast.parse(source.read_text(encoding = "utf-8"))
     records = {
         "merges": [],

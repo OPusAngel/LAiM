@@ -47,7 +47,7 @@ def cache_env(tmp_path, monkeypatch):
 
 
 def _install(pipe, **overrides):
-    kwargs = dict(family = "flux.1", repo_id = "LAiM/repo", dtype = "torch.bfloat16")
+    kwargs = dict(family = "flux.1", repo_id = "unsloth/repo", dtype = "torch.bfloat16")
     kwargs.update(overrides)
     return cond_cache.install(pipe, **kwargs)
 
@@ -113,7 +113,7 @@ def test_load_fingerprint_keys_apart(cache_env):
     _install(a)
     a.encode_prompt("a sloth")
     b = _EncodePipe()
-    _install(b, repo_id = "LAiM/other-repo")
+    _install(b, repo_id = "unsloth/other-repo")
     b.encode_prompt("a sloth")
     c = _EncodePipe()
     _install(c, te_quant = "fp8")

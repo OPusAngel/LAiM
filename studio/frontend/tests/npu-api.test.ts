@@ -43,7 +43,7 @@ function sse(chunks: string[]): Response {
 test("recognizes NPU model paths only", () => {
   const { api } = client(() => Response.json({}));
   assert.equal(api.isNpuModelId("lemonade:qwen3-0.6b-FLM"), true);
-  assert.equal(api.isNpuModelId("LAiM/Qwen3-0.6B-GGUF"), false);
+  assert.equal(api.isNpuModelId("unsloth/Qwen3-0.6B-GGUF"), false);
   assert.equal(api.isNpuModelId(null), false);
 });
 
@@ -163,9 +163,9 @@ test("a download waiting for the backend says it is reconnecting", () => {
 
 test("the picker's NPU format holds no Hub repo", () => {
   for (const [id, gguf] of [
-    ["LAiM/Qwen3-0.6B-GGUF", true],
+    ["unsloth/Qwen3-0.6B-GGUF", true],
     ["mlx-community/Qwen3-8B-4bit", false],
-    ["LAiM/Qwen3-0.6B", false],
+    ["unsloth/Qwen3-0.6B", false],
   ] as const) {
     assert.equal(matchesFormatFilter(id, gguf, "npu"), false);
     assert.equal(matchesFormatFilter(id, gguf, "all"), true);

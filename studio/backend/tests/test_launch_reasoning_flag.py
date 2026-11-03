@@ -376,10 +376,10 @@ class TestAnInheritedReasoningModeIsHonoured:
     @pytest.mark.parametrize(
         "model_identifier,value,expected",
         [
-            ("LAiM/Qwen3.6-35B-A3B-GGUF", "off", False),
-            ("LAiM/Qwen3.6-35B-A3B-GGUF", "disabled", False),
-            ("LAiM/Qwen3.5-9B-GGUF", "on", True),
-            ("LAiM/Qwen3.5-9B-GGUF", "1", True),
+            ("unsloth/Qwen3.6-35B-A3B-GGUF", "off", False),
+            ("unsloth/Qwen3.6-35B-A3B-GGUF", "disabled", False),
+            ("unsloth/Qwen3.5-9B-GGUF", "on", True),
+            ("unsloth/Qwen3.5-9B-GGUF", "1", True),
             ("test", "false", False),
         ],
     )
@@ -407,7 +407,7 @@ class TestAnInheritedReasoningModeIsHonoured:
     @pytest.mark.parametrize("value", [None, "auto", "-1"])
     @pytest.mark.parametrize(
         "model_identifier,expected",
-        [("LAiM/Qwen3.6-35B-A3B-GGUF", True), ("LAiM/Qwen3.5-9B-GGUF", False)],
+        [("unsloth/Qwen3.6-35B-A3B-GGUF", True), ("unsloth/Qwen3.5-9B-GGUF", False)],
     )
     def test_auto_or_unset_keeps_the_model_default(
         self, tmp_path, monkeypatch, modern, value, model_identifier, expected

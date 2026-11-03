@@ -32,6 +32,8 @@ import {
   ToolFallbackTrigger,
 } from "./tool-fallback";
 import { useToolActivityOpen } from "./use-tool-activity-open";
+import { translate } from "@/i18n";
+
 
 interface ParsedSource {
   title: string;
@@ -210,21 +212,18 @@ const WebSearchToolUIImpl: ToolCallMessagePartComponent = ({
             <span>
               {isFindInPage ? (
                 pattern ? (
-                  <>
-                    Finding &ldquo;{pattern}&rdquo; in {displayDomain || "page"}
-                    &hellip;
-                  </>
+                  <>{translate("uxComponents.findingIn9ujst", { p1: pattern, p2: displayDomain || "page" })}</>
                 ) : (
-                  <>Searching {displayDomain || "page"}&hellip;</>
+                  <>{translate("uxComponents.searching346n5", { p1: displayDomain || "page" })}</>
                 )
               ) : isUrlFetch ? (
-                <>Reading {displayDomain || "page"}&hellip;</>
+                <>{translate("uxComponents.readingq8vkx", { p1: displayDomain || "page" })}</>
               ) : isImageOnly ? (
-                <>Finding images for &ldquo;{imageLabel}&rdquo;&hellip;</>
+                <>{translate("uxComponents.findingImagesFort53do", { p1: imageLabel })}</>
               ) : query ? (
-                <>Searching for &ldquo;{query}&rdquo;&hellip;</>
+                <>{translate("uxComponents.searchingForngm8j", { p1: query })}</>
               ) : (
-                <>Searching&hellip;</>
+                <>{translate("uxComponents.searchingxb126")}</>
               )}
             </span>
           </div>

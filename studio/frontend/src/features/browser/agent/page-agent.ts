@@ -15,6 +15,16 @@ export type AgentCommand =
   | { op: "pointer"; phase: "down" | "move" | "up" | "cancel"; x: number; y: number; expect?: string }
   | { op: "type"; ref: string; text: string; submit: boolean }
   | { op: "select"; ref: string; value: string }
+  | {
+      op: "upload";
+      ref: string;
+      name: string;
+      mime?: string;
+      /** base64 of the bytes; every piece but the last is sent as its own command (`more`). */
+      data: string;
+      more?: boolean;
+      multiple?: boolean;
+    }
   | { op: "scroll"; direction: "up" | "down"; ref?: string }
   | { op: "press"; key: string }
   | { op: "evaluate"; id: string; doc: string; script: string }
@@ -1253,6 +1263,83 @@ export function installPageAgent(): PageAgent {
     return { ok: false, error: `${ref} is not a dropdown or checkbox; click it, then click the option.` };
   };
 
+  const pendingUploads = new Map<string, { parts: string[]; name: string; mime: string; multiple: boolean }>();
+  // A chunk's base64, or nothing: a page can overwrite the agent's scratch, so a bad piece fails
+  // closed rather than putting mixed bytes into the field.
+  const decodePiece = (value: string): Uint8Array | null => {
+    if (value.length % 4 !== 0 || !/^[0-9A-Za-z+/]*={0,2}$/.test(value)) return null;
+    try {
+      const binary = atob(value);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      return bytes;
+    } catch {
+      return null;
+    }
+  };
+
+  /** Fills an `input[type=file]` from bytes the panel read off the user's machine through LAiM's own
+   *  route, so no file dialog opens. `data` is base64; with `more` the pieces accumulate under `name`
+   *  and only the last one acts. */
+  const upload = (
+    ref: string,
+    name: string,
+    mime: string,
+    data: string,
+    more: boolean,
+    multiple: boolean,
+  ): Record<string, unknown> => {
+    if (!name) return { ok: false, error: "the upload has no file name." };
+    if (more) {
+      const piece = decodePiece(data);
+      if (!piece) return { ok: false, error: "the upload's bytes did not arrive whole; upload the file again." };
+      const held = pendingUploads.get(name);
+      if (!held) pendingUploads.set(name, { parts: [data], name, mime, multiple });
+      else held.parts.push(data);
+      if (pendingUploads.size > 8) {
+        const oldest = pendingUploads.keys().next().value;
+        if (oldest !== undefined && oldest !== name) pendingUploads.delete(oldest);
+      }
+      return { ok: true };
+    }
+    const held = pendingUploads.get(name);
+    pendingUploads.delete(name);
+    const pieces = held ? [...held.parts, data] : [data];
+    const bytes: Uint8Array[] = [];
+    let total = 0;
+    for (const piece of pieces) {
+      const decoded = decodePiece(piece);
+      if (!decoded) return { ok: false, error: "the upload's bytes did not arrive whole; upload the file again." };
+      bytes.push(decoded);
+      total += decoded.length;
+    }
+    const el = lookup(ref);
+    // The attribute as well as the IDL type: a page that hasn't upgraded its field still opens a dialog.
+    if (!(el instanceof HTMLInputElement) || el.type !== "file" || el.getAttribute("type")?.toLowerCase() !== "file") {
+      return { ok: false, error: `${ref} is not a file field, so no file can be put in it.` };
+    }
+    if (el.matches(":disabled")) return { ok: false, error: `${ref} is disabled or read-only.` };
+    if (typeof DataTransfer !== "function" || typeof File !== "function") {
+      return { ok: false, error: "this page cannot take a file without the user picking it; ask them to upload it." };
+    }
+    const content = new Uint8Array(total);
+    let at = 0;
+    for (const piece of bytes) {
+      content.set(piece, at);
+      at += piece.length;
+    }
+    const transfer = new DataTransfer();
+    // A multi-field keeps what the user already chose: this file joins them, as adding one would.
+    if (multiple) for (const held of Array.from(el.files ?? [])) transfer.items.add(held);
+    transfer.items.add(new File([content], name, mime ? { type: mime } : undefined));
+    el.files = transfer.files;
+    el.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }));
+    el.dispatchEvent(new Event("change", { bubbles: true }));
+    const now = Array.from(el.files ?? []).map((file) => file.name);
+    const page = el.form ? " It has not been sent: submit the form when asked." : "";
+    return { ok: true, note: `Added ${quoted(clean(name, 120))}${now.length > 1 ? ` to ${now.length} files` : ""}; the field shows ${quoted(clean(now.join(", "), 200))}.${page}` };
+  };
+
   const scrollPage = (direction: string, ref?: string): Record<string, unknown> => {
     if (ref) {
       lookup(ref).scrollIntoView({ block: "center" });
@@ -1327,6 +1414,15 @@ export function installPageAgent(): PageAgent {
           return inOwnTab(() => type(ref, String(command.text ?? ""), command.submit === true));
         case "select":
           return inOwnTab(() => choose(ref, String(command.value ?? "")));
+        case "upload":
+          return upload(
+            ref,
+            clean(String(command.name ?? ""), 260),
+            clean(String(command.mime ?? ""), 200),
+            String(command.data ?? ""),
+            command.more === true,
+            command.multiple === true,
+          );
         case "scroll":
           return scrollPage(String(command.direction ?? "down"), ref || undefined);
         case "press":

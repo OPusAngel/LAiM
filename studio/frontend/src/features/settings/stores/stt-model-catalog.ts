@@ -89,13 +89,13 @@ export type DefaultSttModel = (typeof STT_MODELS)[number];
 export type SttModel = string;
 /** Whisper repos downloaded through LAiM's existing Model Hub manager. */
 export const STT_MODEL_REPOS: Record<DefaultSttModel, string> = {
-  tiny: "LAiM/whisper-tiny",
-  base: "LAiM/whisper-base",
-  small: "LAiM/whisper-small",
-  "large-v3-turbo": "LAiM/whisper-large-v3-turbo",
-  "large-v3": "LAiM/whisper-large-v3",
-  "qwen3-asr-0.6b": "LAiMai/Qwen3-ASR-0.6B-GGUF",
-  "qwen3-asr-1.7b": "LAiMai/Qwen3-ASR-1.7B-GGUF",
+  tiny: "unsloth/whisper-tiny",
+  base: "unsloth/whisper-base",
+  small: "unsloth/whisper-small",
+  "large-v3-turbo": "unsloth/whisper-large-v3-turbo",
+  "large-v3": "unsloth/whisper-large-v3",
+  "qwen3-asr-0.6b": "unslothai/Qwen3-ASR-0.6B-GGUF",
+  "qwen3-asr-1.7b": "unslothai/Qwen3-ASR-1.7B-GGUF",
   ...(Object.fromEntries(
     AUDIO_CPP_DICTATION_MODELS.map((model) => [model.key, model.id]),
   ) as Record<AudioCppSttKey, string>),

@@ -42,7 +42,7 @@ def client(monkeypatch):
     return TestClient(app, raise_server_exceptions = False)
 
 
-def _resolve(c, model = "LAiM/bge-small-en-v1.5"):
+def _resolve(c, model = "unsloth/bge-small-en-v1.5"):
     return c.get("/embedding-model/resolve", params = {"model": model})
 
 
@@ -56,12 +56,12 @@ def test_sentence_transformers_backend_points_at_the_model_repo(client, monkeypa
     # Cached now also means "holds a checkpoint ST can open", not just "loadable",
     # and names the repo it was filed under: for an exact id, that id.
     monkeypatch.setattr(
-        settings, "_cached_st_source", lambda m: ("LAiM/bge-small-en-v1.5", Path("/snap"))
+        settings, "_cached_st_source", lambda m: ("unsloth/bge-small-en-v1.5", Path("/snap"))
     )
 
     body = _resolve(client).json()
     assert body["backend"] == "sentence-transformers"
-    assert body["download_repo"] == "LAiM/bge-small-en-v1.5"
+    assert body["download_repo"] == "unsloth/bge-small-en-v1.5"
     assert body["cached"] is True
     assert body["files"] is None
     assert body["error"] is None
@@ -224,7 +224,7 @@ def test_uncached_gguf_names_the_one_file_the_loader_would_open(client, monkeypa
 
     body = _resolve(client).json()
     assert body["backend"] == "llama"
-    assert body["download_repo"] == "LAiM/bge-small-en-v1.5-GGUF"
+    assert body["download_repo"] == "unsloth/bge-small-en-v1.5-GGUF"
     assert body["files"] == ["bge-small-en-v1.5-F16.gguf"]
     assert body["cached"] is False
     assert body["size_bytes"] == 133_000_000
@@ -285,14 +285,14 @@ def test_the_search_fallback_finds_an_off_convention_name(client, monkeypatch):
         settings,
         "_search_hub_for_gguf",
         lambda m, token: (
-            "LAiM/embeddinggemma-300m-GGUF",
+            "unsloth/embeddinggemma-300m-GGUF",
             ["embeddinggemma-300M-F16.gguf"],
         ),
     )
     monkeypatch.setattr(settings, "_hf_files_size", lambda repo, files, token: None)
 
-    body = _resolve(client, "LAiM/embeddinggemma-300m-qat-q8_0-unquantized").json()
-    assert body["download_repo"] == "LAiM/embeddinggemma-300m-GGUF"
+    body = _resolve(client, "unsloth/embeddinggemma-300m-qat-q8_0-unquantized").json()
+    assert body["download_repo"] == "unsloth/embeddinggemma-300m-GGUF"
     assert body["files"] == ["embeddinggemma-300M-F16.gguf"]
     assert body["error"] is None
 
@@ -310,14 +310,14 @@ def test_the_search_never_leaves_the_model_owner(monkeypatch):
         def list_models(self, **kwargs):
             seen.update(kwargs)
             # The Hub can return neighbours; only the owner's own may be taken.
-            return [_Hit("someone-else/Qwen3-Embedding-8B-GGUF"), _Hit("LAiM/unrelated")]
+            return [_Hit("someone-else/Qwen3-Embedding-8B-GGUF"), _Hit("unsloth/unrelated")]
 
     import huggingface_hub
 
     monkeypatch.setattr(huggingface_hub, "HfApi", _Api)
     monkeypatch.setattr(huggingface_hub, "list_repo_files", lambda *a, **k: ["x.gguf"])
 
-    assert settings._search_hub_for_gguf("LAiM/Qwen3-Embedding-8B", None) is None
+    assert settings._search_hub_for_gguf("unsloth/Qwen3-Embedding-8B", None) is None
     # And the query itself is scoped to the owner, not filtered only afterwards.
     assert seen["author"] == "LAiM"
 
@@ -442,9 +442,9 @@ def test_no_gguf_falls_back_to_the_models_own_safetensors(client, monkeypatch):
 
     monkeypatch.setattr(utils, "hf_cache_snapshot_is_loadable", lambda m: False)
 
-    body = _resolve(client, "LAiM/Qwen3-Embedding-8B").json()
+    body = _resolve(client, "unsloth/Qwen3-Embedding-8B").json()
     assert body["backend"] == "sentence-transformers"
-    assert body["download_repo"] == "LAiM/Qwen3-Embedding-8B"
+    assert body["download_repo"] == "unsloth/Qwen3-Embedding-8B"
     # No file list: ST needs the config and tokenizer too, not just the weights.
     assert body["files"] is None
     assert body["size_bytes"] == 4096
@@ -614,7 +614,7 @@ def test_nothing_anywhere_still_reports_the_save_reason(client, monkeypatch):
     """Only when the name candidates, the Hub search AND safetensors come up empty."""
     _no_gguf_anywhere(monkeypatch)
     monkeypatch.setattr(settings, "_safetensors_plan", lambda m, token: None)
-    body = _resolve(client, "LAiM/nothing-like-this").json()
+    body = _resolve(client, "unsloth/nothing-like-this").json()
     assert body["download_repo"] is None
     assert body["files"] is None
     assert body["cached"] is False
@@ -689,11 +689,11 @@ def test_resolved_mirror_reports_its_exact_downloaded_files_as_cached(client, mo
     assert settings._embedding_gguf_candidates("acme/embedder-GGUF") == ["acme/embedder-GGUF"]
     # LAiM's unquantized re-uploads keep their GGUF on the base name.
     assert settings._embedding_gguf_candidates(
-        "LAiM/embeddinggemma-300m-qat-q8_0-unquantized"
+        "unsloth/embeddinggemma-300m-qat-q8_0-unquantized"
     ) == [
-        "LAiM/embeddinggemma-300m-qat-q8_0-unquantized-GGUF",
-        "LAiM/embeddinggemma-300m-GGUF",
-        "LAiM/embeddinggemma-300m-qat-q8_0-unquantized",
+        "unsloth/embeddinggemma-300m-qat-q8_0-unquantized-GGUF",
+        "unsloth/embeddinggemma-300m-GGUF",
+        "unsloth/embeddinggemma-300m-qat-q8_0-unquantized",
     ]
 
 
@@ -713,14 +713,14 @@ def test_the_resolved_repo_is_what_the_loader_opens(monkeypatch):
 
     ems._invalidate_cache()
     ems.set_rag_embedding_model(
-        "LAiM/Qwen3-Embedding-4B", gguf_repo = "Qwen/Qwen3-Embedding-4B-GGUF"
+        "unsloth/Qwen3-Embedding-4B", gguf_repo = "Qwen/Qwen3-Embedding-4B-GGUF"
     )
     assert rag_config.effective_gguf_repo() == "Qwen/Qwen3-Embedding-4B-GGUF"
 
     # A pair recorded for another model must never be served for this one.
     store[ems.EMBEDDING_GGUF_SETTING_KEY] = "Qwen/Qwen3-Embedding-4B-GGUF"
     ems._invalidate_cache()
-    assert ems.get_stored_gguf_repo("LAiM/bge-m3") is None
+    assert ems.get_stored_gguf_repo("unsloth/bge-m3") is None
     ems._invalidate_cache()
 
 
@@ -739,27 +739,27 @@ def test_the_chosen_backend_is_read_back_by_the_loader(monkeypatch):
     from core.rag import embeddings as rag_embeddings
 
     ems._invalidate_cache()
-    ems.set_rag_embedding_model("LAiM/Qwen3-Embedding-8B", backend = "sentence-transformers")
-    assert ems.get_stored_backend("LAiM/Qwen3-Embedding-8B") == "sentence-transformers"
+    ems.set_rag_embedding_model("unsloth/Qwen3-Embedding-8B", backend = "sentence-transformers")
+    assert ems.get_stored_backend("unsloth/Qwen3-Embedding-8B") == "sentence-transformers"
     assert rag_embeddings._resolve_auto_for_model() == "sentence-transformers"
 
     # A backend recorded for another model must not be served for this one.
-    store[ems.EMBEDDING_MODEL_SETTING_KEY] = "LAiM/bge-m3"
+    store[ems.EMBEDDING_MODEL_SETTING_KEY] = "unsloth/bge-m3"
     store[ems.EMBEDDING_RESOLUTION_SETTING_KEY] = {
-        "model": "LAiM/bge-m3",
+        "model": "unsloth/bge-m3",
         "gguf_repo": None,
         "backend": "llama-server",
     }
     ems._invalidate_cache()
     # A model this process never resolved gets nothing, which is the property that
     # matters: the record belongs to bge-m3 and is not lent to anyone else.
-    assert ems.get_stored_backend("LAiM/never-resolved") is None
+    assert ems.get_stored_backend("unsloth/never-resolved") is None
     # Qwen keeps ITS OWN earlier resolution, not bge-m3's. Forgetting it dropped a
     # still-running job for Qwen back onto the hardware default; the memo is keyed
     # per model, so this is Qwen's record, not a stale pair.
-    assert ems.get_stored_backend("LAiM/Qwen3-Embedding-8B") == "sentence-transformers"
+    assert ems.get_stored_backend("unsloth/Qwen3-Embedding-8B") == "sentence-transformers"
     ems._resolved_gguf_memo.clear()
-    assert ems.get_stored_backend("LAiM/Qwen3-Embedding-8B") is None
+    assert ems.get_stored_backend("unsloth/Qwen3-Embedding-8B") is None
     ems._invalidate_cache()
 
 
@@ -1070,8 +1070,8 @@ def test_a_remote_gguf_repo_is_served_by_llama_server_on_an_st_host(monkeypatch)
     # And the forced save recorded no backend, exactly as a failed plan does.
     monkeypatch.setattr(ems, "get_stored_backend", lambda model: None)
 
-    assert rag_embeddings._resolve_auto_for_model("LAiM/bge-m3-GGUF") == "llama-server"
-    assert rag_embeddings._resolve_auto_for_model("LAiM/bge-m3") == "sentence-transformers"
+    assert rag_embeddings._resolve_auto_for_model("unsloth/bge-m3-GGUF") == "llama-server"
+    assert rag_embeddings._resolve_auto_for_model("unsloth/bge-m3") == "sentence-transformers"
 
 
 def test_a_local_directory_named_gguf_is_still_a_sentence_transformers_model(monkeypatch, tmp_path):
@@ -1100,7 +1100,7 @@ def test_a_gguf_only_model_is_refused_when_llama_server_is_missing(client, monke
     monkeypatch.setattr(settings, "_llama_backend_active", lambda *_: True)
     monkeypatch.setattr(settings, "_llama_runtime_available", lambda: False)
 
-    body = _resolve(client, "LAiM/bge-m3-GGUF").json()
+    body = _resolve(client, "unsloth/bge-m3-GGUF").json()
     assert body["download_repo"] is None
     assert "no llama-server binary was found" in body["error"]
 

@@ -209,7 +209,7 @@ try {
     Check "pypi transport: retried through the mirror after the default's attempts, which is kept" ($rc -eq 0 -and $script:calls.Count -eq 3 -and $env:UV_DEFAULT_INDEX -eq $pypiMirror -and $script:lines -contains "STEP PyPI failed; retrying through $pypiMirror" -and $env:_LAiM_MIRROR_SPARE -notlike 'pypi|*')
     $script:LAiMVerbose = $true; $rc = Retry $stall { uv pip install numpy } -Once; $script:LAiMVerbose = $false
     Check "a stall naming no host retries on the host that ran, in verbose mode too" ($rc -eq 0 -and $script:calls.Count -eq 2 -and $env:UV_DEFAULT_INDEX -eq $pypiMirror -and $script:lines -contains "STEP PyPI failed; retrying through $pypiMirror")
-    foreach ($own in '--torch-backend=auto', '--find-links', 'git+https://github.com/LAiMai/LAiM-zoo') {
+    foreach ($own in '--torch-backend=auto', '--find-links', 'git+https://github.com/OPusAngel/LAiM-zoo') {
         $rc = Retry $stall { uv pip install LAiM $own } -Once; Check "a stall in a command that picks its own source ($own) is not retried" ($rc -eq 1 -and $script:calls.Count -eq 1 -and $env:_LAiM_MIRROR_SPARE -like 'pypi|*')
     }
     $rc = Retry $noVersion { uv pip install nothing==9 }; Check "a version not found, with nothing spared behind the mirror, keeps the spare" ($rc -eq 1 -and $script:calls.Count -eq 2 -and $env:_LAiM_MIRROR_SPARE -like 'pypi|*')

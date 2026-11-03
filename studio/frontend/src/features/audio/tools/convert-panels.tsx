@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   Select,
   SelectContent,
@@ -75,9 +76,7 @@ function MoreSettings({
         aria-expanded={open}
         onClick={() => onOpenChange(!open)}
         className="flex w-fit items-center gap-1 rounded-full text-ui-11p5 font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      >
-        More settings
-        <HugeiconsIcon
+      >{translate("uxAudio.moreSettingsydtaz")}<HugeiconsIcon
           icon={ChevronDownStandardIcon}
           className={cn(
             "size-3 transition-transform duration-150 motion-reduce:transition-none",
@@ -98,7 +97,7 @@ export const seedVcPanel: AudioToolPanel<SeedVcValue> = {
     return (
       <PanelSection
         title="Seed-VC"
-        hint={singing ? "Singing uses the V1 singing engine." : undefined}
+        hint={singing ? translate("uxAudio.singingUsesTheV1qm1i8") : undefined}
       >
         {singing ? null : (
           <div className="grid gap-1.5">
@@ -135,23 +134,23 @@ export const seedVcPanel: AudioToolPanel<SeedVcValue> = {
         {v2 ? (
           <>
             <ParamSlider
-              label="Sound like the target"
+              label={translate("uxAudio.soundLikeTheTarget1szx7")}
               value={value.similarity}
               min={SEED_VC_GUIDANCE_RANGE.min}
               max={SEED_VC_GUIDANCE_RANGE.max}
               step={0.05}
               disabled={disabled}
-              info="Higher follows the target voice more closely."
+              info={translate("uxAudio.higherFollowsTheTargetlhgzt")}
               onChange={(similarity) => onChange({ ...value, similarity })}
             />
             <ParamSlider
-              label="Keep words clear"
+              label={translate("uxAudio.keepWordsClear1eayf")}
               value={value.intelligibility}
               min={SEED_VC_GUIDANCE_RANGE.min}
               max={SEED_VC_GUIDANCE_RANGE.max}
               step={0.05}
               disabled={disabled}
-              info="Higher keeps the words easier to understand."
+              info={translate("uxAudio.higherKeepsTheWordskxy5b")}
               onChange={(intelligibility) =>
                 onChange({ ...value, intelligibility })
               }
@@ -159,13 +158,13 @@ export const seedVcPanel: AudioToolPanel<SeedVcValue> = {
           </>
         ) : (
           <ParamSlider
-            label="Guidance"
+            label={translate("uxVideo.guidancew7efa")}
             value={value.guidance}
             min={SEED_VC_GUIDANCE_RANGE.min}
             max={SEED_VC_GUIDANCE_RANGE.max}
             step={0.05}
             disabled={disabled}
-            info="How strongly the output is pushed toward the target voice."
+            info={translate("uxAudio.howStronglyTheOutputjlj6o")}
             onChange={(guidance) => onChange({ ...value, guidance })}
           />
         )}
@@ -174,24 +173,24 @@ export const seedVcPanel: AudioToolPanel<SeedVcValue> = {
           onOpenChange={(more) => onChange({ ...value, more })}
         >
           <ParamSlider
-            label="Length"
+            label={translate("studio.preview.length")}
             value={value.length}
             min={SEED_VC_LENGTH_RANGE.min}
             max={SEED_VC_LENGTH_RANGE.max}
             step={0.05}
             disabled={disabled}
             format={(v) => `${v.toFixed(2)}×`}
-            info="Below 1 speeds the result up, above 1 slows it down."
+            info={translate("uxAudio.below1SpeedsTher1x8i")}
             onChange={(length) => onChange({ ...value, length })}
           />
           <ParamSlider
-            label="Steps"
+            label={translate("settings.profile.stats.trainingSteps")}
             value={value.steps}
             min={SEED_VC_STEPS_RANGE.min}
             max={SEED_VC_STEPS_RANGE.max}
             step={1}
             disabled={disabled}
-            info="More steps can sound cleaner but take longer."
+            info={translate("uxAudio.moreStepsCanSoundoddwa")}
             onChange={(steps) => onChange({ ...value, steps })}
           />
           {v2 ? (
@@ -211,7 +210,7 @@ export const seedVcPanel: AudioToolPanel<SeedVcValue> = {
                 />
               </label>
               <p className="text-ui-11p5 leading-snug text-muted-foreground">
-                Makes the voice hard to recognise instead of copying the target.
+                {translate("uxAudio.makesTheVoiceHard1jo3u")}
               </p>
             </div>
           ) : null}
@@ -226,33 +225,33 @@ export const rvcPanel: AudioToolPanel<RvcValue> = {
   Component: ({ value, onChange, disabled }) => (
     <PanelSection title="RVC">
       <ParamSlider
-        label="Index blend"
+        label={translate("uxAudio.indexBlendpobol")}
         value={value.blend}
         min={0}
         max={1}
         step={0.05}
         disabled={disabled}
-        info="Higher brings in more of the voice's accent and texture; too high can blur words."
+        info={translate("uxAudio.higherBringsInMorewr6y6")}
         onChange={(blend) => onChange({ ...value, blend })}
       />
       <ParamSlider
-        label="Protect consonants"
+        label={translate("uxAudio.protectConsonants188ms")}
         value={value.protect}
         min={0}
         max={0.5}
         step={0.01}
         disabled={disabled}
-        info="Keeps breaths and soft consonants from the recording. 0.5 turns it off."
+        info={translate("uxAudio.keepsBreathsAndSoftedxy5")}
         onChange={(protect) => onChange({ ...value, protect })}
       />
       <ParamSlider
-        label="Volume envelope mix"
+        label={translate("uxAudio.volumeEnvelopeMix1k2jh")}
         value={value.rms}
         min={0}
         max={1}
         step={0.05}
         disabled={disabled}
-        info="0 keeps the recording's loudness changes; 1 uses the voice's own."
+        info={translate("uxAudio.0KeepsTheRecordingerj7j")}
         onChange={(rms) => onChange({ ...value, rms })}
       />
     </PanelSection>
@@ -264,13 +263,13 @@ export const chatterboxConvertPanel: AudioToolPanel<ChatterboxConvertValue> = {
   Component: ({ value, onChange, disabled }) => (
     <PanelSection title="Chatterbox">
       <ParamSlider
-        label="Guidance"
+        label={translate("uxVideo.guidancew7efa")}
         value={value.guidance}
         min={CHATTERBOX_CONVERT_GUIDANCE_RANGE.min}
         max={CHATTERBOX_CONVERT_GUIDANCE_RANGE.max}
         step={0.05}
         disabled={disabled}
-        info="How strongly the output is pushed toward the target voice."
+        info={translate("uxAudio.howStronglyTheOutputjlj6o")}
         onChange={(guidance) => onChange({ ...value, guidance })}
       />
       <MoreSettings
@@ -278,13 +277,13 @@ export const chatterboxConvertPanel: AudioToolPanel<ChatterboxConvertValue> = {
         onOpenChange={(more) => onChange({ ...value, more })}
       >
         <ParamSlider
-          label="Steps"
+          label={translate("settings.profile.stats.trainingSteps")}
           value={value.steps}
           min={CHATTERBOX_CONVERT_STEPS_RANGE.min}
           max={CHATTERBOX_CONVERT_STEPS_RANGE.max}
           step={1}
           disabled={disabled}
-          info="More steps can sound cleaner but take longer."
+          info={translate("uxAudio.moreStepsCanSoundoddwa")}
           onChange={(steps) => onChange({ ...value, steps })}
         />
       </MoreSettings>
@@ -295,10 +294,9 @@ export const chatterboxConvertPanel: AudioToolPanel<ChatterboxConvertValue> = {
 // ---- Vevo2 -----------------------------------------------------------------------------------
 
 const VEVO2_HINTS = {
-  singing: "Singing keeps the recording's own style.",
-  target:
-    "Takes the target's accent and delivery too. Needs what's said in the recording.",
-  source: "Changes only the voice; the recording's delivery stays.",
+  get singing() { return translate("uxAudio.singingKeepsTheRecordingjp7t8"); },
+  get target() { return translate("uxAudio.takesTheTargetS1k591"); },
+  get source() { return translate("uxAudio.changesOnlyTheVoicekvk0g"); },
 } as const;
 
 export const vevo2StylePanel: AudioToolPanel<Vevo2StyleValue> = {
@@ -322,8 +320,8 @@ export const vevo2StylePanel: AudioToolPanel<Vevo2StyleValue> = {
           compact={true}
           className="[&>button]:px-3"
           tabs={[
-            { value: "source", label: "Keep source style" },
-            { value: "target", label: "Take target style" },
+            { value: "source", label: translate("uxAudio.keepSourceStyle142pb") },
+            { value: "target", label: translate("uxAudio.takeTargetStylef447b") },
           ]}
         />
       )}

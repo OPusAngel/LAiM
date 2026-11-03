@@ -7,7 +7,7 @@ import test from "node:test";
 import { modelConfigInstanceKey } from "../src/features/model-picker/model-config/config-signature.ts";
 import type { PerModelConfig } from "../src/features/model-picker/model-config/per-model-config.ts";
 
-const MODEL = "LAiM/Qwen3-8B-GGUF";
+const MODEL = "unsloth/Qwen3-8B-GGUF";
 const VARIANT = "Q4_K_M";
 
 // What the model is actually running with, as useActiveModelConfig reports it.
@@ -137,7 +137,7 @@ test("every mirrored setting moves the instance key", () => {
 
 test("the model and its quant still key the editor", () => {
   const base = modelConfigInstanceKey(MODEL, VARIANT, LIVE);
-  assert.notEqual(modelConfigInstanceKey("LAiM/Other-GGUF", VARIANT, LIVE), base);
+  assert.notEqual(modelConfigInstanceKey("unsloth/Other-GGUF", VARIANT, LIVE), base);
   assert.notEqual(modelConfigInstanceKey(MODEL, "Q8_0", LIVE), base);
   // A loose .gguf carries no quant; null and undefined are the same absence.
   assert.equal(

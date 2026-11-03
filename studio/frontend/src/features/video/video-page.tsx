@@ -1,5 +1,6 @@
 ﻿// SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+import { HF_SOURCE_OWNER } from "@/config/hub-source";
 
 import { generationFailureLogsAction } from "@/features/settings/lib/view-logs-action";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
@@ -243,8 +244,8 @@ import { type Playback, fetchWithFreshLink, playWithMutedFallback, readPlayback 
 import { videoThumbnailQueue, withThumbnailRetries } from "./thumbnail-request-queue";
 
 /** Placeholder hint until the prompt box is first focused. */
-const VIDEO_EXAMPLE_PROMPT =
-  "A slow cinematic shot down a quiet Kyoto street at sunrise, cherry blossom petals drifting in the air, a shopkeeper opening a wooden storefront, warm natural light.";
+const videoExamplePrompt = () =>
+  translate("uxVideo.aSlowCinematicf5wus");
 
 // Curated models come from the shared catalog, one group per model with a format second level,
 // which also surfaces LTX-2.3 in Recommended since its HF pipeline_tag is image-to-video.
@@ -439,10 +440,10 @@ function formatTimestamp(iso: string): string {
 
 // Labels for conditioned MiniMax-H3 tasks. Text-only and older clips need none.
 const CONDITIONING_LABELS: Record<string, string> = {
-  i2va: "From start frame",
-  l2va: "To end frame",
-  fl2va: "Start to end frame",
-  ref2va: "From references",
+  get i2va() { return translate("uxVideo.fromStartFrame3xgym"); },
+  get l2va() { return translate("uxVideo.toEndFramey2tl8"); },
+  get fl2va() { return translate("uxVideo.startToEndFrame5us42"); },
+  get ref2va() { return translate("uxVideo.fromReferences007td"); },
 };
 
 // Keep the narrow gallery caption to duration and resolution.
@@ -475,15 +476,15 @@ function loadToastDescription(p: VideoLoadProgress) {
   const downloading =
     p.phase === "downloading" && (frac === null || frac < 0.999);
   const title = downloading
-    ? "Downloading model…"
+    ? translate("uxVideo.downloadingModelsw8tk")
     : p.phase === "finalizing"
-      ? "Loading to GPU…"
-      : "Starting model…";
+      ? translate("uxVideo.loadingToGPUyzhdt")
+      : translate("uxVideo.startingModel4qzzc");
   const hasTotal = frac !== null;
   return (
     <ModelLoadDescription
       title={title}
-      message="Loading the model. This may include downloading its base model."
+      message={translate("uxVideo.loadingTheModelThisihhbt")}
       progressPercent={hasTotal ? frac * 100 : null}
       progressLabel={
         hasTotal
@@ -508,7 +509,7 @@ function loadToastArgs(
     description: loadToastDescription(p),
     duration: Infinity,
     closeButton: true,
-    ...(onCancel ? { cancel: { label: "Cancel", onClick: onCancel } } : {}),
+    ...(onCancel ? { cancel: { label: translate("browser.agentSettings.cancel"), onClick: onCancel } } : {}),
     classNames: LOAD_TOAST_CLASSNAMES,
   };
 }
@@ -629,14 +630,13 @@ function LoadedBuildSummary({ status }: { status: VideoStatus | null }) {
   return (
     <div className="flex flex-col gap-1 rounded-md border border-border/60 px-2.5 py-2 text-ui-11">
       <div className="flex items-center gap-1 pb-0.5 text-xs font-medium text-muted-foreground">
-        Loaded build
+        {translate("uxVideo.loadedBuild1q31k")}
         <InfoHint>
-          What the loaded model is actually running, reported by the backend. A control whose
-          requested value could not be used shows it next to that control, with the reason.
+          {translate("uxCopy.whatTheLoadedModel1glal")}
         </InfoHint>
       </div>
       <BuildRow
-        label="Transformer"
+        label={translate("uxVideo.transformerklhnk")}
         value={
           status.transformer_quant
             ? formatResolvedValue("transformer_quant", status.transformer_quant)
@@ -646,7 +646,7 @@ function LoadedBuildSummary({ status }: { status: VideoStatus | null }) {
         badge={<ResolvedBadge status={status} controlKey="transformer_quant" />}
       />
       <BuildRow
-        label="Text encoder"
+        label={translate("uxVideo.textEncoder1eci4")}
         value={
           status.text_encoder_quant
             ? formatResolvedValue("text_encoder_quant", status.text_encoder_quant)
@@ -656,7 +656,7 @@ function LoadedBuildSummary({ status }: { status: VideoStatus | null }) {
         badge={<ResolvedBadge status={status} controlKey="text_encoder_quant" />}
       />
       <BuildRow
-        label="Memory"
+        label={translate("studio.params.memory")}
         value={
           offload === "none"
             ? `${status.memory_mode ?? "auto"} · resident`
@@ -664,11 +664,11 @@ function LoadedBuildSummary({ status }: { status: VideoStatus | null }) {
         }
       />
       <BuildRow
-        label="Attention"
+        label={translate("uxVideo.attention2fg7y")}
         value={
           status.attention_backend
             ? formatResolvedValue("attention_backend", status.attention_backend)
-            : "Native SDPA"
+            : translate("uxVideo.nativeSDPA1i5dt")
         }
       />
     </div>
@@ -784,7 +784,7 @@ function RecipePopover({
       <PopoverTrigger asChild>
         <Button size="sm" variant="ghost" className="gap-1.5">
           <HugeiconsIcon icon={InformationCircleIcon} className="size-4" />
-          Recipe
+          {translate("studio.datasetPicker.sourceRecipe")}
         </Button>
       </PopoverTrigger>
       {/* Fits the viewport: only the settings scroll, and overflow-hidden keeps the corners round. */}
@@ -795,35 +795,35 @@ function RecipePopover({
         className="flex max-h-[var(--radix-popover-content-available-height)] w-80 flex-col gap-0 overflow-hidden p-0"
       >
         <div className="shrink-0 border-b border-border/60 px-4 py-2.5">
-          <p className="text-sm font-semibold">Generation settings</p>
+          <p className="text-sm font-semibold">{translate("uxVideo.generationSettingsw26ni")}</p>
           <p className="text-ui-11 text-muted-foreground">{formatTimestamp(video.created_at)}</p>
         </div>
         <div className="flex min-h-0 flex-col gap-2 overflow-y-auto overscroll-contain px-4 py-3 text-xs">
-          <RecipeRow label="Prompt" value={video.prompt} wrap />
+          <RecipeRow label={translate("uxVideo.prompt1lmzx")} value={video.prompt} wrap />
           {video.negative_prompt ? (
-            <RecipeRow label="Negative" value={video.negative_prompt} wrap />
+            <RecipeRow label={translate("uxVideo.negative35c9q")} value={video.negative_prompt} wrap />
           ) : null}
-          {video.model ? <RecipeRow label="Model" value={video.model} /> : null}
+          {video.model ? <RecipeRow label={translate("settings.voice.dictation.customModelLabel")} value={video.model} /> : null}
           {CONDITIONING_LABELS[video.conditioning ?? ""] ? (
             <RecipeRow
-              label="Source"
+              label={translate("uxVideo.sourcer5qyu")}
               value={CONDITIONING_LABELS[video.conditioning ?? ""]}
             />
           ) : null}
           {/* The load-time build, all ENGAGED values, so a saved clip can never be labelled with a
               precision that did not run. */}
           {video.gguf_filename ? (
-            <RecipeRow label="File" value={video.gguf_filename} mono />
+            <RecipeRow label={translate("uxVideo.filebygjt")} value={video.gguf_filename} mono />
           ) : null}
           {video.transformer_quant ? (
-            <RecipeRow label="Quant" value={video.transformer_quant} />
+            <RecipeRow label={translate("uxVideo.quant1rjug")} value={video.transformer_quant} />
           ) : null}
           {video.text_encoder_quant ? (
-            <RecipeRow label="TE quant" value={video.text_encoder_quant} />
+            <RecipeRow label={translate("uxVideo.tEQuant19dnq")} value={video.text_encoder_quant} />
           ) : null}
           {video.memory_mode ? (
             <RecipeRow
-              label="Memory"
+              label={translate("studio.params.memory")}
               value={
                 video.offload_policy && video.offload_policy !== "none"
                   ? `${video.memory_mode} (${video.offload_policy} offload)`
@@ -831,14 +831,14 @@ function RecipePopover({
               }
             />
           ) : null}
-          <RecipeRow label="Size" value={`${video.width} × ${video.height}`} />
-          <RecipeRow label="Frames" value={`${video.num_frames} @ ${video.fps} fps`} />
-          <RecipeRow label="Duration" value={`${video.duration_s.toFixed(2)}s`} />
-          <RecipeRow label="Steps" value={String(video.steps)} />
-          <RecipeRow label="Guidance" value={String(video.guidance)} />
+          <RecipeRow label={translate("library.toolbar.sortSize")} value={`${video.width} × ${video.height}`} />
+          <RecipeRow label={translate("uxVideo.frames1unpu")} value={`${video.num_frames} @ ${video.fps} fps`} />
+          <RecipeRow label={translate("uxVideo.duration1n1du")} value={`${video.duration_s.toFixed(2)}s`} />
+          <RecipeRow label={translate("settings.profile.stats.trainingSteps")} value={String(video.steps)} />
+          <RecipeRow label={translate("uxVideo.guidancew7efa")} value={String(video.guidance)} />
           {video.flow_shift != null ? (
             <RecipeRow
-              label="Shift"
+              label={translate("uxVideo.shift1xake")}
               value={
                 video.audio_flow_shift != null
                   ? `${video.flow_shift} video / ${video.audio_flow_shift} audio`
@@ -846,11 +846,11 @@ function RecipePopover({
               }
             />
           ) : null}
-          <RecipeRow label="Seed" value={String(video.seed)} mono />
+          <RecipeRow label={translate("uxVideo.seed1lu3q")} value={String(video.seed)} mono />
         </div>
         <div className="shrink-0 border-t border-border/60 px-3 py-2.5">
           <Button size="sm" className="w-full gap-1.5" onClick={() => onRestore(video)}>
-            Restore these settings
+            {translate("uxVideo.restoreTheseSettings68bd8")}
           </Button>
         </div>
       </PopoverContent>
@@ -976,7 +976,7 @@ export function VideoPage({
     return (
       <VideoGate>
         <Spinner className="size-5" />
-        <span>Checking this machine for video support...</span>
+        <span>{translate("shell.navigation.videoChecking")}</span>
       </VideoGate>
     );
   }
@@ -992,7 +992,7 @@ export function VideoPage({
         />
         <p className="max-w-sm text-balance">
           {hardware.videoUnsupportedMessage ??
-            "Video generation is not supported on this machine."}
+            translate("uxVideo.videoGenerationIsNot0wggq")}
         </p>
       </VideoGate>
     );
@@ -1920,17 +1920,17 @@ function VideoGenerator({
   const handleDownload = useCallback(
     async (src: string, video: GalleryVideo, format: "mp4" | "webm" | "gif") => {
       const toastId =
-        format === "mp4" ? null : toast.loading(`Converting to ${format.toUpperCase()}…`);
+        format === "mp4" ? null : toast.loading(translate("uxVideo.convertingTotkgon", { p1: format.toUpperCase() }));
       try {
         await downloadVideo(src, video, format);
         if (toastId !== null) toast.dismiss(toastId);
         if (isTauri) {
-          toast.success("Video saved", { description: exportFilename(video, format) });
+          toast.success(translate("uxVideo.videoSaved15rxp"), { description: exportFilename(video, format) });
         }
       } catch (err) {
         if (toastId !== null) toast.dismiss(toastId);
         if (isDownloadCancelled(err)) return;
-        toast.error("Could not save video", {
+        toast.error(translate("uxVideo.couldNotSaveVideo75zlr"), {
           description: err instanceof Error ? err.message : undefined,
         });
       }
@@ -1948,7 +1948,7 @@ function VideoGenerator({
         try {
           url = await fetchGalleryVideoSignedUrl(video.id);
         } catch (err) {
-          toast.error("Could not save video", {
+          toast.error(translate("uxVideo.couldNotSaveVideo75zlr"), {
             description: err instanceof Error ? err.message : undefined,
           });
           return;
@@ -2001,7 +2001,7 @@ function VideoGenerator({
         await deleteGalleryVideo(id);
       } catch (err) {
         pendingShelfMutations.current -= 1;
-        toast.error(err instanceof Error ? err.message : "Failed to delete video");
+        toast.error(err instanceof Error ? err.message : translate("uxVideo.failedToDeleteVideotphbe"));
         return;
       }
       dropFromStrip(id, true);
@@ -2101,7 +2101,7 @@ function VideoGenerator({
         // two requests in flight can be stamped in either order. One at a time follows the clicks.
         await serializeById("video-pin", () => setGalleryVideoFlags(id, { pinned }));
       } catch (err) {
-        toast.error(err instanceof Error ? err.message : "Failed to pin video");
+        toast.error(err instanceof Error ? err.message : translate("uxVideo.failedToPinVideosqxqq"));
         // Put the old order back rather than leave the strip lying about server state, but only while
         // this is still what the user last asked for.
         if (pinAttempt.current.get(id) === attempt) {
@@ -2162,7 +2162,7 @@ function VideoGenerator({
           return out;
         });
       } catch (err) {
-        toast.error(err instanceof Error ? err.message : "Failed to move video");
+        toast.error(err instanceof Error ? err.message : translate("uxVideo.failedToMoveVideor2hav"));
         // Restore the server's order.
         stripEpoch.current += 1;
         const epoch = stripEpoch.current;
@@ -2187,7 +2187,7 @@ function VideoGenerator({
         await setGalleryVideoFlags(id, { archived: true });
       } catch (err) {
         pendingShelfMutations.current -= 1;
-        toast.error(err instanceof Error ? err.message : "Failed to archive video");
+        toast.error(err instanceof Error ? err.message : translate("uxVideo.failedToArchiveVideo69gl4"));
         return;
       }
       galleryCache.archived.add(id);
@@ -2202,7 +2202,7 @@ function VideoGenerator({
           }}
           className="w-full cursor-pointer text-left"
         >
-          You can view archived videos in Settings
+          {translate("uxCopy.youCanViewArchived1g66h")}
         </button>,
         { closeButton: true },
       );
@@ -2236,7 +2236,7 @@ function VideoGenerator({
       setSelectedId(null);
       setClearConfirmOpen(false);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to clear gallery");
+      toast.error(err instanceof Error ? err.message : translate("uxVideo.failedToClearGalleryzun5f"));
     } finally {
       setClearingGallery(false);
     }
@@ -2265,7 +2265,7 @@ function VideoGenerator({
         setDurationIntentSeconds(video.num_frames / fps);
         setNumFrames(video.num_frames);
       }
-      toast.success("Settings restored to inputs");
+      toast.success(translate("uxVideo.settingsRestoredToInputs10whk"));
     },
     [sizeLimits, durationOptions, fps],
   );
@@ -2405,7 +2405,7 @@ function VideoGenerator({
           return;
         }
         setStatusIfNewest(ticket, loaded);
-        toast.success("Model loaded");
+        toast.success(translate("uxVideo.modelLoaded4vnur"));
         setBusy(null);
         quantRevert.current?.commitRecipeClaim?.();
         quantRevert.current = null;
@@ -2415,7 +2415,7 @@ function VideoGenerator({
       }
       if (p.phase === "error") {
         dismissLoadToast();
-        reportLoadFailure(p.error, "Failed to load model");
+        reportLoadFailure(p.error, translate("uxVideo.failedToLoadModelakxbp"));
         setBusy(null);
         if (quantRevert.current) {
           revertPick(quantRevert.current);
@@ -2511,7 +2511,7 @@ function VideoGenerator({
               void ensureSrc(clip);
             }
           } else if (p.phase === "failed") {
-            const msg = p.error || "Video generation failed";
+            const msg = p.error || translate("uxVideo.videoGenerationFailed0eaby");
             // The user's own Cancel surfaces as the backend's cancelled sentinel; not an error.
             if (!msg.toLowerCase().includes("cancelled"))
               toast.error(msg, { action: generationFailureLogsAction(msg) });
@@ -2577,7 +2577,7 @@ function VideoGenerator({
         } else if (g.phase === "failed") {
           // The other terminal phase, kept only until the next job: without this a reload after a failed
           // generation shows an idle page and loses the error.
-          const msg = g.error || "Video generation failed";
+          const msg = g.error || translate("uxVideo.videoGenerationFailed0eaby");
           if (!msg.toLowerCase().includes("cancelled"))
               toast.error(msg, { action: generationFailureLogsAction(msg) });
         }
@@ -2729,7 +2729,7 @@ function VideoGenerator({
         setCanReapply(prevCanReapply);
         lastLoadRevert.current = null;
         dismissLoadToast();
-        reportLoadFailure(err instanceof Error ? err.message : "", "Failed to start load");
+        reportLoadFailure(err instanceof Error ? err.message : "", translate("uxVideo.failedToStartLoadp6xh5"));
         setBusy(null);
         void refreshStatus();
         return settle(false);
@@ -2954,7 +2954,7 @@ function VideoGenerator({
           }),
         // Still ambiguous (several quants, or the listing failed): only the expander can say which.
         onAmbiguous: () =>
-          toast.error("Pick a quantization for this model to load it"),
+          toast.error(translate("uxVideo.pickAQuantizationForqedwv")),
         // Optimistic label, reverted if the load never starts, like the curated GGUF branch below.
         onResolved: (filename) => {
           quantRevert.current = revert;
@@ -3313,8 +3313,8 @@ function VideoGenerator({
       }
       // Otherwise treat it as a full diffusers repo. The backend gates loads to LAiM/* repos, the
       // family bases, or on-device paths.
-      if (!pipelineTarget.onDevice && !id.toLowerCase().startsWith("LAiM/")) {
-        toast.error("Only LAiM or on-device video models can be loaded here");
+      if (!pipelineTarget.onDevice && !id.toLowerCase().startsWith(`${HF_SOURCE_OWNER}/`)) {
+        toast.error(translate("uxVideo.onlyLAiMOrOn7bh0a"));
         abandonPick();
         return;
       }
@@ -3384,7 +3384,7 @@ function VideoGenerator({
       // so the load is still running and this eject stopped nothing.
       return !loadTrackingRestored.current;
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to unload model");
+      toast.error(err instanceof Error ? err.message : translate("uxVideo.failedToUnloadModeless5n"));
       void refreshStatus();
       return false;
     } finally {
@@ -3402,8 +3402,8 @@ function VideoGenerator({
     if (await handleUnload()) {
       // handleUnload holds the page for the whole pending-start path, so by here the window for the
       // backend's "a load is already in progress" refusal is shut.
-      toast.info("Stopped loading the model", {
-        description: "Anything already downloaded stays cached, so loading it again resumes.",
+      toast.info(translate("uxVideo.stoppedLoadingTheModel1dbp9"), {
+        description: translate("uxVideo.anythingAlreadyDownloadedStaysolt27"),
       });
       return;
     }
@@ -3479,18 +3479,18 @@ function VideoGenerator({
 
   const handleGenerate = useCallback(async () => {
     if (!prompt.trim()) {
-      toast.error("Prompt is empty");
+      toast.error(translate("uxVideo.promptIsEmpty1ogeh"));
       return;
     }
     if (supportsReferences && referenceImages.length === 0 && referenceVideos.length === 0) {
-      toast.error("Add a reference picture or video for this checkpoint");
+      toast.error(translate("uxVideo.addAReferencePicturehf8uw"));
       return;
     }
     for (const [index, entry] of referenceVideos.entries()) {
       const start = entry.trimStartSeconds;
       const end = entry.trimEndSeconds;
       const trimError = referenceVideoTrimError(
-        `Video ${index + 1}`,
+        translate("uxVideo.videouph0s", { p1: index + 1 }),
         start,
         end,
         entry.video.durationSeconds,
@@ -3505,7 +3505,7 @@ function VideoGenerator({
     if (seed.trim()) {
       const n = Number(seed);
       if (!Number.isInteger(n) || n < 0 || n > Number.MAX_SAFE_INTEGER) {
-        toast.error("Seed must be a non-negative integer");
+        toast.error(translate("uxVideo.seedMustBeAtrxu8"));
         return;
       }
       resolvedSeed = n;
@@ -3571,7 +3571,7 @@ function VideoGenerator({
       });
     } catch (err) {
       if (!isMounted.current) return;
-      const refusal = err instanceof Error ? err.message : "Video generation failed";
+      const refusal = err instanceof Error ? err.message : translate("uxVideo.videoGenerationFailed0eaby");
       toast.error(refusal, { action: generationFailureLogsAction(refusal) });
       setBusy(null);
       setGenStep(null);
@@ -3616,21 +3616,21 @@ function VideoGenerator({
     <>
       <AdvancedSelect {...familySelect} badge={<ResolvedBadge status={status} controlKey="family_override" />} />
       <AdvancedSelect
-        label="Memory"
-        hint="auto measures free VRAM. fast keeps everything resident. balanced streams the transformer. low_vram offloads every component (lowest VRAM, slower)."
+        label={translate("studio.params.memory")}
+        hint={translate("uxVideo.autoMeasuresFreeVRAMxr0mg")}
         badge={<ResolvedBadge status={status} controlKey="memory_mode" />}
         value={memoryMode}
         onValueChange={(v) => setMemoryMode(v as typeof memoryMode)}
         options={[
           ["auto", "Auto"],
-          ["fast", "Fast (resident)"],
+          ["fast", translate("uxVideo.fastResidentp4yof")],
           ["balanced", "Balanced"],
-          ["low_vram", "Low VRAM"],
+          ["low_vram", translate("uxVideo.lowVRAM9z47j")],
         ]}
       />
       <AdvancedSelect
-        label="Speed"
-        hint="Auto compiles every model at load: a clip takes minutes to denoise, so the one-time compile always pays for itself within a single run. eager = fused kernels, no compile. max adds TF32 + fused QKV, plus the step cache on 20+ step models."
+        label={translate("settings.voice.readAloud.speedLabel")}
+        hint={translate("uxVideo.autoCompilesEveryModel5mn6e")}
         badge={<ResolvedBadge status={status} controlKey="speed_mode" />}
         value={speedMode}
         onValueChange={(v) => setSpeedMode(v as typeof speedMode)}
@@ -3638,7 +3638,7 @@ function VideoGenerator({
           ["auto", "Auto"],
           ["off", "Off (bit-exact)"],
           ["eager", "Eager"],
-          ["default", "Default (compile)"],
+          ["default", translate("uxVideo.defaultCompilebrihp")],
           ["max", "Max"],
         ]}
       />
@@ -3646,13 +3646,13 @@ function VideoGenerator({
           control and otherwise show why it is unavailable. */}
       {!status?.loaded || status.model_kind === "pipeline" ? (
         <AdvancedSelect
-          label="Precision"
-          hint="How the model computes. Auto picks the fastest precision the hardware supports (INT8 on every capable GPU, then FP8 where the card has it) by quantising the transformer onto low-precision tensor cores, and keeps plain bf16 when the device or memory plan can't take it. Off always runs bf16."
+          label={translate("uxVideo.precisionjks6g")}
+          hint={translate("uxVideo.howTheModelComputesec4iz")}
           badge={<ResolvedBadge status={status} controlKey="transformer_quant" />}
           value={transformerQuant}
           onValueChange={(v) => setTransformerQuant(v as typeof transformerQuant)}
           options={[
-            ["auto", "Auto (fastest for GPU)"],
+            ["auto", translate("uxVideo.autoFastestForGPU2nluu")],
             ["none", "Off (bf16)"],
             // The explicit low-precision schemes need the dense tensor-core path, which a Mac or
             // CPU-only host cannot run, so the picker does not list what the loader would refuse.
@@ -3672,29 +3672,29 @@ function VideoGenerator({
       ) : (
         <div className="flex items-center justify-between gap-2">
           <span className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
-            Precision
+            {translate("uxVideo.precisionjks6g")}
           </span>
-          <span className="text-xs text-muted-foreground/60">Full-pipeline models only</span>
+          <span className="text-xs text-muted-foreground/60">{translate("uxVideo.fullPipelineModelsOnlyjfkj2")}</span>
         </div>
       )}
       <AdvancedSelect
-        label="Attention"
-        hint="Attention kernel. Auto upgrades to cuDNN fused attention on NVIDIA when a speed profile is active. sage is INT8 attention (SageAttention 2; without a local install Studio fetches the Hugging Face kernels-hub build, which runs on Ampere, Ada and Hopper GPUs, and any other GPU keeps the default): fast (10-40%) but can black-frame some families (Qwen, Wan), so it never engages automatically."
+        label={translate("uxVideo.attention2fg7y")}
+        hint={translate("uxVideo.attentionKernelAutoUpgradescor8d")}
         badge={<ResolvedBadge status={status} controlKey="attention_backend" />}
         value={attentionBackend}
         onValueChange={(v) => setAttentionBackend(v as typeof attentionBackend)}
         options={[
           ["auto", "Auto"],
-          ["native", "Native SDPA"],
+          ["native", translate("uxVideo.nativeSDPAa93ez")],
           ["cudnn", "cuDNN"],
           ["flash3", "FlashAttention 3"],
-          ["sage", "SageAttention (INT8)"],
+          ["sage", translate("uxVideo.sageAttentionINT893l93")],
         ]}
       />
       {gpuChoices.length > 0 && (
         <AdvancedSelect
           label="GPU"
-          hint="Which card this model loads on. Auto uses whichever device torch is pointing at, which on a mixed box is not necessarily the largest. A video model is never split across cards, so this is one choice, not a pool."
+          hint={translate("uxVideo.whichCardThisModeltksig")}
           value={selectedGpu}
           onValueChange={setSelectedGpu}
           options={[
@@ -3710,8 +3710,8 @@ function VideoGenerator({
         />
       )}
       <AdvancedSelect
-        label="Step cache"
-        hint="Static skip extrapolates middle steps on a fixed schedule (12+ steps) and keeps the compile and CUDA graph; Wan2.2 A14B and LTX-2 run uncached. Auto uses it for text-to-video (no keyframes or references), at or above the step count it was measured at, on Wan2.2 TI2V 5B on every speed tier but Off/Eager, and on HunyuanVideo 1.5 and MiniMax-H3 on Max only. First-Block-Cache reuses the transformer tail across steps (larger quality cost); Auto turns it on for other many-step models on Max only. LAiM_DIFFUSION_AUTO_STEP_SKIP=0 stops Auto from picking Static skip."
+        label={translate("uxVideo.stepCachexk1do")}
+        hint={translate("uxVideo.staticSkipExtrapolatesMiddlec3l3k")}
         badge={<ResolvedBadge status={status} controlKey="transformer_cache" />}
         value={transformerCache}
         onValueChange={(v) => setTransformerCache(v as typeof transformerCache)}
@@ -3719,18 +3719,18 @@ function VideoGenerator({
           ["auto", "Auto"],
           ["off", "Off"],
           ["fbcache", "First-Block-Cache"],
-          ["static", "Static skip"],
+          ["static", translate("uxVideo.staticSkipyzt74")],
         ]}
       />
       <div className="flex items-center justify-between">
         <span className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
-          Live preview
-          <InfoHint>Show a rough preview of the first frame while the clip denoises. Costs no measurable speed and never changes the final video.</InfoHint>
+          {translate("uxVideo.livePreviewz16ij")}
+          <InfoHint>{translate("uxCopy.showARoughPreview3frma")}</InfoHint>
         </span>
         <Switch
           checked={livePreview}
           onCheckedChange={(on) => setLivePreviewOff(!on)}
-          aria-label="Live preview"
+          aria-label={translate("uxVideo.livePreviewz16ij")}
         />
       </div>
       <LoadedBuildSummary status={status} />
@@ -3756,10 +3756,9 @@ function VideoGenerator({
       >
         <AlertDialogContent size="sm">
           <AlertDialogHeader>
-            <AlertDialogTitle>Clear all videos?</AlertDialogTitle>
+            <AlertDialogTitle>{translate("uxVideo.clearAllVideos13kes")}</AlertDialogTitle>
             <AlertDialogDescription>
-              This permanently deletes every generated video from the gallery. This action cannot
-              be undone.
+              {translate("uxCopy.thisPermanentlyDeletesEvery1dsk8")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -3772,7 +3771,7 @@ function VideoGenerator({
                 void handleClearAll();
               }}
             >
-              {clearingGallery ? "Clearing…" : "Clear all"}
+              {clearingGallery ? translate("uxVideo.clearingEllipsiscv8ka") : translate("uxVideo.clearAllyi8fz")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -3787,10 +3786,9 @@ function VideoGenerator({
             rather than a panel. */}
         <DialogContent className="max-w-lg rounded-2xl">
           <DialogHeader>
-            <DialogTitle>Choose how MiniMax H3 should generate</DialogTitle>
+            <DialogTitle>{translate("uxCopy.chooseHowMiniMaxH31hvza")}</DialogTitle>
             <DialogDescription>
-              MiniMax H3 uses a separate denoiser for reference generation. Choose the mode you
-              want to load now. Shared components already on disk are reused.
+              {translate("uxCopy.miniMaxH3UsesAmqeup")}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-3 sm:grid-cols-2">
@@ -3801,9 +3799,9 @@ function VideoGenerator({
               onClick={() => chooseH3Task("fl2va")}
             >
               <span className="grid gap-1">
-                <span className="font-medium">Text and frames</span>
+                <span className="font-medium">{translate("uxVideo.textAndFramesc2vly")}</span>
                 <span className="text-ui-11 font-normal leading-snug text-muted-foreground">
-                  Generate from text, with optional first and last frame images.
+                  {translate("uxVideo.generateFromTextWith1yv8k")}
                 </span>
               </span>
             </Button>
@@ -3816,7 +3814,7 @@ function VideoGenerator({
               <span className="grid gap-1">
                 <span className="font-medium">References</span>
                 <span className="text-ui-11 font-normal leading-snug text-muted-foreground">
-                  Generate from reference pictures, videos and audio tracks.
+                  {translate("uxVideo.generateFromReferencePictures3hqts")}
                 </span>
               </span>
             </Button>
@@ -3853,7 +3851,7 @@ function VideoGenerator({
               catalog={VIDEO_CATALOG}
               opaqueKind={opaqueKind}
               hubCapability="video-gen"
-              placeholder="Select video model"
+              placeholder={translate("uxVideo.selectVideoModel17j54")}
               open={active && selectorOpen}
               onOpenChange={(o) => setSelectorOpen(active && o)}
             />
@@ -3867,14 +3865,12 @@ function VideoGenerator({
                     type="button"
                     variant="outline"
                     size="sm"
-                    aria-label="Cancel load"
+                    aria-label={translate("uxVideo.cancelLoad145nv")}
                     className="!h-[calc(34px*var(--ui-space-scale,1))] rounded-full text-xs"
                     onClick={() => void handleCancelLoad()}
-                  >
-                    Cancel load
-                  </Button>
+                  >{translate("uxVideo.cancelLoadnxvsd")}</Button>
                 </TooltipTrigger>
-                <TooltipContent>Stop loading this model</TooltipContent>
+                <TooltipContent>{translate("uxCopy.stopLoadingThisModel2r2e4")}</TooltipContent>
               </Tooltip>
             )}
           </div>
@@ -3883,13 +3879,13 @@ function VideoGenerator({
           {/* Loaded-model status line; chips that do not fit wrap onto a clipped second line. */}
           {status?.loaded && (
             <div className="pointer-events-auto col-start-1 mt-[var(--studio-chat-header-padding-top,11px)] flex h-[var(--studio-chat-control-height,34px)] min-w-0 flex-wrap content-start gap-x-3 overflow-hidden pl-4 text-ui-11 leading-[var(--studio-chat-control-height,34px)]">
-              {status.family && <StatusChip label="Family" value={status.family} />}
-              {status.engine && <StatusChip label="Engine" value={status.engine} />}
-              {status.model_kind && <StatusChip label="Kind" value={status.model_kind} />}
+              {status.family && <StatusChip label={translate("uxVideo.family1ii54")} value={status.family} />}
+              {status.engine && <StatusChip label={translate("uxVideo.engine1ovbg")} value={status.engine} />}
+              {status.model_kind && <StatusChip label={translate("uxVideo.kindhqumo")} value={status.model_kind} />}
               {status.offload_policy && (
-                <StatusChip label="Offload" value={status.offload_policy} />
+                <StatusChip label={translate("uxVideo.offload143lm")} value={status.offload_policy} />
               )}
-              {status.speed_mode && <StatusChip label="Speed" value={status.speed_mode} />}
+              {status.speed_mode && <StatusChip label={translate("settings.voice.readAloud.speedLabel")} value={status.speed_mode} />}
             </div>
           )}
           <div className="pointer-events-none col-start-2 flex min-w-0 items-start justify-end pr-2 pt-[var(--studio-chat-header-padding-top,11px)]">
@@ -3925,16 +3921,16 @@ function VideoGenerator({
               <h2 className="flex items-center gap-2 font-heading text-xl font-medium leading-none text-foreground">
                 {/* The app's Video icon, same as the sidebar row. */}
                 <HugeiconsIcon icon={FlimSlateIcon} className="size-[calc(18px*var(--ui-space-scale,1))] shrink-0" />
-                Create videos
+                {translate("uxVideo.createVideoszl51e")}
               </h2>
               <p className="text-xs leading-snug text-muted-foreground">
                 {supportsReferences
-                  ? "Generate a video from a prompt and reference pictures, videos or audio"
+                  ? translate("uxVideo.generateAVideoFromjcmgd")
                   : supportsLastFrame
-                    ? "Generate a video from a prompt, or from a start and end frame"
+                    ? translate("uxVideo.generateAVideoFromdpw2q")
                     : supportsFirstFrame
-                      ? "Generate a video from a prompt, or animate a start frame"
-                      : "Generate a video from a prompt"}
+                      ? translate("uxVideo.generateAVideoFromzrsd3")
+                      : translate("uxVideo.generateAVideoFromcmsx7")}
               </p>
             </div>
 
@@ -3950,12 +3946,12 @@ function VideoGenerator({
             />
           </div>
 
-          <Field label="Prompt">
+          <Field label={translate("uxVideo.prompt1lmzx")}>
             <Textarea
               data-type-to-activate="prompt"
               rows={4}
               className={cn(PROMPT_BOX_CLASS, "min-h-32")}
-              placeholder={exampleDismissed ? undefined : VIDEO_EXAMPLE_PROMPT}
+              placeholder={exampleDismissed ? undefined : videoExamplePrompt()}
               value={prompt}
               onFocus={() => {
                 if (exampleDismissed) return;
@@ -3971,40 +3967,40 @@ function VideoGenerator({
               onChange={setNegativePrompt}
               open={negativeOpen}
               onOpenChange={setNegativeOpen}
-              hint="What to steer the video away from. Only used when guidance is above 0."
+              hint={translate("uxVideo.whatToSteerThe1f5v7")}
             />
           )}
 
           {supportsKeyframes && (
             <div className="grid gap-2" data-testid="video-keyframes">
               <span className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
-                {supportsLastFrame ? "Start and end frame" : "Start frame"}
+                {supportsLastFrame ? translate("uxVideo.startAndEndFramevsw5l") : translate("uxVideo.startFrame6ke3u")}
                 <InfoHint>
                   {supportsLastFrame
-                    ? "Optional. A start frame animates that picture; an end frame makes the clip land on one; both make it travel between them. Text-to-video is what you get with neither. The start frame is stretched onto the canvas and the end frame is centre-cropped, which is how the model was conditioned."
-                    : "Optional. The clip starts on this picture and animates it (image-to-video); without one it is text-to-video. Match source picks the resolution preset closest to the picture's shape, and the picture is centre-cropped onto it."}
+                    ? translate("uxVideo.optionalAStartFramet3rxk")
+                    : translate("uxVideo.optionalTheClipStarts1ls8f")}
                 </InfoHint>
               </span>
               <div className={supportsLastFrame ? "grid grid-cols-2 gap-2" : "grid gap-2"}>
                 {supportsFirstFrame && (
                   <div className="grid gap-1.5">
-                    <span className="text-ui-11 text-muted-foreground/70">Start frame</span>
+                    <span className="text-ui-11 text-muted-foreground/70">{translate("uxVideo.startFramefkner")}</span>
                     <ImageDropzone
                       value={firstFrame}
                       onChange={setFirstFrame}
-                      label="Click or drop"
-                      removeLabel="Remove start frame"
+                      label={translate("uxVideo.clickOrDrop1368r")}
+                      removeLabel={translate("uxVideo.removeStartFrameysf9b")}
                     />
                   </div>
                 )}
                 {supportsLastFrame && (
                   <div className="grid gap-1.5">
-                    <span className="text-ui-11 text-muted-foreground/70">End frame</span>
+                    <span className="text-ui-11 text-muted-foreground/70">{translate("uxVideo.endFramekrt47")}</span>
                     <ImageDropzone
                       value={lastFrame}
                       onChange={setLastFrame}
-                      label="Click or drop"
-                      removeLabel="Remove end frame"
+                      label={translate("uxVideo.clickOrDrop1368r")}
+                      removeLabel={translate("uxVideo.removeEndFramepuzx9")}
                     />
                   </div>
                 )}
@@ -4012,8 +4008,7 @@ function VideoGenerator({
               {canvasKeyframe && !matchedResolution && canvasRefusesAspect && (
                 // Surface the same aspect-ratio rejection before Generate.
                 <p className="text-ui-11 leading-snug text-destructive">
-                  This picture is too far from square for MiniMax-H3, which was trained between
-                  1:4 and 4:1. Crop it, or pick a resolution preset to stretch it onto.
+                  {translate("uxCopy.thisPictureIsToo2fz5n")}
                 </p>
               )}
             </div>
@@ -4022,14 +4017,8 @@ function VideoGenerator({
           {supportsReferences && (
             <div className="grid gap-2">
               <span className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
-                References
-                <InfoHint>
-                  Lock the clip to a character, style, motion, camera move or voice. Name them in
-                  the prompt by the tags below -- "use the cat from &lt;Picture 1&gt;, match the
-                  shot rhythm of &lt;Video 1&gt;" -- since order is what the model reads them by.
-                  At most 9 pictures, 3 videos and 3 audio clips, 12 in all. Audio needs a picture
-                  or a video to go with it.
-                </InfoHint>
+                {translate("uxVideo.references1p1yp")}
+                <InfoHint>{translate("uxVideo.lockTheClipTo98y47")}</InfoHint>
               </span>
 
               <div className="grid grid-cols-3 gap-2">
@@ -4037,13 +4026,11 @@ function VideoGenerator({
                   // Index IS the identity here: the tag in the prompt is the position.
                   // biome-ignore lint/suspicious/noArrayIndexKey: position is the reference's name
                   <div key={`picture-${index}`} className="grid gap-1">
-                    <span className="text-ui-11 text-muted-foreground/70">
-                      Picture {index + 1}
-                    </span>
+                    <span className="text-ui-11 text-muted-foreground/70">{translate("uxVideo.picture97ysg", { p1: index + 1 })}</span>
                     <div className="relative h-24 overflow-hidden rounded-[10px] border border-border bg-muted/30">
                       <button
                         type="button"
-                        aria-label={`Edit crop for picture ${index + 1}`}
+                        aria-label={translate("uxVideo.editCropForPicturekd9qg", { p1: index + 1 })}
                         className="group h-full w-full overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
                         onClick={() => setCropPictureIndex(index)}
                       >
@@ -4054,7 +4041,7 @@ function VideoGenerator({
                         />
                         <span className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-1 bg-gradient-to-t from-black/80 to-transparent px-2 pb-1.5 pt-6 text-ui-11 font-medium text-[#f9e2de]">
                           <HugeiconsIcon icon={ImageCropIcon} className="size-3.5" />
-                          Edit crop
+                          {translate("uxVideo.editCrop1j7lf")}
                         </span>
                       </button>
                       <Tooltip>
@@ -4063,7 +4050,7 @@ function VideoGenerator({
                             type="button"
                             variant="secondary"
                             size="icon"
-                            aria-label={`Remove picture ${index + 1}`}
+                            aria-label={translate("uxVideo.removePicture9wbn8", { p1: index + 1 })}
                             className="absolute right-1.5 top-1.5 size-7 bg-background/85 shadow-sm backdrop-blur-sm"
                             onClick={() =>
                               setReferenceImages((prev) =>
@@ -4074,23 +4061,21 @@ function VideoGenerator({
                             <HugeiconsIcon icon={Cancel01Icon} className="size-3.5" />
                           </Button>
                         </TooltipTrigger>
-                        <TooltipContent>Remove picture {index + 1}</TooltipContent>
+                        <TooltipContent>{translate("uxVideo.removePicture0li2i", { p1: index + 1 })}</TooltipContent>
                       </Tooltip>
                     </div>
                   </div>
                 ))}
                 {referenceImages.length < 9 && hasReferenceRoom && (
                   <div className="grid gap-1">
-                    <span className="text-ui-11 text-muted-foreground/70">
-                      Picture {referenceImages.length + 1}
-                    </span>
+                    <span className="text-ui-11 text-muted-foreground/70">{translate("uxVideo.picture97ysg", { p1: referenceImages.length + 1 })}</span>
                     <ImageDropzone
                       value={null}
                       onChange={(next) =>
                         next &&
                         setReferenceImages((prev) => [...prev, stageReferenceImage(next)])
                       }
-                      label="Add"
+                      label={translate("browser.agentSettings.addSite")}
                       className="h-24"
                       // MiniMax-H3 references take up to 8192px and have their own crop and fit.
                       maxSide={null}
@@ -4103,11 +4088,11 @@ function VideoGenerator({
                 {referenceVideos.map((entry, index) => (
                   // biome-ignore lint/suspicious/noArrayIndexKey: position is the reference's name
                   <div key={`video-${index}`} className="grid gap-1">
-                    <span className="text-ui-11 text-muted-foreground/70">Video {index + 1}</span>
+                    <span className="text-ui-11 text-muted-foreground/70">{translate("uxVideo.videos5z8f", { p1: index + 1 })}</span>
                     <ReferenceMediaPicker
                       kind="video"
                       value={entry.video}
-                      label={`Video ${index + 1}`}
+                      label={translate("uxVideo.video346t3", { p1: index + 1 })}
                       onChange={(next) => {
                         const trim = defaultReferenceVideoTrim(next?.durationSeconds);
                         setReferenceVideos((prev) =>
@@ -4135,9 +4120,9 @@ function VideoGenerator({
                     />
                     <div className="grid grid-cols-2 gap-2">
                       <div className="grid gap-1 text-ui-11 text-muted-foreground">
-                        Trim start (seconds)
+                        {translate("uxVideo.trimStartSeconds4yz5i")}
                         <Input
-                          aria-label={`Video ${index + 1} trim start in seconds`}
+                          aria-label={translate("uxVideo.videoTrimStartInwq5t1", { p1: index + 1 })}
                           type="number"
                           min={0}
                           max={entry.video.durationSeconds}
@@ -4162,9 +4147,9 @@ function VideoGenerator({
                         />
                       </div>
                       <div className="grid gap-1 text-ui-11 text-muted-foreground">
-                        Trim end (seconds)
+                        {translate("uxVideo.trimEndSeconds1cv3u")}
                         <Input
-                          aria-label={`Video ${index + 1} trim end in seconds`}
+                          aria-label={translate("uxVideo.videoTrimEndInncf01", { p1: index + 1 })}
                           type="number"
                           min={0}
                           max={entry.video.durationSeconds}
@@ -4197,7 +4182,7 @@ function VideoGenerator({
                       </div>
                     </div>
                     <ReferenceVideoTrimStatus
-                      label={`Video ${index + 1}`}
+                      label={translate("uxVideo.video346t3", { p1: index + 1 })}
                       start={entry.trimStartSeconds}
                       end={entry.trimEndSeconds}
                       sourceDuration={entry.video.durationSeconds}
@@ -4206,7 +4191,7 @@ function VideoGenerator({
                       kind="audio"
                       compact={true}
                       value={entry.audio}
-                      label="Replace its soundtrack (optional)"
+                      label={translate("uxVideo.replaceItsSoundtrackOptionalfhfd2")}
                       onChange={(next) =>
                         setReferenceVideos((prev) =>
                           prev.map((item, i) => (i === index ? { ...item, audio: next } : item)),
@@ -4219,7 +4204,7 @@ function VideoGenerator({
                   <ReferenceMediaPicker
                     kind="video"
                     value={null}
-                    label={`Add video ${referenceVideos.length + 1}`}
+                    label={translate("uxVideo.addVideo8bud7", { p1: referenceVideos.length + 1 })}
                     onChange={(next) => {
                       if (!next) return;
                       const trim = defaultReferenceVideoTrim(next.durationSeconds);
@@ -4241,11 +4226,11 @@ function VideoGenerator({
                 {referenceAudios.map((audio, index) => (
                   // biome-ignore lint/suspicious/noArrayIndexKey: position is the reference's name
                   <div key={`audio-${index}`} className="grid gap-1">
-                    <span className="text-ui-11 text-muted-foreground/70">Audio {index + 1}</span>
+                    <span className="text-ui-11 text-muted-foreground/70">{translate("uxVideo.audiowwdxv", { p1: index + 1 })}</span>
                     <ReferenceMediaPicker
                       kind="audio"
                       value={audio}
-                      label={`Audio ${index + 1}`}
+                      label={translate("uxVideo.audioc8f3g", { p1: index + 1 })}
                       onChange={(next) =>
                         setReferenceAudios((prev) =>
                           next
@@ -4262,7 +4247,7 @@ function VideoGenerator({
                     <ReferenceMediaPicker
                       kind="audio"
                       value={null}
-                      label={`Add audio ${referenceAudios.length + 1}`}
+                      label={translate("uxVideo.addAudioi7933", { p1: referenceAudios.length + 1 })}
                       onChange={(next) => next && setReferenceAudios((prev) => [...prev, next])}
                     />
                   )}
@@ -4271,15 +4256,14 @@ function VideoGenerator({
               {referenceImages.length === 0 && referenceVideos.length === 0 && (
                 // Ref2VA cannot generate without an image or video reference.
                 <p className="text-ui-11 leading-snug text-muted-foreground/70">
-                  This checkpoint generates from references. Add a picture or a video, or load a
-                  first/last-frame checkpoint for plain text-to-video.
+                  {translate("uxCopy.thisCheckpointGeneratesFrom1eyee")}
                 </p>
               )}
 
               {canPickReferenceSize && (
                 <Field
-                  label="Reference detail"
-                  hint="How reference pictures are sized. Match keeps them at the clip's own pixel area. Max encodes them at 2048px for stronger identity fidelity, and rides every sampling step, so it can be several times slower."
+                  label={translate("uxVideo.referenceDetail10psv")}
+                  hint={translate("uxVideo.howReferencePicturesAregaaxx")}
                 >
                   <Select
                     value={referenceImageSize}
@@ -4289,8 +4273,8 @@ function VideoGenerator({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="match">Match the clip</SelectItem>
-                      <SelectItem value="max">Max (2048px, slower)</SelectItem>
+                      <SelectItem value="match">{translate("uxVideo.matchTheClipzl0t5")}</SelectItem>
+                      <SelectItem value="max">{translate("uxVideo.max2048pxSlowerarxqg")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </Field>
@@ -4316,8 +4300,8 @@ function VideoGenerator({
           )}
 
           <Field
-            label="Aspect ratio"
-            hint="Pick a ratio to lock the proportions, then set the size below. Flip swaps width and height. With a keyframe staged, Match source keeps the picture's own shape."
+            label={translate("uxVideo.aspectRatiodgimx")}
+            hint={translate("uxVideo.pickARatioTo7rt43")}
           >
             <AspectRatioSelect
               value={sourceSized ? MATCH_SOURCE : aspect}
@@ -4326,20 +4310,20 @@ function VideoGenerator({
               onFlip={flipDimensions}
               extraItems={
                 canvasKeyframe && matchedResolution ? (
-                  <SelectItem value={MATCH_SOURCE}>Match source</SelectItem>
+                  <SelectItem value={MATCH_SOURCE}>{translate("uxVideo.matchSourcejnyer")}</SelectItem>
                 ) : null
               }
             />
           </Field>
 
           <Field
-            label="Resolution"
-            hint={`Width and height in pixels, in steps of ${sizeLimits.multiple}. The model was trained at ${resolutionPresets.map(([w, h]) => `${w} × ${h}`).join(", ")}; other sizes keep about the same pixel count and may lower quality.`}
+            label={translate("uxVideo.resolution1cj3d")}
+            hint={translate("uxVideo.widthAndHeightInxb815", { p1: sizeLimits.multiple, p2: resolutionPresets.map(([w, h]) => `${w} × ${h}`).join(", ") })}
           >
             <div className="flex items-center gap-2">
               <DimensionSelect
                 icon={ArrowLeftRightIcon}
-                label="Width"
+                label={translate("uxVideo.widthgfxz9")}
                 value={shownSize[0]}
                 onChange={changeWidth}
                 options={dimOptions}
@@ -4347,7 +4331,7 @@ function VideoGenerator({
               />
               <DimensionSelect
                 icon={ArrowUpDownIcon}
-                label="Height"
+                label={translate("uxVideo.height7puwk")}
                 value={shownSize[1]}
                 onChange={changeHeight}
                 options={dimOptions}
@@ -4356,14 +4340,14 @@ function VideoGenerator({
             </div>
             {!sourceSized && !isPresetSize(videoSize[0], videoSize[1], sizeLimits) && (
               <p className="text-ui-11 leading-snug text-muted-foreground">
-                Not one of the model's trained sizes, so quality may be lower.
+                {translate("uxVideo.notOneOfThe1xnou")}
               </p>
             )}
           </Field>
 
           <Field
-            label="Trained sizes"
-            hint="The sizes the loaded model was trained at, which give the best quality. Portrait sizes are marked."
+            label={translate("uxVideo.trainedSizes3wdnt")}
+            hint={translate("uxVideo.theSizesTheLoaded1wdsw")}
           >
             <Select
               value=""
@@ -4372,14 +4356,14 @@ function VideoGenerator({
                 if (preset) applySize(preset[0], preset[1]);
               }}
             >
-              <SelectTrigger aria-label="Trained sizes">
-                <SelectValue placeholder="Choose a trained size" />
+              <SelectTrigger aria-label={translate("uxVideo.trainedSizes3wdnt")}>
+                <SelectValue placeholder={translate("uxVideo.chooseATrainedSize3hifh")} />
               </SelectTrigger>
               <SelectContent>
                 {resolutionPresets.map(([w, h]) => (
                   <SelectItem key={`${w}x${h}`} value={`${w}x${h}`}>
                     {w} × {h}
-                    {h > w ? " (portrait)" : ""}
+                    {h > w ? translate("uxVideo.portraitTagP58na") : ""}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -4387,8 +4371,8 @@ function VideoGenerator({
           </Field>
 
           <Field
-            label="Duration"
-            hint="Clip length in seconds at the current frame rate. Valid lengths are set by the model's temporal lattice."
+            label={translate("uxVideo.duration1n1du")}
+            hint={translate("uxVideo.clipLengthInSecondsuva4u")}
           >
             <Select
               value={String(numFrames)}
@@ -4403,9 +4387,7 @@ function VideoGenerator({
               </SelectTrigger>
               <SelectContent>
                 {durationOptions.map((o) => (
-                  <SelectItem key={o.frames} value={String(o.frames)}>
-                    {o.seconds.toFixed(1)}s · {o.frames} frames
-                  </SelectItem>
+                  <SelectItem key={o.frames} value={String(o.frames)}>{translate("uxVideo.sFramesmw3vk", { p1: o.seconds.toFixed(1), p2: o.frames })}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -4413,15 +4395,15 @@ function VideoGenerator({
 
           <div className="flex items-center justify-between">
             <span className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
-              Frame rate
-              <InfoHint>Playback frame rate, fixed per model.</InfoHint>
+              {translate("uxVideo.frameRate1busi")}
+              <InfoHint>{translate("uxCopy.playbackFrameRateFixed1yrfy")}</InfoHint>
             </span>
-            <span className="font-mono text-xs font-medium text-foreground">{fps} fps</span>
+            <span className="font-mono text-xs font-medium text-foreground">{translate("uxVideo.fpsoq2no", { p1: fps })}</span>
           </div>
 
           <SliderField
-            label="Steps"
-            hint="Denoising steps. Distilled models want very few (8); the full base model wants more (40)."
+            label={translate("settings.profile.stats.trainingSteps")}
+            hint={translate("uxVideo.denoisingStepsDistilledModels1qk15")}
             value={steps}
             min={1}
             max={100}
@@ -4430,8 +4412,8 @@ function VideoGenerator({
           />
           {status?.supports_cfg !== false && (
             <SliderField
-              label="Guidance"
-              hint="Classifier-free guidance scale. Keep low (1) for the distilled model; the base model uses real guidance (4)."
+              label={translate("uxVideo.guidancew7efa")}
+              hint={translate("uxVideo.classifierFreeGuidanceScale87l45")}
               value={guidance}
               min={0}
               max={20}
@@ -4441,8 +4423,8 @@ function VideoGenerator({
           )}
           {defaultFlowShift != null && (
             <SliderField
-              label="Motion shift"
-              hint="Sigma shift of the video schedule. Higher spends more of the schedule at high noise, which reads as more motion and less fine detail. MiniMax-H3 ships 12."
+              label={translate("uxVideo.motionShifth3712")}
+              hint={translate("uxVideo.sigmaShiftOfThesv9to")}
               value={flowShift ?? defaultFlowShift}
               min={1}
               max={30}
@@ -4452,8 +4434,8 @@ function VideoGenerator({
           )}
           {canPickAudioFlowShift && defaultAudioFlowShift != null && (
             <SliderField
-              label="Audio shift"
-              hint="Sigma shift of the audio schedule, which MiniMax-H3 runs alongside the video one. Ships at 3."
+              label={translate("uxVideo.audioShift1l80x")}
+              hint={translate("uxVideo.sigmaShiftOfThe1b5wh")}
               value={audioFlowShift ?? defaultAudioFlowShift}
               min={1}
               max={30}
@@ -4463,12 +4445,12 @@ function VideoGenerator({
           )}
           {/* A slider row ends flush with its track, so the label below needs room. */}
           <Field
-            label="Seed"
-            hint="Leave empty for a fresh random seed each run."
+            label={translate("uxVideo.seed1lu3q")}
+            hint={translate("uxVideo.leaveEmptyForAxewf0")}
             className="pt-2"
           >
             <Input
-              placeholder="Random if empty"
+              placeholder={translate("uxVideo.randomIfEmptyokdsy")}
               value={seed}
               onChange={(e) => setSeed(e.target.value)}
             />
@@ -4510,10 +4492,10 @@ function VideoGenerator({
                         onClick={handleReapply}
                       >
                         <HugeiconsIcon icon={Refresh01Icon} className="mr-2 size-4" />
-                        Reapply
+                        {translate("uxVideo.reapply4ytff")}
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent>Reload the current model with the advanced options</TooltipContent>
+                    <TooltipContent>{translate("uxCopy.reloadTheCurrentModel1cf3i")}</TooltipContent>
                   </Tooltip>
                 )}
               </>
@@ -4530,7 +4512,7 @@ function VideoGenerator({
               open={true}
               onOpenChange={(open) => !open && closeViewer()}
               title={viewerVideo.prompt || t("library.viewer.untitledVideo")}
-              meta={`Generated · ${viewerVideo.width} × ${viewerVideo.height} · ${Math.round(viewerVideo.duration_s)}s`}
+              meta={translate("uxVideo.generatedSg6csu", { p1: viewerVideo.width, p2: viewerVideo.height, p3: Math.round(viewerVideo.duration_s) })}
               media={true}
               noun="video"
               actions={{
@@ -4591,7 +4573,7 @@ function VideoGenerator({
               // preview itself). The finished clip replaces it.
               <img
                 src={livePreviewSrc}
-                alt="Live preview of the first frame being generated"
+                alt={translate("uxVideo.livePreviewOfThe13h1w")}
                 data-testid="video-live-preview"
                 style={livePreviewBox}
                 className="size-full object-contain shadow-sm"
@@ -4625,7 +4607,7 @@ function VideoGenerator({
                 {selected.has_audio && (
                   <div className="absolute left-4 top-4 flex items-center gap-1 rounded-lg bg-background/80 px-2 py-1 text-ui-11 font-medium shadow-lg ring-1 ring-border backdrop-blur">
                     <HugeiconsIcon icon={Volume02Icon} className="size-3.5" />
-                    Audio
+                    {translate("shell.navigation.audio")}
                   </div>
                 )}
                 {/* Actions grouped in one glass toolbar so they stay legible over any clip. */}
@@ -4651,25 +4633,19 @@ function VideoGenerator({
                     <DropdownMenuTrigger asChild={true}>
                       <Button size="sm" variant="ghost" className="gap-1.5">
                         <HugeiconsIcon icon={Download01Icon} className="size-4" />
-                        Download
+                        {translate("imageViewer.download")}
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem
                         onClick={() => void handleDownload(selectedSrc, selected, "mp4")}
-                      >
-                        MP4 (original{selected.has_audio ? ", keeps audio" : ""})
-                      </DropdownMenuItem>
+                      >{translate("uxVideo.mP4Originalnadp1", { p1: selected.has_audio ? ", keeps audio" : "" })}</DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => void handleDownload(selectedSrc, selected, "webm")}
-                      >
-                        WebM (web embeds)
-                      </DropdownMenuItem>
+                      >{translate("uxVideo.webMWebEmbedsemo79")}</DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => void handleDownload(selectedSrc, selected, "gif")}
-                      >
-                        GIF (preview, no audio)
-                      </DropdownMenuItem>
+                      >{translate("uxVideo.gIFPreviewNoAudiospg5o")}</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                   <GalleryItemMenu
@@ -4693,7 +4669,7 @@ function VideoGenerator({
               // The selected record's link has not landed yet; spin in place.
               <div className="flex flex-col items-center gap-3 text-muted-foreground">
                 <Spinner className="size-8" />
-                <p className="text-sm">Loading…</p>
+                <p className="text-sm">{translate("uxVideo.loadingnr34g")}</p>
               </div>
             ) : busy === "generating" ? null : (
               <div className="flex flex-col items-center gap-3 text-muted-foreground">
@@ -4701,8 +4677,8 @@ function VideoGenerator({
                 <HugeiconsIcon icon={FlimSlateIcon} className="size-12" strokeWidth={1.5} />
                 <p className="text-sm">
                   {status?.loaded
-                    ? "Enter a prompt and hit Generate."
-                    : "Select a video model to load"}
+                    ? translate("uxVideo.enterAPromptAndq24o6")
+                    : translate("uxVideo.selectAVideoModelsucvu")}
                 </p>
               </div>
             )}
@@ -4720,7 +4696,7 @@ function VideoGenerator({
                   <ModelLoadDescription
                     className="min-h-0"
                     title={null}
-                    message="Starting…"
+                    message={translate("uxVideo.startingd3ta0")}
                     progressPercent={
                       genStep?.phase === "denoise" && genStep.total > 0
                         ? (genStep.step / genStep.total) * 100
@@ -4862,10 +4838,10 @@ function VideoGenerator({
                       className="flex h-16 w-16 shrink-0 flex-col items-center justify-center gap-1 rounded-[10px] text-muted-foreground ring-1 ring-border transition-colors hover:text-destructive hover:ring-destructive/40"
                     >
                       <HugeiconsIcon icon={Delete02Icon} className="size-4" />
-                      <span className="text-ui-9 font-medium">Clear all</span>
+                      <span className="text-ui-9 font-medium">{translate("uxVideo.clearAllyye4n")}</span>
                     </button>
                   </TooltipTrigger>
-                  <TooltipContent>Clear all videos</TooltipContent>
+                  <TooltipContent>{translate("uxVideo.clearAllVideos9rv8o")}</TooltipContent>
                 </Tooltip>
               )}
             </div>

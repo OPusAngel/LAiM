@@ -33,7 +33,11 @@ const gate = loadWithStubs<typeof GateModule>(
     "../stores/external-providers-store": {
       useExternalProvidersStore: selectorStore({ providers: [] }),
     },
-    "../stores/chat-runtime-store": { useChatRuntimeStore },
+    "../stores/chat-runtime-store": {
+      useChatRuntimeStore,
+      selectToolsSelectable: (state: Record<string, unknown>) =>
+        Boolean(state.supportsTools),
+    },
   },
 );
 
@@ -201,7 +205,7 @@ function renderProjectChat(
 
 test("a model without tool calling does not claim to use the project's sources", () => {
   const html = renderProjectChat({
-    checkpoint: "LAiM/gemma-3-4b-it-GGUF",
+    checkpoint: "unsloth/gemma-3-4b-it-GGUF",
     supportsTools: false,
   });
   assert.match(html, /handbook\.pdf/);
@@ -215,7 +219,7 @@ test("a model without tool calling does not claim to use the project's sources",
 
 test("a model with tool calling still shows the project's sources as in effect", () => {
   const html = renderProjectChat({
-    checkpoint: "LAiM/Qwen3-4B-GGUF",
+    checkpoint: "unsloth/Qwen3-4B-GGUF",
     supportsTools: true,
   });
   assert.match(html, /handbook\.pdf/);
@@ -225,7 +229,7 @@ test("a model with tool calling still shows the project's sources as in effect",
 
 test("with Docs on, a model without tool calling dims the files it will not search", () => {
   const html = renderProjectChat(
-    { checkpoint: "LAiM/gemma-3-4b-it-GGUF", supportsTools: false },
+    { checkpoint: "unsloth/gemma-3-4b-it-GGUF", supportsTools: false },
     true,
   );
   assert.match(html, /handbook\.pdf/);
@@ -245,7 +249,7 @@ test("a linked folder's files collapse into one folder card", () => {
   try {
     for (const ragEnabled of [false, true]) {
       const html = renderProjectChat(
-        { checkpoint: "LAiM/Qwen3-4B-GGUF", supportsTools: true },
+        { checkpoint: "unsloth/Qwen3-4B-GGUF", supportsTools: true },
         ragEnabled,
       );
       assert.match(html, /handbook\.pdf/);
@@ -266,7 +270,7 @@ test("indexed cards of any format open", () => {
   ];
   try {
     const html = renderProjectChat(
-      { checkpoint: "LAiM/Qwen3-4B-GGUF", supportsTools: true },
+      { checkpoint: "unsloth/Qwen3-4B-GGUF", supportsTools: true },
       true,
     );
     for (const name of ["handbook\\.pdf", "notes\\.docx", "book\\.epub"]) {
@@ -280,7 +284,7 @@ test("indexed cards of any format open", () => {
 
 test("with Docs on, a model with tool calling keeps the files in effect", () => {
   const html = renderProjectChat(
-    { checkpoint: "LAiM/Qwen3-4B-GGUF", supportsTools: true },
+    { checkpoint: "unsloth/Qwen3-4B-GGUF", supportsTools: true },
     true,
   );
   assert.match(html, /handbook\.pdf/);

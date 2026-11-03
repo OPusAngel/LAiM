@@ -502,14 +502,14 @@ def test_disagreeing_manifests_across_caches_are_refused(monkeypatch, tmp_path):
 
     old = download_manifest.Manifest(
         repo_type = "model",
-        repo_id = "LAiM/Model-GGUF",
+        repo_id = "unsloth/Model-GGUF",
         variant = "Q4_K_M",
         started_at = "2026-01-01T00:00:00Z",
         expected_files = (download_manifest.ExpectedFile("old.gguf", 10, "aaa"),),
     )
     new = download_manifest.Manifest(
         repo_type = "model",
-        repo_id = "LAiM/Model-GGUF",
+        repo_id = "unsloth/Model-GGUF",
         variant = "Q4_K_M",
         started_at = "2026-02-01T00:00:00Z",
         expected_files = (download_manifest.ExpectedFile("new.gguf", 20, "bbb"),),
@@ -527,11 +527,11 @@ def test_disagreeing_manifests_across_caches_are_refused(monkeypatch, tmp_path):
         ),
     )
 
-    assert downloads._variant_manifest_in_any_cache("LAiM/Model-GGUF", "Q4_K_M") is None
+    assert downloads._variant_manifest_in_any_cache("unsloth/Model-GGUF", "Q4_K_M") is None
 
     # Agreement is still answered: the point is the ambiguity, not the multiplicity.
     served[second.parent] = old
-    assert downloads._variant_manifest_in_any_cache("LAiM/Model-GGUF", "Q4_K_M") is old
+    assert downloads._variant_manifest_in_any_cache("unsloth/Model-GGUF", "Q4_K_M") is old
 
 
 def test_a_stale_active_manifest_is_compared_rather_than_returned(monkeypatch, tmp_path):
@@ -544,14 +544,14 @@ def test_a_stale_active_manifest_is_compared_rather_than_returned(monkeypatch, t
 
     stale = download_manifest.Manifest(
         repo_type = "model",
-        repo_id = "LAiM/Model-GGUF",
+        repo_id = "unsloth/Model-GGUF",
         variant = "Q4_K_M",
         started_at = "2026-01-01T00:00:00Z",
         expected_files = (download_manifest.ExpectedFile("old.gguf", 10, "aaa"),),
     )
     current = download_manifest.Manifest(
         repo_type = "model",
-        repo_id = "LAiM/Model-GGUF",
+        repo_id = "unsloth/Model-GGUF",
         variant = "Q4_K_M",
         started_at = "2026-02-01T00:00:00Z",
         expected_files = (download_manifest.ExpectedFile("new.gguf", 20, "bbb"),),
@@ -569,7 +569,7 @@ def test_a_stale_active_manifest_is_compared_rather_than_returned(monkeypatch, t
         ),
     )
 
-    assert downloads._variant_manifest_in_any_cache("LAiM/Model-GGUF", "Q4_K_M") is None
+    assert downloads._variant_manifest_in_any_cache("unsloth/Model-GGUF", "Q4_K_M") is None
 
 
 def test_variant_enumeration_sees_legacy_scope_when_handed_a_RESOLVED_root(monkeypatch, tmp_path):
@@ -612,7 +612,7 @@ def test_a_scanned_cache_with_no_manifest_refuses_the_others(monkeypatch, tmp_pa
 
     only = download_manifest.Manifest(
         repo_type = "model",
-        repo_id = "LAiM/Model-GGUF",
+        repo_id = "unsloth/Model-GGUF",
         variant = "Q4_K_M",
         started_at = "2026-01-01T00:00:00Z",
         expected_files = (download_manifest.ExpectedFile("old.gguf", 10, "aaa"),),
@@ -630,11 +630,11 @@ def test_a_scanned_cache_with_no_manifest_refuses_the_others(monkeypatch, tmp_pa
         ),
     )
 
-    assert downloads._variant_manifest_in_any_cache("LAiM/Model-GGUF", "Q4_K_M") is None
+    assert downloads._variant_manifest_in_any_cache("unsloth/Model-GGUF", "Q4_K_M") is None
 
     # ...and once that cache has its own agreeing manifest, the answer comes back.
     served[second.parent] = only
-    assert downloads._variant_manifest_in_any_cache("LAiM/Model-GGUF", "Q4_K_M") is only
+    assert downloads._variant_manifest_in_any_cache("unsloth/Model-GGUF", "Q4_K_M") is only
 
 
 def test_the_active_cache_must_have_a_manifest_when_it_is_scanned(monkeypatch, tmp_path):
@@ -646,7 +646,7 @@ def test_the_active_cache_must_have_a_manifest_when_it_is_scanned(monkeypatch, t
 
     other = download_manifest.Manifest(
         repo_type = "model",
-        repo_id = "LAiM/Model-GGUF",
+        repo_id = "unsloth/Model-GGUF",
         variant = "Q4_K_M",
         started_at = "2026-01-01T00:00:00Z",
         expected_files = (download_manifest.ExpectedFile("old.gguf", 10, "aaa"),),
@@ -672,7 +672,7 @@ def test_the_active_cache_must_have_a_manifest_when_it_is_scanned(monkeypatch, t
         ),
     )
 
-    assert downloads._variant_manifest_in_any_cache("LAiM/Model-GGUF", "Q4_K_M") is None
+    assert downloads._variant_manifest_in_any_cache("unsloth/Model-GGUF", "Q4_K_M") is None
 
 
 def test_an_unreadable_cache_root_is_unknown_rather_than_absent(monkeypatch, tmp_path):
@@ -699,7 +699,7 @@ def test_an_unreadable_cache_root_is_unknown_rather_than_absent(monkeypatch, tmp
     # The enumeration reports the skip rather than only swallowing it...
     errors: list = []
     assert (
-        hf_cache_state.preferred_repo_cache_dirs("model", "LAiM/Model-GGUF", scan_errors = errors)
+        hf_cache_state.preferred_repo_cache_dirs("model", "unsloth/Model-GGUF", scan_errors = errors)
         == []
     )
     assert errors and isinstance(errors[0], OSError)
@@ -711,7 +711,7 @@ def test_an_unreadable_cache_root_is_unknown_rather_than_absent(monkeypatch, tmp
 
     reading = snapshot_progress.compute_snapshot_progress(
         repo_type = "model",
-        repo_id = "LAiM/Model-GGUF",
+        repo_id = "unsloth/Model-GGUF",
         job_key = "model:LAiM/Model-GGUF",
         expected_bytes = 33_000_000_000,
         hf_token = None,
@@ -793,7 +793,7 @@ def test_a_variant_with_nothing_of_its_own_says_so(monkeypatch, tmp_path):
     def _reading(variant, expected_hashes):
         return snapshot_progress.compute_snapshot_progress(
             repo_type = "model",
-            repo_id = "LAiM/Model-GGUF",
+            repo_id = "unsloth/Model-GGUF",
             job_key = "model:LAiM/Model-GGUF",
             expected_bytes = 33_000_000_000,
             hf_token = None,
@@ -851,7 +851,7 @@ def test_a_root_that_cannot_even_be_stat_ed_is_unknown(monkeypatch, tmp_path):
     errors: list = []
     assert (
         hf_cache_state.preferred_repo_cache_dirs(
-            "model", "LAiM/Model-GGUF", active_root = root, scan_errors = errors
+            "model", "unsloth/Model-GGUF", active_root = root, scan_errors = errors
         )
         == []
     )

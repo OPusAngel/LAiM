@@ -111,13 +111,13 @@ def test_mistral_native_ids_pass_through_unchanged():
 
 # Anthropic states its charset in the 400 it raises: "tool_use.id: String should match
 # pattern '^[a-zA-Z0-9_-]+$'". A colon is not in it, and the two stored shapes carrying
-# one (the duplicate-base fallback, and "<sandbox>:<thread>:<approval>" confirmation ids)
+# one (the duplicate-base fallback, and "<workdir>:<thread>:<approval>" confirmation ids)
 # are both under 64 chars, so the length branch never touched them.
 ANTHROPIC_ID = re.compile(r"[a-zA-Z0-9_-]+")
 
 
 def test_anthropic_rejects_nothing_it_would_have_rejected():
-    call_id, output_id = _replayed_ids("sandboxsess:threadid:approvalid", provider_type = "anthropic")
+    call_id, output_id = _replayed_ids("workdirsess:threadid:approvalid", provider_type = "anthropic")
     assert call_id == output_id
     assert ANTHROPIC_ID.fullmatch(call_id), call_id
 

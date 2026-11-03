@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   pickNativeDocumentFolder,
   useNativePathLeasesSupported,
@@ -129,7 +130,7 @@ export function useLinkedFolders(
         notifySourcesChanged(job);
         const userStarted = userStartedJobs.current.delete(job.id);
         if (job.status === "failed" && userStarted) {
-          toast.error("Folder sync failed", {
+          toast.error(translate("uxRag.folderSyncFailedto830"), {
             description: job.error ?? "The folder could not be indexed.",
           });
         }
@@ -229,7 +230,7 @@ export function useLinkedFolders(
           return sourcesChanged;
         } catch (error) {
           if (isCurrent() && !options?.quiet) {
-            toast.error("Failed to load linked folders", {
+            toast.error(translate("uxRag.failedToLoadLinked1fonr"), {
               description:
                 error instanceof Error ? error.message : String(error),
             });
@@ -294,7 +295,7 @@ export function useLinkedFolders(
       trackJob(result.job);
       onSourcesChanged?.();
     } catch (error) {
-      toast.error("Could not link folder", {
+      toast.error(translate("uxRag.couldNotLinkFolder6kvby"), {
         description: error instanceof Error ? error.message : String(error),
       });
     } finally {
@@ -331,7 +332,13 @@ export function useLinkedFolders(
         trackJob(job);
         onSourcesChanged?.();
       } catch (error) {
-        toast.error(`Could not ${mode} folder`, {
+        toast.error(
+          translate(
+            mode === "rebuild"
+              ? "uxRag.couldNotRebuildFolderH42zw"
+              : "uxRag.couldNotSyncFolderI76xb",
+          ),
+          {
           description: error instanceof Error ? error.message : String(error),
         });
       }
@@ -380,7 +387,7 @@ export function useLinkedFolders(
         } else {
           void refresh({ quiet: true });
         }
-        toast.error("Could not unlink folder", {
+        toast.error(translate("uxRag.couldNotUnlinkFolder1d5pt"), {
           description: error instanceof Error ? error.message : String(error),
         });
       }

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
+
 import type { NativeAudioInstructionsKind } from "../audio-page-policy";
 import {
   InstructionsField,
@@ -29,11 +31,11 @@ export interface InstructionsValue {
   language: string;
 }
 
-export const MUSIC_DESCRIPTION_REQUIRED =
-  "Add a music description. This model needs one beside the lyrics.";
+export const musicDescriptionRequired = () =>
+  translate("uxAudio.addAMusicDescriptionb8ng9");
 
-const VOICE_DESCRIPTION_REQUIRED =
-  "Describe the voice. This model needs a voice description.";
+const voiceDescriptionRequired = () =>
+  translate("uxAudio.describeTheVoice2rk06");
 
 function needsVoiceDescription(ctx: AudioModelContext): boolean {
   return ctx.requiredInputs?.includes("instruct") === true;
@@ -42,14 +44,17 @@ function needsVoiceDescription(ctx: AudioModelContext): boolean {
 function instructionsPanel(
   id: string,
   kind: NativeAudioInstructionsKind,
-  title: string,
+  title: () => string,
   workflows: readonly AudioWorkflowId[],
 ): AudioToolPanel<InstructionsValue> {
   return {
     id,
     families: [],
     workflows,
-    title,
+    // Lazy: the panel list is built at module scope, before the active locale catalog loads.
+    get title() {
+      return title();
+    },
     // Request fields, not spec options, so Advanced keeps every option.
     claims: [],
     appliesTo: (ctx) =>
@@ -85,11 +90,11 @@ function instructionsPanel(
     },
     validate: (value, _core, ctx) =>
       kind === "music" && ctx.musicNeedsDescription && !value.instructions.trim()
-        ? MUSIC_DESCRIPTION_REQUIRED
+        ? musicDescriptionRequired()
         : kind === "voice" &&
             needsVoiceDescription(ctx) &&
             !value.instructions.trim()
-          ? VOICE_DESCRIPTION_REQUIRED
+          ? voiceDescriptionRequired()
           : null,
   };
 }
@@ -97,11 +102,11 @@ function instructionsPanel(
 const INSTRUCTION_PANELS: readonly AudioToolPanel<InstructionsValue>[] =
   [
     // Qwen3-TTS VoiceDesign and CustomVoice and VoxCPM2 read it; other GGUF speech models ignore it.
-    instructionsPanel("voice-design", "voice", "Voice design", ["speak"]),
-    instructionsPanel("higgs-scene", "scene", "Scene", ["speak"]),
-    instructionsPanel("moss-style", "style", "Style", ["speak"]),
+    instructionsPanel("voice-design", "voice", () => translate("uxAudio.voiceDesignPanelg23fl"), ["speak"]),
+    instructionsPanel("higgs-scene", "scene", () => translate("uxAudio.scenePaneltnu57"), ["speak"]),
+    instructionsPanel("moss-style", "style", () => translate("uxAudio.stylePaneltea5u"), ["speak"]),
     // MiniMax Music 3 and YuE2 require it; other music models fall back to the lyrics.
-    instructionsPanel("music-description", "music", "Description", ["music"]),
+    instructionsPanel("music-description", "music", () => translate("uxAudio.descriptionPanel2fl5v"), ["music"]),
   ];
 
 const INSTRUCTION_PANEL_IDS: ReadonlySet<string> = new Set(

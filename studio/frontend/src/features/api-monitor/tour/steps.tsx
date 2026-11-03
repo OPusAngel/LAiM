@@ -1,43 +1,48 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import type { TourStep } from "@/features/tour";
 
 export const apiMonitorTourSteps: TourStep[] = [
   {
     id: "endpoint",
     target: "api-endpoint",
-    title: "Your endpoint",
-    body: (
+    get title() {
+      return translate("uxApimonitor.yourEndpoint1j84z");
+    },
+    get body() {
+      return (
       <>
-        LAiM serves an OpenAI-compatible API. Point any client at this base
-        URL, keep the model name the same, and it works. Status and queue slots
-        sit beside it.
+        {translate("uxTour.lAiMServesAnOpenAIl3zmk")}
       </>
-    ),
+    );
+    },
   },
   {
     id: "toolbar",
     target: "api-toolbar",
-    title: "Controls",
-    body: (
+    get title() {
+      return translate("uxApimonitor.controls1wio9");
+    },
+    get body() {
+      return (
       <>
-        Pause the live feed to read a request without it scrolling away. Eject
-        frees the model's VRAM. The gear opens API settings, where you create
-        keys.
-      </>
-    ),
+        {translate("uxApimonitor.pauseTheLiveFeed1iid5")}</>
+    );
+    },
   },
   {
     id: "log",
     target: "api-log",
-    title: "Request log",
-    body: (
+    get title() {
+      return translate("uxApimonitor.requestLogb6x6l");
+    },
+    get body() {
+      return (
       <>
-        Pick a request on the left to see its prompt, reply, token counts and
-        any error on the right. Search and the status filter above narrow it
-        down.
-      </>
-    ),
+        {translate("uxApimonitor.pickARequestOn1fcln")}</>
+    );
+    },
   },
 ];

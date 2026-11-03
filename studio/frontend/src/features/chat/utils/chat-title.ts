@@ -32,6 +32,8 @@ import type {
 } from "../types/api";
 import { extractDeltaText } from "./parse-assistant-content";
 import { attachmentsSample } from "./pasted-text";
+import { translate } from "@/i18n";
+
 
 /** Store the whole first line and let the sidebar clip it with CSS, so a wider one shows more.
  *  Matches the rename input's maxLength: UTF-16 units, ellipsis included. */
@@ -73,7 +75,7 @@ function cutToUnits(text: string, maxUnits: number): string {
 
 export function fallbackTitleFromUserText(userText: string): string {
   const cleaned = firstLineOf(userText);
-  if (!cleaned) return "New Chat";
+  if (!cleaned) return translate("uxChat.newChatxtazy");
   if (cleaned.length <= FALLBACK_TITLE_MAX) return cleaned;
   // The ellipsis takes one of the budget, so the title still fits the input.
   return cutToUnits(cleaned, FALLBACK_TITLE_MAX - 1).trimEnd() + "…";

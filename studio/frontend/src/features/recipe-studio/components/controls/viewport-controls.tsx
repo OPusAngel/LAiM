@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { Panel, useReactFlow } from "@xyflow/react";
 import {
@@ -57,7 +58,7 @@ export function ViewportControls({
         size="icon"
         className={RECIPE_FLOATING_ICON_BUTTON_CLASS}
         onClick={handleZoomIn}
-        aria-label="Zoom in"
+        aria-label={translate("imageViewer.zoomIn")}
       >
         <Plus className="size-4" />
       </Button>
@@ -67,7 +68,7 @@ export function ViewportControls({
         size="icon"
         className={RECIPE_FLOATING_ICON_BUTTON_CLASS}
         onClick={handleZoomOut}
-        aria-label="Zoom out"
+        aria-label={translate("imageViewer.zoomOut")}
       >
         <Minus className="size-4" />
       </Button>
@@ -77,7 +78,7 @@ export function ViewportControls({
         size="icon"
         className={RECIPE_FLOATING_ICON_BUTTON_CLASS}
         onClick={handleFitView}
-        aria-label="Center view"
+        aria-label={translate("uxRecipestudio.centerView11uf8")}
       >
         <Focus className="size-4" />
       </Button>
@@ -87,7 +88,7 @@ export function ViewportControls({
         size="icon"
         className={RECIPE_FLOATING_ICON_BUTTON_CLASS}
         onClick={onToggleMaximize}
-        aria-label={maximized ? "Exit full view" : "Expand to full view"}
+        aria-label={maximized ? translate("uxRecipestudio.exitFullView9341y") : translate("uxRecipestudio.expandToFullView7s0px")}
       >
         {maximized ? (
           <Minimize2 className="size-4" />
@@ -102,7 +103,7 @@ export function ViewportControls({
         className={RECIPE_FLOATING_ICON_BUTTON_CLASS}
         disabled={lockDisabled}
         onClick={onToggleInteractive}
-        aria-label={interactive ? "Lock interaction" : "Unlock interaction"}
+        aria-label={interactive ? translate("uxRecipestudio.lockInteractionw7tj8") : translate("uxRecipestudio.unlockInteractionm2kyc")}
       >
         {interactive ? (
           <LockOpen className="size-4" />

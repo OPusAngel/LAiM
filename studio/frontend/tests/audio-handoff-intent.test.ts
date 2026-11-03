@@ -46,7 +46,7 @@ test("unknown tasks, workflows and audio types are dropped", () => {
 
 test("the params the route accepted before pass through unchanged", () => {
   const search = {
-    model: "LAiM/orpheus-3b-0.1-ft-GGUF",
+    model: "unsloth/orpheus-3b-0.1-ft-GGUF",
     quant: "orpheus-3b-0.1-ft-Q4_K_M.gguf",
     ggufQuant: "Q4_K_M",
     task: "text-to-speech",

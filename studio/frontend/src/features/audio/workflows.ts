@@ -3,6 +3,7 @@
 
 // Free of app imports so the node test runner and the sidebar can load it directly.
 
+import { translate } from "@/i18n";
 import {
   ArrowReloadHorizontalIcon,
   ClosedCaptionIcon,
@@ -37,64 +38,106 @@ export const AUDIO_WORKFLOWS: ReadonlyArray<{
 }> = [
   {
     id: "speak",
-    label: "Text to Speech",
-    heading: "Text to speech",
+    get label() {
+      return translate("uxAudio.textToSpeech1e911");
+    },
+    get heading() {
+      return translate("settings.voice.readAloud.ttsLabel");
+    },
     icon: TextToSpeechIcon,
-    hint: "Turn text into speech with a built-in or designed voice",
+    get hint() {
+      return translate("uxAudio.turnTextIntoSpeech108e5");
+    },
     slot: "speak",
     createTrain: true,
   },
   {
     id: "clone",
-    label: "Clone",
-    heading: "Clone a voice",
+    get label() {
+      return translate("settings.apiKeys.audioApi.clone");
+    },
+    get heading() {
+      return translate("uxAudio.cloneAVoice18c2w");
+    },
     icon: Copy02Icon,
-    hint: "Speak in the voice from a short recording",
+    get hint() {
+      return translate("uxAudio.speakInTheVoice1n6je");
+    },
     slot: "speak",
     createTrain: true,
   },
   {
     id: "edit",
-    label: "Edit",
-    heading: "Edit speech",
+    get label() {
+      return translate("shell.sections.edit");
+    },
+    get heading() {
+      return translate("uxAudio.editSpeech1vobw");
+    },
     icon: Edit03Icon,
-    hint: "Change words in a recording, same voice",
+    get hint() {
+      return translate("uxAudio.changeWordsInA1tesd");
+    },
     slot: "speak",
     createTrain: false,
   },
   {
     id: "convert",
-    label: "Convert",
-    heading: "Convert voice",
+    get label() {
+      return translate("settings.apiKeys.audioApi.convert");
+    },
+    get heading() {
+      return translate("uxAudio.convertVoice12cem");
+    },
     icon: ArrowReloadHorizontalIcon,
-    hint: "Make a recording sound like another voice",
+    get hint() {
+      return translate("uxAudio.makeARecordingSound1obae");
+    },
     slot: "speak",
     createTrain: false,
   },
   {
     id: "music",
-    label: "Music",
-    heading: "Create music",
+    get label() {
+      return translate("settings.apiKeys.audioApi.music");
+    },
+    get heading() {
+      return translate("uxAudio.createMusicbn9an");
+    },
     icon: MusicThreeIcon,
-    hint: "Songs, instrumentals and sound effects",
+    get hint() {
+      return translate("uxAudio.songsInstrumentalsAndSound1p4h3");
+    },
     slot: "speak",
     createTrain: false,
   },
   {
     id: "separate",
-    label: "Separate",
-    heading: "Separate audio",
+    get label() {
+      return translate("settings.apiKeys.audioApi.separate");
+    },
+    get heading() {
+      return translate("uxAudio.separateAudio1brli");
+    },
     icon: SplitIcon,
-    hint: "Split a track into vocals and instruments",
+    get hint() {
+      return translate("uxAudio.splitATrackInto1f54e");
+    },
     slot: "speak",
     createTrain: false,
   },
   {
     id: "transcribe",
-    label: "Transcribe",
-    heading: "Transcribe",
+    get label() {
+      return translate("settings.apiKeys.audioApi.transcribe");
+    },
+    get heading() {
+      return translate("settings.apiKeys.audioApi.transcribe");
+    },
     icon: ClosedCaptionIcon,
-    hint: "Turn speech into text",
+    get hint() {
+      return translate("uxAudio.turnSpeechIntoTextfsi0h");
+    },
     slot: "transcribe",
     createTrain: true,
   },

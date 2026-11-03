@@ -5,7 +5,7 @@
 - Licence: `LICENSE` beside this file, copied unmodified from the upstream repo.
 
 `joint_schema_model.py` is byte-identical to upstream and is the reference implementation:
-`LAiM/models/clef.py` imports its record encoding and layers, and subclasses its head with
+`unsloth/models/clef.py` imports its record encoding and layers, and subclasses its head with
 LAiM's batched, memory-bounded forward. Ruff and the kwargs formatter skip this directory
 (`[tool.ruff] extend-exclude` and the `ruff-format-with-kwargs` hook in `.pre-commit-config.yaml`)
 so the bytes keep matching the manifest; `tests/test_decision_clef_head.py` checks the digests.

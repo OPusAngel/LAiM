@@ -196,14 +196,14 @@ def test_a_newer_table_is_picked_up(monkeypatch):
     """The probe's actual job: report a mapping the installed tables do not have."""
     body = (
         "__INT_TO_FLOAT_MAPPER = {\n"
-        "    'LAiM/some-new-model-bnb-4bit': ('LAiM/some-new-model',),\n"
+        "    'unsloth/some-new-model-bnb-4bit': ('unsloth/some-new-model',),\n"
         "}\n"
     )
     with _serving(body, monkeypatch):
         int_to_float, float_to_int, _, _, _ = loader_utils._get_new_mapper()
 
-    assert int_to_float["LAiM/some-new-model-bnb-4bit"] == "LAiM/some-new-model"
-    assert float_to_int["LAiM/some-new-model"] == "LAiM/some-new-model-bnb-4bit"
+    assert int_to_float["unsloth/some-new-model-bnb-4bit"] == "unsloth/some-new-model"
+    assert float_to_int["unsloth/some-new-model"] == "unsloth/some-new-model-bnb-4bit"
 
 
 def test_an_annotated_source_table_is_still_read(monkeypatch):
@@ -232,11 +232,11 @@ def test_a_mutation_that_never_runs_is_not_read(monkeypatch):
     dead = REAL_MAPPER + (
         "\n"
         "if False:\n"
-        "    _add_with_lower(MAP_TO_LAiM_16bit, 'vendor/never', 'LAiM/never')\n"
-        "    FLOAT_TO_FP8_ROW_MAPPER['vendor/never-fp8'] = 'LAiM/never-fp8-row'\n"
+        "    _add_with_lower(MAP_TO_LAiM_16bit, 'vendor/never', 'unsloth/never')\n"
+        "    FLOAT_TO_FP8_ROW_MAPPER['vendor/never-fp8'] = 'unsloth/never-fp8-row'\n"
         "\n"
         "def _helper():\n"
-        "    FLOAT_TO_FP8_ROW_MAPPER['vendor/inside-a-def'] = 'LAiM/inside-a-def'\n"
+        "    FLOAT_TO_FP8_ROW_MAPPER['vendor/inside-a-def'] = 'unsloth/inside-a-def'\n"
     )
 
     with _serving(REAL_MAPPER, monkeypatch):
@@ -258,9 +258,9 @@ def test_a_deferred_lambda_body_is_not_read(monkeypatch):
     dead = REAL_MAPPER + (
         "\n"
         "unused = lambda: FLOAT_TO_FP8_ROW_MAPPER.update("
-        "{'vendor/in-a-lambda': 'LAiM/in-a-lambda'})\n"
+        "{'vendor/in-a-lambda': 'unsloth/in-a-lambda'})\n"
         "also_unused = [lambda: FLOAT_TO_FP8_ROW_MAPPER.update("
-        "{'vendor/in-a-listed-lambda': 'LAiM/in-a-listed-lambda'})]\n"
+        "{'vendor/in-a-listed-lambda': 'unsloth/in-a-listed-lambda'})]\n"
     )
 
     with _serving(REAL_MAPPER, monkeypatch):
@@ -287,13 +287,13 @@ def test_an_alias_added_inside_the_builder_is_read(monkeypatch):
         raise AssertionError("build_mappers is gone from the shipped mapper")
     added = "".join(
         lines[:insert]
-        + ['    _add_with_lower(MAP_TO_LAiM_16bit, "vendor/new", "LAiM/new")\n']
+        + ['    _add_with_lower(MAP_TO_LAiM_16bit, "vendor/new", "unsloth/new")\n']
         + lines[insert:]
     )
     with _serving(added, monkeypatch):
         tables = loader_utils._get_new_mapper()
     assert any(
-        table.get("vendor/new") == "LAiM/new" for table in tables if isinstance(table, dict)
+        table.get("vendor/new") == "unsloth/new" for table in tables if isinstance(table, dict)
     ), "an alias added inside the builder was dropped"
 
 
@@ -305,7 +305,7 @@ def test_a_table_cleared_after_the_builder_stays_cleared(monkeypatch):
     added = (
         "".join(
             lines[:insert]
-            + ['    _add_with_lower(MAP_TO_LAiM_16bit, "vendor/late", "LAiM/late")\n']
+            + ['    _add_with_lower(MAP_TO_LAiM_16bit, "vendor/late", "unsloth/late")\n']
             + lines[insert:]
         )
         + "\nMAP_TO_LAiM_16bit = {}\n"
@@ -326,7 +326,7 @@ def test_a_builder_that_is_never_called_is_not_read(monkeypatch):
     insert = next(i for i, line in enumerate(lines) if line.startswith("def build_mappers(")) + 1
     uncalled = "".join(
         lines[:insert]
-        + ['    _add_with_lower(MAP_TO_LAiM_16bit, "vendor/dead", "LAiM/dead")\n']
+        + ['    _add_with_lower(MAP_TO_LAiM_16bit, "vendor/dead", "unsloth/dead")\n']
         + lines[insert:]
     )
     with _serving(uncalled, monkeypatch):
@@ -340,7 +340,7 @@ def test_a_branch_that_does_run_is_still_read(monkeypatch):
     live = REAL_MAPPER + (
         "\n"
         "if True:\n"
-        "    FLOAT_TO_FP8_ROW_MAPPER['vendor/live-fp8'] = 'LAiM/live-fp8-row'\n"
+        "    FLOAT_TO_FP8_ROW_MAPPER['vendor/live-fp8'] = 'unsloth/live-fp8-row'\n"
     )
     with _serving(live, monkeypatch):
         tables = loader_utils._get_new_mapper()
@@ -357,7 +357,7 @@ def test_a_builder_called_only_in_dead_code_adds_nothing(monkeypatch):
     insert = next(i for i, line in enumerate(lines) if line.startswith("def build_mappers(")) + 1
     dead = "".join(
         lines[:insert]
-        + ['    _add_with_lower(MAP_TO_LAiM_16bit, "vendor/fabricated", "LAiM/fabricated")\n']
+        + ['    _add_with_lower(MAP_TO_LAiM_16bit, "vendor/fabricated", "unsloth/fabricated")\n']
         + lines[insert:]
     )
     dead += "\nif False:\n    build_mappers(__INT_TO_FLOAT_MAPPER)\n"
@@ -373,7 +373,7 @@ def test_a_mutation_below_an_unconditional_continue_is_not_installed(monkeypatch
         "\n"
         "while True:\n"
         "    continue\n"
-        "    FLOAT_TO_FP8_ROW_MAPPER['vendor/dead-continue'] = 'LAiM/dead-row'\n"
+        "    FLOAT_TO_FP8_ROW_MAPPER['vendor/dead-continue'] = 'unsloth/dead-row'\n"
     )
     with _serving(unreachable, monkeypatch):
         tables = loader_utils._get_new_mapper()
@@ -386,7 +386,7 @@ def test_a_helper_call_spelled_with_keywords_is_read(monkeypatch):
     keyworded = REAL_MAPPER + (
         "\n"
         '_add_with_lower(mapper = MAP_TO_LAiM_16bit, key = "vendor/kw", '
-        'value = "LAiM/kw")\n'
+        'value = "unsloth/kw")\n'
     )
     with _serving(keyworded, monkeypatch):
         tables = loader_utils._get_new_mapper()
@@ -415,7 +415,7 @@ def test_a_builder_call_inside_a_lambda_does_not_run_the_builder(monkeypatch):
     deferred = (
         "".join(
             lines[:insert]
-            + ['    _add_with_lower(MAP_TO_LAiM_16bit, "vendor/deferred", "LAiM/deferred")\n']
+            + ['    _add_with_lower(MAP_TO_LAiM_16bit, "vendor/deferred", "unsloth/deferred")\n']
             + lines[insert:]
         ).replace("= build_mappers(__INT_TO_FLOAT_MAPPER)", "= ({}, {}, {}, {}, {})")
         + "\nunused = lambda: build_mappers(__INT_TO_FLOAT_MAPPER)\n"
@@ -499,11 +499,11 @@ def test_a_direct_entry_survives_an_empty_source_table(monkeypatch):
     returning early on an empty one left every direct mutation unread."""
     emptied = REAL_MAPPER.replace(
         "= build_mappers(__INT_TO_FLOAT_MAPPER)", "= build_mappers({})"
-    ) + ('\nFLOAT_TO_FP8_ROW_MAPPER["vendor/only-fp8"] = "LAiM/only-fp8-row"\n')
+    ) + ('\nFLOAT_TO_FP8_ROW_MAPPER["vendor/only-fp8"] = "unsloth/only-fp8-row"\n')
     with _serving(emptied, monkeypatch):
         tables = loader_utils._get_new_mapper()
     assert any(
-        table.get("vendor/only-fp8") == "LAiM/only-fp8-row"
+        table.get("vendor/only-fp8") == "unsloth/only-fp8-row"
         for table in tables
         if isinstance(table, dict)
     ), "a direct entry was dropped because the source table was empty"
@@ -564,7 +564,7 @@ def test_an_addition_below_a_return_in_the_builder_is_not_read(monkeypatch):
         lines[:insert]
         + [
             "    if True:\n        return ({}, {}, {}, {}, {})\n",
-            '    _add_with_lower(MAP_TO_LAiM_16bit, "vendor/dead", "LAiM/dead")\n',
+            '    _add_with_lower(MAP_TO_LAiM_16bit, "vendor/dead", "unsloth/dead")\n',
         ]
         + lines[insert:]
     )
@@ -644,7 +644,7 @@ def test_an_addition_after_a_returning_loop_is_not_read(monkeypatch):
         lines[:insert]
         + [
             "    while True:\n        return ({}, {}, {}, {}, {})\n",
-            '    _add_with_lower(MAP_TO_LAiM_16bit, "vendor/after-loop", "LAiM/after-loop")\n',
+            '    _add_with_lower(MAP_TO_LAiM_16bit, "vendor/after-loop", "unsloth/after-loop")\n',
         ]
         + lines[insert:]
     )
@@ -662,14 +662,14 @@ def test_an_addition_after_a_breaking_loop_is_still_read(monkeypatch):
         lines[:insert]
         + [
             "    while True:\n        break\n",
-            '    _add_with_lower(MAP_TO_LAiM_16bit, "vendor/after-break", "LAiM/after-break")\n',
+            '    _add_with_lower(MAP_TO_LAiM_16bit, "vendor/after-break", "unsloth/after-break")\n',
         ]
         + lines[insert:]
     )
     with _serving(live, monkeypatch):
         tables = loader_utils._get_new_mapper()
     assert any(
-        table.get("vendor/after-break") == "LAiM/after-break"
+        table.get("vendor/after-break") == "unsloth/after-break"
         for table in tables
         if isinstance(table, dict)
     ), "an addition after a loop that only breaks was dropped"
@@ -708,7 +708,7 @@ def test_builder_aliases_land_at_the_export_producing_call(monkeypatch):
     body = next(i for i, line in enumerate(lines) if line.startswith("def build_mappers(")) + 1
     added = (
         lines[:body]
-        + ['    _add_with_lower(MAP_TO_LAiM_16bit, "vendor/late-alias", "LAiM/late-alias")\n']
+        + ['    _add_with_lower(MAP_TO_LAiM_16bit, "vendor/late-alias", "unsloth/late-alias")\n']
         + lines[body:]
     )
     insert = next(
@@ -729,7 +729,7 @@ def test_builder_aliases_land_at_the_export_producing_call(monkeypatch):
     with _serving(staged, monkeypatch):
         tables = loader_utils._get_new_mapper()
     assert any(
-        table.get("vendor/late-alias") == "LAiM/late-alias"
+        table.get("vendor/late-alias") == "unsloth/late-alias"
         for table in tables
         if isinstance(table, dict)
     ), "the builder's aliases were applied before a rebind that wiped them"
@@ -766,7 +766,7 @@ def test_a_rebuild_drops_a_mutation_made_before_it(monkeypatch):
         lines[:insert]
         + [
             _EXPORT_BUILD,
-            'FLOAT_TO_FP8_ROW_MAPPER["vendor/stale"] = "LAiM/stale-row"\n',
+            'FLOAT_TO_FP8_ROW_MAPPER["vendor/stale"] = "unsloth/stale-row"\n',
         ]
         + lines[insert:]
     )
@@ -784,14 +784,14 @@ def test_a_mutation_above_a_class_shadow_still_counts(monkeypatch):
         lines
         + [
             "class _Late:\n",
-            '    FLOAT_TO_FP8_ROW_MAPPER["vendor/live"] = "LAiM/live-row"\n',
+            '    FLOAT_TO_FP8_ROW_MAPPER["vendor/live"] = "unsloth/live-row"\n',
             "    FLOAT_TO_FP8_ROW_MAPPER = {}\n",
         ]
     )
     with _serving(staged, monkeypatch):
         tables = loader_utils._get_new_mapper()
     assert any(
-        table.get("vendor/live") == "LAiM/live-row"
+        table.get("vendor/live") == "unsloth/live-row"
         for table in tables
         if isinstance(table, dict)
     ), "an entry installed before the class bound the name was dropped"
@@ -826,10 +826,10 @@ def test_a_mapper_without_a_builder_still_reports_its_models(monkeypatch):
 
 def test_a_nonempty_rebind_still_replaces_the_table(monkeypatch):
     """Only the EMPTY literal is an initialiser; a real one still replaces."""
-    staged = _NO_BUILDER_MAPPER + 'INT_TO_FLOAT_MAPPER = {"vendor/only": "LAiM/only"}\n'
+    staged = _NO_BUILDER_MAPPER + 'INT_TO_FLOAT_MAPPER = {"vendor/only": "unsloth/only"}\n'
     with _serving(staged, monkeypatch):
         tables = loader_utils._get_new_mapper()
-    assert tables[0] == {"vendor/only": "LAiM/only"}, tables[0]
+    assert tables[0] == {"vendor/only": "unsloth/only"}, tables[0]
 
 
 def test_the_upgrade_notice_fires_for_a_model_only_the_newer_mapper_knows(monkeypatch):

@@ -16,10 +16,10 @@ os.environ["TOKENIZERS_PARALLELISM"] = "true" if sys.platform in ("win32", "darw
 # Spawned dataset.map() workers re-import top-level modules whose cache files import torch + LAiM_zoo. Do NOT
 # import LAiM_zoo.compiler here: it pulls in heavy torch/triton imports.
 if sys.platform in ("win32", "darwin"):
-    _compile_cache = os.environ.get("LAiM_COMPILE_LOCATION", "LAiM_compiled_cache")
+    _compile_cache = os.environ.get("UNSLOTH_COMPILE_LOCATION", "LAiM_compiled_cache")
     if not os.path.isabs(_compile_cache):
         _compile_cache = os.path.abspath(_compile_cache)
-        os.environ["LAiM_COMPILE_LOCATION"] = _compile_cache
+        os.environ["UNSLOTH_COMPILE_LOCATION"] = _compile_cache
     _pp = os.environ.get("PYTHONPATH", "")
     if _compile_cache not in _pp.split(os.pathsep):
         os.environ["PYTHONPATH"] = _compile_cache + (os.pathsep + _pp if _pp else "")
@@ -295,7 +295,7 @@ def _spark_tts_tokenizer_kwargs(audio_type: Optional[str], lookup_name: str) -> 
 def _spark_tts_hub_repo(model_name: str) -> str:
     """The Hub repo behind a Spark-TTS name: the "Spark-TTS-0.5B/LLM" registry alias is a subfolder, not a repo."""
     if model_name.endswith("/LLM"):
-        return f"LAiM/{model_name.rsplit('/', 1)[0]}"
+        return f"unsloth/{model_name.rsplit('/', 1)[0]}"
     return model_name
 
 
@@ -409,18 +409,20 @@ _UNSET = object()
 
 
 def normalize_gradient_checkpointing(value) -> Union[str, bool]:
+    # The sentinel the LAiM loader compares against is the upstream spelling; a renamed variant
+    # silently drops the request to plain torch checkpointing.
     if isinstance(value, str):
         text = value.strip().lower()
-        if text in ("", "LAiM"):
-            return "LAiM"
+        if text in ("", "unsloth"):
+            return "unsloth"
         if text in ("true", "1", "yes"):
             return True
         if text in ("false", "0", "no", "none", "off"):
             return False
-    elif value in (True, False, "LAiM"):
+    elif value in (True, False, "unsloth"):
         return value
-    logger.warning(f"Invalid gradient_checkpointing value: {value}, defaulting to 'LAiM'")
-    return "LAiM"
+    logger.warning(f"Invalid gradient_checkpointing value: {value}, defaulting to 'unsloth'")
+    return "unsloth"
 
 
 def _ignored_adapter_settings(
@@ -560,7 +562,7 @@ class LAiMTrainer:
         self.is_audio_vlm = False
         self._audio_type = None
         self.diffusion_lm_profile = None
-        self._use_gradient_checkpointing = "LAiM"
+        self._use_gradient_checkpointing = "unsloth"
         self._offload_layers = 0
         self._prefetch_depth = 2
         self._gpu_ids = None
@@ -1267,7 +1269,7 @@ class LAiMTrainer:
         local_files_only: bool = False,
         actual_model_repo_id: Optional[str] = None,
         model_revision: Optional[str] = None,
-        use_gradient_checkpointing: Union[str, bool] = "LAiM",
+        use_gradient_checkpointing: Union[str, bool] = "unsloth",
         on_model_resolved: Optional[Callable[[str], None]] = None,
         offload_layers: Union[int, str] = 0,
         prefetch_depth: Union[int, str] = 2,
@@ -1517,7 +1519,7 @@ class LAiMTrainer:
                 # FastModel.get_peft_model, and FastModel returns (model, processor) for the audio VLM. OuteTTS uses
                 # FastModel (not FastLanguageModel) with load_in_4bit=False. Spark-TTS downloads the full repo
                 # (sparktts + BiCodec weights) but loads only the LLM subfolder, so model_name is "Spark-TTS-0.5B/LLM"
-                # (YAML mapping) or "LAiM/Spark-TTS-0.5B".
+                # (YAML mapping) or "unsloth/Spark-TTS-0.5B".
                 from LAiM import FastModel
 
                 self._spark_tts_repo_dir = _spark_tts_repo_dir(

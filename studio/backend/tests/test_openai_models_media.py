@@ -111,7 +111,7 @@ _INFOS = [
     _Info(
         "models--LAiM--Z-Image-Turbo-GGUF",
         "Z-Image-Turbo",
-        model_id = "LAiM/Z-Image-Turbo-GGUF",
+        model_id = "unsloth/Z-Image-Turbo-GGUF",
         path = "/hf/models--LAiM--Z-Image-Turbo-GGUF/snapshots/abc",
         task = "text-to-image",
     ),
@@ -130,7 +130,7 @@ _INFOS = [
 _PICKS = {
     "text-to-image": [
         MediaModelPick(
-            "LAiM/Z-Image-Turbo-GGUF",
+            "unsloth/Z-Image-Turbo-GGUF",
             "/hf/models--LAiM--Z-Image-Turbo-GGUF/snapshots/abc",
             "z-image-turbo-Q8_0.gguf",
             "gguf",
@@ -146,7 +146,7 @@ def test_media_models_list_with_task_and_residency(monkeypatch):
     resident = {
         "text-to-image": {
             "loaded": True,
-            "repo_id": "LAiM/z-image-turbo-gguf",
+            "repo_id": "unsloth/z-image-turbo-gguf",
             "gguf_variant": "Q8_0",
             "model_kind": "gguf",
         }
@@ -156,7 +156,7 @@ def test_media_models_list_with_task_and_residency(monkeypatch):
     data = asyncio.run(inf._openai_catalog_objects())
     ids = {m["id"]: m for m in data}
 
-    image = ids["LAiM/Z-Image-Turbo-GGUF"]
+    image = ids["unsloth/Z-Image-Turbo-GGUF"]
     assert image["task"] == "text-to-image" and image["loaded"] is True
     assert image["quant"] == "Q8_0" and image["display_name"] == "Z-Image-Turbo"
     assert image["object"] == "model" and image["owned_by"] == inf._OWNED_BY
@@ -165,7 +165,7 @@ def test_media_models_list_with_task_and_residency(monkeypatch):
     assert "quant" not in video
     assert "Unsupported" not in ids
     assert "task" not in ids["Qwen3-Q4"] and ids["Qwen3-Q4"]["quant"] == "Q8_0"
-    assert [m["id"] for m in data].count("LAiM/Z-Image-Turbo-GGUF") == 1
+    assert [m["id"] for m in data].count("unsloth/Z-Image-Turbo-GGUF") == 1
     blob = json.dumps(data)
     assert "/hf/" not in blob and "/data/" not in blob
 
@@ -173,8 +173,8 @@ def test_media_models_list_with_task_and_residency(monkeypatch):
 def test_media_models_report_the_on_disk_quant_when_not_loaded(monkeypatch):
     _catalog(monkeypatch, _INFOS)
     ids = {m["id"]: m for m in asyncio.run(inf._openai_catalog_objects())}
-    assert ids["LAiM/Z-Image-Turbo-GGUF"]["loaded"] is False
-    assert ids["LAiM/Z-Image-Turbo-GGUF"]["quant"] == "Q8_0"
+    assert ids["unsloth/Z-Image-Turbo-GGUF"]["loaded"] is False
+    assert ids["unsloth/Z-Image-Turbo-GGUF"]["quant"] == "Q8_0"
 
 
 def test_resident_media_model_matches_by_path(monkeypatch):
@@ -192,15 +192,15 @@ def test_a_resident_sibling_quant_is_not_reported_as_the_indexed_build(monkeypat
     resident = {
         "text-to-image": {
             "loaded": True,
-            "repo_id": "LAiM/z-image-turbo-gguf",
+            "repo_id": "unsloth/z-image-turbo-gguf",
             "gguf_variant": "Q4_K_M",
             "model_kind": "gguf",
         }
     }
     _catalog(monkeypatch, _INFOS, resident)
     ids = {m["id"]: m for m in asyncio.run(inf._openai_catalog_objects())}
-    assert ids["LAiM/Z-Image-Turbo-GGUF"]["loaded"] is False
-    assert ids["LAiM/Z-Image-Turbo-GGUF"]["quant"] == "Q8_0"
+    assert ids["unsloth/Z-Image-Turbo-GGUF"]["loaded"] is False
+    assert ids["unsloth/Z-Image-Turbo-GGUF"]["quant"] == "Q8_0"
 
 
 def test_ambiguous_same_token_media_builds_are_not_both_loaded(monkeypatch):
@@ -552,13 +552,13 @@ def test_stt_models_list_downloaded_and_loaded(monkeypatch):
     )
     objects = inf._stt_model_objects(7)
     assert [(o["id"], o["loaded"]) for o in objects] == [
-        ("LAiM/whisper-small", False),
+        ("unsloth/whisper-small", False),
         ("qwen3-asr-0.6b", False),
         ("org/whisper-custom", True),
     ]
     assert all(o["task"] == "automatic-speech-recognition" and o["created"] == 7 for o in objects)
     assert {o["id"]: o.get("quant") for o in objects} == {
-        "LAiM/whisper-small": None,
+        "unsloth/whisper-small": None,
         "qwen3-asr-0.6b": "Q8_0",
         "org/whisper-custom": None,
     }
@@ -572,8 +572,8 @@ def test_stt_rows_name_their_workflows(monkeypatch):
         whisper_loaded = "org/whisper-custom",
     )
     assert {o["id"]: o["audio_workflows"] for o in inf._stt_model_objects(7)} == {
-        "LAiM/whisper-small": ["transcribe", "translate"],
-        "LAiM/whisper-large-v3-turbo": ["transcribe"],
+        "unsloth/whisper-small": ["transcribe", "translate"],
+        "unsloth/whisper-large-v3-turbo": ["transcribe"],
         "qwen3-asr-0.6b": ["transcribe"],
         "org/whisper-custom": ["transcribe"],
     }
@@ -582,7 +582,7 @@ def test_stt_rows_name_their_workflows(monkeypatch):
 def test_curated_stt_alias_reports_canonical_loaded_id(monkeypatch):
     _stt(monkeypatch, downloaded = ("small",), whisper_loaded = "small")
     assert [(o["id"], o["loaded"]) for o in inf._stt_model_objects(7)] == [
-        ("LAiM/whisper-small", True)
+        ("unsloth/whisper-small", True)
     ]
 
 
@@ -681,8 +681,8 @@ def test_whisper_rows_need_the_transformers_runtime(monkeypatch):
     assert inf._stt_model_objects(3) == []
     _stt(monkeypatch, whisper = True, downloaded = ("small", "tiny"))
     assert [o["id"] for o in inf._stt_model_objects(3)] == [
-        "LAiM/whisper-tiny",
-        "LAiM/whisper-small",
+        "unsloth/whisper-tiny",
+        "unsloth/whisper-small",
     ]
 
 
@@ -695,7 +695,7 @@ def test_mtmd_models_are_hidden_when_their_runtime_is_missing(monkeypatch):
         downloaded = ("small",),
         mtmd_downloaded = ("qwen3-asr-0.6b", "qwen3-asr-1.7b"),
     )
-    assert [o["id"] for o in inf._stt_model_objects(3)] == ["LAiM/whisper-small"]
+    assert [o["id"] for o in inf._stt_model_objects(3)] == ["unsloth/whisper-small"]
 
     _stt(
         monkeypatch,
@@ -704,7 +704,7 @@ def test_mtmd_models_are_hidden_when_their_runtime_is_missing(monkeypatch):
         mtmd_downloaded = ("qwen3-asr-0.6b", "qwen3-asr-1.7b"),
     )
     assert [o["id"] for o in inf._stt_model_objects(3)] == [
-        "LAiM/whisper-small",
+        "unsloth/whisper-small",
         "qwen3-asr-0.6b",
         "qwen3-asr-1.7b",
     ]
@@ -730,7 +730,7 @@ def test_stt_models_join_the_catalog(monkeypatch):
         "_stt_model_objects",
         lambda created, catalog_at = None: [
             {
-                "id": "LAiM/whisper-small",
+                "id": "unsloth/whisper-small",
                 "object": "model",
                 "created": created,
                 "owned_by": inf._OWNED_BY,
@@ -740,7 +740,7 @@ def test_stt_models_join_the_catalog(monkeypatch):
         ],
     )
     ids = {m["id"]: m for m in asyncio.run(inf._openai_catalog_objects())}
-    assert ids["LAiM/whisper-small"]["task"] == "automatic-speech-recognition"
+    assert ids["unsloth/whisper-small"]["task"] == "automatic-speech-recognition"
     assert "task" not in ids["small"]
 
 
@@ -748,7 +748,7 @@ def test_stt_gguf_repository_is_not_advertised_as_chat(monkeypatch):
     repo = _Info(
         "models--LAiMai--Qwen3-ASR-0.6B-GGUF",
         "Qwen3-ASR-0.6B-GGUF",
-        model_id = "LAiMai/Qwen3-ASR-0.6B-GGUF",
+        model_id = "unslothai/Qwen3-ASR-0.6B-GGUF",
         task = "automatic-speech-recognition",
     )
     _catalog(monkeypatch, [repo], picks = {})
@@ -768,7 +768,7 @@ def test_stt_gguf_repository_is_not_advertised_as_chat(monkeypatch):
     )
 
     ids = {model["id"]: model for model in asyncio.run(inf._openai_catalog_objects())}
-    assert "LAiMai/Qwen3-ASR-0.6B-GGUF" not in ids
+    assert "unslothai/Qwen3-ASR-0.6B-GGUF" not in ids
     assert ids["qwen3-asr-0.6b"]["task"] == "automatic-speech-recognition"
 
 
@@ -872,8 +872,8 @@ def test_audio_input_models_are_not_tagged_text_to_speech(monkeypatch):
         "_Tts",
         (_FakeLAiM,),
         {
-            "active_model_name": "LAiM/csm-1b",
-            "models": {"LAiM/csm-1b": {"is_audio": True, "audio_type": "csm"}},
+            "active_model_name": "unsloth/csm-1b",
+            "models": {"unsloth/csm-1b": {"is_audio": True, "audio_type": "csm"}},
         },
     )
     monkeypatch.setattr(inf, "get_inference_backend", lambda: LAiM())
@@ -881,7 +881,7 @@ def test_audio_input_models_are_not_tagged_text_to_speech(monkeypatch):
     assert entry["task"] == "text-to-speech"
 
     # the mlx worker rejects audio generation even when its model metadata is tts.
-    LAiM.models["LAiM/csm-1b"]["is_mlx"] = True
+    LAiM.models["unsloth/csm-1b"]["is_mlx"] = True
     (entry,) = inf._openai_model_objects()
     assert "task" not in entry
 
@@ -919,7 +919,7 @@ def test_downloaded_tts_model_is_not_advertised_without_switch_support(monkeypat
     tts = _Info(
         "models--LAiM--csm-1b",
         "csm-1b",
-        model_id = "LAiM/csm-1b",
+        model_id = "unsloth/csm-1b",
         task = "text-to-speech",
         is_gguf = False,
     )
@@ -936,7 +936,7 @@ def test_resident_media_status(monkeypatch):
         mk, "engine_if_imported", lambda owner: SimpleNamespace(status = lambda: {"loaded": False})
     )
     assert inf._resident_media_status("text-to-video") is None
-    loaded = {"loaded": True, "repo_id": "LAiM/LTX-2.3-GGUF"}
+    loaded = {"loaded": True, "repo_id": "unsloth/LTX-2.3-GGUF"}
     monkeypatch.setattr(
         mk, "engine_if_imported", lambda owner: SimpleNamespace(status = lambda: loaded)
     )
@@ -997,9 +997,9 @@ def test_retrieve_and_list_media_models_over_http(monkeypatch):
     assert listing["object"] == "list"
     assert {m["id"]: m.get("task") for m in listing["data"]} == {
         "Qwen3-Q4": None,
-        "LAiM/Z-Image-Turbo-GGUF": "text-to-image",
+        "unsloth/Z-Image-Turbo-GGUF": "text-to-image",
         "Lightricks/LTX-2": "text-to-video",
     }
-    model = client.get("/v1/models/LAiM/Z-Image-Turbo-GGUF").json()
+    model = client.get("/v1/models/unsloth/Z-Image-Turbo-GGUF").json()
     assert model["task"] == "text-to-image" and model["loaded"] is False
     assert client.get("/v1/models/nope/missing").status_code == 404

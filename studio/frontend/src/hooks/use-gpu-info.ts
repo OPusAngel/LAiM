@@ -141,7 +141,9 @@ function toGpuInfo(
     extraOffloadFitTiers: normalizeReportedOffloadFitTiers(
       data?.diffusers_offload_tiers,
     ),
-    cpuCore: data?.cpu?.physical_count ?? 0,
+    // Windows and virtualized hosts can report no physical count; the logical one
+    // is still a real number, and a zero here renders the CPU chip as unavailable.
+    cpuCore: data?.cpu?.physical_count ?? data?.cpu?.logical_count ?? 0,
     cpuThread: data?.cpu?.logical_count ?? 0,
     systemRamAvailableGb: data?.memory?.available_gb ?? 0,
     systemRamAvailableHostGb: data?.memory?.available_gb ?? 0,
@@ -298,6 +300,8 @@ function useGpuInfoSource(source: "gpu" | "inference_gpu"): GpuInfo {
     // No early return on cachedSystem: a consumer mounting as the cache fills
     // (between render and effect) would otherwise stay stuck at the default.
     let cancelled = false;
+    let retryTimer: ReturnType<typeof setTimeout> | null = null;
+    let failures = 0;
     const sync = (data: SystemInfoResponse) => {
       if (cancelled) return;
       const next = toGpuInfo(data, source);
@@ -307,10 +311,20 @@ function useGpuInfoSource(source: "gpu" | "inference_gpu"): GpuInfo {
           : withStableSchemes(current, next),
       );
     };
+    // A single failed probe (backend still importing torch, session not ready yet)
+    // used to leave every stat card on "Unavailable" for the whole session.
     const update = () => {
       fetchSystemInfo().then((d) => {
         if (cancelled) return;
-        if (!d) return;
+        if (!d) {
+          failures += 1;
+          retryTimer = setTimeout(
+            update,
+            Math.min(1000 * 2 ** Math.min(failures, 4), 15000),
+          );
+          return;
+        }
+        failures = 0;
         // A cache hit does not publish a new snapshot. Sync it here so a
         // consumer mounting while the initial request finishes cannot miss it.
         sync(d);
@@ -322,6 +336,7 @@ function useGpuInfoSource(source: "gpu" | "inference_gpu"): GpuInfo {
     update();
     return () => {
       cancelled = true;
+      if (retryTimer !== null) clearTimeout(retryTimer);
       unsubscribe();
     };
   }, [source]);

@@ -29,7 +29,7 @@ def _files(**dirs: int) -> list:
     return [(f"{name}/model.safetensors", mib * MIB) for name, mib in dirs.items()]
 
 
-# LAiM/Qwen-Image-2512 @ b96dde7f, 57.70 GB total.
+# unsloth/Qwen-Image-2512 @ b96dde7f, 57.70 GB total.
 QWEN_IMAGE_2512 = _files(transformer = 38966, text_encoder = 15812, vae = 240, tokenizer = 10)
 
 FLUX2_DEV = _files(transformer = 61461, text_encoder = 45798, vae = 321, tokenizer = 16)
@@ -59,7 +59,7 @@ LUMINA_2_MINUS_DENSE_TE = _files(transformer = 9956, vae = 320, tokenizer = 21)
 LUMINA_HOSTED_TE_MIB = 3056
 LUMINA_HOSTED_TE = {
     "text_encoder": (
-        "LAiM/Lumina-Image-2.0-fp8-te",
+        "unsloth/Lumina-Image-2.0-fp8-te",
         [("text_encoder_fp8.pt", LUMINA_HOSTED_TE_MIB * MIB)],
     )
 }
@@ -91,7 +91,7 @@ def _flux2(name = "flux.2-dev", base_repo = "black-forest-labs/FLUX.2-dev"):
     return _family(name = name, base_repo = base_repo)
 
 
-def _real_family(repo_id = "LAiM/FLUX.2-dev"):
+def _real_family(repo_id = "unsloth/FLUX.2-dev"):
     fam = detect_family_for_pick(repo_id, None, None)
     assert fam is not None
     return fam
@@ -128,7 +128,7 @@ def _verdict(backend, fam, repo, base, files):
 
 def _flux_verdict(backend):
     return _verdict(
-        backend, _flux2(), "LAiM/FLUX.2-dev", "black-forest-labs/FLUX.2-dev", FLUX2_DEV
+        backend, _flux2(), "unsloth/FLUX.2-dev", "black-forest-labs/FLUX.2-dev", FLUX2_DEV
     )
 
 
@@ -246,10 +246,10 @@ def test_an_fp32_stored_pipeline_is_not_priced_at_its_download_size(monkeypatch)
 def test_float32_target_rejects_lumina_that_bf16_accepts(monkeypatch):
     fam = _family(name = "lumina-2", base_repo = "Alpha-VLLM/Lumina-Image-2.0")
     bf16 = _backend(monkeypatch, total_mib = 16 * 1024)
-    assert _verdict(bf16, fam, "LAiM/Lumina-Image-2.0", fam.base_repo, LUMINA_2) is None
+    assert _verdict(bf16, fam, "unsloth/Lumina-Image-2.0", fam.base_repo, LUMINA_2) is None
 
     fp32 = _backend(monkeypatch, total_mib = 16 * 1024, device = "mps", dtype = "float32")
-    message = _verdict(fp32, fam, "LAiM/Lumina-Image-2.0", fam.base_repo, LUMINA_2)
+    message = _verdict(fp32, fam, "unsloth/Lumina-Image-2.0", fam.base_repo, LUMINA_2)
     assert message is not None
     assert "about 22 GB of memory for its weights" in message
 
@@ -258,7 +258,7 @@ def test_only_a_compatible_prequant_can_replace_dense_encoder_shards(monkeypatch
     from core.inference import diffusion_te_prequant as te_prequant
 
     source = te_prequant.TePrequantSource(
-        kind = "repo", location = "LAiM/Qwen-Image-FP8", filename = "encoder.pt"
+        kind = "repo", location = "unsloth/Qwen-Image-FP8", filename = "encoder.pt"
     )
     monkeypatch.setattr(
         te_prequant,
@@ -277,7 +277,7 @@ def test_only_a_compatible_prequant_can_replace_dense_encoder_shards(monkeypatch
 
     assert (
         DiffusionBackend._te_prequant_plan_files(
-            fam, "fp8", None, base_repo = "LAiM/custom-qwen-image"
+            fam, "fp8", None, base_repo = "unsloth/custom-qwen-image"
         )
         == {}
     )
@@ -291,7 +291,7 @@ def test_hidream_te4_uses_its_standalone_base_for_prequant_compatibility(monkeyp
 
     seen: dict = {}
     source = te_prequant.TePrequantSource(
-        kind = "repo", location = "LAiM/HiDream-I1-Full-FP8", filename = "te4.pt"
+        kind = "repo", location = "unsloth/HiDream-I1-Full-FP8", filename = "te4.pt"
     )
 
     def _sources(*_a, **kwargs):
@@ -326,7 +326,7 @@ def test_hidream_dense_te4_is_counted_when_no_prequant_is_selected():
     fam = _family(name = "hidream-i1", base_repo = "HiDream-ai/HiDream-I1-Full")
     assert _predownload_encoder_bf16_bytes(fam, {}) == HIDREAM_LLAMA_BF16_BYTES
     assert _predownload_encoder_bf16_bytes(fam, {}, pipeline_declared = False) == 0
-    hosted = {"text_encoder_4": ("LAiM/HiDream-I1-Full-FP8", [("te4.pt", 8 * MIB)])}
+    hosted = {"text_encoder_4": ("unsloth/HiDream-I1-Full-FP8", [("te4.pt", 8 * MIB)])}
     assert _prequant_plan_bytes(hosted) == 8 * MIB
     assert _predownload_encoder_bf16_bytes(fam, hosted) == 0
 
@@ -342,8 +342,8 @@ def test_the_verdict_is_capacity_not_the_free_reading(monkeypatch):
         _verdict(
             backend,
             _family(),
-            "LAiM/Qwen-Image-2512",
-            "LAiM/Qwen-Image-2512",
+            "unsloth/Qwen-Image-2512",
+            "unsloth/Qwen-Image-2512",
             QWEN_IMAGE_2512,
         )
         is None
@@ -356,7 +356,7 @@ def test_only_a_pipeline_pick_is_judged(monkeypatch, kind):
     assert (
         backend.declared_footprint_shortfall(
             _flux2(),
-            "LAiM/FLUX.2-dev",
+            "unsloth/FLUX.2-dev",
             "black-forest-labs/FLUX.2-dev",
             kind = kind,
             declared_files = FLUX2_DEV,
@@ -376,7 +376,7 @@ def test_no_sizes_does_not_resolve_a_target(monkeypatch, files):
     assert (
         backend.declared_footprint_shortfall(
             _flux2(),
-            "LAiM/FLUX.2-dev",
+            "unsloth/FLUX.2-dev",
             "black-forest-labs/FLUX.2-dev",
             kind = "pipeline",
             declared_files = files,
@@ -411,7 +411,7 @@ def _stub_pipeline_hub(monkeypatch, tmp_path, repos):
 
 
 def test_pipeline_estimate_uses_selected_components_and_default_variant(monkeypatch, tmp_path):
-    repo = "LAiM/custom-pipeline"
+    repo = "unsloth/custom-pipeline"
     payload = {
         "_class_name": "FluxPipeline",
         "_ignore_files": ["transformer/ignored.safetensors"],
@@ -456,7 +456,7 @@ def test_pipeline_estimate_uses_selected_components_and_default_variant(monkeypa
 
 def test_gated_pipeline_manifest_is_read_from_the_fetch_mirror(monkeypatch, tmp_path):
     upstream = "black-forest-labs/FLUX.2-dev"
-    mirror = "LAiM/FLUX.2-dev"
+    mirror = "unsloth/FLUX.2-dev"
     payload = {"transformer": ["diffusers", "Flux2Transformer2DModel"]}
     files = [
         ("model_index.json", 100),
@@ -493,7 +493,7 @@ def test_gated_pipeline_manifest_is_read_from_the_fetch_mirror(monkeypatch, tmp_
 
 def test_pipeline_listing_restarts_when_the_exact_scope_selects_the_mirror(monkeypatch, tmp_path):
     upstream = "black-forest-labs/FLUX.2-dev"
-    mirror = "LAiM/FLUX.2-dev"
+    mirror = "unsloth/FLUX.2-dev"
     payload = {"transformer": ["diffusers", "Flux2Transformer2DModel"]}
     listings = {
         upstream: (
@@ -571,7 +571,7 @@ def test_explicit_pipeline_assemblers_use_their_fixed_component_sets(
 ):
     from core.inference.diffusion import _explicit_pipeline_components
 
-    repo = f"LAiM/{family}"
+    repo = f"unsloth/{family}"
     files = [
         ("model_index.json", 100),
         (f"{included}/diffusion_pytorch_model.safetensors", 20 * MIB),
@@ -619,7 +619,7 @@ def _stub_estimate(monkeypatch, files):
     def _estimate(*_a, **kwargs):
         file_sizes = kwargs.get("file_sizes_out")
         if file_sizes is not None:
-            file_sizes["LAiM/FLUX.2-dev"] = {name: size for name, size in files}
+            file_sizes["unsloth/FLUX.2-dev"] = {name: size for name, size in files}
         resident_sizes = kwargs.get("resident_file_sizes_out")
         if resident_sizes is not None:
             resident_sizes.extend(files)
@@ -657,7 +657,7 @@ def _staged_backend(
     backend = _backend(monkeypatch, total_mib = total_mib)
     backend._load_token = 1
     backend._loading = diffusion_mod._LoadingState(
-        repo_id = "LAiM/FLUX.2-dev", base_repo = "LAiM/FLUX.2-dev"
+        repo_id = "unsloth/FLUX.2-dev", base_repo = "unsloth/FLUX.2-dev"
     )
     _stub_pick(monkeypatch, files, family = family, te_prequant = te_prequant)
     monkeypatch.setattr(diffusion_mod, "assert_flux2_pick_compatible", lambda *_a, **_k: None)
@@ -683,7 +683,7 @@ def test_an_offline_load_never_probes_the_device(monkeypatch):
     monkeypatch.setattr(diffusion_mod, "snapshot_device_memory", _probe)
 
     backend._run_load(
-        repo_id = "LAiM/FLUX.2-dev",
+        repo_id = "unsloth/FLUX.2-dev",
         model_kind = "pipeline",
         local_files_only = True,
         _load_token = 1,
@@ -712,7 +712,7 @@ def _plan_backend(
 
 def test_download_plan_keeps_an_earlier_refusal(monkeypatch):
     backend = _plan_backend(monkeypatch, files = FLUX2_DEV, mismatch = "wrong base size")
-    plan = backend.download_plan("LAiM/FLUX.2-dev", model_kind = "pipeline")
+    plan = backend.download_plan("unsloth/FLUX.2-dev", model_kind = "pipeline")
     assert plan["incompatible_reason"] == "wrong base size"
 
 
@@ -726,7 +726,7 @@ def test_download_plan_skips_the_device_probe_when_asked(monkeypatch):
     monkeypatch.setattr(DiffusionBackend, "_te_prequant_plan_files", _probe)
     monkeypatch.setattr(DiffusionBackend, "_dit_prequant_plan_source", _probe)
     plan = backend.download_plan(
-        "LAiM/FLUX.2-dev",
+        "unsloth/FLUX.2-dev",
         model_kind = "pipeline",
         text_encoder_quant = "fp8",
         allow_device_probe = False,
@@ -738,7 +738,7 @@ def test_download_plan_skips_the_device_probe_when_asked(monkeypatch):
     ("repo", "files", "total_mib", "te_prequant", "expected_calls"),
     [
         pytest.param(
-            "LAiM/FLUX.2-dev",
+            "unsloth/FLUX.2-dev",
             FLUX2_DEV,
             STRIX_HALO_POOL_MIB,
             None,
@@ -746,7 +746,7 @@ def test_download_plan_skips_the_device_probe_when_asked(monkeypatch):
             id = "refused",
         ),
         pytest.param(
-            "LAiM/FLUX.2-dev",
+            "unsloth/FLUX.2-dev",
             FLUX2_DEV,
             256 * 1024,
             None,
@@ -754,7 +754,7 @@ def test_download_plan_skips_the_device_probe_when_asked(monkeypatch):
             id = "fits",
         ),
         pytest.param(
-            "LAiM/Lumina-Image-2.0",
+            "unsloth/Lumina-Image-2.0",
             LUMINA_2_MINUS_DENSE_TE,
             12 * 1024,
             LUMINA_HOSTED_TE,

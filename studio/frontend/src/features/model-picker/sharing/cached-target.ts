@@ -21,6 +21,8 @@ import {
   isStandaloneGgufPath,
 } from "../model-config/model-identity";
 import type { resolveRunConfigTarget } from "./target";
+import { translate } from "@/i18n";
+
 
 type RunConfigTarget = NonNullable<ReturnType<typeof resolveRunConfigTarget>>;
 type ResolutionOptions = {
@@ -43,7 +45,7 @@ const notGgufMessage =
 
 function readVariantsResponse(value: unknown): CachedVariantsResponse {
   if (!value || typeof value !== "object") {
-    throw new Error("Invalid GGUF variants response.");
+    throw new Error(translate("uxModelpicker.invalidGGUFVariantsResponsesvahe"));
   }
   const response = value as Partial<CachedVariantsResponse>;
   if (
@@ -70,7 +72,7 @@ function readVariantsResponse(value: unknown): CachedVariantsResponse {
     (response.dependencies_resolved !== undefined &&
       typeof response.dependencies_resolved !== "boolean")
   ) {
-    throw new Error("Invalid GGUF variants response.");
+    throw new Error(translate("uxModelpicker.invalidGGUFVariantsResponsesvahe"));
   }
   return {
     variants: response.variants,
@@ -92,7 +94,7 @@ function listCachedVariants(
       signal,
     });
     if (!response.ok) {
-      throw new Error("Could not check cached GGUF variants.");
+      throw new Error(translate("uxModelpicker.couldNotCheckCachednolur"));
     }
     return readVariantsResponse(await response.json());
   });
@@ -144,7 +146,7 @@ function resolveLocalTarget(
   const variant = findCachedVariant(target, listing);
   if (!variant) {
     throw new RunConfigResolutionError(
-      "The selected folder does not contain a complete copy of the requested GGUF variant.",
+      translate("uxModelpicker.theSelectedFolderDoescsz81"),
     );
   }
   return withVariant(target, variant, { isGguf: true, isDownloaded: true });
@@ -293,7 +295,7 @@ async function resolveHubVariantTarget(
       return target;
     }
     throw new RunConfigResolutionError(
-      "The shared GGUF variant is unavailable for this model. Ask the sender for an updated link.",
+      translate("uxModelpicker.theSharedGGUFVariantqhhoh"),
     );
   }
   return withVariant(target, variant, {

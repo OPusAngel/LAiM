@@ -13,26 +13,26 @@ import { getInventoryVersion } from "../stores/inventory-events";
 // paths, never substring needles. Per-repo views are not filtered, so reinstall flows still show
 // downloaded files.
 const HIDDEN_NEEDLES = [
-  "bge-small-en-v1.5", // RAG embedder: LAiM/bge-small-en-v1.5[-GGUF]
+  "bge-small-en-v1.5", // RAG embedder: unsloth/bge-small-en-v1.5[-GGUF]
   "ggml-org/models", // llama.cpp validation probe repo
   "stories260k.gguf", // probe filename (carries .gguf so it stays specific)
 ];
 const HIDDEN_STT_REPOS = new Set([
   // Transformers safetensors repos and their whisper.cpp GGUF companions
-  // (LAiMai/whisper-*-GGUF): STT-only, never chat models. The Qwen3-ASR GGUFs are here for the
+  // (unslothai/whisper-*-GGUF): STT-only, never chat models. The Qwen3-ASR GGUFs are here for the
   // same reason: llama.cpp will load one as a chat model, where it only answers with transcripts.
-  "LAiM/whisper-tiny",
-  "LAiM/whisper-base",
-  "LAiM/whisper-small",
-  "LAiM/whisper-large-v3-turbo",
-  "LAiM/whisper-large-v3",
-  "LAiMai/whisper-tiny-gguf",
-  "LAiMai/whisper-base-gguf",
-  "LAiMai/whisper-small-gguf",
-  "LAiMai/whisper-large-v3-turbo-gguf",
-  "LAiMai/whisper-large-v3-gguf",
-  "LAiMai/qwen3-asr-0.6b-gguf",
-  "LAiMai/qwen3-asr-1.7b-gguf",
+  "unsloth/whisper-tiny",
+  "unsloth/whisper-base",
+  "unsloth/whisper-small",
+  "unsloth/whisper-large-v3-turbo",
+  "unsloth/whisper-large-v3",
+  "unslothai/whisper-tiny-gguf",
+  "unslothai/whisper-base-gguf",
+  "unslothai/whisper-small-gguf",
+  "unslothai/whisper-large-v3-turbo-gguf",
+  "unslothai/whisper-large-v3-gguf",
+  "unslothai/qwen3-asr-0.6b-gguf",
+  "unslothai/qwen3-asr-1.7b-gguf",
   // audio.cpp's umbrella repo: every speech, music and ASR package is a subfolder, reached through
   // the audio.cpp catalog ids, never as a llama.cpp chat GGUF.
   "audio-cpp/audio.cpp-gguf",

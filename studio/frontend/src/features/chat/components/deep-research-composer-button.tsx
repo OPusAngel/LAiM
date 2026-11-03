@@ -2,6 +2,7 @@
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { Button } from "@/components/ui/button";
+import { translate, useT } from "@/i18n";
 import { Telescope02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
@@ -84,11 +85,11 @@ function DomainList({
     if (!draft.trim()) return;
     const domain = normalizeDomain(draft);
     if (!domain) {
-      setError("Enter a domain without a port, such as arxiv.org.");
+      setError(translate("uxChat.enterADomainWithoutybtrd"));
       return;
     }
     if (values.length >= 100 && !values.includes(domain)) {
-      setError("You can add up to 100 domains to each list.");
+      setError(translate("uxChat.youCanAddUp5ay11"));
       return;
     }
     if (!values.includes(domain)) onChange([...values, domain]);
@@ -130,7 +131,7 @@ function DomainList({
             <button
               type="button"
               className="flex size-4 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-[color-mix(in_oklab,var(--foreground)_calc(10%*var(--contrast-wash-gain,1)),transparent)] hover:text-foreground"
-              aria-label={`Remove ${domain}`}
+              aria-label={translate("uxChat.removecucki", { p1: domain })}
               onClick={() =>
                 onChange(values.filter((value) => value !== domain))
               }
@@ -147,7 +148,7 @@ function DomainList({
           }}
           onBlur={addDraft}
           onKeyDown={handleKeyDown}
-          placeholder={values.length ? "Add another domain" : "example.com"}
+          placeholder={values.length ? translate("uxChat.addAnotherDomaine82pn") : "example.com"}
           aria-label={label}
           aria-invalid={Boolean(error)}
           className="h-7 min-w-32 flex-1 bg-transparent px-2 text-base outline-none placeholder:text-muted-foreground md:text-sm"
@@ -192,17 +193,14 @@ function McpSourceList({
   return (
     <div className="space-y-2">
       <div>
-        <div className="text-sm font-medium">MCP search sources</div>
-        <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
-          Every research search also sends its query to the tools turned on
-          here. Choose up to {MAX_RESEARCH_MCP_SOURCES}.
-        </p>
+        <div className="text-sm font-medium">{translate("uxCopy.mCPSearchSourcesku27s")}</div>
+        <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{translate("uxChat.everyResearchSearchAlsodxaig", { p1: MAX_RESEARCH_MCP_SOURCES })}</p>
       </div>
       {tools === null ? (
-        <p className="text-xs text-muted-foreground">Loading MCP tools…</p>
+        <p className="text-xs text-muted-foreground">{translate("uxChat.loadingMCPToolsputdw")}</p>
       ) : tools.length === 0 ? (
         <p className="text-xs text-muted-foreground">
-          No enabled MCP server has a search tool that takes a single query.
+          {translate("uxChat.noEnabledMCPServerwcow2")}
         </p>
       ) : (
         tools.map((tool) => (
@@ -238,7 +236,7 @@ function McpSourceList({
                       ),
                 )
               }
-              aria-label={`Search with ${tool.serverName} ${tool.tool}`}
+              aria-label={translate("uxChat.searchWithztlov", { p1: tool.serverName, p2: tool.tool })}
             />
           </label>
         ))
@@ -251,13 +249,13 @@ function McpSourceList({
           <span className="min-w-0 break-words text-sm">
             {value.serverId} · {value.tool}
             <span className="block text-xs text-muted-foreground">
-              Currently unavailable. Selection kept until you remove it.
+              {translate("uxChat.currentlyUnavailableSelectionKept17j26")}
             </span>
           </span>
           <button
             type="button"
             className="text-sm text-muted-foreground hover:text-foreground"
-            aria-label={`Remove unavailable source ${value.serverId} ${value.tool}`}
+            aria-label={translate("uxChat.removeUnavailableSource7g97g", { p1: value.serverId, p2: value.tool })}
             onClick={() =>
               onChange(values.filter((item) =>
                 item.serverId !== value.serverId || item.tool !== value.tool,
@@ -277,6 +275,7 @@ export function DeepResearchComposerButton({
 }: {
   onConfigure: () => void;
 }) {
+  const t = useT();
   const enabled = useChatRuntimeStore((state) => state.deepResearchEnabled);
   const setEnabled = useChatRuntimeStore(
     (state) => state.setDeepResearchEnabled,
@@ -289,14 +288,14 @@ export function DeepResearchComposerButton({
       type="button"
       onClick={onConfigure}
       className="composer-pill-btn"
-      data-pill-label="Deep research"
+      data-pill-label={t("composer.pill.deepResearch")}
       data-active="true"
-      aria-label="Configure Deep Research website access"
-      title="Configure website access"
+      aria-label={translate("uxChat.configureDeepResearchWebsitez3oq8")}
+      title={translate("uxChat.configureWebsiteAccess1p4yq")}
     >
       <span
         role="button"
-        aria-label="Disable deep research"
+        aria-label={translate("uxChat.disableDeepResearchx3563")}
         tabIndex={-1}
         onPointerDown={(event) => event.stopPropagation()}
         onClick={(event) => {
@@ -308,7 +307,7 @@ export function DeepResearchComposerButton({
         <HugeiconsIcon icon={Telescope02Icon} className="size-[calc(15px*var(--ui-space-scale,1))]" />
         <XIcon className="composer-pill-x" />
       </span>
-      <span>Deep research</span>
+      <span>{t("composer.pill.deepResearch")}</span>
       {/* Same caret as the other composer pills, so the arrows match. */}
       <HugeiconsIcon
         icon={ChevronDownStandardIcon}
@@ -395,11 +394,10 @@ function DeepResearchWebsiteAccessContent({
         {/* Icon and title, as in the Skills dialog. */}
         <div className="flex items-center gap-2">
           <HugeiconsIcon icon={Telescope02Icon} strokeWidth={1.75} className="size-5 text-primary" />
-          <DialogTitle>Deep research</DialogTitle>
+          <DialogTitle>{translate("uxChat.deepResearchhwj3y")}</DialogTitle>
         </div>
         <DialogDescription>
-          Control website access and model request time for the next Deep
-          Research run.
+          {translate("uxCopy.controlWebsiteAccessAndzghta")}
         </DialogDescription>
       </DialogHeader>
       <div className="space-y-6">
@@ -407,20 +405,18 @@ function DeepResearchWebsiteAccessContent({
           <div className="flex items-start justify-between gap-6">
             <div>
               {/* A run makes many model requests, so this bounds each one, not the run. */}
-              <div className="text-sm font-medium">Time per model request</div>
+              <div className="text-sm font-medium">{translate("uxCopy.timePerModelRequest1pitq")}</div>
               <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
                 {unlimited
-                  ? "No limit on a single model request. Slow models can continue while they keep producing output."
-                  : "Maximum time for each model request, so a run of many requests can take longer. Output stall safeguards stay active."}
+                  ? translate("uxChat.noLimitOnAgstlb")
+                  : translate("uxChat.maximumTimeForEachq38q8")}
               </p>
             </div>
             {/* A switch: it is a state, so its label never flips. */}
             <label
               htmlFor="research-no-time-limit"
               className="flex shrink-0 cursor-pointer items-center gap-2 pt-0.5 text-sm text-muted-foreground"
-            >
-              No limit
-              <Switch
+            >{translate("uxChat.noLimitcfknv")}<Switch
                 id="research-no-time-limit"
                 checked={unlimited}
                 onCheckedChange={(checked) => {
@@ -442,7 +438,7 @@ function DeepResearchWebsiteAccessContent({
                   setTimeoutEdited(true);
                   setTimeoutMinutes(event.target.value);
                 }}
-                aria-label="Deep Research time per model request in minutes"
+                aria-label={translate("uxChat.deepResearchTimePer1iu8q")}
                 className="w-24"
               />
               <span className="text-sm text-muted-foreground">minutes</span>
@@ -450,14 +446,14 @@ function DeepResearchWebsiteAccessContent({
           )}
         </div>
         <DomainList
-          label="Allow only"
-          description="When set, research can access only these domains and their subdomains."
+          label={translate("uxChat.allowOnlydth4g")}
+          description={translate("uxChat.whenSetResearchCanah7yg")}
           values={draft.allowedDomains}
           onChange={(allowedDomains) => setDraft({ ...draft, allowedDomains })}
         />
         <DomainList
-          label="Always block"
-          description="These domains and their subdomains stay blocked. Blocking takes precedence."
+          label={translate("browser.downloadSiteBlock")}
+          description={translate("uxChat.theseDomainsAndTheir1t76p")}
           values={draft.blockedDomains}
           onChange={(blockedDomains) => setDraft({ ...draft, blockedDomains })}
         />
@@ -465,7 +461,7 @@ function DeepResearchWebsiteAccessContent({
       </div>
       <DialogFooter>
         <Button variant="ghost" onClick={onClose}>
-          Cancel
+          {translate("browser.agentSettings.cancel")}
         </Button>
         <Button
           onClick={() => {
@@ -484,9 +480,7 @@ function DeepResearchWebsiteAccessContent({
             );
             onClose();
           }}
-        >
-          Save limits
-        </Button>
+        >{translate("uxChat.saveLimitsdu6yh")}</Button>
       </DialogFooter>
     </DialogContent>
   );

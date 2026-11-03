@@ -276,7 +276,7 @@ def test_not_downloadable(raw):
 
 
 @pytest.mark.parametrize(
-    "raw", ["LAiM/gemma-4-31B-it-GGUF", "LAiM/gemma-4-31B-it-GGUF:UD-Q5_K_XL"]
+    "raw", ["unsloth/gemma-4-31B-it-GGUF", "unsloth/gemma-4-31B-it-GGUF:UD-Q5_K_XL"]
 )
 def test_downloadable(raw):
     assert auto_dl.is_downloadable_ref(raw) is True
@@ -285,9 +285,9 @@ def test_downloadable(raw):
 @pytest.mark.parametrize(
     "repo_id,expected",
     [
-        ("LAiM/gemma-4-E2B-it-GGUF", True),
+        ("unsloth/gemma-4-E2B-it-GGUF", True),
         ("org/nope-GGUF", True),
-        ("LAiM/typo-vision", True),
+        ("unsloth/typo-vision", True),
         ("openai/gpt-4o", False),
         ("anthropic/claude-3.5-sonnet", False),
         ("meta-llama/llama-3-70b-instruct", False),
@@ -301,9 +301,9 @@ def test_looks_like_gguf_hub_repo_id(repo_id, expected):
 
 def test_a_mistyped_gguf_repo_is_refused_while_another_model_is_loaded(monkeypatch):
     # #8376: a mistyped GGUF catalog id must 404, not be answered by the resident model.
-    loaded = _Loaded("LAiM/A-GGUF", "UD-Q4_K_XL")
+    loaded = _Loaded("unsloth/A-GGUF", "UD-Q4_K_XL")
     with pytest.raises(HTTPException) as excinfo:
-        _reject("LAiM/typo-vision-GGUF", loaded, monkeypatch)
+        _reject("unsloth/typo-vision-GGUF", loaded, monkeypatch)
     assert excinfo.value.status_code == 404
     assert excinfo.value.detail["error"]["code"] == "model_not_found"
 
@@ -348,29 +348,29 @@ def test_foreign_id_never_probes(hub):
 
 
 def test_starts_download_and_asks_for_a_retry(hub):
-    refusal = _run("LAiM/x-GGUF:UD-Q5_K_XL")
+    refusal = _run("unsloth/x-GGUF:UD-Q5_K_XL")
     assert refusal.status == 503
     assert refusal.code == "model_downloading"
     assert refusal.retry_after and refusal.retry_after > 0
-    assert "LAiM/x-GGUF:UD-Q5_K_XL" in refusal.message
-    assert hub["started"] == [("LAiM/x-GGUF", "UD-Q5_K_XL", None)]
+    assert "unsloth/x-GGUF:UD-Q5_K_XL" in refusal.message
+    assert hub["started"] == [("unsloth/x-GGUF", "UD-Q5_K_XL", None)]
 
 
 def test_bare_id_freezes_the_same_quant_a_manual_load_would_pick(hub):
     from utils.models.model_config import _extract_quant_label, _pick_best_gguf
 
-    refusal = _run("LAiM/x-GGUF")
+    refusal = _run("unsloth/x-GGUF")
     assert refusal.status == 503
     repo, variant, _token = hub["started"][0]
     expected = _extract_quant_label(
         _pick_best_gguf([s.rfilename for s in _gguf_repo_info().siblings])
     )
-    assert (repo, variant) == ("LAiM/x-GGUF", expected)
+    assert (repo, variant) == ("unsloth/x-GGUF", expected)
     assert variant == "UD-Q4_K_XL"
 
 
 def test_missing_quant_lists_the_real_ones(hub):
-    refusal = _run("LAiM/x-GGUF:Q2_K")
+    refusal = _run("unsloth/x-GGUF:Q2_K")
     assert refusal.status == 404 and refusal.code == "model_not_found"
     assert "UD-Q4_K_XL" in refusal.message and "Q8_0" in refusal.message
     assert hub["started"] == []
@@ -379,7 +379,7 @@ def test_missing_quant_lists_the_real_ones(hub):
 def test_missing_repo_is_404_without_confirming_existence(hub):
     hub["raise"] = _hub_error(_repo_not_found_error(), 404, "nope")
     # An explicit quant is a deliberate GGUF reference, so a miss is answered.
-    refusal = _run("LAiM/not-real:UD-Q4_K_XL")
+    refusal = _run("unsloth/not-real:UD-Q4_K_XL")
     assert refusal.status == 404 and refusal.code == "model_not_found"
     assert "not accessible" in refusal.message
     assert hub["started"] == []
@@ -388,9 +388,9 @@ def test_missing_repo_is_404_without_confirming_existence(hub):
 def test_a_repo_missing_on_modelscope_keeps_the_switch_back_advice(hub):
     from hub.utils.hf_errors import not_on_modelscope
 
-    sentence = not_on_modelscope("LAiM/not-real")
+    sentence = not_on_modelscope("unsloth/not-real")
     hub["raise"] = _hub_error(_repo_not_found_error(), 404, sentence)
-    refusal = _run("LAiM/not-real:UD-Q4_K_XL")
+    refusal = _run("unsloth/not-real:UD-Q4_K_XL")
     assert refusal.status == 404 and refusal.code == "model_not_found"
     assert refusal.message == sentence
 
@@ -472,7 +472,7 @@ def test_a_gated_repo_this_token_may_read_still_downloads(hub):
 
 def test_hub_unreachable_is_retryable(hub):
     hub["raise"] = OSError("network down")
-    refusal = _run("LAiM/x-GGUF")
+    refusal = _run("unsloth/x-GGUF")
     assert refusal.status == 503 and refusal.code == "model_lookup_failed"
     assert refusal.retry_after
     assert hub["started"] == []
@@ -480,7 +480,7 @@ def test_hub_unreachable_is_retryable(hub):
 
 def test_non_gguf_repo_is_refused(hub):
     hub["info"] = _Info([_Sibling("model.safetensors", 100), _Sibling("config.json", 10)])
-    refusal = _run("LAiM/plain-transformers:Q4_K_M")
+    refusal = _run("unsloth/plain-transformers:Q4_K_M")
     assert refusal.status == 400 and refusal.code == "model_not_supported"
     assert hub["started"] == []
 
@@ -488,7 +488,7 @@ def test_non_gguf_repo_is_refused(hub):
 def test_a_bare_non_gguf_id_falls_through(hub):
     # Without a quant this is indistinguishable from a foreign provider label.
     hub["info"] = _Info([_Sibling("model.safetensors", 100)])
-    assert _run("LAiM/plain-transformers") is None
+    assert _run("unsloth/plain-transformers") is None
     assert hub["started"] == []
 
 
@@ -510,22 +510,22 @@ def test_unreadable_config_fails_closed(hub):
 
 def test_insufficient_disk_never_downgrades_the_quant(hub, monkeypatch):
     monkeypatch.setattr(auto_dl, "_enough_disk", lambda need: (False, 1024**3))
-    refusal = _run("LAiM/x-GGUF:UD-Q5_K_XL")
+    refusal = _run("unsloth/x-GGUF:UD-Q5_K_XL")
     assert refusal.status == 507 and refusal.code == "insufficient_disk_space"
     assert hub["started"] == []
 
 
 def test_second_model_waits_for_the_first(hub):
-    assert _run("LAiM/first-GGUF").code == "model_downloading"
-    refusal = _run("LAiM/second-GGUF")
+    assert _run("unsloth/first-GGUF").code == "model_downloading"
+    refusal = _run("unsloth/second-GGUF")
     assert refusal.status == 503 and refusal.code == "model_download_busy"
-    assert "LAiM/first-GGUF" in refusal.message
+    assert "unsloth/first-GGUF" in refusal.message
     # Only the first was dispatched.
     assert len(hub["started"]) == 1
 
 
 def test_repeat_request_reports_progress_without_reprobing(hub, monkeypatch):
-    assert _run("LAiM/x-GGUF:UD-Q5_K_XL").code == "model_downloading"
+    assert _run("unsloth/x-GGUF:UD-Q5_K_XL").code == "model_downloading"
 
     async def _running(repo, variant):
         return "running", None
@@ -535,7 +535,7 @@ def test_repeat_request_reports_progress_without_reprobing(hub, monkeypatch):
 
     monkeypatch.setattr(auto_dl, "_job_state", _running)
     monkeypatch.setattr(auto_dl, "_progress_percent", _pct)
-    refusal = _run("LAiM/x-GGUF:UD-Q5_K_XL")
+    refusal = _run("unsloth/x-GGUF:UD-Q5_K_XL")
     assert refusal.code == "model_downloading" and "42%" in refusal.message
     assert len(hub["started"]) == 1
 
@@ -557,20 +557,20 @@ def test_progress_is_scaled_to_a_percentage(monkeypatch):
 
 
 def test_failed_job_surfaces_once_then_frees_the_slot(hub, monkeypatch):
-    assert _run("LAiM/x-GGUF").code == "model_downloading"
+    assert _run("unsloth/x-GGUF").code == "model_downloading"
 
     async def _errored(repo, variant):
         return "error", "disk exploded"
 
     monkeypatch.setattr(auto_dl, "_job_state", _errored)
-    refusal = _run("LAiM/x-GGUF")
+    refusal = _run("unsloth/x-GGUF")
     assert refusal.status == 502 and "disk exploded" in refusal.message
     # Slot released, so a different model can now start.
-    assert _run("LAiM/other-GGUF").code == "model_downloading"
+    assert _run("unsloth/other-GGUF").code == "model_downloading"
 
 
 def test_hf_token_is_passed_to_the_worker(hub):
-    _run("LAiM/x-GGUF", hf_token = "hf_secret")
+    _run("unsloth/x-GGUF", hf_token = "hf_secret")
     assert hub["started"][0][2] == "hf_secret"
 
 
@@ -580,25 +580,25 @@ def test_hf_token_is_passed_to_the_worker(hub):
 def test_a_refused_dispatch_is_not_reported_as_downloading(hub):
     # The hub service can decline without raising (accepted=False), so the caller hears "busy".
     hub["dispatch_result"] = {
-        "job_key": "LAiM/x-gguf::ud-q5_k_xl",
+        "job_key": "unsloth/x-gguf::ud-q5_k_xl",
         "state": "running",  # the blocking job's state, not ours
         "accepted": False,
         "generation": 3,
     }
-    refusal = _run("LAiM/x-GGUF:UD-Q5_K_XL")
+    refusal = _run("unsloth/x-GGUF:UD-Q5_K_XL")
     assert refusal.status == 503 and refusal.code == "model_download_busy"
     # No watcher installed for a job that is not running.
     assert hub["watched"] == []
     # The slot is free, so an unrelated repo is still admitted.
     assert auto_dl._active is None
     hub["dispatch_result"] = {"job_key": "k", "state": "running", "accepted": True}
-    assert _run("LAiM/other-GGUF").code == "model_downloading"
+    assert _run("unsloth/other-GGUF").code == "model_downloading"
 
 
 def test_an_adoptable_dispatch_still_tracks_the_existing_job(hub):
     # accepted=True with claimed=False means it is already downloading (Hub UI); attach to it.
     hub["dispatch_result"] = {"job_key": "k", "state": "running", "accepted": True}
-    assert _run("LAiM/x-GGUF:UD-Q5_K_XL").code == "model_downloading"
+    assert _run("unsloth/x-GGUF:UD-Q5_K_XL").code == "model_downloading"
     assert len(hub["watched"]) == 1
 
 
@@ -609,20 +609,20 @@ def test_a_failed_status_probe_does_not_end_the_watch(hub, monkeypatch):
         raise RuntimeError("registry unavailable")
 
     monkeypatch.setattr(downloads, "get_download_status_response", _boom)
-    state, error = asyncio.run(auto_dl._job_state("LAiM/x-GGUF", "UD-Q4_K_XL"))
+    state, error = asyncio.run(auto_dl._job_state("unsloth/x-GGUF", "UD-Q4_K_XL"))
     assert (state, error) == ("unknown", None)
 
 
 def test_an_unknown_state_still_reports_the_download_to_a_retry(hub, monkeypatch):
-    assert _run("LAiM/x-GGUF:UD-Q4_K_XL").code == "model_downloading"
+    assert _run("unsloth/x-GGUF:UD-Q4_K_XL").code == "model_downloading"
 
     async def _unknown(repo, variant):
         return "unknown", None
 
     monkeypatch.setattr(auto_dl, "_job_state", _unknown)
     # Still downloading as far as anyone knows, so the slot stays taken.
-    assert _run("LAiM/x-GGUF:UD-Q4_K_XL").code == "model_downloading"
-    assert _run("LAiM/other-GGUF").code == "model_download_busy"
+    assert _run("unsloth/x-GGUF:UD-Q4_K_XL").code == "model_downloading"
+    assert _run("unsloth/other-GGUF").code == "model_download_busy"
 
 
 def test_a_hanging_code_probe_does_not_pin_the_slot(hub, monkeypatch):
@@ -644,7 +644,7 @@ def test_a_hanging_code_probe_does_not_pin_the_slot(hub, monkeypatch):
         # Time the await, not asyncio.run: the probe thread cannot be cancelled, so
         # loop shutdown waits for it here in a way a long-lived server loop never does.
         started = time.monotonic()
-        refusal = await auto_dl.maybe_auto_download("LAiM/x-GGUF:UD-Q4_K_XL")
+        refusal = await auto_dl.maybe_auto_download("unsloth/x-GGUF:UD-Q4_K_XL")
         waited = time.monotonic() - started
         release.set()
         return refusal, waited
@@ -672,7 +672,7 @@ def test_a_hanging_auth_check_falls_through_to_the_download(hub, monkeypatch):
     monkeypatch.setattr(auto_dl, "_MODEL_INFO_TIMEOUT_S", 0.2)
 
     async def _timed():
-        refusal = await auto_dl.maybe_auto_download("LAiM/x-GGUF:UD-Q4_K_XL")
+        refusal = await auto_dl.maybe_auto_download("unsloth/x-GGUF:UD-Q4_K_XL")
         release.set()
         return refusal
 
@@ -683,18 +683,18 @@ def test_a_companion_only_repo_is_not_held_at_busy(hub):
     # mmproj and MTP files are companions, not quants, so such a repo is non-servable
     # and falls through to the resident model. The busy probe accepted any .gguf, which
     # stranded that ordinary traffic behind an unrelated multi-hour download.
-    assert _run("LAiM/x-GGUF:UD-Q4_K_XL").code == "model_downloading"
+    assert _run("unsloth/x-GGUF:UD-Q4_K_XL").code == "model_downloading"
     gb = 1024**3
     hub["info"] = _Info([_Sibling("mmproj-F16.gguf", gb), _Sibling("mtp-model.gguf", gb)])
-    assert _run("LAiM/companions-GGUF") is None
+    assert _run("unsloth/companions-GGUF") is None
     # A repo that does hold a real quant is still a second download.
     hub["info"] = _gguf_repo_info()
-    assert _run("LAiM/other-GGUF").code == "model_download_busy"
+    assert _run("unsloth/other-GGUF").code == "model_download_busy"
 
 
 def test_a_stale_watcher_cannot_release_a_newer_download(hub, monkeypatch):
     # Variant A is downloading; its watcher holds the slot.
-    assert _run("LAiM/x-GGUF:UD-Q4_K_XL").code == "model_downloading"
+    assert _run("unsloth/x-GGUF:UD-Q4_K_XL").code == "model_downloading"
     watcher_a = hub["watched"][-1]
 
     # A fails, so an adopting request surfaces the error and frees the slot.
@@ -707,11 +707,11 @@ def test_a_stale_watcher_cannot_release_a_newer_download(hub, monkeypatch):
         return await real_job_state(repo, variant)
 
     monkeypatch.setattr(auto_dl, "_job_state", _maybe_errored)
-    assert _run("LAiM/x-GGUF:UD-Q4_K_XL").code == "model_download_failed"
+    assert _run("unsloth/x-GGUF:UD-Q4_K_XL").code == "model_download_failed"
     errored["on"] = False
 
     # The retry starts variant B of the same repo, which now owns the slot.
-    assert _run("LAiM/x-GGUF:UD-Q5_K_XL").code == "model_downloading"
+    assert _run("unsloth/x-GGUF:UD-Q5_K_XL").code == "model_downloading"
     watcher_b = hub["watched"][-1]
     assert auto_dl._active is watcher_b
 
@@ -720,7 +720,7 @@ def test_a_stale_watcher_cannot_release_a_newer_download(hub, monkeypatch):
     monkeypatch.setattr(auto_dl, "_WATCH_POLL_S", 0.0)
     asyncio.run(hub["real_watch"](watcher_a, None))
     assert auto_dl._active is watcher_b
-    assert _run("LAiM/other-GGUF").code == "model_download_busy"
+    assert _run("unsloth/other-GGUF").code == "model_download_busy"
 
 
 def test_a_cancelled_admission_does_not_wedge_the_slot(hub):
@@ -732,12 +732,12 @@ def test_a_cancelled_admission_does_not_wedge_the_slot(hub):
 
     async def _cancelled_request():
         with pytest.raises(asyncio.CancelledError):
-            await auto_dl.maybe_auto_download("LAiM/x-GGUF")
+            await auto_dl.maybe_auto_download("unsloth/x-GGUF")
 
     asyncio.run(_cancelled_request())
     assert auto_dl._active is None
     hub["on_probe"] = None
-    assert _run("LAiM/other-GGUF").code == "model_downloading"
+    assert _run("unsloth/other-GGUF").code == "model_downloading"
 
 
 # --- route wiring ------------------------------------------------------------
@@ -780,13 +780,13 @@ def _hook(
 
 def test_setting_off_does_nothing_at_all(hub):
     # The compatibility invariant: no probe, no dispatch, no raise.
-    assert _hook("LAiM/x-GGUF:UD-Q5_K_XL", _Req(), enabled = False) is None
+    assert _hook("unsloth/x-GGUF:UD-Q5_K_XL", _Req(), enabled = False) is None
     assert hub["started"] == []
 
 
 def test_hook_raises_the_openai_envelope_with_retry_after(hub):
     with pytest.raises(HTTPException) as excinfo:
-        _hook("LAiM/x-GGUF:UD-Q5_K_XL", _Req(), enabled = True)
+        _hook("unsloth/x-GGUF:UD-Q5_K_XL", _Req(), enabled = True)
     exc = excinfo.value
     assert exc.status_code == 503
     assert exc.headers and exc.headers["Retry-After"]
@@ -797,7 +797,7 @@ def test_hook_raises_the_openai_envelope_with_retry_after(hub):
 
 def test_hook_uses_the_anthropic_envelope_on_messages(hub):
     with pytest.raises(HTTPException) as excinfo:
-        _hook("LAiM/x-GGUF", _Req(path = "/v1/messages"), enabled = True)
+        _hook("unsloth/x-GGUF", _Req(path = "/v1/messages"), enabled = True)
     detail = excinfo.value.detail
     assert detail["type"] == "error"
     assert detail["error"]["type"] == "api_error"
@@ -813,7 +813,7 @@ def test_hook_swallows_unexpected_failures(hub, monkeypatch):
         raise RuntimeError("boom")
 
     monkeypatch.setattr(auto_dl, "maybe_auto_download", _boom)
-    assert _hook("LAiM/x-GGUF", _Req(), enabled = True) is None
+    assert _hook("unsloth/x-GGUF", _Req(), enabled = True) is None
 
 
 def _download_rows():
@@ -828,7 +828,7 @@ def test_a_ui_session_download_is_not_marked_as_api_traffic(hub):
     api_monitor.clear()
     with pytest.raises(HTTPException):
         # No Authorization header: the UI's session-JWT path.
-        _hook("LAiM/x-GGUF", _Req(), enabled = True, current_subject = "LAiM")
+        _hook("unsloth/x-GGUF", _Req(), enabled = True, current_subject = "LAiM")
     rows = _download_rows()
     assert rows and all(row["via_api_key"] is False for row in rows)
 
@@ -841,7 +841,7 @@ def test_an_api_key_download_keeps_the_attribution_and_names_its_caller(hub):
     api_monitor.clear()
     with pytest.raises(HTTPException):
         _hook(
-            "LAiM/x-GGUF",
+            "unsloth/x-GGUF",
             _Req(headers = {"authorization": f"Bearer {API_KEY_PREFIX}abc123"}),
             enabled = True,
             current_subject = "LAiM",
@@ -865,13 +865,13 @@ def test_an_api_key_caller_waiting_on_someone_elses_download_gets_a_row(hub):
     api_monitor.clear()
     with pytest.raises(HTTPException):
         # LAiM's chat (session JWT) starts the download and takes the slot.
-        _hook("LAiM/x-GGUF", _Req(), enabled = True, current_subject = "LAiM")
+        _hook("unsloth/x-GGUF", _Req(), enabled = True, current_subject = "LAiM")
     seeded = {row["id"] for row in api_monitor.snapshot(subject = "LAiM")}
 
     with pytest.raises(HTTPException) as excinfo:
         # The adopted-download branch: same repo, an sk-LAiM key this time.
         _hook(
-            "LAiM/x-GGUF",
+            "unsloth/x-GGUF",
             _Req(headers = {"authorization": f"Bearer {API_KEY_PREFIX}abc123"}),
             enabled = True,
             current_subject = "LAiM",
@@ -893,7 +893,7 @@ def test_hook_prefers_the_hub_header_token(hub):
     from hub.dependencies import HUB_HF_TOKEN_HEADER
     with pytest.raises(HTTPException):
         _hook(
-            "LAiM/x-GGUF",
+            "unsloth/x-GGUF",
             _Req(headers = {HUB_HF_TOKEN_HEADER: "hf_from_header"}),
             enabled = True,
         )
@@ -959,48 +959,48 @@ async def _fake_unavailable_message(model):
 
 def test_wrong_quant_is_not_answered_by_the_loaded_one(monkeypatch):
     # The reported bug: asking for UD-Q6_K_XL while UD-Q4_K_XL is resident returned 200.
-    loaded = _Loaded("LAiM/gemma-4-E2B-it-GGUF", "UD-Q4_K_XL")
+    loaded = _Loaded("unsloth/gemma-4-E2B-it-GGUF", "UD-Q4_K_XL")
     with pytest.raises(HTTPException) as excinfo:
-        _reject("LAiM/gemma-4-E2B-it-GGUF:UD-Q6_K_XL", loaded, monkeypatch)
+        _reject("unsloth/gemma-4-E2B-it-GGUF:UD-Q6_K_XL", loaded, monkeypatch)
     assert excinfo.value.status_code == 404
 
 
 def test_bare_repo_id_is_satisfied_by_any_loaded_quant(monkeypatch):
     # No quant named means "this model", so the resident quant answers it.
-    loaded = _Loaded("LAiM/gemma-4-E2B-it-GGUF", "UD-Q4_K_XL")
-    assert _reject("LAiM/gemma-4-E2B-it-GGUF", loaded, monkeypatch) is None
+    loaded = _Loaded("unsloth/gemma-4-E2B-it-GGUF", "UD-Q4_K_XL")
+    assert _reject("unsloth/gemma-4-E2B-it-GGUF", loaded, monkeypatch) is None
 
 
 def test_matching_quant_is_served(monkeypatch):
-    loaded = _Loaded("LAiM/gemma-4-E2B-it-GGUF", "UD-Q4_K_XL")
-    assert _reject("LAiM/gemma-4-E2B-it-GGUF:ud-q4_k_xl", loaded, monkeypatch) is None
+    loaded = _Loaded("unsloth/gemma-4-E2B-it-GGUF", "UD-Q4_K_XL")
+    assert _reject("unsloth/gemma-4-E2B-it-GGUF:ud-q4_k_xl", loaded, monkeypatch) is None
 
 
 def test_advertised_alias_counts_as_serving(monkeypatch):
     # Loaded by path, requested by the repo id auto-switch advertised for it.
-    loaded = _Loaded("/cache/snap/abc", "UD-Q4_K_XL", "LAiM/gemma-4-E2B-it-GGUF")
-    assert _reject("LAiM/gemma-4-E2B-it-GGUF", loaded, monkeypatch) is None
+    loaded = _Loaded("/cache/snap/abc", "UD-Q4_K_XL", "unsloth/gemma-4-E2B-it-GGUF")
+    assert _reject("unsloth/gemma-4-E2B-it-GGUF", loaded, monkeypatch) is None
 
 
 @pytest.mark.parametrize("foreign", ["gpt-4", "gpt-4o-mini", "claude-3-5-sonnet", "default"])
 def test_foreign_ids_still_fall_through(monkeypatch, foreign):
     # Drop-in compatibility: an id with no namespace is a label, not a reference.
-    loaded = _Loaded("LAiM/gemma-4-E2B-it-GGUF", "UD-Q4_K_XL")
+    loaded = _Loaded("unsloth/gemma-4-E2B-it-GGUF", "UD-Q4_K_XL")
     assert _reject(foreign, loaded, monkeypatch) is None
 
 
 def test_downloaded_but_auto_switch_off_says_so(monkeypatch):
-    loaded = _Loaded("LAiM/A-GGUF", "UD-Q4_K_XL")
+    loaded = _Loaded("unsloth/A-GGUF", "UD-Q4_K_XL")
     with pytest.raises(HTTPException) as excinfo:
-        _reject("LAiM/B-GGUF", loaded, monkeypatch, downloaded = True)
+        _reject("unsloth/B-GGUF", loaded, monkeypatch, downloaded = True)
     assert "Switch model by request" in str(excinfo.value.detail)
 
 
 def test_a_failed_switch_is_reported_not_answered_by_the_resident_model(monkeypatch):
     # On disk and switching allowed means the swap failed; the resident model is wrong weights.
-    loaded = _Loaded("LAiM/A-GGUF", "UD-Q4_K_XL")
+    loaded = _Loaded("unsloth/A-GGUF", "UD-Q4_K_XL")
     with pytest.raises(HTTPException) as excinfo:
-        _reject("LAiM/B-GGUF", loaded, monkeypatch, downloaded = True, auto_switch = True)
+        _reject("unsloth/B-GGUF", loaded, monkeypatch, downloaded = True, auto_switch = True)
     assert excinfo.value.status_code == 503
     assert excinfo.value.detail["error"]["code"] == "model_switch_failed"
     assert excinfo.value.headers["Retry-After"] == "5"
@@ -1017,29 +1017,29 @@ def test_a_failed_switch_is_reported_not_answered_by_the_resident_model(monkeypa
 )
 def test_a_provider_prefixed_label_still_reaches_the_resident_model(foreign, monkeypatch):
     # A namespace is how LiteLLM addresses providers, so reading it as a reference 404s them.
-    loaded = _Loaded("LAiM/A-GGUF", "UD-Q4_K_XL")
+    loaded = _Loaded("unsloth/A-GGUF", "UD-Q4_K_XL")
     assert _reject(foreign, loaded, monkeypatch) is None
 
 
 def test_an_explicit_quant_is_still_refused(monkeypatch):
     # A quant is the signal: no LiteLLM or OpenRouter id carries one.
-    loaded = _Loaded("LAiM/A-GGUF", "UD-Q4_K_XL")
+    loaded = _Loaded("unsloth/A-GGUF", "UD-Q4_K_XL")
     with pytest.raises(HTTPException) as excinfo:
-        _reject("LAiM/B-GGUF:UD-Q6_K_XL", loaded, monkeypatch)
+        _reject("unsloth/B-GGUF:UD-Q6_K_XL", loaded, monkeypatch)
     assert excinfo.value.status_code == 404
 
 
 def test_a_repo_that_is_here_is_refused_without_a_quant(monkeypatch):
     # The other half of the evidence test: a repo this server has is a reference to it.
-    loaded = _Loaded("LAiM/A-GGUF", "UD-Q4_K_XL")
+    loaded = _Loaded("unsloth/A-GGUF", "UD-Q4_K_XL")
     with pytest.raises(HTTPException) as excinfo:
-        _reject("LAiM/B-GGUF", loaded, monkeypatch, downloaded = True)
+        _reject("unsloth/B-GGUF", loaded, monkeypatch, downloaded = True)
     assert excinfo.value.status_code == 404
 
 
 def test_a_diagnosis_failure_does_not_serve_the_wrong_model(monkeypatch):
     # The mismatch is already established, so falling through would answer as another model.
-    loaded = _Loaded("LAiM/A-GGUF", "UD-Q4_K_XL")
+    loaded = _Loaded("unsloth/A-GGUF", "UD-Q4_K_XL")
     monkeypatch.setattr(inference_route, "get_llama_cpp_backend", lambda: loaded)
     monkeypatch.setattr(
         inference_route,
@@ -1052,7 +1052,7 @@ def test_a_diagnosis_failure_does_not_serve_the_wrong_model(monkeypatch):
 
     monkeypatch.setattr("core.inference.local_model_resolver.resolve_local_gguf", _boom)
     with pytest.raises(HTTPException) as excinfo:
-        asyncio.run(inference_route._reject_unservable_model("LAiM/B-GGUF:UD-Q6_K_XL", _Req()))
+        asyncio.run(inference_route._reject_unservable_model("unsloth/B-GGUF:UD-Q6_K_XL", _Req()))
     assert excinfo.value.status_code == 404
 
 
@@ -1065,16 +1065,16 @@ def test_nothing_loaded_leaves_the_existing_error_alone(monkeypatch):
         "get_inference_backend",
         lambda: type("B", (), {"active_model_name": None})(),
     )
-    assert asyncio.run(inference_route._reject_unservable_model("LAiM/B-GGUF", _Req())) is None
+    assert asyncio.run(inference_route._reject_unservable_model("unsloth/B-GGUF", _Req())) is None
 
 
 def test_reload_only_sentinel_is_ignored(monkeypatch):
-    loaded = _Loaded("LAiM/A-GGUF", "UD-Q4_K_XL")
+    loaded = _Loaded("unsloth/A-GGUF", "UD-Q4_K_XL")
     assert _reject(inference_route._RELOAD_ONLY_MODEL, loaded, monkeypatch) is None
 
 
 def test_diagnosis_failure_never_breaks_a_servable_request(monkeypatch):
-    loaded = _Loaded("LAiM/A-GGUF", "UD-Q4_K_XL")
+    loaded = _Loaded("unsloth/A-GGUF", "UD-Q4_K_XL")
 
     def _boom(_name, **_kw):
         raise RuntimeError("scan exploded")
@@ -1086,7 +1086,7 @@ def test_diagnosis_failure_never_breaks_a_servable_request(monkeypatch):
         "get_inference_backend",
         lambda: type("B", (), {"active_model_name": None})(),
     )
-    assert asyncio.run(inference_route._reject_unservable_model("LAiM/B-GGUF", _Req())) is None
+    assert asyncio.run(inference_route._reject_unservable_model("unsloth/B-GGUF", _Req())) is None
 
 
 def _reject_with_active(model, active, monkeypatch):
@@ -1110,21 +1110,21 @@ def test_a_directory_loaded_model_is_not_refused_under_its_own_hub_id(monkeypatc
     # under a bare name that no org/name request can be told apart from. Refusing one
     # 404s the weights serving right now.
     local = "/srv/models/gemma-3-4b-it"
-    assert _reject_with_active("LAiM/gemma-3-4b-it", local, monkeypatch) is None
-    assert _reject_with_active("LAiM/gemma-3-4b-it:latest", local, monkeypatch) is None
+    assert _reject_with_active("unsloth/gemma-3-4b-it", local, monkeypatch) is None
+    assert _reject_with_active("unsloth/gemma-3-4b-it:latest", local, monkeypatch) is None
 
 
 def test_an_hf_cache_load_keeps_its_namespace_and_still_refuses_a_typo(monkeypatch):
     # A cache path maps back to org/name, so the resident id stays comparable there.
     cache = "/h/.cache/huggingface/hub/models--LAiM--gemma-3-4b-it/snapshots/abc"
-    assert _reject_with_active("LAiM/gemma-3-4b-it", cache, monkeypatch) is None
+    assert _reject_with_active("unsloth/gemma-3-4b-it", cache, monkeypatch) is None
     with pytest.raises(HTTPException) as excinfo:
-        _reject_with_active("LAiM/typo-vision-GGUF", cache, monkeypatch)
+        _reject_with_active("unsloth/typo-vision-GGUF", cache, monkeypatch)
     assert excinfo.value.status_code == 404
 
 
 def test_anthropic_surface_gets_its_own_envelope(monkeypatch):
-    loaded = _Loaded("LAiM/A-GGUF", "UD-Q4_K_XL")
+    loaded = _Loaded("unsloth/A-GGUF", "UD-Q4_K_XL")
     monkeypatch.setattr(inference_route, "get_llama_cpp_backend", lambda: loaded)
     monkeypatch.setattr(
         inference_route,
@@ -1138,7 +1138,7 @@ def test_anthropic_surface_gets_its_own_envelope(monkeypatch):
     with pytest.raises(HTTPException) as excinfo:
         asyncio.run(
             inference_route._reject_unservable_model(
-                "LAiM/B-GGUF:UD-Q6_K_XL", _Req(path = "/v1/messages")
+                "unsloth/B-GGUF:UD-Q6_K_XL", _Req(path = "/v1/messages")
             )
         )
     assert excinfo.value.detail["type"] == "error"
@@ -1245,28 +1245,28 @@ def test_a_quant_cannot_be_satisfied_by_a_non_gguf_backend(monkeypatch):
 
 def test_the_worker_is_never_given_the_servers_own_token(hub):
     # A falsy token would make the worker fall back to the server owner's HF_TOKEN.
-    assert _run("LAiM/x-GGUF").code == "model_downloading"
+    assert _run("unsloth/x-GGUF").code == "model_downloading"
     assert hub["started"][0][2] is None
     assert hub["allow_ambient"] is False
 
 
 def test_the_metadata_probe_is_explicitly_anonymous(hub):
     # token=None means "use the cached login" to huggingface_hub; only False is anonymous.
-    _run("LAiM/x-GGUF")
+    _run("unsloth/x-GGUF")
     assert hub["token"] is False
     auto_dl.reset_for_tests()
-    _run("LAiM/y-GGUF", hf_token = "hf_caller_own")
+    _run("unsloth/y-GGUF", hf_token = "hf_caller_own")
     assert hub["token"] == "hf_caller_own"
 
 
 def test_an_ollama_tag_still_matches_the_resident_gguf(monkeypatch):
     # looks_like_quant() calls these foreign, so they must not be checked against hf_variant.
-    loaded = _Loaded("LAiM/A-GGUF", "UD-Q4_K_XL")
+    loaded = _Loaded("unsloth/A-GGUF", "UD-Q4_K_XL")
     monkeypatch.setattr(inference_route, "get_llama_cpp_backend", lambda: loaded)
-    assert inference_route._loaded_satisfies("LAiM/A-GGUF:latest") is True
-    assert inference_route._loaded_satisfies("LAiM/A-GGUF:8b") is True
-    assert inference_route._loaded_satisfies("LAiM/A-GGUF:UD-Q4_K_XL") is True
-    assert inference_route._loaded_satisfies("LAiM/A-GGUF:Q8_0") is False
+    assert inference_route._loaded_satisfies("unsloth/A-GGUF:latest") is True
+    assert inference_route._loaded_satisfies("unsloth/A-GGUF:8b") is True
+    assert inference_route._loaded_satisfies("unsloth/A-GGUF:UD-Q4_K_XL") is True
+    assert inference_route._loaded_satisfies("unsloth/A-GGUF:Q8_0") is False
 
 
 def test_a_windows_path_matches_the_gguf_loaded_from_it(monkeypatch):
@@ -1292,9 +1292,9 @@ def test_a_probing_adoption_never_releases_the_slot(hub, monkeypatch):
             return "error", "an older failure"
 
         monkeypatch.setattr(auto_dl, "_job_state", _stale)
-        seen["refusal"] = _run("LAiM/x-GGUF")
+        seen["refusal"] = _run("unsloth/x-GGUF")
 
-    assert _run("LAiM/x-GGUF").code == "model_downloading"
+    assert _run("unsloth/x-GGUF").code == "model_downloading"
     assert seen["refusal"].code == "model_downloading"
     assert "queried" not in seen  # the stale job key was never consulted
 
@@ -1315,7 +1315,7 @@ def test_the_default_pick_survives_lowercase_quant_labels():
 
 def test_a_slashless_local_model_is_still_a_concrete_reference(monkeypatch):
     # /v1/models advertises these without a namespace, so a namespace decides nothing.
-    loaded = _Loaded("LAiM/A-GGUF", "UD-Q4_K_XL")
+    loaded = _Loaded("unsloth/A-GGUF", "UD-Q4_K_XL")
     monkeypatch.setattr(inference_route, "get_llama_cpp_backend", lambda: loaded)
     monkeypatch.setattr(
         inference_route,
@@ -1347,7 +1347,7 @@ def test_a_cancelled_download_is_not_reported_as_failed(hub, monkeypatch):
     # fail_open rendered a deliberate cancel as "Model download failed".
     from core.inference import api_monitor as monitor_module
 
-    assert _run("LAiM/x-GGUF:UD-Q4_K_XL").code == "model_downloading"
+    assert _run("unsloth/x-GGUF:UD-Q4_K_XL").code == "model_downloading"
     active = hub["watched"][-1]
 
     async def _cancelled(repo, variant):
@@ -1382,7 +1382,7 @@ def test_disk_admission_counts_only_what_is_left_to_fetch(hub, monkeypatch):
         "hub.utils.download_registry.existing_blob_bytes",
         lambda repo_type, repo_id, hashes: 3 * gb,
     )
-    assert _run("LAiM/x-GGUF:UD-Q4_K_XL").code == "model_downloading"
+    assert _run("unsloth/x-GGUF:UD-Q4_K_XL").code == "model_downloading"
     # 4 GB quant + 2 GB companions, 3 GB of which is already cached.
     assert seen["need"] == 3 * gb
 
@@ -1415,7 +1415,7 @@ def test_the_request_path_never_triggers_a_model_index_rescan(monkeypatch):
     monkeypatch.setattr(resolver, "_scan", (1.0, {}))
     # Stub the warm: it is allowed to scan, just not on the thread serving the request.
     monkeypatch.setattr(resolver, "warm_index_soon", lambda: warmed.append(1))
-    loaded = _Loaded("LAiM/A-GGUF", "UD-Q4_K_XL")
+    loaded = _Loaded("unsloth/A-GGUF", "UD-Q4_K_XL")
     monkeypatch.setattr(inference_route, "get_llama_cpp_backend", lambda: loaded)
     monkeypatch.setattr(
         inference_route,
@@ -1426,7 +1426,7 @@ def test_the_request_path_never_triggers_a_model_index_rescan(monkeypatch):
     monkeypatch.setattr(
         "utils.openai_auto_switch_settings.get_openai_auto_switch_enabled", lambda: False
     )
-    for model in ("gpt-4", "anthropic/claude-3.5-sonnet", "LAiM/B-GGUF:UD-Q6_K_XL"):
+    for model in ("gpt-4", "anthropic/claude-3.5-sonnet", "unsloth/B-GGUF:UD-Q6_K_XL"):
         try:
             asyncio.run(inference_route._reject_unservable_model(model, _Req()))
         except HTTPException:
@@ -1448,7 +1448,7 @@ def test_a_cold_index_is_scanned_rather_than_read_as_nothing_here(monkeypatch):
 
     monkeypatch.setattr(resolver, "_scan", (0.0, {}))
     monkeypatch.setattr(resolver, "_build_index", _build)
-    loaded = _Loaded("LAiM/A-GGUF", "UD-Q4_K_XL")
+    loaded = _Loaded("unsloth/A-GGUF", "UD-Q4_K_XL")
     monkeypatch.setattr(inference_route, "get_llama_cpp_backend", lambda: loaded)
     monkeypatch.setattr(
         inference_route,
@@ -1488,7 +1488,7 @@ def test_a_cold_scan_that_never_finishes_says_so_instead_of_guessing(monkeypatch
     monkeypatch.setattr(resolver, "_build_index", lambda: (released.wait(0.5), {})[1])
     warmed = []
     monkeypatch.setattr(resolver, "warm_index_soon", lambda: warmed.append(1))
-    loaded = _Loaded("LAiM/A-GGUF", "UD-Q4_K_XL")
+    loaded = _Loaded("unsloth/A-GGUF", "UD-Q4_K_XL")
     monkeypatch.setattr(inference_route, "get_llama_cpp_backend", lambda: loaded)
     monkeypatch.setattr(
         inference_route,
@@ -1509,7 +1509,7 @@ def test_a_refusal_is_never_swallowed_by_the_cannot_verify_handler(monkeypatch):
     # The checks run inside a broad `except Exception` that turns a failure to decide
     # into a fallthrough. An HTTPException there is a decision, but was logged as a
     # failure and answered by the resident model.
-    loaded = _Loaded("LAiM/A-GGUF", "UD-Q4_K_XL")
+    loaded = _Loaded("unsloth/A-GGUF", "UD-Q4_K_XL")
     monkeypatch.setattr(inference_route, "get_llama_cpp_backend", lambda: loaded)
     monkeypatch.setattr(
         inference_route,
@@ -1541,7 +1541,7 @@ def test_warming_the_index_never_waits_on_the_scan_lock(monkeypatch):
     try:
         started = _time.perf_counter()
         _real_warm_index_soon()
-        resolver.resolve_local_gguf("LAiM/A-GGUF", allow_scan = False)
+        resolver.resolve_local_gguf("unsloth/A-GGUF", allow_scan = False)
         elapsed = _time.perf_counter() - started
     finally:
         released.set()
@@ -1639,7 +1639,7 @@ def test_an_id_v1_models_advertised_is_refused_before_the_resolver_warms(monkeyp
         {"at": 1.0, "models": [_CatalogInfo("org/Other", "/srv/models/org--Other")]},
     )
     monkeypatch.setattr(inference_route, "_ADVERTISED_CACHE", {"at": None, "paths": {}})
-    loaded = _Loaded("LAiM/A-GGUF", "UD-Q4_K_XL")
+    loaded = _Loaded("unsloth/A-GGUF", "UD-Q4_K_XL")
     monkeypatch.setattr(inference_route, "get_llama_cpp_backend", lambda: loaded)
     monkeypatch.setattr(
         inference_route,
@@ -1685,7 +1685,7 @@ def test_a_rejected_token_says_so_instead_of_asking_for_a_retry(hub):
     from huggingface_hub.utils import HfHubHTTPError
 
     hub["raise"] = _hub_error(HfHubHTTPError, 401, "unauthorized")
-    refusal = _run("LAiM/x-GGUF:UD-Q5_K_XL", hf_token = "hf_expired")
+    refusal = _run("unsloth/x-GGUF:UD-Q5_K_XL", hf_token = "hf_expired")
     assert refusal.status == 401 and refusal.code == "model_access_denied"
     assert "token" in refusal.message.lower()
     assert hub["started"] == []
@@ -1697,7 +1697,7 @@ def test_an_image_request_does_not_download_a_text_only_model(hub):
     gb = 1024**3
     hub["info"] = _Info([_Sibling("model-UD-Q5_K_XL.gguf", 5 * gb)])
     refusal = asyncio.run(
-        auto_dl.maybe_auto_download("LAiM/text-GGUF:UD-Q5_K_XL", require_vision = True)
+        auto_dl.maybe_auto_download("unsloth/text-GGUF:UD-Q5_K_XL", require_vision = True)
     )
     assert refusal.status == 400 and refusal.code == "invalid_value"
     assert "mmproj" in refusal.message
@@ -1706,7 +1706,7 @@ def test_an_image_request_does_not_download_a_text_only_model(hub):
     hub["info"] = _gguf_repo_info()
     assert (
         asyncio.run(
-            auto_dl.maybe_auto_download("LAiM/x-GGUF:UD-Q5_K_XL", require_vision = True)
+            auto_dl.maybe_auto_download("unsloth/x-GGUF:UD-Q5_K_XL", require_vision = True)
         ).code
         == "model_downloading"
     )
@@ -1933,19 +1933,19 @@ def test_a_rekeyed_slash_pin_is_admitted_for_a_bare_local_id(monkeypatch):
 def test_a_remote_tag_that_names_no_quant_picks_the_preferred_one(hub):
     # ":latest" and ":8b" name no quant, so remote admission must default-select like a
     # bare repo id (as the local resolver does) instead of 404ing on a non-quant.
-    assert _run("LAiM/x-GGUF").code == "model_downloading"
+    assert _run("unsloth/x-GGUF").code == "model_downloading"
     bare_repo, bare_variant, _ = hub["started"][0]
     for tag in (":latest", ":8b"):
         auto_dl.reset_for_tests()
         hub["started"].clear()
-        assert _run(f"LAiM/x-GGUF{tag}").code == "model_downloading"
+        assert _run(f"unsloth/x-GGUF{tag}").code == "model_downloading"
         assert hub["started"][0][0] == bare_repo
         assert hub["started"][0][1] == bare_variant, f"{tag} did not default-select"
 
     # A real quant the repo does not have is still a 404, never a substitution.
     auto_dl.reset_for_tests()
     hub["started"].clear()
-    refusal = _run("LAiM/x-GGUF:Q2_K")
+    refusal = _run("unsloth/x-GGUF:Q2_K")
     assert refusal.status == 404 and "no quant" in refusal.message
     assert hub["started"] == []
 
@@ -1959,7 +1959,7 @@ def test_a_generic_gguf_advertises_the_label_the_worker_resolves(hub):
 
     sibling = _Sibling("llama-7b.gguf", 4 * 1024**3)
     hub["info"] = _Info([sibling])
-    assert _run("LAiM/generic-GGUF").code == "model_downloading"
+    assert _run("unsloth/generic-GGUF").code == "model_downloading"
     dispatched = hub["started"][0][1]
     assert dispatched == canonical("llama-7b.gguf")
     # The key the worker will look up has to contain it, which is the whole point.
@@ -1994,7 +1994,7 @@ def test_a_bare_request_for_a_just_downloaded_model_is_refused(monkeypatch):
 
     monkeypatch.setattr(resolver, "_scan", (time.monotonic(), {}))
     monkeypatch.setattr(resolver, "_just_downloaded", {"org/fresh"})
-    loaded = _Loaded("LAiM/A-GGUF", "UD-Q4_K_XL")
+    loaded = _Loaded("unsloth/A-GGUF", "UD-Q4_K_XL")
     monkeypatch.setattr(inference_route, "get_llama_cpp_backend", lambda: loaded)
     monkeypatch.setattr(
         inference_route,
@@ -2114,26 +2114,26 @@ def test_the_trust_probe_never_falls_back_to_the_server_identity(hub, monkeypatc
         return False
 
     monkeypatch.setattr("utils.security.consent._config_has_auto_map", _probe)
-    _run("LAiM/x-GGUF:UD-Q5_K_XL")
+    _run("unsloth/x-GGUF:UD-Q5_K_XL")
     assert seen == [False], f"trust probe ran with {seen!r}, not an explicit anonymous token"
 
     seen.clear()
     auto_dl.reset_for_tests()
-    _run("LAiM/x-GGUF:UD-Q5_K_XL", hf_token = "hf_caller")
+    _run("unsloth/x-GGUF:UD-Q5_K_XL", hf_token = "hf_caller")
     assert seen == ["hf_caller"], "the caller's own token must still be used"
 
 
 def test_a_foreign_label_is_not_told_to_wait_for_someone_elses_download(hub):
     # The busy refusal fired before the probe, so any namespaced label a drop-in client
     # sends (LiteLLM/OpenRouter style) was told to wait out an unrelated download.
-    assert _run("LAiM/first-GGUF").code == "model_downloading"
+    assert _run("unsloth/first-GGUF").code == "model_downloading"
 
     hub["info"] = _Info([_Sibling("README.md", 1024)])  # real repo, no GGUF
     assert _run("anthropic/claude-3.5-sonnet") is None, "a foreign label was refused as busy"
 
     # A label that really is another downloadable model still gets the busy refusal.
     hub["info"] = _gguf_repo_info()
-    refusal = _run("LAiM/second-GGUF")
+    refusal = _run("unsloth/second-GGUF")
     assert refusal.status == 503 and refusal.code == "model_download_busy"
 
 
@@ -2157,7 +2157,7 @@ def test_a_failed_download_keeps_the_slot_until_someone_is_told(monkeypatch):
 def test_the_retry_after_a_failure_is_told_instead_of_restarting_it(hub, monkeypatch):
     # End of the same chain: the held failure has to reach the caller.
     active = auto_dl._Active(
-        repo_id = "LAiM/x-GGUF",
+        repo_id = "unsloth/x-GGUF",
         variant = "UD-Q5_K_XL",
         error = "disk exploded",
         failed_at = 1.0,
@@ -2168,7 +2168,7 @@ def test_the_retry_after_a_failure_is_told_instead_of_restarting_it(hub, monkeyp
         return "idle", None
 
     monkeypatch.setattr(auto_dl, "_job_state", _idle)
-    refusal = _run("LAiM/x-GGUF:UD-Q5_K_XL")
+    refusal = _run("unsloth/x-GGUF:UD-Q5_K_XL")
     assert refusal.status == 502 and "disk exploded" in refusal.message
     assert hub["started"] == [], "the retry restarted the failing download"
     # Told once, so the slot is free again for a fresh attempt.
@@ -2190,14 +2190,14 @@ def test_an_exact_generic_variant_beats_the_default_pick(hub):
     # anything non-quant-shaped as a tag, so repo:llama-13b default-selected llama-7b.
     gb = 1024**3
     hub["info"] = _Info([_Sibling("llama-7b.gguf", 4 * gb), _Sibling("llama-13b.gguf", 8 * gb)])
-    assert _run("LAiM/generic-GGUF:llama-13b").code == "model_downloading"
+    assert _run("unsloth/generic-GGUF:llama-13b").code == "model_downloading"
     assert hub["started"][0][1] == "llama-13b"
 
     # A quant-shaped suffix that matches nothing is still a miss, never a swap.
     auto_dl.reset_for_tests()
     hub["started"].clear()
     hub["info"] = _gguf_repo_info()
-    assert _run("LAiM/x-GGUF:Q2_K").status == 404
+    assert _run("unsloth/x-GGUF:Q2_K").status == 404
     assert hub["started"] == []
 
 
@@ -2221,7 +2221,7 @@ def test_speech_download_admission(hub, monkeypatch, sidecar, probe, code):
     monkeypatch.setattr(
         auto_dl, "_probe_remote_gguf_audio_type", lambda *a: weights.append(a) or probe
     )
-    result = asyncio.run(auto_dl.maybe_auto_download("LAiM/tts-GGUF:Q8_0", require_speech = True))
+    result = asyncio.run(auto_dl.maybe_auto_download("unsloth/tts-GGUF:Q8_0", require_speech = True))
     assert result.code == code
     assert result.status == (400 if code == "invalid_value" else 503)
     assert bool(hub["started"]) is (code == "model_downloading")
@@ -2229,7 +2229,7 @@ def test_speech_download_admission(hub, monkeypatch, sidecar, probe, code):
     assert weights == (
         []
         if probe is None
-        else [("LAiM/tts-GGUF", "model-Q8_0-00001-of-00002.gguf", None, hub["info"].sha)]
+        else [("unsloth/tts-GGUF", "model-Q8_0-00001-of-00002.gguf", None, hub["info"].sha)]
     )
 
 
@@ -2275,21 +2275,21 @@ def test_a_downloaded_but_unservable_model_is_not_reported_as_missing(monkeypatc
     message = _unavailable_message(
         "ornith-ai/Ornith-1.5-35B-A3B-MLX-4bit",
         # Last, not first: a lookup that only ever reads row zero would pass either way.
-        downloaded = ["LAiM/A-GGUF", "org/Other", "ornith-ai/Ornith-1.5-35B-A3B-MLX-4bit"],
-        servable = ["LAiM/A-GGUF"],
+        downloaded = ["unsloth/A-GGUF", "org/Other", "ornith-ai/Ornith-1.5-35B-A3B-MLX-4bit"],
+        servable = ["unsloth/A-GGUF"],
         monkeypatch = monkeypatch,
     )
     assert "is not downloaded" not in message
     assert "is downloaded, but this server cannot serve it" in message
     # Still says what can serve the request.
-    assert "LAiM/A-GGUF" in message
+    assert "unsloth/A-GGUF" in message
 
 
 def test_a_model_that_is_really_absent_still_says_it_is_not_downloaded(monkeypatch):
     message = _unavailable_message(
         "some-org/never-fetched",
-        downloaded = ["LAiM/A-GGUF"],
-        servable = ["LAiM/A-GGUF"],
+        downloaded = ["unsloth/A-GGUF"],
+        servable = ["unsloth/A-GGUF"],
         monkeypatch = monkeypatch,
     )
     assert "is not downloaded on this server" in message
@@ -2312,9 +2312,9 @@ def test_a_loaded_model_is_never_called_unservable(monkeypatch):
     """Anything the listing serves is not withheld, so the servable set is what decides, not the
     catalog alone."""
     message = _unavailable_message(
-        "LAiM/A-GGUF",
-        downloaded = ["LAiM/A-GGUF"],
-        servable = ["LAiM/A-GGUF"],
+        "unsloth/A-GGUF",
+        downloaded = ["unsloth/A-GGUF"],
+        servable = ["unsloth/A-GGUF"],
         monkeypatch = monkeypatch,
     )
     assert "cannot serve it" not in message
@@ -2433,7 +2433,7 @@ def test_vision_refusal_names_the_image_block_on_messages(hub, monkeypatch):
     with pytest.raises(HTTPException) as excinfo:
         asyncio.run(
             inference_route._maybe_auto_download_model(
-                "LAiM/text-GGUF",
+                "unsloth/text-GGUF",
                 _Req(path = "/v1/messages"),
                 require_vision = True,
                 rejection_prefix = "messages.0.content.1.image: ",

@@ -55,9 +55,8 @@ const MIRRORED_BOOLEAN_KEYS = [
 ] as const satisfies readonly (keyof PersistedChatSettings)[];
 
 const MIRRORED_ENUM_VALUES = {
-  // "full" (Full access) is session-only and never persisted.
+  // "full" (Full access) lives in local storage, never in the server mirror.
   permissionMode: ["ask", "auto", "off"],
-  sandboxLevel: ["high", "low"],
   ragMode: ["hybrid", "lexical", "dense"],
   ragAutoInject: ["auto", "on", "off"],
   speculativeType: ["auto", "ngram", "off"],
@@ -234,8 +233,13 @@ export function loadShadowOwnsMirroredSetting(
 export function normalizeStoredPermissionMode(
   rawMode: string | null,
   legacyConfirm: boolean | null,
-): "ask" | "auto" | "off" {
-  if (rawMode === "ask" || rawMode === "auto" || rawMode === "off") {
+): "ask" | "auto" | "off" | "full" {
+  if (
+    rawMode === "ask" ||
+    rawMode === "auto" ||
+    rawMode === "off" ||
+    rawMode === "full"
+  ) {
     return rawMode;
   }
   if (legacyConfirm === null) return "auto";

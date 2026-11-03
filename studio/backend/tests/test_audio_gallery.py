@@ -30,7 +30,7 @@ def _wav(tag = b"RIFF\x24\x00\x00\x00WAVEfmt "):
 def _meta(**over):
     base = {
         "prompt": "hello from a sloth",
-        "model": "LAiM/orpheus-3b-0.1-ft",
+        "model": "unsloth/orpheus-3b-0.1-ft",
         "audio_type": "snac",
         "sample_rate": 24000,
         "duration_s": 1.5,
@@ -661,11 +661,11 @@ def test_project_route_copies_the_wav(monkeypatch, tmp_path):
     from routes.inference import add_gallery_audio_to_project
 
     root = tmp_path / "Projects" / "demo"
-    (root / "sandbox").mkdir(parents = True)
+    (root / "workdir").mkdir(parents = True)
     monkeypatch.setattr(
         studio_db,
         "ensure_chat_project_workspace",
-        lambda pid: {"id": pid, "rootPath": str(root), "sandboxPath": str(root / "sandbox")},
+        lambda pid: {"id": pid, "rootPath": str(root), "workdirPath": str(root / "workdir")},
     )
     record = gallery.save(_wav(), _meta())
     result = asyncio.run(
@@ -673,7 +673,7 @@ def test_project_route_copies_the_wav(monkeypatch, tmp_path):
             record["id"], GalleryProjectRequest(project_id = "p1"), current_subject = "tester"
         )
     )
-    dest = root / "sandbox" / "audio" / f"{record['id']}.wav"
+    dest = root / "workdir" / "audio" / f"{record['id']}.wav"
     assert result.path == str(dest) and result.already is False
     assert dest.read_bytes() == _wav()
 

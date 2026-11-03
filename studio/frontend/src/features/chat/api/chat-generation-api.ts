@@ -9,6 +9,8 @@ import type {
 } from "../types/api";
 
 import { skillLoadCardEvent } from "./skill-load-event";
+import { translate } from "@/i18n";
+
 export type ChatGenerationStatus =
   | "queued"
   | "running"
@@ -113,7 +115,7 @@ const TERMINAL_STATUSES = new Set<ChatGenerationStatus>([
  *  the backend may still be generating, so the reply is incomplete. */
 export class ChatGenerationStalledError extends Error {
   constructor(runId: string) {
-    super(`Chat generation run ${runId} made no progress`);
+    super(translate("uxChat.chatGenerationRunMade6uzmf", { p1: runId }));
     this.name = "ChatGenerationStalledError";
   }
 }
@@ -176,7 +178,7 @@ async function json<T>(response: Response): Promise<T> {
         ? detail
         : typeof message === "string"
           ? message
-          : `Chat generation request failed (${response.status})`,
+          : translate("uxChat.chatGenerationRequestFailedruubh", { p1: response.status }),
       response.status,
     );
   }
@@ -401,7 +403,7 @@ async function* streamChatGenerationEvents(
   );
   if (!response.ok) await json(response);
   if (!response.body)
-    throw new Error("Chat generation event stream returned no body");
+    throw new Error(translate("uxChat.chatGenerationEventStream6oicr"));
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let buffer = "";

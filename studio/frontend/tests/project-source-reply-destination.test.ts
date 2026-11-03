@@ -14,9 +14,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { readSrcAsync } from "./helpers/kit.ts";
+import { readSrcAsync, readSrcAsyncExpanded } from "./helpers/kit.ts";
 
-const src = await readSrcAsync("components/assistant-ui/thread.tsx");
+const src = await readSrcAsyncExpanded("components/assistant-ui/thread.tsx");
 
 /** The onSelect body of the "Save to project sources" action bar item. */
 function saveHandler(): string {

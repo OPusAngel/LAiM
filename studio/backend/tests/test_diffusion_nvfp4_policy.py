@@ -217,13 +217,13 @@ def test_a_policy_resolves_for_the_bases_it_was_solved_on_and_no_others():
     assert resolve_policy("flux.1", "black-forest-labs/FLUX.1-schnell") is FLUX_R420
     assert resolve_policy("qwen-image", "Qwen/Qwen-Image") is QWEN_P02
     assert resolve_policy("qwen-image", "Qwen/Qwen-Image-2512") is QWEN2512_M120_ATTN8
-    assert resolve_policy("qwen-image", "LAiM/Qwen-Image-2512") is QWEN2512_M120_ATTN8
+    assert resolve_policy("qwen-image", "unsloth/Qwen-Image-2512") is QWEN2512_M120_ATTN8
     assert resolve_policy("qwen-image-2.1", "Qwen/Qwen-Image-2.1") is QWEN21_R020
-    assert resolve_policy("qwen-image-2.1", "LAiM/Qwen-Image-2.1") is QWEN21_R020
+    assert resolve_policy("qwen-image-2.1", "unsloth/Qwen-Image-2.1") is QWEN21_R020
     assert resolve_policy("qwen-image", "Qwen/Qwen-Image-2.1") is None
     assert resolve_policy("qwen-image-2.1", "Qwen/Qwen-Image-2512") is None
-    assert resolve_policy("z-image", "LAiM/Z-Image-Turbo") is ZIMG_RG76
-    assert resolve_policy("flux.1", "  LAiM/FLUX.1-schnell ") is FLUX_R420
+    assert resolve_policy("z-image", "unsloth/Z-Image-Turbo") is ZIMG_RG76
+    assert resolve_policy("flux.1", "  unsloth/FLUX.1-schnell ") is FLUX_R420
     assert resolve_policy("flux.1", "black-forest-labs/FLUX.1-dev") is None
     assert resolve_policy("qwen-image", "Qwen/Qwen-Image-Edit-2511") is None
     assert resolve_policy("z-image", None) is None

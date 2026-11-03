@@ -56,7 +56,7 @@ DEV = "black-forest-labs/FLUX.1-dev"
         ((DEV,), "default", 28, None),  # max-only row
         ((DEV,), "max", 28, {"every": 2, "min_steps": 20}),
         # The LAiM mirror and a local path with the upstream as its base both resolve to the upstream row.
-        (("LAiM/FLUX.1-Krea-dev",), "default", 28, {"every": 2, "min_steps": 20}),
+        (("unsloth/FLUX.1-Krea-dev",), "default", 28, {"every": 2, "min_steps": 20}),
         (("/models/my-krea", KREA), "default", 28, {"every": 2, "min_steps": 20}),
         (("black-forest-labs/FLUX.1-schnell",), "max", 28, None),
         ((None,), "max", 28, None),
@@ -136,7 +136,7 @@ def test_every_measured_model_reaches_the_auto_floor_at_its_default_steps(repo):
         "Tongyi-MAI/Z-Image",
         "Qwen/Qwen-Image-2512",
         "Qwen/Qwen-Image-Edit-2511",
-        "LAiM/Krea-2-Turbo",
+        "unsloth/Krea-2-Turbo",
     ],
 )
 def test_unmeasured_or_distilled_siblings_never_auto_skip(repo):

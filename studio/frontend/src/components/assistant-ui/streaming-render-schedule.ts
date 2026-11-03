@@ -73,7 +73,7 @@ function isEscaped(text: string, index: number): boolean {
   return slashes % 2 === 1;
 }
 // Same predicate as the regex over the whole reply (it has no anchor or lookaround), scanned from
-// the rare `]:` rather than from every `[` (LAiMai/LAiM#10529). Two bounds keep each
+// the rare `]:` rather than from every `[` (OPusAngel/LAiM#10529). Two bounds keep each
 // terminator cheap: a match opens with `[`, and its label admits no bare `]`, so the window starts
 // after the last unescaped one. Both cursors only advance and their lookaheads are CACHED --
 // re-asking `indexOf` past -1 rescans the tail while advancing nothing, measured slower than no
@@ -148,7 +148,7 @@ function isCodeBlock(block: string): boolean {
   return backtick === null || !backtick[1].includes("`");
 }
 // Must admit exactly what `LINK_DEFINITION_RE` admits: a label resolves only when BOTH ends
-// carry it, so a narrower cap here made the wider one there unreachable (LAiMai/LAiM#9540).
+// carry it, so a narrower cap here made the wider one there unreachable (OPusAngel/LAiM#9540).
 const LINK_REFERENCE_RE =
   /!?\[(?:\\[\s\S]|[^\]\\]){1,999}\]\[(?:\\[\s\S]|[^\]\\]){0,999}\]/u;
 // Label side as above, plus `[` and the optional `!`; the reference side needs no `!`.

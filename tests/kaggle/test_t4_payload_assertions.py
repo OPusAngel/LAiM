@@ -443,7 +443,7 @@ def _write_reference(
     path: Path,
     *,
     config: dict,
-    model: str = "LAiM/Qwen2.5-0.5B-Instruct",
+    model: str = "unsloth/Qwen2.5-0.5B-Instruct",
 ):
     path.write_text(
         json.dumps(
@@ -467,7 +467,7 @@ def test_a_band_check_against_a_reference_from_another_card_is_refused(tmp_path)
         json.dumps(
             {
                 "config": REFERENCE_CONFIG,
-                "model": "LAiM/Qwen2.5-0.5B-Instruct",
+                "model": "unsloth/Qwen2.5-0.5B-Instruct",
                 "environment": {"gpu_name": "Tesla T4", "gpu_capability": "sm_75"},
                 "metrics": [{"step": s, "loss": 1.0 / s, "grad_norm": 3.0} for s in (1, 2, 3)],
             }
@@ -482,7 +482,7 @@ def test_a_band_check_against_a_reference_from_another_card_is_refused(tmp_path)
         0.05,
         max_steps = 3,
         config = REFERENCE_CONFIG,
-        model = "LAiM/Qwen2.5-0.5B-Instruct",
+        model = "unsloth/Qwen2.5-0.5B-Instruct",
         environment = {"gpu_name": "Tesla P100-PCIE-16GB", "gpu_capability": "sm_60"},
     )
     assert verdict["status"] == "hardware_mismatch", verdict
@@ -499,7 +499,7 @@ def test_a_band_check_against_a_reference_from_another_card_is_refused(tmp_path)
         0.05,
         max_steps = 3,
         config = REFERENCE_CONFIG,
-        model = "LAiM/Qwen2.5-0.5B-Instruct",
+        model = "unsloth/Qwen2.5-0.5B-Instruct",
         environment = {"gpu_name": "Tesla T4", "gpu_capability": "sm_75"},
     )
     assert same["status"] == "ok", same
@@ -543,7 +543,7 @@ def test_a_run_that_cannot_name_its_card_is_refused_not_waved_through(tmp_path, 
         json.dumps(
             {
                 "config": REFERENCE_CONFIG,
-                "model": "LAiM/Qwen2.5-0.5B-Instruct",
+                "model": "unsloth/Qwen2.5-0.5B-Instruct",
                 "environment": {"gpu_name": "Tesla T4", "gpu_capability": "sm_75"},
                 "metrics": [{"step": s, "loss": 1.0 / s, "grad_norm": 3.0} for s in (1, 2, 3)],
             }
@@ -558,7 +558,7 @@ def test_a_run_that_cannot_name_its_card_is_refused_not_waved_through(tmp_path, 
         0.05,
         max_steps = 3,
         config = REFERENCE_CONFIG,
-        model = "LAiM/Qwen2.5-0.5B-Instruct",
+        model = "unsloth/Qwen2.5-0.5B-Instruct",
         environment = environment,
     )
     assert verdict["status"] == "hardware_unverified", verdict
@@ -587,7 +587,7 @@ REFERENCE_CONFIG = {
     "lora_r": 16,
     "lora_alpha": 32,
     "optim": "adamw_8bit",
-    "gradient_checkpointing": "LAiM",
+    "gradient_checkpointing": "unsloth",
     "repeat": 2,
 }
 
@@ -620,7 +620,7 @@ def test_a_reference_captured_for_another_model_is_refused(tmp_path):
         0.05,
         max_steps = 3,
         config = REFERENCE_CONFIG,
-        model = "LAiM/Llama-3.2-1B-Instruct",
+        model = "unsloth/Llama-3.2-1B-Instruct",
     )
     assert verdict["status"] == "config_mismatch"
     assert reference_failures(verdict, 0.10)
@@ -675,7 +675,7 @@ def test_a_shifted_step_coordinate_is_refused_by_the_band_check(tmp_path):
 def test_the_model_revision_travels_with_the_reference(tmp_path):
     check_reference, ref, reference_failures = _shared_setup_2(tmp_path)
     payload = json.loads(ref.read_text())
-    payload["resolved_checkpoint"] = "LAiM/Qwen2.5-0.5B-Instruct-LAiM-bnb-4bit"
+    payload["resolved_checkpoint"] = "unsloth/Qwen2.5-0.5B-Instruct-unsloth-bnb-4bit"
     payload["resolved_revision"] = "10413c288cb9629acdf60b3e0229f3ba75efe413"
     ref.write_text(json.dumps(payload))
     observed = [{"step": s, "loss": 1.0 / s, "grad_norm": 3.0} for s in (1, 2, 3)]
@@ -686,7 +686,7 @@ def test_the_model_revision_travels_with_the_reference(tmp_path):
         0.10,
         0.05,
         max_steps = 3,
-        resolved_checkpoint = "LAiM/Qwen2.5-0.5B-Instruct-LAiM-bnb-4bit",
+        resolved_checkpoint = "unsloth/Qwen2.5-0.5B-Instruct-unsloth-bnb-4bit",
         resolved_revision = "10413c288cb9629acdf60b3e0229f3ba75efe413",
     )
     assert same["status"] == "ok"
@@ -697,7 +697,7 @@ def test_the_model_revision_travels_with_the_reference(tmp_path):
         0.10,
         0.05,
         max_steps = 3,
-        resolved_checkpoint = "LAiM/Qwen2.5-0.5B-Instruct-LAiM-bnb-4bit",
+        resolved_checkpoint = "unsloth/Qwen2.5-0.5B-Instruct-unsloth-bnb-4bit",
         resolved_revision = "0000000000000000000000000000000000000000",
     )
     assert moved["status"] == "config_mismatch"
@@ -710,8 +710,8 @@ def test_a_repo_id_that_differs_only_in_case_is_the_same_reference(tmp_path):
     old spelling; that is the same checkpoint, and the revision pin is what moves with weights."""
     check_reference, ref, reference_failures = _shared_setup_2(tmp_path)
     payload = json.loads(ref.read_text())
-    payload["model"] = "LAiM/qwen2.5-0.5b-instruct"
-    payload["resolved_checkpoint"] = "LAiM/qwen2.5-0.5b-instruct-LAiM-bnb-4bit"
+    payload["model"] = "unsloth/qwen2.5-0.5b-instruct"
+    payload["resolved_checkpoint"] = "unsloth/qwen2.5-0.5b-instruct-unsloth-bnb-4bit"
     payload["resolved_revision"] = "10413c288cb9629acdf60b3e0229f3ba75efe413"
     ref.write_text(json.dumps(payload))
     observed = [{"step": s, "loss": 1.0 / s, "grad_norm": 3.0} for s in (1, 2, 3)]
@@ -722,8 +722,8 @@ def test_a_repo_id_that_differs_only_in_case_is_the_same_reference(tmp_path):
         0.10,
         0.05,
         max_steps = 3,
-        model = "LAiM/Qwen2.5-0.5B-Instruct",
-        resolved_checkpoint = "LAiM/Qwen2.5-0.5B-Instruct-LAiM-bnb-4bit",
+        model = "unsloth/Qwen2.5-0.5B-Instruct",
+        resolved_checkpoint = "unsloth/Qwen2.5-0.5B-Instruct-unsloth-bnb-4bit",
         resolved_revision = "10413c288cb9629acdf60b3e0229f3ba75efe413",
     )
     assert recased["status"] == "ok", recased
@@ -736,7 +736,7 @@ def test_a_repo_id_that_differs_only_in_case_is_the_same_reference(tmp_path):
         0.10,
         0.05,
         max_steps = 3,
-        resolved_checkpoint = "LAiM/Qwen2.5-1.5B-Instruct-LAiM-bnb-4bit",
+        resolved_checkpoint = "unsloth/Qwen2.5-1.5B-Instruct-unsloth-bnb-4bit",
         resolved_revision = "10413c288cb9629acdf60b3e0229f3ba75efe413",
     )
     assert other["status"] == "config_mismatch"
@@ -746,7 +746,7 @@ def test_a_repo_id_that_differs_only_in_case_is_the_same_reference(tmp_path):
         0.10,
         0.05,
         max_steps = 3,
-        resolved_checkpoint = "LAiM/qwen2.5-0.5b-instruct-LAiM-bnb-4bit",
+        resolved_checkpoint = "unsloth/qwen2.5-0.5b-instruct-unsloth-bnb-4bit",
         resolved_revision = "10413C288CB9629ACDF60B3E0229F3BA75EFE413",
     )
     assert revision["status"] == "config_mismatch"
@@ -826,7 +826,7 @@ def test_what_the_band_did_not_compare_reaches_the_summary():
     lines = report_module.render(
         {
             "label": "control",
-            "model": "LAiM/Qwen2.5-0.5B-Instruct",
+            "model": "unsloth/Qwen2.5-0.5B-Instruct",
             "passed": True,
             "metrics": [],
             "reference_check": {
@@ -1566,11 +1566,11 @@ def test_the_recapture_recipe_records_the_kernel_it_came_from(tmp_path, monkeypa
                 {
                     "label": leg,
                     "passed": True,
-                    "model": "LAiM/Qwen2.5-0.5B-Instruct",
+                    "model": "unsloth/Qwen2.5-0.5B-Instruct",
                     "metrics": [{"step": 1, "loss": 1.0}],
                     "environment": {"gpu_name": "Tesla T4"},
                     "config": {"max_steps": 10},
-                    "resolved_checkpoint": "LAiM/Qwen2.5-0.5B-Instruct-LAiM-bnb-4bit",
+                    "resolved_checkpoint": "unsloth/Qwen2.5-0.5B-Instruct-unsloth-bnb-4bit",
                     "resolved_revision": "0123456789abcdef",
                 }
             )
@@ -1589,7 +1589,7 @@ def test_the_recapture_recipe_records_the_kernel_it_came_from(tmp_path, monkeypa
         )
     )
     assert written["source_kernel"] == "danielhanchen/LAiM-t4-ci-9f0e1a2b"
-    assert written["model"] == "LAiM/Qwen2.5-0.5B-Instruct"
+    assert written["model"] == "unsloth/Qwen2.5-0.5B-Instruct"
     assert written["resolved_revision"] == "0123456789abcdef"
 
 
@@ -1821,7 +1821,7 @@ def test_an_empty_row_inside_a_batch_is_a_failure_even_when_the_singles_are_fine
         agrees = {"2": True, "4": True, "8": False},
         empty_batched_outputs = {"8": [2]},
     )
-    failures = batched_generation_failures(record, "LAiM/gemma-4-E2B-it")
+    failures = batched_generation_failures(record, "unsloth/gemma-4-E2B-it")
     assert any("inside the batch" in f and "[2]" in f for f in failures), failures
 
 
@@ -1889,7 +1889,7 @@ def test_batched_generation_records_a_row_that_is_empty_only_inside_the_batch():
 
     assert record["empty_outputs"] == [], "the singles were fine; that is the point"
     assert record["empty_batched_outputs"] == {"8": [2]}
-    failures = batched_generation_failures(record, "LAiM/gemma-4-E2B-it")
+    failures = batched_generation_failures(record, "unsloth/gemma-4-E2B-it")
     assert any("inside the batch" in f and "[2]" in f for f in failures), failures
 
 

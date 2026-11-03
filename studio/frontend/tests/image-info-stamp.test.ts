@@ -32,7 +32,7 @@ function fakeContext() {
 
 test("model name is the repo basename without the GGUF suffix", () => {
   assert.equal(
-    stampModelName("LAiM/FLUX.2-klein-4B-GGUF"),
+    stampModelName("unsloth/FLUX.2-klein-4B-GGUF"),
     "FLUX.2-klein-4B",
   );
   assert.equal(stampModelName("Tongyi-MAI/Z-Image-Turbo"), "Z-Image-Turbo");
@@ -47,7 +47,7 @@ test("stamp text is model, local date time and seed", () => {
   const created = new Date(2026, 7, 9, 13, 1, 25).getTime() / 1000;
   assert.equal(
     infoStampText({
-      model: "LAiM/FLUX.2-klein-4B-GGUF",
+      model: "unsloth/FLUX.2-klein-4B-GGUF",
       seed: 6630007,
       created_at: created,
     }),

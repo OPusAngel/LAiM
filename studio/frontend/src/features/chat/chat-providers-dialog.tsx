@@ -41,7 +41,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useSettingsDialogStore } from "@/features/settings";
-import { useT } from "@/i18n";
+import { translate, useT } from "@/i18n";
 import { ApiProviderLogo } from "./api-provider-logo";
 
 import { OpenAICodexConnect } from "./openai-codex-connect";
@@ -145,26 +145,36 @@ function parseManualModelIds(text: string): string[] {
 const EMPTY_CATALOG_HINTS: Record<string, { title: string; description: string }> =
   {
     ollama: {
-      title: "No local Ollama models found.",
-      description:
-        "Run `ollama pull <model>` in a terminal, then reload — or enter a model ID manually below.",
+      get title() {
+        return translate("uxChat.noLocalOllamaModels13blk");
+      },
+      get description() { return translate("uxChat.runOllamaPullModelp12gm"); },
     },
     llama_cpp: {
-      title: "No llama.cpp models found.",
-      description:
-        "Ensure llama-server is running with models loaded, then reload — or enter model IDs manually below.",
+      get title() {
+        return translate("uxChat.noLlamaCppModels1lif4");
+      },
+      get description() {
+        return translate("uxChat.ensureLlamaServerIs125gp");
+      },
     },
     vllm: {
-      title: "No vLLM models found.",
-      description:
-        "Ensure the vLLM server is running and models are loaded, then reload — or enter model IDs manually below.",
+      get title() {
+        return translate("uxChat.noVLLMModelsFoundt7wnm");
+      },
+      get description() {
+        return translate("uxChat.ensureTheVLLMServer122gm");
+      },
     },
   };
 
 const SYSTEM_ONE_EMPTY_CATALOG_HINT = {
-  title: "No decision models found on this server.",
-  description:
-    "Type the model name in the box below. For another LAiM server, type default.",
+  get title() {
+    return translate("uxChat.noDecisionModelsFound1dzbg");
+  },
+  get description() {
+    return translate("uxChat.typeTheModelName3jiuq");
+  },
 };
 
 function emptyCatalogHint(providerType: string): {
@@ -173,8 +183,12 @@ function emptyCatalogHint(providerType: string): {
 } {
   return (
     EMPTY_CATALOG_HINTS[providerType] ?? {
-      title: "No models returned by this connection.",
-      description: "Enter model IDs manually below, or check the server.",
+      get title() {
+        return translate("uxChat.noModelsReturnedByplk4z");
+      },
+      get description() {
+        return translate("uxChat.enterModelIDsManually12der");
+      },
     }
   );
 }
@@ -194,7 +208,7 @@ function shouldShowProviderApiType(providerType: string): boolean {
 
 function formatModelSummary(models: string[]): string {
   if (models.length === 0) {
-    return "No models enabled";
+    return translate("uxChat.noModelsEnabledpcmvf");
   }
   const visible = models.slice(0, 4);
   const remaining = models.length - visible.length;
@@ -408,7 +422,7 @@ export function ChatProvidersSettings({
     !isManualModelList &&
     !remoteAllowsManual &&
     availableModels.length === 0
-      ? "No models loaded"
+      ? translate("uxChat.noModelsLoaded8p07n")
       : `${formModelCount} ${formModelCount === 1 ? "model" : "models"} selected`;
   const showModelsBody =
     isManualModelList ||
@@ -427,7 +441,7 @@ export function ChatProvidersSettings({
   const formTitle = editingProviderId
     ? editingProvider?.name || selectedProviderLabel || "Edit"
     : selectedProviderLabel
-      ? `New ${selectedProviderLabel}`
+      ? translate("uxChat.newx01lc", { p1: selectedProviderLabel })
       : "New";
   const missingModelCatalogApiKey =
     !isCustomProvider &&
@@ -442,15 +456,15 @@ export function ChatProvidersSettings({
     missingModelCatalogApiKey;
   const loadModelsTitle =
     isManualModelList && isCustomProvider
-      ? "This connection uses manual model IDs"
+      ? translate("uxChat.thisConnectionUsesManualxhhys")
       : providerType === "openai_codex"
-        ? "Load the models this ChatGPT plan can reach"
+        ? translate("uxChat.loadTheModelsThisqo9mt")
         : isCuratedModelList
-          ? "Full catalog is not fetched for this connection"
+          ? translate("uxChat.fullCatalogIsNot7a9v3")
         : missingModelCatalogBaseUrl
-          ? "Enter a Base URL before loading models"
+          ? translate("uxChat.enterABaseURLfndy0")
           : missingModelCatalogApiKey
-            ? "Enter an API key before loading models"
+            ? translate("uxChat.enterAnAPIKeyqhtcm")
             : undefined;
   const filteredAvailableModels = useMemo(() => {
     const query = modelSearchQuery.trim().toLowerCase();
@@ -562,7 +576,7 @@ export function ChatProvidersSettings({
         // Only surface a toast for real failures, not for the silent background re-sync on tab focus.
         if (showSpinner) {
           const message =
-            error instanceof Error ? error.message : "Unknown error";
+            error instanceof Error ? error.message : translate("uxChat.unknownErrorb575w");
           toast.error(`Failed to load connections: ${message}`);
         }
         // A failed sync leaves the hydrated list as all there is. Waiting on a success the backend
@@ -670,10 +684,10 @@ export function ChatProvidersSettings({
     try {
       parsed = new URL(trimmed);
     } catch {
-      throw new Error("Base URL must be a valid URL.");
+      throw new Error(translate("uxChat.baseURLMustBe5y6sd"));
     }
     if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
-      throw new Error("Base URL must use http or https.");
+      throw new Error(translate("uxChat.baseURLMustUse6cj4n"));
     }
     if (options.appendOpenAiVersionPath) {
       const pathname = parsed.pathname.replace(/\/+$/, "");
@@ -692,7 +706,7 @@ export function ChatProvidersSettings({
     const trimmed = input.trim();
     if (!trimmed) {
       if (required) {
-        throw new Error("Base URL is required for this connection.");
+        throw new Error(translate("uxChat.baseURLIsRequiredrc8r1"));
       }
       return null;
     }
@@ -708,11 +722,11 @@ export function ChatProvidersSettings({
     const trimmed = input.trim();
     if (!trimmed) return null;
     if (!/^\d+$/.test(trimmed)) {
-      throw new Error("Max Tokens limit must be an integer.");
+      throw new Error(translate("uxChat.maxTokensLimitMustx20ch"));
     }
     const value = Number(trimmed);
     if (!Number.isSafeInteger(value)) {
-      throw new Error("Max Tokens limit must be a safe integer.");
+      throw new Error(translate("uxChat.maxTokensLimitMustyvsar"));
     }
     // getExternalMaxOutputTokens raises a sub-floor cap anyway, so say so instead of storing it
     const floor = Math.max(
@@ -721,7 +735,7 @@ export function ChatProvidersSettings({
     );
     if (value < floor) {
       throw new Error(
-        `Max Tokens limit must be at least ${floor.toLocaleString()}.`,
+        translate("uxChat.maxTokensLimitMust9695q", { p1: floor.toLocaleString() }),
       );
     }
     return value;
@@ -729,18 +743,18 @@ export function ChatProvidersSettings({
 
   async function loadModels() {
     if (!providerType) {
-      toast.error("Choose a connection first.");
+      toast.error(translate("uxChat.chooseAConnectionFirst131ku"));
       return;
     }
     if (isCustomProvider && !supportsRemoteModelCatalog(providerType)) {
-      toast.info("This connection uses manual model IDs.");
+      toast.info(translate("uxChat.thisConnectionUsesManualfultk"));
       return;
     }
     if (providerType === "openai_codex") {
       // Registry-curated, but the real catalog comes from the plan, so this control has to refetch
       // it. The branch below would leave closing and reopening the form as the only retry.
       if (!editingProviderId) {
-        toast.info("Connect this ChatGPT subscription to load the models it can reach.");
+        toast.info(translate("uxChat.connectThisChatGPTSubscription1izrj"));
         return;
       }
       const provider = providersRef.current.find(
@@ -763,12 +777,12 @@ export function ChatProvidersSettings({
     }
     if (isCuratedModelList) {
       toast.info(
-        "This connection has a very large model catalog. Use the suggestions and add model IDs manually — full list is not fetched.",
+        translate("uxChat.thisConnectionHasAauvq1"),
       );
       return;
     }
     if (!isCustomProvider && !apiKey.trim() && !editingProviderHasSavedKey) {
-      toast.error("Add an API key first.");
+      toast.error(translate("uxChat.addAnAPIKey6wnu2"));
       return;
     }
     setModelsLoading(true);
@@ -815,7 +829,7 @@ export function ChatProvidersSettings({
         toast.info(hint.title, { description: hint.description });
       } else {
         toast.success(
-          `Found ${modelIds.length} ${modelIds.length === 1 ? "model" : "models"}.`,
+          translate("uxChat.foundModelCountB53wt", { p1: modelIds.length }),
         );
       }
       if (editingProviderId) {
@@ -829,7 +843,7 @@ export function ChatProvidersSettings({
       }
       setModelSearchQuery("");
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Unknown error";
+      const message = error instanceof Error ? error.message : translate("uxChat.unknownErrorb575w");
       toast.error(`Could not load models: ${message}`);
     } finally {
       setModelsLoading(false);
@@ -841,7 +855,7 @@ export function ChatProvidersSettings({
     const backendProviderType = toExternalBackendProviderType(providerType);
     const entry = registryByType.get(backendProviderType);
     if (entry?.auth_kind !== "chatgpt_oauth") {
-      throw new Error("This connection does not support ChatGPT authorization.");
+      throw new Error(translate("uxChat.thisConnectionDoesNotck4vo"));
     }
 
     setMutatingProvider(true);
@@ -897,7 +911,7 @@ export function ChatProvidersSettings({
 
   async function addProvider() {
     if (!providerType) {
-      toast.error("Choose a connection first.");
+      toast.error(translate("uxChat.chooseAConnectionFirst131ku"));
       return;
     }
     const backendProviderType = toExternalBackendProviderType(providerType);
@@ -910,7 +924,7 @@ export function ChatProvidersSettings({
       selectedRegistryEntry?.auth_kind !== "chatgpt_oauth" &&
       !apiKey.trim()
     ) {
-      toast.error("API key is required.");
+      toast.error(translate("uxChat.aPIKeyIsRequired1afx0"));
       return;
     }
     const curated = selectedRegistryEntry?.model_list_mode === "curated";
@@ -933,23 +947,23 @@ export function ChatProvidersSettings({
     );
     if (manualOnly) {
       if (modelsToSave.length === 0) {
-        toast.error("Add at least one model ID.");
+        toast.error(translate("uxChat.addAtLeastOneu1vz5"));
         return;
       }
     } else if (remoteAllowsManual) {
       if (modelsToSave.length === 0) {
-        toast.error("Add at least one model ID.");
+        toast.error(translate("uxChat.addAtLeastOneu1vz5"));
         return;
       }
     } else {
       if (availableModels.length === 0) {
         toast.error(
-          "Load available models first, then choose which to enable.",
+          translate("uxChat.loadAvailableModelsFirstc4bxf"),
         );
         return;
       }
       if (selectedModelIds.length === 0) {
-        toast.error("Select at least one model.");
+        toast.error(translate("uxChat.selectAtLeastOne1q49z"));
         return;
       }
     }
@@ -1026,11 +1040,13 @@ export function ChatProvidersSettings({
       autoOpenedAddFormRef.current = true;
       setPage("list");
       toast.success(
-        "Connection added.",
+        translate("uxChat.connectionAdded6ellm"),
         isDecisionConnection(provider)
           ? {
               action: {
-                label: "Use it for the Decision API",
+                get label() {
+                  return translate("uxChat.useItForTheu7wcg");
+                },
                 onClick: () =>
                   useSettingsDialogStore.getState().openDialog("api-keys", {
                     scrollTarget: "api-keys-decision-api",
@@ -1040,7 +1056,7 @@ export function ChatProvidersSettings({
           : undefined,
       );
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Unknown error";
+      const message = error instanceof Error ? error.message : translate("uxChat.unknownErrorb575w");
       toast.error(`Failed to add connection: ${message}`);
     } finally {
       setMutatingProvider(false);
@@ -1053,7 +1069,7 @@ export function ChatProvidersSettings({
       (provider) => provider.id === editingProviderId,
     );
     if (!existing) {
-      toast.error("Connection not found.");
+      toast.error(translate("uxChat.connectionNotFound1dtwq"));
       return;
     }
     const isEditingCustomProvider =
@@ -1075,7 +1091,7 @@ export function ChatProvidersSettings({
       !isEditingOAuthProvider &&
       credentialEdit.action === "missing"
     ) {
-      toast.error("API key is required.");
+      toast.error(translate("uxChat.aPIKeyIsRequired1afx0"));
       return;
     }
     const entry = registryByType.get(existing.providerType);
@@ -1102,23 +1118,23 @@ export function ChatProvidersSettings({
     );
     if (manualOnly) {
       if (modelsToSave.length === 0) {
-        toast.error("Add at least one model ID.");
+        toast.error(translate("uxChat.addAtLeastOneu1vz5"));
         return;
       }
     } else if (remoteAllowsManual) {
       if (modelsToSave.length === 0) {
-        toast.error("Add at least one model ID.");
+        toast.error(translate("uxChat.addAtLeastOneu1vz5"));
         return;
       }
     } else {
       if (availableModels.length === 0) {
         toast.error(
-          "Load available models first, then choose which to enable.",
+          translate("uxChat.loadAvailableModelsFirstc4bxf"),
         );
         return;
       }
       if (selectedModelIds.length === 0) {
-        toast.error("Select at least one model.");
+        toast.error(translate("uxChat.selectAtLeastOne1q49z"));
         return;
       }
     }
@@ -1204,12 +1220,12 @@ export function ChatProvidersSettings({
         ),
       );
       void refreshProviderModelCatalogs([editedProvider]);
-      toast.success("Connection updated.");
+      toast.success(translate("uxChat.connectionUpdated14mld"));
       resetForm();
       autoOpenedAddFormRef.current = true;
       setPage("list");
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Unknown error";
+      const message = error instanceof Error ? error.message : translate("uxChat.unknownErrorb575w");
       toast.error(`Failed to update connection: ${message}`);
     } finally {
       providerSavesInFlight.delete(editingProviderId);
@@ -1421,7 +1437,7 @@ export function ChatProvidersSettings({
         ),
       );
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Unknown error";
+      const message = error instanceof Error ? error.message : translate("uxChat.unknownErrorb575w");
       toast.error(`Failed to delete connection: ${message}`);
     } finally {
       setMutatingProvider(false);
@@ -1432,10 +1448,10 @@ export function ChatProvidersSettings({
 
     if (provider.authKind === "chatgpt_oauth") {
       if (provider.authStatus === "connected") {
-        toast.success("ChatGPT subscription is connected.");
+        toast.success(translate("uxChat.chatGPTSubscriptionIsConnected1vri8"));
       } else {
         await editProvider(provider);
-        toast.info("Authorize this ChatGPT subscription connection.");
+        toast.info(translate("uxChat.authorizeThisChatGPTSubscription1a0hc"));
       }
       return;
     }
@@ -1454,7 +1470,7 @@ export function ChatProvidersSettings({
         return;
       }
       await editProvider(provider);
-      toast.info(`No API key for ${provider.name}. Add one in Connections and save.`);
+      toast.info(translate("uxChat.noAPIKeyForwc26z", { p1: provider.name }));
       return;
     }
     try {
@@ -1486,7 +1502,7 @@ export function ChatProvidersSettings({
         toast.error(result.message);
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Unknown error";
+      const message = error instanceof Error ? error.message : translate("uxChat.unknownErrorb575w");
       if (
         isCustomProviderType(provider.providerType) &&
         message.includes("Illegal header value b'Bearer '")
@@ -1508,14 +1524,14 @@ export function ChatProvidersSettings({
             size="icon-sm"
             className="size-8"
             onClick={closeForm}
-            aria-label="Back to connections"
-            title="Back to connections"
+            aria-label={translate("uxChat.backToConnections1m633")}
+            title={translate("uxChat.backToConnections1m633")}
           >
             <ArrowLeftIcon className="size-4" />
           </Button>
           <div className="flex min-w-0 items-center gap-2 leading-none">
             <span className="text-xs font-medium text-muted-foreground">
-              Connections
+              {translate("settings.tabs.connections")}
             </span>
             <span className="size-1 rounded-full bg-muted-foreground/35" />
             <span
@@ -1539,7 +1555,7 @@ export function ChatProvidersSettings({
                     Connection
                   </Label>
                   <p className="text-xs leading-snug text-muted-foreground">
-                    OpenAI, Anthropic, or a compatible local endpoint.
+                    {translate("uxChat.openAIAnthropicOrAb33o9")}
                   </p>
                 </div>
                 <Select
@@ -1562,7 +1578,7 @@ export function ChatProvidersSettings({
                     className="h-9 w-full text-sm"
                     disabled={editingProviderId != null}
                   >
-                    <SelectValue placeholder="Choose a connection" />
+                    <SelectValue placeholder={translate("uxChat.chooseAConnection19r9k")} />
                   </SelectTrigger>
                   {/* No scroll chevrons: the list scrolls by wheel, trackpad and keyboard. */}
                   <SelectContent className="[&_[data-slot=select-scroll-down-button]]:hidden [&_[data-slot=select-scroll-up-button]]:hidden">
@@ -1626,13 +1642,11 @@ export function ChatProvidersSettings({
                     <Label
                       htmlFor="provider-api-key"
                       className="text-sm font-medium"
-                    >
-                      API key {isCustomProvider ? "(optional)" : ""}
-                    </Label>
+                    >{translate("uxChat.aPIKeyka2m1", { p1: isCustomProvider ? "(optional)" : "" })}</Label>
                     <p className="text-xs leading-snug text-muted-foreground">
                       {editingProviderHasSavedKey
-                        ? "Saved securely. Leave blank to keep it."
-                        : "Saved securely after you connect."}
+                        ? translate("uxChat.savedSecurelyLeaveBlankfn99j")
+                        : translate("uxChat.savedSecurelyAfterYou44q58")}
                     </p>
                   </div>
                   <div className="relative min-w-0">
@@ -1647,8 +1661,8 @@ export function ChatProvidersSettings({
                       }}
                       placeholder={
                         editingProviderHasSavedKey
-                          ? "Leave blank to keep saved key"
-                          : "Enter API key"
+                          ? translate("uxChat.leaveBlankToKeepgnmgj")
+                          : translate("uxChat.enterAPIKeylicar")
                       }
                       className="h-9 pr-9 text-sm"
                     />
@@ -1656,7 +1670,7 @@ export function ChatProvidersSettings({
                       type="button"
                       onClick={() => setShowApiKey((visible) => !visible)}
                       className="absolute top-1/2 right-1.5 flex size-5 -translate-y-1/2 items-center justify-center rounded text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                      aria-label={showApiKey ? "Hide API key" : "Show API key"}
+                      aria-label={showApiKey ? translate("uxChat.hideAPIKeyvlmfd") : translate("uxChat.showAPIKeyaognr")}
                       aria-pressed={showApiKey}
                     >
                       {showApiKey ? (
@@ -1676,12 +1690,12 @@ export function ChatProvidersSettings({
                           setClearApiKeyRequested((requested) => !requested);
                         }}
                       >
-                        {clearApiKeyRequested ? "Keep saved key" : "Remove saved key"}
+                        {clearApiKeyRequested ? translate("uxChat.keepSavedKeyb7enl") : translate("uxChat.removeSavedKeyas88q")}
                       </Button>
                     ) : null}
                     {clearApiKeyRequested ? (
                       <p className="mt-1 text-xs text-destructive">
-                        The saved key will be removed when you save this connection.
+                        {translate("uxChat.theSavedKeyWill1c2vv")}
                       </p>
                     ) : null}
 
@@ -1694,9 +1708,7 @@ export function ChatProvidersSettings({
                   <Label
                     htmlFor="provider-custom-name"
                     className="text-sm font-medium"
-                  >
-                    Connection name
-                  </Label>
+                  >{translate("uxChat.connectionNamef0x3i")}</Label>
                   <Input
                     id="provider-custom-name"
                     type="text"
@@ -1713,11 +1725,9 @@ export function ChatProvidersSettings({
               {shouldShowProviderApiType(providerType) ? (
                 <div className="grid grid-cols-[minmax(140px,0.8fr)_minmax(0,1.2fr)] items-center gap-4 px-4 py-3 @max-[520px]:grid-cols-1">
                   <div className="flex min-w-0 flex-col gap-0.5">
-                    <Label htmlFor="provider-api-type" className="text-sm font-medium">
-                      API type
-                    </Label>
+                    <Label htmlFor="provider-api-type" className="text-sm font-medium">{translate("uxChat.aPITypegv0yv")}</Label>
                     <p className="text-xs leading-snug text-muted-foreground">
-                      Choose the endpoint your enabled models support.
+                      {translate("uxChat.chooseTheEndpointYour717y8")}
                     </p>
                   </div>
                   <Select
@@ -1733,7 +1743,7 @@ export function ChatProvidersSettings({
                     <SelectContent>
                       <SelectItem value="chat_completions">OpenAI Chat Completions</SelectItem>
                       <SelectItem value="responses">OpenAI Responses</SelectItem>
-                      <SelectItem value="systemone">System One (decisions)</SelectItem>
+                      <SelectItem value="systemone">{translate("uxChat.systemOneDecisionsyu7eg")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -1745,13 +1755,11 @@ export function ChatProvidersSettings({
                     <Label
                       htmlFor="provider-base-url"
                       className="text-sm font-medium"
-                    >
-                      Base URL
-                    </Label>
+                    >{translate("uxChat.baseURLxcv6p")}</Label>
                     <p className="text-xs leading-snug text-muted-foreground">
                       {decisionsOnly
-                        ? "Up to the version, such as /v1. Studio adds /systemone."
-                        : "OpenAI-compatible endpoint."}
+                        ? translate("uxChat.upToTheVersion7n8jl")
+                        : translate("uxChat.openAICompatibleEndpointpwaiz")}
                     </p>
                   </div>
                   <Input
@@ -1772,15 +1780,13 @@ export function ChatProvidersSettings({
                       htmlFor="provider-max-output-tokens"
                       className="text-sm font-medium"
                     >
-                      Max Tokens limit
+                      {translate("uxCopy.maxTokensLimit1n0b8")}
                     </Label>
                     <p
                       id="provider-max-output-tokens-help"
                       className="text-xs leading-snug text-muted-foreground"
                     >
-                      Caps Max Tokens for this connection. Never raises it past a
-                      model's documented limit. Leave blank to use that limit, or
-                      32,768 for a model without one.
+                      {translate("uxCopy.capsMaxTokensForz84wx")}
                     </p>
                   </div>
                   <div className="flex min-w-0 flex-col gap-1.5">
@@ -1813,8 +1819,7 @@ export function ChatProvidersSettings({
                       id="provider-max-output-tokens-warning"
                       className="text-xs leading-snug text-amber-700 dark:text-amber-400"
                     >
-                      If the upstream provider does not support this value,
-                      requests may fail.
+                      {translate("uxCopy.ifTheUpstreamProvider1f896")}
                     </p>
                   </div>
                 </div>
@@ -1827,14 +1832,13 @@ export function ChatProvidersSettings({
                       htmlFor="provider-auto-reload-models"
                       className="text-sm font-medium"
                     >
-                      Reload models automatically on connect
+                      {translate("uxCopy.reloadModelsAutomaticallyOnv8u6a")}
                     </Label>
                     <p
                       id="provider-auto-reload-models-help"
                       className="text-xs text-muted-foreground"
                     >
-                      Refresh once on connect and after a disconnect while Studio is open.
-                      New model IDs are enabled automatically. Saved in this browser.
+                      {translate("uxCopy.refreshOnceOnConnectc6u8h")}
                     </p>
                   </div>
                   <Switch
@@ -1850,10 +1854,10 @@ export function ChatProvidersSettings({
                   <div className="grid grid-cols-[minmax(140px,0.8fr)_minmax(0,1.2fr)] items-start gap-4 px-4 py-3 @max-[520px]:grid-cols-1">
                     <div className="flex min-w-0 flex-col gap-0.5">
                       <Label htmlFor="provider-reasoning-support" className="text-sm font-medium">
-                        Reasoning support
+                        {translate("uxChat.reasoningSupportc5323")}
                       </Label>
                       <p id="provider-reasoning-support-help" className="text-xs leading-snug text-muted-foreground">
-                        Opt in only if this endpoint accepts reasoning controls. Otherwise no reasoning fields are sent.
+                        {translate("uxChat.optInOnlyIf17pdv")}
                       </p>
                     </div>
                     <label htmlFor="provider-reasoning-support" className="flex cursor-pointer items-center gap-2 text-sm">
@@ -1866,17 +1870,17 @@ export function ChatProvidersSettings({
                           style: reasoningConfig?.style ?? "reasoning_effort",
                         })}
                       />
-                      Enable reasoning controls
+                      {translate("uxChat.enableReasoningControls67xcp")}
                     </label>
                   </div>
                   {reasoningConfig?.enabled ? (
                     <div className="grid grid-cols-[minmax(140px,0.8fr)_minmax(0,1.2fr)] items-start gap-4 px-4 py-3 @max-[520px]:grid-cols-1">
                       <div className="flex min-w-0 flex-col gap-0.5">
                         <Label htmlFor="provider-reasoning-style" className="text-sm font-medium">
-                          Reasoning parameter style
+                          {translate("uxChat.reasoningParameterStyle13fjn")}
                         </Label>
                         <p className="text-xs leading-snug text-muted-foreground">
-                          Choose the request format your endpoint supports.
+                          {translate("uxChat.chooseTheRequestFormat1kej6")}
                         </p>
                       </div>
                       <div className="flex min-w-0 flex-col gap-1.5">
@@ -1892,14 +1896,14 @@ export function ChatProvidersSettings({
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="reasoning_effort">reasoning_effort</SelectItem>
-                            <SelectItem value="reasoning">reasoning (enabled / effort)</SelectItem>
-                            <SelectItem value="thinking">thinking (enabled / disabled)</SelectItem>
+                            <SelectItem value="reasoning">{translate("uxChat.reasoningEnabledEffortr25sw")}</SelectItem>
+                            <SelectItem value="thinking">{translate("uxChat.thinkingEnabledDisabledc4sqd")}</SelectItem>
                             <SelectItem value="chat_template_kwargs.enable_thinking">chat_template_kwargs.enable_thinking</SelectItem>
                           </SelectContent>
                         </Select>
                         <p id="provider-reasoning-style-help" className="text-xs leading-snug text-muted-foreground">
                           {reasoningConfig.style === "reasoning_effort"
-                            ? 'Thinking off sends reasoning_effort: "none".'
+                            ? translate("uxChat.thinkingOffSendsReasoning7sj6q")
                             : reasoningConfig.style === "reasoning"
                               ? "Thinking off sends reasoning: { enabled: false }."
                               : reasoningConfig.style === "thinking"
@@ -1916,9 +1920,7 @@ export function ChatProvidersSettings({
                   <Label
                     htmlFor="provider-is-reasoning"
                     className="text-sm font-medium"
-                  >
-                    Reasoning model
-                  </Label>
+                  >{translate("uxChat.reasoningModelb7al2")}</Label>
                   <label
                     htmlFor="provider-is-reasoning"
                     className="flex cursor-pointer items-center gap-2 text-sm"
@@ -1930,19 +1932,13 @@ export function ChatProvidersSettings({
                         setIsReasoningModel(checked === true)
                       }
                     />
-                    This server runs a reasoning model
+                    {translate("uxChat.thisServerRunsAm1ioz")}
                   </label>
                 </div>
               ) : null}
               {runsStudioToolsLocally ? (
                 <div className="px-4 py-3">
-                  <p className="text-xs text-muted-foreground">
-                    Models on this connection can use LAiM&apos;s Search, Tools,
-                    MCP and Docs. Those run on this machine, and their
-                    results are sent back to the provider as part of the next
-                    message. Code and terminal calls still ask before anything
-                    risky runs.
-                  </p>
+                  <p className="text-xs text-muted-foreground">{translate("uxChat.modelsOnThisConnectionu1mpl")}</p>
                 </div>
               ) : null}
             </div>
@@ -2041,13 +2037,11 @@ export function ChatProvidersSettings({
                   >
                     {modelsLoading ? (
                       <>
-                        <Spinner className="mr-2 size-3.5" />
-                        Loading…
-                      </>
+                        <Spinner className="mr-2 size-3.5" />{translate("uxChat.loadingkapgw")}</>
                     ) : availableModels.length > 0 ? (
-                      "Reload models"
+                      translate("uxChat.reloadModels7m8kl")
                     ) : (
-                      "Load available models"
+                      translate("uxChat.loadAvailableModelsa3ukr")
                     )}
                   </Button>
                 </div>
@@ -2058,7 +2052,7 @@ export function ChatProvidersSettings({
                         htmlFor="provider-manual-models"
                         className="text-sm font-medium"
                       >
-                        Model IDs (one per line or comma-separated)
+                        {translate("uxCopy.modelIDsOnePerbgnbz")}
                       </Label>
                       <Textarea
                         id="provider-manual-models"
@@ -2075,7 +2069,7 @@ export function ChatProvidersSettings({
                 ) : isCuratedModelList ? (
                   <div className="space-y-3 px-4 py-4">
                     <p className="text-xs leading-relaxed text-muted-foreground">
-                      Select from suggestions below or enter exact model IDs.
+                      {translate("uxChat.selectFromSuggestionsBelows2o0s")}
                     </p>
                     {availableModels.length > 0 ? (
                       <>
@@ -2090,8 +2084,8 @@ export function ChatProvidersSettings({
                             onChange={(event) =>
                               setModelSearchQuery(event.target.value)
                             }
-                            placeholder="Search"
-                            aria-label="Search models"
+                            placeholder={translate("uxChat.searchModels1t6ao")}
+                            aria-label={translate("uxChat.searchModels1t6ao")}
                             className={modelSearchInputClassName}
                           />
                           <div className="flex items-center justify-end gap-2">
@@ -2101,9 +2095,7 @@ export function ChatProvidersSettings({
                               size="sm"
                               className="h-8 px-2 text-xs font-medium text-foreground/80 hover:bg-muted/45"
                               onClick={selectAllModels}
-                            >
-                              Select all
-                            </Button>
+                            >{translate("uxChat.selectAllfu43r")}</Button>
                             <Button
                               type="button"
                               variant="ghost"
@@ -2121,7 +2113,7 @@ export function ChatProvidersSettings({
                         <ul className={modelListClassName}>
                           {filteredAvailableModels.length === 0 ? (
                             <li className="px-4 py-2.5 text-xs text-muted-foreground">
-                              No matching models
+                              {translate("uxChat.noMatchingModels1add2")}
                             </li>
                           ) : (
                             filteredAvailableModels.map((model, index) => (
@@ -2153,7 +2145,7 @@ export function ChatProvidersSettings({
                           htmlFor="provider-manual-models"
                           className="text-sm font-medium"
                         >
-                          Model IDs (one per line or comma-separated)
+                          {translate("uxCopy.modelIDsOnePerbgnbz")}
                         </Label>
                         <Textarea
                           id="provider-manual-models"
@@ -2182,8 +2174,8 @@ export function ChatProvidersSettings({
                             onChange={(event) =>
                               setModelSearchQuery(event.target.value)
                             }
-                            placeholder="Search"
-                            aria-label="Search models"
+                            placeholder={translate("uxChat.searchModels1t6ao")}
+                            aria-label={translate("uxChat.searchModels1t6ao")}
                             className={modelSearchInputClassName}
                           />
                           <div className="flex items-center justify-end gap-2">
@@ -2193,9 +2185,7 @@ export function ChatProvidersSettings({
                               size="sm"
                               className="h-8 px-2 text-xs font-medium text-foreground/80 hover:bg-muted/45"
                               onClick={selectAllModels}
-                            >
-                              Select all
-                            </Button>
+                            >{translate("uxChat.selectAllfu43r")}</Button>
                             <Button
                               type="button"
                               variant="ghost"
@@ -2210,7 +2200,7 @@ export function ChatProvidersSettings({
                         <ul className={modelListClassName}>
                           {filteredAvailableModels.length === 0 ? (
                             <li className="px-4 py-2.5 text-xs text-muted-foreground">
-                              No matching models
+                              {translate("uxChat.noMatchingModels1add2")}
                             </li>
                           ) : (
                             filteredAvailableModels.map((model, index) => (
@@ -2244,8 +2234,8 @@ export function ChatProvidersSettings({
                           className="text-sm font-medium"
                         >
                           {availableModels.length === 0
-                            ? "Or enter model IDs manually (one per line or comma-separated)"
-                            : "Additional model IDs (one per line or comma-separated)"}
+                            ? translate("uxChat.orEnterModelIDsl5j3y")
+                            : translate("uxChat.additionalModelIDsOnefydal")}
                         </Label>
                         <Textarea
                           id="provider-manual-models"
@@ -2286,7 +2276,7 @@ export function ChatProvidersSettings({
                     : void addProvider()
                 }
               >
-                {editingProviderId ? "Save connection" : "Add connection"}
+                {editingProviderId ? translate("uxChat.saveConnectiondphhv") : translate("uxChat.addConnectionx0y8n")}
               </Button>
               <Button
                 type="button"
@@ -2310,7 +2300,7 @@ export function ChatProvidersSettings({
       <header className="flex min-w-0 flex-col gap-1 pr-8">
         <h1 className="text-xl font-semibold font-heading">Connections</h1>
         <p className="text-xs text-muted-foreground">
-          Manage model connections for chat and the Decision API.
+          {translate("uxChat.manageModelConnectionsFord52fi")}
         </p>
       </header>
 
@@ -2319,14 +2309,12 @@ export function ChatProvidersSettings({
           <Label
             htmlFor="chat-connections-enabled"
             className="cursor-pointer text-xs text-muted-foreground"
-          >
-            Enable connections
-          </Label>
+          >{translate("uxChat.enableConnectionsw1shz")}</Label>
           <Switch
             id="chat-connections-enabled"
             checked={connectionsEnabled}
             onCheckedChange={setConnectionsEnabled}
-            aria-label="Enable connections"
+            aria-label={translate("uxChat.enableConnections1wvz6")}
             aria-describedby="chat-connections-description"
           />
         </div>
@@ -2334,7 +2322,7 @@ export function ChatProvidersSettings({
           id="chat-connections-description"
           className="max-w-md text-ui-11 leading-snug text-muted-foreground/65 sm:text-right"
         >
-          When off, all connections are disabled.
+          {translate("uxCopy.whenOffAllConnections1fgr7")}
         </p>
       </div>
 
@@ -2347,20 +2335,18 @@ export function ChatProvidersSettings({
           >
             <span className="flex min-w-0 items-center gap-2 rounded-full border border-border bg-background/50 px-3 py-1.5 transition-colors group-hover/add:border-control-accent/25 group-hover/add:text-control-accent">
               <HugeiconsIcon icon={PlusSignIcon} className="size-4 shrink-0" />
-              <span>Add connection</span>
+              <span>{translate("uxChat.addConnectionxvxot")}</span>
             </span>
-            <span className="shrink-0 text-xs tabular-nums text-muted-foreground/90">
-              {providers.length} connections · {totalModels} models
-            </span>
+            <span className="shrink-0 text-xs tabular-nums text-muted-foreground/90">{translate("uxChat.connectionsModelsgzith", { p1: providers.length, p2: totalModels })}</span>
           </button>
           {providers.length === 0 ? (
             <div className="px-3 py-4">
               <div className="flex min-w-0 flex-col gap-0.5">
                 <span className="text-sm font-medium text-foreground">
-                  No connections yet
+                  {translate("uxChat.noConnectionsYetyv89")}
                 </span>
                 <span className="text-xs leading-snug text-muted-foreground">
-                  Add a connection to use hosted models from chat.
+                  {translate("uxChat.addAConnectionTod2ncq")}
                 </span>
               </div>
             </div>
@@ -2427,8 +2413,8 @@ export function ChatProvidersSettings({
                         className="size-7 hover:text-foreground"
                         disabled={mutatingProvider}
                         onClick={() => editProvider(provider)}
-                        title="Edit connection"
-                        aria-label={`Edit ${provider.name}`}
+                        title={translate("uxChat.editConnectionqpi4z")}
+                        aria-label={translate("uxChat.editmln1i", { p1: provider.name })}
                       >
                         <HugeiconsIcon icon={Edit03Icon} className="size-4" />
                       </Button>
@@ -2439,8 +2425,8 @@ export function ChatProvidersSettings({
                         className="size-7 hover:text-foreground"
                         disabled={mutatingProvider}
                         onClick={() => void testProvider(provider)}
-                        title="Check connection"
-                        aria-label={`Check ${provider.name}`}
+                        title={translate("uxChat.checkConnection1gkl9")}
+                        aria-label={translate("uxChat.checka6701", { p1: provider.name })}
                       >
                         <HugeiconsIcon icon={Wifi02Icon} className="size-4" />
                       </Button>
@@ -2451,8 +2437,8 @@ export function ChatProvidersSettings({
                         className="size-7 hover:text-destructive"
                         disabled={mutatingProvider}
                         onClick={() => void deleteProvider(provider.id)}
-                        title="Delete connection"
-                        aria-label={`Delete ${provider.name}`}
+                        title={translate("uxChat.deleteConnection146cy")}
+                        aria-label={translate("uxChat.deletevau21", { p1: provider.name })}
                       >
                         <HugeiconsIcon icon={Delete02Icon} className="size-4" />
                       </Button>
@@ -2488,7 +2474,7 @@ export function ChatProvidersDialog({
         <DialogHeader className="sr-only">
           <DialogTitle>Connections</DialogTitle>
           <DialogDescription>
-            Manage model connections for chat.
+            {translate("uxChat.manageModelConnectionsFord48ay")}
           </DialogDescription>
         </DialogHeader>
         <ChatProvidersSettings

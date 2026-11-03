@@ -1,57 +1,75 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import type { TourStep } from "@/features/tour";
 import type { AudioWorkflowId } from "../workflows";
 
 const modeStep: TourStep = {
   id: "mode",
   target: "audio-mode",
-  title: "Pick a page",
-  body: (
+  get title() {
+    return translate("uxAudio.pickAPage1ct1h");
+  },
+  get body() {
+    return (
     <>
-      Open the page title to switch pages. Speak turns text into speech, Clone
-      speaks in the voice from a short recording, Edit changes words in a
-      recording, Convert makes a recording sound like another voice, Music
-      makes songs and sound effects, Separate splits a track into vocals and
-      instruments, and Transcribe turns a recording into text. Each lists only
-      the models that can do it, so the picker above follows the page.
+      {translate("uxTour.openThePageTitle1edk4")}
     </>
-  ),
+  );
+  },
 };
 
-const MAIN_SLOT = "Loading one replaces the model in the main slot.";
-
 const MODEL_STEP_BODY: Record<AudioWorkflowId, string> = {
-  speak: `Text-to-speech models, including voices you fine-tuned under On Device. ${MAIN_SLOT}`,
-  clone: `Models that can speak in the voice of a short recording you give them. ${MAIN_SLOT}`,
-  edit: `Models that can change words in a recording and keep the voice. ${MAIN_SLOT}`,
-  convert: `Voice conversion models. ${MAIN_SLOT}`,
-  music: `Music models. ${MAIN_SLOT}`,
-  separate: `Source separation models. ${MAIN_SLOT}`,
-  transcribe:
-    "Speech recognition models. They run beside your chat model, not in its place.",
+  get speak() {
+    return `${translate("uxTour.textToSpeechModelse4pii")} ${translate("uxTour.loadingOneReplacesTheosq6j")}`;
+  },
+  get clone() {
+    return `${translate("uxTour.modelsThatCanSpeak15zt7")} ${translate("uxTour.loadingOneReplacesTheosq6j")}`;
+  },
+  get edit() {
+    return `${translate("uxTour.modelsThatCanChange1hq71")} ${translate("uxTour.loadingOneReplacesTheosq6j")}`;
+  },
+  get convert() {
+    return `${translate("uxTour.voiceConversionModels2anc8")} ${translate("uxTour.loadingOneReplacesTheosq6j")}`;
+  },
+  get music() {
+    return `${translate("uxTour.musicModels1im3u")} ${translate("uxTour.loadingOneReplacesTheosq6j")}`;
+  },
+  get separate() {
+    return `${translate("uxTour.sourceSeparationModels7i1a0")} ${translate("uxTour.loadingOneReplacesTheosq6j")}`;
+  },
+  get transcribe() {
+    return translate("uxTour.speechRecognitionModelsThey1p9vq");
+  },
 };
 
 function modelStep(workflow: AudioWorkflowId): TourStep {
   return {
     id: "model",
     target: "audio-model",
-    title: "Pick a model",
-    body: <>{MODEL_STEP_BODY[workflow]}</>,
+    get title() {
+      return translate("uxVideo.pickAModelx7b6j");
+    },
+    get body() {
+      return <>{MODEL_STEP_BODY[workflow]}</>;
+    },
   };
 }
 
 const outputStep: TourStep = {
   id: "output",
   target: "audio-output",
-  title: "Output",
-  body: (
+  get title() {
+    return translate("uxAudio.output1u5xh");
+  },
+  get body() {
+    return (
     <>
-      Clips play here and stay in the history list beside them, ready to
-      download. Transcripts appear here too and keep their own history.
+      {translate("uxTour.clipsPlayHereAndrytli")}
     </>
-  ),
+  );
+  },
 };
 
 export function buildAudioTourSteps({
@@ -66,13 +84,16 @@ export function buildAudioTourSteps({
       {
         id: "record",
         target: "audio-record",
-        title: "Record or upload",
-        body: (
+        get title() {
+          return translate("uxAudio.recordOrUpload1cuzc");
+        },
+        get body() {
+          return (
           <>
-            Record from your microphone and it transcribes when you stop, or
-            upload a wav, mp3, m4a or webm file instead.
+            {translate("uxTour.recordFromYourMicrophonecujmp")}
           </>
-        ),
+        );
+        },
       },
       outputStep,
     ];
@@ -85,24 +106,30 @@ export function buildAudioTourSteps({
       {
         id: "source",
         target: "audio-separate-source",
-        title: "Track",
-        body: (
+        get title() {
+          return translate("uxAudio.track95ckw");
+        },
+        get body() {
+          return (
           <>
-            Upload, record or pick the track to split. It is converted to 44.1
-            kHz for the model.
+            {translate("uxTour.uploadRecordOrPick1s8sn")}
           </>
-        ),
+        );
+        },
       },
       {
         id: "output",
         target: "audio-output",
-        title: "Stems",
-        body: (
+        get title() {
+          return translate("uxAudio.stems1komr");
+        },
+        get body() {
+          return (
           <>
-            Each stem gets its own row with solo, mute and volume, all playing
-            in sync. Download one stem or all of them.
+            {translate("uxTour.eachStemGetsItsl6ver")}
           </>
-        ),
+        );
+        },
       },
     ];
   }
@@ -114,30 +141,40 @@ export function buildAudioTourSteps({
       {
         id: "reference",
         target: "audio-clone-reference",
-        title: "Reference clip",
-        body: (
+        get title() {
+          return translate("uxAudio.referenceClip1liuw");
+        },
+        get body() {
+          return (
           <>
-            Upload, record or pick a few seconds of the voice to copy. A saved
-            voice works too.
+            {translate("uxTour.uploadRecordOrPick1jp9h")}
           </>
-        ),
+        );
+        },
       },
       {
         id: "transcript",
         target: "audio-clone-transcript",
-        title: "What's said in the clip",
-        body: (
+        get title() {
+          return translate("uxAudio.whatSSaidInin5xk");
+        },
+        get body() {
+          return (
           <>
-            Some models need the clip's words to match its voice. Type them or
-            press Transcribe.
+            {translate("uxTour.someModelsNeedThe2qk5z")}
           </>
-        ),
+        );
+        },
       },
       {
         id: "text",
         target: "audio-clone-text",
-        title: "Text to speak",
-        body: <>What the cloned voice should say.</>,
+        get title() {
+          return translate("uxAudio.textToSpeak6wm8b");
+        },
+        get body() {
+          return <>{translate("uxTour.whatTheClonedVoice119cf")}</>;
+        },
       },
       outputStep,
     ];
@@ -150,33 +187,40 @@ export function buildAudioTourSteps({
       {
         id: "source",
         target: "audio-convert-source",
-        title: "Recording",
-        body: (
+        get title() {
+          return translate("uxAudio.recording1s70r");
+        },
+        get body() {
+          return (
           <>
-            Upload, record or pick the speech or singing to convert. Its words
-            and timing stay; only the voice changes.
+            {translate("uxTour.uploadRecordOrPick164by")}
           </>
-        ),
+        );
+        },
       },
       {
         id: "target",
         target: "audio-convert-target",
-        title: "Target voice",
-        body: (
+        get title() {
+          return translate("uxAudio.targetVoice1lyes");
+        },
+        get body() {
+          return (
           <>
-            The voice it should sound like: a short clip, a saved voice, or one
-            of the model's built-in voices.
+            {translate("uxTour.theVoiceItShould1qgmy")}
           </>
-        ),
+        );
+        },
       },
       {
         ...outputStep,
-        body: (
+        get body() {
+          return (
           <>
-            Results play here and stay in the history list. Switch between
-            Source and Converted to hear the difference at the same moment.
+            {translate("uxTour.resultsPlayHereAnd1ydl5")}
           </>
-        ),
+        );
+        },
       },
     ];
   }
@@ -188,35 +232,44 @@ export function buildAudioTourSteps({
       {
         id: "recording",
         target: "audio-edit-recording",
-        title: "Recording",
-        body: (
+        get title() {
+          return translate("uxAudio.recording1s70r");
+        },
+        get body() {
+          return (
           <>
-            Upload, record or pick up to 30 seconds of one voice from your
-            history.
+            {translate("uxTour.uploadRecordOrPick10wjy")}
           </>
-        ),
+        );
+        },
       },
       {
         id: "transcript",
         target: "audio-edit-transcript",
-        title: "Check the transcript",
-        body: (
+        get title() {
+          return translate("uxAudio.checkTheTranscript19y9k");
+        },
+        get body() {
+          return (
           <>
-            It fills in by itself. Fix any word the recognizer got wrong so it
-            matches what's said.
+            {translate("uxTour.itFillsInBy1u22x")}
           </>
-        ),
+        );
+        },
       },
       {
         id: "changes",
         target: "audio-edit-changes",
-        title: "Make your changes",
-        body: (
+        get title() {
+          return translate("uxAudio.makeYourChanges1wow7");
+        },
+        get body() {
+          return (
           <>
-            Change, add or remove words. The voice stays the same, and the
-            result plays against the original.
+            {translate("uxTour.changeAddOrRemove11zf1")}
           </>
-        ),
+        );
+        },
       },
       outputStep,
     ];
@@ -228,17 +281,17 @@ export function buildAudioTourSteps({
     {
       id: "settings",
       target: "audio-settings",
-      title: "Settings",
+      get title() {
+        return translate("shell.navigation.settings");
+      },
       body:
         workflow === "music" ? (
           <>
-            Lyrics, plus a description of the style where the model takes one.
-            Length sits under Advanced.
+            {translate("uxTour.lyricsPlusADescriptionvbic3")}
           </>
         ) : (
           <>
-            Your text, plus voice and style where the model supports them.
-            Length and temperature sit under Advanced.
+            {translate("uxTour.yourTextPlusVoice1g7a8")}
           </>
         ),
     },

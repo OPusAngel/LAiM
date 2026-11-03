@@ -18,7 +18,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { sandboxFilePath } from "./sandbox-files";
+import { workdirFilePath } from "./workdir-files";
 
 const WebLinkMenuContent = lazy(() =>
   import("./link-menu-content").then((module) => ({ default: module.WebLinkMenuContent })),
@@ -109,11 +109,11 @@ export type ContextFile = {
   load: () => Promise<Blob>;
   /** What a click on it does; opening it in the browser otherwise. */
   open?: () => void;
-  sandbox?: { sessionId: string; file: string };
+  workdir?: { sessionId: string; file: string };
 };
 
-export function loadSandboxFile(sessionId: string, file: string): Promise<Blob> {
-  return authFetch(sandboxFilePath(sessionId, file)).then((response) => {
+export function loadWorkdirFile(sessionId: string, file: string): Promise<Blob> {
+  return authFetch(workdirFilePath(sessionId, file)).then((response) => {
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     return response.blob();
   });

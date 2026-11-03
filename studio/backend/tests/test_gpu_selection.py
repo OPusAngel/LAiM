@@ -69,8 +69,8 @@ def _gguf_model_config(**overrides):
             "gguf_file": "/tmp/test.gguf",
             "gguf_mmproj_file": None,
             "gguf_variant": None,
-            "identifier": "LAiM/test.gguf",
-            "display_name": "LAiM/test.gguf",
+            "identifier": "unsloth/test.gguf",
+            "display_name": "unsloth/test.gguf",
             "is_vision": False,
             "is_audio": False,
             "audio_type": None,
@@ -765,7 +765,7 @@ class TestGpuAutoSelection(_GpuCacheResetMixin, unittest.TestCase):
         ):
             # FP16 inference: 8GB * 1.3 = 10.4GB
             required_gb, metadata = estimate_required_model_memory_gb(
-                "LAiM/test",
+                "unsloth/test",
                 load_in_4bit = False,
             )
             self.assertAlmostEqual(required_gb, 10.4, places = 3)
@@ -774,14 +774,14 @@ class TestGpuAutoSelection(_GpuCacheResetMixin, unittest.TestCase):
             # 4bit inference: base_4bit = 8/3.2 = 2.5GB
             # required = 2.5 + max(2.5*0.3, 2.0) = 2.5 + 2.0 = 4.5GB
             required_gb, _ = estimate_required_model_memory_gb(
-                "LAiM/test",
+                "unsloth/test",
                 load_in_4bit = True,
             )
             self.assertAlmostEqual(required_gb, 4.5, places = 2)
 
             # Full FT fallback: model_size * 3.5 + overhead
             required_gb, metadata = estimate_required_model_memory_gb(
-                "LAiM/test", training_type = "Full Finetuning"
+                "unsloth/test", training_type = "Full Finetuning"
             )
             self.assertEqual(metadata.get("estimation_mode"), "fallback")
             self.assertGreater(required_gb, 25.0)
@@ -789,7 +789,7 @@ class TestGpuAutoSelection(_GpuCacheResetMixin, unittest.TestCase):
 
             # LoRA fp16 fallback: model_size + lora_overhead + activations + overhead
             required_gb, metadata = estimate_required_model_memory_gb(
-                "LAiM/test",
+                "unsloth/test",
                 training_type = "LoRA/QLoRA",
                 load_in_4bit = False,
             )
@@ -799,7 +799,7 @@ class TestGpuAutoSelection(_GpuCacheResetMixin, unittest.TestCase):
 
             # QLoRA 4-bit fallback: compressed weights + lora overhead + activations + overhead
             required_gb, metadata = estimate_required_model_memory_gb(
-                "LAiM/test",
+                "unsloth/test",
                 training_type = "LoRA/QLoRA",
                 load_in_4bit = True,
             )
@@ -814,7 +814,7 @@ class TestGpuAutoSelection(_GpuCacheResetMixin, unittest.TestCase):
             return_value = (sixteen_gb, "config"),
         ):
             required_gb, _ = estimate_required_model_memory_gb(
-                "LAiM/test",
+                "unsloth/test",
                 training_type = "LoRA/QLoRA",
                 load_in_4bit = True,
             )
@@ -827,7 +827,7 @@ class TestGpuAutoSelection(_GpuCacheResetMixin, unittest.TestCase):
         with (
             patch(
                 "utils.hardware.hardware._resolve_model_identifier_for_gpu_estimate",
-                return_value = "LAiM/test",
+                return_value = "unsloth/test",
             ),
             patch(
                 "utils.hardware.hardware._get_hf_safetensors_total_params",
@@ -850,7 +850,7 @@ class TestGpuAutoSelection(_GpuCacheResetMixin, unittest.TestCase):
                 return_value = 1234,
             ),
         ):
-            model_size_bytes, source = _hw_module.estimate_fp16_model_size_bytes("LAiM/test")
+            model_size_bytes, source = _hw_module.estimate_fp16_model_size_bytes("unsloth/test")
 
         self.assertEqual(model_size_bytes, 1234)
         self.assertEqual(source, "vllm_utils")
@@ -864,7 +864,7 @@ class TestGpuAutoSelection(_GpuCacheResetMixin, unittest.TestCase):
                     patch("huggingface_hub.model_info") as hub_info,
                     patch(
                         "utils.hardware.hardware._resolve_model_identifier_for_gpu_estimate",
-                        return_value = "LAiM/test",
+                        return_value = "unsloth/test",
                     ),
                     patch(
                         "utils.hardware.hardware._load_config_for_gpu_estimate",
@@ -880,7 +880,7 @@ class TestGpuAutoSelection(_GpuCacheResetMixin, unittest.TestCase):
                     ),
                 ):
                     model_size_bytes, source = _hw_module.estimate_fp16_model_size_bytes(
-                        "LAiM/test"
+                        "unsloth/test"
                     )
 
                 self.assertEqual((model_size_bytes, source), (1234, "config"))
@@ -909,7 +909,7 @@ class TestGpuAutoSelection(_GpuCacheResetMixin, unittest.TestCase):
                 return_value = fake_devices,
             ),
         ):
-            selected, metadata = auto_select_gpu_ids("LAiM/test")
+            selected, metadata = auto_select_gpu_ids("unsloth/test")
 
         self.assertEqual(selected, [0, 1])
         self.assertEqual(metadata["selection_mode"], "auto")
@@ -938,7 +938,7 @@ class TestGpuAutoSelection(_GpuCacheResetMixin, unittest.TestCase):
                 return_value = fake_devices,
             ),
         ):
-            selected, metadata = auto_select_gpu_ids("LAiM/test")
+            selected, metadata = auto_select_gpu_ids("unsloth/test")
 
         self.assertEqual(selected, [0, 1])
         self.assertEqual(metadata["selection_mode"], "fallback_all")
@@ -956,7 +956,7 @@ class TestGpuAutoSelection(_GpuCacheResetMixin, unittest.TestCase):
         ):
             selected, metadata = prepare_gpu_selection(
                 [2, 3],
-                model_name = "LAiM/test",
+                model_name = "unsloth/test",
             )
 
         self.assertEqual(selected, [2, 3])
@@ -970,7 +970,7 @@ class TestGpuAutoSelection(_GpuCacheResetMixin, unittest.TestCase):
         ) as mock_auto_select:
             selected, metadata = prepare_gpu_selection(
                 [],
-                model_name = "LAiM/test",
+                model_name = "unsloth/test",
             )
 
         self.assertEqual(selected, [0, 1])
@@ -991,7 +991,7 @@ class TestGpuAutoSelection(_GpuCacheResetMixin, unittest.TestCase):
         ):
             selected, metadata = prepare_gpu_selection(
                 None,
-                model_name = "LAiM/test",
+                model_name = "unsloth/test",
             )
 
         self.assertIsNone(selected)
@@ -1020,7 +1020,7 @@ class TestExplicitPickWithoutTorchKernels(unittest.TestCase):
                 r"GPU 1 \(AMD Radeon RX 5700 XT, gfx1010\) cannot run the PyTorch build this LAiM Studio installed, "
                 r"which has kernels for gfx1030, gfx1034 only",
             ):
-                prepare_gpu_selection([1], model_name = "LAiM/test")
+                prepare_gpu_selection([1], model_name = "unsloth/test")
         mock_auto_select.assert_not_called()
 
     def test_a_covered_card_beside_an_uncovered_one_is_accepted(self):
@@ -1030,7 +1030,7 @@ class TestExplicitPickWithoutTorchKernels(unittest.TestCase):
             patch("utils.hardware.hardware.rocm_gpu_ids_without_torch_kernels", return_value = {1}),
             patch("utils.hardware.hardware.auto_select_gpu_ids") as mock_auto_select,
         ):
-            selected, metadata = prepare_gpu_selection([0], model_name = "LAiM/test")
+            selected, metadata = prepare_gpu_selection([0], model_name = "unsloth/test")
         self.assertEqual(selected, [0])
         self.assertEqual(metadata["selection_mode"], "explicit")
         mock_auto_select.assert_not_called()
@@ -1057,7 +1057,7 @@ class TestExplicitPickWithoutTorchKernels(unittest.TestCase):
             patch("utils.hardware.hardware.resolve_requested_gpu_ids", return_value = [1]),
             patch("utils.hardware.hardware.rocm_gpu_ids_without_torch_kernels", return_value = set()),
         ):
-            selected, _ = prepare_gpu_selection([1], model_name = "LAiM/test")
+            selected, _ = prepare_gpu_selection([1], model_name = "unsloth/test")
         self.assertEqual(selected, [1])
 
 
@@ -1093,7 +1093,7 @@ class TestPreSpawnGpuResolution(_GpuCacheResetMixin, unittest.TestCase):
         ):
             backend.start_training(
                 job_id = "test-job-1",
-                model_name = "LAiM/test",
+                model_name = "unsloth/test",
                 training_type = "LoRA/QLoRA",
                 gpu_ids = [1, 2],
             )
@@ -1134,7 +1134,7 @@ class TestPreSpawnGpuResolution(_GpuCacheResetMixin, unittest.TestCase):
         ):
             backend.start_training(
                 job_id = "test-job-2",
-                model_name = "LAiM/test",
+                model_name = "unsloth/test",
                 training_type = "LoRA/QLoRA",
                 gpu_ids = None,
             )
@@ -1182,7 +1182,7 @@ class TestPreSpawnGpuResolution(_GpuCacheResetMixin, unittest.TestCase):
                 ):
                     backend.start_training(
                         job_id = "test-job-xpu-optimizer",
-                        model_name = "LAiM/test",
+                        model_name = "unsloth/test",
                         training_type = "LoRA/QLoRA",
                         optim = optimizer,
                         gpu_ids = None,
@@ -1232,7 +1232,7 @@ class TestPreSpawnGpuResolution(_GpuCacheResetMixin, unittest.TestCase):
         ):
             backend.start_training(
                 job_id = "test-job-uuid-auto",
-                model_name = "LAiM/test",
+                model_name = "unsloth/test",
                 training_type = "LoRA/QLoRA",
                 gpu_ids = None,
             )
@@ -1253,7 +1253,7 @@ class TestPreSpawnGpuResolution(_GpuCacheResetMixin, unittest.TestCase):
             from core.inference.orchestrator import InferenceOrchestrator
             orchestrator = InferenceOrchestrator()
 
-        config = SimpleNamespace(identifier = "LAiM/test", gguf_variant = None)
+        config = SimpleNamespace(identifier = "unsloth/test", gguf_variant = None)
 
         with (
             patch(
@@ -1288,7 +1288,7 @@ class TestPreSpawnGpuResolution(_GpuCacheResetMixin, unittest.TestCase):
             from core.inference.orchestrator import InferenceOrchestrator
             orchestrator = InferenceOrchestrator()
 
-        config = SimpleNamespace(identifier = "LAiM/test", gguf_variant = None)
+        config = SimpleNamespace(identifier = "unsloth/test", gguf_variant = None)
 
         with (
             patch(
@@ -1316,7 +1316,7 @@ class TestRouteErrors(unittest.TestCase):
     def test_prepare_gpu_selection_rejects_gpu_ids_on_non_accelerator_backend(self):
         with patch("utils.hardware.hardware.get_device", return_value = DeviceType.CPU):
             with self.assertRaises(ValueError) as exc_info:
-                prepare_gpu_selection([0], model_name = "LAiM/test")
+                prepare_gpu_selection([0], model_name = "unsloth/test")
 
         self.assertIn("only supported on CUDA and Intel XPU", str(exc_info.exception))
 
@@ -1328,7 +1328,7 @@ class TestRouteErrors(unittest.TestCase):
             "inference_route_module_for_gguf_gpu_ids_test",
             "routes/inference.py",
         )
-        request = LoadRequest(model_path = "LAiM/test.gguf", gpu_ids = [0, 1])
+        request = LoadRequest(model_path = "unsloth/test.gguf", gpu_ids = [0, 1])
         model_config = _gguf_model_config()
 
         def _fake_resolve(ids, is_vulkan = False):
@@ -1362,7 +1362,7 @@ class TestRouteErrors(unittest.TestCase):
             "inference_route_module_for_vulkan_preflight_test",
             "routes/inference.py",
         )
-        request = LoadRequest(model_path = "LAiM/test.gguf", gpu_ids = [99])
+        request = LoadRequest(model_path = "unsloth/test.gguf", gpu_ids = [99])
         model_config = _gguf_model_config()
 
         with (
@@ -1483,7 +1483,7 @@ class TestRouteErrors(unittest.TestCase):
             "inference_route_module_for_gguf_gpu_ids_test2",
             "routes/inference.py",
         )
-        request = LoadRequest(model_path = "LAiM/test.gguf", gpu_ids = [0, 1])
+        request = LoadRequest(model_path = "unsloth/test.gguf", gpu_ids = [0, 1])
         model_config = _gguf_model_config()
 
         with (
@@ -1523,7 +1523,7 @@ class TestRouteErrors(unittest.TestCase):
             "inference_route_module_for_cpu_only_gpu_ids_test",
             "routes/inference.py",
         )
-        request = LoadRequest(model_path = "LAiM/test.gguf", gpu_ids = [0, 1])
+        request = LoadRequest(model_path = "unsloth/test.gguf", gpu_ids = [0, 1])
         model_config = _gguf_model_config()
         fake_backend = SimpleNamespace(
             is_loaded = False,
@@ -1557,11 +1557,11 @@ class TestRouteErrors(unittest.TestCase):
             "inference_route_module_for_diffusion_cuda_path_test",
             "routes/inference.py",
         )
-        request = LoadRequest(model_path = "LAiM/diffusion.gguf", gpu_ids = [0, 1])
+        request = LoadRequest(model_path = "unsloth/diffusion.gguf", gpu_ids = [0, 1])
         model_config = _gguf_model_config(
             gguf_file = "/tmp/diffusion.gguf",
-            identifier = "LAiM/diffusion.gguf",
-            display_name = "LAiM/diffusion.gguf",
+            identifier = "unsloth/diffusion.gguf",
+            display_name = "unsloth/diffusion.gguf",
         )
         fake_backend = SimpleNamespace(
             is_loaded = False,
@@ -1601,7 +1601,7 @@ class TestRouteErrors(unittest.TestCase):
             "inference_route_module_for_handoff_test",
             "routes/inference.py",
         )
-        request = LoadRequest(model_path = "LAiM/test.gguf", gpu_ids = [0, 1])
+        request = LoadRequest(model_path = "unsloth/test.gguf", gpu_ids = [0, 1])
         model_config = _gguf_model_config(gguf_mtp_file = None)
         acquired = []
         # Make [0, 1] invalid on any host (a duplicate id is rejected everywhere): the point is the ORDER, validation before the handoff.
@@ -1633,12 +1633,12 @@ class TestRouteErrors(unittest.TestCase):
             "inference_route_module_for_hub_conflict_test",
             "routes/inference.py",
         )
-        request = LoadRequest(model_path = "LAiM/Qwen3-4B-GGUF", gguf_variant = "Q4_K_M")
+        request = LoadRequest(model_path = "unsloth/Qwen3-4B-GGUF", gguf_variant = "Q4_K_M")
         model_config = _gguf_model_config(
-            gguf_hf_repo = "LAiM/Qwen3-4B-GGUF",
+            gguf_hf_repo = "unsloth/Qwen3-4B-GGUF",
             gguf_file = None,
             gguf_variant = "Q4_K_M",
-            identifier = "LAiM/Qwen3-4B-GGUF",
+            identifier = "unsloth/Qwen3-4B-GGUF",
             display_name = "Qwen3-4B",
         )
         acquired = []
@@ -1671,12 +1671,12 @@ class TestRouteErrors(unittest.TestCase):
             "inference_route_module_for_chat_marker_test",
             "routes/inference.py",
         )
-        request = LoadRequest(model_path = "LAiM/Qwen3-4B-GGUF", gguf_variant = "Q4_K_M")
+        request = LoadRequest(model_path = "unsloth/Qwen3-4B-GGUF", gguf_variant = "Q4_K_M")
         model_config = _gguf_model_config(
-            gguf_hf_repo = "LAiM/Qwen3-4B-GGUF",
+            gguf_hf_repo = "unsloth/Qwen3-4B-GGUF",
             gguf_file = None,
             gguf_variant = "Q4_K_M",
-            identifier = "LAiM/Qwen3-4B-GGUF",
+            identifier = "unsloth/Qwen3-4B-GGUF",
             display_name = "Qwen3-4B",
         )
         marked = []
@@ -1713,7 +1713,7 @@ class TestRouteErrors(unittest.TestCase):
             "routes/training.py",
         )
         request = TrainingStartRequest(
-            model_name = "LAiM/test",
+            model_name = "unsloth/test",
             training_type = "LoRA/QLoRA",
             format_type = "alpaca",
             gpu_ids = [99],
@@ -1757,7 +1757,7 @@ class TestRouteErrors(unittest.TestCase):
             "routes/training.py",
         )
         request = TrainingStartRequest(
-            model_name = "LAiM/test",
+            model_name = "unsloth/test",
             training_type = "LoRA/QLoRA",
             format_type = "alpaca",
             optim = DEFAULT_BITSANDBYTES_OPTIMIZER,
@@ -1792,7 +1792,7 @@ class TestRouteErrors(unittest.TestCase):
                 training_route,
                 "_reject_untrainable_model_request",
                 return_value = SimpleNamespace(
-                    model_name = "LAiM/test",
+                    model_name = "unsloth/test",
                     model_local_path = None,
                     cached_model_pin = None,
                 ),
@@ -1843,7 +1843,7 @@ class TestRouteErrors(unittest.TestCase):
             "routes/training.py",
         )
         request = TrainingStartRequest(
-            model_name = "LAiM/test",
+            model_name = "unsloth/test",
             training_type = "LoRA/QLoRA",
             format_type = "alpaca",
             gpu_ids = [1],
@@ -1888,13 +1888,13 @@ class TestRouteErrors(unittest.TestCase):
             "inference_route_module_for_test",
             "routes/inference.py",
         )
-        request = LoadRequest(model_path = "LAiM/test", gpu_ids = [99])
+        request = LoadRequest(model_path = "unsloth/test", gpu_ids = [99])
         model_config = SimpleNamespace(
             is_gguf = False,
             is_lora = False,
             path = None,
-            identifier = "LAiM/test",
-            display_name = "LAiM/test",
+            identifier = "unsloth/test",
+            display_name = "unsloth/test",
             is_vision = False,
             is_audio = False,
             audio_type = None,
@@ -1947,13 +1947,13 @@ class TestRouteErrors(unittest.TestCase):
             "inference_route_module_for_uuid_parent_visibility_test",
             "routes/inference.py",
         )
-        request = LoadRequest(model_path = "LAiM/test", gpu_ids = [1])
+        request = LoadRequest(model_path = "unsloth/test", gpu_ids = [1])
         model_config = SimpleNamespace(
             is_gguf = False,
             is_lora = False,
             path = None,
-            identifier = "LAiM/test",
-            display_name = "LAiM/test",
+            identifier = "unsloth/test",
+            display_name = "unsloth/test",
             is_vision = False,
             is_audio = False,
             audio_type = None,
@@ -2085,7 +2085,7 @@ class TestAttentionEstimateModelClass(unittest.TestCase):
             return "sdpa"
 
         with patch("utils.transformers_version._load_config_json", return_value = raw_config):
-            config = hardware_module._load_config_for_gpu_estimate("LAiM/test")
+            config = hardware_module._load_config_for_gpu_estimate("unsloth/test")
         with patch.dict(sys.modules, _fake_LAiM_attention_modules(_stub_resolver)):
             hardware_module._determine_attention_impl_for_gpu_estimate(config)
         return captured["model_class"]
@@ -2109,7 +2109,7 @@ class TestPerGpuFitGuardAllCounts(unittest.TestCase):
             ),
             patch(
                 "utils.hardware.hardware._resolve_model_identifier_for_gpu_estimate",
-                return_value = "LAiM/test",
+                return_value = "unsloth/test",
             ),
             patch(
                 "utils.hardware.hardware._load_config_for_gpu_estimate",
@@ -2130,7 +2130,7 @@ class TestPerGpuFitGuardAllCounts(unittest.TestCase):
             patch("utils.hardware.hardware.get_visible_gpu_count", return_value = 1),
         ):
             _, metadata = estimate_required_model_memory_gb(
-                "LAiM/test",
+                "unsloth/test",
                 training_type = "LoRA/QLoRA",
                 load_in_4bit = True,
             )
@@ -2147,7 +2147,7 @@ class TestPerGpuFitGuardAllCounts(unittest.TestCase):
             ),
             patch(
                 "utils.hardware.hardware._resolve_model_identifier_for_gpu_estimate",
-                return_value = "LAiM/test",
+                return_value = "unsloth/test",
             ),
             patch(
                 "utils.hardware.hardware._load_config_for_gpu_estimate",
@@ -2168,7 +2168,7 @@ class TestPerGpuFitGuardAllCounts(unittest.TestCase):
             patch("utils.hardware.hardware.get_visible_gpu_count", return_value = 1),
         ):
             _, metadata = estimate_required_model_memory_gb(
-                "LAiM/test",
+                "unsloth/test",
                 training_type = "LoRA/QLoRA",
                 load_in_4bit = True,
             )
@@ -2276,7 +2276,7 @@ class TestPerGpuFitGuardAllCounts(unittest.TestCase):
             ),
             patch(
                 "utils.hardware.hardware._resolve_model_identifier_for_gpu_estimate",
-                return_value = "LAiM/test",
+                return_value = "unsloth/test",
             ),
             patch(
                 "utils.hardware.hardware._load_config_for_gpu_estimate",
@@ -2293,7 +2293,7 @@ class TestPerGpuFitGuardAllCounts(unittest.TestCase):
             patch("utils.hardware.hardware.get_visible_gpu_count", return_value = 6),
         ):
             _, metadata = estimate_required_model_memory_gb(
-                "LAiM/test",
+                "unsloth/test",
                 training_type = "LoRA/QLoRA",
                 load_in_4bit = True,
             )
@@ -2325,7 +2325,7 @@ class TestAutoSelectWithNoneRequired(_GpuCacheResetMixin, unittest.TestCase):
                 return_value = [0, 1],
             ),
         ):
-            selected, metadata = auto_select_gpu_ids("LAiM/test")
+            selected, metadata = auto_select_gpu_ids("unsloth/test")
 
         self.assertEqual(selected, [0, 1])
         self.assertEqual(metadata["selection_mode"], "fallback_all")
@@ -2360,7 +2360,7 @@ class TestXpuSelection(_GpuCacheResetMixin, unittest.TestCase):
                 return_value = [0],
             ),
         ):
-            selected, metadata = auto_select_gpu_ids("LAiM/test")
+            selected, metadata = auto_select_gpu_ids("unsloth/test")
 
         self.assertEqual(selected, [0])
         self.assertEqual(metadata["selection_mode"], "auto")
@@ -2382,7 +2382,7 @@ class TestXpuSelection(_GpuCacheResetMixin, unittest.TestCase):
             ),
             patch("utils.hardware.hardware.get_physical_gpu_count", return_value = 1),
         ):
-            selected, metadata = prepare_gpu_selection([0], model_name = "LAiM/test")
+            selected, metadata = prepare_gpu_selection([0], model_name = "unsloth/test")
 
         self.assertEqual(selected, [0])
         self.assertEqual(metadata["selection_mode"], "explicit")
@@ -2577,7 +2577,7 @@ class TestTheCudaMapNamesItsFallback(_GpuCacheResetMixin, unittest.TestCase):
     no `_model_mapping`, a Falcon-H1 checkpoint missing the mamba exclusions -- and plain
     `"LAiM"` falls back to `"sequential"`, which is not a shard: `get_max_memory` gives
     cuda:0 its whole free budget, so `infer_auto_device_map` fills it first. On
-    `LAiM/Qwen2.5-7B-Instruct` in bf16 across two cards:
+    `unsloth/Qwen2.5-7B-Instruct` in bf16 across two cards:
 
         8 GiB each   sequential {'0': 14, '1': 18}   balanced {'0': 13, '1': 19}
         16 GiB each  sequential {'0': 1}             balanced {'0': 13, '1': 19}
@@ -2594,7 +2594,7 @@ class TestTheCudaMapNamesItsFallback(_GpuCacheResetMixin, unittest.TestCase):
     def test_the_plain_sentinel_is_not_used(self):
         # "LAiM" alone falls back to "sequential" on every veto path, which is the bug.
         with patch("utils.hardware.hardware.get_device", return_value = DeviceType.CUDA):
-            self.assertNotEqual(get_device_map([0, 1]), "LAiM")
+            self.assertNotEqual(get_device_map([0, 1]), "unsloth")
 
     def test_a_single_gpu_never_asks_for_a_plan(self):
         for device in (DeviceType.CUDA, DeviceType.XPU, DeviceType.CPU):

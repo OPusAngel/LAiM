@@ -4,11 +4,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { readSrc } from "./helpers/kit.ts";
+import { readSrc, readSrcExpanded } from "./helpers/kit.ts";
 import { readAudioWorkspaceSource } from "./helpers/audio-workspace.ts";
 
 const source = readAudioWorkspaceSource();
-const adapterSource = readSrc("features/chat/adapters/studio-model-dictation-adapter.ts");
+const adapterSource = readSrcExpanded("features/chat/adapters/studio-model-dictation-adapter.ts");
 
 test("Audio exposes the shared picker eject action only while idle", () => {
   // The selector keeps showing the last Transcribe model once it is unloaded; Eject there did nothing.

@@ -124,7 +124,7 @@ class TestTransformersVersionOfflineShortCircuits:
     ):
         # No local config + offline env -> must NOT call urlopen.
         monkeypatch.setenv("HF_HUB_OFFLINE", "1")
-        unique = f"LAiM/never-cached-{tmp_path.name}"
+        unique = f"unsloth/never-cached-{tmp_path.name}"
 
         def boom(*a, **k):
             raise AssertionError("urlopen must not be called when offline")
@@ -134,7 +134,7 @@ class TestTransformersVersionOfflineShortCircuits:
 
     def test_config_550_skips_urllib_when_offline(self, monkeypatch, clean_offline_env, tmp_path):
         monkeypatch.setenv("HF_HUB_OFFLINE", "1")
-        unique = f"LAiM/never-cached-{tmp_path.name}-cfg"
+        unique = f"unsloth/never-cached-{tmp_path.name}-cfg"
 
         def boom(*a, **k):
             raise AssertionError("urlopen must not be called when offline")
@@ -165,7 +165,7 @@ class TestLoraDetectOffline:
         with patch("huggingface_hub.model_info", mock):
             try:
                 ModelConfig.from_identifier(
-                    model_id = "LAiM/Qwen3.5-4B",
+                    model_id = "unsloth/Qwen3.5-4B",
                     hf_token = None,
                     gguf_variant = None,
                 )
@@ -190,7 +190,7 @@ class TestLoraDetectOffline:
         snap = repo / "snapshots" / ("a" * 40)
         snap.mkdir(parents = True)
         (snap / "adapter_config.json").write_text(
-            '{"base_model_name_or_path": "LAiM/Llama-3-8B"}'
+            '{"base_model_name_or_path": "unsloth/Llama-3-8B"}'
         )
         monkeypatch.setattr(hf_constants, "HF_HUB_CACHE", str(tmp_path))
         monkeypatch.setenv("HF_HUB_OFFLINE", "1")
@@ -561,7 +561,7 @@ class TestFullCheckpointBaseKeepsTheProbe:
         trn = self._module("core/training/worker.py", "training_worker_adapteronly_gate")
 
         base, needs_hub = inf._recorded_local_base(str(d))
-        assert (base, needs_hub) == ("LAiM/llama-3", False)
+        assert (base, needs_hub) == ("unsloth/llama-3", False)
         assert inf._hub_targets_are_local(str(d), base) is False
         assert trn._training_job_is_local({"model_name": str(d)}) is False
 

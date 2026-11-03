@@ -209,7 +209,7 @@ export const SETTINGS_SEARCH_INDEX: Record<SettingsTab, TranslationKey[]> = {
     "settings.data.archivedChats",
     "settings.data.archiveAllChats",
     "settings.data.confirmBeforeDeleting",
-    "settings.data.sandboxFiles",
+    "settings.data.workdirFiles",
     "settings.data.deletionSection",
     "settings.data.archives",
     "settings.data.archivedImages",
@@ -327,13 +327,6 @@ export const SETTINGS_SEARCH_INDEX: Record<SettingsTab, TranslationKey[]> = {
     "settings.keyboardShortcuts.actions.openKeyboardShortcuts.label",
   ],
   // The Windows rows render only on Windows, so only the rows every platform shows are indexed.
-  sandbox: [
-    "settings.general.permissions.sectionTitle",
-    "settings.sandbox.levelLabel",
-    "settings.sandbox.toolsSection",
-    "settings.sandbox.python",
-    "settings.sandbox.terminal",
-  ],
   debugging: [
     "settings.debugging.logSection",
     "settings.debugging.source",
@@ -393,9 +386,6 @@ const HUGGING_FACE_ONLY_ENTRIES: ReadonlySet<TranslationKey> = new Set([
 
 // owner-only rows on tabs visible to every account.
 const OWNER_ONLY_ENTRIES: ReadonlySet<TranslationKey> = new Set([
-  "settings.sandbox.toolsSection",
-  "settings.sandbox.python",
-  "settings.sandbox.terminal",
   "settings.apiKeys.mcp.title",
   "settings.chat.toolResultLimit",
   "settings.chat.firstTokenLabel",
@@ -424,7 +414,6 @@ export const SETTINGS_SEARCH_KEYWORDS: Partial<
 > = {
   "settings.resources.storage.modelsFolder":
     "settings.resources.storage.modelsFolderKeywords",
-  "settings.sandbox.toolsSection": "settings.sandbox.setupKeywords",
   // "purge", "prune" and the tool names are in none of the labels, so the row
   // the feature is named after was unreachable by search.
   "settings.resources.storage.caches.label":

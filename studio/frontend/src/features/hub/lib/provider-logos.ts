@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+import { HF_SOURCE_OWNER } from "@/config/hub-source";
 
 /**
  * Provider-logo registry for LAiM re-uploads. LAiM re-uploads upstream
- * models (e.g. LAiM/Qwen2.5-7B is Alibaba's Qwen); we show the upstream
+ * models (e.g. unsloth/Qwen2.5-7B is Alibaba's Qwen); we show the upstream
  * provider's logo in place of the LAiM picture (username stays "LAiM").
  *
  * Matching: providers are evaluated in declaration order; a provider matches if
@@ -297,7 +298,7 @@ export function matchProviderLogo(repoName: string): ProviderLogo | null {
 }
 
 // Owners whose avatars get swapped for the matched provider's logo.
-const RELABELED_OWNERS: ReadonlySet<string> = new Set(["LAiM"]);
+const RELABELED_OWNERS: ReadonlySet<string> = new Set([HF_SOURCE_OWNER]);
 
 /** True if the owner's avatars get replaced with the upstream provider's logo. */
 export function isProviderRelabeledOwner(

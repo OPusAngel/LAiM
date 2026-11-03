@@ -41,16 +41,16 @@ function shown(stateIdentity: string | null, currentIdentity: string | null) {
 }
 
 test("switching GGUF never paints the previous model's numbers", () => {
-  const before = identity("LAiM/Qwen3-8B-GGUF", "Q4_K_M");
-  const after = identity("LAiM/Llama-3.1-8B-GGUF", "Q4_K_M");
+  const before = identity("unsloth/Qwen3-8B-GGUF", "Q4_K_M");
+  const after = identity("unsloth/Llama-3.1-8B-GGUF", "Q4_K_M");
   // The render that first names the new model still holds the old model's state.
   assert.equal(shown(before, after), false);
 });
 
 test("switching quantization on ONE repository is also a switch", () => {
   // modelPath is identical across this change while the weights roughly quadruple.
-  const q4 = identity("LAiM/Qwen3-8B-GGUF", "Q4_K_M");
-  const f16 = identity("LAiM/Qwen3-8B-GGUF", "F16");
+  const q4 = identity("unsloth/Qwen3-8B-GGUF", "Q4_K_M");
+  const f16 = identity("unsloth/Qwen3-8B-GGUF", "F16");
   assert.notEqual(q4, f16);
   assert.equal(shown(q4, f16), false);
 });
@@ -58,13 +58,13 @@ test("switching quantization on ONE repository is also a switch", () => {
 test("a settings change is NOT a switch, so the figures stay up and go grey", () => {
   // Context, KV dtype, slots, pins: none of them select a different file, so the
   // source identity is unchanged and the hook keeps the numbers with `stale` set.
-  const before = identity("LAiM/Qwen3-8B-GGUF", "Q4_K_M");
-  const after = identity("LAiM/Qwen3-8B-GGUF", "Q4_K_M");
+  const before = identity("unsloth/Qwen3-8B-GGUF", "Q4_K_M");
+  const after = identity("unsloth/Qwen3-8B-GGUF", "Q4_K_M");
   assert.equal(shown(before, after), true);
 });
 
 test("standing down blanks the row rather than freezing the last answer", () => {
-  const held = identity("LAiM/Qwen3-8B-GGUF", "Q4_K_M");
+  const held = identity("unsloth/Qwen3-8B-GGUF", "Q4_K_M");
   assert.equal(shown(held, null), false);
 });
 

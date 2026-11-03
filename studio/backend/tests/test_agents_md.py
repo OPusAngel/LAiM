@@ -16,7 +16,7 @@ def home(tmp_path, monkeypatch):
     monkeypatch.setattr(agents_md, "workspace_root", lambda: tmp_path / "home/.LAiM/studio")
     monkeypatch.setattr(agents_md, "is_owner_context", lambda: True)
     monkeypatch.delenv("LAiM_STUDIO_AGENTS_MD", raising = False)
-    for name in ("home/.agents", "home/.claude", "home/.LAiM/studio", "proj/sandbox", "host"):
+    for name in ("home/.agents", "home/.claude", "home/.LAiM/studio", "proj/workdir", "host"):
         (tmp_path / name).mkdir(parents = True)
     return tmp_path
 
@@ -24,7 +24,7 @@ def home(tmp_path, monkeypatch):
 def _project(home, **extra):
     return {
         "rootPath": str(home / "proj"),
-        "sandboxPath": str(home / "proj/sandbox"),
+        "workdirPath": str(home / "proj/workdir"),
         "archived": False,
         **extra,
     }
@@ -39,14 +39,14 @@ def test_nothing_on_disk_reads_as_empty(home):
     assert agents_md.agents_md_text(_project(home)) == ""
 
 
-def test_global_then_project_then_sandbox_each_under_its_source(home):
+def test_global_then_project_then_workdir_each_under_its_source(home):
     _write(home / "home/.LAiM/studio/AGENTS.md", "Be brief.\n")
     _write(home / "proj/AGENTS.md", "Use pnpm.")
-    _write(home / "proj/sandbox/AGENTS.md", "Notes: tests pass.")
+    _write(home / "proj/workdir/AGENTS.md", "Notes: tests pass.")
     assert agents_md.agents_md_text(_project(home)) == (
         "# Source: ~/.LAiM/studio/AGENTS.md\n\nBe brief.\n\n"
         f"# Source: {(home / 'proj/AGENTS.md').as_posix()}\n\nUse pnpm.\n\n"
-        f"# Source: {(home / 'proj/sandbox/AGENTS.md').as_posix()}\n\nNotes: tests pass."
+        f"# Source: {(home / 'proj/workdir/AGENTS.md').as_posix()}\n\nNotes: tests pass."
     )
     # A chat outside any project still gets the global file.
     assert agents_md.agents_md_text(None) == "# Source: ~/.LAiM/studio/AGENTS.md\n\nBe brief."
@@ -69,7 +69,7 @@ def test_claude_md_only_stands_in_for_a_missing_agents_md(home):
 @pytest.mark.skipif(
     sys.platform == "win32", reason = "symlinks need admin or developer mode on Windows"
 )
-def test_project_root_link_reads_but_sandbox_link_does_not(home):
+def test_project_root_link_reads_but_workdir_link_does_not(home):
     _write(home / "proj/AGENTS.md", "Use pnpm.")
     # CLAUDE.md -> AGENTS.md at the root is common and stays readable.
     os.symlink(home / "proj/AGENTS.md", home / "proj/CLAUDE.md")
@@ -77,10 +77,10 @@ def test_project_root_link_reads_but_sandbox_link_does_not(home):
     _write(home / "proj/real.md", "Linked rules")
     os.symlink(home / "proj/real.md", home / "proj/AGENTS.md")
     assert agents_md.agents_md_text(_project(home)).endswith("Linked rules")
-    # A link the model plants in its sandbox must not pull a host file into the prompt.
+    # A link the model plants in its workdir must not pull a host file into the prompt.
     _write(home / "host/secret.txt", "HOST SECRET")
-    os.symlink(home / "host/secret.txt", home / "proj/sandbox/AGENTS.md")
-    os.symlink(home / "host/secret.txt", home / "proj/sandbox/CLAUDE.md")
+    os.symlink(home / "host/secret.txt", home / "proj/workdir/AGENTS.md")
+    os.symlink(home / "host/secret.txt", home / "proj/workdir/CLAUDE.md")
     assert "HOST SECRET" not in agents_md.agents_md_text(_project(home))
 
 
@@ -127,30 +127,30 @@ def test_route_returns_the_text(home, monkeypatch):
     assert chat_history.get_agents_md("missing", current_subject = "owner").text == ""
 
 
-def test_sandbox_hard_link_and_fifo_are_not_read(home):
+def test_workdir_hard_link_and_fifo_are_not_read(home):
     root = home / "p"
-    sandbox = root / "sandbox"
-    sandbox.mkdir(parents = True)
-    project = {"rootPath": str(root), "sandboxPath": str(sandbox), "archived": False}
+    workdir = root / "workdir"
+    workdir.mkdir(parents = True)
+    project = {"rootPath": str(root), "workdirPath": str(workdir), "archived": False}
     secret = home / "secret.txt"
     secret.write_text("host secret", encoding = "utf-8")
-    os.link(secret, sandbox / "AGENTS.md")
+    os.link(secret, workdir / "AGENTS.md")
     assert "host secret" not in agents_md.agents_md_text(project)
     if hasattr(os, "mkfifo"):
-        (sandbox / "AGENTS.md").unlink()
-        os.mkfifo(sandbox / "AGENTS.md")
+        (workdir / "AGENTS.md").unlink()
+        os.mkfifo(workdir / "AGENTS.md")
         assert agents_md.agents_md_text(project) == ""
 
 
 @pytest.mark.skipif(
     sys.platform == "win32", reason = "symlinks need admin or developer mode on Windows"
 )
-def test_sandbox_outside_the_project_is_not_read(home):
-    # Same layout tools._get_project_workdir refuses: sandbox linked out of the project folder.
+def test_workdir_outside_the_project_is_not_read(home):
+    # Same layout tools._get_project_workdir refuses: workdir linked out of the project folder.
     (home / "host/elsewhere").mkdir()
     _write(home / "host/elsewhere/AGENTS.md", "outside rules")
     root = home / "linked"
     root.mkdir()
-    os.symlink(home / "host/elsewhere", root / "sandbox")
-    project = {"rootPath": str(root), "sandboxPath": str(root / "sandbox"), "archived": False}
+    os.symlink(home / "host/elsewhere", root / "workdir")
+    project = {"rootPath": str(root), "workdirPath": str(root / "workdir"), "archived": False}
     assert agents_md.agents_md_text(project) == ""

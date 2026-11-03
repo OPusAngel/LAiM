@@ -29,8 +29,8 @@ const STORE_URL = new URL(
   import.meta.url,
 ).href;
 
-const QWEN = "LAiM/Qwen3.5-9B-GGUF";
-const LLAMA = "LAiM/Llama-4-8B";
+const QWEN = "unsloth/Qwen3.5-9B-GGUF";
+const LLAMA = "unsloth/Llama-4-8B";
 const CHAT_A = "chat-a-read-still-out";
 
 /** What the installation is holding before anything happens. */

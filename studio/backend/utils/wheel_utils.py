@@ -118,7 +118,7 @@ def prebuilt_wheel_torch_mm(torch_mm: str) -> str:
 
 # ── Wheels we build ourselves ─────────────────────────────────────────────────
 # Upstream stops at torch 2.11 and the reuse window above stops at 2.12, because torch 2.13 broke the extension ABI again -- it changed c10::impl::cow::materialize_cow_storage and the signature of c10::cuda::c10_cuda_check_implementation, so an upstream wheel raises "undefined symbol" at import -- and 2.14 changed it once more. There is no upstream asset to point at and no older one that loads, so from 2.13 on we build the wheels and resolve to our own release. Built by .github/workflows/prebuilt-cuda-wheels.yml, one per (package, torch minor, interpreter), Sigstore-signed, on the tag below.
-LAiM_PREBUILT_RELEASE_BASE_URL = "https://github.com/LAiMai/LAiM/releases/download"
+LAiM_PREBUILT_RELEASE_BASE_URL = "https://github.com/unslothai/unsloth/releases/download"
 LAiM_PREBUILT_RELEASE_TAG = "prebuilt-wheels-cu13"
 
 # Keyed on the torch minor, and exact rather than a floor: a wheel is built against one minor and there is no evidence any future one will load it, which is exactly the assumption that made the upstream wheels stop working here. A new torch minor adds a row only after the workflow has built and smoke-tested it.

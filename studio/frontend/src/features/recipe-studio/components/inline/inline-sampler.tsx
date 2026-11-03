@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -35,7 +36,7 @@ function ConvertToField({
       }
     >
       <SelectTrigger className="nodrag h-8 w-full text-xs">
-        <SelectValue placeholder="Convert" />
+        <SelectValue placeholder={translate("settings.apiKeys.audioApi.convert")} />
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="none">None</SelectItem>
@@ -54,7 +55,7 @@ export function InlineSampler({
   if (config.sampler_type === "uniform") {
     return (
       <div className="grid gap-3 sm:grid-cols-3">
-        <InlineField label="Low">
+        <InlineField label={translate("composer.pill.effortLow")}>
           <Input
             className="nodrag h-8 w-full text-xs"
             type="number"
@@ -63,7 +64,7 @@ export function InlineSampler({
             onChange={(event) => onUpdate({ low: event.target.value })}
           />
         </InlineField>
-        <InlineField label="High">
+        <InlineField label={translate("composer.pill.effortHigh")}>
           <Input
             className="nodrag h-8 w-full text-xs"
             type="number"
@@ -72,7 +73,7 @@ export function InlineSampler({
             onChange={(event) => onUpdate({ high: event.target.value })}
           />
         </InlineField>
-        <InlineField label="Convert to">
+        <InlineField label={translate("uxRecipestudio.convertTooaov5")}>
           <ConvertToField
             value={config.convert_to}
             onValueChange={(value) =>
@@ -90,7 +91,7 @@ export function InlineSampler({
   if (config.sampler_type === "gaussian") {
     return (
       <div className="grid gap-3 sm:grid-cols-3">
-        <InlineField label="Mean">
+        <InlineField label={translate("uxRecipestudio.mean1lci9")}>
           <Input
             className="nodrag h-8 w-full text-xs"
             type="number"
@@ -99,7 +100,7 @@ export function InlineSampler({
             onChange={(event) => onUpdate({ mean: event.target.value })}
           />
         </InlineField>
-        <InlineField label="Std dev">
+        <InlineField label={translate("uxRecipestudio.stdDev8y7d5")}>
           <Input
             className="nodrag h-8 w-full text-xs"
             type="number"
@@ -108,7 +109,7 @@ export function InlineSampler({
             onChange={(event) => onUpdate({ std: event.target.value })}
           />
         </InlineField>
-        <InlineField label="Convert to">
+        <InlineField label={translate("uxRecipestudio.convertTooaov5")}>
           <ConvertToField
             value={config.convert_to}
             onValueChange={(value) =>
@@ -125,7 +126,7 @@ export function InlineSampler({
 
   if (config.sampler_type === "bernoulli") {
     return (
-      <InlineField label="Probability (p)">
+      <InlineField label={translate("uxRecipestudio.probabilityP1i6ps")}>
         <Input
           className="nodrag h-8 w-full text-xs"
           type="number"
@@ -142,10 +143,10 @@ export function InlineSampler({
 
   if (config.sampler_type === "uuid") {
     return (
-      <InlineField label="UUID format">
+      <InlineField label={translate("uxRecipestudio.uUIDFormat1rrjy")}>
         <Input
           className="nodrag h-8 w-full text-xs"
-          placeholder="uuid4"
+          placeholder={translate("uxRecipestudio.uuid4j2t9w")}
           value={config.uuid_format ?? ""}
           onChange={(event) =>
             onUpdate({

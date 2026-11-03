@@ -14,7 +14,7 @@ import {
 import { useIsAccountOwner } from "@/features/auth";
 import { SettingsRow } from "@/features/settings/components/settings-row";
 import { SettingsSection } from "@/features/settings/components/settings-section";
-import { useT } from "@/i18n";
+import { translate, useT } from "@/i18n";
 import { isEngineGpuDevice, useGpuDevices } from "@/hooks/use-gpu-info";
 import { formatGiB } from "@/lib/memory/format";
 import { cn } from "@/lib/utils";
@@ -103,7 +103,7 @@ export function EngineInstall({
     } catch (err) {
       useAfterInstall.current = false;
       setAutoConfirm(true);
-      setError(err instanceof Error ? err.message : "Engine operation failed");
+      setError(err instanceof Error ? err.message : translate("uxModelpicker.engineOperationFailedkj4lw"));
     } finally {
       setBusy(false);
     }

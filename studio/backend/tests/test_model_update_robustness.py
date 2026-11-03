@@ -161,7 +161,7 @@ def test_variant_update_check_missing_remote_blob_id_is_not_phantom_update(
     tmp_path, patch_hub_gguf
 ):
     """Missing sha/blob metadata is unknown, not update_available=True."""
-    repo = "LAiM/gemma-3-4b-it-GGUF"
+    repo = "unsloth/gemma-3-4b-it-GGUF"
     patch_hub_gguf.apply(
         tmp_path,
         repo,
@@ -176,7 +176,7 @@ def test_variant_update_check_missing_remote_blob_id_is_not_phantom_update(
 
 
 def test_variant_update_check_detects_update_from_existing_siblings(tmp_path, patch_hub_gguf):
-    repo = "LAiM/gemma-3-4b-it-GGUF"
+    repo = "unsloth/gemma-3-4b-it-GGUF"
     patch_hub_gguf.apply(
         tmp_path,
         repo,
@@ -189,7 +189,7 @@ def test_variant_update_check_detects_update_from_existing_siblings(tmp_path, pa
 
 
 def test_variant_update_check_no_update_when_blob_matches(tmp_path, patch_hub_gguf):
-    repo = "LAiM/gemma-3-4b-it-GGUF"
+    repo = "unsloth/gemma-3-4b-it-GGUF"
     patch_hub_gguf.apply(
         tmp_path,
         repo,
@@ -211,7 +211,7 @@ def test_variant_update_check_no_update_when_blob_matches(tmp_path, patch_hub_gg
 def test_variant_update_check_detects_companion_only_update(
     monkeypatch, tmp_path, patch_hub_gguf, companion_path, has_vision
 ):
-    repo_id = "LAiM/gemma-4-GGUF"
+    repo_id = "unsloth/gemma-4-GGUF"
     with GV._VARIANT_HASH_LOCK:
         GV._VARIANT_HASH_CACHE.clear()
         GV._VARIANT_REQUIREMENT_CACHE.clear()
@@ -282,7 +282,7 @@ def test_variant_update_check_detects_companion_only_update(
 
 
 def test_variant_update_check_accepts_lfs_dict_and_blob_id_fallback(tmp_path, patch_hub_gguf):
-    repo = "LAiM/gemma-3-4b-it-GGUF"
+    repo = "unsloth/gemma-3-4b-it-GGUF"
     patch_hub_gguf.apply(
         tmp_path,
         repo,
@@ -469,10 +469,10 @@ def test_force_download_is_forwarded_through_the_shim(monkeypatch):
     monkeypatch.setattr(X, "_shared_hf_hub_download_with_xet_fallback", fake_shared, raising = True)
 
     X.hf_hub_download_with_xet_fallback(
-        "LAiM/repo", "model.gguf", token = None, force_download = False
+        "unsloth/repo", "model.gguf", token = None, force_download = False
     )
     X.hf_hub_download_with_xet_fallback(
-        "LAiM/repo", "model.gguf", token = None, force_download = True
+        "unsloth/repo", "model.gguf", token = None, force_download = True
     )
     assert seen == [False, True]  # the shim forwards force_download to the shared helper unchanged
 

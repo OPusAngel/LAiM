@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { authFetch } from "@/features/auth";
 import { forgetThreadReads } from "../api/thread-read-cache.ts";
 import type { ImageDisclosure } from "../api/mcp-image";
@@ -166,13 +167,13 @@ export const MODELS_FIT_ON_DEVICE_ONLY_KEY =
   "LAiM_models_fit_on_device_only";
 export const CHAT_BYPASS_PERMISSIONS_KEY = "LAiM_chat_bypass_permissions";
 export const CHAT_PERMISSION_MODE_KEY = "LAiM_chat_permission_mode";
-export const CHAT_SANDBOX_LEVEL_KEY = "LAiM_chat_sandbox_level";
 
 /** Local tool-call gate: "ask" every call, "auto" only high-risk ones, "off" never but keeps the
- *  sandbox, "full" drops both and is session-only. */
+ *  workdir, "full" drops both. Every value persists until the user picks another. */
 export type PermissionMode = "ask" | "auto" | "off" | "full";
-/** "high" adds the OS sandbox (bubblewrap, Seatbelt, MXC) to the software safeguards; "low" uses only those. */
-export type SandboxLevel = "high" | "low";
+/** Wire value for the engine-side isolation switch. LAiM ships no workdir: the chat request always
+ *  sends "low", so Python and Terminal run on the software safeguards alone and files land on the
+ *  real machine. The type stays because the API payload still carries the field. */
 export const CHAT_WEB_FETCH_TOOLS_ENABLED_KEY =
   "LAiM_chat_web_fetch_tools_enabled";
 export const CHAT_RAG_SOURCE_KEY = "LAiM_chat_rag_source";
@@ -454,8 +455,8 @@ function warnSettingsPersistenceFailure(): void {
     return;
   }
   hasShownSettingsPersistenceWarning = true;
-  toast.warning("Chat settings could not be persisted", {
-    description: "Your changes apply now, but may reset after refresh.",
+  toast.warning(translate("uxChat.chatSettingsCouldNotdmcp2"), {
+    description: translate("uxChat.yourChangesApplyNow4jz8z"),
   });
 }
 
@@ -762,7 +763,6 @@ const MIRRORED_SETTINGS = {
         ? loadPermissionMode()
         : undefined,
   },
-  sandboxLevel: { storageKey: CHAT_SANDBOX_LEVEL_KEY, ...STRING_SETTING },
   ragSource: { storageKey: CHAT_RAG_SOURCE_KEY, ...JSON_SETTING },
   ragMode: { storageKey: CHAT_RAG_MODE_KEY, ...STRING_SETTING },
   ragTopK: { storageKey: CHAT_RAG_TOP_K_KEY, ...NUMBER_SETTING },
@@ -1060,7 +1060,9 @@ function pillPreference(key: ClampedPillKey): boolean {
   return (
     pillOnRecord(key) ??
     loadOptionalBool(MIRRORED_SETTINGS[key].storageKey) ??
-    false
+    // A fresh install starts Internet (web_search) and Code on: the agent must be able to look
+    // things up and run code out of the box. An explicit stored value always wins.
+    (key === "toolsEnabled" || key === "codeToolsEnabled")
   );
 }
 
@@ -1071,7 +1073,6 @@ function isPillClampedOff(
   if (key === "deepResearchEnabled") {
     return (
       state.incognito ||
-      localCheckpointRefusesDeepResearch(state) ||
       externalCheckpointRefusesDeepResearch(state.params.checkpoint)
     );
   }
@@ -1080,8 +1081,11 @@ function isPillClampedOff(
     Exclude<ClampedPillKey, "deepResearchEnabled">,
     boolean
   > = {
-    toolsEnabled: state.supportsTools || state.supportsBuiltinWebSearch,
-    codeToolsEnabled: state.supportsTools || state.supportsBuiltinCodeExecution,
+    // Internet is never clamped: the backend runs web_search in its own tool loop and reads
+    // tool calls out of the model's text when the chat template cannot emit them natively.
+    toolsEnabled: true,
+    // Code tools are never clamped either: every model, local or cloud, runs with them on.
+    codeToolsEnabled: true,
     imageToolsEnabled: state.supportsBuiltinImageGeneration,
     webFetchToolsEnabled: state.supportsBuiltinWebFetch,
   };
@@ -1483,7 +1487,7 @@ export async function settleThreadScopedSettingsForCopy(
   // A flushed replacement write that failed resolves false rather than throwing, so the chain
   // alone cannot tell a saved edit from a lost one.
   if (!(await awaitThreadScopedSettingsWrite(threadId))) {
-    throw new Error("This chat's settings could not be saved before copying it");
+    throw new Error(translate("uxChat.thisChatSSettings1qmoc"));
   }
 }
 
@@ -1913,20 +1917,36 @@ export function loadOptionalBool(key: string): boolean | null {
   return raw === "true";
 }
 
+/** Whether the tool pills may be used for the loaded model.
+ *
+ *  A chat template that renders no tool calls normally greys them out. Agent Core and Agent
+ *  Full Core are an explicit request from the user to act, so they keep the pills selectable:
+ *  the backend then opens the tool loop anyway (see `_admit_tool_loop`), and the loop reads
+ *  tool calls out of the model's text when the template cannot emit them natively. */
+export function selectToolsSelectable(state: {
+  supportsTools: boolean;
+  permissionMode: PermissionMode;
+}): boolean {
+  return (
+    state.supportsTools ||
+    state.permissionMode === "ask" ||
+    state.permissionMode === "full"
+  );
+}
+
 /** Pill state to apply on a model load: the persisted preference wins in both directions, the
- *  open chat beats the installation default, and with no preference the pills stay off. */
+ *  open chat beats the installation default, and with no preference the pills stay off.
+ *
+ *  A model whose chat template cannot render tool calls used to force the pills off, so the
+ *  request never asked for tools and the model answered that it cannot run code. Agent Core and
+ *  Agent Full Core are an explicit ask, and the backend now honours it for those templates, so
+ *  what the user left switched on stays switched on. */
 export function resolveToolsEnabledOnLoad(supportsTools: boolean): {
   toolsEnabled: boolean;
   codeToolsEnabled: boolean;
   deepResearchEnabled: boolean;
 } {
-  if (!supportsTools) {
-    return {
-      toolsEnabled: false,
-      codeToolsEnabled: false,
-      deepResearchEnabled: false,
-    };
-  }
+  void supportsTools;
   return {
     deepResearchEnabled:
       !useChatRuntimeStore.getState().incognito &&
@@ -1959,17 +1979,6 @@ export function resolvePreserveThinkingOnLoad(resp: {
 }
 
 
-/** "full" is never restored: it disables the sandbox and every confirmation gate, so it needs
- *  the warning dialog each session. First run derives from the legacy confirm toggle. */
-/** Anything but an explicit "low" (missing, garbled, a newer value) reads as the default, "high". */
-export function normalizeSandboxLevel(raw: unknown): SandboxLevel {
-  return raw === "low" ? "low" : "high";
-}
-
-export function loadSandboxLevel(): SandboxLevel {
-  return normalizeSandboxLevel(readStorageValue(CHAT_SANDBOX_LEVEL_KEY));
-}
-
 function loadPermissionMode(): PermissionMode {
   return normalizeStoredPermissionMode(
     readStorageValue(CHAT_PERMISSION_MODE_KEY),
@@ -1978,11 +1987,17 @@ function loadPermissionMode(): PermissionMode {
 }
 
 function savePermissionMode(mode: PermissionMode): void {
-  if (mode === "full") return;
   persistSetting(CHAT_PERMISSION_MODE_KEY, mode);
 }
 
 const INITIAL_PERMISSION_MODE: PermissionMode = loadPermissionMode();
+
+/** The level Full access falls back to when it is switched off. Full access is stored now, so the
+ *  stored value can be Full access itself; Agent Core is the level underneath it. */
+function loadPermissionModeBelowFull(): Exclude<PermissionMode, "full"> {
+  const mode = loadPermissionMode();
+  return mode === "full" ? "ask" : mode;
+}
 
 /** Re-picking the level already in force is not a fresh grant, so a manual Tools-off stands. */
 function codeDeclinedOnEnteringFullAccess(state: ChatRuntimeStore): boolean {
@@ -1991,26 +2006,17 @@ function codeDeclinedOnEnteringFullAccess(state: ChatRuntimeStore): boolean {
     : false;
 }
 
-/** Effective Code setting. Full access auto-enables it only for local models.
- *  Read the level live, never a flag armed on entry: Full access outlives a chat switch
- *  (applyThreadScopedSettings) but codeToolsEnabled does not, so a snapshotted grant missed
- *  every chat opened afterwards. */
+/** Effective Code setting. Every checkpoint - local or cloud - runs with the code tools on:
+ *  the agent must be able to act out of the box, and the switch that turns them back off lives
+ *  in the composer + menu, never as a per-chat pill. The signature is kept so every
+ *  call site keeps reading one source of truth. */
 export function codeToolsOn(
-  state: Pick<
-    ChatRuntimeStore,
-    | "codeToolsEnabled"
-    | "codeToolsDeclinedUnderFullAccess"
-    | "permissionMode"
-    | "supportsTools"
-  > & { params: { checkpoint: string } },
+  state: Pick<ChatRuntimeStore, "codeToolsEnabled"> & {
+    params: { checkpoint: string };
+  },
 ): boolean {
-  return (
-    state.codeToolsEnabled ||
-    (!state.codeToolsDeclinedUnderFullAccess &&
-      state.permissionMode === "full" &&
-      state.supportsTools &&
-      !isExternalModelId(state.params.checkpoint))
-  );
+  void state;
+  return true;
 }
 
 function loadString(key: string, fallback: string): string {
@@ -2494,18 +2500,17 @@ type ChatRuntimeStore = {
   ragCaptionFigures: boolean;
   /** When on, local LAiM tool calls pause for an explicit allow/deny before they run. */
   confirmToolCalls: boolean;
-  /** Tool calls run with no confirmation gate AND no python/terminal sandbox (secrets still
+  /** Tool calls run with no confirmation gate AND no python/terminal workdir (secrets still
    *  stripped). Outranks confirmToolCalls; kept in sync with permissionMode "full". */
   bypassPermissions: boolean;
   /** Permission level. Single source of truth for the bypass dropdowns; bypassPermissions and
-   *  confirmToolCalls mirror it. "full" is session-only. */
+   *  confirmToolCalls mirror it. Every level, "full" included, survives a restart. */
   permissionMode: PermissionMode;
-  sandboxLevel: SandboxLevel;
   /** Whether the bypass warning dialog is open. Lifted out of the composer menu so confirming
    *  it does not leave the menu frozen. */
   bypassConfirmOpen: boolean;
   /** Per-chat tool names auto-approved via "Always allow", keyed by UI confirmation scope
-   *  rather than the backend sandbox session id. Not persisted. */
+   *  rather than the backend workdir session id. Not persisted. */
   alwaysAllowToolsBySession: Map<string, Set<string>>;
   /** Calls paused for allow/deny, keyed by scoped frontend tool-call id. Each carries the
    *  backend `approvalId` and the run's `sessionId` so the exact call resolves;
@@ -2781,7 +2786,6 @@ type ChatRuntimeStore = {
   setConfirmToolCalls: (enabled: boolean) => void;
   setBypassPermissions: (enabled: boolean) => void;
   setPermissionMode: (mode: PermissionMode) => void;
-  setSandboxLevel: (level: SandboxLevel) => void;
   setBypassConfirmOpen: (open: boolean) => void;
   allowToolAlways: (sessionId: string, toolName: string) => void;
   setToolConfirmation: (
@@ -2897,7 +2901,6 @@ type ScalarSettingKey =
   | "mcpEnabledForChat"
   | "confirmToolCalls"
   | "permissionMode"
-  | "sandboxLevel"
   | "ragSource"
   | "ragMode"
   | "ragTopK"
@@ -2949,7 +2952,6 @@ const SCALAR_SETTING_KEYS = [
   "mcpEnabledForChat",
   "confirmToolCalls",
   "permissionMode",
-  "sandboxLevel",
   "ragSource",
   "ragMode",
   "ragTopK",
@@ -3419,15 +3421,6 @@ function externalCheckpointRefusesDeepResearch(
   );
 }
 
-function localCheckpointRefusesDeepResearch(state: ChatRuntimeStore): boolean {
-  return Boolean(
-    state.params.checkpoint &&
-      !state.modelLoading &&
-      !isExternalModelId(state.params.checkpoint) &&
-      !state.supportsTools,
-  );
-}
-
 /** Kimi's $web_search requires thinking disabled and the composer keeps the pills exclusive,
  *  so a restore must too, or a chat stored elsewhere sends a combination Kimi rejects. */
 function isKimiCheckpoint(checkpoint: string | null | undefined): boolean {
@@ -3572,8 +3565,8 @@ function getHydratedSettingsState(
   }
   for (const key of SCALAR_SETTING_KEYS) {
     const value = settings[key];
-    // Full access is session-only, so a stored level must not silently drop the sandbox bypass
-    // the user accepted a warning for.
+    // Full access stays live until the user changes it, so a stored level must not silently drop
+    // it on hydration.
     if (
       state.permissionMode === "full" &&
       (key === "permissionMode" || key === "confirmToolCalls")
@@ -4341,9 +4334,9 @@ export const useChatRuntimeStore = create<ChatRuntimeStore>((set, get) => ({
   supportsBuiltinCodeExecution: false,
   supportsBuiltinImageGeneration: false,
   supportsBuiltinWebFetch: false,
-  toolsEnabled: loadBool(CHAT_TOOLS_ENABLED_KEY, false),
+  toolsEnabled: loadBool(CHAT_TOOLS_ENABLED_KEY, true),
   keepModelsLoaded: false,
-  codeToolsEnabled: loadBool(CHAT_CODE_TOOLS_ENABLED_KEY, false),
+  codeToolsEnabled: loadBool(CHAT_CODE_TOOLS_ENABLED_KEY, true),
   codeToolsDeclinedUnderFullAccess: false,
   imageToolsEnabled: loadBool(CHAT_IMAGE_TOOLS_ENABLED_KEY, false),
   deepResearchEnabled: loadBool(CHAT_DEEP_RESEARCH_ENABLED_KEY, false),
@@ -4360,10 +4353,9 @@ export const useChatRuntimeStore = create<ChatRuntimeStore>((set, get) => ({
   // mirrors permissionMode so both controls agree on load.
   confirmToolCalls:
     INITIAL_PERMISSION_MODE === "ask" || INITIAL_PERMISSION_MODE === "auto",
-  // no stored bypass: sandbox and gate removal needs a warning each session.
-  bypassPermissions: false,
+  // Restored with the level: the user picked Agent Full Core until they change it.
+  bypassPermissions: INITIAL_PERMISSION_MODE === "full",
   permissionMode: INITIAL_PERMISSION_MODE,
-  sandboxLevel: loadSandboxLevel(),
   bypassConfirmOpen: false,
   alwaysAllowToolsBySession: new Map<string, Set<string>>(),
   toolConfirmations: {},
@@ -5234,11 +5226,12 @@ export const useChatRuntimeStore = create<ChatRuntimeStore>((set, get) => ({
         // Full access was accepted through a warning dialog, so a switch must not drop it. The chat
         // is still pinned with the level underneath, or it would store no level at all.
         if (key === "permissionMode" && state.permissionMode === "full") {
-          const underneath =
+          // Thread scope never stores "full" (it is the live, global level), so whatever this
+          // falls back to is the level underneath.
+          applied[key] =
             stored?.permissionMode ??
             globalThreadScopedDefaults?.permissionMode ??
-            loadPermissionMode();
-          if (underneath !== "full") applied[key] = underneath;
+            loadPermissionModeBelowFull();
           continue;
         }
         // A key the snapshot omits falls back to the defaults, not to the outgoing chat's value.
@@ -5600,7 +5593,7 @@ export const useChatRuntimeStore = create<ChatRuntimeStore>((set, get) => ({
       saveBool(CHAT_DEEP_RESEARCH_ENABLED_KEY, deepResearchEnabled);
       // The level this chat carries, or the global one when it carries none.
       const permissionMode =
-        threadScopedOverride("permissionMode") ?? loadPermissionMode();
+        threadScopedOverride("permissionMode") ?? loadPermissionModeBelowFull();
       if (deepResearchEnabled) {
         saveBool(CHAT_TOOLS_ENABLED_KEY, false);
         saveBool(CHAT_IMAGE_TOOLS_ENABLED_KEY, false);
@@ -5708,14 +5701,9 @@ export const useChatRuntimeStore = create<ChatRuntimeStore>((set, get) => ({
         queuedSettingsEpoch: state.queuedSettingsEpoch + 1,
       };
     }),
-  setSandboxLevel: (sandboxLevel) =>
-    set((state) => {
-      saveString(CHAT_SANDBOX_LEVEL_KEY, sandboxLevel);
-      return { sandboxLevel, queuedSettingsEpoch: state.queuedSettingsEpoch + 1 };
-    }),
   setPermissionMode: (permissionMode) =>
     set((state) => {
-      // "full" is session-only (see init); ask/auto/off persist and keep the legacy confirm toggle in sync.
+      // Every level persists, "full" included, and ask/auto/off keep the legacy confirm toggle in sync.
       savePermissionMode(permissionMode);
       if (permissionMode === "full") {
         // Full access sends confirm_tool_calls=false; keep the store flag in sync so metadata does
@@ -5742,11 +5730,12 @@ export const useChatRuntimeStore = create<ChatRuntimeStore>((set, get) => ({
       };
     }),
   setBypassPermissions: (bypassPermissions) =>
-    // Deliberately not persisted (see init): a reload must not keep the sandbox/confirmation
-    // bypass unaccepted. Turning it off returns to the last persisted level.
+    // Persisted with the level, like setPermissionMode: the choice survives a restart until the
+    // user changes it. Turning it off returns to the level underneath.
     set((state) => {
       if (bypassPermissions) {
         // Full access never prompts; mirror confirm_tool_calls=false so metadata agrees.
+        savePermissionMode("full");
         saveBool(CHAT_DEEP_RESEARCH_ENABLED_KEY, false);
         return {
           bypassPermissions,
@@ -5759,7 +5748,8 @@ export const useChatRuntimeStore = create<ChatRuntimeStore>((set, get) => ({
       }
       // Back to the level this chat carries, or the global one when it carries none.
       const permissionMode =
-        threadScopedOverride("permissionMode") ?? loadPermissionMode();
+        threadScopedOverride("permissionMode") ?? loadPermissionModeBelowFull();
+      savePermissionMode(permissionMode);
       return {
         bypassPermissions,
         permissionMode,

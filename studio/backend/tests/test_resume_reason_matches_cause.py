@@ -33,14 +33,14 @@ def _row(tmp_path, **overrides):
     row = {
         "id": "run-1",
         "status": "error",
-        "model_name": "LAiM/Llama-3.2-1B-Instruct",
+        "model_name": "unsloth/Llama-3.2-1B-Instruct",
         "dataset_name": "yahma/alpaca-cleaned",
         "started_at": "2026-08-06T00:00:00Z",
         "output_dir": str(tmp_path / "run-1"),
         # A real run's config: the trained model plus what initialize_resource_provenance writes.
         "config_json": json.dumps(
             {
-                "model_name": "LAiM/Llama-3.2-1B-Instruct",
+                "model_name": "unsloth/Llama-3.2-1B-Instruct",
                 RESOURCE_PROVENANCE_KEY: {"version": 1, "status": "pending"},
             }
         ),
@@ -84,7 +84,7 @@ def test_an_intact_checkpoint_still_gets_the_provenance_reason(tmp_path, unresum
             tmp_path,
             config_json = json.dumps(
                 {
-                    "model_name": "LAiM/Llama-3.2-1B-Instruct",
+                    "model_name": "unsloth/Llama-3.2-1B-Instruct",
                     "hf_dataset": "yahma/alpaca-cleaned",
                     RESOURCE_PROVENANCE_KEY: {
                         "version": 1,

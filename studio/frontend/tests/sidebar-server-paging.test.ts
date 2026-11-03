@@ -15,7 +15,7 @@ import {
   RowPager,
 } from "../src/features/chat/utils/sidebar-row-pager.ts";
 import * as rowQuery from "../src/features/chat/utils/sidebar-row-query.ts";
-import { readSrc } from "./helpers/kit.ts";
+import { readSrc, readSrcExpanded } from "./helpers/kit.ts";
 import { loadWithStubs } from "./helpers/module-stubs.ts";
 
 const {
@@ -447,7 +447,7 @@ test("an old server's folders take their activity from the full list the lists a
   // t4 is the newest unarchived chat in "p"; t44 is archived and does not count
   assert.deepEqual([...(await mod.readFullListProjectActivity())], [["p", 996]]);
   assert.equal(fullReads(), 1, "the folder activity read the history again");
-  const projects = readSrc("features/chat/hooks/use-chat-projects.ts");
+  const projects = readSrcExpanded("features/chat/hooks/use-chat-projects.ts");
   assert.match(projects, /if \(projects\.every\(\(project\) => "lastActivityAt" in project\)\) return projects;/);
   assert.match(projects, /nextProjects = Array\.isArray\(next\) \? await withChatActivity\(next\) : \[\];/);
 });
@@ -515,7 +515,7 @@ test("a loaded page with more on the server ends in the sentinel, not the end st
 });
 
 test("a server page is asked for only after a scroll, one page per scroll", () => {
-  const src = readSrc("components/progressive-rows.tsx");
+  const src = readSrcExpanded("components/progressive-rows.tsx");
   const advance = src.slice(
     src.indexOf("const advance = useCallback("),
     src.indexOf("// re-observe"),
@@ -547,7 +547,7 @@ test("a server page is asked for only after a scroll, one page per scroll", () =
 });
 
 test("the sidebar reads every chat list through the pager, twenty rows at a time", () => {
-  const src = readSrc("components/app-sidebar.tsx");
+  const src = readSrcExpanded("components/app-sidebar.tsx");
   assert.doesNotMatch(src, /useChatSidebarItems\(/);
   assert.match(src, /const RECENTS_PAGE_SIZE = SIDEBAR_PAGE_SIZE;/);
   assert.match(src, /= useSidebarRowPages\(\n\s*chatRowSlots,/);
@@ -566,7 +566,7 @@ test("the sidebar reads every chat list through the pager, twenty rows at a time
     );
   }
   assert.equal(
-    readSrc("features/chat/utils/sidebar-row-query.ts").includes(
+    readSrcExpanded("features/chat/utils/sidebar-row-query.ts").includes(
       "SIDEBAR_PAGE_SIZE = 20",
     ),
     true,
@@ -578,7 +578,7 @@ test("the thread-row lookup reads the key and the per-request cap the route defi
     new URL("../../backend/routes/chat_history.py", import.meta.url),
     "utf8",
   );
-  const client = readSrc("features/chat/api/chat-api.ts");
+  const client = readSrcExpanded("features/chat/api/chat-api.ts");
   assert.match(route, /rowIdByThreadId: dict\[str, str\]/);
   assert.match(client, /data\.rowIdByThreadId/);
   const serverCap = route.match(/_SIDEBAR_THREAD_ROWS_MAX = (\d+)/)?.[1];
@@ -588,7 +588,7 @@ test("the thread-row lookup reads the key and the per-request cap the route defi
 });
 
 test("a drag in a partly loaded list shows its order at once and saves it once every id is known", () => {
-  const src = readSrc("components/app-sidebar.tsx");
+  const src = readSrcExpanded("components/app-sidebar.tsx");
   const body = src.slice(
     src.indexOf("const writeManualOrder = useCallback("),
     src.indexOf("// Escape leaves a selection"),
@@ -614,7 +614,7 @@ test("the full-list fallback finds a compare row through one of its pane threads
 });
 
 test("the last 20 opened chats and every running one load their rows, so row lookups never miss them", () => {
-  const src = readSrc("components/app-sidebar.tsx");
+  const src = readSrcExpanded("components/app-sidebar.tsx");
   assert.match(
     src,
     /\[slotActiveId, \.\.\.openedChatIds, \.\.\.runningThreadKey\.split\("\\n"\)\]\.filter\(/,
@@ -637,7 +637,7 @@ test("the last 20 opened chats and every running one load their rows, so row loo
 });
 
 test("follow-ups that main got from the full list still happen with paged lists", () => {
-  const src = readSrc("components/app-sidebar.tsx");
+  const src = readSrcExpanded("components/app-sidebar.tsx");
   // a chord at the last loaded row of any paged list reads its next page; a click there does not
   assert.match(src, /chordTargetRef\.current = item\?\.id \?\? null;\n\s*openChatItemById\(item\);/);
   assert.equal(src.match(/if \(!activeThreadId \|\| chordTargetRef\.current !== activeThreadId\) return;/g)?.length, 2);
@@ -646,7 +646,7 @@ test("follow-ups that main got from the full list still happen with paged lists"
   const write = src.slice(src.indexOf("const writeManualOrder = useCallback("));
   assert.ok(write.indexOf("writes.set(scope, generation);") < write.indexOf("const slot ="));
   // project activity follows chat activity, not only project edits
-  const projects = readSrc("features/chat/hooks/use-chat-projects.ts");
+  const projects = readSrcExpanded("features/chat/hooks/use-chat-projects.ts");
   assert.match(projects, /const onActivity = \(\) => onChatActivity\(\);/);
   assert.match(projects, /window\.addEventListener\(CHAT_HISTORY_UPDATED_EVENT, onActivity\);/);
   assert.match(projects, /window\.removeEventListener\(CHAT_HISTORY_UPDATED_EVENT, onActivity\);/);
@@ -654,7 +654,7 @@ test("follow-ups that main got from the full list still happen with paged lists"
 });
 
 test("\"No chats yet\" asks for any chat, archived or in an unloaded folder, before it shows", () => {
-  const src = readSrc("components/app-sidebar.tsx");
+  const src = readSrcExpanded("components/app-sidebar.tsx");
   assert.match(src, /\[sidebarRowQuery\(\{\}\), sidebarRowQuery\(\{ archived: true \}\)\]/);
   // and shows nothing until a probe has answered, so it never flashes while one is in flight
   assert.match(src, /useState<boolean \| null>\(null\);/);
@@ -663,7 +663,7 @@ test("\"No chats yet\" asks for any chat, archived or in an unloaded folder, bef
 });
 
 test("a hidden or hand-ordered section still loads its newest chat, which orders Move to", () => {
-  const src = readSrc("components/app-sidebar.tsx");
+  const src = readSrcExpanded("components/app-sidebar.tsx");
   assert.match(src, /\(hiddenSectionSet\.has\(section\.id\) \|\|\n\s*section\.sort === "manual" \|\|\n\s*ids\.length < members\.length\)/);
   assert.match(src, /slots\[`latest:\$\{section\.id\}`\] = \{\n\s*initialLimit: 1,\n\s*query: sidebarRowQuery\(\{ includeIds: members \}\),\n\s*lookupOnly: true,/);
   const latest = src.indexOf("slots[`latest:${section.id}`]");
@@ -673,12 +673,12 @@ test("a hidden or hand-ordered section still loads its newest chat, which orders
 });
 
 test("a failed first read never shows \"No chats yet\"; it waits for a read that worked, as main did", () => {
-  const src = readSrc("components/app-sidebar.tsx");
+  const src = readSrcExpanded("components/app-sidebar.tsx");
   assert.match(src, /const chatItemsLoaded = Boolean\(recentsPages\?\.loaded && !recentsPages\.error\);/);
 });
 
 test("a section's Mark all read and Archive act on the whole section, not its loaded pages", () => {
-  const src = readSrc("components/app-sidebar.tsx");
+  const src = readSrcExpanded("components/app-sidebar.tsx");
   const menu = src.slice(src.indexOf("const unreadInSection"), src.indexOf("const unreadInSection") + 1600);
   assert.match(menu, /inSection\(unreadRowIds\[threadId\] \?\? threadId\)/);
   assert.match(menu, /onSelect=\{\(\) => clearThreadsUnread\(unreadInSection\)\}/);
@@ -686,18 +686,18 @@ test("a section's Mark all read and Archive act on the whole section, not its lo
 });
 
 test("only folder rows on screen read their chats", () => {
-  const src = readSrc("components/app-sidebar.tsx");
+  const src = readSrcExpanded("components/app-sidebar.tsx");
   assert.match(src, /!collapsedProjectIds\.has\(project\.id\) && mountedFolderIds\.has\(project\.id\)/);
   assert.match(src, /<MountedFolder id=\{project\.id\} onChange=\{setFolderMounted\} \/>/);
 });
 
 test("a list that shrank while a page was read frees its paging latch", () => {
-  const src = readSrc("components/progressive-rows.tsx");
+  const src = readSrcExpanded("components/progressive-rows.tsx");
   assert.match(src, /if \(itemCountRef\.current <= fetchFromRef\.current\) fetchingRef\.current = false;/);
 });
 
 test("a running Compare pane keeps its opened pair row, which is opened by pair id", () => {
-  const src = readSrc("components/app-sidebar.tsx");
+  const src = readSrcExpanded("components/app-sidebar.tsx");
   assert.match(src, /if \(item\.threadIds\?\.some\(\(id\) => running\.has\(id\)\)\) rows\.add\(item\.id\);/);
   assert.match(src, /const running = new Set\(runningRowKey\.split\("\\n"\)\);\n\s*setOpenedChatIds\(\(opened\) => keepOpenedChats\(touchOpenedChat\(opened, slotActiveId\), running\)\);/);
 });
@@ -772,7 +772,7 @@ test("a drag saved from a partly loaded manual list keeps held-back rows where t
 });
 
 test("a training refresh past one request re-reads from the top if the run count moved under it", () => {
-  const src = readSrc("features/training/hooks/use-training-history-sidebar.ts");
+  const src = readSrcExpanded("features/training/hooks/use-training-history-sidebar.ts");
   assert.match(src, /for \(let attempt = 0; attempt < 3; attempt\+\+\) \{/);
   assert.match(src, /shifted \|\|= result\.total !== firstTotal \|\| fresh\.length < result\.runs\.length;/);
   assert.match(src, /runs\.push\(\.\.\.fresh\);/);
@@ -780,7 +780,7 @@ test("a training refresh past one request re-reads from the top if the run count
 });
 
 test("Pinned and manual sections hold rows past their last loaded chat, and a drag saves around them", () => {
-  const src = readSrc("components/app-sidebar.tsx");
+  const src = readSrcExpanded("components/app-sidebar.tsx");
   assert.match(src, /holdRowsPastLoadedChats\(\n\s*applyManualOrder\(rows, order, \(row\) => row\.id\),\n\s*order,\n\s*Boolean\(pinnedHasMore\),/);
   assert.match(src, /holdRowsPastLoadedChats\(\n\s*applyManualOrder\(list, order, \(row\) => row\.id\),\n\s*order,\n\s*sectionHasMore\.has\(section\.id\),/);
   assert.match(src, /settle\(settledManualOrder\(ids, all, current\)\);/);
@@ -804,19 +804,19 @@ test("a page asked for just before a history refresh is read by that refresh ins
 });
 
 test("a Compare row's panes are repaired with their own titles, not the row's", async () => {
-  const src = readSrc("features/chat/hooks/use-sidebar-row-pages.ts");
+  const src = readSrcExpanded("features/chat/hooks/use-sidebar-row-pages.ts");
   assert.match(src, /title: row\.threadTitles\?\.\[index\] \?\? row\.title,/);
 });
 
 test("a training refresh moves its offset by the server rows read, and a repeated run restarts it", () => {
-  const src = readSrc("features/training/hooks/use-training-history-sidebar.ts");
+  const src = readSrcExpanded("features/training/hooks/use-training-history-sidebar.ts");
   assert.match(src, /offset \+= result\.runs\.length;/);
   assert.match(src, /shifted \|\|= result\.total !== firstTotal \|\| fresh\.length < result\.runs\.length;/);
   assert.match(src, /if \(result\.runs\.length === 0 \|\| offset >= result\.total\) break;/);
 });
 
 test("a failed empty-history probe stops an older answer from showing \"No chats yet\"", () => {
-  const src = readSrc("components/app-sidebar.tsx");
+  const src = readSrcExpanded("components/app-sidebar.tsx");
   assert.match(src, /\.catch\(\(\) => \{\n\s*if \(!cancelled && mine === latest\) setHasUnlistedChats\(null\);\n\s*\}\);/);
   assert.match(src, /const mine = \+\+latest;/);
   assert.match(src, /if \(!cancelled && mine === latest\) \{\n\s*setHasUnlistedChats\(pages\.some/);
@@ -841,13 +841,13 @@ test("Pinned and custom sections mount every row they have, so navigation sees o
     );
   assert.equal(html(false).match(/data-row=/g)?.length, 20);
   assert.equal(html(true).match(/data-row=/g)?.length, 27);
-  const src = readSrc("components/app-sidebar.tsx");
+  const src = readSrcExpanded("components/app-sidebar.tsx");
   assert.match(src, /items=\{pinnedRows\}\n\s*pageSize=\{SIDEBAR_PAGE_SIZE\}\n\s*mountAll\n/);
   assert.match(src, /items=\{rows\}\n\s*pageSize=\{SIDEBAR_PAGE_SIZE\}\n\s*mountAll\n/);
 });
 
 test("an empty spell starts with no answer from an earlier one, from its first paint", () => {
-  const src = readSrc("components/app-sidebar.tsx");
+  const src = readSrcExpanded("components/app-sidebar.tsx");
   assert.match(src, /if \(!sidebarLooksEmpty\) \{\n\s*setHasUnlistedChats\(null\);\n\s*return;\n\s*\}/);
 });
 

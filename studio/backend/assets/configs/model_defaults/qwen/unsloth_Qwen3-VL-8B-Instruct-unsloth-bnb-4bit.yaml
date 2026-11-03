@@ -1,6 +1,6 @@
-# Model defaults for LAiM/Qwen3-VL-8B-Instruct
+# Model defaults for unsloth/Qwen3-VL-8B-Instruct
 # Based on Qwen3_VL_(8B)-Vision.ipynb
-# Also applies to: Qwen/Qwen3-VL-8B-Instruct-FP8, LAiM/Qwen3-VL-8B-Instruct-FP8, LAiM/Qwen3-VL-8B-Instruct, Qwen/Qwen3-VL-8B-Instruct, LAiM/Qwen3-VL-8B-Instruct-bnb-4bit
+# Also applies to: Qwen/Qwen3-VL-8B-Instruct-FP8, unsloth/Qwen3-VL-8B-Instruct-FP8, unsloth/Qwen3-VL-8B-Instruct, Qwen/Qwen3-VL-8B-Instruct, unsloth/Qwen3-VL-8B-Instruct-bnb-4bit
 # added inference parameters from LAiM guides
 
 training:
@@ -17,7 +17,7 @@ training:
   random_seed: 3407
   packing: false
   train_on_completions: true
-  gradient_checkpointing: "LAiM"
+  gradient_checkpointing: "unsloth"
   optim: "adamw_8bit"
   lr_scheduler_type: "linear"
 

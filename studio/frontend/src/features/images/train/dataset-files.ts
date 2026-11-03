@@ -3,6 +3,8 @@
 
 // Mirrors _DIFFUSION_DATASET_IMAGE_EXTS, _CLIP_EXTS and _TEXT_EXTS in backend/routes/training.py.
 export const DATASET_IMAGE_EXTS = [".png", ".jpg", ".jpeg", ".webp", ".bmp"];
+import { translate } from "@/i18n";
+
 // video containers, for the families that train from clips rather than stills.
 export const DATASET_CLIP_EXTS = [".mp4", ".mov", ".mkv", ".webm", ".m4v", ".avi"];
 // the trainable unit, whichever kind: everything that pairs with a <stem>.txt caption.
@@ -307,7 +309,7 @@ export async function filesFromDataTransfer(transfer: DataTransfer): Promise<Fil
   if (entries.length === 0) return Array.from(transfer.files ?? []);
   if (entries.length < fileItems) {
     // some items resolved and some did not, so the walk would quietly upload part of the drop.
-    throw new Error("Some dropped items could not be read.");
+    throw new Error(translate("uxImages.someDroppedItemsCouldpfjhu"));
   }
   const out: File[] = [];
   // no partial result: a half-walked folder would upload as if it were the whole dataset.

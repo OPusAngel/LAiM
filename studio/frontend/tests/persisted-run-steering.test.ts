@@ -4,6 +4,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import ts from "@typescript/typescript6";
+
+import { enTranslate } from "./helpers/module-stubs.ts";
+
+// A slice of src run through new Function has no module table, so the catalog stand-in goes in as a global.
+Object.assign(globalThis, { translate: enTranslate });
 import { readSrc } from "./helpers/kit.ts";
 
 // Execute the production adapter wrapper around a controlled pending history write.

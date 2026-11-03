@@ -132,8 +132,8 @@ for (const modelFormat of ["gguf", "safetensors"] as const) {
   test(`keeps a selected local HF-cache ${modelFormat} partial stable across resume and cancel`, () => {
     const repoId =
       modelFormat === "safetensors"
-        ? "LAiM/gemma-3-270m-it"
-        : "LAiM/gemma-3-270m-it-GGUF";
+        ? "unsloth/gemma-3-270m-it"
+        : "unsloth/gemma-3-270m-it-GGUF";
     const localId = `hf_cache:${modelFormat}:${encodeURIComponent(repoId)}`;
     const liveId = optimisticInventoryId(modelFormat, repoId);
     const local = buildLocalInventoryRows([

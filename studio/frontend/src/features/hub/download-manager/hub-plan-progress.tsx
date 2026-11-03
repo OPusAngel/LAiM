@@ -7,6 +7,8 @@ import {
 } from "./download-manager-controller";
 import { DownloadProgressBar } from "./download-progress-bar";
 import type { Plan } from "./use-hub-download-queue";
+import { translate } from "@/i18n";
+
 export function HubPlanProgress({ plan }: { plan: Plan }) {
   const entry = plan.remaining[0];
   const job = useDownloadManagerStore((s) =>
@@ -32,8 +34,8 @@ export function HubPlanProgress({ plan }: { plan: Plan }) {
         <span>
           {job
             ? entry.checkpoint !== false
-              ? "Downloading model file"
-              : "Downloading required files"
+              ? translate("uxHub.downloadingModelFilea7cvs")
+              : translate("uxHub.downloadingRequiredFilesbsw76")
             : "Queued"}
         </span>
         {job && (
@@ -41,9 +43,7 @@ export function HubPlanProgress({ plan }: { plan: Plan }) {
             type="button"
             disabled={job.state === "cancelling"}
             onClick={() => void downloadManager.cancel(job.key)}
-          >
-            Cancel download
-          </button>
+          >{translate("uxHub.cancelDownload2blbj")}</button>
         )}
       </div>
       <DownloadProgressBar

@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import { formatBytes } from "@/features/hub/lib/format";
 import { fetchDeleteImpact, type DeleteImpact } from "../inventory";
 import { useHfTokenStore } from "../stores/hf-token-store";
+import { translate } from "@/i18n";
+
 
 /** preview reclaimed and shared companion bytes; return `null` so confirmation stays available. */
 export function useDeleteImpact(
@@ -46,10 +48,7 @@ export function DeleteImpactSummary({ impact }: { impact: DeleteImpact | null })
   if (!impact) return null;
   if (impact.blocked_by.length > 0) {
     return (
-      <span className="mt-2 block text-ui-12p5 text-destructive">
-        These are shared assets that {joinNames(impact.blocked_by)} still needs, so they cannot
-        be removed yet. Delete those models first.
-      </span>
+      <span className="mt-2 block text-ui-12p5 text-destructive">{translate("uxHub.theseAreSharedAssetszqkx1", { p1: joinNames(impact.blocked_by) })}</span>
     );
   }
   const retained = impact.retained_companions.reduce((sum, c) => sum + c.size_bytes, 0);
@@ -57,13 +56,9 @@ export function DeleteImpactSummary({ impact }: { impact: DeleteImpact | null })
   return (
     <span className="mt-2 block space-y-1 text-ui-12p5">
       {impact.cache_path && (
-        <span className="block break-all text-muted-foreground" data-testid="delete-impact-folder">
-          Folder: {impact.cache_path}
-        </span>
+        <span className="block break-all text-muted-foreground" data-testid="delete-impact-folder">{translate("uxHub.folderlq847", { p1: impact.cache_path })}</span>
       )}
-      <span className="block text-foreground" data-testid="delete-impact-reclaimed">
-        Frees {formatBytes(impact.reclaimed_bytes)} of disk space.
-      </span>
+      <span className="block text-foreground" data-testid="delete-impact-reclaimed">{translate("uxHub.freesOfDiskSpace1o6pi", { p1: formatBytes(impact.reclaimed_bytes) })}</span>
       {retained > 0 ? (
         <span className="block text-muted-foreground" data-testid="delete-impact-retained">
           {formatBytes(retained)} of shared assets stay on disk:{" "}
@@ -75,11 +70,7 @@ export function DeleteImpactSummary({ impact }: { impact: DeleteImpact | null })
         </span>
       ) : null}
       {freeable > 0 ? (
-        <span className="block text-muted-foreground" data-testid="delete-impact-freeable">
-          This also leaves {formatBytes(freeable)} of shared assets (
-          {joinNames(impact.freeable_companions.map((c) => c.repo_id))}) that nothing else
-          needs. Remove them with Free up space on the On Device tab.
-        </span>
+        <span className="block text-muted-foreground" data-testid="delete-impact-freeable">{translate("uxHub.thisAlsoLeavesOfj8tzm", { p1: formatBytes(freeable), p2: joinNames(impact.freeable_companions.map((c) => c.repo_id)) })}</span>
       ) : null}
     </span>
   );

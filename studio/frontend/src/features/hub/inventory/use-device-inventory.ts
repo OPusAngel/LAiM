@@ -21,6 +21,8 @@ import { useInventoryVersion } from "../stores/inventory-events";
 import { useCallback, useEffect, useMemo } from "react";
 import { create } from "zustand";
 import { useShallow } from "zustand/react/shallow";
+import { translate } from "@/i18n";
+
 import {
   inventoryRefreshDecision,
   nextRevalidationStamp,
@@ -137,19 +139,19 @@ function fetchErrorMessage(
   }
   switch (source) {
     case "cachedGguf":
-      return "Couldn't scan cached GGUF models";
+      return translate("uxHub.couldnTScanCached1upns");
     case "cachedModels":
-      return "Couldn't scan cached Hugging Face models";
+      return translate("uxHub.couldnTScanCached5z877");
     case "cachedDatasets":
-      return "Couldn't scan cached datasets";
+      return translate("uxHub.couldnTScanCached1v47v");
     case "localModels":
-      return "Couldn't scan local models";
+      return translate("uxHub.couldnTScanLocalo2yog");
     case "LAiMModels":
-      return "Couldn't scan trained and exported models";
+      return translate("uxHub.couldnTScanTraineddiqdd");
     case "localDatasets":
-      return "Couldn't scan local datasets";
+      return translate("uxHub.couldnTScanLocalqhxp4");
     default:
-      return "Couldn't scan inventory";
+      return translate("uxHub.couldnTScanInventorym0099");
   }
 }
 
@@ -160,7 +162,7 @@ function logInventorySourceFailure(
   if (!import.meta.env?.DEV) {
     return;
   }
-  console.warn(`Inventory source "${source}" failed to refresh:`, error);
+  console.warn(translate("uxHub.inventorySourceFailedTobz42l", { p1: source }), error);
 }
 
 async function runSourceFetch<K extends DeviceInventorySource>(
@@ -207,7 +209,7 @@ async function runSourceFetch<K extends DeviceInventorySource>(
         scanConfirmed: true,
       };
     default:
-      throw new Error("Unsupported inventory source");
+      throw new Error(translate("uxHub.unsupportedInventorySource8kr8e"));
   }
 }
 

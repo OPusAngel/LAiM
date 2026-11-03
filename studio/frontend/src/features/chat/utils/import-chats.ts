@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { isTauri } from "@/lib/api-base";
 import { pickNativeChatImport } from "@/lib/native-files";
 import { toast } from "@/lib/toast";
@@ -28,7 +29,7 @@ let running = false;
 /** Imports a file, counting up in a toast; the chats are filed in the target's section. */
 export async function runChatImport(source: ImportSource, target: ChatImportTarget): Promise<void> {
   running = true;
-  const toastId = toast.loading("Importing chats...");
+  const toastId = toast.loading(translate("uxChat.importingChatsir79a"));
   try {
     const threadIds: string[] = [];
     const { imported, failed } = await importConversationsFromSource(
@@ -40,19 +41,21 @@ export async function runChatImport(source: ImportSource, target: ChatImportTarg
           const percent = totalBytes
             ? Math.min(100, Math.round((bytesRead / totalBytes) * 100))
             : 0;
-          toast.loading(`Importing chats: ${done} so far (${percent}%)...`, { id: toastId });
+          toast.loading(translate("uxChat.importingChatsSoFar04agc", { p1: done, p2: percent }), { id: toastId });
         },
       },
     );
     if (imported === 0 && failed === 0) {
-      toast.info("No conversations found in file.", { id: toastId });
+      toast.info(translate("settings.chat.importNoConversations"), { id: toastId });
       return;
     }
     if (imported === 0) {
       // Nothing was created, so however the count is phrased this is a failure.
-      toast.error("Import failed.", {
+      toast.error(translate("settings.chat.importFailed"), {
         id: toastId,
-        description: `${failed} conversation${failed === 1 ? "" : "s"} could not be saved.`,
+        description: translate("uxChat.conversationsCouldNotSaveZ49dq", {
+          p1: failed,
+        }),
       });
       return;
     }
@@ -62,12 +65,12 @@ export async function runChatImport(source: ImportSource, target: ChatImportTarg
     const dest = target.name ?? "Recents";
     toast.success(
       failed > 0
-        ? `Imported ${imported} conversation${imported === 1 ? "" : "s"} to ${dest}; ${failed} could not be saved.`
-        : `Imported ${imported} conversation${imported === 1 ? "" : "s"} to ${dest}.`,
+        ? translate("uxChat.importedConversationsToCouldfi72u", { p1: imported, p2: imported === 1 ? "" : "s", p3: dest, p4: failed })
+        : translate("uxChat.importedConversationsToxwxzl", { p1: imported, p2: imported === 1 ? "" : "s", p3: dest }),
       { id: toastId },
     );
   } catch (error) {
-    toast.error("Import failed.", {
+    toast.error(translate("settings.chat.importFailed"), {
       id: toastId,
       description: error instanceof Error ? error.message : undefined,
     });
@@ -98,7 +101,7 @@ export async function pickAndImportChats(target: ChatImportTarget): Promise<void
     const selected = await pickNativeChatImport();
     if (selected) await runChatImport(nativeImportSource(selected), target);
   } catch (error) {
-    toast.error("Import failed.", {
+    toast.error(translate("settings.chat.importFailed"), {
       description: error instanceof Error ? error.message : String(error),
     });
   }

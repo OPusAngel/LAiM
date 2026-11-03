@@ -79,7 +79,7 @@ def test_scan_checkpoints_uses_output_dir_history_for_base_model(tmp_path, monke
             """,
             (
                 "run-1",
-                "LAiM/Llama-3.2-3B-Instruct",
+                "unsloth/Llama-3.2-3B-Instruct",
                 "{}",
                 str(run_dir.resolve()),
                 "2026-04-09T00:00:00Z",
@@ -97,7 +97,7 @@ def test_scan_checkpoints_uses_output_dir_history_for_base_model(tmp_path, monke
 
     models = checkpoints_module.scan_checkpoints(outputs_dir = str(outputs_dir))
 
-    assert models[0][2]["base_model"] == "LAiM/Llama-3.2-3B-Instruct"
+    assert models[0][2]["base_model"] == "unsloth/Llama-3.2-3B-Instruct"
 
 
 def test_scan_checkpoints_matches_project_suffixed_default_dir_against_history(
@@ -105,7 +105,7 @@ def test_scan_checkpoints_matches_project_suffixed_default_dir_against_history(
 ):
     outputs_dir = _make_outputs_dir(tmp_path, monkeypatch)
     run_name = build_default_output_dir_name(
-        "LAiM/Llama-3.2-3B-Instruct",
+        "unsloth/Llama-3.2-3B-Instruct",
         "Customer Support",
         timestamp = 1771227800,
     )
@@ -124,7 +124,7 @@ def test_scan_checkpoints_matches_project_suffixed_default_dir_against_history(
             """,
             (
                 "run-2",
-                "LAiM/Llama-3.2-3B-Instruct",
+                "unsloth/Llama-3.2-3B-Instruct",
                 json.dumps({"project_name": "Customer Support"}),
                 None,
                 "2026-04-09T00:00:00Z",
@@ -142,13 +142,13 @@ def test_scan_checkpoints_matches_project_suffixed_default_dir_against_history(
 
     models = checkpoints_module.scan_checkpoints(outputs_dir = str(outputs_dir))
 
-    assert models[0][2]["base_model"] == "LAiM/Llama-3.2-3B-Instruct"
+    assert models[0][2]["base_model"] == "unsloth/Llama-3.2-3B-Instruct"
 
 
 def test_scan_checkpoints_strips_project_suffix_without_history(tmp_path, monkeypatch):
     outputs_dir = _make_outputs_dir(tmp_path, monkeypatch)
     run_name = build_default_output_dir_name(
-        "LAiM/Llama-3.2-3B-Instruct",
+        "unsloth/Llama-3.2-3B-Instruct",
         "Customer Support",
         timestamp = 1771227800,
     )
@@ -166,7 +166,7 @@ def test_scan_checkpoints_strips_project_suffix_without_history(tmp_path, monkey
 
     models = checkpoints_module.scan_checkpoints(outputs_dir = str(outputs_dir))
 
-    assert models[0][2]["base_model"] == "LAiM/Llama-3.2-3B-Instruct"
+    assert models[0][2]["base_model"] == "unsloth/Llama-3.2-3B-Instruct"
 
 
 def test_scan_checkpoints_preserves_project_marker_in_model_without_history(tmp_path, monkeypatch):
@@ -208,7 +208,7 @@ def test_scan_checkpoints_preserves_legacy_folder_name_fallback(tmp_path, monkey
 
     models = checkpoints_module.scan_checkpoints(outputs_dir = str(outputs_dir))
 
-    assert models[0][2]["base_model"] == "LAiM/Llama-3.2-3B-Instruct"
+    assert models[0][2]["base_model"] == "unsloth/Llama-3.2-3B-Instruct"
 
 
 def test_scan_checkpoints_prefers_exact_history_match_over_newer_suffix(tmp_path, monkeypatch):
@@ -270,7 +270,7 @@ def test_scan_checkpoints_lists_run_with_only_intermediate_checkpoints(tmp_path,
     run_dir = outputs_dir / "run_x"
     for step, loss, adapter_config in (
         (50, 0.75, {}),
-        (100, 0.5, {"base_model_name_or_path": "LAiM/X", "peft_type": "LORA", "r": 16}),
+        (100, 0.5, {"base_model_name_or_path": "unsloth/X", "peft_type": "LORA", "r": 16}),
     ):
         checkpoint_dir = run_dir / f"checkpoint-{step}"
         checkpoint_dir.mkdir(parents = True)
@@ -292,7 +292,7 @@ def test_scan_checkpoints_lists_run_with_only_intermediate_checkpoints(tmp_path,
                 ("checkpoint-50", str(run_dir / "checkpoint-50"), 0.75),
             ],
             {
-                "base_model": "LAiM/X",
+                "base_model": "unsloth/X",
                 "peft_type": "LORA",
                 "lora_rank": 16,
                 "adapter_features": _PLAIN_FEATURES,
@@ -340,7 +340,7 @@ def test_scan_checkpoints_keeps_root_adapter_first(tmp_path, monkeypatch):
     run_dir = outputs_dir / "run_root"
     run_dir.mkdir()
     (run_dir / "adapter_config.json").write_text(
-        json.dumps({"base_model_name_or_path": "LAiM/X", "peft_type": "LORA", "r": 16})
+        json.dumps({"base_model_name_or_path": "unsloth/X", "peft_type": "LORA", "r": 16})
     )
     for step, loss in ((50, 0.25), (100, 0.125)):
         checkpoint_dir = run_dir / f"checkpoint-{step}"
@@ -361,7 +361,7 @@ def test_scan_checkpoints_keeps_root_adapter_first(tmp_path, monkeypatch):
                 ("checkpoint-50", str(run_dir / "checkpoint-50"), 0.25),
             ],
             {
-                "base_model": "LAiM/X",
+                "base_model": "unsloth/X",
                 "peft_type": "LORA",
                 "lora_rank": 16,
                 "adapter_features": _PLAIN_FEATURES,

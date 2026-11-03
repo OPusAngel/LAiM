@@ -6,7 +6,7 @@ export const NUDGE_TOOL_CALLS_STATUS = "Nudging tool calls";
 
 export type ToolStatusKind = "nudge" | "terminal" | "web";
 
-/** Which glyph the badge shows: exact match for the nudge, "Running"/"Editing" prefix for sandbox
+/** Which glyph the badge shows: exact match for the nudge, "Running"/"Editing" prefix for workdir
  *  tools, globe otherwise. */
 export function toolStatusKind(status: string): ToolStatusKind {
   if (status === NUDGE_TOOL_CALLS_STATUS) {

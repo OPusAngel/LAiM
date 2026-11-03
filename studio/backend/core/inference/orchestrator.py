@@ -3262,7 +3262,6 @@ class InferenceOrchestrator:
         confirm_tool_calls: bool = False,
         bypass_permissions: bool = False,
         permission_mode: Optional[str] = None,
-        sandbox_level: Optional[str] = None,
         use_adapter: Optional[Union[bool, str]] = None,
         stats_holder: Optional[dict] = None,
         presence_penalty: float = 0.0,
@@ -3471,7 +3470,6 @@ class InferenceOrchestrator:
             mcp_image = mcp_image,
             bypass_permissions = bypass_permissions,
             permission_mode = permission_mode,
-            sandbox_level = sandbox_level,
             reasoning_prefilled = reasoning_prefilled,
             continue_final_message = continue_final_message,
             # So a conversation search can be sized against what this model can hold.

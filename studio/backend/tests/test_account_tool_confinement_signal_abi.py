@@ -25,17 +25,15 @@ BOB = AccountContext("bob-id", "bob")
 def isolated(tmp_path, monkeypatch):
     monkeypatch.setenv("LAiM_STUDIO_HOME", str(tmp_path / "studio"))
     monkeypatch.setenv("LAiM_STUDIO_PROJECTS_HOME", str(tmp_path / "projects"))
-    monkeypatch.delenv("LAiM_STUDIO_SANDBOX_HOME", raising = False)
+    monkeypatch.delenv("LAiM_STUDIO_WORKDIR_HOME", raising = False)
     monkeypatch.delenv("LAiM_STUDIO_ALLOW_UNCONFINED_TOOLS", raising = False)
-    monkeypatch.setenv("LAiM_STUDIO_SANDBOX_NPROC", "4000000")
+    monkeypatch.setenv("LAiM_STUDIO_WORKDIR_NPROC", "4000000")
     monkeypatch.setattr(policy, "installation_is_multi_user", lambda: True)
     monkeypatch.setattr(tools, "_workdirs", {})
     monkeypatch.setattr(tools, "_active_sessions", {})
     monkeypatch.setattr(tools, "_pending_removals", {})
     monkeypatch.setattr(tools, "_removing_sessions", set())
-    monkeypatch.setattr(tools, "_legacy_sandbox_migrated", True)
     monkeypatch.setattr(tools, "_start_detached_sweep", lambda: None)
-    monkeypatch.setattr(tools, "_legacy_sandbox_root", lambda: str(tmp_path / "legacy"))
 
 
 @pytest.mark.skipif(
@@ -44,9 +42,9 @@ def isolated(tmp_path, monkeypatch):
 )
 @pytest.mark.parametrize("abi", (3, 4, 5))
 def test_pre_scope_landlock_abi_never_confines_a_managed_account(abi, monkeypatch):
-    """Below ABI 6 signals are unscoped, so the fs sandbox alone must not count as confinement."""
+    """Below ABI 6 signals are unscoped, so the fs workdir alone must not count as confinement."""
     monkeypatch.setattr(tool_confinement, "landlock_abi", lambda: abi)
-    assert tool_confinement._linux_confinement(tools._SANDBOX_SITE_DIR) is None
+    assert tool_confinement._linux_confinement(tools._WORKDIR_SITE_DIR) is None
     with pytest.raises(tool_confinement.ToolConfinementUnavailable):
         run_as(BOB, tools._account_confinement)
 

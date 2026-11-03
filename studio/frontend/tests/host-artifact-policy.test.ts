@@ -149,14 +149,14 @@ test("a gguf-only host keeps every non-GGUF row the backend can still load", () 
   // diffusion_device.py picks MPS bfloat16 for exactly these), and the STT rows run through
   // the whisper.cpp sidecar, whose format label in the catalog is informational only.
   for (const id of [
-    "LAiM/whisper-large-v3-turbo",
-    "LAiM/whisper-tiny",
-    "LAiM/csm-1b",
+    "unsloth/whisper-large-v3-turbo",
+    "unsloth/whisper-tiny",
+    "unsloth/csm-1b",
     "stabilityai/sdxl-turbo",
     "Tongyi-MAI/Z-Image-Turbo",
     "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
     "Lightricks/LTX-2",
-    "LAiM/MiniMax-H3-GGUF",
+    "unsloth/MiniMax-H3-GGUF",
   ]) {
     assert.equal(curatedArtifactIsOfferable(id, "gguf-only"), true, id);
   }
@@ -164,7 +164,7 @@ test("a gguf-only host keeps every non-GGUF row the backend can still load", () 
 
 test("the speed suffixes name the two H3 rows on an accelerated host", () => {
   assert.equal(h3PerfSuffix("MiniMaxAI/MiniMax-H3", "accelerated"), "Fast");
-  assert.equal(h3PerfSuffix("LAiM/MiniMax-H3-GGUF", "accelerated"), "Slow");
+  assert.equal(h3PerfSuffix("unsloth/MiniMax-H3-GGUF", "accelerated"), "Slow");
 });
 
 test("every dense 8-bit scheme shares the one FP8 label", () => {
@@ -193,7 +193,7 @@ test("the H3 pipeline row names its precision from the same scheme list", () => 
   assert.equal(h3PerfSuffix("MiniMaxAI/MiniMax-H3", "accelerated", ["fp8"]), "Fast FP8");
   for (const schemes of [["fp8"], ["int8"], []]) {
     assert.equal(
-      h3PerfSuffix("LAiM/MiniMax-H3-GGUF", "dense-quant", schemes),
+      h3PerfSuffix("unsloth/MiniMax-H3-GGUF", "dense-quant", schemes),
       "Slow",
       schemes.join(",") || "none",
     );
@@ -205,7 +205,7 @@ test("the H3 pipeline row names its precision from the same scheme list", () => 
 test("no other model claims a speed it was never measured at", () => {
   for (const id of [
     "Lightricks/LTX-2.3",
-    "LAiM/LTX-2.3-GGUF",
+    "unsloth/LTX-2.3-GGUF",
     "MiniMaxAI/MiniMax-H3-Other",
   ]) {
     assert.equal(h3PerfSuffix(id, "accelerated"), null, id);
@@ -225,7 +225,7 @@ test("an absent or malformed scheme list reads as no schemes, never as a guess",
 test("a gguf-only or undiscovered host gets no suffix at all", () => {
   for (const host of ["gguf-only", "unknown"] as const) {
     assert.equal(h3PerfSuffix("MiniMaxAI/MiniMax-H3", host), null, host);
-    assert.equal(h3PerfSuffix("LAiM/MiniMax-H3-GGUF", host), null, host);
+    assert.equal(h3PerfSuffix("unsloth/MiniMax-H3-GGUF", host), null, host);
     assert.equal(h3PerfSuffix("MiniMaxAI/MiniMax-H3", host, ["fp8"]), null, host);
     assert.equal(ggufPerfSuffix(host), null, host);
   }

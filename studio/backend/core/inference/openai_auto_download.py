@@ -125,7 +125,7 @@ def is_downloadable_ref(requested: str) -> bool:
     """Whether *requested* is shaped like a Hub repo we may fetch.
 
     Requires an explicit namespace: keeps ``gpt-4`` and other foreign ids falling
-    through, and stops ModelConfig.from_identifier's bare-name ``LAiM/``
+    through, and stops ModelConfig.from_identifier's bare-name ``unsloth/``
     prefixing from turning an unrelated label into a real repo.
     """
     from hub.utils.paths import is_valid_repo_id
@@ -143,7 +143,7 @@ def looks_like_gguf_hub_repo_id(repo_id: str) -> bool:
     """Whether *repo_id* names an LAiM catalog entry, not a LiteLLM/OpenRouter label.
 
     Namespaced ids without a GGUF suffix are foreign routing labels (``openai/gpt-4o``).
-    ``-GGUF`` and the ``LAiM/`` namespace mark ids clients pick from this server's
+    ``-GGUF`` and the ``unsloth/`` namespace mark ids clients pick from this server's
     model list (GGUF and Transformers-backed entries alike); a mistyped one must 404
     instead of being answered by another loaded model.
     """
@@ -157,7 +157,7 @@ def looks_like_gguf_hub_repo_id(repo_id: str) -> bool:
     name = text.rsplit("/", 1)[-1]
     if name.lower().endswith("-gguf"):
         return True
-    return text.lower().startswith("LAiM/")
+    return text.lower().startswith("unsloth/")
 
 
 def looks_like_quant(variant: Optional[str]) -> bool:

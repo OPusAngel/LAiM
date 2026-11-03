@@ -12,9 +12,9 @@ import {
   samePromptDraft,
 } from "../src/features/chat/prompt-storage/mutation-lock.ts";
 
-import { readSrc } from "./helpers/kit.ts";
+import { readSrc, readSrcExpanded } from "./helpers/kit.ts";
 
-const PROMPT_STORAGE_DIALOG = readSrc("features/chat/prompt-storage/prompt-storage-dialog.tsx");
+const PROMPT_STORAGE_DIALOG = readSrcExpanded("features/chat/prompt-storage/prompt-storage-dialog.tsx");
 
 const empty: LockSet = new Set<string>();
 

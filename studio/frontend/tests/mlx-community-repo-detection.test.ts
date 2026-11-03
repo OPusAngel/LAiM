@@ -18,9 +18,9 @@ test("an mlx-community repo is MLX even without an -MLX suffix", () => {
 });
 
 test("an mlx token in the repo leaf is MLX wherever it sits", () => {
-  assert.equal(isMlxId("LAiM/Qwen3-8B-MLX"), true);
-  assert.equal(isMlxId("LAiM/Qwen3-MLX-8B"), true);
-  assert.equal(isMlxId("LAiM/mlx_Qwen3-8B"), true);
+  assert.equal(isMlxId("unsloth/Qwen3-8B-MLX"), true);
+  assert.equal(isMlxId("unsloth/Qwen3-MLX-8B"), true);
+  assert.equal(isMlxId("unsloth/mlx_Qwen3-8B"), true);
   assert.equal(isMlxId("Qwen3-8B-4bit-mlx"), true);
 });
 
@@ -28,7 +28,7 @@ test("the mlx token stays bounded, so a longer word is not MLX", () => {
   assert.equal(isMlxId("org/mlxray-7B"), false);
   assert.equal(isMlxId("org/Qwen-mlxtra"), false);
   assert.equal(isMlxId("mlxcommunity/Qwen3-8B-4bit"), false);
-  assert.equal(isMlxId("LAiM/Qwen3-8B-GGUF"), false);
+  assert.equal(isMlxId("unsloth/Qwen3-8B-GGUF"), false);
 });
 
 test("the format filter routes an mlx-community repo to MLX, not Safetensors", () => {
@@ -50,7 +50,7 @@ test("a local path is judged by its leaf on both separators", () => {
 });
 
 test("a plain safetensors repo still answers the safetensors filter", () => {
-  const plain = "LAiM/Qwen3-8B";
+  const plain = "unsloth/Qwen3-8B";
   assert.equal(matchesFormatFilter(plain, false, "safetensors"), true);
   assert.equal(matchesFormatFilter(plain, false, "mlx"), false);
   assert.equal(

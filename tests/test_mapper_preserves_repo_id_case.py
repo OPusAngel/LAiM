@@ -51,8 +51,8 @@ def test_float_to_int_mapper_preserves_case():
 
 def test_lowercase_lookup_returns_upstream_casing():
     mapper = _load_mapper()
-    resolved = mapper.INT_TO_FLOAT_MAPPER.get("LAiM/gemma-4-e2b-LAiM-bnb-4bit")
-    assert resolved == "LAiM/gemma-4-E2B", resolved
+    resolved = mapper.INT_TO_FLOAT_MAPPER.get("unsloth/gemma-4-e2b-unsloth-bnb-4bit")
+    assert resolved == "unsloth/gemma-4-E2B", resolved
 
 
 def test_case_insensitive_lookup_still_works():
@@ -60,7 +60,7 @@ def test_case_insensitive_lookup_still_works():
     for mapping in (mapper.INT_TO_FLOAT_MAPPER, mapper.FLOAT_TO_INT_MAPPER):
         lowered = [key for key in mapping if key == key.lower()]
         assert len(lowered) > 100, len(lowered)
-    assert "LAiM/gemma-4-e2b-LAiM-bnb-4bit" in mapper.INT_TO_FLOAT_MAPPER
+    assert "unsloth/gemma-4-e2b-unsloth-bnb-4bit" in mapper.INT_TO_FLOAT_MAPPER
 
 
 def _declared_repo_ids(mapper):

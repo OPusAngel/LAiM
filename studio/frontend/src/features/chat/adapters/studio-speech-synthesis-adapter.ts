@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { TTS_MAX_TOKENS } from "@/features/audio/audio-workspace-constants";
 import { authFetch } from "@/features/auth";
 import { useVoiceSettingsStore } from "@/features/settings/stores/voice-settings-store";
@@ -245,7 +246,7 @@ export async function generateStudioTtsAudio(
     const detail = body?.detail ?? `HTTP ${response.status}`;
     if (/no model loaded|not an audio model/i.test(detail)) {
       throw new Error(
-        "No speech model is loaded. Open Audio and load one in Speak, then try again.",
+        translate("uxChat.noSpeechModelIs1tzf5"),
       );
     }
     // Only this 404 is about the voice; another one (a model hidden from the account) must not
@@ -253,12 +254,12 @@ export async function generateStudioTtsAudio(
     if (ttsStudioVoiceId && /saved voice no longer exists/i.test(detail)) {
       useVoiceSettingsStore.getState().setTtsStudioVoiceId("");
       throw new Error(
-        "The saved voice for read aloud no longer exists. Read aloud now uses the model's own voice.",
+        translate("uxChat.theSavedVoiceForskkqs"),
       );
     }
     if (ttsStudioVoiceId && /can clone a voice/i.test(detail)) {
       throw new Error(
-        "The loaded model can't use saved voices. Load a voice-cloning model in Audio, or choose Model's own voice in Settings → Voice.",
+        translate("uxChat.theLoadedModelCan3m7yg"),
       );
     }
     throw new Error(detail);
@@ -268,11 +269,11 @@ export async function generateStudioTtsAudio(
     choices?: { finish_reason?: string }[];
   };
   if (!data.audio?.data) {
-    throw new Error("The TTS model returned no audio.");
+    throw new Error(translate("uxChat.theTTSModelReturnedxduyj"));
   }
   if (data.choices?.[0]?.finish_reason === "length") {
     toast.warning(
-      "Read aloud stopped at the speech model's length limit before the end of the reply.",
+      translate("uxChat.readAloudStoppedAt1okbs"),
     );
   }
   return `data:audio/wav;base64,${data.audio.data}`;
@@ -286,7 +287,7 @@ export async function generateCustomTtsAudio(
   const providersState = useExternalProvidersStore.getState();
   if (!providersState.connectionsEnabled) {
     throw new Error(
-      "Connections are disabled. Turn on Enable connections in Settings → Connections to use a custom TTS endpoint.",
+      translate("uxChat.connectionsAreDisabledTurntdemu"),
     );
   }
   const { ttsProviderId, ttsProviderModel, ttsProviderVoice } =
@@ -295,7 +296,7 @@ export async function generateCustomTtsAudio(
   const voice = ttsProviderVoice.trim() || "alloy";
   if (!ttsProviderId || !model) {
     throw new Error(
-      "Custom TTS is not configured. Pick a connection and model in Settings → Voice.",
+      translate("uxChat.customTTSIsNotisvwv"),
     );
   }
   // A browser whose key migration failed keeps the connection selectable on a retained legacy
@@ -306,7 +307,7 @@ export async function generateCustomTtsAudio(
   if (!provider) {
     useVoiceSettingsStore.getState().setTtsProviderId("");
     throw new Error(
-      "The custom TTS connection no longer exists. Pick another connection in Settings → Voice.",
+      translate("uxChat.theCustomTTSConnection6hpzi"),
     );
   }
   const legacyApiKey = provider.hasApiKey
@@ -323,7 +324,7 @@ export async function generateCustomTtsAudio(
     const currentProvidersState = useExternalProvidersStore.getState();
     if (!currentProvidersState.connectionsEnabled) {
       throw new Error(
-        "Connections are disabled. Turn on Enable connections in Settings → Connections to use a custom TTS endpoint.",
+        translate("uxChat.connectionsAreDisabledTurntdemu"),
       );
     }
     const currentProvider = currentProvidersState.providers.find(
@@ -332,7 +333,7 @@ export async function generateCustomTtsAudio(
     if (!currentProvider) {
       useVoiceSettingsStore.getState().setTtsProviderId("");
       throw new Error(
-        "The custom TTS connection no longer exists. Pick another connection in Settings → Voice.",
+        translate("uxChat.theCustomTTSConnection6hpzi"),
       );
     }
     if (
@@ -343,7 +344,7 @@ export async function generateCustomTtsAudio(
       currentProvider.updatedAt !== provider.updatedAt
     ) {
       throw new Error(
-        "The custom TTS connection changed while the request was starting. Try again.",
+        translate("uxChat.theCustomTTSConnection6chui"),
       );
     }
   };
@@ -433,7 +434,7 @@ function speakWithBackendAudio(
       audio.addEventListener("error", () => {
         if (cancelled) return;
         cleanup();
-        handleEnd("error", new Error("Audio playback failed."));
+        handleEnd("error", new Error(translate("uxChat.audioPlaybackFailed4k5mt")));
       });
       markRunning();
       await audio.play();
@@ -492,7 +493,7 @@ export class StudioSpeechSynthesisAdapter implements SpeechSynthesisAdapter {
         error !== "canceled"
       ) {
         toast.error(
-          error instanceof Error ? error.message : "Read aloud failed.",
+          error instanceof Error ? error.message : translate("uxChat.readAloudFailedu785a"),
         );
       }
       res.status = { type: "ended", reason, error };

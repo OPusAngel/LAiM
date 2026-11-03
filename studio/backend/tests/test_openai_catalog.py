@@ -361,7 +361,7 @@ def test_monitor_reports_nothing_once_a_non_gguf_model_is_unloaded(monkeypatch):
     # ungated made the monitor report a ready model with nothing loaded.
     class _Orchestrator:
         active_model_name = None
-        _openai_advertised_id = "LAiM/Qwen3-MLX"
+        _openai_advertised_id = "unsloth/Qwen3-MLX"
 
     monkeypatch.setattr(inf, "get_llama_cpp_backend", lambda: _FakeLlama(loaded = False))
     monkeypatch.setattr(inf, "_peek_inference_backend", lambda: _Orchestrator())
@@ -395,7 +395,7 @@ def test_lifecycle_label_recovers_the_repo_id_from_an_hf_cache_path():
     # An auto-switch load gets the snapshot dir, whose basename is a commit sha.
     snap = "/home/me/.cache/huggingface/hub/models--LAiM--gemma-4-E4B-it-GGUF/snapshots/bfc15c3"
     assert (
-        inf._lifecycle_model_label(snap, "UD-Q4_K_XL") == "LAiM/gemma-4-E4B-it-GGUF:UD-Q4_K_XL"
+        inf._lifecycle_model_label(snap, "UD-Q4_K_XL") == "unsloth/gemma-4-E4B-it-GGUF:UD-Q4_K_XL"
     )
 
 

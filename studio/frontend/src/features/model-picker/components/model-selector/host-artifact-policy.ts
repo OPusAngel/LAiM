@@ -68,7 +68,7 @@ export function curatedArtifactIsOfferable(
   return !UNPLACEABLE_WITHOUT_ACCELERATOR.has(repoId.trim().toLowerCase());
 }
 
-const H3_GGUF_ID = "LAiM/minimax-h3-gguf";
+const H3_GGUF_ID = "unsloth/minimax-h3-gguf";
 
 /** The speed qualifier for a dense-quant row, naming the precision that will run. An empty list (an
  *  older backend) falls back to a bare "Fast". Only the first, best entry is read. */

@@ -37,7 +37,7 @@ export async function printPage(tab: BrowserTab): Promise<boolean> {
   );
 }
 
-// The page's sandbox can't open the print dialog, so a copy prints from a frame that can.
+// The page's workdir can't open the print dialog, so a copy prints from a frame that can.
 export async function printFramePage(tabId: string): Promise<boolean> {
   const html = await requestFrameSnapshot(tabId);
   if (!html) return false;

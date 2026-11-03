@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   CACHE_MISS_DOWNLOAD_DESCRIPTION,
   EMPTY_CACHE_MISS_WATCH,
@@ -460,7 +461,7 @@ function describeModel(model: {
   if (model.is_lora) tags.push("LoRA");
   if (model.is_vision) tags.push("Vision");
   if (model.is_audio) tags.push("Audio");
-  if (model.has_audio_input) tags.push("Audio Input");
+  if (model.has_audio_input) tags.push(translate("uxChat.audioInputjctc6"));
   if (
     !model.is_lora &&
     !model.is_vision &&
@@ -568,7 +569,7 @@ function toLoraSummary(lora: {
   return {
     id: lora.adapter_path,
     name: stripTrailingEpoch(lora.display_name),
-    baseModel: lora.base_model || "Unknown base model",
+    baseModel: lora.base_model || translate("uxChat.unknownBaseModeljeyyk"),
     updatedAt,
     source: lora.source ?? undefined,
     exportType: lora.export_type ?? undefined,
@@ -659,7 +660,7 @@ function stopQueuedRuns(decision: StopRunningChatsDecision, scoped: boolean): vo
 }
 
 function unloadKeptModel(keptId: string): Promise<boolean> {
-  return confirmStopRunningChatsIfNeeded("Unloading this model", "unload", keptId).then(
+  return confirmStopRunningChatsIfNeeded(translate("uxChat.unloadingThisModelqpzin"), "unload", keptId).then(
     async (decision) => {
       if (!decision.proceed) return false;
       stopQueuedRuns(decision, true);
@@ -812,9 +813,9 @@ async function syncInferenceStatusToStore(options?: {
       ) {
         // Already the clean id the header shows: resolveInferenceCheckpointId put it there, not a load path.
         if (wasResident) {
-          toast.info(`${wasResident} is no longer loaded`, {
+          toast.info(translate("uxChat.isNoLongerLoadedyt9bl", { p1: wasResident }), {
             description:
-              "The server released it, which loading an image, video or audio model does. Pick it again to keep chatting.",
+              translate("uxChat.theServerReleasedIt16dv0"),
           });
         }
         // Drop the pick too, as a server-side unload does: the name alone reads as "this is my model"
@@ -829,9 +830,9 @@ async function syncInferenceStatusToStore(options?: {
     // The update screen already reports the backend it stopped.
     if (isSilencedDesktopUpdateFailure(error, downWhenIssued)) return;
     const message =
-      error instanceof Error ? error.message : "Failed to load models";
+      error instanceof Error ? error.message : translate("uxChat.failedToLoadModelswmmf8");
     setModelsError(message);
-    toast.error("Failed to refresh models", {
+    toast.error(translate("uxChat.failedToRefreshModels10fmw"), {
       description: message,
     });
   }
@@ -905,7 +906,7 @@ export function useChatModelRuntime() {
   // Settings owns "Keep multiple models loaded"; until it answers, loads replace as before.
   useEffect(() => {
     let cancelled = false;
-    loadMultiModelEnabled("Failed to read the multiple models setting").then(
+    loadMultiModelEnabled(translate("uxChat.failedToReadThekphlg")).then(
       (enabled) => {
         if (!cancelled) {
           useChatRuntimeStore.getState().setKeepModelsLoaded(enabled);
@@ -1075,10 +1076,10 @@ export function useChatModelRuntime() {
         useChatRuntimeStore.getState().clearLoadingModelPick(pickOf(model));
       }
       const isCachedOrLocal = model?.isDownloaded || model?.isCachedLora;
-      toast.info("Stopping model load", {
+      toast.info(translate("uxChat.stoppingModelLoad132tm"), {
         description: isCachedOrLocal
           ? undefined
-          : "The current download may still finish in the background.",
+          : translate("uxChat.theCurrentDownloadMay6wjje"),
       });
       const cancelPromise = (async (): Promise<boolean> => {
         try {
@@ -1110,8 +1111,8 @@ export function useChatModelRuntime() {
           return true;
         } catch (error) {
           const detail =
-            error instanceof Error ? error.message : "Unknown unload error";
-          const message = `Failed to stop ${model?.displayName ?? "the model"}`;
+            error instanceof Error ? error.message : translate("uxChat.unknownUnloadErrorysw2l");
+          const message = translate("uxChat.failedToStop9zdbd", { p1: model?.displayName ?? "the model" });
           setModelsError(`${message}: ${detail}`);
           toast.error(message, { description: detail });
           // The request failed, so reconcile against the backend before releasing the
@@ -1128,7 +1129,7 @@ export function useChatModelRuntime() {
             const refreshDetail =
               refreshError instanceof Error
                 ? refreshError.message
-                : "Unknown status refresh error";
+                : translate("uxChat.unknownStatusRefreshErrorruj6w");
             setModelsError(
               `${message}: ${detail}. Failed to refresh model status: ${refreshDetail}`,
             );
@@ -1344,7 +1345,7 @@ export function useChatModelRuntime() {
         const preparedToken = await prepareHfTokenForUse(hfToken);
         if (!preparedToken.proceed) {
           if (modelSelectionIntentEpoch === loadIntentId) {
-            toast.error("Model load cancelled.");
+            toast.error(translate("uxChat.modelLoadCancelled1clp4"));
             // This pick invalidated the previous run before opening credentials. If that run
             // fails while the dialog is open, its stale-intent catch cannot restore the config
             // it staged over the still-resident model. Wait until the run settles, then reconcile
@@ -1527,7 +1528,7 @@ export function useChatModelRuntime() {
         inheritCancelledRunRollback(activeRun);
         if (modelSelectionIntentEpoch !== loadIntentId) {
           if (throwOnError) {
-            throw new Error("Model selection was superseded by a newer choice.");
+            throw new Error(translate("uxChat.modelSelectionWasSupersededjp6ap"));
           }
           return;
         }
@@ -1538,7 +1539,7 @@ export function useChatModelRuntime() {
           // the refreshed store instead of inheriting the failed run's checkpoint and config.
           pendingReplacementRollback = null;
           const message =
-            "The current model could not be stopped, so the new model was not loaded.";
+            translate("uxChat.theCurrentModelCould1q6r0");
           setModelsError(message);
           if (throwOnError) throw new Error(message);
           return;
@@ -1560,7 +1561,7 @@ export function useChatModelRuntime() {
       };
       if (modelSelectionIntentEpoch !== loadIntentId) {
         if (throwOnError) {
-          throw new Error("Model selection was superseded by a newer choice.");
+          throw new Error(translate("uxChat.modelSelectionWasSupersededjp6ap"));
         }
         return;
       }
@@ -1806,8 +1807,8 @@ export function useChatModelRuntime() {
       }
       if (lifecycleLease === null) {
         restorePreviousConfig();
-        toast.info("A model is loading", {
-          description: "Wait for it to finish or cancel it first.",
+        toast.info(translate("uxChat.aModelIsLoading1xlm4"), {
+          description: translate("uxChat.waitForItTo1xiu7"),
         });
         return;
       }
@@ -1830,7 +1831,7 @@ export function useChatModelRuntime() {
       // vLLM and SGLang always replace the loaded models, so they keep the running-chat prompt.
       let keepsOthers =
         keepModelsLoaded && !forceReload && (paramsNow.engine ?? "auto") === "auto";
-      let switchingNote = keepsOthers ? "Keeping the loaded models." : "Switching models.";
+      let switchingNote = keepsOthers ? translate("uxChat.keepingTheLoadedModelsecw4b") : translate("uxChat.switchingModels9kurv");
       // Reloading one of several touches only its own slot, so only its chats stop.
       const touchesOnlySelected =
         forceReload && !isExternalModelId(paramsNow.checkpoint) && loadedNow.length > 1;
@@ -1843,7 +1844,7 @@ export function useChatModelRuntime() {
               preStreamRunTokens: [],
             }
           : await confirmStopRunningChatsIfNeeded(
-              forceReload ? "Applying these settings" : "Loading a different model",
+              forceReload ? translate("uxChat.applyingTheseSettingsapqel") : translate("uxChat.loadingADifferentModelq6039"),
               "reload",
               touchesOnlySelected ? (paramsNow.checkpoint ?? undefined) : undefined,
             );
@@ -1934,8 +1935,8 @@ export function useChatModelRuntime() {
       let loadingDescription = [
         currentCheckpoint ? switchingNote : null,
         extraLoadingDescription ?? null,
-        isDownloaded ? "Loading cached model into memory." : null,
-        !isDownloaded && isCachedLora ? "Loading trained model into memory." : null,
+        isDownloaded ? translate("uxChat.loadingCachedModelInto4ldpx") : null,
+        !isDownloaded && isCachedLora ? translate("uxChat.loadingTrainedModelIntokyvu3") : null,
       ]
         .filter(Boolean)
         .join(" ");
@@ -1955,7 +1956,7 @@ export function useChatModelRuntime() {
       setLoadProgress(
         isDownloaded || isCachedLora
           ? { percent: null, label: null, phase: "starting" }
-          : { percent: 0, label: "Preparing download", phase: "downloading" },
+          : { percent: 0, label: translate("uxChat.preparingDownload1nle9"), phase: "downloading" },
       );
       loadingModelRef.current = loadInfo;
       const abortCtrl = new AbortController();
@@ -2466,8 +2467,8 @@ export function useChatModelRuntime() {
                 id: toastId,
                 ...modelLoadToastOptions(
                   renderLoadDescription(
-                    "Waiting for an engine…",
-                    `Choose how to run ${displayName}.`,
+                    translate("uxChat.waitingForAnEnginepz6yx"),
+                    translate("uxChat.chooseHowToRungr5c7", { p1: displayName }),
                   ),
                 ),
               });
@@ -2481,13 +2482,13 @@ export function useChatModelRuntime() {
                 toast(null, {
                   id: toastId,
                   ...modelLoadToastOptions(
-                    renderLoadDescription("Starting model…", loadingDescription),
+                    renderLoadDescription(translate("uxChat.startingModelm6tbv"), loadingDescription),
                   ),
                 });
               }
               if (!engine) {
                 throw new Error(
-                  `${displayName} is quantized with ${engineOffer.quantization}, which the default engine cannot run. Set Inference engine to ${engineOffer.engines[0] === "sglang" ? "SGLang" : "vLLM"} in its run settings to load it.`,
+                  translate("uxChat.isQuantizedWithWhich3sai3", { p1: displayName, p2: engineOffer.quantization, p3: engineOffer.engines[0] === "sglang" ? "SGLang" : "vLLM" }),
                 );
               }
               loadEngineFields = {
@@ -2501,7 +2502,7 @@ export function useChatModelRuntime() {
               if (keepsOthers) {
                 // vLLM and SGLang replace every loaded model, so ask as any replacing load does.
                 stopDecision = await confirmStopRunningChatsIfNeeded(
-                  "Loading a different model",
+                  translate("uxChat.loadingADifferentModelq6039"),
                   "reload",
                 );
                 if (abortCtrl.signal.aborted) throw new Error("Cancelled");
@@ -2521,8 +2522,8 @@ export function useChatModelRuntime() {
                 keepsOthers = false;
                 forceCancelActive = stopDecision.forceCancelActive;
                 loadRun.forceCancelActive = forceCancelActive;
-                loadingDescription = loadingDescription.replace(switchingNote, "Switching models.");
-                switchingNote = "Switching models.";
+                loadingDescription = loadingDescription.replace(switchingNote, translate("uxChat.switchingModels9kurv"));
+                switchingNote = translate("uxChat.switchingModels9kurv");
               }
               // Re-validate as that engine before unloading; a spent Desktop path lease relies on /load.
               if (!nativePathToken) {
@@ -2551,8 +2552,8 @@ export function useChatModelRuntime() {
             if (validation.mlx_loads_base_model) {
               mlxLoadProgress = true;
               const mlxBaseDescription = isLora
-                ? `Loading the adapter with ${validation.mlx_loads_base_model} in place of its bitsandbytes base, downloading it first if needed.`
-                : `Loading ${validation.mlx_loads_base_model} instead, downloading it first if needed.`;
+                ? translate("uxChat.loadingTheAdapterWithisysz", { p1: validation.mlx_loads_base_model })
+                : translate("uxChat.loadingInsteadDownloadingItfpjz1", { p1: validation.mlx_loads_base_model });
               progressModelIds = isLora && !isLocal
                 ? [modelId, validation.mlx_loads_base_model]
                 : [validation.mlx_loads_base_model];
@@ -2566,10 +2567,10 @@ export function useChatModelRuntime() {
                 .join(" ");
               setLoadProgress({
                 percent: 0,
-                label: "Preparing download",
+                label: translate("uxChat.preparingDownload1nle9"),
                 phase: "downloading",
               });
-              toast.info("MLX cannot use 4-bit bitsandbytes weights", {
+              toast.info(translate("uxChat.mLXCannotUse41yrqz"), {
                 description: mlxBaseDescription,
               });
             }
@@ -2848,10 +2849,10 @@ export function useChatModelRuntime() {
             offloadCounts = offloadCountsFrom(loadResponse);
             if (loadResponse.evicted?.length) {
               toast.info(
-                `Unloaded ${loadResponse.evicted.join(", ")} to make room`,
+                translate("uxChat.unloadedToMakeRoom99v6o", { p1: loadResponse.evicted.join(", ") }),
                 {
                   description:
-                    "Select it again to load it back.",
+                    translate("uxChat.selectItAgainTo1fxbk"),
                 },
               );
             }
@@ -3182,7 +3183,7 @@ export function useChatModelRuntime() {
                   ).nativePathLease;
                 } catch {
                   throw new Error(
-                    "Could not reload the previous local model: please re-select the file.",
+                    translate("uxChat.couldNotReloadThea5s61"),
                   );
                 }
               }
@@ -3349,13 +3350,13 @@ export function useChatModelRuntime() {
         }
 
         const isCachedLoad = downloadComplete;
-        const toastTitle = isCachedLoad ? "Starting model…" : "Downloading model…";
+        const toastTitle = isCachedLoad ? translate("uxChat.startingModelm6tbv") : translate("uxChat.downloadingModel15dsz");
         const modelLoadToastOptions = (description: ReturnType<typeof renderLoadDescription>) => ({
           description,
           duration: Infinity,
           closeButton: true,
           cancel: {
-            label: "Cancel",
+            label: translate("browser.agentSettings.cancel"),
             onClick: cancelLoading,
           },
           classNames: MODEL_LOAD_TOAST_CLASSNAMES,
@@ -3373,7 +3374,7 @@ export function useChatModelRuntime() {
               toastTitle,
               loadingDescription,
               isCachedLoad ? null : 0,
-              isCachedLoad ? null : "Preparing download",
+              isCachedLoad ? null : translate("uxChat.preparingDownloadvxcph"),
             ),
           ),
         );
@@ -3522,7 +3523,7 @@ export function useChatModelRuntime() {
                 id: toastId,
                 ...modelLoadToastOptions(
                   renderLoadDescription(
-                    "Downloading model…",
+                    translate("uxChat.downloadingModel15dsz"),
                     activeLoadingDescription,
                     pct,
                     progressLabel,
@@ -3554,7 +3555,7 @@ export function useChatModelRuntime() {
                   id: toastId,
                   ...modelLoadToastOptions(
                     renderLoadDescription(
-                      "Downloading model…",
+                      translate("uxChat.downloadingModel15dsz"),
                       activeLoadingDescription,
                       null,
                       unknownTotalLabel,
@@ -3573,7 +3574,7 @@ export function useChatModelRuntime() {
               if (loadToastDismissedRef.current) {
                 setLoadProgress({
                   percent: 100,
-                  label: "Download complete",
+                  label: translate("browser.downloads.complete"),
                   phase: "starting",
                 });
               } else {
@@ -3581,12 +3582,12 @@ export function useChatModelRuntime() {
                   id: toastId,
                   ...modelLoadToastOptions(
                     renderLoadDescription(
-                      "Starting model…",
+                      translate("uxChat.startingModelm6tbv"),
                       hasShownProgress
-                        ? "Download complete. Loading the model into memory."
+                        ? translate("uxChat.downloadCompleteLoadingThe2x4p4")
                         : loadingDescription,
                       hasShownProgress ? 100 : null,
-                      hasShownProgress ? "Download complete" : null,
+                      hasShownProgress ? translate("uxChat.downloadCompleteemljb") : null,
                     ),
                   ),
                 });
@@ -3614,14 +3615,14 @@ export function useChatModelRuntime() {
             }
             if ((managedLoad || engineSwitched) && prog.bytes_total <= 0) {
               const label = prog.phase === "warming_up"
-                ? "Warming up inference kernels. The first load can take several minutes."
+                ? translate("uxChat.warmingUpInferenceKernels7bi85")
                 : prog.phase === "loading_weights"
-                  ? "Loading model weights into GPU memory."
-                  : "Starting the inference engine and preparing model files.";
+                  ? translate("uxChat.loadingModelWeightsIntoed0w7")
+                  : translate("uxChat.startingTheInferenceEnginekpver");
               if (loadToastDismissedRef.current) {
                 setLoadProgress({ percent: 0, label, phase: "starting" });
               } else {
-                toast(null, { id: toastId, ...modelLoadToastOptions(renderLoadDescription("Starting model...", label)) });
+                toast(null, { id: toastId, ...modelLoadToastOptions(renderLoadDescription(translate("uxChat.startingModelaailz"), label)) });
               }
               return;
             }
@@ -3634,7 +3635,7 @@ export function useChatModelRuntime() {
             const base = `${loadedGb.toFixed(1)} of ${totalGb.toFixed(1)} GB in memory`;
             const label = est.stable
               ? `${base} • ${formatRate(est.rate)}${
-                  formatEta(est.eta) !== "--" ? ` • ${formatEta(est.eta)} left` : ""
+                  formatEta(est.eta) !== "--" ? translate("uxChat.leftskl0g", { p1: formatEta(est.eta) }) : ""
                 }`
               : base;
             // Inline-status-only state (see pollDownload): while the toast is up, skip the state write so
@@ -3651,8 +3652,8 @@ export function useChatModelRuntime() {
               id: toastId,
               ...modelLoadToastOptions(
                 renderLoadDescription(
-                  "Starting model…",
-                  "Paging weights into memory.",
+                  translate("uxChat.startingModelm6tbv"),
+                  translate("uxChat.pagingWeightsIntoMemoryx46fb"),
                   pct,
                   label,
                 ),
@@ -3681,7 +3682,7 @@ export function useChatModelRuntime() {
             activeLoadingDescription = cacheMissDescription;
             setLoadProgress({
               percent: verdict.percent,
-              label: "Downloading the rest of the model",
+              label: translate("uxChat.downloadingTheRestOf1s1kf"),
               phase: "downloading",
             });
             return true;
@@ -3741,7 +3742,7 @@ export function useChatModelRuntime() {
         } catch (err) {
           if (!abortCtrl.signal.aborted) {
             const message =
-              err instanceof Error ? err.message : "Failed to load model";
+              err instanceof Error ? err.message : translate("uxChat.failedToLoadModelm6se1");
             const [summary, ...rest] = message.split("\n");
             const detail = rest.join("\n").trim();
             const runnerLogPath = failureLogPath(message);
@@ -3785,7 +3786,7 @@ export function useChatModelRuntime() {
         if (abortCtrl.signal.aborted) return; // User cancelled, nothing to report
         resetLoadingUiForRun(loadRun);
         const message =
-          error instanceof Error ? error.message : "Failed to load model";
+          error instanceof Error ? error.message : translate("uxChat.failedToLoadModelm6se1");
         setModelsError(message);
         setLastModelLoadError(message); // load-specific failure for the attach gates
         if (throwOnError) {
@@ -3829,15 +3830,15 @@ export function useChatModelRuntime() {
         reload?.config ?? resolveInitialConfig(modelPath).config,
       );
       if (loadingModelRef.current ?? store.loadingModelPick) {
-        toast.info("Another model is already loading", {
-          description: "Wait for it to finish or cancel it first.",
+        toast.info(translate("uxChat.anotherModelIsAlready1gyvd"), {
+          description: translate("uxChat.waitForItTo1xiu7"),
         });
         return;
       }
       const lease = store.beginModelLoading("preparing");
       if (lease === null) {
-        toast.info("A model is loading", {
-          description: "Wait for it to finish or cancel it first.",
+        toast.info(translate("uxChat.aModelIsLoading1xlm4"), {
+          description: translate("uxChat.waitForItTo1xiu7"),
         });
         return;
       }
@@ -3879,7 +3880,7 @@ export function useChatModelRuntime() {
       let toastId: string | number | undefined;
       try {
         const stopDecision = await confirmStopRunningChatsIfNeeded(
-          "Loading a different model",
+          translate("uxChat.loadingADifferentModelq6039"),
         );
         if (!stopDecision.proceed || signal.aborted) return;
         loadAbortRef.current = abortCtrl;
@@ -3897,7 +3898,7 @@ export function useChatModelRuntime() {
         loadingModelRef.current = loadInfo;
         useChatRuntimeStore.getState().setLoadingModelPick(pickOf(loadInfo));
         setLoadProgress({ percent: null, label: null, phase: "starting" });
-        toastId = toast.loading(`Loading ${displayName} on the NPU`);
+        toastId = toast.loading(translate("uxChat.loadingOnTheNPUvrnk5", { p1: displayName }));
         loadToastIdRef.current = toastId;
         loadRun.forceCancelActive = stopDecision.forceCancelActive;
         loadRun.loadAttemptPath = modelPath;
@@ -3924,7 +3925,7 @@ export function useChatModelRuntime() {
         });
         syncModelCapabilities(modelPath, status);
         void refreshContextUsage({ afterModelLoad: true });
-        toast.success(`${displayName} loaded on the NPU`, {
+        toast.success(translate("uxChat.loadedOnTheNPU1pooz", { p1: displayName }), {
           id: toastId,
           closeButton: true,
           duration: 4000,
@@ -3932,7 +3933,7 @@ export function useChatModelRuntime() {
       } catch (error) {
         if (signal.aborted) return;
         const message =
-          error instanceof Error ? error.message : "Failed to load model";
+          error instanceof Error ? error.message : translate("uxChat.failedToLoadModelm6se1");
         setModelsError(message);
         setLastModelLoadError(message);
         toast.error(message, {
@@ -3954,18 +3955,18 @@ export function useChatModelRuntime() {
     confirmed?: StopRunningChatsDecision,
   ): Promise<boolean> => {
     if (modelId && modelId !== checkpoint) {
-      const toastId = toast.loading("Unloading model");
+      const toastId = toast.loading(translate("uxChat.unloadingModelhqohm"));
       try {
         if (!(await unloadKeptModel(modelId))) {
           toast.dismiss(toastId);
           return false;
         }
         await refresh();
-        toast.success("Model unloaded", { id: toastId, duration: 1200 });
+        toast.success(translate("uxAudio.modelUnloaded1moc6"), { id: toastId, duration: 1200 });
         return true;
       } catch (err) {
         toast.error(
-          err instanceof Error ? err.message : "Failed to unload model",
+          err instanceof Error ? err.message : translate("uxChat.failedToUnloadModeless5n"),
           { id: toastId },
         );
         return false;
@@ -3978,11 +3979,11 @@ export function useChatModelRuntime() {
       const runtime = useChatRuntimeStore.getState();
       if (!runtime.modelLoading && !runtime.loadingModelPick) return false;
       if (chatModelLifecycleGate.currentPhase() === "unloading") {
-        toast.info("Wait for the model to finish unloading.");
+        toast.info(translate("uxChat.waitForTheModel145k3"));
         return true;
       }
-      toast.info("A model is loading", {
-        description: "Wait for it to finish or cancel it first.",
+      toast.info(translate("uxChat.aModelIsLoading1xlm4"), {
+        description: translate("uxChat.waitForItTo1xiu7"),
       });
       return true;
     };
@@ -4003,8 +4004,8 @@ export function useChatModelRuntime() {
         return false;
       }
       // Before the running-chats check, which open chat streams can queue in the browser (#10339).
-      const toastId = toast.loading("Unloading model", {
-        description: "Checking for running chats.",
+      const toastId = toast.loading(translate("uxChat.unloadingModelhqohm"), {
+        description: translate("uxChat.checkingForRunningChats884tv"),
       });
       // Ejecting tears down llama-server, so every chat stops. Same prompt, but it leaves no model
       // loaded, so it must not be worded as a reload. With several loaded only this one's chats stop.
@@ -4015,7 +4016,7 @@ export function useChatModelRuntime() {
       const stopDecision =
         confirmed ??
         (await confirmStopRunningChatsIfNeeded(
-          "Unloading the model",
+          translate("uxChat.unloadingTheModelxfnf5"),
           "unload",
           scope,
         ));
@@ -4040,17 +4041,17 @@ export function useChatModelRuntime() {
       const unloadPromise = performUnload();
       toast.promise(unloadPromise, {
         id: toastId,
-        loading: "Unloading model",
-        success: { message: "Model unloaded", duration: 1200 },
+        get loading() { return translate("uxChat.unloadingModelrcs10"); },
+        success: { get message() { return translate("uxChat.modelUnloaded3wb75"); }, duration: 1200 },
         error: (err) =>
-          err instanceof Error ? err.message : "Failed to unload model",
-        description: "Releases VRAM and resets inference state.",
+          err instanceof Error ? err.message : translate("uxChat.failedToUnloadModelfa53l"),
+        description: translate("uxChat.releasesVRAMAndResetsq8fv2"),
       });
       await unloadPromise;
       return true;
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Failed to unload model";
+        error instanceof Error ? error.message : translate("uxChat.failedToUnloadModeless5n");
       setModelsError(message);
       return false;
     } finally {
@@ -4068,7 +4069,7 @@ export function useChatModelRuntime() {
     const selectedLocal =
       Boolean(checkpoint) && !isExternalModelId(checkpoint);
     const decision = await confirmStopRunningChatsIfNeeded(
-      "Unloading every model",
+      translate("uxChat.unloadingEveryModelxu41s"),
       "unload",
     );
     if (!decision.proceed) return false;
@@ -4089,7 +4090,7 @@ export function useChatModelRuntime() {
       setModelsError(
         failed.reason instanceof Error
           ? failed.reason.message
-          : "Failed to unload every model",
+          : translate("uxChat.failedToUnloadEverym35nh"),
       );
       return false;
     }

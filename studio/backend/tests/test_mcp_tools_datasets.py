@@ -13,7 +13,7 @@ PAYLOADS = {
             {
                 "id": "my-chats",
                 "label": "My chats",
-                "path": "/srv/LAiM/datasets/my-chats",
+                "path": "/srv/unsloth/datasets/my-chats",
                 "rows": 120,
             }
         ]

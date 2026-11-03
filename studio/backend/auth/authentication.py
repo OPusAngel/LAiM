@@ -389,7 +389,7 @@ async def authenticated_without_credential(
 
 def require_ui_session_for_local_commands(via_api_key: bool) -> None:
     """Refuse an sk-LAiM API key that asks to define a local (stdio) MCP command. stdio MCP runs a command on
-    this host as the backend user, outside the python/terminal sandbox, so only a UI session may choose what
+    this host as the backend user, outside the python/terminal workdir, so only a UI session may choose what
     runs. API keys keep http(s) MCP, and stdio servers the owner already configured.
     """
     if via_api_key:

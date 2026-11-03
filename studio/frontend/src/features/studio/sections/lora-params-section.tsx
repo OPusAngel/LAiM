@@ -17,7 +17,7 @@ import {
   isTrainingLoraVariantSupportedOnDevice,
   useTrainingConfigStore,
 } from "@/features/training";
-import { useT } from "@/i18n";
+import { translate, useT } from "@/i18n";
 import { ChevronDownStandardIcon } from "@/lib/chevron-icons";
 import { isAdapterMethod } from "@/types/training";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -235,17 +235,17 @@ export function LoraParamsSection(): ReactElement | null {
                   },
                   {
                     value: "rslora",
-                    label: "RS-LoRA",
+                    label: translate("uxStudio.rSLoRA8kb87"),
                     desc: t("studio.params.stableRank"),
                   },
                   {
                     value: "loftq",
-                    label: "LoftQ",
+                    label: translate("uxStudio.loftQ1sh9g"),
                     desc: t("studio.params.memoryEfficient"),
                   },
                   {
                     value: "dora",
-                    label: "DoRA",
+                    label: translate("uxStudio.doRAxu1gr"),
                     desc: t("studio.params.weightDecomposed"),
                   },
                 ] as const

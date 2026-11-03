@@ -3,14 +3,14 @@
 
 """Which side runs the code when a turn mixes the Tools pill with an LAiM tool.
 
-``code_execution`` runs in the provider's sandbox; ``python`` / ``terminal`` run
+``code_execution`` runs in the provider's workdir; ``python`` / ``terminal`` run
 on the machine LAiM is installed on. They are two trust boundaries, not two
 spellings of one feature, so the request says which one it wants by name and
 this server forwards accordingly. LAiM has no implementation of
 ``code_execution`` (``ALL_TOOLS`` is web_search / python / terminal / render_html
 / search_knowledge_base), so filtering it out as "locally replaced" does not
 substitute anything -- it drops the tool while its pill stays lit, and the model
-is never offered a sandbox at all.
+is never offered a workdir at all.
 
 The one case that IS a substitution is a request naming both, which no LAiM
 build sends: there the local names win and the hosted one is dropped, so a
@@ -31,7 +31,7 @@ def test_studio_really_has_no_local_code_execution():
 @pytest.mark.parametrize("provider_type", ["openai", "anthropic", "gemini"])
 def test_hosted_code_execution_rides_along_with_a_studio_tool(provider_type):
     """RAG or MCP selects the LAiM loop; the Tools pill must still reach the
-    provider's sandbox rather than being dropped on the way."""
+    provider's workdir rather than being dropped on the way."""
     assert hosted_only_tools(provider_type, ["search_knowledge_base", "code_execution"]) == [
         "code_execution"
     ]
@@ -49,7 +49,7 @@ def test_web_search_is_still_never_forwarded():
     assert hosted_only_tools("anthropic", ["web_search", "python"]) == []
 
 
-def test_a_provider_without_a_sandbox_is_not_offered_one():
+def test_a_provider_without_a_workdir_is_not_offered_one():
     assert "code_execution" not in hosted_only_tools(
         "openrouter", ["search_knowledge_base", "code_execution"]
     )

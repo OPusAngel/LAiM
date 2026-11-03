@@ -12,14 +12,14 @@ import {
 const META = "/hub/profile/logo/meta.svg";
 
 test("LAiM re-uploads of Muse models show the Meta mark", () => {
-  // The row the Model hub actually lists. Owner is LAiM, so the org rule
+  // The row the Model hub actually lists. Owner is unsloth, so the org rule
   // never fires and the repo name has to carry it.
   assert.equal(
-    resolveOwnerProviderLogo("LAiM", "Muse-Glimmer-30B-GGUF")?.logoPath,
+    resolveOwnerProviderLogo("unsloth", "Muse-Glimmer-30B-GGUF")?.logoPath,
     META,
   );
   assert.equal(
-    resolveOwnerProviderLogo("LAiM", "Muse-Spark-Open-816B-A42B-GGUF")
+    resolveOwnerProviderLogo("unsloth", "Muse-Spark-Open-816B-A42B-GGUF")
       ?.logoPath,
     META,
   );
@@ -29,7 +29,7 @@ test("every Muse family and variant rides the same stem", () => {
   for (const repo of [
     "Muse-Glimmer-30B",
     "Muse-Glimmer-30B-GGUF",
-    "Muse-Glimmer-30B-LAiM-bnb-4bit",
+    "Muse-Glimmer-30B-unsloth-bnb-4bit",
     "Muse-Glimmer-30B-Instruct",
     // No trailing dash in the stem, so a future minor version is picked up.
     "Muse-Glimmer2-30B-GGUF",

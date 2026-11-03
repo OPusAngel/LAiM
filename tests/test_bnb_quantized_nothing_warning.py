@@ -76,7 +76,7 @@ def test_silent_without_a_bitsandbytes_request(capsys):
 
 @pytest.mark.parametrize(
     "relpath, expected",
-    [("LAiM/models/vision.py", 1), ("LAiM/models/llama.py", 2)],
+    [("unsloth/models/vision.py", 1), ("unsloth/models/llama.py", 2)],
 )
 def test_every_in_process_load_is_checked(relpath, expected):
     src = (ROOT / relpath).read_text(encoding = "utf-8")

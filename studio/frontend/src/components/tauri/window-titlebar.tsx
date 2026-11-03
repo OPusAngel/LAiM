@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   getViewportBackdropOpen,
   getViewportBackdropTone,
@@ -229,7 +230,7 @@ export function DesktopTitlebarNavigation({
         className,
       )}
       role="toolbar"
-      aria-label="Sidebar and page navigation"
+      aria-label={translate("uxComponents.sidebarAndPageNavigation1o357")}
     >
       {showSidebarToggle ? (
         <button
@@ -258,8 +259,8 @@ export function DesktopTitlebarNavigation({
       )}
       <button
         type="button"
-        title="Go back"
-        aria-label="Go back"
+        title={translate("uxComponents.goBackrcg61")}
+        aria-label={translate("uxComponents.goBackrcg61")}
         onMouseDown={stopTitlebarDrag}
         onDoubleClick={stopTitlebarDrag}
         onClick={(event) => {
@@ -276,8 +277,8 @@ export function DesktopTitlebarNavigation({
       </button>
       <button
         type="button"
-        title="Go forward"
-        aria-label="Go forward"
+        title={translate("uxComponents.goForward1gs8m")}
+        aria-label={translate("uxComponents.goForward1gs8m")}
         onMouseDown={stopTitlebarDrag}
         onDoubleClick={stopTitlebarDrag}
         onClick={(event) => {
@@ -513,7 +514,7 @@ export function WindowTitlebar({
         data-slot="window-titlebar"
         data-viewport-backdrop-open={backdropOpen ? "" : undefined}
         data-viewport-backdrop-tone={backdropTone ?? undefined}
-        aria-label="Window titlebar"
+        aria-label={translate("uxComponents.windowTitlebar15l9i")}
       >
         {showSidebarSurface && (
           <div
@@ -547,10 +548,10 @@ export function WindowTitlebar({
             focused ? "text-foreground" : "text-muted-foreground",
           )}
           role="toolbar"
-          aria-label="Window controls"
+          aria-label={translate("uxComponents.windowControls18iuj")}
         >
           <WindowControlButton
-            label="Minimize window"
+            label={translate("uxComponents.minimizeWindow1rr7i")}
             onClick={() => runWindowAction((appWindow) => appWindow.minimize())}
           >
             <CaptionGlyph kind="minimize" />
@@ -564,7 +565,7 @@ export function WindowTitlebar({
             <CaptionGlyph kind={maximized ? "restore" : "maximize"} />
           </WindowControlButton>
           <WindowControlButton
-            label="Close window"
+            label={translate("uxComponents.closeWindow1vvpu")}
             // No optimistic overlay here. Rust raises it only once the quit confirmations
             // have passed, and one of those can be a dialog asking whether to keep
             // training: painting "Closing LAiM Desktop..." behind that question would

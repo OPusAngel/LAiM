@@ -16,7 +16,7 @@ test("a quant picked from the list reads as its quant key, not the file name lla
   // The loader sends the file name, llama status echoes it, and picker rows key the quant.
   const loaded = (gguf_variant: string | null) =>
     audioLoadedSelection(
-      { active_model: "LAiM/orpheus-3b-0.1-ft-GGUF", gguf_variant },
+      { active_model: "unsloth/orpheus-3b-0.1-ft-GGUF", gguf_variant },
       ggufQuantLabel,
     ).variant;
   assert.equal(loaded("orpheus-3b-0.1-ft-q4_k_m.gguf"), "Q4_K_M");

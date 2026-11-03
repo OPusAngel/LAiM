@@ -35,9 +35,9 @@ test("an uncurated TTS repo still takes the main slot", () => {
 });
 
 test("the catalog still wins over the tag", () => {
-  assert.equal(routeFor("LAiM/whisper-small", null), "stt");
-  assert.equal(routeFor("LAiMai/Qwen3-ASR-0.6B-GGUF", null), "stt");
-  assert.equal(routeFor("LAiM/orpheus-3b-0.1-ft", null), "tts");
+  assert.equal(routeFor("unsloth/whisper-small", null), "stt");
+  assert.equal(routeFor("unslothai/Qwen3-ASR-0.6B-GGUF", null), "stt");
+  assert.equal(routeFor("unsloth/orpheus-3b-0.1-ft", null), "tts");
 });
 
 const curatedArtifactGate = (repoId: string, isGguf: boolean) =>

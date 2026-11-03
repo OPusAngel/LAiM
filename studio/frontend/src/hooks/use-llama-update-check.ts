@@ -13,6 +13,8 @@ import {
   llamaUpdatePresentation,
 } from "@/lib/llama-job-lifecycle";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { translate } from "@/i18n";
+
 
 // Initial check plus hourly reminders until dismissed or applied.
 const FIRST_CHECK_DELAY_MS = 1000;
@@ -530,7 +532,7 @@ export function useLlamaUpdateCheck({
           notifyReloadIfNeeded(s.job);
           onDone?.({ ok: false, error: s.job.error });
         } else {
-          onDone?.({ ok: false, error: "update did not complete" });
+          onDone?.({ ok: false, get error() { return translate("uxFeatures.updateDidNotCompletepp84q"); } });
         }
       }, JOB_POLL_INTERVAL_MS);
       pollTimer.current = timer;
@@ -678,7 +680,7 @@ export function useLlamaUpdateCheck({
   }, [presentStatus]);
 
   const apply = useCallback(async (): Promise<LlamaApplyResult> => {
-    if (applying) return { ok: false, error: "already running" };
+    if (applying) return { ok: false, get error() { return translate("uxFeatures.alreadyRunning3hrxp"); } };
     const suppressionAtRequest = suppressionRef.current;
     setApplying(true);
     setVisible(true);

@@ -79,10 +79,10 @@ def _function_dump(path: Path, name: str) -> str:
 @pytest.mark.parametrize("name", _SHARED_FUNCTIONS)
 def test_studio_copy_matches_LAiM_import_fixes(name):
     if not _IMPORT_FIXES.is_file():
-        pytest.skip("LAiM/import_fixes.py is not in this checkout")
+        pytest.skip("unsloth/import_fixes.py is not in this checkout")
     assert _function_dump(_PATCH_MODULE, name) == _function_dump(_IMPORT_FIXES, name), (
         f"DRIFT: {name}() differs between core/inference/diffusion_torchao_patches.py and "
-        "LAiM/import_fixes.py. The two copies must stay interchangeable, because whichever "
+        "unsloth/import_fixes.py. The two copies must stay interchangeable, because whichever "
         "one runs first in a process is the one that patches torchao."
     )
 
@@ -131,7 +131,7 @@ def test_finder_answers_for_both_torchao_homes(monkeypatch):
     if _IMPORT_FIXES.is_file():
         text = _IMPORT_FIXES.read_text(encoding = "utf-8")
         for name in _TORCHAO_INTMM_MODULES:
-            assert f'"{name}"' in text, f"LAiM/import_fixes.py does not list {name}"
+            assert f'"{name}"' in text, f"unsloth/import_fixes.py does not list {name}"
 
     class _Loader:
         def exec_module(self, module):

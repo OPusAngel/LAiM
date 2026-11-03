@@ -28,7 +28,7 @@ const SOURCE = readSrc("features/loaded-models/use-loaded-models.ts");
 
 test("a stale pending entry outlives every poll, so it must not survive a disable", () => {
   const pending = new Map<LoadedModelSource, string | null>([
-    ["image", "LAiM/flux"],
+    ["image", "unsloth/flux"],
   ]);
   // What the poll reports after the load failed: this runtime holds nothing.
   const polled: LoadedModelEntry[] = [
@@ -94,17 +94,17 @@ test("a replacement load shows alongside the model it is replacing", () => {
       id: "image:LAiM/flux-old",
       kind: "image",
       source: "image",
-      name: "LAiM/flux-old",
+      name: "unsloth/flux-old",
       detail: "FLUX · BF16 · cuda",
     },
   ];
   const pending = new Map<LoadedModelSource, string | null>([
-    ["image", "LAiM/flux-new"],
+    ["image", "unsloth/flux-new"],
   ]);
 
   const rows = withPendingLoads(resident, pending);
   assert.equal(rows.length, 2);
-  assert.equal(rows[1].name, "LAiM/flux-new");
+  assert.equal(rows[1].name, "unsloth/flux-new");
   assert.equal(rows[1].loading, true);
 });
 
@@ -114,12 +114,12 @@ test("the resident row wins once the replacement has committed", () => {
       id: "image:LAiM/flux-new",
       kind: "image",
       source: "image",
-      name: "LAiM/flux-new",
+      name: "unsloth/flux-new",
       detail: "FLUX · BF16 · cuda",
     },
   ];
   const pending = new Map<LoadedModelSource, string | null>([
-    ["image", "LAiM/flux-new"],
+    ["image", "unsloth/flux-new"],
   ]);
   assert.deepEqual(withPendingLoads(committed, pending), committed);
 });
@@ -138,7 +138,7 @@ test("a status loading row still suppresses the announcement", () => {
     },
   ];
   const pending = new Map<LoadedModelSource, string | null>([
-    ["chat", "LAiM/Qwen3-0.6B-GGUF"],
+    ["chat", "unsloth/Qwen3-0.6B-GGUF"],
   ]);
   assert.deepEqual(withPendingLoads(loadingRow, pending), loadingRow);
 });
@@ -149,7 +149,7 @@ test("an unnamed announcement defers to any row for its runtime", () => {
       id: "video:LAiM/wan",
       kind: "video",
       source: "video",
-      name: "LAiM/wan",
+      name: "unsloth/wan",
       detail: "WAN",
     },
   ];

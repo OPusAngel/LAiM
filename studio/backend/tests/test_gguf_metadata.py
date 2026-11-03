@@ -825,7 +825,7 @@ def test_is_gguf_embedding_model_from_name_hint(tmp_path: Path):
     )
     with patch("utils.models.model_config.is_embedding_model") as remote_classifier:
         assert (
-            is_gguf_embedding_model(str(p), model_identifier = "LAiM/Qwen3-Embedding-4B") is True
+            is_gguf_embedding_model(str(p), model_identifier = "unsloth/Qwen3-Embedding-4B") is True
         )
     remote_classifier.assert_not_called()
 

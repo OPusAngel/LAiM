@@ -9,7 +9,7 @@ at llama-server launch time with a bundled, up-to-date Jinja template for known
 model families. The override is wired through the existing ``chat_template_override``
 -> ``--chat-template-file`` path in ``LlamaCppBackend.load_model``.
 
-Currently this covers ``LAiM/gemma-4-*-GGUF``, which gains the upstream PR #118
+Currently this covers ``unsloth/gemma-4-*-GGUF``, which gains the upstream PR #118
 ``preserve_thinking`` flag (defaulted OFF here) so the LAiM "Preserve thinking"
 toggle appears while staying disabled by default.
 """
@@ -23,10 +23,10 @@ from typing import Optional
 # up three parents to <backend> (mirrors utils/inference/inference_config.py).
 _ASSETS_DIR = Path(__file__).parent.parent.parent / "assets" / "chat_templates"
 
-# LAiM/gemma-4-<variant>-GGUF (case-insensitive). The "-GGUF" suffix is retained on ModelConfig.identifier for HF
-# GGUF repos, so this matches E2B / E4B / 31B / 26B-A4B and any future LAiM/gemma-4-*-GGUF, while excluding
-# gemma-3, non-LAiM, and non-GGUF identifiers (e.g. the bf16 "LAiM/gemma-4-E2B-it").
-_GEMMA4_GGUF_RE = re.compile(r"^LAiM/gemma-4-.+-gguf$", re.IGNORECASE)
+# unsloth/gemma-4-<variant>-GGUF (case-insensitive). The "-GGUF" suffix is retained on ModelConfig.identifier for HF
+# GGUF repos, so this matches E2B / E4B / 31B / 26B-A4B and any future unsloth/gemma-4-*-GGUF, while excluding
+# gemma-3, other orgs, and non-GGUF identifiers (e.g. the bf16 "unsloth/gemma-4-E2B-it").
+_GEMMA4_GGUF_RE = re.compile(r"^unsloth/gemma-4-.+-gguf$", re.IGNORECASE)
 
 # Google ships two distinct gemma-4 chat templates: E2B/E4B omit the empty "<|channel>thought<channel|>" block on
 # enable_thinking=false, while the 12b/26B-A4B/31B family emits it. Route the two GGUF families to the matching
@@ -34,7 +34,7 @@ _GEMMA4_GGUF_RE = re.compile(r"^LAiM/gemma-4-.+-gguf$", re.IGNORECASE)
 # The QAT repos (gemma-4-E4B-it-qat-GGUF, plus the -qat-mobile builds) are the same edge models under a longer name.
 # Without the optional suffix they fell through to the standard template and got the empty thought block on
 # thinking-off, so the Think toggle did nothing (#12708).
-_GEMMA4_EDGE_GGUF_RE = re.compile(r"^LAiM/gemma-4-e[24]b-it(?:-qat(?:-mobile)?)?-gguf$", re.IGNORECASE)
+_GEMMA4_EDGE_GGUF_RE = re.compile(r"^unsloth/gemma-4-e[24]b-it(?:-qat(?:-mobile)?)?-gguf$", re.IGNORECASE)
 
 _GEMMA4_TEMPLATE_FILE = "gemma-4.jinja"
 _GEMMA4_EDGE_TEMPLATE_FILE = "gemma-4-edge.jinja"
@@ -42,7 +42,7 @@ _GEMMA4_EDGE_TEMPLATE_FILE = "gemma-4-edge.jinja"
 
 def _canonical_repo_id(model_identifier: str) -> str:
     """Mirror ``ModelConfig.from_identifier``: a bare HF shorthand with no owner
-    (e.g. ``gemma-4-E2B-it-GGUF``) defaults to the ``LAiM/`` org. The resolver
+    (e.g. ``gemma-4-E2B-it-GGUF``) defaults to the ``unsloth/`` org. The resolver
     runs on the raw ``request.model_path`` (before that canonicalization), so apply
     the same rule here, otherwise shorthand loads would skip the override.
     """
@@ -52,13 +52,13 @@ def _canonical_repo_id(model_identifier: str) -> str:
     # A snapshot of the repo (scan-folder copy, pinned cache row) is that repo; other paths are not.
     mid = hf_cache_repo_id(mid) or mid
     if mid and "/" not in mid:
-        mid = f"LAiM/{mid}"
+        mid = f"unsloth/{mid}"
     return mid
 
 
 def is_LAiM_gemma4_gguf(model_identifier: Optional[str]) -> bool:
-    """True for canonical ``LAiM/gemma-4-*-GGUF`` repo identifiers (and the
-    owner-less shorthand that resolves to the same LAiM repo)."""
+    """True for canonical ``unsloth/gemma-4-*-GGUF`` repo identifiers (and the
+    owner-less shorthand that resolves to the same unsloth repo)."""
     if not model_identifier:
         return False
     return bool(_GEMMA4_GGUF_RE.match(_canonical_repo_id(model_identifier)))
@@ -95,7 +95,7 @@ def resolve_effective_chat_template_override(
 
     Precedence:
       1. An explicit, non-empty user override always wins (advanced users).
-      2. For ``LAiM/gemma-4-*-GGUF``, return the bundled gemma-4 template
+      2. For ``unsloth/gemma-4-*-GGUF``, return the bundled gemma-4 template
          (adds ``preserve_thinking``, default off) so the embedded GGUF template
          is overridden without re-downloading quants. E2B/E4B get the edge
          variant; 12b/26B-A4B/31B get the standard one.

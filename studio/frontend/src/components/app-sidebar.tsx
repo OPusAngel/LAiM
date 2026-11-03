@@ -166,7 +166,7 @@ import {
   showForkCreatedToast,
   getSidebarItemThreadIds,
   useForkInFlight,
-  sandboxSessionIdsHolding,
+  workdirSessionIdsHolding,
   deleteChatProject,
   deleteChatItem,
   moveChatItemToProject,
@@ -232,7 +232,7 @@ import {
   newInputImeState,
   resetInputIme,
 } from "@/features/chat/utils/composer-preferences";
-import { sandboxSessionIdFor } from "@/components/assistant-ui/sandbox-files";
+import { workdirSessionIdFor } from "@/components/assistant-ui/workdir-files";
 import { NewProjectDialog } from "@/features/chat/components/new-project-dialog";
 import {
   sidebarNavRowPinned,
@@ -708,7 +708,7 @@ function NavItem({
   );
 }
 
-const WORKFLOW_UNAVAILABLE = "The loaded model cannot do this";
+const workflowUnavailableLabel = () => translate("uxComponents.loadedModelCannottwty8");
 
 // Re-read cadences for the hardware verdict below. An unmeasured verdict holds Train and Video on
 // a spinner, so it is re-read sooner than the background MLX self-heal check. A re-read outstanding
@@ -757,7 +757,7 @@ function WorkflowChoice({
     <button
       type="button"
       disabled={!enabled}
-      title={enabled ? undefined : WORKFLOW_UNAVAILABLE}
+      title={enabled ? undefined : workflowUnavailableLabel()}
       onClick={onSelect}
       // Weight and colour come from the nav rows above; only the size sets a submenu apart.
       className={cn(
@@ -1039,7 +1039,7 @@ function MediaMoreSubmenu<Id extends string>({
           <DropdownMenuItem
             key={tab.id}
             disabled={!enabled(tab.id)}
-            title={enabled(tab.id) ? undefined : WORKFLOW_UNAVAILABLE}
+            title={enabled(tab.id) ? undefined : workflowUnavailableLabel()}
             onSelect={() => onPick(tab.id)}
             className={cn(current === tab.id && "bg-accent/60")}
           >
@@ -1181,7 +1181,7 @@ function MediaRailFlyout<Id extends string>({
           <DropdownMenuItem
             key={tab.id}
             disabled={!enabled(tab.id)}
-            title={enabled(tab.id) ? undefined : WORKFLOW_UNAVAILABLE}
+            title={enabled(tab.id) ? undefined : workflowUnavailableLabel()}
             onSelect={() => onPick(tab.id)}
             className={cn(current === tab.id && "bg-accent/60")}
           >
@@ -2774,7 +2774,7 @@ export function AppSidebar() {
         .catch(() => {
           if (writes.get(scope) !== generation) return;
           setPendingManualOrder(({ [scope]: _dropped, ...rest }) => rest);
-          toast.error("Couldn't save the new order");
+          toast.error(translate("uxComponents.couldnTSaveThesbnyc"));
         });
     },
     [setManualOrder, chatRowSlots, chatRowLists],
@@ -3329,7 +3329,7 @@ export function AppSidebar() {
       children: (
         <button
           type="button"
-          aria-label="New project"
+          aria-label={translate("library.chats.toolbar.newProject")}
           onClick={(e) => {
             e.stopPropagation();
             // NewProjectDialog owns its own name field, so opening it is just the move target plus the open flag.
@@ -3593,7 +3593,7 @@ export function AppSidebar() {
         }}
         className="w-full cursor-pointer text-left"
       >
-        You can view archived chats in Settings
+        {translate("uxCopy.youCanViewArchived1jftd")}
       </button>,
       { closeButton: true },
     );
@@ -3611,7 +3611,7 @@ export function AppSidebar() {
       });
       showArchivedChatsToast();
     } catch (err) {
-      toast.error("Failed to archive chat", {
+      toast.error(translate("uxComponents.failedToArchiveChat1fs9u"), {
         description: err instanceof Error ? err.message : undefined,
       });
     }
@@ -3634,7 +3634,7 @@ export function AppSidebar() {
       if ((error as { LAiMForkRefused?: boolean } | null)?.LAiMForkRefused) {
         toast.info(error instanceof Error ? error.message : "Cannot fork this chat.");
       } else {
-        toast.error("Failed to fork", {
+        toast.error(translate("library.chats.toast.forkFailed"), {
           description: error instanceof Error ? error.message : undefined,
         });
       }
@@ -3736,7 +3736,7 @@ export function AppSidebar() {
     useState<DeleteTarget | null>(null);
   const [deleteFilesOnDelete, setDeleteFilesOnDelete] = useState(false);
 
-  /** Always through here: a stale switch would delete an unrelated sandbox. */
+  /** Always through here: a stale switch would delete an unrelated workdir. */
   function openDeleteDialog(target: DeleteTarget) {
     // Chats follow the preference, so the switch shows what will happen and can
     // still be turned off for this one delete. A project workspace is a bigger
@@ -3746,7 +3746,7 @@ export function AppSidebar() {
     setConfirmingDelete(target);
   }
 
-  /** Only where a sandbox can actually be removed. A training run has none.
+  /** Only where a workdir can actually be removed. A training run has none.
    *  A chat in a project still has one: anything it wrote before the move is in
    *  its own folder, and deletion never touches the project workspace. */
   function deleteTargetHasFiles(target: DeleteTarget | null): boolean {
@@ -3793,7 +3793,7 @@ export function AppSidebar() {
           });
           deletedIds.add(project.id);
         } catch (err) {
-          toast.error("Failed to delete project", {
+          toast.error(translate("library.chats.toast.projectDeleteFailed"), {
             description: err instanceof Error ? err.message : undefined,
           });
         }
@@ -3834,7 +3834,7 @@ export function AppSidebar() {
           navigate({ to: "/chat", search: { new: createNavigationNonce() } });
         }
       } catch (err) {
-        toast.error("Failed to delete project", {
+        toast.error(translate("library.chats.toast.projectDeleteFailed"), {
           description: err instanceof Error ? err.message : undefined,
         });
       }
@@ -3912,7 +3912,7 @@ export function AppSidebar() {
       }
       return true;
     } catch (err) {
-      toast.error("Failed to move chat", {
+      toast.error(translate("uxComponents.failedToMoveChathwane"), {
         description: err instanceof Error ? err.message : undefined,
       });
       return false;
@@ -3933,22 +3933,22 @@ export function AppSidebar() {
       const markdown = await buildChatItemMarkdown(item);
       if (!markdown) {
         empty.value = true;
-        throw new Error("nothing to copy");
+        throw new Error(translate("uxComponents.nothingToCopyst9he"));
       }
       return markdown;
     });
     if (copied) {
-      toast.success("Chat copied as Markdown");
+      toast.success(translate("uxComponents.chatCopiedAsMarkdown1y7oh"));
     } else if (empty.value) {
-      toast.info("No exportable content.");
+      toast.info(translate("uxComponents.noExportableContentfe4dd"));
     } else {
       // Denied permission, an unfocused document, a failed history read: the payload was fine and
       // the write was not, and a chord has no cursor to show that with.
-      toast.error("Could not copy this chat.");
+      toast.error(translate("uxComponents.couldNotCopyThis1yd7c"));
     }
   }
 
-  /** The sandbox session this chat's tool calls write into. */
+  /** The workdir session this chat's tool calls write into. */
   async function copyChatSessionId(item: SidebarItem) {
     const threadIds = getSidebarItemThreadIds(item);
     const ids = threadIds.length > 0 ? threadIds : [item.id];
@@ -3962,18 +3962,18 @@ export function AppSidebar() {
     const copied = await copyToClipboardFrom(async () => {
       let sessionId: string | undefined;
       try {
-        const distinct = await sandboxSessionIdsHolding(ids);
+        const distinct = await workdirSessionIdsHolding(ids);
         if (distinct.length > 1) {
           refusal.value = {
-            title: "This chat wrote to more than one folder.",
-            description: "Copy the session id from a tool card instead.",
+            title: translate("library.chats.folder.manyFolders"),
+            description: translate("uxComponents.copyTheSessionId8kelv"),
           };
-          throw new Error("more than one folder");
+          throw new Error(translate("uxComponents.moreThanOneFolderb3p94"));
         }
         sessionId = distinct[0];
       } catch (error) {
         refusal.value ??= {
-          title: "Could not read this chat's session id.",
+          title: translate("uxComponents.couldNotReadThis1fi1s"),
           description: error instanceof Error ? error.message : String(error),
         };
         throw error;
@@ -3982,16 +3982,16 @@ export function AppSidebar() {
       // the one current membership gives it.
       sessionId ??=
         item.type === "single" || item.projectId
-          ? sandboxSessionIdFor(ids[0], item.projectId)
+          ? workdirSessionIdFor(ids[0], item.projectId)
           : undefined;
       if (!sessionId) {
-        refusal.value = { title: "This chat has no single session id" };
-        throw new Error("no session id");
+        refusal.value = { title: translate("uxComponents.thisChatHasNooyd8j") };
+        throw new Error(translate("uxComponents.noSessionIdkbwqv"));
       }
       return sessionId;
     });
     if (copied) {
-      toast.success("Session id copied");
+      toast.success(translate("uxComponents.sessionIdCopied1qz2m"));
       return;
     }
     if (refusal.value) {
@@ -4001,7 +4001,7 @@ export function AppSidebar() {
       return;
     }
     // No refusal means the id was found and the clipboard write itself failed.
-    toast.error("Could not copy the session id.");
+    toast.error(translate("uxComponents.couldNotCopyTheo7uao"));
   }
 
   /** Open a chat row. Shared by the row and the navigation chords. */
@@ -4054,7 +4054,7 @@ export function AppSidebar() {
   /** Run `fn` on the open chat, or say why nothing happened. */
   const withActiveChat = (fn: (item: SidebarItem) => void) => {
     if (!activeChatItem) {
-      toast.info("Open a chat first");
+      toast.info(translate("uxComponents.openAChatFirstgen5g"));
       return;
     }
     fn(activeChatItem);
@@ -4251,11 +4251,13 @@ export function AppSidebar() {
     const state = useChatNavigationStore.getState();
     const cleared = countUnreadRows(state);
     if (state.unreadThreadIds.size === 0) {
-      toast.info("No unread chats");
+      toast.info(translate("uxComponents.noUnreadChatsf7x7z"));
       return;
     }
     state.clearAllUnreads();
-    toast.success(`Cleared ${cleared} unread ${cleared === 1 ? "chat" : "chats"}`);
+    toast.success(
+      translate("uxComponents.clearedUnreadChatsk93mv", { p1: cleared }),
+    );
   });
 
   // The six slots register as <Shortcut> elements: a loop of hooks would break the rules of hooks.
@@ -4593,7 +4595,7 @@ export function AppSidebar() {
             )}
           >
             <CollapsibleTrigger className="cursor-pointer flex min-w-0 flex-1 items-center gap-1 group/sb-collap">
-              Pinned
+              {translate("library.chats.toolbar.pinned")}
               <ChevronDown className="size-3.5 opacity-0 transition-[transform,opacity] duration-200 group-hover/sb-section:opacity-100 group-hover/sb-collap:opacity-100 group-focus-visible/sb-collap:opacity-100 data-[state=open]:rotate-0 [[data-state=closed]_&]:rotate-[-90deg] [[data-state=closed]_&]:opacity-100" />
             </CollapsibleTrigger>
             {/* Pinning is the grouping, so no organize half and no "+". */}
@@ -4858,7 +4860,7 @@ export function AppSidebar() {
             </CollapsibleTrigger>
             <button
               type="button"
-              aria-label="New project"
+              aria-label={translate("library.chats.toolbar.newProject")}
               onClick={() => {
                 setProjectCreateMoveTarget(null);
                 setCreatingProject(true);
@@ -5166,11 +5168,11 @@ export function AppSidebar() {
     const moveProjects = recentProjects
       .filter((project) => project.id !== item.projectId)
       .slice(0, MOVE_TO_MAX);
-    // A compare row outside a project spans two sandboxes, and there is no
+    // A compare row outside a project spans two workdirs, and there is no
     // honest single folder to offer for it.
-    const sandboxSessionId =
+    const workdirSessionId =
       item.type === "single" || item.projectId
-        ? sandboxSessionIdFor(threadIds[0] ?? item.id, item.projectId)
+        ? workdirSessionIdFor(threadIds[0] ?? item.id, item.projectId)
         : undefined;
     const alreadyUnread = threadIds.some((threadId) =>
       unreadThreadIds.has(threadId),
@@ -5210,7 +5212,7 @@ export function AppSidebar() {
             <P.Separator />
             <P.Item
               disabled={!canForkChatRow(item) || isGenerating || forkInFlight}
-              title="Copy this chat into a new one, from its last message"
+              title={translate("uxComponents.copyThisChatInto1cwi3")}
               onSelect={() => void forkChatFromRow(item)}
             >
               <HugeiconsIcon icon={ForkIcon} strokeWidth={1.75} className="size-icon" />
@@ -5235,7 +5237,7 @@ export function AppSidebar() {
                   }}
                 >
                   <HugeiconsIcon icon={PlusSignIcon} strokeWidth={1.75} className="size-icon" />
-                  <span>New project</span>
+                  <span>{translate("uxComponents.newProjectatytc")}</span>
                 </P.Item>
                 {/* The project the chat is in is not a place to move it to: left out, not greyed. */}
                 {moveProjects.length > 0 && (
@@ -5336,11 +5338,11 @@ export function AppSidebar() {
   ) {
     const threadIds = getSidebarItemThreadIds(item);
     const isPinned = pinnedIdSet.has(item.id);
-    // A compare row outside a project spans two sandboxes, and there is no
+    // A compare row outside a project spans two workdirs, and there is no
     // honest single folder to offer for it.
-    const sandboxSessionId =
+    const workdirSessionId =
       item.type === "single" || item.projectId
-        ? sandboxSessionIdFor(threadIds[0] ?? item.id, item.projectId)
+        ? workdirSessionIdFor(threadIds[0] ?? item.id, item.projectId)
         : undefined;
     // A compare row's id is the pair id while runningByThreadId is per pane thread; aggregate.
     const isGenerating =
@@ -5548,7 +5550,7 @@ export function AppSidebar() {
                   ref={triggerRef}
                   type="button"
                   onClick={(e) => e.stopPropagation()}
-                  aria-label="Chat options"
+                  aria-label={translate("browser.fullView.options")}
                   className={actionClass}
                 >
                   <span className="sidebar-row-action-glyph">
@@ -5578,7 +5580,7 @@ export function AppSidebar() {
       <>
           <P.Item onSelect={() => openProject(project.id)}>
             <HugeiconsIcon icon={Folder01Icon} strokeWidth={1.75} className="size-icon" />
-            <span>Project home</span>
+            <span>{translate("uxComponents.projectHomeleyj7")}</span>
           </P.Item>
           {/* No "New chat" here: the row's own pencil does it. */}
           <P.Item onSelect={() => toggleProjectPin(project.id)}>
@@ -5604,7 +5606,7 @@ export function AppSidebar() {
             }}
           >
             <HugeiconsIcon icon={Delete02Icon} strokeWidth={1.75} className="size-icon" />
-            <span>Delete project</span>
+            <span>{translate("uxComponents.deleteProjectt7p96")}</span>
           </P.Item>
       </>
     );
@@ -5711,7 +5713,7 @@ export function AppSidebar() {
           {/* New chat in this project */}
           <button
             type="button"
-            aria-label="New chat"
+            aria-label={translate("linkMenu.newChat")}
             onClick={(e) => {
               e.stopPropagation();
               openNewChat(project.id);
@@ -5736,7 +5738,7 @@ export function AppSidebar() {
                 ref={triggerRef}
                 type="button"
                 onClick={(e) => e.stopPropagation()}
-                aria-label="Project options"
+                aria-label={translate("uxComponents.projectOptions1yhqf")}
                 className="sidebar-row-action sidebar-touch-reveal group-hover/recent-item:opacity-100 group-hover/recent-item:pointer-events-auto focus-visible:opacity-100 focus-visible:pointer-events-auto"
               >
                 <span className="sidebar-row-action-glyph">
@@ -5855,7 +5857,7 @@ export function AppSidebar() {
                 usesDesktopTitlebar
                   ? "justify-between pl-4 pr-3"
                   : "justify-between",
-                usesCustomTitlebar && "h-[var(--studio-chat-control-height,34px)]",
+                usesCustomTitlebar && "min-h-[var(--studio-chat-control-height,34px)]",
               )}
             >
                 <Link
@@ -5879,13 +5881,13 @@ export function AppSidebar() {
                   <img
                     src="/LAiM_line.png"
                     alt="LAiM"
-                    className="relative top-px h-[calc(88px+2rem*var(--ui-font-scale,1))] w-auto max-w-[calc(480px+8rem*var(--ui-font-scale,1))] shrink-0 object-contain object-left group-data-[collapsible=icon]:hidden"
+                    className="relative top-px h-[calc(56px+1.28rem*var(--ui-font-scale,1))] w-auto max-w-[calc(307px+5.12rem*var(--ui-font-scale,1))] shrink-0 object-contain object-left group-data-[collapsible=icon]:hidden"
                   />
                   <img
                     src="/LAiM.png"
                     alt="LAiM"
                     aria-hidden="true"
-                    className="relative top-px hidden size-[calc(36px+0.5rem*var(--ui-font-scale,1))] shrink-0 object-contain group-data-[collapsible=icon]:block"
+                    className="relative top-px hidden size-[calc(28.8px+0.4rem*var(--ui-font-scale,1))] shrink-0 object-contain group-data-[collapsible=icon]:block"
                   />
                 </Link>
               <div className="flex shrink-0 items-center gap-0.25">
@@ -5974,7 +5976,12 @@ export function AppSidebar() {
         className={cn(
           "group-data-[collapsible=icon]:px-0 shrink-0 transition-[padding]",
           rowPadding,
-          usesDesktopTitlebar ? "pt-[calc(11px*var(--ui-space-scale,1))]" : "pt-[calc(7px*var(--ui-space-scale,1))]",
+          // LAiM: the same gap the 22px spacer before Обучить модель puts above that row. The web
+          // header already leaves 8px under the lockup, so its share is 14px; a desktop titlebar
+          // header carries none, so it takes the full 22px.
+          usesDesktopTitlebar
+            ? "pt-[calc(22px*var(--ui-space-scale,1))]"
+            : "pt-[calc(14px*var(--ui-space-scale,1))]",
           // Scrolled: New Chat is pinned, give a little gap below it.
           scrolled ? "pb-[calc(5px*var(--ui-space-scale,1))]" : "pb-px",
         )}
@@ -6887,9 +6894,7 @@ export function AppSidebar() {
                 Delete{" "}
                 <span className="font-medium text-foreground">
                   &quot;{confirmingDelete.project.name}&quot;
-                </span>
-                ? Its chats will be permanently deleted.
-              </>
+                </span>{translate("uxComponents.itsChatsWillBekuyiq")}</>
             ) : null}
           </DialogDescription>
         </DialogHeader>

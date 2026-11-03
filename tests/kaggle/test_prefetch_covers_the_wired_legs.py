@@ -54,8 +54,8 @@ def test_the_model_walk_reads_the_payload_default_and_not_only_the_args():
     """Three of the five wired legs carry no --model at all. A rule that read
     the args alone would report them as having no checkpoint and pass by
     finding nothing, which is the shape of a guard that guards nothing."""
-    assert models_for(legs.LEGS["canary"]) == {"LAiM/Qwen2.5-0.5B-Instruct"}
-    assert "LAiM/gpt-oss-20b-LAiM-bnb-4bit" in models_for(legs.LEGS["gptoss"]), (
+    assert models_for(legs.LEGS["canary"]) == {"unsloth/Qwen2.5-0.5B-Instruct"}
+    assert "unsloth/gpt-oss-20b-unsloth-bnb-4bit" in models_for(legs.LEGS["gptoss"]), (
         "the gpt-oss redirect is not being applied, so the prefetch would warm "
         "the 16-bit repo that no sm_75 run ever loads"
     )
@@ -64,8 +64,8 @@ def test_the_model_walk_reads_the_payload_default_and_not_only_the_args():
 def test_the_critical_path_leg_is_fetched_before_the_one_with_slack():
     """The lane fetches in list order, so the leg that sets the makespan goes first."""
     order = list(legs.PREFETCH_REPOS)
-    assert order.index("LAiM/Qwen3.5-2B") < order.index(
-        "LAiM/gpt-oss-20b-LAiM-bnb-4bit"
+    assert order.index("unsloth/Qwen3.5-2B") < order.index(
+        "unsloth/gpt-oss-20b-unsloth-bnb-4bit"
     ), "the leg that sets the makespan is queued behind the leg with 500s of slack"
 
 
@@ -100,7 +100,7 @@ def test_every_redirect_target_is_prefetched_under_its_EXACT_name():
 
 def test_the_qwen3_redirect_matches_the_measured_case():
     """Repo casing must match the loader's current canonical spelling as shown in a kernel report."""
-    assert legs.LOAD_REDIRECTS["LAiM/Qwen3-0.6B"] == "LAiM/Qwen3-0.6B-LAiM-bnb-4bit"
+    assert legs.LOAD_REDIRECTS["unsloth/Qwen3-0.6B"] == "unsloth/Qwen3-0.6B-unsloth-bnb-4bit"
 
 
 def test_a_blob_is_counted_once_not_once_per_symlink(tmp_path, monkeypatch):

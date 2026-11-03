@@ -45,7 +45,7 @@ from core.inference.offload_planner import (
 GIB = 1024**3
 MIB = 1024**2
 
-_MODELS = "/mnt/disks/LAiMai/daniel3/workspace_11/temp/loadmode_sim"
+_MODELS = "/mnt/disks/unslothai/daniel3/workspace_11/temp/loadmode_sim"
 Q2_PATH = f"{_MODELS}/qwen38/Qwen3.8-27B-UD-Q2_K_XL.gguf"
 Q4_PATH = f"{_MODELS}/qwen38/Qwen3.8-27B-UD-Q4_K_XL.gguf"
 MOE_PATH = f"{_MODELS}/qwen36moe/Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf"

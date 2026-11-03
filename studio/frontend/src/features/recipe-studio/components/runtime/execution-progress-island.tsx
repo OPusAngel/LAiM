@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Spinner } from "@/components/ui/spinner";
@@ -40,12 +41,12 @@ function statusLabel(input: {
   inProgress: boolean;
 }): string {
   if (input.complete) {
-    return "Run completed";
+    return translate("uxRecipestudio.runCompleteds6dh2");
   }
   if (input.inProgress) {
-    return "Run in progress";
+    return translate("uxRecipestudio.runInProgressdvmfp");
   }
-  return "Run status";
+  return translate("uxRecipestudio.runStatusq1z45");
 }
 
 function formatSourceResource(value: string | null | undefined): string {
@@ -67,10 +68,10 @@ function formatGitHubSourceSummary(
       typeof source.retry_after_sec === "number" && source.retry_after_sec > 0
         ? ` ~${formatMetricValue(source.retry_after_sec)}s`
         : "";
-    return `Waiting for GitHub rate limit${wait}. LAiM will resume automatically.`;
+    return translate("uxRecipestudio.waitingForGitHubRatev403x", { p1: wait });
   }
   if (source.status === "retrying") {
-    return source.message ?? "GitHub request failed; retrying automatically.";
+    return source.message ?? translate("uxRecipestudio.githubRequestFailed94joq");
   }
 
   const parts = [
@@ -89,7 +90,7 @@ function formatGitHubSourceSummary(
   ].filter(Boolean);
 
   if (parts.length === 0) {
-    return source.message ?? "Crawling GitHub source";
+    return source.message ?? translate("uxRecipestudio.crawlingGitHubSourceho10e");
   }
   return parts.join(" · ");
 }
@@ -163,7 +164,7 @@ export function ExecutionProgressIsland({
             type="button"
             onClick={() => onMinimizedChange(!minimized)}
             className="inline-flex size-8 shrink-0 items-center justify-center rounded border border-border/70 text-muted-foreground transition hover:bg-muted/50"
-            aria-label={minimized ? "Expand progress" : "Minimize progress"}
+            aria-label={minimized ? translate("uxRecipestudio.expandProgress35mjg") : translate("uxRecipestudio.minimizeProgressncz60")}
             title={minimized ? "Expand" : "Minimize"}
           >
             <HugeiconsIcon
@@ -184,27 +185,19 @@ export function ExecutionProgressIsland({
             <p
               className="truncate"
               title={`Done: ${formatMetricValue(execution.progress?.done)}`}
-            >
-              Done: {formatMetricValue(execution.progress?.done)}
-            </p>
+            >{translate("uxRecipestudio.donezmtvo", { p1: formatMetricValue(execution.progress?.done) })}</p>
             <p
               className="truncate"
               title={`Total: ${formatMetricValue(execution.progress?.total)}`}
-            >
-              Total: {formatMetricValue(execution.progress?.total)}
-            </p>
+            >{translate("uxRecipestudio.totaly8zva", { p1: formatMetricValue(execution.progress?.total) })}</p>
             <p
               className="truncate"
               title={`Rate: ${formatMetricValue(execution.progress?.rate)}`}
-            >
-              Rate: {formatMetricValue(execution.progress?.rate)}
-            </p>
+            >{translate("uxRecipestudio.rategk415", { p1: formatMetricValue(execution.progress?.rate) })}</p>
             <p
               className="truncate"
               title={`ETA: ${formatEta(execution.progress?.eta_sec)}`}
-            >
-              ETA: {formatEta(execution.progress?.eta_sec)}
-            </p>
+            >{translate("uxRecipestudio.eTAy2tv9", { p1: formatEta(execution.progress?.eta_sec) })}</p>
           </div>
           {showSourceProgress ? (
             <div className="mt-1 flex items-center gap-1.5 px-3 text-ui-11 text-muted-foreground">
@@ -212,9 +205,7 @@ export function ExecutionProgressIsland({
                 icon={Flag02Icon}
                 className="size-3.5 shrink-0 text-amber-700 dark:text-amber-300"
               />
-              <p className="truncate" title={sourceSummary ?? undefined}>
-                GitHub source: {sourceSummary}
-              </p>
+              <p className="truncate" title={sourceSummary ?? undefined}>{translate("uxRecipestudio.gitHubSourcey5yno", { p1: sourceSummary })}</p>
             </div>
           ) : (
             <div className="mt-1 flex items-center gap-1.5 px-3 text-ui-11 text-muted-foreground">
@@ -222,19 +213,14 @@ export function ExecutionProgressIsland({
                 icon={currentColumnIcon}
                 className="size-3.5 shrink-0"
               />
-              <p className="truncate" title={execution.current_column ?? "--"}>
-                Column: {execution.current_column ?? "--"}
-              </p>
+              <p className="truncate" title={execution.current_column ?? "--"}>{translate("uxRecipestudio.columnllylq", { p1: execution.current_column ?? "--" })}</p>
             </div>
           )}
           {showBatch && (
             <div
               className="mt-1 truncate px-3 text-ui-11 text-muted-foreground"
               title={`Batch: ${execution.batch?.idx ?? "--"}/${execution.batch?.total ?? "--"}`}
-            >
-              Batch: {execution.batch?.idx ?? "--"}/
-              {execution.batch?.total ?? "--"}
-            </div>
+            >{translate("uxRecipestudio.batchkxfc3", { p1: execution.batch?.idx ?? "--", p2: execution.batch?.total ?? "--" })}</div>
           )}
           <div className="px-3 pb-2 pt-2">
             <Button
@@ -244,7 +230,7 @@ export function ExecutionProgressIsland({
               className="h-7 w-full text-ui-11"
               onClick={onViewExecutions}
             >
-              View run details
+              {translate("uxCopy.viewRunDetails1bjmk")}
             </Button>
           </div>
         </>

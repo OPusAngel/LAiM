@@ -3,6 +3,8 @@
 
 import type { CategoryConditionalParams, SamplerConfig } from "../../types";
 import { isValidSex, parseAgeRange, parseNumber } from "./parse";
+import { translate } from "@/i18n";
+
 
 const DATETIME_UNIT_MAP: Record<string, "Y" | "M" | "D" | "h" | "m" | "s"> = {
   year: "Y",
@@ -22,14 +24,14 @@ function buildCategoryConditionalParams(
   for (const [rawCondition, params] of Object.entries(conditional)) {
     const condition = rawCondition.trim();
     if (!condition) {
-      errors.push(`Sampler ${config.name}: conditional rule needs condition text.`);
+      errors.push(translate("uxRecipestudio.samplerConditionalRuleNeedsruxz4", { p1: config.name }));
       continue;
     }
     const values = (params.values ?? [])
       .map((value) => value.trim())
       .filter(Boolean);
     if (values.length === 0) {
-      errors.push(`Sampler ${config.name}: conditional '${condition}' needs values.`);
+      errors.push(translate("uxRecipestudio.samplerConditionalNeedsValues9rv2k", { p1: config.name, p2: condition }));
       continue;
     }
     const weights = params.weights ?? [];
@@ -38,7 +40,7 @@ function buildCategoryConditionalParams(
       hasWeights &&
       (weights.length !== values.length || weights.some((weight) => weight === null))
     ) {
-      errors.push(`Sampler ${config.name}: conditional '${condition}' weights invalid.`);
+      errors.push(translate("uxRecipestudio.samplerConditionalWeightsInvalidmsvv8", { p1: config.name, p2: condition }));
       continue;
     }
     output[condition] = {
@@ -64,7 +66,7 @@ function buildSamplerParams(
     const weights = config.weights ?? [];
     const hasWeights = weights.some((weight) => weight !== null);
     if (hasWeights && weights.some((weight) => weight === null)) {
-      errors.push(`Sampler ${config.name}: weights missing values.`);
+      errors.push(translate("uxRecipestudio.samplerWeightsMissingValuesjk9r1", { p1: config.name }));
     } else if (hasWeights) {
       params.weights = weights.filter((weight) => weight !== null);
     }
@@ -75,7 +77,7 @@ function buildSamplerParams(
     for (const [key, values] of Object.entries(mapping)) {
       if (!values || values.length === 0) {
         errors.push(
-          `Subcategory ${config.name}: '${key}' needs at least 1 subcategory.`,
+          translate("uxRecipestudio.subcategoryNeedsAtLeast16esz", { p1: config.name, p2: key }),
         );
       }
     }
@@ -109,7 +111,7 @@ function buildSamplerParams(
       unit = DATETIME_UNIT_MAP[rawUnit];
     }
     if (rawUnit === "week") {
-      errors.push(`Datetime ${config.name}: unit 'week' not supported.`);
+      errors.push(translate("uxRecipestudio.datetimeUnitWeekNotecl3j", { p1: config.name }));
       unit = undefined;
     }
     return {
@@ -160,7 +162,7 @@ function buildSamplerParams(
     if (isValidSex(config.person_sex.trim())) {
       params.sex = config.person_sex.trim();
     } else {
-      errors.push(`Person ${config.name}: sex must be Male or Female.`);
+      errors.push(translate("uxRecipestudio.personSexMustBeg2lce", { p1: config.name }));
     }
   }
   if (config.person_city?.trim()) {
@@ -172,7 +174,7 @@ function buildSamplerParams(
       // biome-ignore lint/style/useNamingConvention: api schema
       params.age_range = parsed;
     } else {
-      errors.push(`Person ${config.name}: age range must be like 18-70.`);
+      errors.push(translate("uxRecipestudio.personAgeRangeMust0mlir", { p1: config.name }));
     }
   }
   return params;

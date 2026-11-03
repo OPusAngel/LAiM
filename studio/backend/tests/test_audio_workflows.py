@@ -35,7 +35,7 @@ def test_music_audio_types_match_the_frontend_set():
 
 
 def test_a_status_reports_no_workflows_for_a_model_that_is_not_audio():
-    status = InferenceStatusResponse(active_model = "LAiM/Qwen3-0.6B-GGUF")
+    status = InferenceStatusResponse(active_model = "unsloth/Qwen3-0.6B-GGUF")
     assert status.audio_workflows == []
     assert InferenceStatusResponse().audio_workflows == []
 

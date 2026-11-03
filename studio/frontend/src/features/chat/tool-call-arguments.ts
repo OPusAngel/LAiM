@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
+
 /** `true` when `text` is exactly one JSON object and nothing else. */
 function isSingleJsonObject(text: string): boolean {
   try {
@@ -223,7 +225,7 @@ class JsonTextParser {
     const value = this.parseValue();
     this.skipWhitespace();
     if (this.offset !== this.text.length) {
-      throw new Error("Trailing JSON text");
+      throw new Error(translate("uxChat.trailingJSONTextzzl33"));
     }
     return value;
   }
@@ -249,7 +251,7 @@ class JsonTextParser {
         return { raw, value: JSON.parse(raw) as string };
       }
     }
-    throw new Error("Unterminated JSON string");
+    throw new Error(translate("uxChat.unterminatedJSONStringderk5"));
   }
 
   private parseValue(): JsonTextNode {
@@ -275,7 +277,7 @@ class JsonTextParser {
     }
     const raw = this.text.slice(start, this.offset);
     if (!raw) {
-      throw new Error("Missing JSON value");
+      throw new Error(translate("uxChat.missingJSONValuel8lu3"));
     }
     return { kind: "scalar", raw, value: JSON.parse(raw) as unknown };
   }
@@ -291,12 +293,12 @@ class JsonTextParser {
     while (this.offset < this.text.length) {
       this.skipWhitespace();
       if (this.text[this.offset] !== '"') {
-        throw new Error("Invalid JSON key");
+        throw new Error(translate("uxChat.invalidJSONKeymd0ym"));
       }
       const key = this.parseString().value;
       this.skipWhitespace();
       if (this.text[this.offset++] !== ":") {
-        throw new Error("Missing JSON colon");
+        throw new Error(translate("uxChat.missingJSONColonw3p39"));
       }
       entries.push({ key, value: this.parseValue() });
       this.skipWhitespace();
@@ -305,10 +307,10 @@ class JsonTextParser {
         return { kind: "object", entries };
       }
       if (separator !== ",") {
-        throw new Error("Invalid JSON object separator");
+        throw new Error(translate("uxChat.invalidJSONObjectSeparatoropd56"));
       }
     }
-    throw new Error("Unterminated JSON object");
+    throw new Error(translate("uxChat.unterminatedJSONObjectwyuvy"));
   }
 
   private parseArray(): JsonTextNode {
@@ -327,10 +329,10 @@ class JsonTextParser {
         return { kind: "array", items };
       }
       if (separator !== ",") {
-        throw new Error("Invalid JSON array separator");
+        throw new Error(translate("uxChat.invalidJSONArraySeparatorp8q4e"));
       }
     }
-    throw new Error("Unterminated JSON array");
+    throw new Error(translate("uxChat.unterminatedJSONArray1li1q"));
   }
 }
 

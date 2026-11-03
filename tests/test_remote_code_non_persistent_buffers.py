@@ -587,7 +587,7 @@ def test_float64_loads_rebuild_under_float64():
 
 
 def test_loaders_restore_right_after_from_pretrained():
-    for relative, calls in (("LAiM/models/vision.py", 1), ("LAiM/models/llama.py", 2)):
+    for relative, calls in (("unsloth/models/vision.py", 1), ("unsloth/models/llama.py", 2)):
         with open(os.path.join(_ROOT, relative), encoding = "utf-8") as file:
             source = file.read()
         assert source.count("restore_remote_code_non_persistent_buffers(model)") == calls, relative

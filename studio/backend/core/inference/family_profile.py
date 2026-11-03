@@ -148,8 +148,8 @@ def profile_for(family: Any) -> FamilyProfile:
 
 
 def trusted_repo_ids(families: Any) -> frozenset[str]:
-    """Lowercased non-``LAiM/`` repo ids ``families`` name as their own bases, plus each profile's
-    ``trusted_repos``. ``LAiM/`` ids are trusted by prefix elsewhere, so they are left out here."""
+    """Lowercased non-``unsloth/`` repo ids ``families`` name as their own bases, plus each profile's
+    ``trusted_repos``. ``unsloth/`` ids are trusted by prefix elsewhere, so they are left out here."""
     ids: set[str] = set()
     for fam in families:
         named = [fam.base_repo]
@@ -158,4 +158,4 @@ def trusted_repo_ids(families: Any) -> frozenset[str]:
         named += [row[0] for row in getattr(fam, "prequant_variant_repos", ()) or ()]
         named += list(getattr(fam, "profile", DEFAULT_PROFILE).trusted_repos)
         ids.update(r.strip().lower() for r in named if r)
-    return frozenset(r for r in ids if not r.startswith("LAiM/"))
+    return frozenset(r for r in ids if not r.startswith("unsloth/"))

@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { ReleaseNotesPanel } from "@/components/update/release-notes-panel";
 import { type DeviceType, usePlatformStore } from "@/config/env";
@@ -114,7 +115,7 @@ export function WebUpdateBanner({
               type="button"
               onClick={dismiss}
               className="absolute top-2.5 right-3 flex size-6 items-center justify-center rounded-full text-muted-foreground/60 transition-colors hover:bg-muted hover:text-foreground"
-              aria-label="Dismiss update notification"
+              aria-label={translate("uxComponents.dismissUpdateNotification17s24")}
             >
               <svg
                 aria-hidden="true"
@@ -141,7 +142,7 @@ export function WebUpdateBanner({
               />
               <div className="min-w-0">
                 <p className="font-heading text-base font-medium text-foreground">
-                  New LAiM version
+                  {translate("uxComponents.newLAiMVersionyhxj5")}
                 </p>
                 <p className="mt-0.5 text-xs text-muted-foreground">
                   {status.currentVersion} &rarr;{" "}
@@ -182,7 +183,7 @@ export function WebUpdateBanner({
                   onClick={snooze}
                   data-testid="web-update-snooze-button"
                 >
-                  Remind me later
+                  {translate("uxCopy.remindMeLateracf87")}
                 </Button>
                 <Button
                   size="sm"

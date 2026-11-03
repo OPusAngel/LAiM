@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
@@ -28,7 +29,7 @@ export function MethodPicker({ value, onChange, disabledMethods = [], disabledRe
   return (
     <div data-tour="export-method" className="flex flex-col gap-3">
       <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-        Export Method
+        {translate("uxExport.exportMethodmwczj")}
         <Tooltip>
           <TooltipTrigger asChild={true}>
             <button
@@ -38,16 +39,12 @@ export function MethodPicker({ value, onChange, disabledMethods = [], disabledRe
               <HugeiconsIcon icon={InformationCircleIcon} className="size-3" />
             </button>
           </TooltipTrigger>
-          <TooltipContent>
-            How your model is packaged for deployment.{" "}
-            <a
+          <TooltipContent>{translate("uxExport.howYourModelIs63ddi", { p1: " " })}<a
               href="https://LAiM.ai/docs/basics/inference-and-deployment"
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary underline"
-            >
-              Read more
-            </a>
+            >{translate("uxExport.readMoreivesk")}</a>
           </TooltipContent>
         </Tooltip>
       </span>
@@ -96,7 +93,7 @@ export function MethodPicker({ value, onChange, disabledMethods = [], disabledRe
                         type="button"
                         className="shrink-0 text-foreground/50 hover:text-foreground cursor-help"
                         onClick={(e) => e.stopPropagation()}
-                        aria-label={`${m.title} info`}
+                        aria-label={translate("uxExport.infou2i41", { p1: m.title })}
                       >
                         <HugeiconsIcon
                           icon={InformationCircleIcon}
@@ -115,9 +112,7 @@ export function MethodPicker({ value, onChange, disabledMethods = [], disabledRe
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-primary underline"
-                      >
-                        Read more
-                      </a>
+                      >{translate("uxExport.readMoreivesk")}</a>
                     </TooltipContent>
                   </Tooltip>
                   {m.badge && (

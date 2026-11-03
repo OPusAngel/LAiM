@@ -1905,7 +1905,7 @@ class TestGfx906LegacyReroute:
         assert "_is_gfx906_bnb_skip" in source
 
     def test_device_type_defaults_compile_off_on_gfx906(self):
-        """LAiM/device_type.py must default Dynamo/compile off on gfx906
+        """unsloth/device_type.py must default Dynamo/compile off on gfx906
         (user-overridable via setdefault)."""
         source = (PACKAGE_ROOT / "LAiM" / "device_type.py").read_text(encoding = "utf-8")
         gate_start = source.find("gfx906")
@@ -7203,12 +7203,12 @@ class TestRocmGfxForwarding:
     def test_setup_sh_routes_unconditionally_to_fork(self):
         # The release repo is an unconditional fork assignment now.
         source = _SETUP_SH_PATH.read_text(encoding = "utf-8")
-        assert '_HELPER_RELEASE_REPO="LAiMai/llama.cpp"' in source
+        assert '_HELPER_RELEASE_REPO="unslothai/llama.cpp"' in source
         assert '_HELPER_RELEASE_REPO="ggml-org/llama.cpp"' not in source
 
     def test_setup_ps1_routes_unconditionally_to_fork(self):
         source = _SETUP_PS1_PATH.read_text(encoding = "utf-8")
-        assert '$HelperReleaseRepo = "LAiMai/llama.cpp"' in source
+        assert '$HelperReleaseRepo = "unslothai/llama.cpp"' in source
         assert "$HelperReleaseRepo = if (" not in source
 
     # Execute the real routing line too, so a reintroduced conditional is caught.
@@ -7227,7 +7227,7 @@ class TestRocmGfxForwarding:
         if bash is None:
             pytest.skip("bash not available")
         source = _SETUP_SH_PATH.read_text(encoding = "utf-8")
-        start = source.index('\n_HELPER_RELEASE_REPO="LAiMai/llama.cpp"\n') + 1
+        start = source.index('\n_HELPER_RELEASE_REPO="unslothai/llama.cpp"\n') + 1
         end = source.index("\n_LLAMA_PR=", start)
         block = source[start:end]
         assert "_HELPER_RELEASE_REPO" in block, "setup.sh routing anchors not found"
@@ -7267,7 +7267,7 @@ class TestRocmGfxForwarding:
             self._resolve_setup_sh_repo(
                 machine, nvidia_usable, setup_gfx, rocm_gfx_arch_env = env_gfx
             )
-            == "LAiMai/llama.cpp"
+            == "unslothai/llama.cpp"
         )
 
     @staticmethod
@@ -7298,7 +7298,7 @@ class TestRocmGfxForwarding:
         return result.stdout.strip()
 
     def test_setup_ps1_routing_resolves_to_fork(self):
-        assert self._resolve_setup_ps1_repo() == "LAiMai/llama.cpp"
+        assert self._resolve_setup_ps1_repo() == "unslothai/llama.cpp"
 
 
 # _pick_rocm_gfx_target honours CUDA/HIP_VISIBLE_DEVICES on mixed-arch hosts.
@@ -7532,7 +7532,7 @@ class TestRocmWslSupplyChainPins:
         assert start != -1
         body = source[start : source.find("\n}", start)]
         assert (
-            "LAiM/main/scripts/install_rocm_wsl_strixhalo.sh" not in body
+            "unsloth/main/scripts/install_rocm_wsl_strixhalo.sh" not in body
         ), "the helper must not be fetched from the mutable main branch"
         ref = re.search(r'_ROCM_WSL_HELPER_REF="([0-9a-f]+)"', body)
         assert ref is not None, "the helper fetch must pin a full commit SHA"

@@ -21,7 +21,7 @@ from urllib.parse import parse_qs, urlparse
 from urllib.request import urlopen
 
 
-REPO_ID = "LAiM/Qwen3.8-Flash-Next-GGUF"
+REPO_ID = "unsloth/Qwen3.8-Flash-Next-GGUF"
 QUANT = "UD-Q4_K_XL"
 MAIN_FILENAME = "Qwen3.8-Flash-Next-UD-Q4_K_XL.gguf"
 MTP_FILENAME = "MTP/mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf"

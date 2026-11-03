@@ -96,7 +96,7 @@ def _run_row(**overrides) -> dict:
     row = {
         "id": "run-1",
         "status": "stopped",
-        "model_name": "LAiM/test-model",
+        "model_name": "unsloth/test-model",
         "dataset_name": "test-dataset",
         "started_at": "2026-01-01T00:00:00Z",
         "output_dir": "/tmp/run-1",
@@ -587,7 +587,7 @@ def test_list_other_run_output_dirs_ignores_unstamped_running_rows(monkeypatch, 
     shared = "/tmp/outputs/shared-run"
     studio_db.create_run(
         id = "run-a",
-        model_name = "LAiM/test-model",
+        model_name = "unsloth/test-model",
         dataset_name = "test-dataset",
         config_json = "{}",
         started_at = "2026-01-01T00:00:00Z",
@@ -604,7 +604,7 @@ def test_list_other_run_output_dirs_ignores_unstamped_running_rows(monkeypatch, 
     )
     studio_db.create_run(
         id = "run-b",
-        model_name = "LAiM/test-model",
+        model_name = "unsloth/test-model",
         dataset_name = "test-dataset",
         config_json = "{}",
         started_at = "2026-01-01T02:00:00Z",
@@ -727,7 +727,7 @@ def test_guarded_delete_prevents_resume_from_spawning_after_artifacts_are_remove
         target = lambda: outcomes.update(
             start = backend.start_training(
                 "resume-job",
-                model_name = "LAiM/test",
+                model_name = "unsloth/test",
                 resume_from_checkpoint = str(run_dir),
             )
         )

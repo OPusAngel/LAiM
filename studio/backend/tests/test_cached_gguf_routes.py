@@ -1449,17 +1449,17 @@ def test_is_hidden_model_hides_validation_probe_everywhere():
     assert models_route._is_hidden_model(
         r"C:\Users\u\.cache\huggingface\hub\models--ggml-org--models\snapshots\abc\tinyllamas\stories260K.gguf"
     )
-    assert not models_route._is_hidden_model("LAiM/gemma-3-270m-it-GGUF")
+    assert not models_route._is_hidden_model("unsloth/gemma-3-270m-it-GGUF")
     # The exact-filename needle must not hide a real repo that merely
     # references stories260K in its name.
     assert not models_route._is_hidden_model("user/stories260K-finetune-GGUF")
 
 
 def test_is_hidden_model_hides_dictation_models(tmp_path):
-    assert models_route._is_hidden_model("LAiM/whisper-tiny")
-    assert models_route._is_hidden_model("LAiM/whisper-base")
-    assert models_route._is_hidden_model("LAiM/whisper-small")
-    assert models_route._is_hidden_model("LAiM/whisper-large-v3-turbo")
+    assert models_route._is_hidden_model("unsloth/whisper-tiny")
+    assert models_route._is_hidden_model("unsloth/whisper-base")
+    assert models_route._is_hidden_model("unsloth/whisper-small")
+    assert models_route._is_hidden_model("unsloth/whisper-large-v3-turbo")
     assert models_route._is_hidden_model(
         "/hf/models--LAiM--whisper-large-v3/snapshots/abc/model.safetensors"
     )
@@ -1575,8 +1575,8 @@ def test_is_hidden_model_keeps_stale_default_embedder_hidden(monkeypatch):
     monkeypatch.setattr(rag_config, "effective_embedding_model", lambda: "org/custom")
     monkeypatch.setattr(rag_config, "effective_gguf_repo", lambda: "org/custom-GGUF")
 
-    assert models_route._is_hidden_model("LAiM/bge-small-en-v1.5")
-    assert models_route._is_hidden_model("LAiM/bge-small-en-v1.5-GGUF")
+    assert models_route._is_hidden_model("unsloth/bge-small-en-v1.5")
+    assert models_route._is_hidden_model("unsloth/bge-small-en-v1.5-GGUF")
     assert models_route._is_hidden_model("/models/bge-small-en-v1.5")
     assert models_route._is_hidden_model("/models/bge-small-en-v1.5-F16.gguf")
     assert models_route._is_hidden_model(r"C:\models\bge-small-en-v1.5-Q8_0.gguf")
@@ -1635,7 +1635,7 @@ def test_hidden_models_importable_without_heavy_model_stack():
         loaded = sorted(m for m in sys.modules if m.startswith("utils.models"))
         assert not loaded, loaded
         assert is_hidden_model("ggml-org/models") is True
-        assert is_hidden_model("LAiM/gemma-3-270m-it-GGUF") is False
+        assert is_hidden_model("unsloth/gemma-3-270m-it-GGUF") is False
         print("HIDDEN_MODELS_IMPORT_OK")
         """
     )
@@ -1661,7 +1661,7 @@ def test_list_cached_gguf_hides_llama_validation_probe(monkeypatch, tmp_path):
         tmp_path / "models--ggml-org--models",
     )
     real = _repo(
-        "LAiM/gemma-3-270m-it-GGUF",
+        "unsloth/gemma-3-270m-it-GGUF",
         [_file("gemma-3-270m-it-UD-Q4_K_XL.gguf", 200_000)],
         tmp_path / "models--LAiM--gemma-3-270m-it-GGUF",
     )
@@ -1671,7 +1671,7 @@ def test_list_cached_gguf_hides_llama_validation_probe(monkeypatch, tmp_path):
 
     repo_ids = [c["repo_id"] for c in result["cached"]]
     assert "ggml-org/models" not in repo_ids
-    assert "LAiM/gemma-3-270m-it-GGUF" in repo_ids
+    assert "unsloth/gemma-3-270m-it-GGUF" in repo_ids
 
 
 def test_list_cached_gguf_skips_repos_without_positive_gguf_size(monkeypatch, tmp_path):
@@ -1944,7 +1944,7 @@ def test_list_cached_models_tags_diffusers_pipeline_as_text_to_image(monkeypatch
         tmp_path / "models--Tongyi-MAI--Z-Image-Turbo",
     )
     checkpoint = _repo(
-        "LAiM/Llama-3.2-1B-Instruct",
+        "unsloth/Llama-3.2-1B-Instruct",
         [_file("config.json", 1_000), _file("model.safetensors", 9_000)],
         tmp_path / "models--LAiM--Llama-3.2-1B-Instruct",
     )
@@ -1961,13 +1961,13 @@ def test_list_cached_models_tags_diffusers_pipeline_as_text_to_image(monkeypatch
     by_repo = {c["repo_id"]: c["task"] for c in result["cached"]}
     assert by_repo == {
         "Tongyi-MAI/Z-Image-Turbo": "text-to-image",
-        "LAiM/Llama-3.2-1B-Instruct": None,
+        "unsloth/Llama-3.2-1B-Instruct": None,
     }
     rows = {c["repo_id"]: c for c in result["cached"]}
     assert rows["Tongyi-MAI/Z-Image-Turbo"]["artifact_kind"] == "diffusers_pipeline"
     # A snapshot on refs/main loads by its Hub id, not a pinned path.
     assert "load_id" not in rows["Tongyi-MAI/Z-Image-Turbo"]
-    assert rows["LAiM/Llama-3.2-1B-Instruct"].get("artifact_kind", "unknown") == "unknown"
+    assert rows["unsloth/Llama-3.2-1B-Instruct"].get("artifact_kind", "unknown") == "unknown"
 
 
 def test_list_cached_models_marks_companion_only_pipeline_partial(monkeypatch, tmp_path):
@@ -2707,7 +2707,7 @@ def test_arch_to_task_hides_unsupported_diffusion_from_chat():
     assert models_route._arch_to_task("wan") not in ("text-generation", "text-to-image")
     # With a repo/file name hint the loadable TI2V-5B resolves to Video while the A14B MoE stays unsupported, matching the loader.
     assert (
-        models_route._arch_to_task("wan", ("LAiM/Wan2.2-TI2V-5B-GGUF",))
+        models_route._arch_to_task("wan", ("unsloth/Wan2.2-TI2V-5B-GGUF",))
         == models_route._VIDEO_GEN_TASK
     )
     assert (
@@ -2771,15 +2771,15 @@ def test_arch_to_task_tags_the_h3_gguf_bundle_as_video():
         )
     # No hint is still unknown, and an unrelated repo is untouched.
     assert models_route._arch_to_task(None) is None
-    assert models_route._arch_to_task(None, ("LAiM/Qwen3-GGUF", "q.gguf")) is None
+    assert models_route._arch_to_task(None, ("unsloth/Qwen3-GGUF", "q.gguf")) is None
 
 
 def test_arch_to_task_resolves_z_image_gguf_tagged_lumina2():
     # Z-Image's DiT is a Lumina2 derivative, so both Z-Image GGUF repos declare general.architecture = "lumina2". Reading
     # the arch alone tagged the whole line unsupported and hid it, even though validate_load_request loads it happily.
     for repo, fname in (
-        ("LAiM/Z-Image-Turbo-GGUF", "z-image-turbo-Q4_K_M.gguf"),
-        ("LAiM/Z-Image-GGUF", "z-image-Q8_0.gguf"),
+        ("unsloth/Z-Image-Turbo-GGUF", "z-image-turbo-Q4_K_M.gguf"),
+        ("unsloth/Z-Image-GGUF", "z-image-Q8_0.gguf"),
     ):
         assert models_route._arch_to_task("lumina2", (repo, fname)) == "text-to-image"
         # The filename alone carries the family for a bare local .gguf pick.
@@ -2799,7 +2799,7 @@ def test_arch_to_task_agrees_with_the_loader_on_ambiguous_archs():
 
     backend = DiffusionBackend.__new__(DiffusionBackend)  # validation touches no state
     for fam in _FAMILIES:
-        repo = f"LAiM/{fam.name}-GGUF"
+        repo = f"unsloth/{fam.name}-GGUF"
         fname = f"{fam.name}-Q4_K_M.gguf"
         task = models_route._arch_to_task("lumina2", (repo, fname))
         try:
@@ -2889,13 +2889,13 @@ def test_delete_cached_refuses_video_loaded_repo(monkeypatch):
         video_mod,
         "get_video_backend",
         lambda: SimpleNamespace(
-            status = lambda: {"loaded": True, "repo_id": "LAiM/LTX-2.3-GGUF"},
+            status = lambda: {"loaded": True, "repo_id": "unsloth/LTX-2.3-GGUF"},
             loading_repo_ids = lambda: (),
         ),
     )
 
     try:
-        asyncio.run(deletion.delete_cached_model_response("LAiM/LTX-2.3-GGUF"))
+        asyncio.run(deletion.delete_cached_model_response("unsloth/LTX-2.3-GGUF"))
         assert False, "expected HTTPException refusing the delete"
     except HTTPException as e:
         assert e.status_code == 400
@@ -2915,11 +2915,11 @@ def test_delete_cached_refuses_loaded_native_companion_repo(monkeypatch):
         der,
         "get_active_diffusion_engine",
         lambda: SimpleNamespace(
-            status = lambda: {"loaded": True, "repo_id": "LAiM/FLUX.1-dev-GGUF"},
+            status = lambda: {"loaded": True, "repo_id": "unsloth/FLUX.1-dev-GGUF"},
             loaded_repo_ids = lambda: (
-                "LAiM/FLUX.1-dev-GGUF",
+                "unsloth/FLUX.1-dev-GGUF",
                 "black-forest-labs/FLUX.1-dev",
-                "LAiM/flux-text-encoders",
+                "unsloth/flux-text-encoders",
             ),
             loading_repo_ids = lambda: (),
         ),
@@ -2927,7 +2927,7 @@ def test_delete_cached_refuses_loaded_native_companion_repo(monkeypatch):
     monkeypatch.setattr(video_mod, "get_video_backend", _idle_video_backend)
 
     try:
-        asyncio.run(deletion.delete_cached_model_response("LAiM/flux-text-encoders"))
+        asyncio.run(deletion.delete_cached_model_response("unsloth/flux-text-encoders"))
         assert False, "expected HTTPException refusing the in-use companion delete"
     except HTTPException as e:
         assert e.status_code == 400
@@ -2953,7 +2953,7 @@ def test_delete_cached_rechecks_the_load_guard_after_reserving_the_scope(monkeyp
         def _loading_repo_ids():
             reads["n"] += 1
             # Idle for the pre-reservation read, loading by the time the scope is reserved.
-            return () if reads["n"] == 1 else ("LAiM/MiniMax-H3-GGUF",)
+            return () if reads["n"] == 1 else ("unsloth/MiniMax-H3-GGUF",)
 
         return SimpleNamespace(
             status = lambda: {"loaded": False, "repo_id": None},
@@ -2964,7 +2964,7 @@ def test_delete_cached_rechecks_the_load_guard_after_reserving_the_scope(monkeyp
     monkeypatch.setattr(video_mod, "get_video_backend", _backend)
 
     try:
-        asyncio.run(deletion.delete_cached_model_response("LAiM/MiniMax-H3-GGUF"))
+        asyncio.run(deletion.delete_cached_model_response("unsloth/MiniMax-H3-GGUF"))
         assert False, "expected HTTPException refusing the delete admitted before the load claim"
     except HTTPException as e:
         assert e.status_code == 400
@@ -2986,13 +2986,13 @@ def test_delete_cached_refuses_repo_a_diffusion_load_is_downloading(monkeypatch)
         lambda: SimpleNamespace(
             status = lambda: {"loaded": False, "repo_id": None},
             loaded_repo_ids = lambda: (),
-            loading_repo_ids = lambda: ("LAiM/Qwen-Image-2512-GGUF",),
+            loading_repo_ids = lambda: ("unsloth/Qwen-Image-2512-GGUF",),
         ),
     )
     monkeypatch.setattr(video_mod, "get_video_backend", _idle_video_backend)
 
     try:
-        asyncio.run(deletion.delete_cached_model_response("LAiM/Qwen-Image-2512-GGUF"))
+        asyncio.run(deletion.delete_cached_model_response("unsloth/Qwen-Image-2512-GGUF"))
         assert False, "expected HTTPException refusing the delete mid-download"
     except HTTPException as e:
         assert e.status_code == 400
@@ -3016,13 +3016,13 @@ def test_delete_cached_refuses_repo_a_cancelled_diffusion_load_is_releasing(monk
             status = lambda: {"loaded": False, "repo_id": None},
             loaded_repo_ids = lambda: (),
             loading_repo_ids = lambda: (),
-            draining_repo_ids = lambda: ("LAiM/Qwen-Image-2512-GGUF",),
+            draining_repo_ids = lambda: ("unsloth/Qwen-Image-2512-GGUF",),
         ),
     )
     monkeypatch.setattr(video_mod, "get_video_backend", _idle_video_backend)
 
     try:
-        asyncio.run(deletion.delete_cached_model_response("LAiM/Qwen-Image-2512-GGUF"))
+        asyncio.run(deletion.delete_cached_model_response("unsloth/Qwen-Image-2512-GGUF"))
         assert False, "expected HTTPException refusing the delete while the load unwinds"
     except HTTPException as e:
         assert e.status_code == 400
@@ -3047,7 +3047,7 @@ def test_delete_cached_is_unaffected_by_a_backend_without_a_drain(monkeypatch):
     )
     monkeypatch.setattr(video_mod, "get_video_backend", _idle_video_backend)
 
-    assert deletion._diffusion_blocks_delete("LAiM/Qwen-Image-2512-GGUF") is None
+    assert deletion._diffusion_blocks_delete("unsloth/Qwen-Image-2512-GGUF") is None
 
 
 def test_delete_cached_allows_sibling_of_loaded_diffusion_repo(monkeypatch):
@@ -3131,7 +3131,7 @@ def test_repo_has_pipeline_index_requires_root_model_index(tmp_path):
         file_path = snap / "prior" / "model_index.json",
     )
     repo_nested = SimpleNamespace(
-        repo_id = "LAiM/nested-index",
+        repo_id = "unsloth/nested-index",
         revisions = [SimpleNamespace(files = [nested], snapshot_path = snap)],
     )
     assert models_route._repo_has_pipeline_index(repo_nested) is False
@@ -3141,7 +3141,7 @@ def test_repo_has_pipeline_index_requires_root_model_index(tmp_path):
         file_path = snap / "model_index.json",
     )
     repo_root = SimpleNamespace(
-        repo_id = "LAiM/root-index",
+        repo_id = "unsloth/root-index",
         revisions = [SimpleNamespace(files = [root], snapshot_path = snap)],
     )
     assert models_route._repo_has_pipeline_index(repo_root) is True
@@ -3272,12 +3272,12 @@ def test_both_cached_listings_agree_on_a_torn_pipeline(extra_files, manifest_ext
 def test_list_cached_models_flags_single_file_diffusion_repos(monkeypatch, tmp_path):
     # A diffusion-tagged repo with NO top-level model_index.json is a single-file checkpoint (single_file=True); a full pipeline or chat repo carries no flag.
     single = _repo(
-        "LAiM/Qwen-Image-fp8-single",
+        "unsloth/Qwen-Image-fp8-single",
         [_file("qwen-image-fp8.safetensors", 10_000)],
         tmp_path / "models--LAiM--Qwen-Image-fp8-single",
     )
     pipeline = _repo(
-        "LAiM/Qwen-Image-pipeline",
+        "unsloth/Qwen-Image-pipeline",
         [_file("model_index.json", 10), _file("transformer/model.safetensors", 10_000)],
         tmp_path / "models--LAiM--Qwen-Image-pipeline",
     )
@@ -3299,8 +3299,8 @@ def test_list_cached_models_flags_single_file_diffusion_repos(monkeypatch, tmp_p
     result = asyncio.run(models_route.list_cached_models(current_subject = "test-user"))
 
     rows = {r["repo_id"]: r for r in result["cached"]}
-    assert rows["LAiM/Qwen-Image-fp8-single"].get("single_file") is True
-    assert "single_file" not in rows["LAiM/Qwen-Image-pipeline"]
+    assert rows["unsloth/Qwen-Image-fp8-single"].get("single_file") is True
+    assert "single_file" not in rows["unsloth/Qwen-Image-pipeline"]
     assert "single_file" not in rows["Org/ChatRepo"]
 
 
@@ -3319,7 +3319,7 @@ def test_cached_repo_task_gates_an_image_pipeline_on_the_load_path_trust_rule(tm
     """Every advertised row must be loadable. A cached community pipeline has a model_index.json
     like any other, so tagging it text-to-image put a row in the Images picker that the loader's
     trust check refuses -- the pick 400s. Gate the tag on the same rule."""
-    assert models_route._cached_repo_task(_pipeline_repo("LAiM/Qwen-Image", tmp_path)) == (
+    assert models_route._cached_repo_task(_pipeline_repo("unsloth/Qwen-Image", tmp_path)) == (
         "text-to-image"
     )
     assert (
@@ -3336,12 +3336,12 @@ def test_cached_repo_task_never_offers_an_sd_cpp_companion_repo_as_a_model(tmp_p
     from core.inference.diffusion_families import sd_cpp_companion_only_repo_ids
 
     for repo_id in (
-        "LAiM/Z-Image-Turbo-ComfyUI",
-        "LAiM/Qwen-Image-ComfyUI",
-        "LAiM/FLUX.2-dev-ComfyUI",
-        "LAiM/FLUX.2-VAE",
-        "LAiM/FLUX.2-klein-9B-ComfyUI",
-        "LAiM/flux-text-encoders",
+        "unsloth/Z-Image-Turbo-ComfyUI",
+        "unsloth/Qwen-Image-ComfyUI",
+        "unsloth/FLUX.2-dev-ComfyUI",
+        "unsloth/FLUX.2-VAE",
+        "unsloth/FLUX.2-klein-9B-ComfyUI",
+        "unsloth/flux-text-encoders",
     ):
         assert repo_id.lower() in sd_cpp_companion_only_repo_ids(), repo_id
         assert models_route._cached_repo_task(_pipeline_repo(repo_id, tmp_path)) is None, repo_id
@@ -3360,12 +3360,12 @@ def test_a_companion_mirror_is_listed_but_flagged_so_no_picker_offers_it(monkeyp
     of GB the user can then never find or remove, so the row stays and carries a flag the pickers
     filter on."""
     companion = _repo(
-        "LAiM/Z-Image-Turbo-ComfyUI",
+        "unsloth/Z-Image-Turbo-ComfyUI",
         [_file("split_files/vae/ae.safetensors", 300_000)],
         tmp_path / "models--LAiM--Z-Image-Turbo-ComfyUI",
     )
     chat = _repo(
-        "LAiM/Qwen3-8B",
+        "unsloth/Qwen3-8B",
         [_file("model.safetensors", 900_000)],
         tmp_path / "models--LAiM--Qwen3-8B",
     )
@@ -3377,26 +3377,26 @@ def test_a_companion_mirror_is_listed_but_flagged_so_no_picker_offers_it(monkeyp
     }
 
     # Listed, so it stays visible and deletable...
-    assert "LAiM/Z-Image-Turbo-ComfyUI" in rows
+    assert "unsloth/Z-Image-Turbo-ComfyUI" in rows
     # ...and flagged, which is the part a task of None could never express.
-    assert rows["LAiM/Z-Image-Turbo-ComfyUI"]["companion"] is True
-    assert rows["LAiM/Z-Image-Turbo-ComfyUI"]["task"] is None
+    assert rows["unsloth/Z-Image-Turbo-ComfyUI"]["companion"] is True
+    assert rows["unsloth/Z-Image-Turbo-ComfyUI"]["task"] is None
     # An ordinary chat repo carries the same task of None and must NOT be flagged.
-    assert rows["LAiM/Qwen3-8B"].get("companion") is None
-    assert rows["LAiM/Qwen3-8B"]["task"] is None
+    assert rows["unsloth/Qwen3-8B"].get("companion") is None
+    assert rows["unsloth/Qwen3-8B"]["task"] is None
 
 
 def test_the_companion_set_never_hides_a_repo_that_is_a_real_chat_model(tmp_path):
-    """sd.cpp borrows LAiM/Qwen2.5-VL-7B-Instruct-GGUF as a text encoder, but it is a genuine
+    """sd.cpp borrows unsloth/Qwen2.5-VL-7B-Instruct-GGUF as a text encoder, but it is a genuine
     chat model. It is in the companion set, so the only thing keeping it safe is that the listing
     this set feeds never sees a GGUF-only repo. Pin that, or a future caller takes a downloaded
     model away from the user."""
     from core.inference.diffusion_families import sd_cpp_companion_only_repo_ids
 
-    assert "LAiM/qwen2.5-vl-7b-instruct-gguf" in sd_cpp_companion_only_repo_ids()
+    assert "unsloth/qwen2.5-vl-7b-instruct-gguf" in sd_cpp_companion_only_repo_ids()
     # A GGUF-only repo has no .safetensors / .bin, so list_cached_models drops it before the flag.
     gguf_only = _repo(
-        "LAiM/Qwen2.5-VL-7B-Instruct-GGUF",
+        "unsloth/Qwen2.5-VL-7B-Instruct-GGUF",
         [_file("Qwen2.5-VL-7B-Instruct-Q4_K_M.gguf", 4_000_000)],
         tmp_path / "models--LAiM--Qwen2.5-VL-7B-Instruct-GGUF",
     )
@@ -3437,7 +3437,7 @@ def test_hub_cached_rows_carry_the_task_the_pickers_filter_on(monkeypatch, tmp_p
     assert "task" in CachedGgufRepo.model_fields
     assert "task" in CachedModelRepo.model_fields
 
-    repo = _pipeline_repo("LAiM/Qwen-Image", tmp_path)
+    repo = _pipeline_repo("unsloth/Qwen-Image", tmp_path)
     monkeypatch.setattr(
         catalog_classification,
         "_cached_repo_task",
@@ -3640,10 +3640,10 @@ def test_cached_pipeline_needs_a_detectable_image_family(monkeypatch):
         return models_route._cached_repo_task(SimpleNamespace(repo_id = repo_id, repo_path = "/x"))
 
     # Trusted AND a detected family -> claimed by Images.
-    assert _task("LAiM/Z-Image-Turbo") == "text-to-image"
-    assert _task("LAiM/FLUX.1-dev") == "text-to-image"
+    assert _task("unsloth/Z-Image-Turbo") == "text-to-image"
+    assert _task("unsloth/FLUX.1-dev") == "text-to-image"
     # Trusted but no image family the loader can detect -> not advertised.
-    assert _task("LAiM/some-unsupported-pipeline") is None
+    assert _task("unsloth/some-unsupported-pipeline") is None
     # Untrusted keeps its existing refusal.
     assert _task("someone/random-diffusers-pipeline") is None
 
@@ -3657,10 +3657,10 @@ def test_cached_repo_task_agrees_with_the_image_loader(monkeypatch):
     )
     backend = DiffusionBackend.__new__(DiffusionBackend)
     for repo_id in (
-        "LAiM/Z-Image-Turbo",
-        "LAiM/FLUX.1-dev",
-        "LAiM/some-unsupported-pipeline",
-        "LAiM/stable-audio-open-1.0",
+        "unsloth/Z-Image-Turbo",
+        "unsloth/FLUX.1-dev",
+        "unsloth/some-unsupported-pipeline",
+        "unsloth/stable-audio-open-1.0",
     ):
         task = models_route._cached_repo_task(SimpleNamespace(repo_id = repo_id, repo_path = "/x"))
         try:
@@ -3681,14 +3681,14 @@ def test_cached_picker_hides_a_family_this_diffusers_cannot_build(monkeypatch):
     import routes.models as models_module
     from core.inference.diffusion_families import detect_family, family_pipeline_available
 
-    fam = detect_family("LAiM/Z-Image-Turbo")
+    fam = detect_family("unsloth/Z-Image-Turbo")
     assert fam is not None
     # Present in this environment's diffusers, so the row is offered.
     assert family_pipeline_available(fam) is True
 
     monkeypatch.setattr(models_module, "_repo_is_diffusers", lambda info, selected = None: True)
     monkeypatch.setattr("core.inference.diffusion._is_trusted_diffusion_repo", lambda repo_id: True)
-    info = types.SimpleNamespace(repo_id = "LAiM/Z-Image-Turbo")
+    info = types.SimpleNamespace(repo_id = "unsloth/Z-Image-Turbo")
     assert models_module._cached_repo_task(info) == "text-to-image"
 
     # An older diffusers without the pipeline class hides the row instead.
@@ -3705,7 +3705,7 @@ def test_family_pipeline_available_fails_open_without_diffusers(monkeypatch):
     from core.inference.diffusion_families import detect_family, family_pipeline_available
 
     monkeypatch.setitem(sys.modules, "diffusers", None)
-    assert family_pipeline_available(detect_family("LAiM/Z-Image-Turbo")) is True
+    assert family_pipeline_available(detect_family("unsloth/Z-Image-Turbo")) is True
     assert family_pipeline_available(None) is False
 
 
@@ -3735,15 +3735,15 @@ def test_gguf_picker_hides_a_family_no_engine_here_can_build(monkeypatch):
 
     # The flat diffusion-arch branch (FLUX.2) and the ambiguous one (Z-Image ships as "lumina2").
     assert (
-        models_route._arch_to_task("flux2", ("LAiM/FLUX.2-klein-4B-GGUF",))
+        models_route._arch_to_task("flux2", ("unsloth/FLUX.2-klein-4B-GGUF",))
         == models_route._UNSUPPORTED_DIFFUSION_TASK
     )
     assert (
-        models_route._arch_to_task("lumina2", ("LAiM/Z-Image-Turbo-GGUF",))
+        models_route._arch_to_task("lumina2", ("unsloth/Z-Image-Turbo-GGUF",))
         == models_route._UNSUPPORTED_DIFFUSION_TASK
     )
     # Neither chat nor Images: the row is hidden, not moved to the picker that would also fail.
-    assert models_route._arch_to_task("flux2", ("LAiM/FLUX.2-klein-4B-GGUF",)) not in (
+    assert models_route._arch_to_task("flux2", ("unsloth/FLUX.2-klein-4B-GGUF",)) not in (
         "text-generation",
         "text-to-image",
     )
@@ -3755,8 +3755,8 @@ def test_gguf_picker_keeps_a_family_the_native_engine_serves(monkeypatch):
 
     _pretend_old_diffusers(monkeypatch, engine = ENGINE_SD_CPP)
 
-    assert models_route._arch_to_task("flux2", ("LAiM/FLUX.2-klein-4B-GGUF",)) == "text-to-image"
-    assert models_route._arch_to_task("lumina2", ("LAiM/Z-Image-Turbo-GGUF",)) == "text-to-image"
+    assert models_route._arch_to_task("flux2", ("unsloth/FLUX.2-klein-4B-GGUF",)) == "text-to-image"
+    assert models_route._arch_to_task("lumina2", ("unsloth/Z-Image-Turbo-GGUF",)) == "text-to-image"
 
 
 def test_the_loader_demands_the_diffusers_class_only_when_diffusers_loads_it(monkeypatch):
@@ -3770,7 +3770,7 @@ def test_the_loader_demands_the_diffusers_class_only_when_diffusers_loads_it(mon
 
     _pretend_old_diffusers(monkeypatch, engine = ENGINE_SD_CPP)
     fam = backend.validate_load_request(
-        "LAiM/FLUX.2-klein-4B-GGUF",
+        "unsloth/FLUX.2-klein-4B-GGUF",
         gguf_filename = "flux2-klein-4b-Q4_0.gguf",
         model_kind = "gguf",
     )
@@ -3779,7 +3779,7 @@ def test_the_loader_demands_the_diffusers_class_only_when_diffusers_loads_it(mon
     _pretend_old_diffusers(monkeypatch, engine = ENGINE_DIFFUSERS)
     with pytest.raises(ValueError) as excinfo:
         backend.validate_load_request(
-            "LAiM/FLUX.2-klein-4B-GGUF",
+            "unsloth/FLUX.2-klein-4B-GGUF",
             gguf_filename = "flux2-klein-4b-Q4_0.gguf",
             model_kind = "gguf",
         )
@@ -3820,8 +3820,8 @@ def test_the_gguf_picker_and_the_image_loader_agree_on_an_old_diffusers(monkeypa
 
     backend = DiffusionBackend.__new__(DiffusionBackend)
     picks = (
-        ("flux2", "LAiM/FLUX.2-klein-4B-GGUF", "flux2-klein-4b-Q4_0.gguf"),
-        ("lumina2", "LAiM/Z-Image-Turbo-GGUF", "z-image-turbo-Q8_0.gguf"),
+        ("flux2", "unsloth/FLUX.2-klein-4B-GGUF", "flux2-klein-4b-Q4_0.gguf"),
+        ("lumina2", "unsloth/Z-Image-Turbo-GGUF", "z-image-turbo-Q8_0.gguf"),
     )
     for engine in (ENGINE_DIFFUSERS, ENGINE_SD_CPP):
         _pretend_old_diffusers(monkeypatch, engine = engine)
@@ -4979,7 +4979,7 @@ def test_a_pure_text_gguf_folder_is_never_promoted_to_a_media_task(tmp_path, mon
     _arch_gguf(repo_dir / "DeepSeek-V4-Flash-0731-UD-Q4_K_XL.gguf", "deepseek4")
     _arch_gguf(repo_dir / "dspark-DeepSeek-V4-Flash-0731-Q8_0.gguf", "deepseek4")
     repo_info = SimpleNamespace(
-        repo_id = "LAiM/DeepSeek-V4-Flash-0731-GGUF", repo_path = str(repo_dir)
+        repo_id = "unsloth/DeepSeek-V4-Flash-0731-GGUF", repo_path = str(repo_dir)
     )
 
     answers = _both_walk_orders(
@@ -5149,7 +5149,7 @@ def test_only_the_first_shard_of_a_split_gguf_is_read_to_classify_a_repo(tmp_pat
         "_iter_gguf_paths",
         lambda _root, deadline = None: iter(sorted(repo_dir.rglob("*.gguf"), reverse = True)),
     )
-    repo_info = SimpleNamespace(repo_id = "LAiM/Big-GGUF", repo_path = str(repo_dir))
+    repo_info = SimpleNamespace(repo_id = "unsloth/Big-GGUF", repo_path = str(repo_dir))
 
     assert models_route._repo_gguf_task(repo_info) == "text-generation"
     assert read == ["Big-Q4_K_M-00001-of-00003.gguf"], read
@@ -5361,18 +5361,18 @@ def test_a_sibling_whose_header_will_not_read_keeps_speech_off_the_folder(tmp_pa
 
 def test_speech_gguf_classification_preserves_decoder_provenance(tmp_path):
     """CSM and Orpheus both stay out of Chat, while Audio can distinguish them."""
-    hints = ("LAiM/csm-1b-GGUF", "csm-1b-Q4_0.gguf", "sesame-csm", "text-to-speech")
+    hints = ("unsloth/csm-1b-GGUF", "csm-1b-Q4_0.gguf", "sesame-csm", "text-to-speech")
     assert models_route._arch_to_task("llama-csm") == models_route._SPEECH_TASK
     for arch in (None, "", "llama", "qwen3", "flux"):
         assert models_route._arch_to_task(arch, name_hints = hints) != models_route._SPEECH_TASK
     # Orpheus ships as a llama GGUF. Its family hint makes it speech-only, and the
     # codec field is what lets Audio route it instead of mistaking it for CSM.
-    assert models_route._arch_to_task("llama", name_hints = ("LAiM/orpheus-3b-0.1-ft-GGUF",)) == (
+    assert models_route._arch_to_task("llama", name_hints = ("unsloth/orpheus-3b-0.1-ft-GGUF",)) == (
         models_route._SPEECH_TASK
     )
     assert _classification._arch_to_audio_type("llama-csm", hints) == "csm"
     assert (
-        _classification._arch_to_audio_type("llama", ("LAiM/orpheus-3b-0.1-ft-GGUF",)) == "snac"
+        _classification._arch_to_audio_type("llama", ("unsloth/orpheus-3b-0.1-ft-GGUF",)) == "snac"
     )
     snapshot = tmp_path / "snapshot"
     _arch_gguf(snapshot / "orpheus-3b-q4.gguf", "llama")
@@ -5600,7 +5600,7 @@ def _listing_families():
     from core.inference.diffusion_families import detect_family, family_probe_class
     from core.inference.video_families import detect_video_family
 
-    z_image = detect_family("LAiM/Z-Image-Turbo")  # ZImagePipeline, from 0.36.0
+    z_image = detect_family("unsloth/Z-Image-Turbo")  # ZImagePipeline, from 0.36.0
     h3 = detect_video_family("MiniMaxAI/MiniMax-H3")  # ModularPipeline, probed on its transformer
     assert z_image is not None and h3 is not None
     assert family_probe_class(h3) == "MiniMaxH3Transformer3DModel"
@@ -5944,7 +5944,7 @@ def test_cached_model_rows_marks_encoder_only_repos_unchattable(monkeypatch, tmp
         {"model_type": "clip", "architectures": ["CLIPModel"]},
     )
     chat = _cached(
-        "LAiM/Qwen3-0.6B",
+        "unsloth/Qwen3-0.6B",
         {"model_type": "qwen3", "architectures": ["Qwen3ForCausalLM"]},
     )
 
@@ -5958,7 +5958,7 @@ def test_cached_model_rows_marks_encoder_only_repos_unchattable(monkeypatch, tmp
     assert rows["sentence-transformers/all-MiniLM-L6-v2"]["can_chat"] is False
     assert rows["openai/clip-vit-base-patch32"]["can_chat"] is False
     # Fails open: a chat repo is never flagged, and neither is an unreadable snapshot.
-    assert "can_chat" not in rows["LAiM/Qwen3-0.6B"]
+    assert "can_chat" not in rows["unsloth/Qwen3-0.6B"]
 
 
 def test_cached_model_rows_pins_the_snapshot_that_holds_the_weights(monkeypatch, tmp_path):

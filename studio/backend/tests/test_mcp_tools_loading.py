@@ -21,14 +21,14 @@ from .mcp_harness import (
     stt_state,
 )
 
-LLM = "LAiM/Llama-3.2-1B-Instruct-GGUF"
+LLM = "unsloth/Llama-3.2-1B-Instruct-GGUF"
 LOADED = {
     "status": "loaded",
     "model": LLM,
     "display_name": "Llama 3.2 1B",
     "is_gguf": True,
     "inference": {"temperature": 0.7},
-    "evicted": ["LAiM/Qwen3-0.6B"],
+    "evicted": ["unsloth/Qwen3-0.6B"],
 }
 STATUS = {"loaded": [LLM], "serving": [LLM], "serving_checkpoints": ["/srv/models/llama.gguf"]}
 EMPTY_STATUS = {"loaded": [], "serving": [], "serving_checkpoints": []}
@@ -60,7 +60,7 @@ def test_load_sends_the_body_and_reports_the_result(monkeypatch, kind):
         "model": LLM,
         "loaded": True,
         "display_name": "Llama 3.2 1B",
-        "evicted": ["LAiM/Qwen3-0.6B"],
+        "evicted": ["unsloth/Qwen3-0.6B"],
     }
     assert bodies(studio, "/api/inference/load") == [
         {"model_path": LLM, "load_in_4bit": True, "max_seq_length": 0, "gguf_variant": "Q4_K_M"}
@@ -74,17 +74,17 @@ def test_load_sends_the_body_and_reports_the_result(monkeypatch, kind):
         (
             "tts",
             [],
-            {**STATUS, "serving": ["LAiM/Qwen3-0.6B-GGUF"]},
+            {**STATUS, "serving": ["unsloth/Qwen3-0.6B-GGUF"]},
             EMPTY_STATUS,
-            ["LAiM/Qwen3-0.6B-GGUF"],
+            ["unsloth/Qwen3-0.6B-GGUF"],
         ),
         # The route keys a dropped GGUF as repo:variant while status serves the bare repo id.
         (
             "llm",
-            ["LAiM/Qwen3-8B-GGUF:Q4_K_M"],
-            {**STATUS, "serving": [LLM, "LAiM/Qwen3-8B-GGUF"]},
+            ["unsloth/Qwen3-8B-GGUF:Q4_K_M"],
+            {**STATUS, "serving": [LLM, "unsloth/Qwen3-8B-GGUF"]},
             STATUS,
-            ["LAiM/Qwen3-8B-GGUF:Q4_K_M"],
+            ["unsloth/Qwen3-8B-GGUF:Q4_K_M"],
         ),
     ],
 )
@@ -156,7 +156,7 @@ def test_download_progress_is_used_before_the_load_starts(monkeypatch, fast_poll
     [
         ({}, (STATUS, EMPTY_STATUS), LLM, [{"model_path": "/srv/models/llama.gguf"}]),
         ({"model": LLM}, (STATUS, EMPTY_STATUS), LLM, [{"model_path": "/srv/models/llama.gguf"}]),
-        ({"model": "LAiM/not-loaded"}, (STATUS,), "LAiM/not-loaded", None),
+        ({"model": "unsloth/not-loaded"}, (STATUS,), "unsloth/not-loaded", None),
         ({"model": LLM}, (STATUS,), LLM, None),
         ({}, (EMPTY_STATUS,), None, []),
     ],

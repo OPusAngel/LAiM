@@ -3,7 +3,7 @@
 
 """A calibration imatrix is not a model, so no GGUF surface may offer one.
 
-LAiM/Qwen3.8-27B-GGUF publishes imatrix_LAiM.gguf beside the weights (most
+unsloth/Qwen3.8-27B-GGUF publishes imatrix_LAiM.gguf beside the weights (most
 repos use the .dat / .gguf_file spellings the Hub does not list as GGUF). Carrying
 a real .gguf suffix, it reached the chat model picker as an unlabelled ~13 MB row
 called "GGUF", downloadable and then unloadable.
@@ -85,7 +85,7 @@ def test_remote_listing_drops_the_imatrix_row(monkeypatch):
     api = SimpleNamespace(model_info = lambda *a, **k: info)
     monkeypatch.setattr("huggingface_hub.HfApi", lambda token = None: api)
 
-    variants, _has_vision, _siblings = list_gguf_variants("LAiM/Qwen3.8-27B-GGUF")
+    variants, _has_vision, _siblings = list_gguf_variants("unsloth/Qwen3.8-27B-GGUF")
     assert [v.quant for v in variants] == ["UD-Q4_K_XL"]
 
 
@@ -220,7 +220,7 @@ def test_the_lmstudio_scanner_does_not_publish_an_imatrix_only_model_dir(tmp_pat
 
     (model_dir / "Qwen3.8-27B-UD-Q4_K_XL.gguf").write_bytes(b"GGUF" + b"0" * 64)
     rows = _scan_lmstudio_dir(tmp_path)
-    assert [(r.model_id, r.model_format) for r in rows] == [("LAiM/Qwen3.8-27B-GGUF", "gguf")]
+    assert [(r.model_id, r.model_format) for r in rows] == [("unsloth/Qwen3.8-27B-GGUF", "gguf")]
 
 
 def test_a_downloaded_imatrix_is_not_a_downloaded_gguf_repo(tmp_path):
@@ -231,7 +231,7 @@ def test_a_downloaded_imatrix_is_not_a_downloaded_gguf_repo(tmp_path):
 
     from routes.models import _repo_gguf_size_bytes, _repo_has_gguf_files
 
-    repo_id = "LAiM/Qwen3.8-27B-GGUF"
+    repo_id = "unsloth/Qwen3.8-27B-GGUF"
     sha = "a" * 40
     repo_dir = tmp_path / f"models--{repo_id.replace('/', '--')}"
     blobs = repo_dir / "blobs"
@@ -319,7 +319,7 @@ def test_interrupted_imatrix_state_does_not_come_back_as_a_row(monkeypatch):
         manifest_for = lambda _variant: manifest,
     )
 
-    variants, _has_vision = list_partial_gguf_variants_from_state("LAiM/Qwen3.8-27B-GGUF")
+    variants, _has_vision = list_partial_gguf_variants_from_state("unsloth/Qwen3.8-27B-GGUF")
     assert variants == []
 
 
@@ -334,7 +334,7 @@ def test_a_marker_only_imatrix_variant_is_dropped_but_a_real_quant_survives(monk
         manifest_for = lambda _variant: None,
     )
 
-    variants, _has_vision = list_partial_gguf_variants_from_state("LAiM/Qwen3.8-27B-GGUF")
+    variants, _has_vision = list_partial_gguf_variants_from_state("unsloth/Qwen3.8-27B-GGUF")
     assert [v.quant for v in variants] == ["UD-Q4_K_XL"]
     assert variants[0].filename == "UD-Q4_K_XL.gguf"
 

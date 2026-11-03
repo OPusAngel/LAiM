@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
@@ -119,8 +120,8 @@ function SecondsSlider({
       onChange={onChange}
       info={
         duration.approximate
-          ? "This model aims for the length; the song may end a little earlier or later."
-          : `Between ${duration.min} and ${duration.max} seconds.`
+          ? translate("uxAudio.thisModelAimsForwlvdf")
+          : translate("uxAudio.betweenAndSeconds73cn1", { p1: duration.min, p2: duration.max })
       }
     />
   );
@@ -144,7 +145,7 @@ function VariationsSlider({
   return (
     <div className="grid gap-1.5">
       <ParamSlider
-        label="Variations"
+        label={translate("uxAudio.variationsydjw4")}
         value={Math.min(max, Math.max(1, value))}
         min={1}
         max={max}
@@ -153,7 +154,7 @@ function VariationsSlider({
         disabled={disabled}
         onChange={onChange}
         commitWhileDragging
-        info="Several takes of the same request, kept together in history."
+        info={translate("uxAudio.severalTakesOfThepvoyk")}
       />
       {notice ? (
         <p className="text-ui-11p5 leading-snug text-muted-foreground">
@@ -191,7 +192,7 @@ function SongInputs({
           label={
             rule.description === "required"
               ? "Description"
-              : "Description (optional)"
+              : translate("uxAudio.descriptionOptionalmrkfw")
           }
           htmlFor={MUSIC_DESCRIPTION_FIELD_ID}
         >
@@ -203,14 +204,14 @@ function SongInputs({
             onChange={(event) => setDescription(event.target.value)}
             placeholder={
               instrumental.value
-                ? "Genre, mood, instruments and tempo…"
-                : "Genre, mood, instruments, voice and tempo…"
+                ? translate("uxAudio.genreMoodInstrumentsAndb11sg")
+                : translate("uxAudio.genreMoodInstrumentsVoiceu3hel")
             }
             className="min-h-16"
           />
         </Field>
         <ExamplesOrHint
-          label="Example descriptions"
+          label={translate("uxAudio.exampleDescriptions1o127")}
           examples={
             instrumental.value
               ? MUSIC_EXAMPLES.instrumental
@@ -219,8 +220,8 @@ function SongInputs({
           empty={!description.trim()}
           hint={
             instrumental.value
-              ? "Genre, mood, instruments and tempo."
-              : "Genre, mood, instruments, voice and tempo."
+              ? translate("uxAudio.genreMoodInstrumentsAndv9n05")
+              : translate("uxAudio.genreMoodInstrumentsVoice82wz1")
           }
           onPick={setDescription}
           disabled={disabled}
@@ -243,7 +244,7 @@ function SongInputs({
             />
           </label>
           <p className="text-ui-11p5 leading-snug text-muted-foreground">
-            {instrumental.reason ?? "No vocals; the lyrics are kept for later."}
+            {instrumental.reason ?? translate("uxAudio.noVocalsLyricsbuhob")}
           </p>
         </div>
       ) : null}
@@ -251,7 +252,7 @@ function SongInputs({
         <div className="grid gap-1.5">
           <LyricsEditor
             id={MUSIC_LYRICS_FIELD_ID}
-            label={rule.lyrics === "required" ? "Lyrics" : "Lyrics (optional)"}
+            label={rule.lyrics === "required" ? "Lyrics" : translate("uxAudio.lyricsOptionalt6nrj")}
             value={lyrics}
             onChange={setLyrics}
             sectionCase={rule.section_case}
@@ -259,7 +260,7 @@ function SongInputs({
             describedBy="music-lyrics-hint"
             placeholder={exampleLyrics(
               rule.section_case,
-              "Morning light through the pines…\n\n…",
+              translate("uxAudio.morningLightExample2p9wm"),
             )}
           />
           {lyrics.trim() ? (
@@ -267,15 +268,13 @@ function SongInputs({
               id="music-lyrics-hint"
               className="text-ui-11p5 leading-snug text-muted-foreground"
             >
-              Section tags shape the song.
+              {translate("uxCopy.sectionTagsShapeThe4jg9u")}
             </p>
           ) : (
             <p
               id="music-lyrics-hint"
               className="text-ui-11p5 leading-snug text-muted-foreground"
-            >
-              Section tags shape the song.{" "}
-              <Button
+            >{translate("uxAudio.sectionTagsShapeThe40rml", { p1: " " })}<Button
                 type="button"
                 variant="link"
                 disabled={disabled}
@@ -289,7 +288,7 @@ function SongInputs({
                   )
                 }
               >
-                Try example lyrics
+                {translate("uxCopy.tryExampleLyricsj386z")}
               </Button>
             </p>
           )}
@@ -325,21 +324,21 @@ function SfxInputs({
   return (
     <>
       <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-1.5">
-        <Field label="Sound" htmlFor={MUSIC_SFX_FIELD_ID}>
+        <Field label={translate("uxAudio.sound1dvvw")} htmlFor={MUSIC_SFX_FIELD_ID}>
           <Textarea
             id={MUSIC_SFX_FIELD_ID}
             value={music.sfx.prompt}
             disabled={disabled}
             onChange={(event) => patch("sfx", { prompt: event.target.value })}
-            placeholder="What you want to hear, and where…"
+            placeholder={translate("uxAudio.whatYouWantTo8hve7")}
             className="min-h-16"
           />
         </Field>
         <ExamplesOrHint
-          label="Example sounds"
+          label={translate("uxAudio.exampleSoundsur85p")}
           examples={MUSIC_EXAMPLES.sfx}
           empty={!music.sfx.prompt.trim()}
-          hint="What you want to hear, and where."
+          hint={translate("uxAudio.whatYouWantTo6bxc0")}
           onPick={(prompt) => patch("sfx", { prompt })}
           disabled={disabled}
         />
@@ -386,7 +385,7 @@ export function MusicStudioInputs({
       {modes.length > 1 ? (
         <div className="grid gap-1.5">
           <PillTabs
-            ariaLabel="What to make"
+            ariaLabel={translate("uxAudio.whatToMakewlwq0")}
             value={rule.id}
             onValueChange={(mode) => music.setMusicMode(mode as MusicMode)}
             disabled={disabled}
@@ -487,8 +486,8 @@ export function MusicOutput({
       {...props}
       emptyText={
         modelReady
-          ? "Generated music lands here. Write lyrics or a description, then press Generate."
-          : "Generated music lands here. Load a music model, write lyrics or a description, and press Generate."
+          ? translate("uxAudio.generatedMusicLandsHerechih4")
+          : translate("uxAudio.generatedMusicLandsHeres6gi2")
       }
     />
   );

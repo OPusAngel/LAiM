@@ -202,7 +202,7 @@ def first_user_text(messages: list[dict]) -> str:
 
 def _thread_row(transcript: Transcript, existing: dict, project_id: str) -> dict:
     # upsert_chat_thread nulls columns it is not handed, so the stored row is the base:
-    # sandbox container, compare pair and fork origin survive a re-import.
+    # workdir container, compare pair and fork origin survive a re-import.
     return {
         **existing,
         "id": transcript.thread_id,

@@ -9,7 +9,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useLocale, useT } from "@/i18n";
+import { translate, useLocale, useT } from "@/i18n";
 import { formatMessageDate } from "@/lib/format-message-date";
 import { messageTimestamp } from "@/lib/message-timestamp";
 import type { FC } from "react";
@@ -33,7 +33,7 @@ export const MessageMenuTime: FC<{ onShowDetails: () => void }> = ({
       <TooltipTrigger asChild={true}>
         <ActionBarMorePrimitive.Item
           onSelect={onShowDetails}
-          aria-label="See response details"
+          aria-label={translate("uxComponents.seeResponseDetailsj7238")}
           className="group/menu-time flex w-fit max-w-full cursor-pointer items-center rounded-[11px] text-muted-foreground outline-none"
         >
           {date && (

@@ -85,42 +85,42 @@ def test_clamp_max_side_bounds_oversized_init():
 
 def test_detect_family_from_repo_id():
     # Detection is by architecture, so Turbo/full and schnell/dev share a family.
-    assert detect_family("LAiM/Z-Image-Turbo-GGUF").name == "z-image"
-    assert detect_family("LAiM/Z-Image-GGUF").name == "z-image"
-    assert detect_family("LAiM/Qwen-Image-2512-GGUF").name == "qwen-image"
-    assert detect_family("LAiM/FLUX.1-schnell-GGUF").name == "flux.1"
+    assert detect_family("unsloth/Z-Image-Turbo-GGUF").name == "z-image"
+    assert detect_family("unsloth/Z-Image-GGUF").name == "z-image"
+    assert detect_family("unsloth/Qwen-Image-2512-GGUF").name == "qwen-image"
+    assert detect_family("unsloth/FLUX.1-schnell-GGUF").name == "flux.1"
     # FLUX.2-klein is its own pipeline (Qwen3 TE), distinct from FLUX.1.
-    klein = detect_family("LAiM/FLUX.2-klein-4B-GGUF")
+    klein = detect_family("unsloth/FLUX.2-klein-4B-GGUF")
     assert klein.name == "flux.2-klein"
     assert klein.pipeline_class == "Flux2KleinPipeline"
     assert klein.cfg_kwarg == "guidance_scale"
     # Both klein sizes share the one family (base repo resolved per-variant).
-    assert detect_family("LAiM/FLUX.2-klein-9B-GGUF").name == "flux.2-klein"
+    assert detect_family("unsloth/FLUX.2-klein-9B-GGUF").name == "flux.2-klein"
     # FLUX.2-dev is the Mistral-based Flux2Pipeline, a distinct family from klein.
-    dev = detect_family("LAiM/FLUX.2-dev-GGUF")
+    dev = detect_family("unsloth/FLUX.2-dev-GGUF")
     assert dev.name == "flux.2-dev"
     assert dev.pipeline_class == "Flux2Pipeline"
     assert dev.base_repo == "black-forest-labs/FLUX.2-dev"
     assert detect_family("black-forest-labs/FLUX.2-dev").name == "flux.2-dev"
     # Qwen-Image guides via true_cfg_scale, not guidance_scale.
-    assert detect_family("LAiM/Qwen-Image-2512-GGUF").cfg_kwarg == "true_cfg_scale"
-    assert detect_family("LAiM/Z-Image-GGUF").cfg_kwarg == "guidance_scale"
+    assert detect_family("unsloth/Qwen-Image-2512-GGUF").cfg_kwarg == "true_cfg_scale"
+    assert detect_family("unsloth/Z-Image-GGUF").cfg_kwarg == "guidance_scale"
     # Qwen-Image-Edit is a supported editing family; the most specific match beats qwen-image.
-    edit = detect_family("LAiM/Qwen-Image-Edit-2511-GGUF")
+    edit = detect_family("unsloth/Qwen-Image-Edit-2511-GGUF")
     assert edit.name == "qwen-image-edit"
     assert edit.pipeline_class == "QwenImageEditPlusPipeline"
     assert edit.edit is True
-    assert detect_family("LAiM/Qwen-Image-Edit-2509-GGUF").name == "qwen-image-edit"
+    assert detect_family("unsloth/Qwen-Image-Edit-2509-GGUF").name == "qwen-image-edit"
     # FLUX Kontext is supported: "kontext" is un-rejected and must beat "flux.1".
-    kontext = detect_family("LAiM/FLUX.1-Kontext-dev-GGUF")
+    kontext = detect_family("unsloth/FLUX.1-Kontext-dev-GGUF")
     assert kontext.name == "flux.1-kontext"
     assert kontext.pipeline_class == "FluxKontextPipeline"
     assert kontext.edit is True
     assert kontext.cfg_kwarg == "guidance_scale"
     # A plain FLUX.1 checkpoint stays on flux.1, not kontext.
-    assert detect_family("LAiM/FLUX.1-dev-GGUF").name == "flux.1"
+    assert detect_family("unsloth/FLUX.1-dev-GGUF").name == "flux.1"
     # A plain Qwen-Image checkpoint stays on the base family, not edit.
-    assert detect_family("LAiM/Qwen-Image-2512-GGUF").name == "qwen-image"
+    assert detect_family("unsloth/Qwen-Image-2512-GGUF").name == "qwen-image"
     # Krea 2 (diffusers >= 0.39): bf16-only single-stream DiT, no GGUF/sd.cpp mapping.
     krea2 = detect_family("krea/Krea-2-Turbo")
     assert krea2.name == "krea-2"
@@ -135,15 +135,15 @@ def test_detect_family_from_repo_id():
 def test_detect_family_matches_reject_and_alias_by_segment():
     # Reject keywords and short aliases match whole path segments, not substrings, so unrelated words cannot misroute.
     assert detect_family("/models/edited/z-image-turbo-Q4_K_M.gguf").name == "z-image"
-    assert detect_family("LAiM/Z-Image-Edition-GGUF").name == "z-image"
+    assert detect_family("unsloth/Z-Image-Edition-GGUF").name == "z-image"
     assert detect_family("/models/kontextual/z-image-turbo-Q4_K_M.gguf").name == "z-image"
     # Supported edit families still resolve (edit / kontext are whole tokens).
-    assert detect_family("LAiM/Qwen-Image-Edit-2511-GGUF").name == "qwen-image-edit"
-    assert detect_family("LAiM/FLUX.1-Kontext-dev-GGUF").name == "flux.1-kontext"
-    assert detect_family("LAiM/Qwen-Image-Layered-GGUF").name == "qwen-image-layered"
+    assert detect_family("unsloth/Qwen-Image-Edit-2511-GGUF").name == "qwen-image-edit"
+    assert detect_family("unsloth/FLUX.1-Kontext-dev-GGUF").name == "flux.1-kontext"
+    assert detect_family("unsloth/Qwen-Image-Layered-GGUF").name == "qwen-image-layered"
     # Unsupported variants sharing only a base arch keyword still reject.
-    assert detect_family("LAiM/FLUX.1-dev-Layered-GGUF") is None
-    assert detect_family("LAiM/Qwen-Image-2512-Inpaint") is None
+    assert detect_family("unsloth/FLUX.1-dev-Layered-GGUF") is None
+    assert detect_family("unsloth/Qwen-Image-2512-Inpaint") is None
 
 
 def test_detect_family_edit_keyword_scoped_to_basename():
@@ -246,7 +246,7 @@ def test_gated_mirror_table_round_trips():
 def test_only_the_genuinely_gated_half_reads_as_gated():
     """Redirecting a fetch and needing credentials are different questions.
 
-    Most of the table is mirrored to keep the fetch inside ``LAiM/*``, not to route around a
+    Most of the table is mirrored to keep the fetch inside ``unsloth/*``, not to route around a
     gate, and callers that override a user's cache must key on the gate rather than on "a mirror
     exists". Klein base-4B is the one that makes this concrete: a default trainable base, which
     is mirrored, and which the Hub serves anonymously.
@@ -308,7 +308,7 @@ def test_every_third_party_bf16_pipeline_the_catalog_offers_is_mirrored():
     missing = sorted(
         repo
         for repo in offered
-        if not repo.lower().startswith("LAiM/")
+        if not repo.lower().startswith("unsloth/")
         and "hunyuan" not in repo.lower()
         and repo.lower() not in mirrored
         and repo.lower() not in _MIRRORS_NOT_YET_PUBLISHED
@@ -328,18 +328,18 @@ def test_every_third_party_bf16_pipeline_the_catalog_offers_is_mirrored():
 def test_the_qwen_2512_mirror_covers_the_card_tag_route(monkeypatch):
     """#8001: the 2512 companions come from a repo the family table never names.
 
-    ``LAiM/Qwen-Image-2512-GGUF`` carries ``base_model: Qwen/Qwen-Image-2512`` and
+    ``unsloth/Qwen-Image-2512-GGUF`` carries ``base_model: Qwen/Qwen-Image-2512`` and
     ``_resolve_base_repo`` trusts that tag, so the fetch lands on the vendor repo whatever the
     family default says. The mirror is the only thing that redirects it.
     """
     _no_cache(monkeypatch)
-    assert mirror_repo("Qwen/Qwen-Image-2512") == "LAiM/Qwen-Image-2512"
-    assert prefer_ungated_mirror("Qwen/Qwen-Image-2512") == "LAiM/Qwen-Image-2512"
+    assert mirror_repo("Qwen/Qwen-Image-2512") == "unsloth/Qwen-Image-2512"
+    assert prefer_ungated_mirror("Qwen/Qwen-Image-2512") == "unsloth/Qwen-Image-2512"
     # The family default is a DIFFERENT repo with its own mirror, so the redirect here is the card
     # tag's own and cannot be mistaken for the fallback doing the work.
-    assert mirror_repo("Qwen/Qwen-Image") == "LAiM/Qwen-Image"
+    assert mirror_repo("Qwen/Qwen-Image") == "unsloth/Qwen-Image"
     # status(), saved configs and a trained adapter's base_model must still read the vendor id.
-    assert canonical_base("LAiM/Qwen-Image-2512") == "Qwen/Qwen-Image-2512"
+    assert canonical_base("unsloth/Qwen-Image-2512") == "Qwen/Qwen-Image-2512"
 
 
 def test_prefer_ungated_mirror_swaps_gated_bases(monkeypatch):
@@ -367,7 +367,7 @@ def test_prefer_ungated_mirror_declines(monkeypatch):
 
 def test_the_opt_out_maps_a_direct_mirror_pick_back_to_its_upstream(monkeypatch):
     """The picker lists mirror ids, so the opt-out must also undo a mirror picked directly."""
-    mirror, upstream = "LAiM/FLUX.1-dev", "black-forest-labs/FLUX.1-dev"
+    mirror, upstream = "unsloth/FLUX.1-dev", "black-forest-labs/FLUX.1-dev"
     _no_cache(monkeypatch)
     monkeypatch.setenv("LAiM_DIFFUSION_NO_MIRROR", "1")
     assert prefer_ungated_mirror(mirror) == upstream
@@ -391,8 +391,8 @@ def test_a_local_base_directory_is_never_mirrored(monkeypatch, tmp_path):
     gated = "black-forest-labs/FLUX.1-dev"
     _no_cache(monkeypatch)
     # The table still knows this id: only the local path stops the swap.
-    assert mirror_repo(gated) == "LAiM/FLUX.1-dev"
-    assert prefer_ungated_mirror(gated) == "LAiM/FLUX.1-dev"
+    assert mirror_repo(gated) == "unsloth/FLUX.1-dev"
+    assert prefer_ungated_mirror(gated) == "unsloth/FLUX.1-dev"
 
     local = tmp_path / gated
     (local / "vae").mkdir(parents = True)
@@ -433,12 +433,12 @@ def test_mirrored_base_still_trips_the_flux2_shape_guard():
     try:
         # A 4B GGUF (inner_dim 3072) against the 9B base still raises through the mirror id.
         gguf.GGUFReader = _reader_for(3072)
-        for base in ("black-forest-labs/FLUX.2-klein-9B", "LAiM/FLUX.2-klein-9B"):
+        for base in ("black-forest-labs/FLUX.2-klein-9B", "unsloth/FLUX.2-klein-9B"):
             with pytest.raises(ValueError, match = "klein"):
                 assert_flux2_gguf_matches_base(fam, base, "some-klein-4b.gguf")
         # A matching pair stays silent through the mirror id too.
         gguf.GGUFReader = _reader_for(4096)
-        for base in ("black-forest-labs/FLUX.2-klein-9B", "LAiM/FLUX.2-klein-9B"):
+        for base in ("black-forest-labs/FLUX.2-klein-9B", "unsloth/FLUX.2-klein-9B"):
             assert assert_flux2_gguf_matches_base(fam, base, "some-klein-9b.gguf") is None
     finally:
         gguf.GGUFReader = original
@@ -449,8 +449,8 @@ def test_family_prequant_repo_accepts_either_id():
     fam = detect_family("x", override = "flux.1")
     for scheme in ("int8", "fp8"):
         upstream = family_prequant_repo(fam, scheme, "black-forest-labs/FLUX.1-dev")
-        mirrored = family_prequant_repo(fam, scheme, "LAiM/FLUX.1-dev")
-        assert upstream == mirrored == "LAiM/FLUX.1-dev-FP8"
+        mirrored = family_prequant_repo(fam, scheme, "unsloth/FLUX.1-dev")
+        assert upstream == mirrored == "unsloth/FLUX.1-dev-FP8"
 
 
 def _fake_hub_cache(
@@ -491,7 +491,7 @@ def test_a_superseded_cached_revision_does_not_disable_the_mirror(monkeypatch, t
     _fake_hub_cache(monkeypatch, tmp_path, gated, wanted, revision = "old")
     _fake_hub_cache(monkeypatch, tmp_path, gated, ["model_index.json"], revision = "new", ref = "new")
     assert _upstream_is_cached(gated, wanted) is False
-    assert prefer_ungated_mirror(gated, files = wanted) == "LAiM/FLUX.1-dev"
+    assert prefer_ungated_mirror(gated, files = wanted) == "unsloth/FLUX.1-dev"
 
     # refs/main pointing at the complete revision is the ordinary cached case.
     _fake_hub_cache(monkeypatch, tmp_path, gated, wanted, revision = "old", ref = "old")
@@ -511,7 +511,7 @@ def test_a_stray_upstream_file_does_not_disable_the_mirror(monkeypatch, tmp_path
     # 1. debris only: not usable, so the mirror stands.
     _fake_hub_cache(monkeypatch, tmp_path, gated, ["model_index.json", "vae/config.json"])
     assert _upstream_is_cached(gated) is False
-    assert prefer_ungated_mirror(gated) == "LAiM/FLUX.1-dev"
+    assert prefer_ungated_mirror(gated) == "unsloth/FLUX.1-dev"
 
     # 2. a real weight file: the user's cache is worth keeping, so no swap.
     _fake_hub_cache(
@@ -526,7 +526,7 @@ def test_a_stray_upstream_file_does_not_disable_the_mirror(monkeypatch, tmp_path
     # 3. with the file list in hand the test is exact: a missing companion still swaps.
     wanted = ["vae/diffusion_pytorch_model.safetensors", "text_encoder/model.safetensors"]
     assert _upstream_is_cached(gated, wanted) is False
-    assert prefer_ungated_mirror(gated, files = wanted) == "LAiM/FLUX.1-dev"
+    assert prefer_ungated_mirror(gated, files = wanted) == "unsloth/FLUX.1-dev"
     assert prefer_ungated_mirror(gated, files = wanted[:1]) == gated
 
 
@@ -544,7 +544,7 @@ def test_a_repack_split_across_the_two_cache_roots_still_counts(monkeypatch, tmp
     from core.inference.diffusion_families import _upstream_is_cached, prefer_cached_legacy_source
 
     repack = "Comfy-Org/z_image_turbo"
-    mirror = "LAiM/Z-Image-Turbo-ComfyUI"
+    mirror = "unsloth/Z-Image-Turbo-ComfyUI"
     first, second = "split_files/vae/ae.safetensors", "split_files/text_encoders/te.safetensors"
     live, other = tmp_path / "live", tmp_path / "other"
 
@@ -651,10 +651,10 @@ def test_te_prequant_equivalence_group_accepts_a_mirrored_base():
 
     ckpt = "black-forest-labs/FLUX.1-schnell"
     assert te_base_equivalent(ckpt, "black-forest-labs/FLUX.1-dev") is True
-    assert te_base_equivalent(ckpt, "LAiM/FLUX.1-dev") is True
-    assert te_base_equivalent("LAiM/FLUX.1-schnell", "LAiM/FLUX.1-dev") is True
+    assert te_base_equivalent(ckpt, "unsloth/FLUX.1-dev") is True
+    assert te_base_equivalent("unsloth/FLUX.1-schnell", "unsloth/FLUX.1-dev") is True
     # A base outside the verified group is still refused, mirrored or not.
-    assert te_base_equivalent(ckpt, "LAiM/FLUX.2-dev") is False
+    assert te_base_equivalent(ckpt, "unsloth/FLUX.2-dev") is False
 
 
 def test_resolve_local_gguf_child(tmp_path):
@@ -2132,7 +2132,7 @@ def test_qwen_edit_display_repo_id_names_the_variant(fake_runtime, tmp_path):
         DiffusionBackend(),
         tmp_path,
         gguf_filename = "model.gguf",
-        display_repo_id = "LAiM/Qwen-Image-Edit-2509-GGUF",
+        display_repo_id = "unsloth/Qwen-Image-Edit-2509-GGUF",
         base_repo = "Qwen/Qwen-Image-Edit-2511",
         family_override = "qwen-image-edit",
     )
@@ -2219,12 +2219,12 @@ def test_load_pipeline_kind_uses_from_pretrained(fake_runtime):
     quant config -- so an embedded bnb-4bit config is reloaded by diffusers itself."""
     backend = DiffusionBackend()
     status = backend.load_pipeline(
-        "LAiM/Z-Image-Turbo-LAiM-bnb-4bit", family_override = "z-image"
+        "unsloth/Z-Image-Turbo-unsloth-bnb-4bit", family_override = "z-image"
     )
     assert status["loaded"] is True
     assert status["family"] == "z-image"
     # from_pretrained pointed at the repo itself (it IS its own base), with no transformer.
-    assert _FakePipeline.last["base"] == "LAiM/Z-Image-Turbo-LAiM-bnb-4bit"
+    assert _FakePipeline.last["base"] == "unsloth/Z-Image-Turbo-unsloth-bnb-4bit"
     assert "transformer" not in _FakePipeline.last
     # The GGUF single-file build path was never taken.
     assert _FakeTransformer.last == {}
@@ -2256,7 +2256,7 @@ def test_load_sdxl_pipeline_from_pretrained(fake_runtime):
     assert status["loaded"] is True
     assert status["family"] == "sdxl"
     # from_pretrained reads the MIRROR: the swap is fetch-only, so status keeps the vendor id.
-    assert _FakePipeline.last["base"] == "LAiM/stable-diffusion-xl-base-1.0"
+    assert _FakePipeline.last["base"] == "unsloth/stable-diffusion-xl-base-1.0"
     assert status["base_repo"] == "stabilityai/stable-diffusion-xl-base-1.0"
     assert "transformer" not in _FakePipeline.last
     # Neither single-file path (transformer-only nor whole-pipeline) was taken.
@@ -2278,7 +2278,7 @@ def test_load_sdxl_single_file_uses_pipeline_from_single_file(fake_runtime, tmp_
     # The whole-pipeline single-file path was taken with the base repo as config.
     assert _FakePipeline.last_single_file["path"] == str((tmp_path / "sdxl.safetensors").resolve())
     # The config comes from the MIRROR; status still reports the vendor id it copies.
-    assert _FakePipeline.last_single_file["config"] == "LAiM/stable-diffusion-xl-base-1.0"
+    assert _FakePipeline.last_single_file["config"] == "unsloth/stable-diffusion-xl-base-1.0"
     assert status["base_repo"] == "stabilityai/stable-diffusion-xl-base-1.0"
     # The transformer-only single-file build was NOT taken.
     assert _FakeTransformer.last == {}
@@ -2304,12 +2304,12 @@ def test_validate_refuses_a_pipeline_pick_of_a_hosted_prequant_repo(fake_runtime
 
     backend = DiffusionBackend()
     with pytest.raises(ValueError, match = "Qwen/Qwen-Image-2.1") as excinfo:
-        backend.validate_load_request("LAiM/Qwen-Image-2.1-FP8")
+        backend.validate_load_request("unsloth/Qwen-Image-2.1-FP8")
     message = str(excinfo.value)
     assert "transformer precision to fp8 or int8" in message
     assert "text encoder precision to fp8" in message
     ids = prequant_only_repo_ids()
-    assert "LAiM/qwen-image-2.1-fp8" in ids
+    assert "unsloth/qwen-image-2.1-fp8" in ids
     assert not any(fam.base_repo.lower() in ids for fam in _FAMILIES)
 
 
@@ -2326,7 +2326,7 @@ def test_validate_gates_untrusted_base_repo(fake_runtime, tmp_path):
     backend = DiffusionBackend()
     with pytest.raises(ValueError, match = "base_repo"):
         backend.validate_load_request(
-            "LAiM/Qwen-Image-2512-GGUF",
+            "unsloth/Qwen-Image-2512-GGUF",
             gguf_filename = "x.gguf",
             model_kind = "gguf",
             base_repo = "evil/companions",
@@ -2336,7 +2336,7 @@ def test_validate_gates_untrusted_base_repo(fake_runtime, tmp_path):
     bad_base.mkdir()
     with pytest.raises(ValueError, match = "model_index.json"):
         backend.validate_load_request(
-            "LAiM/Qwen-Image-2512-GGUF",
+            "unsloth/Qwen-Image-2512-GGUF",
             gguf_filename = "x.gguf",
             model_kind = "gguf",
             base_repo = str(bad_base),
@@ -2344,7 +2344,7 @@ def test_validate_gates_untrusted_base_repo(fake_runtime, tmp_path):
     (tmp_path / "model_index.json").write_text("{")
     with pytest.raises(ValueError, match = "valid model_index.json"):
         backend.validate_load_request(
-            "LAiM/Qwen-Image-2512-GGUF",
+            "unsloth/Qwen-Image-2512-GGUF",
             gguf_filename = "x.gguf",
             model_kind = "gguf",
             base_repo = str(tmp_path),
@@ -2355,7 +2355,7 @@ def test_validate_gates_untrusted_base_repo(fake_runtime, tmp_path):
     (tmp_path / "scheduler").mkdir()
     (tmp_path / "scheduler" / "scheduler_config.json").write_text("{}")
     fam = backend.validate_load_request(
-        "LAiM/Qwen-Image-2512-GGUF",
+        "unsloth/Qwen-Image-2512-GGUF",
         gguf_filename = "x.gguf",
         model_kind = "gguf",
         base_repo = str(tmp_path),
@@ -2433,7 +2433,7 @@ def test_resolve_local_single_file(tmp_path):
     assert resolve_local_single_file(str(d2)) is None
     assert resolve_local_single_file(str(tmp_path / "empty-nonexistent")) is None
     # A remote repo id (not a local dir) -> None.
-    assert resolve_local_single_file("LAiM/Qwen-Image-2512-GGUF") is None
+    assert resolve_local_single_file("unsloth/Qwen-Image-2512-GGUF") is None
 
     # A PEFT adapter folder is not a base checkpoint, even with a family-token name: from_single_file would fail after eviction.
     adapter = tmp_path / "flux-style-lora"
@@ -2452,7 +2452,7 @@ def test_resolve_base_repo_drops_untrusted_card_tag(monkeypatch):
     # With no base_repo the base comes from the GGUF repo's base_model tag, which is attacker-controlled, so an untrusted tag must fall back to the family default.
     import core.inference.diffusion as dmod
 
-    fam = detect_family("LAiM/FLUX.1-dev-GGUF")
+    fam = detect_family("unsloth/FLUX.1-dev-GGUF")
     # A malicious card tag is ignored, so the family default base is used.
     monkeypatch.setattr(dmod, "_hf_base_model", lambda repo_id, hf_token: "attacker/evil-pipeline")
     assert _resolve_base_repo("attacker/flux.1-evil-GGUF", None, fam, None) == fam.base_repo
@@ -2461,13 +2461,13 @@ def test_resolve_base_repo_drops_untrusted_card_tag(monkeypatch):
         dmod, "_hf_base_model", lambda repo_id, hf_token: "black-forest-labs/FLUX.1-dev"
     )
     assert (
-        _resolve_base_repo("LAiM/FLUX.1-dev-GGUF", None, fam, None)
+        _resolve_base_repo("unsloth/FLUX.1-dev-GGUF", None, fam, None)
         == "black-forest-labs/FLUX.1-dev"
     )
     # An explicit trusted base_repo wins over the card tag; an untrusted one is caught earlier at validate_load_request.
     assert (
-        _resolve_base_repo("LAiM/FLUX.1-dev-GGUF", "LAiM/custom-base", fam, None)
-        == "LAiM/custom-base"
+        _resolve_base_repo("unsloth/FLUX.1-dev-GGUF", "unsloth/custom-base", fam, None)
+        == "unsloth/custom-base"
     )
 
 
@@ -2477,16 +2477,16 @@ def test_resolve_base_repo_maps_a_mirrored_card_tag_back_to_the_vendor_id(monkey
     id; only the fetch sites see the mirror."""
     import core.inference.diffusion as dmod
 
-    fam = detect_family("LAiM/FLUX.1-dev-GGUF")
-    monkeypatch.setattr(dmod, "_hf_base_model", lambda repo_id, hf_token: "LAiM/FLUX.1-dev")
+    fam = detect_family("unsloth/FLUX.1-dev-GGUF")
+    monkeypatch.setattr(dmod, "_hf_base_model", lambda repo_id, hf_token: "unsloth/FLUX.1-dev")
     assert (
-        _resolve_base_repo("LAiM/FLUX.1-dev-GGUF", None, fam, None)
+        _resolve_base_repo("unsloth/FLUX.1-dev-GGUF", None, fam, None)
         == "black-forest-labs/FLUX.1-dev"
     )
     # An EXPLICIT base_repo is the caller's own choice and is honoured verbatim.
     assert (
-        _resolve_base_repo("LAiM/FLUX.1-dev-GGUF", "LAiM/FLUX.1-dev", fam, None)
-        == "LAiM/FLUX.1-dev"
+        _resolve_base_repo("unsloth/FLUX.1-dev-GGUF", "unsloth/FLUX.1-dev", fam, None)
+        == "unsloth/FLUX.1-dev"
     )
 
 
@@ -2494,11 +2494,11 @@ def test_detect_family_routes_layered_to_its_own_pipeline():
     # Qwen-Image-Layered needs a dedicated pipeline (additional_t_cond), so it resolves to its own family rather than
     # to qwen-image; a layered variant of a family without one is still rejected at load.
     assert (
-        detect_family("LAiM/Qwen-Image-Layered-GGUF").pipeline_class
+        detect_family("unsloth/Qwen-Image-Layered-GGUF").pipeline_class
         == "QwenImageLayeredPipeline"
     )
-    assert detect_family("LAiM/qwen_image_layered").name == "qwen-image-layered"
-    assert detect_family("LAiM/FLUX.1-Layered") is None
+    assert detect_family("unsloth/qwen_image_layered").name == "qwen-image-layered"
+    assert detect_family("unsloth/FLUX.1-Layered") is None
 
 
 def test_failed_load_rolls_back_eager_patches(fake_runtime, tmp_path, monkeypatch):
@@ -2578,22 +2578,22 @@ def test_resolve_base_repo_prefers_caller_then_hf_tag_then_fallback(monkeypatch)
     from core.inference import diffusion
     from core.inference.diffusion_families import detect_family
 
-    fam = detect_family("LAiM/Qwen-Image-2512-GGUF")
+    fam = detect_family("unsloth/Qwen-Image-2512-GGUF")
     monkeypatch.setattr(diffusion, "_hf_base_model", lambda repo, tok: "Qwen/Qwen-Image-2512")
     # Caller's explicit base wins and the HF tag is not consulted.
     assert (
-        diffusion._resolve_base_repo("LAiM/Qwen-Image-2512-GGUF", "my/base", fam, None)
+        diffusion._resolve_base_repo("unsloth/Qwen-Image-2512-GGUF", "my/base", fam, None)
         == "my/base"
     )
     # No caller base: the repo's base_model tag (the variant base) is used.
     assert (
-        diffusion._resolve_base_repo("LAiM/Qwen-Image-2512-GGUF", None, fam, None)
+        diffusion._resolve_base_repo("unsloth/Qwen-Image-2512-GGUF", None, fam, None)
         == "Qwen/Qwen-Image-2512"
     )
     # No caller base and no tag: the family fallback.
     monkeypatch.setattr(diffusion, "_hf_base_model", lambda repo, tok: None)
     assert (
-        diffusion._resolve_base_repo("LAiM/Qwen-Image-2512-GGUF", "  ", fam, None)
+        diffusion._resolve_base_repo("unsloth/Qwen-Image-2512-GGUF", "  ", fam, None)
         == fam.base_repo
     )
 
@@ -2645,7 +2645,7 @@ def test_load_progress_downloading_then_finalizing(monkeypatch):
 
 
 def test_load_progress_counts_only_the_selected_prequant_file_in_its_artifact_repo(monkeypatch):
-    # LAiM/Qwen-Image-FP8 hosts one checkpoint per scheme, so a card that already ran fp8 and now
+    # unsloth/Qwen-Image-FP8 hosts one checkpoint per scheme, so a card that already ran fp8 and now
     # loads int8 has 19 GB of a sibling file in that repo while expected_bytes counts only int8.
     # Counting the whole repo reported finalizing with most of the selected checkpoint still to come.
     backend = DiffusionBackend()
@@ -2654,9 +2654,9 @@ def test_load_progress_counts_only_the_selected_prequant_file_in_its_artifact_re
         base_repo = "Qwen/Qwen-Image",
         expected_bytes = 1000,
     )
-    backend._loading.asset_repos = ("LAiM/Qwen-Image-FP8",)
+    backend._loading.asset_repos = ("unsloth/Qwen-Image-FP8",)
     # 600 bytes of the fp8 sibling were already there when the load claimed the repo.
-    backend._loading.asset_files = (("LAiM/Qwen-Image-FP8", "Qwen-Image-INT8.pt", 400, 600),)
+    backend._loading.asset_files = (("unsloth/Qwen-Image-FP8", "Qwen-Image-INT8.pt", 400, 600),)
     monkeypatch.setattr(DiffusionBackend, "_cache_bytes", staticmethod(lambda repo: 0))
     monkeypatch.setattr(DiffusionBackend, "_cache_file_bytes", staticmethod(lambda repo, f: 0))
 
@@ -2664,7 +2664,7 @@ def test_load_progress_counts_only_the_selected_prequant_file_in_its_artifact_re
     monkeypatch.setattr(
         DiffusionBackend,
         "_cache_bytes",
-        staticmethod(lambda repo: 700 if repo == "LAiM/Qwen-Image-FP8" else 500),
+        staticmethod(lambda repo: 700 if repo == "unsloth/Qwen-Image-FP8" else 500),
     )
     p = backend.load_progress()
     assert p["phase"] == "downloading"
@@ -2679,7 +2679,7 @@ def test_load_progress_counts_only_the_selected_prequant_file_in_its_artifact_re
     monkeypatch.setattr(
         DiffusionBackend,
         "_cache_bytes",
-        staticmethod(lambda repo: 1000 if repo == "LAiM/Qwen-Image-FP8" else 600),
+        staticmethod(lambda repo: 1000 if repo == "unsloth/Qwen-Image-FP8" else 600),
     )
     assert backend.load_progress()["phase"] == "finalizing"  # 600 + 400
     assert backend.load_progress()["bytes_downloaded"] == 1000
@@ -2694,12 +2694,12 @@ def test_load_progress_reports_a_prequant_file_that_was_already_cached(monkeypat
         base_repo = "Qwen/Qwen-Image",
         expected_bytes = 1000,
     )
-    backend._loading.asset_repos = ("LAiM/Qwen-Image-FP8",)
-    backend._loading.asset_files = (("LAiM/Qwen-Image-FP8", "Qwen-Image-INT8.pt", 400, 1000),)
+    backend._loading.asset_repos = ("unsloth/Qwen-Image-FP8",)
+    backend._loading.asset_files = (("unsloth/Qwen-Image-FP8", "Qwen-Image-INT8.pt", 400, 1000),)
     monkeypatch.setattr(
         DiffusionBackend,
         "_cache_bytes",
-        staticmethod(lambda repo: 1000 if repo == "LAiM/Qwen-Image-FP8" else 600),
+        staticmethod(lambda repo: 1000 if repo == "unsloth/Qwen-Image-FP8" else 600),
     )
     monkeypatch.setattr(DiffusionBackend, "_cache_file_bytes", staticmethod(lambda repo, f: 400))
     assert backend.load_progress()["phase"] == "finalizing"
@@ -2714,7 +2714,7 @@ def test_load_progress_counts_a_mirrored_pipeline_repo_once(monkeypatch):
         base_repo = "black-forest-labs/FLUX.1-dev",
         expected_bytes = 1000,
     )
-    backend._loading.fetch_repo = "LAiM/FLUX.1-dev"
+    backend._loading.fetch_repo = "unsloth/FLUX.1-dev"
     # 600 stale upstream bytes from the interrupted pull, 500 real ones into the mirror.
     monkeypatch.setattr(
         DiffusionBackend,
@@ -2730,11 +2730,11 @@ def test_load_progress_still_sums_a_gguf_pick_and_its_separate_base(monkeypatch)
     # A base that is a DIFFERENT repo from the pick is a separate download, so still summed.
     backend = DiffusionBackend()
     backend._loading = _LoadingState(
-        repo_id = "LAiM/FLUX.1-dev-GGUF",
+        repo_id = "unsloth/FLUX.1-dev-GGUF",
         base_repo = "black-forest-labs/FLUX.1-dev",
         expected_bytes = 1000,
     )
-    backend._loading.fetch_repo = "LAiM/FLUX.1-dev"
+    backend._loading.fetch_repo = "unsloth/FLUX.1-dev"
     monkeypatch.setattr(DiffusionBackend, "_cache_bytes", staticmethod(lambda repo: 150))
     assert backend.load_progress()["bytes_downloaded"] == 300
 
@@ -2975,10 +2975,10 @@ def test_begin_load_rejects_concurrent(monkeypatch):
         assert holding.wait(timeout = 30), "the test never released the load worker"
 
     monkeypatch.setattr(DiffusionBackend, "load_pipeline", held)
-    backend.begin_load("LAiM/Z-Image-Turbo-GGUF", gguf_filename = "z-image-turbo-Q4_K_S.gguf")
+    backend.begin_load("unsloth/Z-Image-Turbo-GGUF", gguf_filename = "z-image-turbo-Q4_K_S.gguf")
     assert entered.wait(timeout = 30), "the load worker never reached load_pipeline"
     with pytest.raises(RuntimeError):
-        backend.begin_load("LAiM/Z-Image-Turbo-GGUF", gguf_filename = "z-image-turbo-Q4_K_S.gguf")
+        backend.begin_load("unsloth/Z-Image-Turbo-GGUF", gguf_filename = "z-image-turbo-Q4_K_S.gguf")
     # Drain the worker: begin_load's thread is fire-and-forget, so left running it outlives
     # this test and then runs the REAL load_pipeline inside whatever test is current, under
     # that test's patches.
@@ -2989,14 +2989,14 @@ def test_begin_load_rejects_concurrent(monkeypatch):
 def test_unload_cancels_in_flight_load(fake_runtime):
     # An unload (or arbiter eviction) mid-download must cancel the worker: load_pipeline sees the bumped token and aborts.
     backend = DiffusionBackend()
-    fam = detect_family("LAiM/Z-Image-Turbo-GGUF")
+    fam = detect_family("unsloth/Z-Image-Turbo-GGUF")
     token = 7
     backend._load_token = token
     with pytest.raises(RuntimeError, match = "cancelled"):
         # Simulate the worker reaching load_pipeline after unload bumped the token.
         backend._load_token = token + 1
         backend.load_pipeline(
-            "LAiM/Z-Image-Turbo-GGUF",
+            "unsloth/Z-Image-Turbo-GGUF",
             gguf_filename = "z-image-turbo-Q4_K_S.gguf",
             base_repo = fam.base_repo,
             _load_token = token,
@@ -3008,14 +3008,14 @@ def test_superseded_load_does_not_cancel_live_generation(fake_runtime):
     import threading as _threading
 
     backend = DiffusionBackend()
-    fam = detect_family("LAiM/Z-Image-Turbo-GGUF")
+    fam = detect_family("unsloth/Z-Image-Turbo-GGUF")
     live_cancel = _threading.Event()
     backend._active_generate_cancel = live_cancel  # a generation from the CURRENT model
     token = 11
     backend._load_token = token + 1  # this load has already been superseded
     with pytest.raises(RuntimeError, match = "cancelled"):
         backend.load_pipeline(
-            "LAiM/Z-Image-Turbo-GGUF",
+            "unsloth/Z-Image-Turbo-GGUF",
             gguf_filename = "z-image-turbo-Q4_K_S.gguf",
             base_repo = fam.base_repo,
             _load_token = token,
@@ -3822,7 +3822,7 @@ def test_each_load_owns_its_cancel_event(fake_runtime, monkeypatch, tmp_path):
         started.set()
 
     monkeypatch.setattr(backend, "_run_load", _capture)  # skip the download thread's work
-    backend.begin_load("LAiM/Z-Image-Turbo-GGUF", gguf_filename = "z-image-turbo-Q4_K_S.gguf")
+    backend.begin_load("unsloth/Z-Image-Turbo-GGUF", gguf_filename = "z-image-turbo-Q4_K_S.gguf")
     assert started.wait(5)
     first = seen[0]
 
@@ -3830,7 +3830,7 @@ def test_each_load_owns_its_cancel_event(fake_runtime, monkeypatch, tmp_path):
     assert first.is_set()
 
     started.clear()
-    backend.begin_load("LAiM/Z-Image-Turbo-GGUF", gguf_filename = "z-image-turbo-Q8_0.gguf")
+    backend.begin_load("unsloth/Z-Image-Turbo-GGUF", gguf_filename = "z-image-turbo-Q8_0.gguf")
     assert started.wait(5)
     second = seen[1]
 
@@ -3859,13 +3859,13 @@ def test_prefetch_downloads_gguf_and_base(monkeypatch, tmp_path):
     )
     # Hub repo: the GGUF transformer and each base file are fetched.
     backend._prefetch_files(
-        "LAiM/Z-Image-Turbo-GGUF",
+        "unsloth/Z-Image-Turbo-GGUF",
         "model.gguf",
         "base/repo",
         ["vae/x.safetensors", "text_encoder/y.safetensors"],
         "hf_tok",
     )
-    assert ("LAiM/Z-Image-Turbo-GGUF", "model.gguf") in calls
+    assert ("unsloth/Z-Image-Turbo-GGUF", "model.gguf") in calls
     assert ("base/repo", "vae/x.safetensors") in calls
     assert ("base/repo", "text_encoder/y.safetensors") in calls
     # Local GGUF path: the transformer download is skipped, base still fetched.
@@ -3887,22 +3887,22 @@ def test_prefetch_pulls_companions_from_the_ungated_mirror(monkeypatch, tmp_path
     )
     _no_cache(monkeypatch)
     backend._prefetch_files(
-        "LAiM/FLUX.1-dev-GGUF",
+        "unsloth/FLUX.1-dev-GGUF",
         "flux1-dev-Q4_K_M.gguf",
         "black-forest-labs/FLUX.1-dev",
         ["vae/diffusion_pytorch_model.safetensors"],
         None,
     )
-    assert ("LAiM/FLUX.1-dev", "vae/diffusion_pytorch_model.safetensors") in calls
+    assert ("unsloth/FLUX.1-dev", "vae/diffusion_pytorch_model.safetensors") in calls
     assert all(repo != "black-forest-labs/FLUX.1-dev" for repo, _ in calls)
     # The GGUF repo is never rewritten.
-    assert ("LAiM/FLUX.1-dev-GGUF", "flux1-dev-Q4_K_M.gguf") in calls
+    assert ("unsloth/FLUX.1-dev-GGUF", "flux1-dev-Q4_K_M.gguf") in calls
 
     # An upstream already on disk keeps its cache.
     calls.clear()
     _all_cached(monkeypatch)
     backend._prefetch_files(
-        "LAiM/FLUX.1-dev-GGUF",
+        "unsloth/FLUX.1-dev-GGUF",
         None,
         "black-forest-labs/FLUX.1-dev",
         ["vae/diffusion_pytorch_model.safetensors"],
@@ -3929,8 +3929,8 @@ def test_single_file_load_reads_config_and_companions_from_the_mirror(
         family_override = "flux.1",
     )
 
-    assert _FakeTransformer.last["config"] == "LAiM/FLUX.1-dev"
-    assert _FakePipeline.last["base"] == "LAiM/FLUX.1-dev"
+    assert _FakeTransformer.last["config"] == "unsloth/FLUX.1-dev"
+    assert _FakePipeline.last["base"] == "unsloth/FLUX.1-dev"
     # Invisible: only the bytes moved, so the API still reports the id the user picked.
     assert status["base_repo"] == "black-forest-labs/FLUX.1-dev"
 
@@ -3964,11 +3964,11 @@ def test_pipeline_kind_assembles_krea_and_ideogram_from_the_mirror(fake_runtime,
     monkeypatch.setattr(dmod, "load_ideogram4_pipeline", _ideogram)
 
     krea = DiffusionBackend().load_pipeline("krea/Krea-2-Turbo", model_kind = "pipeline")
-    assert seen["krea"] == "LAiM/Krea-2-Turbo"
+    assert seen["krea"] == "unsloth/Krea-2-Turbo"
     assert krea["repo_id"] == "krea/Krea-2-Turbo"
 
     ideogram = DiffusionBackend().load_pipeline("ideogram-ai/ideogram-4-fp8", model_kind = "pipeline")
-    assert seen["ideogram"] == "LAiM/ideogram-4-fp8"
+    assert seen["ideogram"] == "unsloth/ideogram-4-fp8"
     assert ideogram["repo_id"] == "ideogram-ai/ideogram-4-fp8"
 
 
@@ -4009,7 +4009,7 @@ def test_dense_quant_pulls_the_transformer_from_the_mirror(monkeypatch):
         fam = detect_family("x", override = "flux.1"),
     )
     assert scheme == "fp8"
-    assert seen["dense"] == "LAiM/FLUX.1-dev"
+    assert seen["dense"] == "unsloth/FLUX.1-dev"
 
 
 def test_load_progress_and_delete_guard_follow_the_mirrored_companion(monkeypatch):
@@ -4019,23 +4019,23 @@ def test_load_progress_and_delete_guard_follow_the_mirrored_companion(monkeypatc
 
     backend = DiffusionBackend()
     backend._loading = dmod._LoadingState(
-        repo_id = "LAiM/FLUX.1-dev-GGUF",
+        repo_id = "unsloth/FLUX.1-dev-GGUF",
         base_repo = "black-forest-labs/FLUX.1-dev",
-        fetch_repo = "LAiM/FLUX.1-dev",
+        fetch_repo = "unsloth/FLUX.1-dev",
         expected_bytes = 10,
     )
     monkeypatch.setattr(
         DiffusionBackend,
         "_cache_bytes",
-        staticmethod(lambda repo_id: 4 if repo_id == "LAiM/FLUX.1-dev" else 0),
+        staticmethod(lambda repo_id: 4 if repo_id == "unsloth/FLUX.1-dev" else 0),
     )
 
     assert backend.load_progress()["bytes_downloaded"] == 4
     # BOTH ids: the upstream is what status reports, the mirror is where the download writes.
     assert backend.loading_repo_ids() == (
-        "LAiM/FLUX.1-dev-GGUF",
+        "unsloth/FLUX.1-dev-GGUF",
         "black-forest-labs/FLUX.1-dev",
-        "LAiM/FLUX.1-dev",
+        "unsloth/FLUX.1-dev",
     )
 
 
@@ -4046,7 +4046,7 @@ def test_plan_memory_sizes_the_mirrored_companion_cache(monkeypatch, tmp_path):
         "_companion_cache_bytes",
         staticmethod(
             lambda base, staged = None, load_dtype = None: (
-                8 * 1024 * 1024 if base == "LAiM/FLUX.1-dev" else 0
+                8 * 1024 * 1024 if base == "unsloth/FLUX.1-dev" else 0
             )
         ),
     )
@@ -4067,7 +4067,7 @@ def test_plan_memory_sizes_the_mirrored_companion_cache(monkeypatch, tmp_path):
         detect_family("x", override = "flux.1"),
         None,
         False,
-        fetch_base = "LAiM/FLUX.1-dev",
+        fetch_base = "unsloth/FLUX.1-dev",
     )
     assert seen["companion_dense_mib"] == 8
 
@@ -4077,19 +4077,19 @@ def test_plan_memory_sizes_the_mirrored_companion_cache(monkeypatch, tmp_path):
 
 def test_zimage_is_fp16_incompatible():
     # Only families whose activations overflow fp16 carry the guard: Z-Image, and Qwen-Image (NaN latents, black).
-    assert detect_family("LAiM/Z-Image-Turbo-GGUF").fp16_incompatible is True
-    assert detect_family("LAiM/Z-Image-GGUF").fp16_incompatible is True
-    assert detect_family("LAiM/Qwen-Image-2512-GGUF").fp16_incompatible is True
-    assert detect_family("LAiM/FLUX.1-schnell-GGUF").fp16_incompatible is False
-    assert detect_family("LAiM/FLUX.2-klein-4B-GGUF").fp16_incompatible is False
+    assert detect_family("unsloth/Z-Image-Turbo-GGUF").fp16_incompatible is True
+    assert detect_family("unsloth/Z-Image-GGUF").fp16_incompatible is True
+    assert detect_family("unsloth/Qwen-Image-2512-GGUF").fp16_incompatible is True
+    assert detect_family("unsloth/FLUX.1-schnell-GGUF").fp16_incompatible is False
+    assert detect_family("unsloth/FLUX.2-klein-4B-GGUF").fp16_incompatible is False
 
 
 def test_resolve_compute_dtype_promotes_fp16_for_zimage(fake_runtime, monkeypatch):
     from core.inference import diffusion_fp16_guard as guard
 
     torch = sys.modules["torch"]
-    z = detect_family("LAiM/Z-Image-GGUF")
-    q = detect_family("LAiM/FLUX.1-schnell-GGUF")
+    z = detect_family("unsloth/Z-Image-GGUF")
+    q = detect_family("unsloth/FLUX.1-schnell-GGUF")
     monkeypatch.setattr(guard, "_recipe_supported", lambda fam, recipe: True)
     assert _resolve_diffusion_compute_dtype(z, torch.float16) is torch.float16
     # Kill switch: fp16 promotes to fp32; bf16 / fp32 unchanged.
@@ -4138,7 +4138,7 @@ def test_load_promotes_fp16_to_fp32_for_zimage_only(fake_runtime, monkeypatch, t
 def test_bad_mode_strings_fail_before_eviction(fake_runtime):
     # Every mode normalizer that can raise runs BEFORE the load evicts the previous pipeline.
     backend = DiffusionBackend()
-    fam = detect_family("LAiM/Z-Image-GGUF")
+    fam = detect_family("unsloth/Z-Image-GGUF")
     backend._state = _LoadState(
         pipe = object(),
         family = fam,
@@ -4156,7 +4156,7 @@ def test_bad_mode_strings_fail_before_eviction(fake_runtime):
         {"text_encoder_quant": "fp3"},
     ):
         with pytest.raises(ValueError):
-            backend.load_pipeline("LAiM/Z-Image-GGUF", gguf_filename = "m.gguf", **kwargs)
+            backend.load_pipeline("unsloth/Z-Image-GGUF", gguf_filename = "m.gguf", **kwargs)
         assert backend._state is not None
 
 
@@ -4176,7 +4176,7 @@ def test_generate_lock_split_keeps_status_and_unload_responsive(fake_runtime):
             release.wait(5)
             return types.SimpleNamespace(images = [_FakeImage()])
 
-    fam = detect_family("LAiM/Z-Image-GGUF")
+    fam = detect_family("unsloth/Z-Image-GGUF")
     backend._state = _LoadState(
         pipe = _BlockingPipe(),
         family = fam,
@@ -4251,7 +4251,7 @@ def test_callback_cancellation_interrupts_denoise(fake_runtime):
             return types.SimpleNamespace(images = [_FakeImage()])
 
     pipe = _SteppingPipe()
-    fam = detect_family("LAiM/Z-Image-GGUF")
+    fam = detect_family("unsloth/Z-Image-GGUF")
     backend._state = _LoadState(
         pipe = pipe,
         family = fam,
@@ -4287,17 +4287,17 @@ def test_callback_cancellation_interrupts_denoise(fake_runtime):
 def test_validate_load_request(tmp_path):
     backend = DiffusionBackend()
     # No filename + LAiM repo -> a full-pipeline load (allowed for LAiM/*).
-    assert backend.validate_load_request("LAiM/Z-Image-Turbo-LAiM-bnb-4bit").name == "z-image"
+    assert backend.validate_load_request("unsloth/Z-Image-Turbo-unsloth-bnb-4bit").name == "z-image"
     # No filename + non-LAiM repo -> a pipeline load, gated to LAiM/* -> rejected.
     with pytest.raises(ValueError, match = "LAiM"):
         backend.validate_load_request("some-org/Z-Image-bnb-4bit")
     # An explicit gguf/single_file kind still requires a single-file name.
     with pytest.raises(ValueError, match = "single-file"):
-        backend.validate_load_request("LAiM/Z-Image-Turbo-GGUF", model_kind = "gguf")
+        backend.validate_load_request("unsloth/Z-Image-Turbo-GGUF", model_kind = "gguf")
     # A pipeline kind must NOT carry a single-file name.
     with pytest.raises(ValueError, match = "pipeline"):
         backend.validate_load_request(
-            "LAiM/Z-Image-Turbo-bnb-4bit", gguf_filename = "q.gguf", model_kind = "pipeline"
+            "unsloth/Z-Image-Turbo-bnb-4bit", gguf_filename = "q.gguf", model_kind = "pipeline"
         )
     # A single .safetensors file is trusted per file, from any repo; any other weight format there is still refused.
     assert (
@@ -4312,23 +4312,23 @@ def test_validate_load_request(tmp_path):
         backend.validate_load_request("meta/Llama-3", gguf_filename = "q.gguf")
     # A family-looking repo with a non-GGUF single-file name is rejected before the route evicts chat.
     with pytest.raises(ValueError, match = r"\.gguf"):
-        backend.validate_load_request("LAiM/Z-Image-Turbo-GGUF", gguf_filename = "README.md")
+        backend.validate_load_request("unsloth/Z-Image-Turbo-GGUF", gguf_filename = "README.md")
     assert (
-        backend.validate_load_request("LAiM/Z-Image-Turbo-GGUF", gguf_filename = "q.gguf").name
+        backend.validate_load_request("unsloth/Z-Image-Turbo-GGUF", gguf_filename = "q.gguf").name
         == "z-image"
     )
     # A kind/extension mismatch fails fast, before the route evicts chat and from_single_file fails in the background.
     with pytest.raises(ValueError, match = ".gguf"):
         backend.validate_load_request(
-            "LAiM/Z-Image-Turbo-GGUF", gguf_filename = "model.safetensors", model_kind = "gguf"
+            "unsloth/Z-Image-Turbo-GGUF", gguf_filename = "model.safetensors", model_kind = "gguf"
         )
     with pytest.raises(ValueError, match = "gguf"):
         backend.validate_load_request(
-            "LAiM/Qwen-Image-2512-FP8", gguf_filename = "q.gguf", model_kind = "single_file"
+            "unsloth/Qwen-Image-2512-FP8", gguf_filename = "q.gguf", model_kind = "single_file"
         )
     # A remote "*-GGUF" repo loaded as a full pipeline has no manifest, so reject it before the GPU handoff.
     with pytest.raises(ValueError, match = "GGUF"):
-        backend.validate_load_request("LAiM/Z-Image-Turbo-GGUF", model_kind = "pipeline")
+        backend.validate_load_request("unsloth/Z-Image-Turbo-GGUF", model_kind = "pipeline")
     # A local path with a missing child fails here (before any GPU/network work).
     with pytest.raises(FileNotFoundError):
         backend.validate_load_request(
@@ -4364,7 +4364,7 @@ def test_replacement_load_waits_for_inflight_generation(fake_runtime, tmp_path):
             release.wait(5)
             return types.SimpleNamespace(images = [_FakeImage()])
 
-    fam = detect_family("LAiM/Z-Image-GGUF")
+    fam = detect_family("unsloth/Z-Image-GGUF")
     backend._state = _LoadState(
         pipe = _BlockingPipe(),
         family = fam,
@@ -4461,9 +4461,9 @@ def _fake_zimage_hub(monkeypatch):
     _fake_hf_api(
         monkeypatch,
         {
-            "LAiM/Z-Image-GGUF": [_FakeSibling("Z-Image-Turbo-Q4_K_M.gguf", 4 * GB)],
+            "unsloth/Z-Image-GGUF": [_FakeSibling("Z-Image-Turbo-Q4_K_M.gguf", 4 * GB)],
             "Tongyi-MAI/Z-Image-Turbo": _ZIMAGE_BASE_SIBLINGS,
-            "LAiM/Z-Image-Turbo-FP8": [_FakeSibling("Z-Image-Turbo-FP8.pt", 6 * GB)],
+            "unsloth/Z-Image-Turbo-FP8": [_FakeSibling("Z-Image-Turbo-FP8.pt", 6 * GB)],
         },
     )
     monkeypatch.setattr(
@@ -4917,7 +4917,7 @@ def test_run_load_flags_the_transformer_prefetched_from_the_staged_file_list(mon
             staticmethod(lambda *a, _files = base_files, **k: (0, _files)),
         )
         DiffusionBackend()._run_load(
-            repo_id = "LAiM/Z-Image-Turbo-GGUF",
+            repo_id = "unsloth/Z-Image-Turbo-GGUF",
             gguf_filename = "z-image-turbo-Q8_0.gguf",
             model_kind = "gguf",
         )
@@ -4949,7 +4949,7 @@ def test_run_load_counts_a_complete_local_base_as_staged(monkeypatch, tmp_path):
         lambda self, **kw: seen.append(kw["_transformer_prefetched"]),
     )
     DiffusionBackend()._run_load(
-        repo_id = "LAiM/Z-Image-Turbo-GGUF",
+        repo_id = "unsloth/Z-Image-Turbo-GGUF",
         gguf_filename = "z-image-turbo-Q8_0.gguf",
         model_kind = "gguf",
     )
@@ -4963,7 +4963,7 @@ def test_run_load_counts_a_complete_local_base_as_staged(monkeypatch, tmp_path):
     assert dmod._local_base_transformer_present(None) is False
 
 
-_TE_REPO = "LAiM/Qwen-Image-2.1-FP8"
+_TE_REPO = "unsloth/Qwen-Image-2.1-FP8"
 _TE_FILE = "Qwen-Image-2.1-text_encoder-INT8-ConvRot.safetensors"
 
 
@@ -5024,7 +5024,7 @@ def _run_te_load(monkeypatch, on_load, **run_kwargs):
 
 def test_run_load_reports_the_pre_cast_encoder_download_as_downloading(monkeypatch):
     # GGUF + base cached; a cached fp8 sibling in the encoder repo must not stand in for the int8 file.
-    cache = {"LAiM/Qwen-Image-2.1-GGUF": 700, "Qwen/Qwen-Image-2.1": 300, _TE_REPO: 950}
+    cache = {"unsloth/Qwen-Image-2.1-GGUF": 700, "Qwen/Qwen-Image-2.1": 300, _TE_REPO: 950}
     file_bytes: dict = {}
     _stub_te_run_load(
         monkeypatch,
@@ -5048,7 +5048,7 @@ def test_run_load_reports_the_pre_cast_encoder_download_as_downloading(monkeypat
     _run_te_load(
         monkeypatch,
         on_load,
-        repo_id = "LAiM/Qwen-Image-2.1-GGUF",
+        repo_id = "unsloth/Qwen-Image-2.1-GGUF",
         gguf_filename = "qwen-image-2.1-Q8_0.gguf",
         model_kind = "gguf",
     )
@@ -5063,11 +5063,11 @@ def test_run_load_reports_the_pre_cast_encoder_download_as_downloading(monkeypat
 def test_run_load_credits_a_shared_prequant_repo_once(monkeypatch):
     # One repo hosts denoiser and encoder; a pre-fetch encoder baseline would count the denoiser twice.
     dit_file = "Qwen-Image-2.1-INT8.safetensors"
-    cache = {"LAiM/Qwen-Image-2.1": 300}
+    cache = {"unsloth/Qwen-Image-2.1": 300}
     file_bytes: dict = {}
     _stub_te_run_load(
         monkeypatch,
-        base = "LAiM/Qwen-Image-2.1",
+        base = "unsloth/Qwen-Image-2.1",
         base_bytes = 300,
         cache = cache,
         file_bytes = file_bytes,
@@ -5083,7 +5083,7 @@ def test_run_load_credits_a_shared_prequant_repo_once(monkeypatch):
     _run_te_load(
         monkeypatch,
         lambda backend: seen.append(backend.load_progress()),
-        repo_id = "LAiM/Qwen-Image-2.1",
+        repo_id = "unsloth/Qwen-Image-2.1",
         model_kind = "pipeline",
     )
     assert (seen[0]["phase"], seen[0]["bytes_downloaded"], seen[0]["bytes_total"]) == (
@@ -5100,7 +5100,7 @@ def test_run_load_leaves_a_mirrored_pre_cast_encoder_out_of_the_download(monkeyp
     monkeypatch.setattr(
         diffusion_te_prequant, "te_prequant_mirror_path", lambda repo, name: "/mirror/" + name
     )
-    cache = {"LAiM/Qwen-Image-2.1-GGUF": 700, "Qwen/Qwen-Image-2.1": 300}
+    cache = {"unsloth/Qwen-Image-2.1-GGUF": 700, "Qwen/Qwen-Image-2.1": 300}
     _stub_te_run_load(
         monkeypatch,
         base = "Qwen/Qwen-Image-2.1",
@@ -5117,7 +5117,7 @@ def test_run_load_leaves_a_mirrored_pre_cast_encoder_out_of_the_download(monkeyp
     _run_te_load(
         monkeypatch,
         on_load,
-        repo_id = "LAiM/Qwen-Image-2.1-GGUF",
+        repo_id = "unsloth/Qwen-Image-2.1-GGUF",
         gguf_filename = "qwen-image-2.1-Q8_0.gguf",
         model_kind = "gguf",
     )
@@ -5135,12 +5135,12 @@ class _PollOnClaimState(_LoadingState):
 @pytest.mark.parametrize("claim", ["encoder", "denoiser"])
 def test_run_load_never_shows_a_claimed_repo_without_its_file(monkeypatch, claim):
     # A repo claimed with no file entry is counted whole (cached siblings included).
-    dit_repo = "LAiM/Qwen-Image-2.1-DiT"
-    cache = {"LAiM/Qwen-Image-2.1": 300}
+    dit_repo = "unsloth/Qwen-Image-2.1-DiT"
+    cache = {"unsloth/Qwen-Image-2.1": 300}
     cache[_TE_REPO if claim == "encoder" else dit_repo] = 1700
     _stub_te_run_load(
         monkeypatch,
-        base = "LAiM/Qwen-Image-2.1",
+        base = "unsloth/Qwen-Image-2.1",
         base_bytes = 300,
         cache = cache,
         file_bytes = {},
@@ -5152,12 +5152,12 @@ def test_run_load_never_shows_a_claimed_repo_without_its_file(monkeypatch, claim
         DiffusionBackend, "load_pipeline", lambda self, **kw: seen.append(self.load_progress())
     )
     backend = DiffusionBackend()
-    state = _PollOnClaimState(repo_id = "LAiM/Qwen-Image-2.1", base_repo = None)
+    state = _PollOnClaimState(repo_id = "unsloth/Qwen-Image-2.1", base_repo = None)
     state.polls = []
     state.backend = backend
     backend._loading = state
     backend._load_token = 7
-    backend._run_load(_load_token = 7, repo_id = "LAiM/Qwen-Image-2.1", model_kind = "pipeline")
+    backend._run_load(_load_token = 7, repo_id = "unsloth/Qwen-Image-2.1", model_kind = "pipeline")
     assert state.polls and set(state.polls) == {"downloading"}
     assert seen[0]["phase"] == "downloading"
 
@@ -5210,14 +5210,14 @@ def test_the_widening_decision_is_taken_on_the_repo_listing(monkeypatch):
         return len(calls) == 1
 
     widened = DiffusionBackend._estimate_download_bytes(
-        "LAiM/Z-Image-Turbo-GGUF",
+        "unsloth/Z-Image-Turbo-GGUF",
         None,
         "Tongyi-MAI/Z-Image-Turbo",
         None,
         include_transformer = _decide,
     )[1]
     narrow = DiffusionBackend._estimate_download_bytes(
-        "LAiM/Z-Image-Turbo-GGUF",
+        "unsloth/Z-Image-Turbo-GGUF",
         None,
         "Tongyi-MAI/Z-Image-Turbo",
         None,
@@ -6273,7 +6273,7 @@ def test_assemble_pipe_routes_krea2_per_component(monkeypatch):
     assert isinstance(pipe, Pipe)
     # _assemble_pipe reads base only to FETCH, so the loader gets the ungated mirror.
     assert calls == {
-        "base": "LAiM/Krea-2-Turbo",
+        "base": "unsloth/Krea-2-Turbo",
         "transformer": marker,
         "device": "cuda:0",
         # Default here (a direct call), but PASSED rather than left to the loader's own default:
@@ -6382,7 +6382,7 @@ def test_dense_quant_prefetch_capacity_gate(fake_runtime, monkeypatch):
 
     backend = DiffusionBackend()
     _force_cuda_target(backend, monkeypatch)
-    fam = detect_family("LAiM/Qwen-Image-GGUF")
+    fam = detect_family("unsloth/Qwen-Image-GGUF")
 
     def candidate_with(steady):
         return lambda **kw: types.SimpleNamespace(prequant = False, steady_total_mib = steady)
@@ -6415,7 +6415,7 @@ def test_dense_quant_prefetch_needed_gates(fake_runtime, monkeypatch):
 
     backend = DiffusionBackend()
     _force_cuda_target(backend, monkeypatch)
-    fam = detect_family("LAiM/Z-Image-Turbo-GGUF")
+    fam = detect_family("unsloth/Z-Image-Turbo-GGUF")
 
     seen: list = []
 
@@ -6500,7 +6500,7 @@ def test_dense_quant_prefetch_needed_gates(fake_runtime, monkeypatch):
 
 _HOSTED_PREQUANT = types.SimpleNamespace(
     kind = "repo",
-    location = "LAiM/Z-Image-Turbo-FP8",
+    location = "unsloth/Z-Image-Turbo-FP8",
     filename = "Z-Image-Turbo-FP8.pt",
     fallback_filenames = ("transformer_fp8.pt",),
 )
@@ -6566,7 +6566,7 @@ def _dense_calls(calls, backend):
 
 
 def test_auto_quant_declines_an_uncached_hosted_prequant(fake_runtime, tmp_path, monkeypatch):
-    # The reported bug: picking LAiM/Z-Image-GGUF fetched the GGUF and THEN a 6.29 GB hosted fp8
+    # The reported bug: picking unsloth/Z-Image-GGUF fetched the GGUF and THEN a 6.29 GB hosted fp8
     # checkpoint that became the denoiser, so the GGUF was never used.
     _stub_hosted_prequant(monkeypatch, cached = False)
     calls = _spy_dense_quant(monkeypatch)
@@ -6677,7 +6677,7 @@ def test_the_dense_builder_skips_the_prequant_only_for_a_real_bake(
             target,
             "fp8",
             None,
-            fam = detect_family("LAiM/Z-Image-GGUF"),
+            fam = detect_family("unsloth/Z-Image-GGUF"),
             lora_specs = lora_specs,
         )
 
@@ -6691,7 +6691,7 @@ def test_the_plan_does_not_force_a_dense_bake_for_disabled_adapters(fake_runtime
 
     backend = DiffusionBackend()
     _force_cuda_target(backend, monkeypatch)
-    fam = detect_family("LAiM/Z-Image-GGUF")
+    fam = detect_family("unsloth/Z-Image-GGUF")
     forced: list = []
     monkeypatch.setattr(
         dmod,
@@ -6717,7 +6717,7 @@ def test_the_plan_reads_pydantic_lora_specs_as_the_load_reads_tuples(fake_runtim
 
     backend = DiffusionBackend()
     _force_cuda_target(backend, monkeypatch)
-    fam = detect_family("LAiM/Z-Image-GGUF")
+    fam = detect_family("unsloth/Z-Image-GGUF")
     consulted: list = []
     monkeypatch.setattr(
         dmod,
@@ -6745,7 +6745,7 @@ def test_the_plan_reads_zero_weight_loras_exactly_as_the_load_does(fake_runtime,
 
     backend = DiffusionBackend()
     _force_cuda_target(backend, monkeypatch)
-    fam = detect_family("LAiM/Z-Image-GGUF")
+    fam = detect_family("unsloth/Z-Image-GGUF")
     consulted: list = []
     monkeypatch.setattr(
         dmod,
@@ -6772,7 +6772,7 @@ def test_dense_quant_prefetch_declines_with_the_load(fake_runtime, monkeypatch):
 
     backend = DiffusionBackend()
     _force_cuda_target(backend, monkeypatch)
-    fam = detect_family("LAiM/Z-Image-GGUF")
+    fam = detect_family("unsloth/Z-Image-GGUF")
     consulted: list = []
     monkeypatch.setattr(
         dmod,
@@ -6795,7 +6795,7 @@ def test_dense_quant_prefetch_declines_with_the_load(fake_runtime, monkeypatch):
 
 
 def test_auto_quant_declines_an_uncached_dense_base(fake_runtime, monkeypatch):
-    # The reported bug: picking LAiM/Qwen-Image-Edit-2511-GGUF Q6_K fetched the 16.85 GB GGUF
+    # The reported bug: picking unsloth/Qwen-Image-Edit-2511-GGUF Q6_K fetched the 16.85 GB GGUF
     # and THEN started a 57.72 GB pull of the base repo, 40.86 GB of which is the dense
     # transformer/ the fast path would denoise with instead of the GGUF the user picked. Same rule
     # as the hosted prequant: an auto quant never downloads a second transformer for a GGUF pick.
@@ -6803,7 +6803,7 @@ def test_auto_quant_declines_an_uncached_dense_base(fake_runtime, monkeypatch):
 
     backend = DiffusionBackend()
     _force_cuda_target(backend, monkeypatch)
-    fam = detect_family("LAiM/Qwen-Image-GGUF")
+    fam = detect_family("unsloth/Qwen-Image-GGUF")
     consulted: list = []
     monkeypatch.setattr(
         dmod,
@@ -6830,7 +6830,7 @@ def test_an_explicit_transformer_quant_still_buys_the_dense_base(fake_runtime, m
 
     backend = DiffusionBackend()
     _force_cuda_target(backend, monkeypatch)
-    fam = detect_family("LAiM/Qwen-Image-GGUF")
+    fam = detect_family("unsloth/Qwen-Image-GGUF")
     monkeypatch.setattr(
         dmod, "resolve_dense_quant_candidate", lambda **kw: types.SimpleNamespace(prequant = False)
     )
@@ -6877,8 +6877,8 @@ def test_the_load_declines_when_the_prefetch_skipped_the_dense_shards(
 def test_an_unstaged_transformer_still_takes_a_CACHED_prequant(fake_runtime, tmp_path, monkeypatch):
     # A cached pre-quant stages no transformer/ shards either, because the small quantised
     # checkpoint REPLACES them, not because a download was refused. Reading the empty stage as a
-    # decline dropped a fast path that costs nothing: LAiM/Z-Image-Turbo-GGUF at Q8_0 with
-    # LAiM/Z-Image-Turbo-FP8 already on disk loaded the GGUF instead of the fp8 checkpoint.
+    # decline dropped a fast path that costs nothing: unsloth/Z-Image-Turbo-GGUF at Q8_0 with
+    # unsloth/Z-Image-Turbo-FP8 already on disk loaded the GGUF instead of the fp8 checkpoint.
     _stub_hosted_prequant(monkeypatch, cached = True)
     _stub_dense_candidate(monkeypatch, prequant = True)
     calls = _spy_dense_quant(monkeypatch)
@@ -6978,7 +6978,7 @@ def test_the_plan_and_the_load_agree_on_a_cached_prequant(fake_runtime, tmp_path
     calls = _spy_dense_quant(monkeypatch)
     backend = DiffusionBackend()
     _force_cuda_target(backend, monkeypatch)
-    fam = detect_family("LAiM/Z-Image-Turbo-GGUF")
+    fam = detect_family("unsloth/Z-Image-Turbo-GGUF")
     (tmp_path / "m.gguf").write_bytes(b"x")
 
     # The plan stages no transformer/ shards ...
@@ -7011,7 +7011,7 @@ def test_dense_transformer_cached_asks_the_repo_the_fetch_will_use(
         dmod,
         "prefer_ungated_mirror",
         lambda base, *a, files = None: (
-            base if files and "vae/config.json" in files else "LAiM/FLUX.2-dev"
+            base if files and "vae/config.json" in files else "unsloth/FLUX.2-dev"
         ),
     )
 
@@ -7035,7 +7035,7 @@ def test_dense_transformer_cached_asks_the_repo_the_fetch_will_use(
         is False
     )
     assert asked[0][0] == "black-forest-labs/FLUX.2-dev"
-    assert asked[1][0] == "LAiM/FLUX.2-dev"
+    assert asked[1][0] == "unsloth/FLUX.2-dev"
 
 
 def test_dense_transformer_cached_follows_the_mirror_the_widened_fetch_picks(
@@ -7057,14 +7057,14 @@ def test_dense_transformer_cached_follows_the_mirror_the_widened_fetch_picks(
         dmod,
         "prefer_ungated_mirror",
         lambda base, *a, files = None: (
-            base if files and set(files) <= upstream_cache else "LAiM/FLUX.2-dev"
+            base if files and set(files) <= upstream_cache else "unsloth/FLUX.2-dev"
         ),
     )
     monkeypatch.setattr(
         dmod,
         "cache_holds_files",
         lambda repo_id, files: set(files)
-        <= (mirror_cache if repo_id == "LAiM/FLUX.2-dev" else upstream_cache),
+        <= (mirror_cache if repo_id == "unsloth/FLUX.2-dev" else upstream_cache),
     )
 
     assert (
@@ -7280,12 +7280,12 @@ def test_diffusion_status_response_carries_the_prequant_artifact():
             "value": "fp8",
             "source": "auto",
             "reason": "seeded",
-            "artifact": "prequant:LAiM/Z-Image-Turbo-FP8/Z-Image-Turbo-FP8.pt",
+            "artifact": "prequant:unsloth/Z-Image-Turbo-FP8/Z-Image-Turbo-FP8.pt",
         }
     }
     resp = DiffusionStatusResponse(loaded = True, resolved = rec)
     dumped = resp.model_dump()["resolved"]["transformer_quant"]
-    assert dumped["artifact"] == "prequant:LAiM/Z-Image-Turbo-FP8/Z-Image-Turbo-FP8.pt"
+    assert dumped["artifact"] == "prequant:unsloth/Z-Image-Turbo-FP8/Z-Image-Turbo-FP8.pt"
 
 
 def test_diffusion_status_response_carries_gguf_variant():
@@ -7889,12 +7889,12 @@ def test_the_dense_builder_reads_transformer_from_the_hub_id_not_the_staged_snap
             target,
             "fp8",
             None,
-            fam = detect_family("LAiM/Z-Image-GGUF"),
+            fam = detect_family("unsloth/Z-Image-GGUF"),
             base_local_dir = str(snapshot),
         )
     # A hub id, not the snapshot path: which hub id is incidental here, and with Z-Image mirrored
     # the load reads the mirror. Pinned so the ambient cache cannot decide it.
-    assert seen == ["LAiM/Z-Image-Turbo"]
+    assert seen == ["unsloth/Z-Image-Turbo"]
 
 
 def test_reset_step_cache_helper_is_best_effort():
@@ -7966,7 +7966,7 @@ def test_pipeline_load_uses_predownloaded_dir(fake_runtime, tmp_path):
     # With a prefetched snapshot, from_pretrained must get the local dir: its own hub sweep would re-download the root singles (24 GB per FLUX.1).
     backend = DiffusionBackend()
     backend.load_pipeline(
-        "LAiM/Qwen-Image-2512-bnb-4bit",
+        "unsloth/Qwen-Image-2512-bnb-4bit",
         model_kind = "pipeline",
         _base_local_dir = str(tmp_path),
     )
@@ -8012,7 +8012,7 @@ def test_unload_mid_render_releases_the_pipeline(fake_runtime, monkeypatch):
     pipe_ref = weakref.ref(pipe)
     backend._state = _LoadState(
         pipe = pipe,
-        family = detect_family("LAiM/Z-Image-GGUF"),
+        family = detect_family("unsloth/Z-Image-GGUF"),
         repo_id = "r",
         base_repo = "b",
         device = "cpu",
@@ -8093,7 +8093,7 @@ def test_replacing_load_mid_render_releases_the_pipeline(
     pipe_ref = weakref.ref(pipe)
     backend._state = _LoadState(
         pipe = pipe,
-        family = detect_family("LAiM/Z-Image-GGUF"),
+        family = detect_family("unsloth/Z-Image-GGUF"),
         repo_id = "r",
         base_repo = "b",
         device = "cpu",
@@ -8629,7 +8629,7 @@ def _fake_flux_hub(monkeypatch):
     _fake_hf_api(
         monkeypatch,
         {
-            "LAiM/FLUX.1-dev-GGUF": [_FakeSibling("flux1-dev-Q4_K_M.gguf", 7 * GB)],
+            "unsloth/FLUX.1-dev-GGUF": [_FakeSibling("flux1-dev-Q4_K_M.gguf", 7 * GB)],
             "black-forest-labs/FLUX.1-dev": _FLUX_BASE_SIBLINGS,
         },
     )
@@ -8642,7 +8642,7 @@ def _fake_flux_hub(monkeypatch):
 
 def _flux_download_plan(**kwargs):
     return DiffusionBackend().download_plan(
-        "LAiM/FLUX.1-dev-GGUF", gguf_filename = "flux1-dev-Q4_K_M.gguf", **kwargs
+        "unsloth/FLUX.1-dev-GGUF", gguf_filename = "flux1-dev-Q4_K_M.gguf", **kwargs
     )
 
 
@@ -8656,8 +8656,8 @@ def test_download_plan_scopes_the_base_repo_files(monkeypatch):
     # The base entry names the MIRROR: staged before the loader runs, so a gated id here 401s an
     # anonymous user at staging and the swap downstream is never reached.
     assert [e["repo_id"] for e in plan["entries"]] == [
-        "LAiM/FLUX.1-dev-GGUF",
-        "LAiM/FLUX.1-dev",
+        "unsloth/FLUX.1-dev-GGUF",
+        "unsloth/FLUX.1-dev",
     ]
     checkpoint, base = plan["entries"]
     assert checkpoint["files"] == ["flux1-dev-Q4_K_M.gguf"]
@@ -8686,14 +8686,14 @@ def test_download_plan_omits_a_cached_gguf_but_keeps_missing_companions(monkeypa
         "_hub_file_is_cached",
         staticmethod(
             lambda repo_id, filename, revision = None, expected_size = None, **kwargs: repo_id
-            == "LAiM/FLUX.1-dev-GGUF"
+            == "unsloth/FLUX.1-dev-GGUF"
             and filename == "flux1-dev-Q4_K_M.gguf"
         ),
     )
 
     plan = _flux_download_plan()
 
-    assert [entry["repo_id"] for entry in plan["entries"]] == ["LAiM/FLUX.1-dev"]
+    assert [entry["repo_id"] for entry in plan["entries"]] == ["unsloth/FLUX.1-dev"]
     assert "text_encoder/model.safetensors" in plan["entries"][0]["files"]
     assert plan["total_bytes"] == plan["entries"][0]["bytes"]
     # Cache state changes the pending download, never the selector's declared footprint.
@@ -8709,21 +8709,21 @@ def test_download_plan_stages_but_does_not_count_a_file_an_older_snapshot_holds(
 
     def reusable(repo_id, names, revision, declared_sizes, hf_token):
         asked.append((repo_id, tuple(names)))
-        return {"flux1-dev-Q4_K_M.gguf"} if repo_id == "LAiM/FLUX.1-dev-GGUF" else set()
+        return {"flux1-dev-Q4_K_M.gguf"} if repo_id == "unsloth/FLUX.1-dev-GGUF" else set()
 
     monkeypatch.setattr(DiffusionBackend, "_reusable_from_older_snapshot", staticmethod(reusable))
 
     plan = _flux_download_plan()
 
     checkpoint, base = plan["entries"]
-    assert checkpoint["repo_id"] == "LAiM/FLUX.1-dev-GGUF"
+    assert checkpoint["repo_id"] == "unsloth/FLUX.1-dev-GGUF"
     assert checkpoint["files"] == ["flux1-dev-Q4_K_M.gguf"]
     assert checkpoint["bytes"] == 0
     assert checkpoint["checkpoint"] is True
     assert base["bytes"] > 0
     assert plan["total_bytes"] == base["bytes"]
     assert plan["checkpoint_bytes"] == 7 * GB
-    assert ("LAiM/FLUX.1-dev-GGUF", ("flux1-dev-Q4_K_M.gguf",)) in asked
+    assert ("unsloth/FLUX.1-dev-GGUF", ("flux1-dev-Q4_K_M.gguf",)) in asked
 
 
 def test_reusable_from_older_snapshot_reads_the_live_cache_without_hashing(monkeypatch, tmp_path):
@@ -8750,7 +8750,7 @@ def test_reusable_from_older_snapshot_reads_the_live_cache_without_hashing(monke
     monkeypatch.setattr(snapshot_reuse, "file_digest", lambda *a, **k: pytest.fail("plan hashed"))
 
     found = DiffusionBackend._reusable_from_older_snapshot(
-        "LAiM/Qwen-Image-2.1-FP8",
+        "unsloth/Qwen-Image-2.1-FP8",
         ["text_encoder.safetensors", "vae/vae.safetensors"],
         new,
         {"text_encoder.safetensors": len(same), "vae/vae.safetensors": len(changed)},
@@ -8761,7 +8761,7 @@ def test_reusable_from_older_snapshot_reads_the_live_cache_without_hashing(monke
     assert not (snap.parent / new).exists()
     assert (
         DiffusionBackend._reusable_from_older_snapshot(
-            "LAiM/Qwen-Image-2.1-FP8", ["text_encoder.safetensors"], None, {}, None
+            "unsloth/Qwen-Image-2.1-FP8", ["text_encoder.safetensors"], None, {}, None
         )
         == set()
     )
@@ -8793,7 +8793,7 @@ def test_reusable_from_older_snapshot_targets_the_main_ref_when_unpinned(monkeyp
 
     def reusable():
         return DiffusionBackend._reusable_from_older_snapshot(
-            "LAiM/Qwen-Image-2.1-FP8",
+            "unsloth/Qwen-Image-2.1-FP8",
             ["te.safetensors"],
             None,
             {"te.safetensors": len(encoder)},
@@ -8819,7 +8819,7 @@ def test_reusable_from_older_snapshot_keeps_the_anonymous_token_sentinel(monkeyp
 
     for token in (False, "", None, "hf_x"):
         DiffusionBackend._reusable_from_older_snapshot(
-            "LAiM/Qwen-Image-2.1-FP8", ["te.safetensors"], "2" * 40, {"te.safetensors": 1}, token
+            "unsloth/Qwen-Image-2.1-FP8", ["te.safetensors"], "2" * 40, {"te.safetensors": 1}, token
         )
 
     assert tokens == [False, None, None, "hf_x"]
@@ -8846,7 +8846,7 @@ def test_download_plan_sizes_the_checkpoint_when_the_base_is_the_same_repo(monke
     # A combined repo (explicit base_repo, or a self-referential base_model tag) keys both Hub
     # lookups on one id. Overwriting instead of merging left the checkpoint at 0 bytes and put the
     # companion total in checkpoint_bytes, and listing it twice double counted the footprint.
-    combined = "LAiM/Combined-Image-GGUF"
+    combined = "unsloth/Combined-Image-GGUF"
     _fake_hf_api(
         monkeypatch,
         {
@@ -8998,10 +8998,10 @@ def test_download_plan_probes_the_cache_at_the_revision_it_sized(monkeypatch):
     _fake_hf_api(
         monkeypatch,
         {
-            "LAiM/FLUX.1-dev-GGUF": [_FakeSibling("flux1-dev-Q4_K_M.gguf", 7 * GB)],
+            "unsloth/FLUX.1-dev-GGUF": [_FakeSibling("flux1-dev-Q4_K_M.gguf", 7 * GB)],
             "black-forest-labs/FLUX.1-dev": _FLUX_BASE_SIBLINGS,
         },
-        shas = {"LAiM/FLUX.1-dev-GGUF": "abc123", "black-forest-labs/FLUX.1-dev": "def456"},
+        shas = {"unsloth/FLUX.1-dev-GGUF": "abc123", "black-forest-labs/FLUX.1-dev": "def456"},
     )
     monkeypatch.setattr(
         "core.inference.diffusion._resolve_base_repo",
@@ -9022,7 +9022,7 @@ def test_download_plan_probes_the_cache_at_the_revision_it_sized(monkeypatch):
     )
 
     DiffusionBackend().download_plan(
-        "LAiM/FLUX.1-dev-GGUF", gguf_filename = "flux1-dev-Q4_K_M.gguf"
+        "unsloth/FLUX.1-dev-GGUF", gguf_filename = "flux1-dev-Q4_K_M.gguf"
     )
 
     assert set(seen) == {"abc123", "def456"}
@@ -9037,7 +9037,7 @@ def test_download_plan_decides_the_widening_from_the_base_listing(monkeypatch):
     _fake_hf_api(
         monkeypatch,
         {
-            "LAiM/FLUX.1-dev-GGUF": [_FakeSibling("flux1-dev-Q4_K_M.gguf", 7 * GB)],
+            "unsloth/FLUX.1-dev-GGUF": [_FakeSibling("flux1-dev-Q4_K_M.gguf", 7 * GB)],
             "black-forest-labs/FLUX.1-dev": _FLUX_BASE_SIBLINGS,
         },
     )
@@ -9077,9 +9077,9 @@ def test_download_plan_decides_the_widening_from_the_base_listing(monkeypatch):
 
 def test_download_plan_pipeline_kind_is_one_entry(monkeypatch):
     # A pipeline load has no separate checkpoint repo: the repo IS the pipeline.
-    _fake_hf_api(monkeypatch, {"LAiM/some-pipeline": _FLUX_BASE_SIBLINGS})
+    _fake_hf_api(monkeypatch, {"unsloth/some-pipeline": _FLUX_BASE_SIBLINGS})
 
-    plan = DiffusionBackend().download_plan("LAiM/some-pipeline", model_kind = "pipeline")
+    plan = DiffusionBackend().download_plan("unsloth/some-pipeline", model_kind = "pipeline")
 
     assert len(plan["entries"]) == 1
     files = plan["entries"][0]["files"]
@@ -9091,11 +9091,11 @@ def test_download_plan_pipeline_kind_is_one_entry(monkeypatch):
 
 def test_download_plan_flags_a_mirrored_pipeline_as_the_checkpoint(monkeypatch):
     # The regression this flag exists for. A gated pipeline is STAGED from its ungated mirror, so
-    # the entry's repo id is LAiM/FLUX.1-dev while the pick is black-forest-labs/FLUX.1-dev.
+    # the entry's repo id is unsloth/FLUX.1-dev while the pick is black-forest-labs/FLUX.1-dev.
     # The page used to derive the label by comparing those two ids, which made every file of the
     # selected model read as "Required assets". Only the planner knows about the swap.
     gated = "black-forest-labs/FLUX.1-dev"
-    mirror = "LAiM/FLUX.1-dev"
+    mirror = "unsloth/FLUX.1-dev"
     _fake_hf_api(monkeypatch, {gated: _FLUX_BASE_SIBLINGS, mirror: _FLUX_BASE_SIBLINGS})
     _no_cache(monkeypatch)
 
@@ -9128,9 +9128,9 @@ def test_download_plan_stages_the_precast_encoder_instead_of_the_dense_one(monke
     _fake_hf_api(
         monkeypatch,
         {
-            "LAiM/FLUX.1-dev-GGUF": [_FakeSibling("flux1-dev-Q4_K_M.gguf", 7 * GB)],
+            "unsloth/FLUX.1-dev-GGUF": [_FakeSibling("flux1-dev-Q4_K_M.gguf", 7 * GB)],
             "black-forest-labs/FLUX.1-dev": _FLUX_BASE_SIBLINGS,
-            "LAiM/FLUX.1-schnell-FP8": [
+            "unsloth/FLUX.1-schnell-FP8": [
                 _FakeSibling("text_encoder_2-fp8.pt", 1 * GB),
                 _FakeSibling("README.md", 100),
             ],
@@ -9148,7 +9148,7 @@ def test_download_plan_stages_the_precast_encoder_instead_of_the_dense_one(monke
             {
                 "text_encoder_2": types.SimpleNamespace(
                     kind = "repo",
-                    location = "LAiM/FLUX.1-schnell-FP8",
+                    location = "unsloth/FLUX.1-schnell-FP8",
                     filename = "text_encoder_2-fp8.pt",
                 )
             }
@@ -9160,14 +9160,14 @@ def test_download_plan_stages_the_precast_encoder_instead_of_the_dense_one(monke
     _no_cache(monkeypatch)
 
     plan = DiffusionBackend().download_plan(
-        "LAiM/FLUX.1-dev-GGUF",
+        "unsloth/FLUX.1-dev-GGUF",
         gguf_filename = "flux1-dev-Q4_K_M.gguf",
         text_encoder_quant = "fp8",
     )
     by_repo = {e["repo_id"]: e for e in plan["entries"]}
-    assert "LAiM/FLUX.1-schnell-FP8" in by_repo
-    assert by_repo["LAiM/FLUX.1-schnell-FP8"]["files"] == ["text_encoder_2-fp8.pt"]
-    base = by_repo["LAiM/FLUX.1-dev"]
+    assert "unsloth/FLUX.1-schnell-FP8" in by_repo
+    assert by_repo["unsloth/FLUX.1-schnell-FP8"]["files"] == ["text_encoder_2-fp8.pt"]
+    base = by_repo["unsloth/FLUX.1-dev"]
     # text_encoder_2 dense weights are gone; text_encoder stays (no hosted artifact), as do the non-weight files the pre-cast loader meta-inits from.
     assert not any(
         f.startswith("text_encoder_2/") and f.endswith(".safetensors") for f in base["files"]
@@ -9196,19 +9196,19 @@ def test_download_plan_keeps_the_dense_encoder_when_the_precast_repo_is_unavaila
         "core.inference.diffusion_te_prequant.te_prequant_sources",
         lambda fam, *, te_quant_mode, target: {
             "text_encoder": types.SimpleNamespace(
-                kind = "repo", location = "LAiM/does-not-exist", filename = "te-fp8.pt"
+                kind = "repo", location = "unsloth/does-not-exist", filename = "te-fp8.pt"
             )
         },
     )
     _no_cache(monkeypatch)
     plan = DiffusionBackend().download_plan(
-        "LAiM/FLUX.1-dev-GGUF",
+        "unsloth/FLUX.1-dev-GGUF",
         gguf_filename = "flux1-dev-Q4_K_M.gguf",
         text_encoder_quant = "fp8",
     )
-    base = next(e for e in plan["entries"] if e["repo_id"] == "LAiM/FLUX.1-dev")
+    base = next(e for e in plan["entries"] if e["repo_id"] == "unsloth/FLUX.1-dev")
     assert "text_encoder/model.safetensors" in base["files"]
-    assert not any(e["repo_id"] == "LAiM/does-not-exist" for e in plan["entries"])
+    assert not any(e["repo_id"] == "unsloth/does-not-exist" for e in plan["entries"])
 
 
 _ZIMAGE_BASE_SIBLINGS = [
@@ -9247,7 +9247,7 @@ def test_qwen_edit_q6_auto_stays_gguf_but_explicit_quant_requests_dense_transfor
     from core.inference import diffusion as dmod
     from core.inference import diffusion_memory as dmem
 
-    checkpoint_repo = "LAiM/Qwen-Image-Edit-2511-GGUF"
+    checkpoint_repo = "unsloth/Qwen-Image-Edit-2511-GGUF"
     base_repo = "Qwen/Qwen-Image-Edit-2511"
     _fake_hf_api(
         monkeypatch,
@@ -9299,7 +9299,7 @@ def test_download_plan_stages_no_second_denoiser_for_an_uncached_prequant(monkey
     _fake_hf_api(
         monkeypatch,
         {
-            "LAiM/Z-Image-GGUF": [_FakeSibling("Z-Image-Turbo-Q4_K_M.gguf", 4 * GB)],
+            "unsloth/Z-Image-GGUF": [_FakeSibling("Z-Image-Turbo-Q4_K_M.gguf", 4 * GB)],
             "Tongyi-MAI/Z-Image-Turbo": _ZIMAGE_BASE_SIBLINGS,
         },
     )
@@ -9309,14 +9309,14 @@ def test_download_plan_stages_no_second_denoiser_for_an_uncached_prequant(monkey
     _stub_hosted_prequant(monkeypatch, cached = False)
 
     plan = DiffusionBackend().download_plan(
-        "LAiM/Z-Image-GGUF", gguf_filename = "Z-Image-Turbo-Q4_K_M.gguf"
+        "unsloth/Z-Image-GGUF", gguf_filename = "Z-Image-Turbo-Q4_K_M.gguf"
     )
 
     # The base entry names the MIRROR: it is staged before the loader runs, so it must be the repo
     # the manager will actually pull from.
     assert [e["repo_id"] for e in plan["entries"]] == [
-        "LAiM/Z-Image-GGUF",
-        "LAiM/Z-Image-Turbo",
+        "unsloth/Z-Image-GGUF",
+        "unsloth/Z-Image-Turbo",
     ]
     checkpoint, base = plan["entries"]
     assert checkpoint["files"] == ["Z-Image-Turbo-Q4_K_M.gguf"]
@@ -9335,7 +9335,7 @@ def test_download_plan_counts_the_hosted_prequant_in_the_required_footprint(monk
     _stub_hosted_prequant(monkeypatch, cached = False)
 
     plan = DiffusionBackend().download_plan(
-        "LAiM/Z-Image-GGUF",
+        "unsloth/Z-Image-GGUF",
         gguf_filename = "Z-Image-Turbo-Q4_K_M.gguf",
         transformer_quant = "fp8",
     )
@@ -9343,16 +9343,16 @@ def test_download_plan_counts_the_hosted_prequant_in_the_required_footprint(monk
     # Counted AND staged: the load fetches this checkpoint inline otherwise, under the load lock
     # and past the manager's progress, cancel and disk preflight.
     staged = {(e["repo_id"], f) for e in plan["entries"] for f in e["files"]}
-    assert ("LAiM/Z-Image-Turbo-FP8", "Z-Image-Turbo-FP8.pt") in staged
+    assert ("unsloth/Z-Image-Turbo-FP8", "Z-Image-Turbo-FP8.pt") in staged
     assert plan["required_bytes"] == plan["total_bytes"]
     # Measured against the same pick without the quant, so the base's small configs do not have
     # to be enumerated here: the delta is exactly the prequant checkpoint.
     baseline = DiffusionBackend().download_plan(
-        "LAiM/Z-Image-GGUF", gguf_filename = "Z-Image-Turbo-Q4_K_M.gguf"
+        "unsloth/Z-Image-GGUF", gguf_filename = "Z-Image-Turbo-Q4_K_M.gguf"
     )
     assert plan["required_bytes"] - baseline["required_bytes"] == 6 * GB
     # A companion, never the selected model.
-    prequant = next(e for e in plan["entries"] if e["repo_id"] == "LAiM/Z-Image-Turbo-FP8")
+    prequant = next(e for e in plan["entries"] if e["repo_id"] == "unsloth/Z-Image-Turbo-FP8")
     assert prequant["checkpoint"] is False
 
 
@@ -9361,14 +9361,14 @@ def test_download_plan_counts_a_cached_lower_auto_prequant(monkeypatch):
 
     source = types.SimpleNamespace(
         kind = "repo",
-        location = "LAiM/Qwen-Image-FP8",
+        location = "unsloth/Qwen-Image-FP8",
         filename = "Qwen-Image-INT8.pt",
         fallback_filenames = ("transformer_int8.pt",),
     )
     _fake_hf_api(
         monkeypatch,
         {
-            "LAiM/Qwen-Image-GGUF": [_FakeSibling("Qwen-Image-Q4_K_M.gguf", 4 * GB)],
+            "unsloth/Qwen-Image-GGUF": [_FakeSibling("Qwen-Image-Q4_K_M.gguf", 4 * GB)],
             "Qwen/Qwen-Image": _ZIMAGE_BASE_SIBLINGS,
             source.location: [_FakeSibling(source.filename, 6 * GB)],
         },
@@ -9396,12 +9396,12 @@ def test_download_plan_counts_a_cached_lower_auto_prequant(monkeypatch):
 
     def plans():
         plan = DiffusionBackend().download_plan(
-            "LAiM/Qwen-Image-GGUF",
+            "unsloth/Qwen-Image-GGUF",
             gguf_filename = "Qwen-Image-Q4_K_M.gguf",
             text_encoder_quant = "off",
         )
         baseline = DiffusionBackend().download_plan(
-            "LAiM/Qwen-Image-GGUF",
+            "unsloth/Qwen-Image-GGUF",
             gguf_filename = "Qwen-Image-Q4_K_M.gguf",
             text_encoder_quant = "off",
             speed_mode = "off",
@@ -9434,7 +9434,7 @@ def test_download_plan_omits_the_prequant_under_a_definite_offload_policy(monkey
         {"cpu_offload": True},
     ):
         plan = DiffusionBackend().download_plan(
-            "LAiM/Z-Image-GGUF",
+            "unsloth/Z-Image-GGUF",
             gguf_filename = "Z-Image-Turbo-Q4_K_M.gguf",
             transformer_quant = "fp8",
             **kwargs,
@@ -9444,7 +9444,7 @@ def test_download_plan_omits_the_prequant_under_a_definite_offload_policy(monkey
 
     # A resident-capable pick still pays for it, so the gate cannot just zero everything.
     resident = DiffusionBackend().download_plan(
-        "LAiM/Z-Image-GGUF",
+        "unsloth/Z-Image-GGUF",
         gguf_filename = "Z-Image-Turbo-Q4_K_M.gguf",
         transformer_quant = "fp8",
     )
@@ -9458,13 +9458,13 @@ def test_download_plan_omits_the_prequant_for_an_auto_pick_at_speed_off(monkeypa
     _stub_hosted_prequant(monkeypatch, cached = True)
 
     auto = DiffusionBackend().download_plan(
-        "LAiM/Z-Image-GGUF", gguf_filename = "Z-Image-Turbo-Q4_K_M.gguf", speed_mode = "off"
+        "unsloth/Z-Image-GGUF", gguf_filename = "Z-Image-Turbo-Q4_K_M.gguf", speed_mode = "off"
     )
     assert not any(f.endswith("-FP8.pt") for e in auto["entries"] for f in e["files"])
 
     # An EXPLICIT quant is not forced off, so it still loads the prequant and still pays for it.
     explicit = DiffusionBackend().download_plan(
-        "LAiM/Z-Image-GGUF",
+        "unsloth/Z-Image-GGUF",
         gguf_filename = "Z-Image-Turbo-Q4_K_M.gguf",
         speed_mode = "off",
         transformer_quant = "fp8",
@@ -9479,11 +9479,11 @@ def test_download_plan_omits_a_prequant_an_auto_pick_would_decline(monkeypatch):
     _stub_hosted_prequant(monkeypatch, cached = False)
     monkeypatch.setattr(
         "core.inference.diffusion._uncached_prequant_repo",
-        lambda *a, **k: "LAiM/Z-Image-Turbo-FP8",
+        lambda *a, **k: "unsloth/Z-Image-Turbo-FP8",
     )
 
     plan = DiffusionBackend().download_plan(
-        "LAiM/Z-Image-GGUF", gguf_filename = "Z-Image-Turbo-Q4_K_M.gguf"
+        "unsloth/Z-Image-GGUF", gguf_filename = "Z-Image-Turbo-Q4_K_M.gguf"
     )
 
     assert plan["required_bytes"] == plan["total_bytes"]
@@ -9491,10 +9491,10 @@ def test_download_plan_omits_a_prequant_an_auto_pick_would_decline(monkeypatch):
 
 def test_download_plan_for_a_pipeline_kind_ignores_the_prequant_cache(monkeypatch):
     # Only a GGUF pick is restricted: a full pipeline's transformer IS the repo's.
-    _fake_hf_api(monkeypatch, {"LAiM/some-pipeline": _ZIMAGE_BASE_SIBLINGS})
+    _fake_hf_api(monkeypatch, {"unsloth/some-pipeline": _ZIMAGE_BASE_SIBLINGS})
     _stub_hosted_prequant(monkeypatch, cached = False)
 
-    plan = DiffusionBackend().download_plan("LAiM/some-pipeline", model_kind = "pipeline")
+    plan = DiffusionBackend().download_plan("unsloth/some-pipeline", model_kind = "pipeline")
 
     assert any(f.startswith("transformer/") for f in plan["entries"][0]["files"])
 
@@ -9504,7 +9504,7 @@ def test_download_plan_restages_a_base_split_across_both_cache_roots(monkeypatch
     # new one. _prefetch_files refuses to name a snapshot in that state and the assembly is pinned
     # to hub_cache_dir(), so the old-root half is invisible to from_pretrained. Staging nothing
     # there means the load re-pulls it inline, past the plan's progress, cancel and disk preflight.
-    _fake_hf_api(monkeypatch, {"LAiM/Z-Image-Turbo": _ZIMAGE_BASE_SIBLINGS})
+    _fake_hf_api(monkeypatch, {"unsloth/Z-Image-Turbo": _ZIMAGE_BASE_SIBLINGS})
     old_root_only = {"model_index.json"}
 
     def probe(
@@ -9521,7 +9521,7 @@ def test_download_plan_restages_a_base_split_across_both_cache_roots(monkeypatch
 
     monkeypatch.setattr(DiffusionBackend, "_hub_file_is_cached", staticmethod(probe))
 
-    plan = DiffusionBackend().download_plan("LAiM/Z-Image-Turbo", model_kind = "pipeline")
+    plan = DiffusionBackend().download_plan("unsloth/Z-Image-Turbo", model_kind = "pipeline")
 
     entry = plan["entries"][0]
     assert set(entry["files"]) == set(_ZIMAGE_BASE_SIBLINGS_BY_NAME)
@@ -9532,7 +9532,7 @@ def test_download_plan_restages_the_old_root_half_when_other_files_are_missing_t
     # The mixed case that matters most: some files sit in the old root, others are absent entirely.
     # Those absent ones land in the LIVE root when staged, so the repo ends up straddling both even
     # though nothing looked split at plan time. The old-root half has to come along.
-    _fake_hf_api(monkeypatch, {"LAiM/Z-Image-Turbo": _ZIMAGE_BASE_SIBLINGS})
+    _fake_hf_api(monkeypatch, {"unsloth/Z-Image-Turbo": _ZIMAGE_BASE_SIBLINGS})
     old_root_only = {"model_index.json"}
     absent = {"vae/diffusion_pytorch_model.safetensors"}
 
@@ -9551,7 +9551,7 @@ def test_download_plan_restages_the_old_root_half_when_other_files_are_missing_t
 
     monkeypatch.setattr(DiffusionBackend, "_hub_file_is_cached", staticmethod(probe))
 
-    plan = DiffusionBackend().download_plan("LAiM/Z-Image-Turbo", model_kind = "pipeline")
+    plan = DiffusionBackend().download_plan("unsloth/Z-Image-Turbo", model_kind = "pipeline")
 
     entry = plan["entries"][0]
     assert set(entry["files"]) == set(_ZIMAGE_BASE_SIBLINGS_BY_NAME)
@@ -9563,7 +9563,7 @@ def test_download_plan_stages_a_file_a_stale_live_copy_shadows(monkeypatch):
     # holds the revision the plan sized. reuse_other_cache_root only switches roots when the live
     # lookup finds nothing, so the stale copy wins and the load reads it, or refetches inline.
     # Treating that as cached would report an empty plan for a base that is not actually usable.
-    _fake_hf_api(monkeypatch, {"LAiM/Z-Image-Turbo": _ZIMAGE_BASE_SIBLINGS})
+    _fake_hf_api(monkeypatch, {"unsloth/Z-Image-Turbo": _ZIMAGE_BASE_SIBLINGS})
     shadowed = {"model_index.json"}
 
     def probe(
@@ -9582,7 +9582,7 @@ def test_download_plan_stages_a_file_a_stale_live_copy_shadows(monkeypatch):
 
     monkeypatch.setattr(DiffusionBackend, "_hub_file_is_cached", staticmethod(probe))
 
-    plan = DiffusionBackend().download_plan("LAiM/Z-Image-Turbo", model_kind = "pipeline")
+    plan = DiffusionBackend().download_plan("unsloth/Z-Image-Turbo", model_kind = "pipeline")
 
     entry = plan["entries"][0]
     assert set(entry["files"]) == set(_ZIMAGE_BASE_SIBLINGS_BY_NAME)
@@ -9592,7 +9592,7 @@ def test_download_plan_stages_a_file_a_stale_live_copy_shadows(monkeypatch):
 def test_download_plan_stages_nothing_for_a_base_wholly_in_the_other_root(monkeypatch):
     # The case reuse_other_cache_root exists for: one root holds the WHOLE base, so _prefetch_files
     # hands back that snapshot and the load reads it off disk. Nothing to restage.
-    _fake_hf_api(monkeypatch, {"LAiM/Z-Image-Turbo": _ZIMAGE_BASE_SIBLINGS})
+    _fake_hf_api(monkeypatch, {"unsloth/Z-Image-Turbo": _ZIMAGE_BASE_SIBLINGS})
 
     def probe(
         repo_id,
@@ -9606,7 +9606,7 @@ def test_download_plan_stages_nothing_for_a_base_wholly_in_the_other_root(monkey
 
     monkeypatch.setattr(DiffusionBackend, "_hub_file_is_cached", staticmethod(probe))
 
-    plan = DiffusionBackend().download_plan("LAiM/Z-Image-Turbo", model_kind = "pipeline")
+    plan = DiffusionBackend().download_plan("unsloth/Z-Image-Turbo", model_kind = "pipeline")
 
     assert plan["entries"] == [], "a base living entirely in one root is already loadable"
 
@@ -9636,7 +9636,7 @@ def test_download_plan_still_plans_an_unrecognised_gguf_given_an_explicit_base(m
             "someone/mixed-gguf-collection": [
                 _FakeSibling("totally-unknown-thing-Q4_K_M.gguf", 4_000)
             ],
-            "LAiM/Z-Image-Turbo": _ZIMAGE_BASE_SIBLINGS,
+            "unsloth/Z-Image-Turbo": _ZIMAGE_BASE_SIBLINGS,
         },
     )
     _no_cache(monkeypatch)
@@ -9645,7 +9645,7 @@ def test_download_plan_still_plans_an_unrecognised_gguf_given_an_explicit_base(m
         "someone/mixed-gguf-collection",
         gguf_filename = "totally-unknown-thing-Q4_K_M.gguf",
         model_kind = "gguf",
-        base_repo = "LAiM/Z-Image-Turbo",
+        base_repo = "unsloth/Z-Image-Turbo",
     )
 
     assert plan["entries"], "an explicit base still has a companion set to stage"
@@ -10466,7 +10466,7 @@ def test_auto_retries_a_lower_scheme_that_has_a_prequant(monkeypatch):
     monkeypatch.setattr(
         "core.inference.diffusion.usable_prequant_source",
         lambda fam, scheme, path_override = None, base_repo = None: (
-            types.SimpleNamespace(kind = "repo", location = f"LAiM/{scheme}")
+            types.SimpleNamespace(kind = "repo", location = f"unsloth/{scheme}")
             if scheme in have
             else None
         ),
@@ -10854,7 +10854,7 @@ def test_download_plan_stages_only_what_the_cache_is_missing(monkeypatch):
 
     plan = _flux_download_plan()
 
-    assert [e["repo_id"] for e in plan["entries"]] == ["LAiM/FLUX.1-dev-GGUF"]
+    assert [e["repo_id"] for e in plan["entries"]] == ["unsloth/FLUX.1-dev-GGUF"]
     assert plan["entries"][0]["files"] == ["flux1-dev-Q4_K_M.gguf"]
     # The cached base is gone from the total too, or the progress bar waits on bytes nobody fetches.
     assert plan["total_bytes"] == 7 * GB
@@ -10910,11 +10910,11 @@ def test_files_already_cached_needs_a_revision_to_drop_anything(monkeypatch, tmp
     panel."""
     live, _other = _two_cache_roots(monkeypatch, tmp_path)
     sha = "a" * 40
-    _seed_cache_file(live, "LAiM/FLUX.1-dev-GGUF", "flux1-dev-Q4_K_M.gguf", sha)
+    _seed_cache_file(live, "unsloth/FLUX.1-dev-GGUF", "flux1-dev-Q4_K_M.gguf", sha)
 
     probe = DiffusionBackend._files_already_cached
-    assert probe("LAiM/FLUX.1-dev-GGUF", ["flux1-dev-Q4_K_M.gguf"]) == set()
-    assert probe("LAiM/FLUX.1-dev-GGUF", ["flux1-dev-Q4_K_M.gguf"], sha) == {
+    assert probe("unsloth/FLUX.1-dev-GGUF", ["flux1-dev-Q4_K_M.gguf"]) == set()
+    assert probe("unsloth/FLUX.1-dev-GGUF", ["flux1-dev-Q4_K_M.gguf"], sha) == {
         "flux1-dev-Q4_K_M.gguf"
     }
 
@@ -10923,11 +10923,11 @@ def test_files_already_cached_ignores_a_superseded_revision(monkeypatch, tmp_pat
     """The blob is on disk under the old commit and refs/main still names it, but the plan asked
     about the commit the Hub just reported, so the file stays staged."""
     live, _other = _two_cache_roots(monkeypatch, tmp_path)
-    _seed_cache_file(live, "LAiM/FLUX.1-dev-GGUF", "flux1-dev-Q4_K_M.gguf", "a" * 40)
+    _seed_cache_file(live, "unsloth/FLUX.1-dev-GGUF", "flux1-dev-Q4_K_M.gguf", "a" * 40)
 
     assert (
         DiffusionBackend._files_already_cached(
-            "LAiM/FLUX.1-dev-GGUF", ["flux1-dev-Q4_K_M.gguf"], "b" * 40
+            "unsloth/FLUX.1-dev-GGUF", ["flux1-dev-Q4_K_M.gguf"], "b" * 40
         )
         == set()
     )
@@ -10993,7 +10993,7 @@ def test_download_plan_stages_a_repo_split_across_two_cache_roots(monkeypatch, t
     _fake_hf_api_with_shas(
         monkeypatch,
         {
-            "LAiM/FLUX.1-dev-GGUF": ([_FakeSibling("flux1-dev-Q4_K_M.gguf", 7 * GB)], "8" * 40),
+            "unsloth/FLUX.1-dev-GGUF": ([_FakeSibling("flux1-dev-Q4_K_M.gguf", 7 * GB)], "8" * 40),
             base: (_FLUX_BASE_SIBLINGS, base_sha),
         },
     )
@@ -11029,7 +11029,7 @@ def test_download_plan_drops_a_repo_the_fallback_root_holds_whole(monkeypatch, t
     _fake_hf_api_with_shas(
         monkeypatch,
         {
-            "LAiM/FLUX.1-dev-GGUF": ([_FakeSibling("flux1-dev-Q4_K_M.gguf", 7 * GB)], gguf_sha),
+            "unsloth/FLUX.1-dev-GGUF": ([_FakeSibling("flux1-dev-Q4_K_M.gguf", 7 * GB)], gguf_sha),
             base: (_FLUX_BASE_SIBLINGS, base_sha),
         },
     )
@@ -11041,7 +11041,7 @@ def test_download_plan_drops_a_repo_the_fallback_root_holds_whole(monkeypatch, t
             _seed_cache_file(other, base, name, base_sha, size = size)
     _seed_cache_file(
         other,
-        "LAiM/FLUX.1-dev-GGUF",
+        "unsloth/FLUX.1-dev-GGUF",
         "flux1-dev-Q4_K_M.gguf",
         gguf_sha,
         size = 7 * GB,
@@ -11063,7 +11063,7 @@ def test_files_already_cached_survives_an_unreadable_root(monkeypatch, tmp_path)
     root's hit, nor abort the files after it."""
     live, other = _two_cache_roots(monkeypatch, tmp_path)
     sha = "d" * 40
-    _seed_cache_file(other, "LAiM/FLUX.1-dev-GGUF", "flux1-dev-Q4_K_M.gguf", sha)
+    _seed_cache_file(other, "unsloth/FLUX.1-dev-GGUF", "flux1-dev-Q4_K_M.gguf", sha)
     import huggingface_hub
 
     real = huggingface_hub.try_to_load_from_cache
@@ -11081,7 +11081,7 @@ def test_files_already_cached_survives_an_unreadable_root(monkeypatch, tmp_path)
     monkeypatch.setattr(huggingface_hub, "try_to_load_from_cache", _boom)
 
     assert DiffusionBackend._files_already_cached(
-        "LAiM/FLUX.1-dev-GGUF", ["flux1-dev-Q4_K_M.gguf"], sha
+        "unsloth/FLUX.1-dev-GGUF", ["flux1-dev-Q4_K_M.gguf"], sha
     ) == {"flux1-dev-Q4_K_M.gguf"}
 
 
@@ -11108,8 +11108,8 @@ def test_download_plan_stages_a_half_cached_repo_whole(monkeypatch):
 
     by_repo = {e["repo_id"]: e for e in plan["entries"]}
     # Nothing is cached, so prefer_ungated_mirror swaps the gated vendor id for the mirror.
-    assert set(by_repo) == {"LAiM/FLUX.1-dev-GGUF", "LAiM/FLUX.1-dev"}
-    base = by_repo["LAiM/FLUX.1-dev"]
+    assert set(by_repo) == {"unsloth/FLUX.1-dev-GGUF", "unsloth/FLUX.1-dev"}
+    base = by_repo["unsloth/FLUX.1-dev"]
     # The whole scoped list, not just the missing VAE: the cached file is still staged.
     assert "vae/diffusion_pytorch_model.safetensors" in base["files"]
     assert "model_index.json" in base["files"]
@@ -11131,7 +11131,7 @@ def test_download_plan_files_do_not_shrink_as_a_repo_warms(monkeypatch):
             _fake_hf_api(
                 mp,
                 {
-                    "LAiM/FLUX.1-dev-GGUF": [_FakeSibling("flux1-dev-Q4_K_M.gguf", 7 * GB)],
+                    "unsloth/FLUX.1-dev-GGUF": [_FakeSibling("flux1-dev-Q4_K_M.gguf", 7 * GB)],
                     "black-forest-labs/FLUX.1-dev": _FLUX_BASE_SIBLINGS,
                 },
             )
@@ -11155,7 +11155,7 @@ def test_download_plan_files_do_not_shrink_as_a_repo_warms(monkeypatch):
                 ),
             )
             return DiffusionBackend().download_plan(
-                "LAiM/FLUX.1-dev-GGUF", gguf_filename = "flux1-dev-Q4_K_M.gguf"
+                "unsloth/FLUX.1-dev-GGUF", gguf_filename = "flux1-dev-Q4_K_M.gguf"
             )
         finally:
             mp.undo()
@@ -11165,12 +11165,12 @@ def test_download_plan_files_do_not_shrink_as_a_repo_warms(monkeypatch):
     most = _plan(lambda files: files[:-1])
     warm = _plan(lambda files: files)
 
-    base_files = {e["repo_id"]: e["files"] for e in cold["entries"]}["LAiM/FLUX.1-dev"]
+    base_files = {e["repo_id"]: e["files"] for e in cold["entries"]}["unsloth/FLUX.1-dev"]
     for plan in (half, most):
         staged = {e["repo_id"]: e["files"] for e in plan["entries"]}
-        assert staged["LAiM/FLUX.1-dev"] == base_files
+        assert staged["unsloth/FLUX.1-dev"] == base_files
     # Fully cached is the one state that removes the row.
-    assert "LAiM/FLUX.1-dev" not in {e["repo_id"] for e in warm["entries"]}
+    assert "unsloth/FLUX.1-dev" not in {e["repo_id"] for e in warm["entries"]}
 
 
 class _ShaInfo(_FakeInfo):
@@ -11205,9 +11205,9 @@ def test_download_plan_pins_each_probe_to_the_commit_it_just_read(monkeypatch):
     _fake_hf_api_with_shas(
         monkeypatch,
         {
-            "LAiM/FLUX.1-dev-GGUF": ([_FakeSibling("flux1-dev-Q4_K_M.gguf", 7 * GB)], gguf_sha),
+            "unsloth/FLUX.1-dev-GGUF": ([_FakeSibling("flux1-dev-Q4_K_M.gguf", 7 * GB)], gguf_sha),
             "black-forest-labs/FLUX.1-dev": (_FLUX_BASE_SIBLINGS, vendor_sha),
-            "LAiM/FLUX.1-dev": (_FLUX_BASE_SIBLINGS, mirror_sha),
+            "unsloth/FLUX.1-dev": (_FLUX_BASE_SIBLINGS, mirror_sha),
         },
     )
     monkeypatch.setattr(
@@ -11229,12 +11229,12 @@ def test_download_plan_pins_each_probe_to_the_commit_it_just_read(monkeypatch):
     )
 
     DiffusionBackend().download_plan(
-        "LAiM/FLUX.1-dev-GGUF", gguf_filename = "flux1-dev-Q4_K_M.gguf"
+        "unsloth/FLUX.1-dev-GGUF", gguf_filename = "flux1-dev-Q4_K_M.gguf"
     )
 
-    assert ("LAiM/FLUX.1-dev-GGUF", gguf_sha) in seen
+    assert ("unsloth/FLUX.1-dev-GGUF", gguf_sha) in seen
     # Nothing is cached, so the swap fired and the base is staged from the mirror.
-    assert ("LAiM/FLUX.1-dev", mirror_sha) in seen
+    assert ("unsloth/FLUX.1-dev", mirror_sha) in seen
     assert vendor_sha not in [rev for _repo, rev in seen]
 
 
@@ -11261,8 +11261,8 @@ def test_download_plan_skips_nothing_when_the_hub_reports_no_commit(monkeypatch)
 
     assert revisions and all(rev is None for rev in revisions)
     assert {e["repo_id"] for e in plan["entries"]} == {
-        "LAiM/FLUX.1-dev-GGUF",
-        "LAiM/FLUX.1-dev",
+        "unsloth/FLUX.1-dev-GGUF",
+        "unsloth/FLUX.1-dev",
     }
 
 
@@ -11470,15 +11470,15 @@ def test_the_cache_probe_reads_the_root_the_dense_load_will_use():
 
 def test_variant_hint_carries_both_the_repo_id_and_the_base():
     # `repo_id or base` dropped the base whenever a repo id existed, which is every GGUF load, and
-    # the base is exactly where the distilled marker lives: LAiM/Z-Image-GGUF says nothing while
+    # the base is exactly where the distilled marker lives: unsloth/Z-Image-GGUF says nothing while
     # Tongyi-MAI/Z-Image-Turbo says turbo, so the 0.85 discount never fired for these models.
     from core.inference.diffusion import _image_variant_hint
     from core.inference.diffusion_memory import estimate_image_runtime_mib
 
     hint = _image_variant_hint(
-        "z-image", "Z-Image-Q4_K_S.gguf", "LAiM/Z-Image-GGUF", "Tongyi-MAI/Z-Image-Turbo"
+        "z-image", "Z-Image-Q4_K_S.gguf", "unsloth/Z-Image-GGUF", "Tongyi-MAI/Z-Image-Turbo"
     )
-    assert "LAiM/Z-Image-GGUF" in hint and "Tongyi-MAI/Z-Image-Turbo" in hint
+    assert "unsloth/Z-Image-GGUF" in hint and "Tongyi-MAI/Z-Image-Turbo" in hint
     # Worth ~1.2 GB of headroom on a card where 1.2 GB decides the offload tier.
     assert estimate_image_runtime_mib(width = None, height = None, family = hint) == 6963
     assert estimate_image_runtime_mib(width = None, height = None, family = "") == 8192
@@ -12282,7 +12282,7 @@ def test_unified_memory_declines_a_prequant_that_outweighs_the_gguf(
         dmod, "select_transformer_quant_scheme", lambda target, mode, family = None, **_kw: "fp8"
     )
     # A hosted pre-cast checkpoint IS available, which is what skips the dense-size check.
-    monkeypatch.setattr(dmod, "usable_prequant_source", lambda *a, **kw: "LAiM/Z-Image-FP8")
+    monkeypatch.setattr(dmod, "usable_prequant_source", lambda *a, **kw: "unsloth/Z-Image-FP8")
     monkeypatch.setattr(
         dmod,
         "resolve_dense_quant_candidate",
@@ -12316,7 +12316,7 @@ def test_unified_memory_keeps_a_prequant_that_fits(fake_runtime, monkeypatch, tm
     monkeypatch.setattr(
         dmod, "select_transformer_quant_scheme", lambda target, mode, family = None, **_kw: "fp8"
     )
-    monkeypatch.setattr(dmod, "usable_prequant_source", lambda *a, **kw: "LAiM/Z-Image-FP8")
+    monkeypatch.setattr(dmod, "usable_prequant_source", lambda *a, **kw: "unsloth/Z-Image-FP8")
     monkeypatch.setattr(
         dmod,
         "resolve_dense_quant_candidate",
@@ -12629,7 +12629,7 @@ def test_the_download_plan_resolves_the_same_nvfp4_rung_the_load_does(monkeypatc
     )
     assert (
         dmod._uncached_prequant_repo(fam, target, "auto", base_repo = base, prequant_path = None)
-        == "LAiM/FLUX.1-schnell-NVFP4"
+        == "unsloth/FLUX.1-schnell-NVFP4"
     )
 
 
@@ -13267,7 +13267,7 @@ def test_a_raw_fp8_pipeline_is_not_quantised_a_second_time(fake_runtime, tmp_pat
 
     monkeypatch.setattr(dmod, "stored_denoiser_precision", _stored)
     status = backend.load_pipeline(
-        "LAiM/Qwen-Image-2512",
+        "unsloth/Qwen-Image-2512",
         model_kind = "pipeline",
         _base_local_dir = str(tmp_path),
     )
@@ -13310,7 +13310,7 @@ def test_a_local_fp8_directory_is_scanned_through_the_load_base(
 
     monkeypatch.setattr(dmod, "stored_denoiser_precision", _stored)
     status = backend.load_pipeline(
-        "LAiM/Qwen-Image-2512", model_kind = "pipeline", _base_local_dir = None
+        "unsloth/Qwen-Image-2512", model_kind = "pipeline", _base_local_dir = None
     )
     # Not None: the fallback handed the probe the base the pipeline was actually loaded from.
     assert seen and seen[0]
@@ -13330,7 +13330,7 @@ def test_a_prequant_repo_missing_its_artifact_marks_the_plan_incomplete(monkeypa
 
     source = SimpleNamespace(
         kind = "repo",
-        location = "LAiM/some-prequant",
+        location = "unsloth/some-prequant",
         filename = "transformer_fp8.safetensors",
         fallback_filenames = ("transformer.fp8.safetensors",),
     )
@@ -13342,7 +13342,7 @@ def test_a_prequant_repo_missing_its_artifact_marks_the_plan_incomplete(monkeypa
     # A repo that exists but carries something else entirely.
     _fake_hf_api(
         monkeypatch,
-        {"LAiM/some-prequant": [_FakeSibling("README.md", 10)]},
+        {"unsloth/some-prequant": [_FakeSibling("README.md", 10)]},
     )
 
     failures: list = []
@@ -13469,14 +13469,14 @@ def test_an_nvfp4_checkpoint_the_hub_refuses_installs_no_flashinfer(
     )
     _load_to_the_install_gate()
     assert installs == []
-    assert listed == ["LAiM/Z-Image-Turbo-NVFP4"]
+    assert listed == ["unsloth/Z-Image-Turbo-NVFP4"]
 
 
 def test_an_nvfp4_repo_missing_the_checkpoint_installs_no_flashinfer(fake_runtime, monkeypatch):
     installs, listed = _nvfp4_install_probe(monkeypatch, listing = [_FakeSibling("README.md", 10)])
     _load_to_the_install_gate()
     assert installs == []
-    assert listed == ["LAiM/Z-Image-Turbo-NVFP4"]
+    assert listed == ["unsloth/Z-Image-Turbo-NVFP4"]
 
 
 def test_a_family_with_no_hosted_nvfp4_checkpoint_installs_no_flashinfer(fake_runtime, monkeypatch):
@@ -13505,7 +13505,7 @@ def test_a_gguf_nvfp4_load_whose_checkpoint_the_hub_refuses_installs_no_flashinf
             _fetch_base = "Tongyi-MAI/Z-Image-Turbo",
         )
     assert installs == []
-    assert listed == ["LAiM/Z-Image-Turbo-NVFP4"]
+    assert listed == ["unsloth/Z-Image-Turbo-NVFP4"]
 
 
 def test_a_reachable_nvfp4_checkpoint_still_installs_flashinfer(fake_runtime, monkeypatch):
@@ -13513,7 +13513,7 @@ def test_a_reachable_nvfp4_checkpoint_still_installs_flashinfer(fake_runtime, mo
         monkeypatch, listing = [_FakeSibling("Z-Image-Turbo-NVFP4.safetensors", 6 * GB)]
     )
     _load_to_the_install_gate()
-    assert listed == ["LAiM/Z-Image-Turbo-NVFP4"]
+    assert listed == ["unsloth/Z-Image-Turbo-NVFP4"]
     assert installs == [("cuda", False)]
 
 
@@ -13857,7 +13857,7 @@ def test_plan_memory_leaves_a_callers_companion_override_alone(monkeypatch, tmp_
 
 
 def _q21_precast_cache(tmp_path, monkeypatch, *, mib):
-    """LAiM/Qwen-Image-2.1-FP8 cached under the live root, holding only the pre-cast encoder."""
+    """unsloth/Qwen-Image-2.1-FP8 cached under the live root, holding only the pre-cast encoder."""
     live, _other = _split_cache_roots(tmp_path, monkeypatch)
     repo = live / "models--LAiM--Qwen-Image-2.1-FP8"
     rev = "b" * 40
@@ -14442,7 +14442,7 @@ def test_status_reports_cuda_graph_off_once_every_armed_step_ran_eager():
     }
     backend._state = _LoadState(
         pipe = object(),
-        family = detect_family("LAiM/Z-Image-GGUF"),
+        family = detect_family("unsloth/Z-Image-GGUF"),
         repo_id = "r",
         base_repo = "b",
         device = "cuda",
@@ -14747,7 +14747,7 @@ def _gguf_offload_swap_setup(
         ),
     )
     source = types.SimpleNamespace(
-        kind = "repo", location = "LAiM/Z-FP8", filename = "Z-INT8.safetensors"
+        kind = "repo", location = "unsloth/Z-FP8", filename = "Z-INT8.safetensors"
     )
     monkeypatch.setattr(dmod, "resolve_prequant_source", lambda *a, **k: source)
     monkeypatch.setattr(dmod, "torchao_offload_plan", lambda plan, s, **k: plan)
@@ -15192,7 +15192,7 @@ def test_untrusted_hub_safetensors_single_file_takes_config_only_from_the_family
     for value in (_FakeTransformer.last["config"], _FakePipeline.last["base"], status["base_repo"]):
         assert "evil-org" not in str(value).lower()
     # The family base, or its byte-identical LAiM mirror (the fetch-site swap).
-    assert _FakeTransformer.last["config"] in ("Tongyi-MAI/Z-Image-Turbo", "LAiM/Z-Image-Turbo")
+    assert _FakeTransformer.last["config"] in ("Tongyi-MAI/Z-Image-Turbo", "unsloth/Z-Image-Turbo")
     assert status["base_repo"] == "Tongyi-MAI/Z-Image-Turbo"
     assert "trust_remote_code" not in _FakeTransformer.last
     assert "trust_remote_code" not in _FakePipeline.last

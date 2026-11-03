@@ -1030,7 +1030,7 @@ def test_overflow_truncation_server_default_env(monkeypatch):
 
 class _FakeLlamaBackend:
     is_loaded = True
-    model_identifier = "LAiM/Qwen3.6-27B-GGUF"
+    model_identifier = "unsloth/Qwen3.6-27B-GGUF"
     context_length = 67584
     max_context_length = 262144
 
@@ -1045,7 +1045,7 @@ def test_v1_models_exposes_real_context_window(monkeypatch):
     models = _openai_model_objects()
     assert len(models) == 1
     entry = models[0]
-    assert entry["id"] == "LAiM/Qwen3.6-27B-GGUF"
+    assert entry["id"] == "unsloth/Qwen3.6-27B-GGUF"
     # The REAL (post /props readback) window, not the requested one.
     assert entry["context_length"] == 67584
     assert entry["max_context_length"] == 262144

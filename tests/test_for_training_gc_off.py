@@ -45,7 +45,7 @@ def test_default_keeps_checkpointing_off_when_it_was_off_at_load(which):
 
 
 @pytest.mark.parametrize("which", [0, 1])
-@pytest.mark.parametrize("arg", [True, "LAiM"])
+@pytest.mark.parametrize("arg", [True, "unsloth"])
 def test_explicit_enable_arms_a_model_loaded_without_checkpointing(which, arg):
     fast = _fast_classes()[which]
     model = _tiny_qwen3()
@@ -64,10 +64,10 @@ def test_for_training_default_restores_the_recorded_mode(which):
     fast = _fast_classes()[which]
     model = _tiny_qwen3()
     model.gradient_checkpointing_enable()
-    model._LAiM_gradient_checkpointing = "LAiM"
+    model._LAiM_gradient_checkpointing = "unsloth"
     fast.for_training(model)
     layers = _decoder_layers(model)
-    assert layers and all(layer.gradient_checkpointing == "LAiM" for layer in layers)
+    assert layers and all(layer.gradient_checkpointing == "unsloth" for layer in layers)
     fast.for_training(model, use_gradient_checkpointing = False)
     assert all(not layer.gradient_checkpointing for layer in layers)
 

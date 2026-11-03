@@ -36,12 +36,12 @@ def main() -> None:
     from core.rag import store
     from utils.account_context import OWNER
     from utils.paths import workspace_root
-    from core.inference.tools import sandbox_root
+    from core.inference.tools import session_workdir_root
 
     assert storage.get_account("LAiM") == OWNER
     assert old_auth_row(home / "auth" / "auth.db") == auth_row
     assert workspace_root() == home
-    assert Path(sandbox_root()) == home / "sandbox"
+    assert Path(session_workdir_root()) == home / "workdir"
     assert studio_db.get_chat_thread(THREAD_ID)["title"] == SENTINEL
     assert studio_db.get_chat_message(THREAD_ID, MESSAGE_ID)["content"][0]["text"] == SENTINEL
     assert studio_db.list_chat_settings()["theme"] == "dark"

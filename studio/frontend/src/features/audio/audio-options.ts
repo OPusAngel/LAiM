@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
+
 // Per-model generation options a GGUF audio model declares in its embedded spec. The backend
 // reports the schema as `audio_options` on the loaded-model status and takes the chosen values
 // back as `audio_options` on a speech or music request, validating them again. Values the user
-// set are kept per model id in this browser. Free of app imports so the node test runner can
-// load it directly.
+// set are kept per model id in this browser. The only app import is i18n, which stays loadable
+// by the node test runner.
 
 export type AudioOptionType = "bool" | "int" | "float" | "string" | "enum";
 export type AudioOptionValue = boolean | number | string;
@@ -167,15 +169,15 @@ export function audioOptionLabel(name: string): string {
 
 // Kokoro voice ids lead with a language letter and a gender letter (hexgrad/Kokoro-82M VOICES.md).
 const KOKORO_LANGUAGES: Record<string, string> = {
-  a: "American English",
-  b: "British English",
-  e: "Spanish",
-  f: "French",
-  h: "Hindi",
-  i: "Italian",
-  j: "Japanese",
-  p: "Brazilian Portuguese",
-  z: "Mandarin Chinese",
+  get a() { return translate("uxAudio.americanEnglishLanghjjhl"); },
+  get b() { return translate("uxAudio.britishEnglishLanga8cnc"); },
+  get e() { return translate("uxAudio.spanishLangkszff"); },
+  get f() { return translate("uxAudio.frenchLangxxka9"); },
+  get h() { return translate("uxAudio.hindiLangoid1j"); },
+  get i() { return translate("uxAudio.italianLanggvaoj"); },
+  get j() { return translate("uxAudio.japaneseLanga69z6"); },
+  get p() { return translate("uxAudio.brazilianPortugueseLang5fcn4"); },
+  get z() { return translate("uxAudio.mandarinChineseLangviiko"); },
 };
 
 function titleWords(text: string): string {
@@ -192,7 +194,7 @@ export function audioVoiceLabel(voice: string, family?: string | null): string {
     const match = /^([a-z])([fm])_([a-z0-9_]+)$/.exec(voice);
     const language = match ? KOKORO_LANGUAGES[match[1]] : undefined;
     if (match && language) {
-      return `${titleWords(match[3])} (${language}, ${match[2] === "f" ? "female" : "male"})`;
+      return `${titleWords(match[3])} (${language}, ${match[2] === "f" ? translate("uxAudio.femaleVoicech8o3") : translate("uxAudio.maleVoiceiykv4")})`;
     }
   }
   return /^[a-z0-9]+(?:[_-][a-z0-9]+)*$/.test(voice) ? titleWords(voice) : voice;

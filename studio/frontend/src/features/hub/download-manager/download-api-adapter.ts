@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { getHfToken } from "../stores/hf-token-store";
 import { toast } from "@/lib/toast";
 import {
@@ -210,10 +211,10 @@ export async function effectiveTransportMode(
     return preferred;
   }
   const reason =
-    capabilities.xet.reason ?? "LAiM will use HTTP downloads instead.";
+    capabilities.xet.reason ?? translate("uxHub.lAiMWillUseHTTPvjjkz");
   if (lastXetUnavailableWarningReason !== reason) {
     lastXetUnavailableWarningReason = reason;
-    toast.warning("Xet download transport unavailable", {
+    toast.warning(translate("uxHub.xetDownloadTransportUnavailable1dopz"), {
       description: reason,
     });
   }
@@ -223,14 +224,14 @@ export async function effectiveTransportMode(
 export function describeUnacceptedStart(state: DownloadStartState): string {
   switch (state) {
     case "deleting":
-      return "This repository is being removed. Try again once it finishes.";
+      return translate("uxHub.thisRepositoryIsBeingjwe3k");
     case "repository_owned":
-      return "A dictation model download is using this repository. Try again once it finishes.";
+      return translate("uxHub.aDictationModelDownloadmeuoa");
     case "running":
     case "cancelling":
-      return "Another download for this repository is already in progress. Wait for it to finish or cancel it first.";
+      return translate("uxHub.anotherDownloadForThis9wljt");
     default:
-      return "The download could not be started. Try again in a moment.";
+      return translate("uxHub.theDownloadCouldNotp53sh");
   }
 }
 
@@ -242,14 +243,14 @@ export function accessErrorMessage(raw: string): string | null {
     lower.includes("gated") ||
     lower.includes("repository not found");
   if (!hasAccessSignal) return null;
-  return "Couldn't access this Hugging Face repo with the token used for this download. Update the HF token and restart the download, or delete the partial download if you no longer need it.";
+  return translate("uxHub.couldnTAccessThisbbvld");
 }
 
 export const pollAccessErrorMessage = accessErrorMessage;
 
 export function normalizeDownloadError(
   error: unknown,
-  fallback = "Failed to start download",
+  fallback = translate("uxHub.failedToStartDownloadcfvg0"),
 ): string {
   const raw =
     error instanceof Error

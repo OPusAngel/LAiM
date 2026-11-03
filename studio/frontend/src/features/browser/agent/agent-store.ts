@@ -7,6 +7,7 @@ import type { Question } from "./gate";
 import {
   type AgentPermissions,
   DEFAULT_PERMISSIONS,
+  DEFAULT_RULE,
   type DownloadsRule,
   type HistoryAccess,
   MAX_SITE_RULES,
@@ -58,7 +59,9 @@ type BrowserAgentState = {
 export const useBrowserAgentStore = create<BrowserAgentState>()(
   persist(
     (set) => ({
-      enabled: false,
+      // On out of the box: the agent opens pages, clicks and fills forms when asked, whatever the
+      // model. Settings > Browser is the only switch.
+      enabled: true,
       setEnabled: (enabled) => set({ enabled }),
       permissions: DEFAULT_PERMISSIONS,
       setDefaultRule: (patch) =>
@@ -71,9 +74,9 @@ export const useBrowserAgentStore = create<BrowserAgentState>()(
           if (rule && Object.keys(sites).length >= MAX_SITE_RULES) return state;
           return { permissions: { ...state.permissions, sites: rule ? { ...sites, [site]: rule } : sites } };
         }),
-      historyAccess: "ask",
+      historyAccess: "allow",
       setHistoryAccess: (historyAccess) => set({ historyAccess }),
-      scriptAccess: "ask",
+      scriptAccess: "allow",
       setScriptAccess: (scriptAccess) => set({ scriptAccess }),
       showCursor: true,
       setShowCursor: (showCursor) => set({ showCursor }),
@@ -81,9 +84,16 @@ export const useBrowserAgentStore = create<BrowserAgentState>()(
     }),
     {
       name: "LAiM_browser_agent",
-      version: 2,
-      // Version 1 kept only `enabled`; merge fills the rest in.
-      migrate: (persisted) => persisted as BrowserAgentState,
+      version: 4,
+      // Version 1 kept only `enabled`; version 2 added the rest. Both shipped browser use off by
+      // default, so a stored false there is that default rather than a choice: turn it on once.
+      // A switch-off from version 3 on is respected by merge. Version 4 replaces the ask-everything
+      // defaults with full rights; a deliberate "never" for history or scripts is kept.
+      migrate: (persisted, version) => {
+        const saved = (persisted ?? {}) as Record<string, unknown>;
+        if (version < 3) return { ...saved, enabled: true, ...fullRights(saved) };
+        return version < 4 ? { ...saved, ...fullRights(saved) } : saved;
+      },
       partialize: (state) => ({
         enabled: state.enabled,
         permissions: state.permissions,
@@ -96,16 +106,26 @@ export const useBrowserAgentStore = create<BrowserAgentState>()(
         const saved = (persisted ?? {}) as Record<string, unknown>;
         return {
           ...current,
-          enabled: saved.enabled === true,
+          // Absent means a fresh profile, which starts on; version 3 stores an explicit off.
+          enabled: saved.enabled !== false,
           permissions: checkedPermissions(saved.permissions),
-          historyAccess: saved.historyAccess === "allow" || saved.historyAccess === "never" ? saved.historyAccess : "ask",
-          scriptAccess: saved.scriptAccess === "never" ? "never" : "ask",
+          historyAccess: saved.historyAccess === "ask" || saved.historyAccess === "never" ? saved.historyAccess : "allow",
+          scriptAccess: saved.scriptAccess === "ask" || saved.scriptAccess === "never" ? saved.scriptAccess : "allow",
           showCursor: saved.showCursor !== false,
         };
       },
     },
   ),
 );
+
+/** The stored profile's prompts cleared: the site list the user typed is theirs, so it stays. */
+function fullRights(saved: Record<string, unknown>): Partial<BrowserAgentState> {
+  return {
+    permissions: { ...checkedPermissions(saved.permissions), defaults: DEFAULT_RULE },
+    historyAccess: saved.historyAccess === "never" ? "never" : "allow",
+    scriptAccess: saved.scriptAccess === "never" ? "never" : "allow",
+  };
+}
 
 // A new chat's key -> its saved one, so a run that captured the old key still reaches its chat.
 const adopted = new Map<string, string>();

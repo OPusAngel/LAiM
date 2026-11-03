@@ -138,15 +138,15 @@ def _model_segment_from_run_dir_name(output_dir_name: str) -> Optional[str]:
 
 
 def base_model_from_run_dir_name(dir_name: str) -> Optional[str]:
-    """``LAiM_<model>_<timestamp>`` -> ``LAiM/<model>``, else None.
+    """``LAiM_<model>_<timestamp>`` -> ``unsloth/<model>``, else None.
 
     The last resort when no config names a base model. It sits beside
     ``build_default_output_dir_name`` because it is that function read backwards; keeping the
     pair together is what stops the parse drifting from the names we write.
 
     None matters as much as a name here. Without a timestamp the folder is not one we wrote,
-    and every caller already asks the user instead. Guessing reaches the Hub: ``LAiM/`` is
-    rejected outright, and a truncated ``LAiM/llama_3`` for ``LAiM_llama_3_8b`` is worse,
+    and every caller already asks the user instead. Guessing reaches the Hub: ``unsloth/`` is
+    rejected outright, and a truncated ``unsloth/llama_3`` for ``LAiM_llama_3_8b`` is worse,
     being a valid id that does not exist.
     """
     model_segment = _model_segment_from_run_dir_name(dir_name)
@@ -155,7 +155,7 @@ def base_model_from_run_dir_name(dir_name: str) -> Optional[str]:
     model_name = model_segment[len(_LAiM_ORG_PREFIX) :]
     if not _is_valid_repo_name(model_name):
         return None
-    return f"LAiM/{model_name}"
+    return f"unsloth/{model_name}"
 
 
 def extract_project_name(config: Any) -> Optional[str]:

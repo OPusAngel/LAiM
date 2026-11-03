@@ -1,4 +1,5 @@
 import { revealPathToken } from "../api";
+import { translate } from "@/i18n";
 import { useNativeIntentStore } from "../store";
 import type { NativeIntent } from "../types";
 import { XIcon } from "lucide-react";
@@ -44,7 +45,7 @@ export function NativeModelChip({
         id: label,
         nativePathToken: intent.path.token,
         isDownloaded: true,
-        loadingDescription: "Loading selected local GGUF model.",
+        get loadingDescription() { return translate("uxNativeintents.loadingSelectedLocalGGUFwhvro"); },
         forceReload: true,
         throwOnError: true,
       });
@@ -60,7 +61,7 @@ export function NativeModelChip({
     try {
       await revealPathToken(intent.path.token);
     } catch (error) {
-      toast.error("Could not reveal model", {
+      toast.error(translate("uxNativeintents.couldNotRevealModel1ef0k"), {
         description: error instanceof Error ? error.message : String(error),
       });
     }
@@ -68,7 +69,7 @@ export function NativeModelChip({
 
   return (
     <div className="flex min-w-0 max-w-[calc(34rem*var(--ui-space-scale,1))] items-center gap-2 rounded-lg border border-border/70 bg-muted/70 px-2.5 py-1.5 text-xs">
-      <span className="shrink-0 font-medium text-muted-foreground">Local GGUF</span>
+      <span className="shrink-0 font-medium text-muted-foreground">{translate("uxNativeintents.localGGUFcefxo")}</span>
       <span className="min-w-0 flex-1 truncate" title={label}>{label}</span>
       <button
         type="button"
@@ -98,7 +99,7 @@ export function NativeModelChip({
         type="button"
         onClick={() => clearModelIntent(intent.id)}
         className="flex size-5 items-center justify-center rounded-full text-muted-foreground hover:bg-destructive hover:text-destructive-foreground"
-        aria-label="Dismiss local model"
+        aria-label={translate("uxNativeintents.dismissLocalModeli49ll")}
       >
         <XIcon className="size-3" />
       </button>

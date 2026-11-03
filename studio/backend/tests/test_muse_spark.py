@@ -29,7 +29,7 @@ if str(_backend_root) not in sys.path:
     sys.path.insert(0, str(_backend_root))
 
 
-REPO = "LAiM/Muse-Spark-Open-816B-A42B-GGUF"
+REPO = "unsloth/Muse-Spark-Open-816B-A42B-GGUF"
 STEM = "Muse-Spark-Open-816B-A42B"
 # Shard counts as published.
 _SPLITS = {
@@ -69,7 +69,7 @@ MUSE_SPARK_IDS = [
     f"{REPO}:UD-IQ1_S",
     f"{REPO}:UD-Q4_K_XL",
     "meta-models/Muse-Spark-Open-816B-A42B",
-    "LAiM/Muse-Spark-Open-816B-A42B",
+    "unsloth/Muse-Spark-Open-816B-A42B",
     "/home/u/.cache/huggingface/hub/models--LAiM--Muse-Spark-Open-816B-A42B-GGUF/snapshots/deadbeef",
     f"/data/models/{STEM}-GGUF/UD-IQ1_S/{STEM}-UD-IQ1_S-00001-of-00005.gguf",
 ]
@@ -101,10 +101,10 @@ def test_disabled_top_k_reaches_llama_server_as_zero():
 def test_neighbouring_families_are_untouched():
     from utils.inference.inference_config import load_inference_config
 
-    glimmer = load_inference_config("LAiM/Muse-Glimmer-30B-GGUF")
+    glimmer = load_inference_config("unsloth/Muse-Glimmer-30B-GGUF")
     assert (glimmer["top_p"], glimmer["top_k"]) == (0.95, 64)
-    assert load_inference_config("LAiM/Llama-4-Scout-17B-16E-Instruct")["top_k"] == -1
-    assert load_inference_config("LAiM/gemma-2-9b-it")["top_k"] == 64
+    assert load_inference_config("unsloth/Llama-4-Scout-17B-16E-Instruct")["top_k"] == -1
+    assert load_inference_config("unsloth/gemma-2-9b-it")["top_k"] == 64
 
 
 # ---------------------------------------------------------------- files

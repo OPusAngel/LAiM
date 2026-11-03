@@ -3,6 +3,7 @@
 
 // What a remote load will apply, otherwise unanswerable from outside the process.
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
@@ -194,15 +195,9 @@ export function SavedModelSettingsPanel(): ReactElement {
     <section className="flex flex-col gap-3">
       <div className="flex flex-col gap-1">
         <h2 className="text-ui-16 font-semibold tracking-[-0.01em] text-foreground">
-          Settings applied on API load
+          {translate("uxApimonitor.settingsAppliedOnAPIhkagg")}
         </h2>
-        <p className="text-sm text-muted-foreground">
-          When a request names one of these models, LAiM loads it with these
-          settings, the same ones you saved in the model&apos;s settings page.
-          Models without an entry load with app defaults. Edit an entry from
-          that model&apos;s settings, or forget it here, which clears it from
-          the picker too.
-        </p>
+        <p className="text-sm text-muted-foreground">{translate("uxApimonitor.whenARequestNames0ky50")}</p>
       </div>
 
       {error ? (
@@ -216,11 +211,7 @@ export function SavedModelSettingsPanel(): ReactElement {
           ))}
         </div>
       ) : entries.length === 0 ? (
-        <p className="rounded-xl border border-border/60 bg-card px-4 py-6 text-center text-sm text-muted-foreground">
-          No saved model settings yet. Open a model&apos;s settings, turn on
-          &quot;Remember for this model&quot;, and it will be applied to API
-          loads too.
-        </p>
+        <p className="rounded-xl border border-border/60 bg-card px-4 py-6 text-center text-sm text-muted-foreground">{translate("uxApimonitor.noSavedModelSettingstun0b")}</p>
       ) : (
         <ul className="flex flex-col gap-2">
           {entries.map(([modelId, override]) => {
@@ -242,13 +233,13 @@ export function SavedModelSettingsPanel(): ReactElement {
                   variant="ghost"
                   size="icon-sm"
                   className="shrink-0 text-muted-foreground hover:text-destructive"
-                  aria-label={`Forget settings for ${modelId}`}
-                  title="Forget these settings"
+                  aria-label={translate("uxApimonitor.forgetSettingsForqtg5t", { p1: modelId })}
+                  title={translate("uxApimonitor.forgetTheseSettings1u2ux")}
                   disabled={forgetting.has(modelId)}
                   onClick={() => void forget(modelId)}
                 >
                   {forgetting.has(modelId) ? (
-                    <Spinner label="Forgetting" />
+                    <Spinner label={translate("uxApimonitor.forgettingn4u7o")} />
                   ) : (
                     <Trash2 />
                   )}

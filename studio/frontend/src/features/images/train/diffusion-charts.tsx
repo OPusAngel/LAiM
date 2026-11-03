@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { type ReactElement, useMemo } from "react";
 
 import type { TrainingSeriesPoint } from "@/features/training";
@@ -122,8 +123,7 @@ export function DiffusionCharts({
           scale="linear"
         />
         <p className="px-1 text-ui-11 leading-snug text-muted-foreground">
-          Per-step loss is noisy by design: every step samples a random noise level. Watch
-          the smoothed line for the trend, not the raw jitter.
+          {translate("uxCopy.perStepLossIs1dhs3")}
         </p>
       </div>
       <GradNormChartCard

@@ -3,6 +3,7 @@
 
 // free of app imports so the node test runner can load it directly.
 
+import { translate } from "@/i18n";
 import {
   EDIT_SOURCE_MAX_SECONDS,
   EDIT_SOURCE_SLACK_SECONDS,
@@ -48,11 +49,11 @@ export function clipSendTargets(
 }
 
 export const STEM_SEND_TARGETS: readonly SendTarget[] = [
-  { id: "clone", workflow: "clone", label: "Clone (as reference)" },
-  { id: "convert", workflow: "convert", label: "Convert" },
-  { id: "music", workflow: "music", label: "Music edit" },
-  { id: "transcribe", workflow: "transcribe", label: "Transcribe" },
-  { id: "voice", workflow: "voice", label: "Save as voice…" },
+  { id: "clone", workflow: "clone", get label() { return translate("uxAudio.cloneAsReference2x4ic"); } },
+  { id: "convert", workflow: "convert", get label() { return translate("settings.apiKeys.audioApi.convert"); } },
+  { id: "music", workflow: "music", get label() { return translate("uxAudio.musicEdit1reei"); } },
+  { id: "transcribe", workflow: "transcribe", get label() { return translate("settings.apiKeys.audioApi.transcribe"); } },
+  { id: "voice", workflow: "voice", get label() { return translate("uxAudio.saveAsVoice1ldir"); } },
 ];
 
 /** text goes to speak; edit and clone also require its source audio. */

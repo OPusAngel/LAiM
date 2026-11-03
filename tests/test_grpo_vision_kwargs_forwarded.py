@@ -3,7 +3,7 @@
 
 """Both GRPO logprob paths forward every multimodal key TRL produced: two hand written
 four-key lists dropped spatial_shapes, num_tiles, image_position_ids, and pixel_values for
-models without image_grid_thw. LAiMai/LAiM#6960."""
+models without image_grid_thw. OPusAngel/LAiM#6960."""
 
 import inspect
 import os

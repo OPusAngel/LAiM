@@ -6,6 +6,8 @@ import test from "node:test";
 import vm from "node:vm";
 import ts from "@typescript/typescript6";
 
+import { enTranslate } from "./helpers/module-stubs.ts";
+
 import {
   codexLocalToolRoundId,
   startsNewCodexToolRound,
@@ -147,6 +149,7 @@ function loadExporters(
     },
   ).outputText;
   const context = {
+    translate: enTranslate,
     exports: {},
     toast: { info: () => {}, success: () => {} },
     listStoredChatThreads: async () => threadIds.map((id) => ({ id })),

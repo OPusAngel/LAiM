@@ -94,7 +94,7 @@ def test_the_module_level_triton_import_is_inside_a_try():
     tree = ast.parse(GPU_INIT.read_text(encoding = "utf-8"))
     bare = _module_level_triton_imports(tree)
     assert not bare, (
-        "LAiM/_gpu_init.py imports triton unguarded at module scope on line(s) "
+        "unsloth/_gpu_init.py imports triton unguarded at module scope on line(s) "
         f"{[node.lineno for node in bare]}; PyPI triton has no Windows wheel, so this "
         "raises ModuleNotFoundError on a CPU only Windows install"
     )
@@ -148,7 +148,7 @@ def test_a_missing_triton_is_reported_in_words():
     combined = (result.stdout + result.stderr).lower()
     if "gpu_init_ran true" not in combined:
         pytest.skip(
-            "LAiM/_gpu_init.py does not run on this platform (Apple Silicon takes the MLX "
+            "unsloth/_gpu_init.py does not run on this platform (Apple Silicon takes the MLX "
             "path), so the guard that emits this message never executes"
         )
     assert "triton" in combined

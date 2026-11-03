@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import type { ReactElement } from "react";
 import {
   Table,
@@ -21,20 +22,20 @@ export function ExecutionColumnsTab({
 }: ExecutionColumnsTabProps): ReactElement {
   return (
     <div className="mt-3 rounded-xl border p-3">
-      <p className="mb-2 text-sm font-semibold">Column statistics</p>
+      <p className="mb-2 text-sm font-semibold">{translate("uxRecipestudio.columnStatisticsmrjxf")}</p>
       {analysisColumns.length === 0 ? (
-        <p className="text-xs text-muted-foreground">No column statistics yet.</p>
+        <p className="text-xs text-muted-foreground">{translate("uxCopy.noColumnStatisticsYett5opb")}</p>
       ) : (
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Column</TableHead>
               <TableHead>Type</TableHead>
-              <TableHead>Data type</TableHead>
+              <TableHead>{translate("uxRecipestudio.dataTypeexlbb")}</TableHead>
               <TableHead>Unique</TableHead>
               <TableHead>Nulls</TableHead>
-              <TableHead>Input tok avg</TableHead>
-              <TableHead>Output tok avg</TableHead>
+              <TableHead>{translate("uxRecipestudio.inputTokAvgysy7d")}</TableHead>
+              <TableHead>{translate("uxRecipestudio.outputTokAvglihj1")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

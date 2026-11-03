@@ -21,7 +21,9 @@ test("Video gen draws the sidebar's Video icon", () => {
   const icon = sidebarIcon("video");
   assert.match(
     shared,
-    new RegExp(`key === "diffusion" && label === "Video gen"\\) return ${icon};`),
+    new RegExp(
+      `key === "diffusion" && label === translate\\("uxHub\\.videoGenwopx5"\\)\\) return ${icon};`,
+    ),
   );
   assert.match(shared, /icon=\{capabilityIcon\(capability\.key, capability\.label\)\}/);
 });
@@ -29,7 +31,12 @@ test("Video gen draws the sidebar's Video icon", () => {
 test("the Library stat draws the sidebar's Library icon", () => {
   const inspector = readSrc("features/hub/catalog/model-inspector.tsx");
   const icon = sidebarIcon("library");
-  assert.match(inspector, new RegExp(`label="Library"[\\s\\S]{0,80}icon=\\{${icon}\\}`));
+  assert.match(
+    inspector,
+    new RegExp(
+      `label=\\{translate\\("shell\\.navigation\\.library"\\)\\}[\\s\\S]{0,80}icon=\\{${icon}\\}`,
+    ),
+  );
 });
 
 test("every Base chip draws Layer", () => {

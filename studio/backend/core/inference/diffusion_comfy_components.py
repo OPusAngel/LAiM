@@ -199,7 +199,7 @@ def parse_component_file(
     if trusted_repo is not None and not trusted_repo(repo_id):
         raise ComponentFileError(
             f"{what} from the Hub is restricted to the same repos as a single-file transformer "
-            f"(LAiM/* or a local path); got '{repo_id}'"
+            f"(unsloth/* or a local path); got '{repo_id}'"
         )
     return ComponentFileRef(spec = spec, repo_id = repo_id, filename = filename)
 

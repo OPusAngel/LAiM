@@ -27,7 +27,7 @@ from core.inference.diffusion_families import detect_family_for_pick
 
 # A plain FLUX.1 GGUF pick: it walks the shared staging path every image pick walks, and its family
 # name keeps the FLUX.2 pairing preflight out of the way (that guard is a header read, not a fetch).
-FLUX_GGUF = "LAiM/FLUX.1-dev-GGUF"
+FLUX_GGUF = "unsloth/FLUX.1-dev-GGUF"
 FLUX_BASE = "black-forest-labs/FLUX.1-dev"
 FLUX_FILE = "flux1-dev-Q4_K_M.gguf"
 

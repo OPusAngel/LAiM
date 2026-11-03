@@ -30,7 +30,7 @@ class _Resp(BaseModel):
     id: str = "chatcmpl-abc"
     object: str = "chat.completion"
     created: int = 1700000000
-    model: str = "LAiM/SmolLM2-135M-Instruct-GGUF"
+    model: str = "unsloth/SmolLM2-135M-Instruct-GGUF"
     choices: list[_Choice] = [_Choice()]
     usage: _Usage = _Usage()
     system_fingerprint: Optional[str] = None

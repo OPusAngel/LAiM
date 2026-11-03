@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { InferenceEnginePicker } from "./inference-engines";
 import {
   AlertDialog,
@@ -308,7 +309,7 @@ function loadModeOverrideNotice(
   if (settings.keepResident && !settings.noRamReserve) {
     return mode === "mmap+mlock"
       ? null
-      : "This will be replaced by mmap+mlock: Keep model in GPU memory, in Settings, owns how the weights are held.";
+      : translate("uxModelpicker.thisWillBeReplacedni26c");
   }
   if (settings.noRamReserve && RAM_RESERVING_LOAD_MODES.has(mode)) {
     return "This will be removed: Don't reserve system RAM, in Settings, chooses the loading policy. Supported Windows builds skip the mapping for a full GPU offload; other placements use the default mmap path.";
@@ -450,11 +451,11 @@ function ChatTemplateSetting({
   return (
     <div className={ROW_CLASS}>
       <div className="flex min-w-0 items-center gap-1.5">
-        <span className={LABEL_CLASS}>Chat Template</span>
+        <span className={LABEL_CLASS}>{translate("uxModelpicker.chatTemplate44teq")}</span>
         <InfoHint>
           {readOnly
-            ? "Preview the model's chat template. This backend cannot take a custom one."
-            : "Replace the model's chat template with custom Jinja. Applies on load."}
+            ? translate("uxModelpicker.previewTheModelSro8kw")
+            : translate("uxModelpicker.replaceTheModelSsmg6h")}
         </InfoHint>
       </div>
       <div className="flex shrink-0 items-center gap-2">
@@ -502,7 +503,7 @@ function MaxSeqLengthSetting({
 }) {
   // MLX sizes itself when unpinned, so the control is the GGUF path's Context Length and
   // shows the length that will be served, not "Auto". A dash only while it is unknown.
-  const label = isMlx ? "Context Length" : "Max Seq Length";
+  const label = isMlx ? translate("uxModelpicker.contextLengthyv9c7") : translate("uxModelpicker.maxSeqLengthvr23x");
   const { draft, sliderProps } = useSliderDraft(
     // Clamped, or the first nudge would jump from the shown number to the bound.
     Math.min(Math.max(value, MAX_SEQ_LENGTH_MIN), max),
@@ -516,12 +517,11 @@ function MaxSeqLengthSetting({
           <span className={LABEL_CLASS}>{label}</span>
           <InfoHint>
             {hint ?? (isMlx
-              ? "Tokens of context the model is sized for." +
+              ? translate("uxModelpicker.tokensOfContextThef1wc7") +
                 (fittedToMemory
-                  ? " Fitted to this machine's memory, which is less than the model's own " +
-                    "window. Set a length to ask for a different one."
+                  ? translate("uxModelpicker.fittedToThisMachineuu2vb")
                   : "")
-              : "Maximum context window in tokens. Applies on load.")}
+              : translate("uxModelpicker.maximumContextWindowInetb2f"))}
           </InfoHint>
         </div>
         <NumericValueInput
@@ -579,16 +579,16 @@ function GgufContextLengthSetting({
     <div className="space-y-2">
       <div className={ROW_CLASS}>
         <div className="flex min-w-0 items-center gap-1.5">
-          <span className={LABEL_CLASS}>Context Length</span>
+          <span className={LABEL_CLASS}>{translate("uxModelpicker.contextLength1maza")}</span>
           <InfoHint>
             Drag all the way left for Auto, which picks a context that
             fits while keeping GPU speed. Custom values request an exact
             context; higher ones use more memory.
             {isAuto && activeLoadedContext != null
-              ? ` Auto currently selected ${activeLoadedContext.toLocaleString()} tokens.`
+              ? translate("uxModelpicker.autoCurrentlySelectedTokenssy3gu", { p1: activeLoadedContext.toLocaleString() })
               : ""}
             {nativeContextLength != null
-              ? ` This model's native context is ${nativeContextLength.toLocaleString()} tokens.`
+              ? translate("uxModelpicker.thisModelSNativekvp1g", { p1: nativeContextLength.toLocaleString() })
               : ""}
           </InfoHint>
         </div>
@@ -600,7 +600,7 @@ function GgufContextLengthSetting({
           step={1}
           onChange={onChange}
           displayValue={isAuto ? "Auto" : undefined}
-          ariaLabel="Context Length"
+          ariaLabel={translate("uxModelpicker.contextLengthyv9c7")}
           className={NUMBER_INPUT_CLASS}
           fixedWidth={true}
           size={8}
@@ -616,12 +616,12 @@ function GgufContextLengthSetting({
               step={128}
               {...sliderProps}
               className="panel-slider"
-              aria-label="Context Length"
+              aria-label={translate("studio.params.contextLength")}
               thumbValueText={(v) =>
                 v !== 0
                   ? `${v.toLocaleString()} tokens`
                   : activeLoadedContext != null
-                    ? `Auto, currently ${autoValue.toLocaleString()} tokens`
+                    ? translate("uxModelpicker.autoCurrentlyTokens8qelb", { p1: autoValue.toLocaleString() })
                     : "Auto"
               }
             />
@@ -793,7 +793,7 @@ function VramBudgetRow() {
       }
       flushVramBudgetSave()?.catch((error: unknown) => {
         toast.error(
-          error instanceof Error ? error.message : "Failed to save VRAM budget",
+          error instanceof Error ? error.message : translate("uxModelpicker.failedToSaveVRAMabcbv"),
         );
       });
     },
@@ -823,7 +823,7 @@ function VramBudgetRow() {
       })
       .catch((error: unknown) => {
         toast.error(
-          error instanceof Error ? error.message : "Failed to reset VRAM budget",
+          error instanceof Error ? error.message : translate("uxModelpicker.failedToResetVRAMv01uy"),
         );
       });
   };
@@ -842,7 +842,7 @@ function VramBudgetRow() {
         .catch((error: unknown) => {
           // The client re-stages it, where the write generation can say whether it is still the newest intent.
           toast.error(
-            error instanceof Error ? error.message : "Failed to save VRAM budget",
+            error instanceof Error ? error.message : translate("uxModelpicker.failedToSaveVRAMabcbv"),
           );
         });
     }, 400);
@@ -851,7 +851,7 @@ function VramBudgetRow() {
   return (
     <div className="space-y-1">
       <AdvancedGpuSlider
-        label="VRAM Budget"
+        label={translate("uxModelpicker.vRAMBudget40u7y")}
         value={percent}
         min={vramFractionToPercent(settings.minFraction)}
         max={vramFractionToPercent(settings.maxFraction)}
@@ -863,28 +863,17 @@ function VramBudgetRow() {
         info={
           <div className="flex flex-col gap-1.5">
             <div>
-              Share of each GPU LAiM will claim when it sizes the model and
-              context. The rest is left for memory fragmentation, the per-device
-              CUDA context on a multi-GPU split, and MoE routing.
-            </div>
-            <div>
-              Applies to every model, not just this one, and takes effect on the
-              next load. Default {defaultPercent}%. Even at 100% a load leaves a
-              margin on each card, up to the 512 MiB llama.cpp keeps for its own
-              fitter, and never more than the default would have reserved.
-            </div>
-            <div>
-              Reset clears the stored value, so LAiM_VRAM_FRACTION applies
-              again if it is set.
-            </div>
+              {translate("uxModelpicker.shareOfEachGPU11mdi")}</div>
+            <div>{translate("uxModelpicker.appliesToEveryModeloqxr1", { p1: defaultPercent })}</div>
+            <div>{translate("uxModelpicker.resetClearsTheStoredvvsmh")}</div>
           </div>
         }
       />
       {shownPercent !== defaultPercent && (
         <p id={adviceId} className="text-ui-11 text-amber-500">
           {shownPercent > defaultPercent
-            ? "Above the default fits more context but leaves less slack, so a load can run out of memory. llama.cpp treats that as a hard failure rather than falling back."
-            : "Below the default is safer on a shared GPU, but a tight fit may push layers onto the CPU and generate slowly."}
+            ? translate("uxModelpicker.aboveTheDefaultFitsh0n15")
+            : translate("uxModelpicker.belowTheDefaultIstbtuz")}
         </p>
       )}
       {settings.isStored && (
@@ -894,13 +883,12 @@ function VramBudgetRow() {
           onClick={resetBudget}
           className="text-ui-11 text-muted-foreground underline underline-offset-2 hover:text-foreground"
         >
-          Reset to the server default
+          {translate("uxCopy.resetToTheServer3u8rc")}
         </button>
       )}
       {settings.reloadRequired && (
         <p className="text-ui-11 text-muted-foreground">
-          The loaded model was sized with a different budget. Reload it to apply
-          this one.
+          {translate("uxCopy.theLoadedModelWas1v2vb")}
         </p>
       )}
     </div>
@@ -1026,17 +1014,13 @@ function GpuMemorySettings({
     <>
       <div className={isDiffusion ? "hidden" : ROW_CLASS}>
         <div className="flex min-w-0 items-center gap-1.5">
-          <span className={LABEL_CLASS}>GPU Memory</span>
+          <span className={LABEL_CLASS}>{translate("uxModelpicker.gPUMemoryyjjkk")}</span>
           <InfoHint>
             <div className="flex flex-col gap-1.5">
               <div>
-                <span className="font-medium">Default:</span> LAiM fits the
-                model and context to your GPUs.
-              </div>
+                <span className="font-medium">{translate("uxModelpicker.defaultv36o8")}</span>{translate("uxModelpicker.lAiMFitsTheModel1yptd")}</div>
               <div>
-                <span className="font-medium">Manual:</span> set GPU Layers
-                yourself.
-              </div>
+                <span className="font-medium">{translate("uxModelpicker.manualcx8as")}</span>{translate("uxModelpicker.setGPULayersYourselffk526")}</div>
             </div>
           </InfoHint>
         </div>
@@ -1081,7 +1065,7 @@ function GpuMemorySettings({
       {!isDiffusion && isManual && (
         <>
           <AdvancedGpuSlider
-            label="GPU Layers"
+            label={translate("uxModelpicker.gPULayersriesa")}
             inputRef={gpuLayersInputRef}
             value={Math.max(GPU_LAYERS_AUTO, Math.min(gpuLayers, gpuLayersMax))}
             min={GPU_LAYERS_AUTO}
@@ -1092,14 +1076,12 @@ function GpuMemorySettings({
             format={(v) => (v < 0 ? "Auto" : undefined)}
             info={
               <>
-                Layers to keep on the GPU (--gpu-layers); the rest run on CPU.
-                Auto sizes the split to fit VRAM.
-              </>
+                {translate("uxModelpicker.layersToKeepOn17nx5")}</>
             }
           />
           {showMoeSlider && (
             <AdvancedGpuSlider
-              label="MoE Layers on CPU"
+              label={translate("uxModelpicker.moELayersOnCPU10voj")}
               inputRef={moeLayersInputRef}
               value={Math.min(nCpuMoe, moeLayersMax)}
               min={0}
@@ -1107,9 +1089,7 @@ function GpuMemorySettings({
               onChange={(v) => update({ nCpuMoe: v })}
               info={
                 <>
-                  Keep the experts of this many MoE layers on the CPU
-                  (--n-cpu-moe) to save VRAM. 0 keeps every expert on the GPU.
-                </>
+                  {translate("uxModelpicker.keepTheExpertsOf1n43q")}</>
               }
             />
           )}
@@ -1123,21 +1103,19 @@ function GpuMemorySettings({
               LAiM picks GPUs automatically. Checking them here limits it to
               those.
               {!isDiffusion &&
-                " Their order here is the order the model gets them."}{" "}
+                translate("uxModelpicker.theirOrderHereIs1ms0z")}{" "}
               Keep at least one selected.
               {showSplit &&
                 (splitIsPercent
-                  ? " The number beside each is its share of every layer, in percent (--tensor-split)."
-                  : " The number beside each is how many of the GPU Layers it holds (--tensor-split).")}
+                  ? translate("uxModelpicker.theNumberBesideEachffdjf")
+                  : translate("uxModelpicker.theNumberBesideEach29oi2"))}
             </InfoHint>
             {showSplit && splitIsCustom && (
               <button
                 type="button"
                 className="ml-auto shrink-0 rounded px-1 text-ui-12 text-muted-foreground hover:text-foreground"
                 onClick={() => update({ tensorSplit: null })}
-              >
-                Reset split
-              </button>
+              >{translate("uxModelpicker.resetSplitdqq5e")}</button>
             )}
           </div>
           <div className="flex flex-col gap-2">
@@ -1163,8 +1141,8 @@ function GpuMemorySettings({
                       derived={!splitIsCustom}
                       ariaLabel={
                         splitIsPercent
-                          ? `Share of each layer on GPU ${d.index}, percent`
-                          : `Layers on GPU ${d.index}`
+                          ? translate("uxModelpicker.shareOfEachLayerpyjmt", { p1: d.index })
+                          : translate("uxModelpicker.layersOnGPUn7y8s", { p1: d.index })
                       }
                       className="panel-field h-7 w-[calc(52px*var(--ui-space-scale,1))] shrink-0"
                       fixedWidth={true}
@@ -1183,7 +1161,7 @@ function GpuMemorySettings({
                     <button
                       type="button"
                       className="rounded px-1 text-ui-12 text-muted-foreground hover:text-foreground disabled:opacity-30"
-                      aria-label={`Move GPU ${d.index} earlier`}
+                      aria-label={translate("uxModelpicker.moveGPUEarlier1wbln", { p1: d.index })}
                       disabled={position === 0}
                       onClick={() => moveGpu(d.index, -1)}
                     >
@@ -1192,7 +1170,7 @@ function GpuMemorySettings({
                     <button
                       type="button"
                       className="rounded px-1 text-ui-12 text-muted-foreground hover:text-foreground disabled:opacity-30"
-                      aria-label={`Move GPU ${d.index} later`}
+                      aria-label={translate("uxModelpicker.moveGPULaterubt7e", { p1: d.index })}
                       disabled={position >= orderedGpuIds.length - 1}
                       onClick={() => moveGpu(d.index, 1)}
                     >
@@ -1229,18 +1207,17 @@ function AdvancedSettingsToggle({
     <div className={`${ROW_CLASS} border-t border-border pt-5`}>
       <div className="flex min-w-0 items-center gap-1.5">
         <span className="min-w-0 text-ui-13 font-medium leading-[1.25] tracking-nav text-muted-foreground">
-          Advanced settings
+          {translate("studio.preview.advancedSettings")}
         </span>
         <InfoHint>
-          Extra options for how the model loads. LAiM already picks the best
-          settings for your device, so most setups don't need these.
+          {translate("uxCopy.extraOptionsForHow1uvil")}
         </InfoHint>
       </div>
       <Switch
         className="panel-switch shrink-0"
         checked={checked}
         onCheckedChange={onCheckedChange}
-        aria-label="Show advanced settings"
+        aria-label={translate("uxModelpicker.showAdvancedSettings16a56")}
       />
     </div>
   );
@@ -1268,7 +1245,7 @@ function ParallelSlotsRow({
   return (
     <div className={ROW_CLASS}>
       <div className="flex min-w-0 items-center gap-1.5">
-        <span className={LABEL_CLASS}>Parallel Slots</span>
+        <span className={LABEL_CLASS}>{translate("uxModelpicker.parallelSlotsz0w70")}</span>
         <InfoHint>{hint}</InfoHint>
       </div>
       <input
@@ -1277,7 +1254,7 @@ function ParallelSlotsRow({
         max={N_PARALLEL_MAX}
         step={1}
         value={config.nParallel ?? ""}
-        placeholder="auto"
+        placeholder={translate("uxModelpicker.auto14ku3")}
         onChange={(event) => {
           const raw = event.target.value;
           if (raw === "") {
@@ -1294,7 +1271,7 @@ function ParallelSlotsRow({
             });
           }
         }}
-        aria-label="Parallel decode slots"
+        aria-label={translate("uxModelpicker.parallelDecodeSlots1iy65")}
         className={NUMBER_INPUT_CLASS}
       />
     </div>
@@ -1330,15 +1307,8 @@ function MlxSpeculativeRows({
     <>
       <div className={ROW_CLASS}>
         <div className="flex min-w-0 items-center gap-1.5">
-          <span className={LABEL_CLASS_WRAP}>Speculative Decoding</span>
-          <InfoHint>
-            Faster generation. Auto uses the first cached drafter (an MTP head
-            or assistant, then DFlash2, DFlash, DSpark, EAGLE-3), tunes the
-            draft length to this machine and drafts only while that is faster.
-            Choose a kind to force it. Every drafter also copies repeated text;
-            Ngram copies without one. Drafters are read from the local Hugging
-            Face cache, never downloaded.
-          </InfoHint>
+          <span className={LABEL_CLASS_WRAP}>{translate("uxModelpicker.speculativeDecoding4giro")}</span>
+          <InfoHint>{translate("uxModelpicker.fasterGenerationAutoUses6u130")}</InfoHint>
         </div>
         <Select
           value={mode}
@@ -1374,14 +1344,9 @@ function MlxSpeculativeRows({
       {DRAFT_N_MAX_SPEC_TYPES.has(mode) && (
         <div className={ROW_CLASS}>
           <div className="flex min-w-0 items-center gap-1.5">
-            <span className={LABEL_CLASS}>Draft Tokens</span>
+            <span className={LABEL_CLASS}>{translate("uxModelpicker.draftTokenskrjcr")}</span>
             <InfoHint>
-              Tokens per draft: up to the drafter's depth (3 for MTP heads),
-              every step drafts exactly this many, even when plain decoding would
-              be faster (a copy of repeated text replaces a draft when it should
-              yield more). Above that depth, or for Ngram, it is a
-              ceiling and LAiM decodes plainly when drafting would be slower.
-              Leave blank to let LAiM tune it for this machine.
+              {translate("uxCopy.tokensPerDraftUp1w3oj")}
             </InfoHint>
           </div>
           <input
@@ -1390,7 +1355,7 @@ function MlxSpeculativeRows({
             max={16}
             step={1}
             value={config.specDraftNMax ?? ""}
-            placeholder="auto"
+            placeholder={translate("uxModelpicker.auto14ku3")}
             onChange={(event) => {
               const parsed = Number.parseInt(event.target.value, 10);
               update(
@@ -1401,7 +1366,7 @@ function MlxSpeculativeRows({
                 }),
               );
             }}
-            aria-label="Speculative decoding draft tokens"
+            aria-label={translate("uxModelpicker.speculativeDecodingDraftTokensarfwh")}
             className={NUMBER_INPUT_CLASS}
           />
         </div>
@@ -1411,9 +1376,7 @@ function MlxSpeculativeRows({
           <div className="flex min-w-0 items-center gap-1.5">
             <span className={LABEL_CLASS}>Drafter</span>
             <InfoHint>
-              A drafter from the local Hugging Face cache that fits this
-              model. Auto uses the model's own head or the first cached drafter
-              named for it.
+              {translate("uxCopy.aDrafterFromThe1fxx1")}
             </InfoHint>
           </div>
           <Select
@@ -1430,7 +1393,7 @@ function MlxSpeculativeRows({
               animateRadius={false}
               icon={ChevronDownStandardIcon}
               iconClassName="size-3.5"
-              aria-label="Speculative decoding drafter"
+              aria-label={translate("uxModelpicker.speculativeDecodingDrafteruszk9")}
               className={SELECT_TRIGGER_CLASS}
             >
               <SelectValue />
@@ -1485,14 +1448,8 @@ function MlxAdvancedSettings({
         <div className="space-y-1">
       <div className={ROW_CLASS}>
         <div className="flex min-w-0 items-center gap-1.5">
-          <span className={LABEL_CLASS}>KV Cache Dtype</span>
-          <InfoHint>
-            Lower KV cache precision to save memory, at some cost to quality.
-            Auto keeps full precision; 8-bit is the safest step down.
-            TurboQuant holds quality better at the low widths and adds 3.5-bit,
-            which uses 3-bit keys beside 4-bit values; sliding-window and
-            recurrent layers keep their native cache under it.
-          </InfoHint>
+          <span className={LABEL_CLASS}>{translate("uxModelpicker.kVCacheDtype5i4gx")}</span>
+          <InfoHint>{translate("uxModelpicker.lowerKVCachePrecision85vry")}</InfoHint>
         </div>
         <Select
           value={config.mlxKvQuant ?? MLX_KV_QUANT_AUTO}
@@ -1527,13 +1484,12 @@ function MlxAdvancedSettings({
       {servedByMlx && (int8PrefillAvailable || config.mlxInt8Prefill) && (
         <div className={ROW_CLASS}>
           <div className="flex min-w-0 items-center gap-1.5">
-            <span className={LABEL_CLASS}>Int8 Prefill</span>
+            <span className={LABEL_CLASS}>{translate("uxModelpicker.int8Prefillt3ypl")}</span>
             <span className="shrink-0 rounded-md bg-[rgb(6_29_33_/_calc(0.04*var(--contrast-wash-gain,1)))] px-1.5 py-0.5 text-ui-10 font-medium uppercase tracking-wide text-muted-foreground dark:bg-muted">
               Exp
             </span>
             <InfoHint>
-              Reads long prompts faster by doing part of the math at lower
-              precision. Answers can change and may be less accurate.
+              {translate("uxCopy.readsLongPromptsFaster1my1g")}
             </InfoHint>
           </div>
           <Switch
@@ -1603,11 +1559,7 @@ function LoadModeRow({
         <div className="flex min-w-0 items-center gap-1.5">
           <span className={LABEL_CLASS}>Mmap/Mlock</span>
           <InfoHint>
-            How the weights are read off disk (--load-mode). Auto is the
-            default and lets LAiM pick. mmap maps the file, mlock keeps the
-            model in RAM, DirectIO streams it, and None asks for no special
-            mode.
-            Model Memory, in Settings, overrides this when it is on.
+            {translate("uxCopy.howTheWeightsAre10uwy")}
           </InfoHint>
         </div>
         <Select
@@ -1700,11 +1652,8 @@ function GgufAdvancedSettings({
     <>
       <div className={ROW_CLASS}>
         <div className="flex min-w-0 items-center gap-1.5">
-          <span className={LABEL_CLASS}>KV Cache Dtype</span>
-          <InfoHint>
-            Lower KV cache precision to save VRAM, at some cost to quality. f16
-            is the default; q8_0 through iq4_nl are quantized.
-          </InfoHint>
+          <span className={LABEL_CLASS}>{translate("uxModelpicker.kVCacheDtype5i4gx")}</span>
+          <InfoHint>{translate("uxModelpicker.lowerKVCachePrecisioni0f9j")}</InfoHint>
         </div>
         <Select
           value={config.kvCacheDtype ?? KV_CACHE_DTYPE_DEFAULT}
@@ -1735,13 +1684,8 @@ function GgufAdvancedSettings({
 
       <div className={ROW_CLASS}>
         <div className="flex min-w-0 items-center gap-1.5">
-          <span className={LABEL_CLASS_WRAP}>Speculative Decoding</span>
-          <InfoHint>
-            Faster generation. Auto picks the best strategy for the model and
-            platform, or choose one to force it. DSpark and DFlash download a
-            drafter sidecar (about 11 GB and 1.5 GB) and trade VRAM for speed;
-            MTP and ngram do not change output.
-          </InfoHint>
+          <span className={LABEL_CLASS_WRAP}>{translate("uxModelpicker.speculativeDecoding4giro")}</span>
+          <InfoHint>{translate("uxModelpicker.fasterGenerationAutoPicksyqp17")}</InfoHint>
         </div>
         <Select
           value={config.speculativeType ?? speculativeFallback}
@@ -1780,10 +1724,9 @@ function GgufAdvancedSettings({
       {showDraftTokens && (
         <div className={ROW_CLASS}>
           <div className="flex min-w-0 items-center gap-1.5">
-            <span className={LABEL_CLASS}>Draft Tokens</span>
+            <span className={LABEL_CLASS}>{translate("uxModelpicker.draftTokenskrjcr")}</span>
             <InfoHint>
-              Max draft tokens per step. Leave blank for the default (2 or 3,
-              depending on the strategy and device).
+              {translate("uxCopy.maxDraftTokensPer7o3ch")}
             </InfoHint>
           </div>
           <input
@@ -1792,7 +1735,7 @@ function GgufAdvancedSettings({
             max={16}
             step={1}
             value={config.specDraftNMax ?? ""}
-            placeholder="auto"
+            placeholder={translate("uxModelpicker.auto14ku3")}
             onChange={(event) => {
               const raw = event.target.value;
               if (raw === "") {
@@ -1804,7 +1747,7 @@ function GgufAdvancedSettings({
                 update({ specDraftNMax: Math.max(1, Math.min(16, parsed)) });
               }
             }}
-            aria-label="Speculative decoding draft tokens"
+            aria-label={translate("uxModelpicker.speculativeDecodingDraftTokensarfwh")}
             className={NUMBER_INPUT_CLASS}
           />
         </div>
@@ -1813,12 +1756,8 @@ function GgufAdvancedSettings({
       {showSpecDraftCacheDtype && (
         <div className={ROW_CLASS}>
           <div className="flex min-w-0 items-center gap-1.5">
-            <span className={LABEL_CLASS_WRAP}>Spec Decoding KV Cache Dtype</span>
-            <InfoHint>
-              KV cache precision for the draft model's own context, separate
-              from the KV Cache Dtype above. f16 is the default; quantizing it
-              saves VRAM on a drafter the target verifies anyway.
-            </InfoHint>
+            <span className={LABEL_CLASS_WRAP}>{translate("uxCopy.specDecodingKVCachexegbe")}</span>
+            <InfoHint>{translate("uxModelpicker.kVCachePrecisionForingjp")}</InfoHint>
           </div>
           <Select
             value={config.specDraftCacheDtype ?? KV_CACHE_DTYPE_DEFAULT}
@@ -1859,10 +1798,9 @@ function GgufAdvancedSettings({
         <div className="space-y-1">
           <div className={ROW_CLASS}>
             <div className="flex min-w-0 items-center gap-1.5">
-              <span className={LABEL_CLASS}>Batch Size</span>
+              <span className={LABEL_CLASS}>{translate("uxModelpicker.batchSizee2ruy")}</span>
               <InfoHint>
-                Logical prompt batch size (--batch-size). Leave blank for the
-                default (2048). The micro-batch below usually matters more.
+                {translate("uxCopy.logicalPromptBatchSize15kyz")}
               </InfoHint>
             </div>
             <input
@@ -1871,7 +1809,7 @@ function GgufAdvancedSettings({
               max={N_BATCH_MAX}
               step={1}
               value={config.nBatch ?? ""}
-              placeholder="auto"
+              placeholder={translate("uxModelpicker.auto14ku3")}
               onChange={(event) => {
                 const raw = event.target.value;
                 if (raw === "") {
@@ -1885,7 +1823,7 @@ function GgufAdvancedSettings({
                   });
                 }
               }}
-              aria-label="Prompt batch size"
+              aria-label={translate("uxModelpicker.promptBatchSize27vvx")}
               aria-describedby={batchBelowFloor ? batchAdviceId : undefined}
               className={NUMBER_INPUT_CLASS}
             />
@@ -1894,8 +1832,8 @@ function GgufAdvancedSettings({
             <p id={batchAdviceId} className="text-ui-11 text-muted-foreground">
               Too small for llama-server, so the load will raise it to {batchFloor}.
               {config.nParallel != null && config.nParallel > 2
-                ? " It needs one output slot per parallel slot."
-                : " It cannot run a batch below 2."}
+                ? translate("uxModelpicker.itNeedsOneOutputly49n")
+                : translate("uxModelpicker.itCannotRunAfwhx4")}
             </p>
           )}
         </div>
@@ -1905,13 +1843,8 @@ function GgufAdvancedSettings({
         <div className="space-y-1">
           <div className={ROW_CLASS}>
             <div className="flex min-w-0 items-center gap-1.5">
-              <span className={LABEL_CLASS}>Micro-batch Size</span>
-              <InfoHint>
-                Physical prompt micro-batch size (--ubatch-size). Leave blank
-                for the default (512, or 1120 on Gemma 4 vision models). Larger
-                values speed up prompt processing but use more VRAM; capped at
-                the batch size.
-              </InfoHint>
+              <span className={LABEL_CLASS}>{translate("uxModelpicker.microBatchSize6hycn")}</span>
+              <InfoHint>{translate("uxModelpicker.physicalPromptMicroBatchqn6lq")}</InfoHint>
             </div>
             <input
               type="number"
@@ -1919,7 +1852,7 @@ function GgufAdvancedSettings({
               max={N_BATCH_MAX}
               step={1}
               value={config.nUbatch ?? ""}
-              placeholder="auto"
+              placeholder={translate("uxModelpicker.auto14ku3")}
               onChange={(event) => {
                 const raw = event.target.value;
                 if (raw === "") {
@@ -1933,16 +1866,13 @@ function GgufAdvancedSettings({
                   });
                 }
               }}
-              aria-label="Prompt micro-batch size"
+              aria-label={translate("uxModelpicker.promptMicroBatchSizeg0l8g")}
               aria-describedby={ubatchExceedsBatch ? ubatchAdviceId : undefined}
               className={NUMBER_INPUT_CLASS}
             />
           </div>
           {ubatchExceedsBatch && (
-            <p id={ubatchAdviceId} className="text-ui-11 text-muted-foreground">
-              Micro-batch is larger than the batch size, so llama.cpp will run at{" "}
-              {effectiveBatch}. Raise the batch size to use {config.nUbatch}.
-            </p>
+            <p id={ubatchAdviceId} className="text-ui-11 text-muted-foreground">{translate("uxModelpicker.microBatchIsLargerkf3u5", { p1: " ", p2: effectiveBatch, p3: config.nUbatch })}</p>
           )}
         </div>
       )}
@@ -1952,10 +1882,9 @@ function GgufAdvancedSettings({
       {!isDiffusion && (
         <div className={ROW_CLASS}>
           <div className="flex min-w-0 items-center gap-1.5">
-            <span className={LABEL_CLASS}>Tensor Parallelism</span>
+            <span className={LABEL_CLASS}>{translate("uxModelpicker.tensorParallelismmhgvt")}</span>
             <InfoHint>
-              Speeds up dense models across multiple GPUs. No effect on a single
-              GPU, and MoE models don't benefit.
+              {translate("uxCopy.speedsUpDenseModels8o24y")}
             </InfoHint>
           </div>
           <Switch
@@ -1973,9 +1902,7 @@ function GgufAdvancedSettings({
           <div className="flex min-w-0 items-center gap-1.5">
             <span className={LABEL_CLASS}>Vision</span>
             <InfoHint>
-              Loads the vision projector so the model can read images. Turning
-              it off frees that VRAM for more layers on the GPU. Text generation
-              is unaffected either way.
+              {translate("uxCopy.loadsTheVisionProjectorbosgn")}
             </InfoHint>
           </div>
           <Switch
@@ -1989,10 +1916,9 @@ function GgufAdvancedSettings({
       {!isDiffusion && (
         <div className={ROW_CLASS}>
           <div className="flex min-w-0 items-center gap-1.5">
-            <span className={LABEL_CLASS}>Reasoning Budget</span>
+            <span className={LABEL_CLASS}>{translate("uxModelpicker.reasoningBudgetsil1i")}</span>
             <InfoHint>
-              Maximum thinking tokens. -1 is unlimited and 0 turns reasoning
-              off.
+              {translate("uxCopy.maximumThinkingTokens112fy5")}
             </InfoHint>
           </div>
           <input
@@ -2017,7 +1943,7 @@ function GgufAdvancedSettings({
                 });
               }
             }}
-            aria-label="Reasoning Budget"
+            aria-label={translate("uxModelpicker.reasoningBudget1700z")}
             className={NUMBER_INPUT_CLASS}
           />
         </div>
@@ -2026,22 +1952,21 @@ function GgufAdvancedSettings({
       {!isDiffusion && (
         <div className={ROW_CLASS}>
           <div className="flex min-w-0 items-center gap-1.5">
-            <span className={LABEL_CLASS_WRAP}>Reasoning Budget Message</span>
+            <span className={LABEL_CLASS_WRAP}>{translate("uxModelpicker.reasoningBudgetMessage1c5i6")}</span>
             <InfoHint>
-              Optional text added before the end-of-thinking tag when the budget
-              runs out.
+              {translate("uxCopy.optionalTextAddedBefore1tb7a")}
             </InfoHint>
           </div>
           <input
             type="text"
             value={config.reasoningBudgetMessage}
-            placeholder="None"
+            placeholder={translate("composer.pill.effortNone")}
             onChange={(event) => {
               if (isReasoningBudgetMessageValid(event.target.value)) {
                 update({ reasoningBudgetMessage: event.target.value });
               }
             }}
-            aria-label="Reasoning Budget Message"
+            aria-label={translate("uxModelpicker.reasoningBudgetMessage1c5i6")}
             className={TEXT_INPUT_CLASS}
           />
         </div>
@@ -2082,7 +2007,7 @@ function GgufAdvancedSettings({
               max={CTX_CHECKPOINTS_MAX}
               step={1}
               value={config.ctxCheckpoints ?? ""}
-              placeholder="auto"
+              placeholder={translate("uxModelpicker.auto14ku3")}
               onChange={(event) => {
                 const raw = event.target.value;
                 if (raw === "") {
@@ -2099,20 +2024,15 @@ function GgufAdvancedSettings({
                   });
                 }
               }}
-              aria-label="Context checkpoints per slot"
+              aria-label={translate("uxModelpicker.contextCheckpointsPerSlot1fy5c")}
               className={NUMBER_INPUT_CLASS}
             />
           </div>
 
           <div className={ROW_CLASS}>
             <div className="flex min-w-0 items-center gap-1.5">
-              <span className={LABEL_CLASS}>Cache RAM</span>
-              <InfoHint>
-                Host memory in MiB for caching prompt state evicted from a slot
-                (--cache-ram), so a returning conversation is not re-processed.
-                Leave blank for the default ({CACHE_RAM_LLAMA_DEFAULT}); 0
-                disables it and -1 lifts the limit.
-              </InfoHint>
+              <span className={LABEL_CLASS}>{translate("uxModelpicker.cacheRAM8z1xu")}</span>
+              <InfoHint>{translate("uxModelpicker.hostMemoryInMiB2u3ap", { p1: CACHE_RAM_LLAMA_DEFAULT })}</InfoHint>
             </div>
             <input
               type="number"
@@ -2120,7 +2040,7 @@ function GgufAdvancedSettings({
               max={CACHE_RAM_MAX}
               step={1}
               value={config.cacheRam ?? ""}
-              placeholder="auto"
+              placeholder={translate("uxModelpicker.auto14ku3")}
               onChange={(event) => {
                 const raw = event.target.value;
                 if (raw === "") {
@@ -2137,7 +2057,7 @@ function GgufAdvancedSettings({
                   });
                 }
               }}
-              aria-label="Host prompt cache size in MiB"
+              aria-label={translate("uxModelpicker.hostPromptCacheSize1q66s")}
               className={NUMBER_INPUT_CLASS}
             />
           </div>
@@ -2274,18 +2194,12 @@ function ExtraArgsRow({
   return (
     <div className="space-y-2">
       <div className="flex min-w-0 items-center gap-1.5">
-        <span className={LABEL_CLASS}>Extra Arguments</span>
+        <span className={LABEL_CLASS}>{translate("uxModelpicker.extraArgumentsw2rx1")}</span>
         <InfoHint>
           <div className="flex flex-col gap-1.5">
             <div>
-              Passed straight to llama-server after the settings above, so
-              anything set in both is taken from here.
-            </div>
-            <div>
-              Quote values with spaces or backslashes. Nothing runs a shell, so
-              $HOME, ; and | are ordinary characters. Flags LAiM owns, like
-              the model and the port, are refused.
-            </div>
+              {translate("uxModelpicker.passedStraightToLlama29mp0")}</div>
+            <div>{translate("uxModelpicker.quoteValuesWithSpacesedt4i")}</div>
           </div>
         </InfoHint>
       </div>
@@ -2296,8 +2210,8 @@ function ExtraArgsRow({
             value={text}
             onChange={(event) => commit(event.target.value)}
             spellCheck={false}
-            placeholder="--rope-scaling yarn --yarn-orig-ctx 32768"
-            aria-label="Extra llama-server arguments"
+            placeholder={translate("uxModelpicker.ropeScalingYarnYarndqnyx")}
+            aria-label={translate("uxModelpicker.extraLlamaServerArgumentsijtgy")}
             aria-describedby={diagnostics.length > 0 ? adviceId : undefined}
             className="block size-full resize-none bg-transparent px-3.5 py-2.5 text-left font-mono text-ui-12 leading-relaxed text-foreground outline-none placeholder:text-muted-foreground"
           />
@@ -3417,11 +3331,11 @@ export function ModelConfigPage({
   const persistenceOnly = isActiveModel && atBaseline && rememberChanged;
   const primaryActionLabel = persistenceOnly
     ? remember
-      ? "Save settings"
-      : "Forget settings"
+      ? translate("uxModelpicker.saveSettingsgqaqj")
+      : translate("uxModelpicker.forgetSettingsdqvq7")
     : isActiveModel
-      ? "Reload model"
-      : "Load model";
+      ? translate("uxModelpicker.reloadModeljssp7")
+      : translate("uxModelpicker.loadModel6orkt");
 
   const [engineReady, setEngineReady] = useState(true);
   const commitDraft = () => {
@@ -3552,10 +3466,10 @@ export function ModelConfigPage({
     setRemember(nextRemember);
     toast.success(
       nextRemember
-        ? "Settings saved."
+        ? translate("uxModelpicker.settingsSavedp3d1t")
         : remember
-          ? "Default settings kept."
-          : "Settings forgotten.",
+          ? translate("uxModelpicker.defaultSettingsKeptosls2")
+          : translate("uxModelpicker.settingsForgotten8ilj9"),
     );
   };
 
@@ -3566,7 +3480,7 @@ export function ModelConfigPage({
     const { effectiveRuntimeConfig } = commitDraft();
     const { saved, defaultConfig } = persistConfig(effectiveRuntimeConfig);
     if (!saved) {
-      toast.error("Couldn't save settings for this model.");
+      toast.error(translate("uxModelpicker.couldnTSaveSettingsi0l6t"));
       return;
     }
     // The page stays mounted, so show a context pinFixedLayerContext stored (else it reads "Auto").
@@ -3603,14 +3517,14 @@ export function ModelConfigPage({
     const { saved, defaultConfig } = persistConfig(effectiveRuntimeConfig);
     if (effectivePersistenceOnly) {
       if (!saved) {
-        toast.error("Couldn't save settings for this model.");
+        toast.error(translate("uxModelpicker.couldnTSaveSettingsi0l6t"));
         return;
       }
       finishPersist(defaultConfig);
       return;
     }
     if (!saved) {
-      toast.error("Couldn't save these settings, loading with them anyway.");
+      toast.error(translate("uxModelpicker.couldnTSaveThesedig7x"));
     }
     const effectiveLoadConfig =
       target.isGguf || pinsContextLength
@@ -3638,7 +3552,7 @@ export function ModelConfigPage({
             // goes, never a newer edit staged over it.
           dropVramBudgetRetry();
           toast.error(
-            error instanceof Error ? error.message : "Failed to save VRAM budget",
+            error instanceof Error ? error.message : translate("uxModelpicker.failedToSaveVRAMabcbv"),
           );
         })
         .finally(() => {
@@ -3671,7 +3585,7 @@ export function ModelConfigPage({
               type="button"
               onClick={onBack}
               className="nav-icon-btn -ml-1.5 shrink-0 text-nav-icon-idle hover:bg-panel-surface-hover hover:text-[#061d21] dark:hover:text-[#f9e2de]"
-              aria-label="Back to model list"
+              aria-label={translate("uxModelpicker.backToModelListlkeyy")}
             >
               <ChevronLeftIcon
                 className="size-4"
@@ -3681,7 +3595,7 @@ export function ModelConfigPage({
           )}
           <div className="min-w-0 flex-1">
             <div className="text-ui-10 font-semibold uppercase leading-none tracking-wider text-muted-foreground">
-              Run settings
+              {translate("uxModelpicker.runSettingsmw4kg")}
             </div>
             <div className="mt-1.5 truncate text-ui-14 font-semibold leading-tight text-foreground">
               {target.displayName}
@@ -3706,16 +3620,14 @@ export function ModelConfigPage({
         {!target.isGguf && !targetIsMlx && !targetIsNpu && !classifiedIsDiffusion && !target.meta.isLora && !target.meta.audioType && (config.engine ?? "auto") === "auto" && (
           <div className={ROW_CLASS}>
             <div className="flex min-w-0 items-center gap-1.5">
-              <span className={LABEL_CLASS}>Load in 4-bit</span>
+              <span className={LABEL_CLASS}>{translate("uxModelpicker.loadIn4Bittuexh")}</span>
               <InfoHint>
-                Quantizes the model to 4 bits as it loads, using about a quarter
-                of the memory. Turn it off to run the model in 16-bit, the same
-                precision as a 16-bit LoRA or full fine-tune.
+                {translate("uxCopy.quantizesTheModelTohque1")}
               </InfoHint>
             </div>
             <Switch
               className="panel-switch shrink-0"
-              aria-label="Load in 4-bit"
+              aria-label={translate("uxModelpicker.loadIn4Bithjer5")}
               checked={config.loadIn4bit !== false}
               onCheckedChange={(checked) => update({ loadIn4bit: checked })}
             />
@@ -3723,9 +3635,7 @@ export function ModelConfigPage({
         )}
         {audioRuntimeGguf ? (
           <p className="text-ui-12 leading-snug text-muted-foreground">
-            This model runs on the audio runtime, so llama.cpp settings do not
-            apply. Its generation options are under Advanced on the Audio page
-            once it is loaded.
+            {translate("uxCopy.thisModelRunsOnoxrrq")}
           </p>
         ) : null}
         {memoryEstimateRequest != null && !audioRuntimeGguf && (
@@ -3773,18 +3683,9 @@ export function ModelConfigPage({
                 v > loadedMaxContextLength && (
                   <p className="text-ui-11 text-amber-500">
                     {isAppleUnifiedMemory ? (
-                      <>
-                        Above Studio&apos;s free-memory estimate (
-                        {loadedMaxContextLength.toLocaleString()} tokens). It
-                        may still load, but macOS may have to compress or swap
-                        other apps and generation may slow down.
-                      </>
+                      <>{translate("uxModelpicker.aboveStudioSFree6e53r", { p1: loadedMaxContextLength.toLocaleString() })}</>
                     ) : (
-                      <>
-                        Exceeds estimated VRAM capacity (
-                        {loadedMaxContextLength.toLocaleString()} tokens). The
-                        model may use system RAM.
-                      </>
+                      <>{translate("uxModelpicker.exceedsEstimatedVRAMCapacityt2iaw", { p1: loadedMaxContextLength.toLocaleString() })}</>
                     )}
                   </p>
                 )
@@ -3836,7 +3737,7 @@ export function ModelConfigPage({
               }
               hint={
                 targetIsNpu
-                  ? `Tokens of context FastFlowLM loads the model with. Unset, it loads ${NPU_DEFAULT_CONTEXT_LENGTH.toLocaleString()}, or the model's limit if that is lower.`
+                  ? translate("uxModelpicker.tokensOfContextFastFlowLM8w76j", { p1: NPU_DEFAULT_CONTEXT_LENGTH.toLocaleString() })
                   : undefined
               }
               onChange={(value) =>
@@ -3891,7 +3792,7 @@ export function ModelConfigPage({
             htmlFor={rememberId}
             className="cursor-pointer select-none truncate text-ui-13 text-foreground"
           >
-            Remember for this model
+            {translate("uxCopy.rememberForThisModel2lfxd")}
           </label>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -3938,7 +3839,7 @@ export function ModelConfigPage({
               }
               onClick={handleSave}
             >
-              {remember ? "Save settings" : "Forget settings"}
+              {remember ? translate("uxModelpicker.saveSettingsdpv7m") : translate("uxModelpicker.forgetSettings6g8e9")}
             </Button>
           )}
           <Button
@@ -3997,12 +3898,8 @@ export function ModelConfigPage({
       >
         <AlertDialogContent size="sm">
           <AlertDialogHeader>
-            <AlertDialogTitle>Turn on Int8 Prefill?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Long prompts are read faster, but the model&apos;s answers will
-              change and may be less accurate. Some models are affected more
-              than others. You can turn it off at any time.
-            </AlertDialogDescription>
+            <AlertDialogTitle>{translate("uxModelpicker.turnOnInt8Prefill3y181")}</AlertDialogTitle>
+            <AlertDialogDescription>{translate("uxModelpicker.longPromptsAreReadj6kt5")}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -4013,9 +3910,7 @@ export function ModelConfigPage({
                 update({ mlxInt8Prefill: true });
                 setInt8PrefillConfirmOpen(false);
               }}
-            >
-              Turn on
-            </AlertDialogAction>
+            >{translate("uxModelpicker.turnOnisc0l")}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

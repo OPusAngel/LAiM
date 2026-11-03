@@ -197,5 +197,5 @@ def test_layers_flagged_by_arming_get_the_requested_mode(module, class_name):
                 layer._gradient_checkpointing_func = lambda f, *a: f(*a)
 
     model = _Model()
-    _for_training(module, class_name)(model, use_gradient_checkpointing = "LAiM")
-    assert model.late.gradient_checkpointing == "LAiM"
+    _for_training(module, class_name)(model, use_gradient_checkpointing = "unsloth")
+    assert model.late.gradient_checkpointing == "unsloth"

@@ -287,7 +287,7 @@ _RELATIVE_PATH_ENV = (
     "STUDIO_HOME",
     "LAiM_STUDIO_DOCUMENTS_HOME",
     "LAiM_STUDIO_PROJECTS_HOME",
-    "LAiM_STUDIO_SANDBOX_HOME",
+    "LAiM_STUDIO_WORKDIR_HOME",
     # `studio update` reads it, and that command relocates.
     "STUDIO_LOCAL_REPO",
     "LAiM_LLAMA_CPP_PATH",

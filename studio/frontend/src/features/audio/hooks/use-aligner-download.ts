@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { useCallback, useEffect, useRef } from "react";
 
 import { useStagedDownload } from "@/features/hub/download-manager";
@@ -37,9 +38,9 @@ export function useAlignerDownload(
     onCancelled: () => {
       if (!pendingRun.current) return;
       pendingRun.current = null;
-      toast.info("Transcription not started", {
+      toast.info(translate("uxAudio.transcriptionNotStartedpnczz"), {
         description:
-          "Timestamps need the timing aligner. Download it again, or turn Timestamps off.",
+          translate("uxAudio.timestampsNeedTheTiming3seas"),
       });
     },
   });

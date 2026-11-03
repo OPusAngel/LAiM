@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { cn } from "@/lib/utils";
 import { ArrowDown01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -64,7 +65,7 @@ export function VariationChips({
   if (siblings.length < 2) return null;
   return (
     <fieldset
-      aria-label="Variations"
+      aria-label={translate("uxAudio.variationsydjw4")}
       className="m-0 flex min-w-0 flex-wrap items-center gap-1 border-0 p-0"
     >
       <span className="mr-1 text-ui-11p5 text-muted-foreground">
@@ -77,7 +78,7 @@ export function VariationChips({
             key={clip.id}
             type="button"
             aria-pressed={current}
-            aria-label={`Variation ${index + 1} of ${siblings.length}`}
+            aria-label={translate("uxAudio.variationOfqaxzt", { p1: index + 1, p2: siblings.length })}
             onClick={() => onSelect(clip.id)}
             className={cn(
               "flex size-[calc(24px*var(--ui-space-scale,1))] items-center justify-center rounded-full font-mono text-ui-11p5 tabular-nums transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",

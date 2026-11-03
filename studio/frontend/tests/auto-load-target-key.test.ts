@@ -8,6 +8,11 @@ import { fileURLToPath } from "node:url";
 
 import ts from "@typescript/typescript6";
 
+import { enTranslate } from "./helpers/module-stubs.ts";
+
+// A slice of src run through new Function has no module table, so the catalog stand-in goes in as a global.
+Object.assign(globalThis, { translate: enTranslate });
+
 // The shipped helper is lifted out of chat-adapter.ts rather than copied, so
 // these assert against the real source. Importing the module would drag in the
 // stores and the toast layer for one pure string function.
@@ -55,7 +60,7 @@ test("a decomposed filename is the same candidate as its composed form", () => {
 });
 
 test("repo ids still fold case", () => {
-  assert.ok(sameKey("LAiM/Qwen3-0.6B-GGUF", "LAiM/qwen3-0.6b-gguf"));
+  assert.ok(sameKey("unsloth/Qwen3-0.6B-GGUF", "unsloth/qwen3-0.6b-gguf"));
 });
 
 

@@ -1771,7 +1771,7 @@ def _build_browse_allowlist(
 
 def _is_path_inside_allowlist(target: Path, allowed_roots: list[Path]) -> bool:
     """True if *target* equals or descends from any allowed root. ``os.path.realpath`` (symlinks cannot
-    escape the sandbox) plus ``os.path.commonpath`` for a component-wise test, so a string prefix
+    escape the workdir) plus ``os.path.commonpath`` for a component-wise test, so a string prefix
     like ``/home/u`` never matches a sibling ``/home/user2`` while a Windows drive root still
     contains its own subdirectories. A drive root authorizes its descendants, but a bare POSIX root
     ``/`` must NOT, else one entry would authorize every absolute path. ``normcase`` keeps the
@@ -1977,7 +1977,7 @@ def browse_folders(
     dialog. Read-only: enumerates visible subdirectories so the user can
     click to a folder and hand the string to POST /api/models/scan-folders.
 
-    Sandbox: bounded to :func:`_build_browse_allowlist`; paths outside it
+    Workdir: bounded to :func:`_build_browse_allowlist`; paths outside it
     return 403, and symlinks are resolved via ``os.path.realpath`` first
     so traversal can't escape. Sorting: model-bearing dirs, then plain,
     then hidden (if ``show_hidden=true``).
@@ -2091,7 +2091,7 @@ def browse_folders(
 
     entries.sort(key = _sort_key)
 
-    # Parent is None at the filesystem root and when it would leave the sandbox (else the
+    # Parent is None at the filesystem root and when it would leave the workdir (else the
     # up-row would 403); users can still hop to other allowed roots via the chips.
     parent: Optional[str]
     if target.parent == target or not _is_path_inside_allowlist(target.parent, allowed_roots):
@@ -4741,7 +4741,7 @@ async def get_kv_cache_estimate(
 @router.get("/gguf-variants", response_model = GgufVariantsResponse)
 async def get_gguf_variants(
     repo_id: str = Query(
-        ..., description = "HuggingFace repo ID (e.g. 'LAiM/gemma-3-4b-it-GGUF')"
+        ..., description = "HuggingFace repo ID (e.g. 'unsloth/gemma-3-4b-it-GGUF')"
     ),
     prefer_local_cache: bool = False,
     offline: bool = False,

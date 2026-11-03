@@ -366,13 +366,13 @@ def _mirror(tmp_path, monkeypatch, *files):
 
 
 def test_a_mirrored_sibling_this_host_cannot_read_is_not_served(tmp_path, monkeypatch):
-    _mirror(tmp_path, monkeypatch, "LAiM/Model-INT8/Model-INT8.safetensors")
+    _mirror(tmp_path, monkeypatch, "unsloth/Model-INT8/Model-INT8.safetensors")
     monkeypatch.setattr(ps, "safetensors_prequant_supported", lambda: False)
     monkeypatch.setattr(pq, "_register_prequant_safe_globals", lambda: True)
     monkeypatch.setattr(pq, "_download_checkpoint_name", lambda *a, **k: "/hub/Model-INT8.pt")
     src = pq.PrequantSource(
         kind = "repo",
-        location = "LAiM/Model-INT8",
+        location = "unsloth/Model-INT8",
         filename = "Model-INT8.pt",
         declared_filenames = ("Model-INT8.pt",),
     )
@@ -382,7 +382,7 @@ def test_a_mirrored_sibling_this_host_cannot_read_is_not_served(tmp_path, monkey
 
 
 def test_any_mirrored_name_wins_before_the_hub_is_asked(tmp_path, monkeypatch):
-    (pt,) = _mirror(tmp_path, monkeypatch, "LAiM/Model-INT8/Model-INT8.pt")
+    (pt,) = _mirror(tmp_path, monkeypatch, "unsloth/Model-INT8/Model-INT8.pt")
     monkeypatch.setattr(
         pq, "restricted_prequant_load_supported", lambda scheme = None, filename = None: True
     )
@@ -394,7 +394,7 @@ def test_any_mirrored_name_wins_before_the_hub_is_asked(tmp_path, monkeypatch):
     )
     src = pq.PrequantSource(
         kind = "repo",
-        location = "LAiM/Model-INT8",
+        location = "unsloth/Model-INT8",
         filename = "Model-INT8.safetensors",
         fallback_filenames = ("Model-INT8.pt",),
     )
@@ -410,7 +410,7 @@ def test_the_text_encoder_mirror_is_used_when_the_hub_is_unreachable(tmp_path, m
 
     import core.inference.diffusion_te_prequant as te
 
-    (pt,) = _mirror(tmp_path, monkeypatch, "LAiM/Model-FP8/Model-text_encoder-FP8.pt")
+    (pt,) = _mirror(tmp_path, monkeypatch, "unsloth/Model-FP8/Model-text_encoder-FP8.pt")
 
     def offline(*a, **k):
         raise LocalEntryNotFoundError("connection error")
@@ -418,7 +418,7 @@ def test_the_text_encoder_mirror_is_used_when_the_hub_is_unreachable(tmp_path, m
     monkeypatch.setattr(huggingface_hub, "hf_hub_download", offline)
     src = te.TePrequantSource(
         kind = "repo",
-        location = "LAiM/Model-FP8",
+        location = "unsloth/Model-FP8",
         filename = "Model-text_encoder-FP8.safetensors",
         fallback_filenames = ("Model-text_encoder-FP8.pt",),
     )
@@ -435,16 +435,16 @@ def test_the_mirror_is_read_before_the_hub_and_cannot_escape_its_root(tmp_path, 
     outside = tmp_path / "secret.safetensors"
     outside.write_bytes(b"x")
     monkeypatch.setenv(pq.PREQUANT_MIRROR_ENV, str(root))
-    assert pq.prequant_mirror_path("LAiM/Model-FP8", "Model-INT8.safetensors") == str(
+    assert pq.prequant_mirror_path("unsloth/Model-FP8", "Model-INT8.safetensors") == str(
         target.resolve()
     )
     # a request for the pickle gets its converted sibling; a pickle with no sibling is not mirrored
-    assert pq.prequant_mirror_path("LAiM/Model-FP8", "Model-INT8.pt") == str(target.resolve())
-    assert pq.prequant_mirror_path("LAiM/Model-FP8", "Model-FP8.pt") is None
-    assert pq.prequant_mirror_path("LAiM/..", "secret.safetensors") is None
-    assert pq.prequant_mirror_path("LAiM/Model-FP8", "../../../secret.safetensors") is None
+    assert pq.prequant_mirror_path("unsloth/Model-FP8", "Model-INT8.pt") == str(target.resolve())
+    assert pq.prequant_mirror_path("unsloth/Model-FP8", "Model-FP8.pt") is None
+    assert pq.prequant_mirror_path("unsloth/..", "secret.safetensors") is None
+    assert pq.prequant_mirror_path("unsloth/Model-FP8", "../../../secret.safetensors") is None
     monkeypatch.delenv(pq.PREQUANT_MIRROR_ENV)
-    assert pq.prequant_mirror_path("LAiM/Model-FP8", "Model-INT8.safetensors") is None
+    assert pq.prequant_mirror_path("unsloth/Model-FP8", "Model-INT8.safetensors") is None
 
 
 def test_the_resolver_takes_the_mirrored_safetensors_without_asking_the_hub(tmp_path, monkeypatch):
@@ -463,7 +463,7 @@ def test_the_resolver_takes_the_mirrored_safetensors_without_asking_the_hub(tmp_
     monkeypatch.setattr(pq, "_download_checkpoint_name", no_hub)
     src = pq.PrequantSource(
         kind = "repo",
-        location = "LAiM/Model-FP8",
+        location = "unsloth/Model-FP8",
         filename = "Model-INT8.safetensors",
         fallback_filenames = ("Model-INT8.pt",),
     )
@@ -487,7 +487,7 @@ def test_the_text_encoder_resolver_reads_the_mirror_too(tmp_path, monkeypatch):
     monkeypatch.setattr(huggingface_hub, "hf_hub_download", no_hub)
     src = te.TePrequantSource(
         kind = "repo",
-        location = "LAiM/Model-FP8",
+        location = "unsloth/Model-FP8",
         filename = "Model-text_encoder-FP8.safetensors",
         fallback_filenames = ("Model-text_encoder-FP8.pt",),
     )
@@ -522,8 +522,8 @@ def test_the_dense_fast_path_reason_names_a_load_time_failure(monkeypatch):
             "ValueError: X-FP8.safetensors is truncated",
         ),
         (
-            "LAiM/X-FP8 has no X-FP8.pt (https://huggingface.co/LAiM/X-FP8)",
-            "ValueError: LAiM/X-FP8 has no X-FP8.pt (https://huggingface.co/LAiM/X-FP8)",
+            "unsloth/X-FP8 has no X-FP8.pt (https://huggingface.co/unsloth/X-FP8)",
+            "ValueError: LAiM/X-FP8 has no X-FP8.pt (https://huggingface.co/unsloth/X-FP8)",
         ),
     ],
 )
@@ -603,7 +603,7 @@ def test_the_converter_writes_a_bit_identical_v1_int8_artifact(
         _legacy_writer()._write_legacy_checkpoint(monkeypatch, src)
     conv = _converter()
     rec = conv.convert(
-        str(src), str(tmp_path / "out"), repo = "LAiM/Model-FP8", revision = "abc", sha = None
+        str(src), str(tmp_path / "out"), repo = "unsloth/Model-FP8", revision = "abc", sha = None
     )
     assert rec["verified_bit_identical"] and rec["int8_source"] == pn.INT8_SOURCE_V1
     dst = tmp_path / "out" / "LAiM" / "Model-FP8" / "Model-INT8.safetensors"

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 import {
@@ -44,7 +45,7 @@ export function GgufDownloadStatusCard({
             )}
           >
             {loading && <Spinner className="size-3.5 shrink-0" />}
-            {partial && <DotTag tone="warning" label="Partial" />}
+            {partial && <DotTag tone="warning" label={translate("uxHub.partialxcezp")} />}
             <span className="truncate">{message}</span>
           </span>
         </div>
@@ -66,7 +67,7 @@ export function GgufDownloadStatusCard({
             {loading ? (
               <>
                 <Spinner />
-                Loading
+                {translate("decisions.modelLoading")}
               </>
             ) : (
               "Unavailable"
@@ -99,7 +100,7 @@ export function GgufDownloadingFallbackCard({
         <div className="relative flex h-9 min-w-0 flex-1 items-center pl-3 pr-2">
           <span className="flex min-w-0 items-center gap-2 text-ui-12p5 text-muted-foreground">
             {progress.variant && <DotTag tone="gguf" label={progress.variant} />}
-            <span className="truncate">Downloading…</span>
+            <span className="truncate">{translate("uxHub.downloadinguamyq")}</span>
           </span>
         </div>
         <CardDivider />

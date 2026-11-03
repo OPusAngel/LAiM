@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import type { ReactNode } from "react";
 
 import { Settings02Icon } from "@hugeicons/core-free-icons";
@@ -17,9 +18,7 @@ export function AdvancedDisclosure({
   onOpenChange,
   description = (
     <>
-      Load-time tuning. Changes apply on the next load; Reapply reloads the
-      current model.
-    </>
+      {translate("uxComponents.loadTimeTuningChanges1ldo1")}</>
   ),
   children,
 }: {
@@ -43,7 +42,7 @@ export function AdvancedDisclosure({
           className="size-3.5 shrink-0 text-muted-foreground"
         />
         <span className="min-w-0 flex-1 text-ui-13 font-medium leading-[1.25] tracking-nav text-foreground">
-          Advanced
+          {translate("settings.chat.groups.advanced.title")}
         </span>
         <ChevronDown
           className={cn(

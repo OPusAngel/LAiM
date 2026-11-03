@@ -54,7 +54,7 @@ print(f"{'='*80}")
 
 max_seq_length = 2048
 model, tokenizer = FastLanguageModel.from_pretrained(
-    model_name = "LAiM/Llasa-1B",
+    model_name = "unsloth/Llasa-1B",
     max_seq_length = max_seq_length,
     dtype = None,
     load_in_4bit = False,
@@ -70,7 +70,7 @@ model = FastLanguageModel.get_peft_model(
     lora_alpha = 128,
     lora_dropout = 0,
     bias = "none",
-    use_gradient_checkpointing = "LAiM",
+    use_gradient_checkpointing = "unsloth",
     random_state = 3407,
     use_rslora = False,
     loftq_config = None,

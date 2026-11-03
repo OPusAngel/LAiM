@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { HugeiconsIcon } from "@hugeicons/react";
 
 import { ChevronDownStandardIcon } from "@/lib/chevron-icons";
@@ -38,14 +39,14 @@ export function TrainBaseSelector({
   const family = families.find((f) => f.name === familyName);
   // Before /info answers there is nothing to pick from; the label still reads sensibly. The owner
   // prefix is dropped as the model selector does, family as the description.
-  const label = base ? base.split("/").pop() || base : "Select base model";
+  const label = base ? base.split("/").pop() || base : translate("uxImages.selectBaseModelrcpfx");
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild={true}>
         <button
           type="button"
-          aria-label="Training base model"
+          aria-label={translate("uxImages.trainingBaseModeljuhp7")}
           className="LAiM-model-selector-trigger flex h-[calc(34px*var(--ui-space-scale,1))] min-w-0 max-w-[calc(320px*var(--ui-space-scale,1))] items-center gap-2 rounded-full pl-4 pr-2 text-sm transition-colors hover:bg-accent"
         >
           <span className="min-w-0 truncate font-medium">{label}</span>

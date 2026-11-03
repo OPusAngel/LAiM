@@ -34,7 +34,7 @@ def test_fine_tunes_and_exports_are_listed_as_LAiM(tmp_path, monkeypatch):
     run = outputs / "my-run"
     run.mkdir()
     (run / "adapter_config.json").write_text(
-        json.dumps({"base_model_name_or_path": "LAiM/Qwen3-0.6B", "peft_type": "LORA"})
+        json.dumps({"base_model_name_or_path": "unsloth/Qwen3-0.6B", "peft_type": "LORA"})
     )
     (run / "adapter_model.safetensors").write_bytes(b"x" * 16)
     gguf = exports / "my-run-finetune-gguf"
@@ -47,7 +47,7 @@ def test_fine_tunes_and_exports_are_listed_as_LAiM(tmp_path, monkeypatch):
     by_path = {Path(row.path).resolve(): row for row in rows}
     adapter = by_path[run.resolve()]
     assert adapter.model_format == "adapter"
-    assert adapter.base_model == "LAiM/Qwen3-0.6B"
+    assert adapter.base_model == "unsloth/Qwen3-0.6B"
     assert any(Path(row.path).resolve().is_relative_to(gguf.resolve()) for row in rows)
 
 

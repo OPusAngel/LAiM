@@ -19,7 +19,7 @@ NEW2 = os.environ.get("STUDIO_NEW2_PW", "ApiSmoke-NEW2-2026!")
 AUTH_DIR = Path(
     os.environ.get("STUDIO_AUTH_DIR", str(Path.home() / ".LAiM" / "studio" / "auth"))
 )
-GGUF_REPO = os.environ.get("GGUF_REPO", "LAiM/gemma-3-270m-it-GGUF")
+GGUF_REPO = os.environ.get("GGUF_REPO", "unsloth/gemma-3-270m-it-GGUF")
 
 _section = [0]
 _failed: list[str] = []

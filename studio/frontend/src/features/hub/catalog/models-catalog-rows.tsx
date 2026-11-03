@@ -1,8 +1,14 @@
 ﻿// SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { useVllmAvailable, useVllmPlatform } from "@/features/model-picker";
 import { isChatGgufTask, reconcileGgufPinsAfterDelete } from "@/features/model-picker/components/model-selector/reconcile-gguf-pins";
+import {
+  HF_SOURCE_OWNER,
+  displayOwnerLabel,
+  isHfFirstPartyOwner,
+} from "@/config/hub-source";
 
 import {
   Tooltip,
@@ -167,12 +173,12 @@ function CachedSizeChipLive({
       : [{ label: repoId, size_bytes: totalBytes }];
   const variantMessage =
     currentVariantState.status === "loading"
-      ? "Loading downloaded variants..."
+      ? translate("uxHub.loadingDownloadedVariantso66v8")
       : currentVariantState.status === "error"
-        ? "Couldn't load downloaded variants. Open again to retry."
+        ? translate("uxHub.couldnTLoadDownloaded1g4pl")
         : currentVariantState.status === "loaded"
-          ? "No downloaded GGUF variants found."
-          : "Open to load downloaded variants.";
+          ? translate("uxHub.noDownloadedGGUFVariantsnfp8m")
+          : translate("uxHub.openToLoadDownloaded3denk");
 
   return (
     <Tooltip
@@ -338,9 +344,9 @@ function StatusDot({
 
 function PartialStatusDot({ downloading }: { downloading: boolean }) {
   return downloading ? (
-    <StatusDot tone="downloading" label="Downloading" />
+    <StatusDot tone="downloading" label={translate("browser.downloads.inProgressLabel")} />
   ) : (
-    <StatusDot tone="warning" label="Partial download" />
+    <StatusDot tone="warning" label={translate("uxHub.partialDownload1ynvx")} />
   );
 }
 
@@ -389,14 +395,14 @@ export function buildRowStatusTooltip({
   if (isGguf) {
     lines.push(
       <TooltipLegendRow key="gguf" toneClass="bg-format-gguf">
-        GGUF format.
+        {translate("uxHub.gGUFFormat1bc1b")}
       </TooltipLegendRow>,
     );
   }
   if (isAdapter) {
     lines.push(
       <TooltipLegendRow key="adapter" toneClass="bg-format-adapter">
-        Adapter format.
+        {translate("uxHub.adapterFormatnb8w7")}
       </TooltipLegendRow>,
     );
   }
@@ -404,21 +410,17 @@ export function buildRowStatusTooltip({
   if (partialRepoId && downloading) {
     lines.push(
       <TooltipLegendRow key="downloading" toneClass={DOWNLOADING_DOT_CLASS}>
-        Downloading <span className="font-medium">{partialRepoId}</span>.
-        Progress is in the downloads panel.
-      </TooltipLegendRow>,
+        Downloading <span className="font-medium">{partialRepoId}</span>{translate("uxHub.progressIsInThez0bci")}</TooltipLegendRow>,
     );
   } else if (partialRepoId) {
     lines.push(
       <TooltipLegendRow key="partial" toneClass="bg-status-warning">
-        Partial download of <span className="font-medium">{partialRepoId}</span>
-        . Open it to finish the download.
-      </TooltipLegendRow>,
+        {translate("uxCopy.partialDownloadOftg0ie")} <span className="font-medium">{partialRepoId}</span>{translate("uxHub.openItToFinisho15hc")}</TooltipLegendRow>,
     );
   } else if (isAvailableOnDevice) {
     lines.push(
       <TooltipLegendRow key="success" toneClass="bg-status-success">
-        On device. Ready to use locally.
+        {translate("uxHub.onDeviceReadyToj8wii")}
       </TooltipLegendRow>,
     );
   }
@@ -426,16 +428,14 @@ export function buildRowStatusTooltip({
   if (unsupported) {
     lines.push(
       <TooltipLegendRow key="danger" toneClass="bg-status-danger">
-        <span className="block">
-          This {resourceLabel} may not be supported yet.
-        </span>
+        <span className="block">{translate("uxHub.thisMayNotBe4f2cm", { p1: resourceLabel })}</span>
         {unsupportedReason && (
           <span className="mt-0.5 block text-[#f9e2de]/75">
             {unsupportedReason}
           </span>
         )}
         <span className="mt-0.5 block text-[#f9e2de]/75">
-          Still downloadable to your Hugging Face cache.
+          {translate("uxHub.stillDownloadableToYour17tew")}
         </span>
       </TooltipLegendRow>,
     );
@@ -526,13 +526,13 @@ export const DiscoverModelRow = memo(function DiscoverModelRow({
                 />
               )}
               {unsupported && (
-                <StatusDot tone="danger" label="May not be supported yet" />
+                <StatusDot tone="danger" label={translate("uxHub.mayNotBeSupportedbants")} />
               )}
               {row.isAvailableOnDevice && row.isPartialOnDevice && (
                 <PartialStatusDot downloading={downloading} />
               )}
               {row.isAvailableOnDevice && !row.isPartialOnDevice && (
-                <StatusDot tone="success" label="On device" />
+                <StatusDot tone="success" label={translate("settings.general.rag.onDevice")} />
               )}
             </div>
             <div className="flex shrink-0 items-center gap-2.5">
@@ -548,10 +548,10 @@ export const DiscoverModelRow = memo(function DiscoverModelRow({
           </div>
           <div className="flex h-[calc(16px*var(--ui-space-scale,1))] min-w-0 items-center justify-between gap-2 text-ui-11p5 leading-ui-16 text-muted-foreground/85">
             <span className="flex min-w-0 items-center gap-1">
-              <span className="truncate">{row.owner}</span>
-              {row.owner.toLowerCase() === "LAiM" && (
+              <span className="truncate">{displayOwnerLabel(row.owner)}</span>
+              {isHfFirstPartyOwner(row.owner) && (
                 <span
-                  aria-label="Verified LAiM"
+                  aria-label={translate("uxHub.verifiedLAiMqmy0j")}
                   className="hub-verified-badge size-3.5 shrink-0 text-verified"
                 />
               )}
@@ -702,17 +702,17 @@ export const InventoryRow = memo(function InventoryRow({
       {showFormatDot && row.modelFormat === "adapter" && (
         <span
           role="img"
-          aria-label="Adapter"
+          aria-label={translate("uxHub.adapter7h27g")}
           className="inline-block size-[calc(5px*var(--ui-space-scale,1))] shrink-0 rounded-full bg-format-adapter"
         />
       )}
       {partialRepoId ? (
         <PartialStatusDot downloading={downloading} />
       ) : row.companionPrefetch ? null : (
-        <StatusDot tone="success" label="On device" />
+        <StatusDot tone="success" label={translate("settings.general.rag.onDevice")} />
       )}
       {unsupported && (
-        <StatusDot tone="danger" label="May not be supported yet" />
+        <StatusDot tone="danger" label={translate("uxHub.mayNotBeSupportedbants")} />
       )}
     </>
   );
@@ -724,17 +724,17 @@ export const InventoryRow = memo(function InventoryRow({
       <span className="flex shrink-0 items-center gap-1">
         {partialRepoId && <PartialStatusDot downloading={downloading} />}
         {unsupported && (
-          <StatusDot tone="danger" label="May not be supported yet" />
+          <StatusDot tone="danger" label={translate("uxHub.mayNotBeSupportedbants")} />
         )}
       </span>
     ) : null;
 
   const ownerLine = (
     <span className="mt-0.5 flex min-w-0 items-center gap-1 text-ui-11p5 leading-ui-15 text-muted-foreground/80">
-      <span className="truncate">{subLabel}</span>
-      {subLabel.toLowerCase() === "LAiM" && (
+      <span className="truncate">{displayOwnerLabel(subLabel)}</span>
+      {isHfFirstPartyOwner(subLabel) && (
         <span
-          aria-label="Verified LAiM"
+          aria-label={translate("uxHub.verifiedLAiMqmy0j")}
           className="hub-verified-badge size-3.5 shrink-0 text-verified"
         />
       )}
@@ -750,7 +750,7 @@ export const InventoryRow = memo(function InventoryRow({
   const deleteAction =
     deletableRepoId ? (
       <ModelRowMenu
-        ariaLabel={`More options for ${deletableRepoId ?? rowModelId}`}
+        ariaLabel={translate("uxHub.moreOptionsForwg1ye", { p1: deletableRepoId ?? rowModelId })}
         buttonClassName="pointer-events-auto hub-modal-pe-guard size-6 rounded-full opacity-0 transition-opacity group-hover/row:opacity-100 focus-visible:opacity-100 data-[state=open]:opacity-100 [@media(pointer:coarse)]:opacity-100"
         pin={
           isDataset || !deletableRepoId
@@ -766,25 +766,23 @@ export const InventoryRow = memo(function InventoryRow({
           isDataset || !deletableRepoId ? undefined : { repoId: deletableRepoId }
         }
         del={deletableRepoId ? {
-          title: isDataset ? "Delete cached dataset?" : "Delete cached model?",
+          title: isDataset ? translate("uxHub.deleteCachedDatasetynqyo") : translate("uxHub.deleteCachedModelihx4a"),
           // Datasets have no companion base repo, so only models get a preview.
           impact: isDataset ? undefined : { repoId: deletableRepoId },
           description: (
-            <>
-              This will remove{" "}
-              <span className="font-medium text-foreground">
+            <>{translate("uxHub.thisWillRemovebmxmc", { p1: " " })}<span className="font-medium text-foreground">
                 {deletableRepoId}
               </span>{" "}
               {isDataset
-                ? "and its downloaded files"
+                ? translate("uxHub.andItsDownloadedFiles30p89")
                 : row.isGguf
-                  ? "and all of its downloaded quantizations"
-                  : "and all of its downloaded files"}
+                  ? translate("uxHub.andAllOfItsvzygj")
+                  : translate("uxHub.andAllOfItsg9xjh")}
               {row.kind === "cache" ? ` (${formatBytes(row.bytes)})` : ""} from
               disk. You can re-download it later.
             </>
           ),
-          successMessage: `Deleted ${deletableRepoId}`,
+          successMessage: translate("uxHub.deletedpyid0", { p1: deletableRepoId }),
           onConfirm: async () => {
             // Delete only the copy this row shows: cache rows carry the owning
             // cache path, so pass it through and leave other caches untouched.
@@ -814,25 +812,21 @@ export const InventoryRow = memo(function InventoryRow({
       />
     ) : localActionPath && row.kind === "local" ? (
       <ModelRowMenu
-        ariaLabel={`More options for ${rowModelId}`}
+        ariaLabel={translate("uxHub.moreOptionsForwg1ye", { p1: rowModelId })}
         buttonClassName="pointer-events-auto hub-modal-pe-guard size-6 rounded-full opacity-0 transition-opacity group-hover/row:opacity-100 focus-visible:opacity-100 data-[state=open]:opacity-100 [@media(pointer:coarse)]:opacity-100"
         onReveal={() => revealLocalModel(localActionPath, row.loadId)}
         del={
           DELETABLE_LOCAL_SOURCES.has(row.source)
             ? {
-                title: "Delete local model?",
+                title: translate("uxHub.deleteLocalModel18bwy"),
                 description: (
-                  <>
-                    This will permanently remove{" "}
-                    <span className="font-medium text-foreground">{title}</span>{" "}
-                    from{" "}
-                    <span className="break-all font-mono text-xs">
+                  <>{translate("uxHub.thisWillPermanentlyRemovenzn11", { p1: " " })}<span className="font-medium text-foreground">{title}</span>{translate("uxHub.fromldt4a", { p1: " ", p2: " " })}<span className="break-all font-mono text-xs">
                       {localActionPath}
                     </span>
                     .
                   </>
                 ),
-                successMessage: `Deleted ${title}`,
+                successMessage: translate("uxHub.deletedpyid0", { p1: title }),
                 onConfirm: () => deleteLocalModel(localActionPath, row.loadId),
                 onDeleted: onChange,
               }
@@ -873,10 +867,10 @@ export const InventoryRow = memo(function InventoryRow({
             </div>
             <span className="mt-0.5 flex min-w-0 items-center gap-1.5 text-ui-10p5 leading-ui-14 text-muted-foreground/75">
               <span className="flex min-w-0 items-center gap-1">
-                <span className="truncate">{subLabel}</span>
-                {subLabel.toLowerCase() === "LAiM" && (
+                <span className="truncate">{displayOwnerLabel(subLabel)}</span>
+                {isHfFirstPartyOwner(subLabel) && (
                   <span
-                    aria-label="Verified LAiM"
+                    aria-label={translate("uxHub.verifiedLAiMqmy0j")}
                     className="hub-verified-badge size-3 shrink-0 text-verified"
                   />
                 )}

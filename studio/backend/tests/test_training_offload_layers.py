@@ -26,7 +26,7 @@ GIB = 1024**3
 
 def _request(**kwargs) -> TrainingStartRequest:
     return TrainingStartRequest(
-        model_name = "LAiM/Qwen3-0.6B", training_type = "LoRA/QLoRA", format_type = "alpaca", **kwargs
+        model_name = "unsloth/Qwen3-0.6B", training_type = "LoRA/QLoRA", format_type = "alpaca", **kwargs
     )
 
 
@@ -415,7 +415,7 @@ def test_offload_without_checkpointing_is_refused_up_front(checkpointing, offloa
 
 
 def test_offload_with_checkpointing_or_off_is_accepted():
-    _request(offload_layers = "auto", gradient_checkpointing = "LAiM")
+    _request(offload_layers = "auto", gradient_checkpointing = "unsloth")
     _request(offload_layers = 0, gradient_checkpointing = "none")
 
 

@@ -58,7 +58,7 @@ export async function ejectEmbeddingModel(): Promise<void> {
   await useEmbeddingModelStore.getState().applyResidency(unloadEmbeddingModel);
 }
 
-/** "LAiM/bge-small-en-v1.5" -> "bge-small-en-v1.5"; local paths keep their last segment. */
+/** "unsloth/bge-small-en-v1.5" -> "bge-small-en-v1.5"; local paths keep their last segment. */
 export function embeddingModelName(model: string): string {
   const id = model.trim().replace(/[\\/]+$/, "");
   return id.slice(Math.max(id.lastIndexOf("/"), id.lastIndexOf("\\")) + 1) || id;

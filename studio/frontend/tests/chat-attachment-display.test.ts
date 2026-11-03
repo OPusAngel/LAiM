@@ -217,7 +217,7 @@ test("composer attachment cards are keyed and scoped by attachment id", async ()
 test("audio or video attached before a model loaded is checked when sent", () => {
   const listener = { hasAudioInput: true, hasVideoInput: false };
   const textOnly = { hasAudioInput: false, hasVideoInput: false };
-  const base = { checkpoint: "LAiM/model", modelLabel: "Model" };
+  const base = { checkpoint: "unsloth/model", modelLabel: "Model" };
   assert.equal(
     attachedMediaUnavailableReason({
       ...base,
@@ -275,7 +275,7 @@ test("audio or video attached before a model loaded is checked when sent", () =>
 });
 
 test("several clips are sent to GGUF and transformers, but refused on MLX", () => {
-  const base = { checkpoint: "LAiM/gemma-4-E4B-it", modelLabel: "Gemma" };
+  const base = { checkpoint: "unsloth/gemma-4-E4B-it", modelLabel: "Gemma" };
   const gguf = { hasAudioInput: true, isMlx: false };
   const mlx = { hasAudioInput: true, isMlx: true };
   assert.equal(

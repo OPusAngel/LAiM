@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+// Every checkpoint runs LAiM's code tools, local or cloud: there is no pill to decline them,
+// and the switch that owns the preference lives outside the composer.
+
 import assert from "node:assert/strict";
 import { register } from "node:module";
 import test from "node:test";
@@ -25,7 +28,7 @@ const STORE_URL = new URL(
   import.meta.url,
 ).href;
 const CODE_KEY = "LAiM_chat_code_tools_enabled";
-const LOCAL = "LAiM/Qwen3-1.7B-GGUF";
+const LOCAL = "unsloth/Qwen3-1.7B-GGUF";
 const EXTERNAL = "external::anthropic::claude-opus-5";
 
 type Store = Record<string, (...args: never[]) => unknown> & {
@@ -46,8 +49,12 @@ interface StoreModule {
 
 let scenario = 0;
 
-/** A fresh store with a tool-capable model selected and Code stored as `codeOn`. */
-async function freshStore(codeOn: boolean, checkpoint = LOCAL) {
+/** A fresh store with `checkpoint` selected and Code stored as `codeOn`. */
+async function freshStore(
+  codeOn: boolean,
+  checkpoint = LOCAL,
+  supportsTools = true,
+) {
   scenario += 1;
   localStorageFake.set(CODE_KEY, String(codeOn));
   settingsHttp.settings = { codeToolsEnabled: codeOn };
@@ -59,7 +66,7 @@ async function freshStore(codeOn: boolean, checkpoint = LOCAL) {
   const store = mod.useChatRuntimeStore;
   store.setState({
     params: { ...store.getState().params, checkpoint },
-    supportsTools: true,
+    supportsTools,
   });
   const on = () => mod.codeToolsOn(store.getState());
   return { mod, store, on, state: () => store.getState() };
@@ -73,66 +80,51 @@ function clickCode(state: Store, next: boolean) {
   (state.setCodeToolsEnabled as (enabled: boolean) => void)(next);
 }
 
-test("picking Full access turns Code on, and leaving it turns Code back off", async () => {
-  const { on, state } = await freshStore(false);
-  assert.equal(on(), false);
-  pick(state(), "full");
+test("a local checkpoint runs the code tools even with the stored pill off", async () => {
+  const { on } = await freshStore(false);
   assert.equal(on(), true);
-  // The user's own choice is untouched, so nothing is stored.
-  assert.equal(state().codeToolsEnabled, false);
-  assert.equal(localStorageFake.get(CODE_KEY), "false");
-  for (const mode of ["auto", "ask", "off"]) {
-    pick(state(), "full");
-    assert.equal(on(), true);
+});
+
+test("a local checkpoint without a tool-capable template still runs them", async () => {
+  const { on } = await freshStore(false, LOCAL, false);
+  assert.equal(on(), true);
+});
+
+test("no permission level switches a local checkpoint's tools off", async () => {
+  const { on, state } = await freshStore(false);
+  for (const mode of ["full", "ask", "auto", "off"]) {
     pick(state(), mode);
-    assert.equal(on(), false, `leaving Full access for ${mode}`);
+    assert.equal(on(), true, mode);
   }
 });
 
-test("the legacy bypass toggle behaves the same way", async () => {
+test("the legacy bypass toggle cannot switch them off either", async () => {
   const { on, state } = await freshStore(false);
   (state().setBypassPermissions as (on: boolean) => void)(true);
   assert.equal(on(), true);
   (state().setBypassPermissions as (on: boolean) => void)(false);
-  assert.equal(on(), false);
-});
-
-test("Code the user already had on stays on after Full access", async () => {
-  const { on, state } = await freshStore(true);
-  pick(state(), "full");
   assert.equal(on(), true);
-  pick(state(), "auto");
-  assert.equal(on(), true);
-  assert.equal(localStorageFake.get(CODE_KEY), "true");
 });
 
-test("a Code click under Full access is the user's and survives leaving it", async () => {
-  const off = await freshStore(false);
-  pick(off.state(), "full");
-  clickCode(off.state(), !off.on());
-  assert.equal(off.on(), false, "the click turns the pill off");
-  // Re-picking the level already on does not undo the click.
-  pick(off.state(), "full");
-  assert.equal(off.on(), false);
-  pick(off.state(), "auto");
-  assert.equal(off.on(), false);
-
-  const offThenOn = await freshStore(false);
-  pick(offThenOn.state(), "full");
-  clickCode(offThenOn.state(), false);
-  clickCode(offThenOn.state(), true);
-  pick(offThenOn.state(), "auto");
-  assert.equal(offThenOn.on(), true);
-  assert.equal(localStorageFake.get(CODE_KEY), "true");
-});
-
-test("Full access does not turn on an external provider's code sandbox", async () => {
+test("a cloud connection runs the code tools exactly like a local one", async () => {
   const { on, state } = await freshStore(false, EXTERNAL);
+  assert.equal(on(), true);
   pick(state(), "full");
-  assert.equal(on(), false);
+  assert.equal(on(), true, "the level never gates the effective switch");
+  clickCode(state(), true);
+  assert.equal(on(), true);
+  clickCode(state(), false);
+  assert.equal(on(), true, "a stored decline never starves a cloud chat of tools");
 });
 
-test("the turn-on reaches neither the installation nor the open chat's snapshot", async (t) => {
+test("a cloud opt-in is the user's and persists", async () => {
+  const { on, state } = await freshStore(false, EXTERNAL);
+  clickCode(state(), true);
+  assert.equal(on(), true);
+  assert.equal(localStorageFake.get(CODE_KEY), "true");
+});
+
+test("a local turn never writes the cloud opt-in", async (t) => {
   enableCountedTimers(t);
   const tick = (ms: number) => t.mock.timers.tick(ms);
   const { mod, on, state } = await freshStore(false);
@@ -149,9 +141,9 @@ test("the turn-on reaches neither the installation nor the open chat's snapshot"
     "A",
     null,
   );
-  pick(state(), "full");
   assert.equal(on(), true);
-  // Any per-chat edit writes the chat's whole snapshot, Code included.
+  // Any per-chat edit writes the chat's whole snapshot; the enforced local default
+  // must not leak into it as if the user had flipped a cloud pill.
   (state().setToolsEnabled as (on: boolean) => void)(true);
   await drain();
   const row = threadRows.rows.get("A") as Record<string, unknown> | undefined;
@@ -163,13 +155,10 @@ test("the turn-on reaches neither the installation nor the open chat's snapshot"
   }
 });
 
-test("a chat opened after Full access was picked still gets the code tools", async (t) => {
-  // Full access outlives a chat switch but Code does not, so a grant armed once
-  // on entry left the incoming chat on Full access with no code tools.
+test("a local chat opened after a cloud chat still runs the code tools", async (t) => {
   enableCountedTimers(t);
   const tick = (ms: number) => t.mock.timers.tick(ms);
-  // Code already on where Full access is picked: the case that arms nothing.
-  const { mod, store, on, state } = await freshStore(true);
+  const { mod, store, on, state } = await freshStore(false, EXTERNAL);
   const drain = () =>
     drainMockedTimers(tick, {
       label: "cross-chat drain",
@@ -177,44 +166,7 @@ test("a chat opened after Full access was picked still gets the code tools", asy
     });
   await (state().hydratePersistedSettings as () => Promise<void>)();
   await drain();
-  (state().setActiveThreadId as (id: string) => void)("A");
-  mod.beginThreadScopedPairing("A");
-  (state().applyThreadScopedSettings as (id: string, s: null) => void)("A", null);
-  pick(state(), "full");
-  assert.equal(on(), true);
-
-  // An older chat whose own settings are Code off and the ordinary level.
-  (state().setActiveThreadId as (id: string) => void)("B");
-  mod.beginThreadScopedPairing("B");
-  (
-    state().applyThreadScopedSettings as (
-      id: string,
-      s: Record<string, unknown>,
-    ) => void
-  )("B", { codeToolsEnabled: false, permissionMode: "auto" });
-  await drain();
-  assert.equal(state().permissionMode, "full", "Full access survives the switch");
-  assert.equal(store.getState().params.checkpoint, LOCAL);
-  assert.equal(on(), true, "so the code tools come with it");
-});
-
-test("a Code click under Full access survives a chat switch too", async (t) => {
-  enableCountedTimers(t);
-  const tick = (ms: number) => t.mock.timers.tick(ms);
-  const { mod, on, state } = await freshStore(false);
-  const drain = () =>
-    drainMockedTimers(tick, {
-      label: "cross-chat decline drain",
-      barrier: () => mod.awaitStartedThreadScopedSettingsWrites(),
-    });
-  await (state().hydratePersistedSettings as () => Promise<void>)();
-  await drain();
-  (state().setActiveThreadId as (id: string) => void)("A");
-  mod.beginThreadScopedPairing("A");
-  (state().applyThreadScopedSettings as (id: string, s: null) => void)("A", null);
-  pick(state(), "full");
-  clickCode(state(), false); // the user's own no
-  assert.equal(on(), false);
+  assert.equal(on(), true, "the cloud connection runs the tools from the start");
 
   (state().setActiveThreadId as (id: string) => void)("B");
   mod.beginThreadScopedPairing("B");
@@ -225,5 +177,16 @@ test("a Code click under Full access survives a chat switch too", async (t) => {
     ) => void
   )("B", { codeToolsEnabled: false, permissionMode: "auto" });
   await drain();
-  assert.equal(on(), false, "a switch does not undo it");
+  assert.equal(on(), true, "a stored decline never starves the cloud chat");
+
+  (state().setActiveThreadId as (id: string) => void)("C");
+  mod.beginThreadScopedPairing("C");
+  (
+    state().applyThreadScopedSettings as (
+      id: string,
+      s: Record<string, unknown>,
+    ) => void
+  )("C", { checkpoint: LOCAL, codeToolsEnabled: false, permissionMode: "auto" });
+  store.setState({ params: { ...state().params, checkpoint: LOCAL } });
+  assert.equal(on(), true, "the local checkpoint gets them regardless");
 });

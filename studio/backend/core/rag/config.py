@@ -8,7 +8,7 @@ from __future__ import annotations
 import os
 import re
 
-DEFAULT_EMBEDDING_MODEL = "LAiM/bge-small-en-v1.5"
+DEFAULT_EMBEDDING_MODEL = "unsloth/bge-small-en-v1.5"
 EMBEDDING_MODEL = os.environ.get("RAG_EMBEDDING_MODEL", DEFAULT_EMBEDDING_MODEL)
 # Keep <= embedder_max - ~12: bge's 512 limit plus 2 special tokens (llama-server 500s on overflow, ST truncates).
 CHUNK_TOKENS = int(os.environ.get("RAG_CHUNK_TOKENS", "500"))
@@ -274,7 +274,7 @@ def effective_gguf_repo_for_embedding_model(model: str) -> str:
 
 
 # F16 over Q8_0: faster (no per-block dequant at this size) and exact, for ~30MB more on disk.
-EMBED_GGUF_REPO = os.environ.get("RAG_EMBED_GGUF_REPO", "LAiM/bge-small-en-v1.5-GGUF")
+EMBED_GGUF_REPO = os.environ.get("RAG_EMBED_GGUF_REPO", "unsloth/bge-small-en-v1.5-GGUF")
 EMBED_GGUF_VARIANT = os.environ.get("RAG_EMBED_GGUF_VARIANT", "F16")
 # "auto" differs per backend: llama-server offloads inside its own subprocess, while
 # sentence-transformers would pin a CUDA primary context (712 MiB on a B200), so it stays on CPU.

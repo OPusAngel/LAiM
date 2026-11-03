@@ -1,53 +1,60 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import type { TourStep } from "@/features/tour";
 
 export const exportTourSteps: TourStep[] = [
   {
     id: "training-run",
     target: "export-training-run",
-    title: "Pick a run",
-    body: (
+    get title() {
+      return translate("uxExport.pickARunfyazi");
+    },
+    get body() {
+      return (
       <>
-        Start here. Each run holds the checkpoints from one fine-tuning job.
-        Runs you started on the Train page show up automatically.
-      </>
-    ),
+        {translate("uxExport.startHereEachRun16s3v")}</>
+    );
+    },
   },
   {
     id: "checkpoint",
     target: "export-checkpoint",
-    title: "Pick a checkpoint",
-    body: (
+    get title() {
+      return translate("uxExport.pickACheckpoint1s13r");
+    },
+    get body() {
+      return (
       <>
-        The last checkpoint is not always the best one. Export one or two
-        candidates and compare them in Chat before you commit.
-      </>
-    ),
+        {translate("uxExport.theLastCheckpointIsy51nf")}</>
+    );
+    },
   },
   {
     id: "method",
     target: "export-method",
-    title: "Choose a format",
-    body: (
+    get title() {
+      return translate("uxExport.chooseAFormatdj43i");
+    },
+    get body() {
+      return (
       <>
-        Merged is a full 16-bit model for vLLM or Transformers. LoRA Only ships
-        the adapter alone and needs the base model at inference. GGUF is for
-        llama.cpp and Ollama, with a quant level you pick below.
-      </>
-    ),
+        {translate("uxExport.mergedIsAFull11173")}</>
+    );
+    },
   },
   {
     id: "cta",
     target: "export-cta",
-    title: "Export",
-    body: (
+    get title() {
+      return translate("browser.exportBookmarks");
+    },
+    get body() {
+      return (
       <>
-        Save to this device or push straight to a Hugging Face repo. Anything
-        exported locally shows up in Chat under On Device, so you can test it
-        against the base model right away.
-      </>
-    ),
+        {translate("uxExport.saveToThisDevicenwdlm")}</>
+    );
+    },
   },
 ];

@@ -12,4 +12,4 @@ def test_desktop_installer_uses_opusangel_sources() -> None:
 
     assert 'LAiM @ https://github.com/OPusAngel/LAiM/archive/refs/heads/main.tar.gz' in installer
     assert 'LAiM-zoo @ https://github.com/OPusAngel/LAiM-zoo/archive/refs/heads/main.tar.gz' in installer
-    assert 'git+https://github.com/LAiMai/LAiM-zoo' not in installer
+    assert 'git+https://github.com/OPusAngel/LAiM-zoo' not in installer

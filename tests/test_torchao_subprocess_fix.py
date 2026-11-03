@@ -366,7 +366,7 @@ def test_the_placeholder_still_refuses_to_be_used(staged):
 
 def test_an_existing_sitecustomize_still_runs(staged, tmp_path):
     """The shadowing hazard is real: this machine already has a sitecustomize
-    at /etc/LAiMai/python/, and ours must chain to it."""
+    at /etc/unslothai/python/, and ours must chain to it."""
     site, fake = staged
     other = tmp_path / "other"
     other.mkdir()

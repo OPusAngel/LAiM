@@ -347,7 +347,7 @@ def test_the_child_refuses_the_same_torchao_train_modes_on_rocm(monkeypatch, mod
     import core.training.diffusion_dit_trainer as dit
 
     _stub_train_torch(monkeypatch, hip = "7.1.25424", version_str = "2.10.0+rocm7.1")
-    cfg = types.SimpleNamespace(base_precision = mode, base_model = "LAiM/Z-Image")
+    cfg = types.SimpleNamespace(base_precision = mode, base_model = "unsloth/Z-Image")
     with pytest.raises(ValueError, match = "ROCm/AMD GPU"):
         dit._resolve_base_precision(cfg, types.SimpleNamespace(dense_bf16_gb = 12.0), "cuda")
 
@@ -364,7 +364,7 @@ def test_auto_never_resolves_to_int8_on_rocm(monkeypatch):
     monkeypatch.setattr(dit, "repo_is_prequantized", lambda repo: False)
     monkeypatch.setattr(dit, "trusted_mem_get_info", lambda: (13.8e9, 16e9), raising = False)
     cfg = types.SimpleNamespace(
-        base_precision = "auto", base_model = "LAiM/Z-Image", mixed_precision = "bf16"
+        base_precision = "auto", base_model = "unsloth/Z-Image", mixed_precision = "bf16"
     )
     resolved = dit._resolve_base_precision(cfg, types.SimpleNamespace(dense_bf16_gb = 12.0), "cuda")
     assert resolved != "int8"

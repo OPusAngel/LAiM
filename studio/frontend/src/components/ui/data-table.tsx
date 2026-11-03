@@ -20,6 +20,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import { translate } from "@/i18n";
+
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -112,9 +114,7 @@ export function DataTable<TData, TValue>({
               <TableCell
                 colSpan={columns.length}
                 className="h-32 text-center text-muted-foreground text-sm"
-              >
-                No results.
-              </TableCell>
+              >{translate("uxComponents.noResultsqj27p")}</TableCell>
             </TableRow>
           )}
         </TableBody>

@@ -101,7 +101,7 @@ def test_compose_preexec_runs_pdeathsig_then_existing(monkeypatch):
     monkeypatch.setattr(pl, "_is_linux", lambda: True)
     monkeypatch.setattr(pl, "_pdeathsig_preexec", lambda owner: calls.append(("death", owner)))
     pl.compose_preexec(lambda: calls.append("existing"), 4242)()
-    assert calls == [("death", 4242), "existing"]  # ordering matters for sandbox hooks
+    assert calls == [("death", 4242), "existing"]  # ordering matters for workdir hooks
 
 
 def test_compose_preexec_passthrough_off_linux(monkeypatch):

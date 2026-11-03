@@ -4,6 +4,8 @@
 import { authFetch } from "@/features/auth";
 import { readFastApiError } from "@/lib/format-fastapi-error";
 import { readSseJsonEvents } from "@/lib/sse-json-events";
+import { translate } from "@/i18n";
+
 
 /** Model paths the backend loads onto the NPU (`lemonade:<Lemonade model id>`). */
 export const NPU_MODEL_PREFIX = "lemonade:";
@@ -218,5 +220,5 @@ async function readDownloadStream(
     onProgress(event);
     if (event.event === "complete") return;
   }
-  throw new Error("The download ended before it completed");
+  throw new Error(translate("uxFeatures.theDownloadEndedBefore2urk0"));
 }

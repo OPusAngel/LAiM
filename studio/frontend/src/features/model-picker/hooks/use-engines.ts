@@ -10,6 +10,8 @@ import {
   updateExternalActivity,
   finishExternalJob,
 } from "@/features/hub/download-manager/external-jobs";
+import { translate } from "@/i18n";
+
 
 export function useEngines(enabled = true, background = false) {
   const [engines, setEngines] = useState<EngineStatus[]>([]);
@@ -67,7 +69,7 @@ export function useEngines(enabled = true, background = false) {
           setError(
             err instanceof Error
               ? err.message
-              : "Could not read inference engines",
+              : translate("uxModelpicker.couldNotReadInference1euqq"),
           );
         }
       } finally {

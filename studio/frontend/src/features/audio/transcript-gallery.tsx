@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   useCallback,
   useEffect,
@@ -66,7 +67,7 @@ export function TranscriptExportItems({
         {label(format)}
         {blocked ? (
           <span className="ml-auto pl-3 text-ui-11p5 text-muted-foreground">
-            Needs timestamps
+            {translate("uxAudio.needsTimestamps146ed")}
           </span>
         ) : null}
       </DropdownMenuItem>
@@ -85,7 +86,7 @@ async function downloadRecord(
       full = await getTranscript(record.id);
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Could not load transcript.",
+        error instanceof Error ? error.message : translate("uxAudio.couldNotLoadTranscriptrse8k"),
       );
       return;
     }
@@ -166,7 +167,7 @@ export function TranscriptGallery({
         setRecords([]);
         setCursor(null);
         toast.error(
-          error instanceof Error ? error.message : "Could not load transcripts.",
+          error instanceof Error ? error.message : translate("uxAudio.couldNotLoadTranscriptse7xhb"),
         );
       })
       .finally(() => {
@@ -206,7 +207,7 @@ export function TranscriptGallery({
       toast.error(
         error instanceof Error
           ? error.message
-          : "Could not load more transcripts.",
+          : translate("uxAudio.couldNotLoadMoreuv2sj"),
       );
     } finally {
       if (ticket === generation.current) {
@@ -228,7 +229,7 @@ export function TranscriptGallery({
       toast.error(
         error instanceof Error
           ? error.message
-          : "Could not update transcript history.",
+          : translate("uxAudio.couldNotUpdateTranscripto07rj"),
       );
     }
   };
@@ -242,15 +243,15 @@ export function TranscriptGallery({
               size="sm"
               className="px-0 text-ui-11p5 text-muted-foreground"
             >
-              {archived ? "Archived transcripts" : "History"}
+              {archived ? translate("uxAudio.archivedTranscriptsg0myb") : "History"}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">
             <DropdownMenuItem onClick={() => setArchived(false)}>
-              History
+              {translate("browser.pages.history")}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setArchived(true)}>
-              Archived transcripts
+              {translate("uxAudio.archivedTranscriptsbsrak")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -261,14 +262,12 @@ export function TranscriptGallery({
             onClick={() => {
               if (
                 window.confirm(
-                  "Delete all transcripts in history? Archived transcripts will be kept.",
+                  translate("uxAudio.deleteAllTranscriptsInp48n7"),
                 )
               )
                 void mutate(() => deleteTranscript(), null);
             }}
-          >
-            Clear all
-          </Button>
+          >{translate("uxAudio.clearAllyye4n")}</Button>
         )}
       </div>
       <div
@@ -316,7 +315,7 @@ export function TranscriptGallery({
                   variant="ghost"
                   size="icon"
                   className="size-5 text-muted-foreground/60 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 data-[state=open]:opacity-100 any-pointer-coarse:opacity-100"
-                  aria-label="Transcript actions"
+                  aria-label={translate("uxAudio.transcriptActionsqaqur")}
                 >
                   <HugeiconsIcon icon={MoreVerticalIcon} className="size-3.5" />
                 </Button>
@@ -327,9 +326,7 @@ export function TranscriptGallery({
                   timed={(record.segment_count ?? 0) > 0}
                   label={(format) => (
                     <>
-                      <HugeiconsIcon icon={Download01Icon} />
-                      Download .{format}
-                    </>
+                      <HugeiconsIcon icon={Download01Icon} />{translate("uxAudio.downloadtrdlq", { p1: format })}</>
                   )}
                   onExport={(format) => void downloadRecord(record, format)}
                 />
@@ -337,13 +334,13 @@ export function TranscriptGallery({
                   onClick={() =>
                     void copyToClipboard(record.text).then((ok) =>
                       ok
-                        ? toast.success("Transcript copied")
-                        : toast.error("Could not copy transcript."),
+                        ? toast.success(translate("uxAudio.transcriptCopied1b9lt"))
+                        : toast.error(translate("uxAudio.couldNotCopyTranscriptgh075")),
                     )
                   }
                 >
                   <HugeiconsIcon icon={Copy01Icon} />
-                  Copy
+                  {translate("chatMenu.copy")}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -364,7 +361,7 @@ export function TranscriptGallery({
                   }
                 >
                   <HugeiconsIcon icon={Delete02Icon} />
-                  Delete
+                  {translate("common.delete")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -373,10 +370,10 @@ export function TranscriptGallery({
         {!records.length && (
           <p className="px-2 py-1.5 text-ui-13 text-muted-foreground">
             {loading
-              ? "Loading transcripts…"
+              ? translate("uxAudio.loadingTranscriptst2gbp")
               : archived
-                ? "No archived transcripts."
-                : "Completed transcripts are saved here."}
+                ? translate("uxAudio.noArchivedTranscriptsad2ml")
+                : translate("uxAudio.completedTranscriptsAreSavednev1n")}
           </p>
         )}
         {cursor && (
@@ -386,7 +383,7 @@ export function TranscriptGallery({
             disabled={loading}
             onClick={() => void loadMore()}
           >
-            {loading ? "Loading…" : "Load more"}
+            {loading ? "Loading…" : translate("uxAudio.loadMore979qc")}
           </Button>
         )}
       </div>

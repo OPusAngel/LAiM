@@ -37,7 +37,7 @@ import {
 const { applyPresetParams, getPresetOwnedParams, isSamePresetConfig } =
   await import("../src/features/chat/presets/preset-policy.ts");
 
-const GGUF = "LAiM/Qwen3.5-9B-GGUF";
+const GGUF = "unsloth/Qwen3.5-9B-GGUF";
 
 function params(overrides: Partial<InferenceParams> = {}): InferenceParams {
   return { ...DEFAULT_INFERENCE_PARAMS, checkpoint: GGUF, ...overrides };

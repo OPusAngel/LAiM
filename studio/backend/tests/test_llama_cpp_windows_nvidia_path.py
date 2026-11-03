@@ -6,7 +6,7 @@
 LAiM installs torch with bundled CUDA wheels (nvidia-cuda-runtime-cu13,
 nvidia-cublas-cu13, etc.) and the prebuilt llama-server.exe must find those
 DLLs at runtime to load CUDA. Mirrors the Linux LD_LIBRARY_PATH block.
-See LAiMai/LAiM#5106.
+See OPusAngel/LAiM#5106.
 """
 
 from __future__ import annotations

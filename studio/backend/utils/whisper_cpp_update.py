@@ -32,7 +32,7 @@ from utils.whisper_cpp_freshness import (
 
 logger = structlog.get_logger(__name__)
 
-DEFAULT_PUBLISHED_REPO = "LAiMai/whisper.cpp"
+DEFAULT_PUBLISHED_REPO = "unslothai/whisper.cpp"
 _INSTALL_TIMEOUT_SECONDS = 1800
 
 # Always-idle job payload: whisper applies run inside the chained llama job, so nothing flips this to running. Kept so status payload shapes stay stable.

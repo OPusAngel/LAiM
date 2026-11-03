@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { withModelLoadNotice } from "@/lib/model-lifecycle-events";
 import {
   type AudioCppRuntimeStatus,
@@ -153,12 +154,12 @@ export async function transcribeAudioBlob(
     const providersState = useExternalProvidersStore.getState();
     if (!providersState.connectionsEnabled) {
       throw new Error(
-        "Connections are disabled. Enable connections before using custom transcription.",
+        translate("uxChat.connectionsAreDisabledEnableqpgsv"),
       );
     }
     if (!providerId || !model) {
       throw new Error(
-        "Custom transcription is not configured. Pick a connection and model in Settings → Voice.",
+        translate("uxChat.customTranscriptionIsNotqkera"),
       );
     }
     const form = new FormData();
@@ -192,7 +193,7 @@ export async function transcribeAudioBlob(
     }
     const data = (await response.json()) as { text?: string };
     if (typeof data.text !== "string") {
-      throw new Error("The transcription endpoint returned no text.");
+      throw new Error(translate("uxChat.theTranscriptionEndpointReturned0rm2k"));
     }
     return data.text.trim();
   }
@@ -227,7 +228,7 @@ export async function transcribeAudioBlob(
     const detail = await sttErrorDetail(response);
     if (response.status === 501) {
       throw new Error(
-        "Speech-to-text is not available on this server. Run `LAiM studio update` to install it.",
+        translate("uxChat.speechToTextIshw5xw"),
       );
     }
     throw sttRequestError(response.status, detail);
@@ -463,7 +464,7 @@ export async function cancelSttDownload(
     throw new Error(body?.detail ?? `HTTP ${response.status}`);
   }
   if (body?.downloading && body.cancelled === false) {
-    throw new Error("The download changed before cancellation completed.");
+    throw new Error(translate("uxChat.theDownloadChangedBeforeyciys"));
   }
 }
 
@@ -522,7 +523,7 @@ export class StudioModelDictationAdapter implements DictationAdapter {
 
   listen(): DictationAdapter.Session {
     if (!StudioModelDictationAdapter.isSupported()) {
-      throw new Error("Recording is not supported in this browser.");
+      throw new Error(translate("uxChat.recordingIsNotSupportedl4y3m"));
     }
 
     // Pin the model, language and linked chat chosen when recording began, so a mid-session
@@ -537,7 +538,7 @@ export class StudioModelDictationAdapter implements DictationAdapter {
       : settings.sttModel;
     if (usesExternalEndpoint && (!sessionProviderId || !sessionModel)) {
       throw new Error(
-        "Custom transcription is not configured. Pick a connection and model in Settings → Voice.",
+        translate("uxChat.customTranscriptionIsNotqkera"),
       );
     }
     beginDictationSession();
@@ -605,7 +606,7 @@ export class StudioModelDictationAdapter implements DictationAdapter {
     ) => {
       if (reportedTranscriptionError || cancelled || ended) return;
       reportedTranscriptionError = true;
-      console.error("STT transcription error:", error);
+      console.error(translate("uxChat.sTTTranscriptionErrorirdr8"), error);
       // undownloaded models require confirmation; never download from dictation
       if (
         !usesExternalEndpoint &&
@@ -618,10 +619,10 @@ export class StudioModelDictationAdapter implements DictationAdapter {
       const message =
         error instanceof Error && error.message
           ? error.message
-          : "A recorded segment could not be transcribed.";
+          : translate("uxChat.aRecordedSegmentCouldg1z3l");
       toast.error(message, {
         action: {
-          label: "Open Voice settings",
+          label: translate("settings.voice.dictation.sttOpenVoiceSettings"),
           onClick: () => useSettingsDialogStore.getState().openDialog("voice"),
         },
       });
@@ -922,9 +923,9 @@ export class StudioModelDictationAdapter implements DictationAdapter {
         for (const callback of speechStartCallbacks) callback();
       } catch (error) {
         const message = isMissingDeviceError(error)
-          ? "No microphone was found for dictation."
-          : "Dictation could not access the microphone.";
-        console.error("STT microphone error:", error);
+          ? translate("uxChat.noMicrophoneWasFoundvdudx")
+          : translate("uxChat.dictationCouldNotAccessgc26u");
+        console.error(translate("uxChat.sTTMicrophoneError85nei"), error);
         toast.error(message);
         finishSession("error");
       }

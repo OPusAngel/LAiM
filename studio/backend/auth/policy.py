@@ -96,7 +96,7 @@ def installation_has_managed_accounts() -> bool:
 
 
 def full_access_permitted() -> bool:
-    """Only the installation owner may run tools outside the sandbox."""
+    """Only the installation owner may run tools outside the workdir."""
     from utils.account_context import is_owner_context
     return is_owner_context()
 

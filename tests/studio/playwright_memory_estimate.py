@@ -33,7 +33,7 @@ NEW = os.environ.get("STUDIO_NEW_PW", "MemEst-NEW-2026!")
 # Attach mode: the model-config scene already rotated the bootstrap password on this server.
 LOGIN_PW = os.environ.get("STUDIO_LOGIN_PW")
 LOGIN_USER = os.environ.get("STUDIO_LOGIN_USER", "LAiM")
-GGUF_REPO = os.environ.get("GGUF_REPO", "LAiM/gemma-3-270m-it-GGUF")
+GGUF_REPO = os.environ.get("GGUF_REPO", "unsloth/gemma-3-270m-it-GGUF")
 GGUF_VARIANT = os.environ.get("GGUF_VARIANT", "UD-Q4_K_XL")
 # From GGUF_REPO: a family-name hint can match a non-GGUF sibling first, which has no memory row.
 MODEL_HINT = os.environ.get("STUDIO_MODEL_HINT") or GGUF_REPO.rsplit("/", 1)[-1]

@@ -443,7 +443,7 @@ class TestExtractQuantToken:
 
 
 @pytest.mark.parametrize(
-    "repo", ["leejet/MiniMax-H3-GGUF", "LAiM/MiniMax-H3-GGUF", "LAiM/minimax-h3-gguf"]
+    "repo", ["leejet/MiniMax-H3-GGUF", "unsloth/MiniMax-H3-GGUF", "unsloth/minimax-h3-gguf"]
 )
 def test_minimax_h3_variant_filter_keeps_both_denoiser_partitions(repo):
     """Both H3 bundle repos need the filter, and the match is case-insensitive.
@@ -789,7 +789,7 @@ def _path_model_row(tmp_path: Path, source: str):
         load_path = path,
         source = source,
         model_format = "gguf",
-        model_id = "LAiM/gpt-oss-20b-GGUF" if source == "lmstudio" else None,
+        model_id = "unsloth/gpt-oss-20b-GGUF" if source == "lmstudio" else None,
         size_bytes = 10,
     )
 
@@ -2430,7 +2430,7 @@ def test_cached_gguf_scan_hides_infra_repos_without_user_downloads(monkeypatch, 
         tmp_path / "probe",
     )
     embedder = _repo(
-        "LAiM/bge-small-en-v1.5-GGUF",
+        "unsloth/bge-small-en-v1.5-GGUF",
         [_file("bge-small-en-v1.5-f16.gguf", 60_000_000)],
         tmp_path / "embedder",
     )
@@ -2449,7 +2449,7 @@ def test_cached_gguf_scan_hides_infra_repos_without_user_downloads(monkeypatch, 
 
 def test_cached_gguf_scan_emits_curated_asr_as_non_chat_audio_inventory(monkeypatch, tmp_path):
     asr = _repo(
-        "LAiMai/Qwen3-ASR-0.6B-GGUF",
+        "unslothai/Qwen3-ASR-0.6B-GGUF",
         [
             _file("Qwen3-ASR-0.6B-Q8_0.gguf", 800_000_000),
             _file("mmproj-Qwen3-ASR-0.6B-Q8_0.gguf", 200_000_000),
@@ -2465,7 +2465,7 @@ def test_cached_gguf_scan_emits_curated_asr_as_non_chat_audio_inventory(monkeypa
 
     [row] = cache_inventory._scan_cached_gguf()
 
-    assert row["repo_id"] == "LAiMai/Qwen3-ASR-0.6B-GGUF"
+    assert row["repo_id"] == "unslothai/Qwen3-ASR-0.6B-GGUF"
     assert row["size_bytes"] == 800_000_000
     assert row["capabilities"]["can_chat"] is False
     assert row["capabilities"]["supports_vision"] is False
@@ -2474,7 +2474,7 @@ def test_cached_gguf_scan_emits_curated_asr_as_non_chat_audio_inventory(monkeypa
 def test_cached_gguf_scan_keeps_infra_repo_with_user_downloaded_variant(monkeypatch, tmp_path):
     monkeypatch.setattr(state_dir, "cache_root", lambda: tmp_path / "state")
     embedder = _repo(
-        "LAiM/bge-small-en-v1.5-GGUF",
+        "unsloth/bge-small-en-v1.5-GGUF",
         [
             _file("bge-small-en-v1.5-f16.gguf", 60_000_000),
             _file("bge-small-en-v1.5-Q8_0.gguf", 35_000_000),
@@ -2484,7 +2484,7 @@ def test_cached_gguf_scan_keeps_infra_repo_with_user_downloaded_variant(monkeypa
     # Variant manifests only exist for user Hub downloads, not auto-downloads.
     assert download_manifest.write_manifest(
         "model",
-        "LAiM/bge-small-en-v1.5-GGUF",
+        "unsloth/bge-small-en-v1.5-GGUF",
         "Q8_0",
         [download_manifest.ExpectedFile(path = "bge-small-en-v1.5-Q8_0.gguf", size = 35_000_000)],
         "http",
@@ -2499,7 +2499,7 @@ def test_cached_gguf_scan_keeps_infra_repo_with_user_downloaded_variant(monkeypa
 
     result = {"cached": cache_inventory._scan_cached_gguf()}
 
-    assert [row["repo_id"] for row in result["cached"]] == ["LAiM/bge-small-en-v1.5-GGUF"]
+    assert [row["repo_id"] for row in result["cached"]] == ["unsloth/bge-small-en-v1.5-GGUF"]
     assert result["cached"][0]["capabilities"]["can_chat"] is False
 
 
@@ -2507,7 +2507,7 @@ def test_cached_models_scan_hides_non_gguf_embedder(monkeypatch, tmp_path):
     embedder_path = tmp_path / "hub" / "models--LAiM--bge-small-en-v1.5"
     embedder_path.mkdir(parents = True)
     embedder = _repo(
-        "LAiM/bge-small-en-v1.5",
+        "unsloth/bge-small-en-v1.5",
         [_file("config.json", 12), _file("model.safetensors", 130_000_000)],
         embedder_path,
     )
@@ -2533,7 +2533,7 @@ def test_cached_models_scan_emits_curated_and_custom_whisper_as_stt(monkeypatch,
     curated_path = tmp_path / "hub" / "models--LAiM--whisper-tiny"
     curated_path.mkdir(parents = True)
     curated = _repo(
-        "LAiM/whisper-tiny",
+        "unsloth/whisper-tiny",
         [_file("config.json", 12), _file("model.safetensors", 80_000_000)],
         curated_path,
     )
@@ -2559,7 +2559,7 @@ def test_cached_models_scan_emits_curated_and_custom_whisper_as_stt(monkeypatch,
     rows = cache_inventory._scan_cached_models(active_hub_cache = curated_path.parent)
 
     rows_by_repo = {row["repo_id"]: row for row in rows}
-    assert set(rows_by_repo) == {"LAiM/whisper-tiny", "Org/custom-whisper"}
+    assert set(rows_by_repo) == {"unsloth/whisper-tiny", "Org/custom-whisper"}
     assert rows_by_repo["Org/custom-whisper"]["task"] == "automatic-speech-recognition"
     assert all(row["capabilities"]["can_chat"] is False for row in rows_by_repo.values())
 
@@ -2786,7 +2786,7 @@ def test_a_companion_mirror_carries_the_flag_on_the_hub_row(monkeypatch, tmp_pat
     row = _diffusion_scan(
         monkeypatch,
         tmp_path,
-        "LAiM/Z-Image-Turbo-ComfyUI",
+        "unsloth/Z-Image-Turbo-ComfyUI",
         [_file("config.json", 12), _file("model.safetensors", 300_000_000)],
         task = None,
     )
@@ -2802,7 +2802,7 @@ def test_an_ordinary_repo_is_not_flagged_as_a_companion(monkeypatch, tmp_path):
     row = _diffusion_scan(
         monkeypatch,
         tmp_path,
-        "LAiM/Qwen3-8B",
+        "unsloth/Qwen3-8B",
         [_file("config.json", 12), _file("model.safetensors", 100)],
         task = None,
     )
@@ -2857,7 +2857,7 @@ def test_the_real_companion_shape_never_reaches_a_row_at_all(monkeypatch, tmp_pa
         target.parent.mkdir(parents = True, exist_ok = True)
         target.write_bytes(b"\0" * 16)
     repo = SimpleNamespace(
-        repo_id = "LAiM/Z-Image-Turbo-ComfyUI",
+        repo_id = "unsloth/Z-Image-Turbo-ComfyUI",
         repo_type = "model",
         repo_path = tmp_path,
         revisions = [SimpleNamespace(files = files, snapshot_path = snapshot, commit_hash = _SNAPSHOT_SHA)],
@@ -3007,14 +3007,14 @@ def test_cached_scans_hide_stale_default_embedder_after_custom_setting(monkeypat
     monkeypatch.setattr(rag_config, "effective_gguf_repo", lambda: "org/custom-GGUF")
 
     gguf = _repo(
-        "LAiM/bge-small-en-v1.5-GGUF",
+        "unsloth/bge-small-en-v1.5-GGUF",
         [_file("bge-small-en-v1.5-f16.gguf", 60_000_000)],
         tmp_path / "default-gguf",
     )
     weights_path = tmp_path / "hub" / "models--LAiM--bge-small-en-v1.5"
     weights_path.mkdir(parents = True)
     weights = _repo(
-        "LAiM/bge-small-en-v1.5",
+        "unsloth/bge-small-en-v1.5",
         [_file("config.json", 12), _file("model.safetensors", 130_000_000)],
         weights_path,
     )
@@ -3870,7 +3870,7 @@ def test_gguf_progress_unknown_hashes_no_backward_dip_when_variant_finalizes(mon
 
     result = asyncio.run(
         downloads.get_gguf_download_progress_response(
-            "LAiM/SmolLM2-360M-Instruct-GGUF",
+            "unsloth/SmolLM2-360M-Instruct-GGUF",
             variant = "Q2_K",
             expected_bytes = own_total,
         )
@@ -4642,7 +4642,7 @@ def test_qwen3_asr_gguf_name_hint_is_not_classified_as_chat(monkeypatch, tmp_pat
 
 
 def test_a_gguf_with_no_architecture_is_classified_from_its_name(monkeypatch, tmp_path):
-    """``LAiM/Qwen-Image-2.1-GGUF`` files have kv_count 0; a name that says nothing stays None."""
+    """``unsloth/Qwen-Image-2.1-GGUF`` files have kv_count 0; a name that says nothing stays None."""
     from hub.services.models import catalog_classification
 
     image = tmp_path / "qwen-image-2.1-Q4_K_M.gguf"
@@ -4653,7 +4653,7 @@ def test_a_gguf_with_no_architecture_is_classified_from_its_name(monkeypatch, tm
     monkeypatch.setattr(catalog_classification, "_gguf_family_buildable", lambda _hints: True)
 
     assert (
-        catalog_classification._gguf_path_task(image, ("LAiM/Qwen-Image-2.1-GGUF",))
+        catalog_classification._gguf_path_task(image, ("unsloth/Qwen-Image-2.1-GGUF",))
         == "text-to-image"
     )
     assert catalog_classification._gguf_path_task(chat) is None
@@ -5166,7 +5166,7 @@ def test_cached_flash_next_quant_needs_managed_mtp_before_it_is_downloaded(
     async def _run_inline(fn, *args, **kwargs):
         return fn(*args, **kwargs)
 
-    repo_id = "LAiM/Qwen3.8-Flash-Next-GGUF"
+    repo_id = "unsloth/Qwen3.8-Flash-Next-GGUF"
     snapshot = (
         tmp_path / "cache" / "models--LAiM--Qwen3.8-Flash-Next-GGUF" / "snapshots" / "rev0"
     )
@@ -7081,7 +7081,7 @@ def test_cached_generative_repo_stays_chat_capable(tmp_path):
         tmp_path, "snap", {"architectures": ["LlamaForCausalLM"], "model_type": "llama"}
     )
     fields = cache_inventory._cache_inventory_fields(
-        "LAiM/Llama-3.2-1B-Instruct",
+        "unsloth/Llama-3.2-1B-Instruct",
         "safetensors",
         identity = cache_inventory._LoadIdentity(
             load_id = str(snapshot), active_cache = False, load_snapshot = snapshot
@@ -7093,10 +7093,10 @@ def test_cached_generative_repo_stays_chat_capable(tmp_path):
 def test_cached_row_without_a_snapshot_keeps_its_format_capability(tmp_path):
     """Fails open: no snapshot to inspect must not hide the row."""
     fields = cache_inventory._cache_inventory_fields(
-        "LAiM/Llama-3.2-1B-Instruct",
+        "unsloth/Llama-3.2-1B-Instruct",
         "safetensors",
         identity = cache_inventory._LoadIdentity(
-            load_id = "LAiM/Llama-3.2-1B-Instruct",
+            load_id = "unsloth/Llama-3.2-1B-Instruct",
             active_cache = True,
             load_snapshot = None,
         ),

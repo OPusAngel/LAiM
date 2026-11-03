@@ -275,11 +275,13 @@ def env_int(
 # (no matching GitHub release), forces a source build, and causes HTTP 422
 # errors. Only use "master" temporarily when the latest release is missing
 # support for a new model architecture.
-DEFAULT_LLAMA_TAG = os.environ.get("LAiM_LLAMA_TAG", "latest")
-# Default published repo for prebuilt release resolution. Every host plans
-# its prebuilt against the LAiM fork; setup.sh/setup.ps1 pass it via
-# --published-repo. ggml-org is reachable only via an explicit override.
-DEFAULT_PUBLISHED_REPO = "LAiMai/llama.cpp"
+DEFAULT_LLAMA_TAG = os.environ.get("UNSLOTH_LLAMA_TAG", "latest")
+# Default published repo for prebuilt release resolution. This constant is the FORK's slug
+# and the code treats it as a sentinel: a fork release carries
+# llama-prebuilt-manifest.json, which says which GPU/arch each bundle covers, and every
+# "is this the fork?" branch compares against it. LAiM itself installs from
+# PREBUILT_SOURCE_REPO below, so a bare run never lands on the manifest path.
+DEFAULT_PUBLISHED_REPO = "unslothai/llama.cpp"
 DEFAULT_PUBLISHED_TAG = os.environ.get("LAiM_LLAMA_RELEASE_TAG")
 DEFAULT_PUBLISHED_MANIFEST_ASSET = os.environ.get(
     "LAiM_LLAMA_RELEASE_MANIFEST_ASSET", "llama-prebuilt-manifest.json"
@@ -289,6 +291,11 @@ DEFAULT_PUBLISHED_SHA256_ASSET = os.environ.get(
 )
 UPSTREAM_REPO = "ggml-org/llama.cpp"
 UPSTREAM_RELEASES_API = f"https://api.github.com/repos/{UPSTREAM_REPO}/releases/latest"
+# Where LAiM actually takes llama.cpp from: the upstream project's own releases, which gain
+# new model architectures as soon as llama.cpp does. Kept as one knob because an install
+# pointing elsewhere is silent -- an old engine simply refuses a new GGUF.
+# LAiM_LLAMA_RELEASE_REPO re-points it (e.g. back at the fork) without patching this file.
+PREBUILT_SOURCE_REPO = os.environ.get("LAiM_LLAMA_RELEASE_REPO", UPSTREAM_REPO)
 
 
 TEST_MODEL_URL = "https://huggingface.co/ggml-org/models/resolve/main/tinyllamas/stories260K.gguf"
@@ -440,7 +447,7 @@ class AssetChoice:
     source_label: str
     # Paired runtime archive (Windows CUDA cudart bundle). When set,
     # install_from_archives also downloads it and overlays its DLLs on
-    # top of the main install. See LAiMai/LAiM#5106.
+    # top of the main install. See OPusAngel/LAiM#5106.
     runtime_name: str | None = None
     runtime_url: str | None = None
     runtime_sha256: str | None = None
@@ -1544,7 +1551,7 @@ def resolve_simple_install_release_plans(
     *,
     max_release_fallbacks: int = DEFAULT_MAX_PREBUILT_RELEASE_FALLBACKS,
 ) -> "tuple[str, Sequence[InstallReleasePlan]]":
-    repo = published_repo or DEFAULT_PUBLISHED_REPO
+    repo = published_repo or PREBUILT_SOURCE_REPO
     # The fork (LAiMai) ships a manifest describing every bundle's GPU/arch
     # coverage, so all fork hosts select from it. Upstream (ggml-org) ships no
     # manifest and is selected by asset filename in the loop below.
@@ -2459,7 +2466,7 @@ def resolve_published_release(
     published_repo: str,
     published_release_tag: str = "",
 ) -> ResolvedPublishedRelease:
-    repo = published_repo or DEFAULT_PUBLISHED_REPO
+    repo = published_repo or PREBUILT_SOURCE_REPO
     normalized_requested = normalized_requested_llama_tag(requested_tag)
 
     if published_release_tag:
@@ -2510,7 +2517,7 @@ def iter_resolved_published_releases(
     allow_download_host_fast_path: bool = True,
     continue_after_fast_path: bool = False,
 ) -> Iterable[ResolvedPublishedRelease]:
-    repo = published_repo or DEFAULT_PUBLISHED_REPO
+    repo = published_repo or PREBUILT_SOURCE_REPO
     normalized_requested = normalized_requested_llama_tag(requested_tag)
 
     # Fast path: resolve a pinned or latest fork release from the download host (no
@@ -2637,7 +2644,7 @@ def resolve_requested_llama_tag(
     if normalized_requested != "latest":
         return normalized_requested
     # Prefer the LAiM release repo tag (tested/approved) over bleeding-edge
-    # upstream. For example, LAiMai/llama.cpp may publish b8508 while
+    # upstream. For example, unslothai/llama.cpp may publish b8508 while
     # ggml-org/llama.cpp latest is b8514. The source-build fallback should
     # compile the same version the prebuilt path would have installed.
     if published_repo:
@@ -2656,7 +2663,7 @@ def resolve_requested_llama_tag(
 def resolve_requested_install_tag(
     requested_tag: str | None,
     published_release_tag: str = "",
-    published_repo: str = DEFAULT_PUBLISHED_REPO,
+    published_repo: str = PREBUILT_SOURCE_REPO,
 ) -> str:
     return resolve_published_release(
         requested_tag,
@@ -4528,7 +4535,7 @@ def ensure_converter_scripts(
     canonical = install_dir / "convert_hf_to_gguf.py"
     if not canonical.exists():
         # Hydration normally placed it; else the fork at the installed mix tag (bare bNNNN tags are not pushed).
-        source_repo = repo or DEFAULT_PUBLISHED_REPO
+        source_repo = repo or PREBUILT_SOURCE_REPO
         ref = release_tag or llama_tag
         raw_base = (
             f"https://raw.githubusercontent.com/{source_repo}/{urllib.parse.quote(ref, safe = '')}"
@@ -5131,7 +5138,7 @@ def _install_side_path_candidates(install_dir: Path, label: str) -> list[Path]:
     if not root.is_dir():
         return []
     # glob.escape because the install directory name reaches here from
-    # LAiM_LLAMA_CPP_PATH, and an unescaped bracket in it would match the
+    # UNSLOTH_LLAMA_CPP_PATH, and an unescaped bracket in it would match the
     # side paths of a *different* install in the same parent, holding a
     # different install lock.
     prefix = f"{install_dir.name}.{label}-"
@@ -7317,7 +7324,7 @@ def release_listing_fallback(exc: BaseException, published_repo: str) -> Prebuil
     # Install time only: a resolver probe must fail hard, or update_flow caches "no prebuilt".
     return PrebuiltFallback(
         f"failed to inspect published releases in "
-        f"{published_repo or DEFAULT_PUBLISHED_REPO}: {exc}"
+        f"{published_repo or PREBUILT_SOURCE_REPO}: {exc}"
     )
 
 
@@ -8050,9 +8057,9 @@ def load_prebuilt_metadata(install_dir: Path) -> dict[str, Any] | None:
 
 def default_managed_llama_dir() -> Path:
     """The managed llama.cpp install root, mirroring setup.sh and the updater:
-    the LAiM_LLAMA_CPP_PATH override, else <custom studio home>/llama.cpp,
+    the UNSLOTH_LLAMA_CPP_PATH override, else <custom studio home>/llama.cpp,
     else the legacy ~/.LAiM/llama.cpp."""
-    override = (os.environ.get("LAiM_LLAMA_CPP_PATH") or "").strip()
+    override = (os.environ.get("UNSLOTH_LLAMA_CPP_PATH") or "").strip()
     if override:
         return Path(override).expanduser()
     home = (os.environ.get("LAiM_STUDIO_HOME") or os.environ.get("STUDIO_HOME") or "").strip()
@@ -9088,7 +9095,7 @@ def _expected_release_tag_without_plan(
             if not isinstance(recorded_upstream, str) or recorded_upstream != requested:
                 return None
         return pinned
-    repo = published_repo or DEFAULT_PUBLISHED_REPO
+    repo = published_repo or PREBUILT_SOURCE_REPO
     if requested != "latest":
         # An upstream pin: a marker naming another build is not current.
         recorded_upstream = marker.get("tag")
@@ -9292,7 +9299,7 @@ def existing_install_current_without_plan(
         )
     host = route.host
     # The ROUTED repo: a Linux arm64 Vulkan host goes upstream, and the marker records that.
-    if (marker.get("published_repo") or "") != (route.published_repo or DEFAULT_PUBLISHED_REPO):
+    if (marker.get("published_repo") or "") != (route.published_repo or PREBUILT_SOURCE_REPO):
         return False
     if not _marker_backend_fits_host(marker, host):
         return False
@@ -10267,9 +10274,9 @@ def _windows_hip_gfx_targets(published_repo: str | None) -> frozenset[str]:
     Vulkan. Answering "supported" there for a fork-only arch would silently land it on
     HIP/CPU instead of the Vulkan bundle that would actually run, so gate on the fork rather
     than exempting one repo, mirroring that dispatch exactly, spelling included: an empty
-    value defaults to the fork, and a differently cased repo really does take the upstream
-    path and must be answered with upstream coverage."""
-    if (published_repo or DEFAULT_PUBLISHED_REPO) == DEFAULT_PUBLISHED_REPO:
+    value defaults to LAiM's source repo, and a differently cased repo really does take the
+    upstream path and must be answered with upstream coverage."""
+    if (published_repo or PREBUILT_SOURCE_REPO) == DEFAULT_PUBLISHED_REPO:
         return WINDOWS_HIP_PREBUILT_GFX_TARGETS
     return UPSTREAM_WINDOWS_HIP_GFX_TARGETS
 
@@ -11388,7 +11395,7 @@ def install_prebuilt(
     explicit_version_request = (
         normalized_requested_llama_tag(llama_tag) != "latest"
         or bool((published_release_tag or "").strip())
-        or (bool((published_repo or "").strip()) and published_repo != DEFAULT_PUBLISHED_REPO)
+        or (bool((published_repo or "").strip()) and published_repo != PREBUILT_SOURCE_REPO)
         # --cpu-fallback is setup.sh's deliberate arm64 recovery, so it counts. --has-rocm
         # and --rocm-gfx do not: both entrypoints forward a DETECTED GPU on every AMD host,
         # so counting them would take the keep path away from all of them.
@@ -11667,7 +11674,7 @@ def install_prebuilt(
                         ensure_converter_scripts(
                             install_dir,
                             plan.llama_tag,
-                            repo = published_repo or DEFAULT_PUBLISHED_REPO,
+                            repo = published_repo or PREBUILT_SOURCE_REPO,
                             release_tag = plan.release_tag,
                         )
                     except Exception as exc:
@@ -11762,12 +11769,12 @@ def parse_args() -> argparse.Namespace:
         default = DEFAULT_LLAMA_TAG,
         help = (
             "llama.cpp release tag. Defaults to the latest usable published LAiM "
-            "release unless LAiM_LLAMA_TAG overrides it."
+            "release unless UNSLOTH_LLAMA_TAG overrides it."
         ),
     )
     parser.add_argument(
         "--published-repo",
-        default = DEFAULT_PUBLISHED_REPO,
+        default = PREBUILT_SOURCE_REPO,
         help = "Published bundle repository",
     )
     parser.add_argument(

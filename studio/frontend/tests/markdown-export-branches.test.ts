@@ -6,6 +6,8 @@ import test from "node:test";
 import vm from "node:vm";
 import ts from "@typescript/typescript6";
 
+import { enTranslate } from "./helpers/module-stubs.ts";
+
 import { stripSearchImageTokens } from "../src/features/chat/search-images/search-images.ts";
 import {
   buildNamedConversationsMarkdown,
@@ -105,6 +107,7 @@ function loadExporters(
     },
   ).outputText;
   const context = {
+    translate: enTranslate,
     exports: {},
     toast: { info: () => {} },
     listStoredChatMessages: async () => stored,

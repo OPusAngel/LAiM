@@ -32,7 +32,7 @@ param(
     # Label for this run, so the four matrix cells do not overwrite each other.
     [string] $Label = 'run',
 
-    [string] $Model = 'LAiM/Qwen3.5-2B-MTP-GGUF:UD-Q4_K_XL',
+    [string] $Model = 'unsloth/Qwen3.5-2B-MTP-GGUF:UD-Q4_K_XL',
 
     # prepare only: skip the Defender signature update, which is slow.
     [switch] $SkipUpdates,

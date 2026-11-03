@@ -576,7 +576,7 @@ def _run(imports: str, body: str) -> dict:
 
 
 LOADED_MODEL = """
-    seed({ params: { checkpoint: "LAiM/gguf-model" }, loadedContextLength: 8192 });
+    seed({ params: { checkpoint: "unsloth/gguf-model" }, loadedContextLength: 8192 });
 """
 
 

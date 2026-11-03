@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -53,13 +54,13 @@ export function ImportDialog({
         viewportClassName="overflow-auto"
       >
         <DialogHeader>
-          <DialogTitle>Import recipe</DialogTitle>
+          <DialogTitle>{translate("uxRecipestudio.importRecipeefcum")}</DialogTitle>
         </DialogHeader>
         <div className="grid gap-1.5">
           <FieldLabel
-            label="Recipe JSON"
+            label={translate("uxRecipestudio.recipeJSON16a4n")}
             htmlFor={payloadId}
-            hint="Paste JSON exported from Recipe Studio."
+            hint={translate("uxRecipestudio.pasteJSONExportedFrom1clz1")}
           />
           <Textarea
             id={payloadId}
@@ -76,7 +77,7 @@ export function ImportDialog({
         </div>
         <DialogFooter>
           <Button type="button" variant="outline" onClick={handleImport}>
-            Import recipe
+            {translate("uxRecipestudio.importRecipe1cuxb")}
           </Button>
         </DialogFooter>
       </RecipeDialogContent>

@@ -3,6 +3,8 @@
 
 import { authFetch, getAuthSessionEpoch } from "@/features/auth";
 import type { RecipeExecutionRecord } from "../execution-types";
+import { translate } from "@/i18n";
+
 
 function executionsUrl(recipeId: string): string {
   return `/api/data-recipe/recipes/${encodeURIComponent(recipeId)}/executions`;
@@ -12,7 +14,7 @@ export async function listRecipeExecutions(
   recipeId: string,
 ): Promise<RecipeExecutionRecord[]> {
   const res = await authFetch(executionsUrl(recipeId));
-  if (!res.ok) throw new Error(`Load executions failed (${res.status})`);
+  if (!res.ok) throw new Error(translate("uxRecipestudio.loadExecutionsFailedfqvt9", { p1: res.status }));
   const { executions } = (await res.json()) as {
     executions: RecipeExecutionRecord[];
   };
@@ -22,7 +24,7 @@ export async function listRecipeExecutions(
 function assertSameSession(epoch: number): void {
   if (getAuthSessionEpoch() !== epoch) {
     // 401 so the transient retry below never resends it.
-    throw Object.assign(new Error("Signed out before the run was saved."), {
+    throw Object.assign(new Error(translate("uxRecipestudio.signedOutBeforeThe7s2t9")), {
       status: 401,
     });
   }
@@ -43,7 +45,7 @@ async function putExecution(
     { beforeRetry: () => assertSameSession(epoch) },
   );
   if (!res.ok) {
-    throw Object.assign(new Error(`Save execution failed (${res.status})`), {
+    throw Object.assign(new Error(translate("uxRecipestudio.saveExecutionFailed8sjhf", { p1: res.status })), {
       status: res.status,
     });
   }

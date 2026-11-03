@@ -123,7 +123,7 @@ def test_checkpoint_loads_without_LAiM(patched, tmp_path):
 def test_training_arguments_conversion_keeps_LAiM_fields(patched, tmp_path):
     """TRL converts a plain `TrainingArguments` with `args = SFTConfig(**dict_args)`.
     That has to land on the LAiM subclass, or the config reaches the trainer
-    without the fields the patched trainer reads (LAiMai/LAiM#3931)."""
+    without the fields the patched trainer reads (OPusAngel/LAiM#3931)."""
     pytest.importorskip("transformers")
     from transformers import TrainingArguments
 

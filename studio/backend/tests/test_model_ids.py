@@ -18,7 +18,7 @@ def test_local_gguf_path_becomes_clean_stem():
 
 
 def test_hf_repo_id_unchanged():
-    assert public_model_id("LAiM/Qwen3-30B-A3B-GGUF") == "LAiM/Qwen3-30B-A3B-GGUF"
+    assert public_model_id("unsloth/Qwen3-30B-A3B-GGUF") == "unsloth/Qwen3-30B-A3B-GGUF"
     assert public_model_id("Qwen3-30B-A3B") == "Qwen3-30B-A3B"
 
 
@@ -46,10 +46,10 @@ def test_hf_cache_snapshot_recovers_the_repo_id():
         "/home/u/.cache/huggingface/hub/models--LAiM--gemma-4-31B-it-GGUF"
         "/snapshots/c1ac76e99d5513b141e8adde7288b85c3f9c32ec"
     )
-    assert public_model_id(snapshot) == "LAiM/gemma-4-31B-it-GGUF"
+    assert public_model_id(snapshot) == "unsloth/gemma-4-31B-it-GGUF"
     # A file inside the snapshot resolves the same way, not to the file stem.
     assert public_model_id(snapshot + "/gemma-4-31B-it-UD-Q5_K_XL.gguf") == (
-        "LAiM/gemma-4-31B-it-GGUF"
+        "unsloth/gemma-4-31B-it-GGUF"
     )
     assert hf_cache_repo_id("/opt/models/plain.gguf") is None
     assert hf_cache_repo_id(None) is None
@@ -97,7 +97,7 @@ def test_display_model_name_uses_the_repo_leaf_not_the_snapshot_sha():
 
 
 def test_display_model_name_leaves_ordinary_ids_alone():
-    assert display_model_name("LAiM/Qwen3-30B-A3B-GGUF") == "Qwen3-30B-A3B-GGUF"
+    assert display_model_name("unsloth/Qwen3-30B-A3B-GGUF") == "Qwen3-30B-A3B-GGUF"
     assert display_model_name("Qwen3-30B-A3B") == "Qwen3-30B-A3B"
     assert display_model_name("/srv/models/Qwen3-30B-A3B-Q4_K_M.gguf") == ("Qwen3-30B-A3B-Q4_K_M")
     assert display_model_name(None) is None

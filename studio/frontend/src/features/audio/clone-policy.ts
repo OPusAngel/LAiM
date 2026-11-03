@@ -3,6 +3,7 @@
 
 // No app imports: the node test runner loads this directly.
 
+import { translate } from "@/i18n";
 import type { AudioSourceSelection } from "./audio-run-request";
 import type { AudioModelContext, AudioRunPatch } from "./tools/types";
 
@@ -53,14 +54,14 @@ export function formatVibeVoiceScript(text: string): string {
 
 /** Order matters: it is the runtime's vector order. */
 export const INDEX_TTS2_EMOTIONS = [
-  { key: "happy", label: "Happy" },
-  { key: "angry", label: "Angry" },
+  { key: "happy", get label() { return translate("uxAudio.happyi8nze"); } },
+  { key: "angry", get label() { return translate("uxAudio.angryi605u"); } },
   { key: "sad", label: "Sad" },
-  { key: "afraid", label: "Afraid" },
-  { key: "disgusted", label: "Disgusted" },
-  { key: "melancholic", label: "Melancholic" },
-  { key: "surprised", label: "Surprised" },
-  { key: "calm", label: "Calm" },
+  { key: "afraid", get label() { return translate("uxAudio.afraid1ouji"); } },
+  { key: "disgusted", get label() { return translate("uxAudio.disgustedhrrns"); } },
+  { key: "melancholic", get label() { return translate("uxAudio.melancholic6woky"); } },
+  { key: "surprised", get label() { return translate("uxAudio.surprisedojd9x"); } },
+  { key: "calm", get label() { return translate("uxAudio.calme6l5x"); } },
 ] as const;
 
 export function emotionVectorString(vector: readonly number[]): string {
@@ -101,13 +102,13 @@ export function cloneBlocker(
     return {
       kind: "reference-expired",
       // The "Add it again" action follows the reason under Generate.
-      reason: "This reference expired.",
+      get reason() { return translate("uxAudio.thisReferenceExpired6vvsx"); },
     };
   }
   if (input.referenceBusy) {
     return {
       kind: "reference-busy",
-      reason: "Waiting for the reference to finish uploading.",
+      get reason() { return translate("uxAudio.waitingForTheReferencem914c"); },
     };
   }
   // A failed replacement hides the kept clip, so Generate waits until it is dismissed.
@@ -117,17 +118,17 @@ export function cloneBlocker(
   if (!input.reference) {
     return {
       kind: "reference",
-      reason: "Needs a short clip of the voice to copy.",
+      get reason() { return translate("uxAudio.needsAShortClipn3cmx"); },
     };
   }
   if (input.referenceTextField === "required" && !input.referenceText.trim()) {
     return {
       kind: "reference-text",
-      reason: "This model needs what's said in the clip.",
+      get reason() { return translate("uxAudio.thisModelNeedsWhat0tlxz"); },
     };
   }
   if (!input.text.trim()) {
-    return { kind: "text", reason: "Type the text to speak." };
+    return { kind: "text", get reason() { return translate("uxAudio.typeTheTextToceq2o"); } };
   }
   if (input.panelError) return { kind: "panel", reason: input.panelError };
   return null;

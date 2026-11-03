@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -116,11 +117,9 @@ export function SharedRunConfigLinkEditor({
     >
       <DialogContent className="content-start gap-5">
         <DialogHeader>
-          <DialogTitle>Choose a GGUF model</DialogTitle>
+          <DialogTitle>{translate("uxCopy.chooseAGGUFModel1ss7s")}</DialogTitle>
           <DialogDescription>
-            This link contains settings without a model. Enter a Hugging Face
-            GGUF model ID, a local GGUF path on the machine running LAiM, or
-            an Ollama reference to review the settings with that model.
+            {translate("uxCopy.thisLinkContainsSettings1nljs")}
           </DialogDescription>
         </DialogHeader>
         <form
@@ -138,19 +137,19 @@ export function SharedRunConfigLinkEditor({
               htmlFor="shared-run-model"
               className="block text-sm font-medium"
             >
-              GGUF model ID or local path
+              {translate("uxCopy.gGUFModelIDOrki9u3")}
             </label>
             <Input
               id="shared-run-model"
               autoComplete="off"
-              placeholder="owner/model-GGUF or local GGUF path"
+              placeholder={translate("uxModelpicker.ownerModelGGUFOra20a6")}
               value={modelInput}
               onChange={(event) => setModelInput(event.target.value)}
             />
           </div>
           <div className="flex justify-end">
             <Button type="submit" disabled={!validModel}>
-              Open run settings
+              {translate("shell.aria.openRunSettings")}
             </Button>
           </div>
         </form>

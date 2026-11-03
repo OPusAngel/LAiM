@@ -35,7 +35,7 @@ from typer.testing import CliRunner
 import LAiM_cli.commands.start as start
 
 BASE = "http://127.0.0.1:8888"
-MODEL = {"id": "LAiM/gemma-4-26B-A4B-it-GGUF", "context_length": 131072}
+MODEL = {"id": "unsloth/gemma-4-26B-A4B-it-GGUF", "context_length": 131072}
 
 
 def _assert_env_set(output: str, name: str, value: str) -> None:
@@ -944,11 +944,11 @@ def test_write_codex_config_profile(tmp_path, monkeypatch):
 
 def test_write_codex_config_catalog_without_context_length(tmp_path, monkeypatch):
     monkeypatch.setattr(start, "_codex_supports_model_catalog", lambda: True)
-    start.write_codex_config(BASE, {"id": "LAiM/no-window"}, tmp_path)
+    start.write_codex_config(BASE, {"id": "unsloth/no-window"}, tmp_path)
     profile = _parse_toml((tmp_path / "LAiM_api.config.toml").read_text())
     catalog = json.loads((tmp_path / profile["model_catalog_json"]).read_text())
     entry = catalog["models"][0]
-    assert entry["slug"] == "LAiM/no-window"
+    assert entry["slug"] == "unsloth/no-window"
     assert "context_window" not in entry
     assert "max_context_window" not in entry
 
@@ -1269,16 +1269,16 @@ def test_subagent_model_id_uses_loaded_variant(monkeypatch):
 def _kept_model_status(url):
     # Primary Qwen3-4B at Q4_K_M, Qwen3-1.7B kept alongside at Q8_0.
     if "model=LAiM%2FQwen3-1.7B-GGUF" in url:
-        return {"is_gguf": True, "active_model": "LAiM/Qwen3-1.7B-GGUF", "gguf_variant": "Q8_0"}
-    return {"is_gguf": True, "active_model": "LAiM/Qwen3-4B-GGUF", "gguf_variant": "Q4_K_M"}
+        return {"is_gguf": True, "active_model": "unsloth/Qwen3-1.7B-GGUF", "gguf_variant": "Q8_0"}
+    return {"is_gguf": True, "active_model": "unsloth/Qwen3-4B-GGUF", "gguf_variant": "Q4_K_M"}
 
 
 def test_subagent_model_id_pins_the_kept_model_quant(monkeypatch):
     monkeypatch.setattr(start, "_http_json", lambda method, url, key, **_: _kept_model_status(url))
 
-    entry = {"id": "LAiM/Qwen3-1.7B-GGUF"}
+    entry = {"id": "unsloth/Qwen3-1.7B-GGUF"}
     assert start._subagent_model_id(BASE, "key", entry, entry["id"], None) == (
-        "LAiM/Qwen3-1.7B-GGUF:Q8_0"
+        "unsloth/Qwen3-1.7B-GGUF:Q8_0"
     )
 
 
@@ -1524,7 +1524,7 @@ def fake_studio(tmp_path, monkeypatch):
                 return {"api_keys": [{"key_prefix": "feedface"}]}
             return {"key": "sk-LAiM-feedfacefeedface"}
         if url.endswith("/api/settings/embedding-model"):
-            return {"embedding_model": "LAiM/bge-small-en-v1.5"}
+            return {"embedding_model": "unsloth/bge-small-en-v1.5"}
         if url.endswith("/api/providers/"):
             if state.get("providers_status"):
                 raise urllib.error.HTTPError(url, state["providers_status"], "error", None, None)
@@ -1627,8 +1627,8 @@ def test_connect_skips_the_load_warning_of_another_active_model(fake_studio, mon
         if url.split("?")[0].endswith("/api/inference/status"):
             return {
                 "is_gguf": True,
-                "active_model": "LAiM/Other-GGUF",
-                "model_identifier": "LAiM/Other-GGUF",
+                "active_model": "unsloth/Other-GGUF",
+                "model_identifier": "unsloth/Other-GGUF",
                 "memory_warning": "Not enough disk space to download BF16, so Q4_1 was loaded instead.",
             }
         return http_json(method, url, token, payload, timeout, error)
@@ -1648,7 +1648,7 @@ def test_connect_prints_the_load_warning_of_a_kept_model(fake_studio, monkeypatc
         if url.split("?")[0].endswith("/api/inference/status"):
             if "model=" in url:
                 return {"is_gguf": True, "active_model": MODEL["id"], "memory_warning": notice}
-            return {"is_gguf": True, "active_model": "LAiM/Other-GGUF"}
+            return {"is_gguf": True, "active_model": "unsloth/Other-GGUF"}
         return http_json(method, url, token, *args, **kwargs)
 
     monkeypatch.setattr(start, "_http_json", kept_model_warns)
@@ -1777,8 +1777,8 @@ def test_connect_claude_as_subagent_attaches_to_a_kept_model(
 ):
     fake = start._http_json
     models = [
-        {"id": "LAiM/Qwen3-4B-GGUF", "context_length": 32768},
-        {"id": "LAiM/Qwen3-1.7B-GGUF", "context_length": 32768},
+        {"id": "unsloth/Qwen3-4B-GGUF", "context_length": 32768},
+        {"id": "unsloth/Qwen3-1.7B-GGUF", "context_length": 32768},
     ]
 
     def http_json(method, url, token, *args, **kwargs):
@@ -1791,7 +1791,7 @@ def test_connect_claude_as_subagent_attaches_to_a_kept_model(
     monkeypatch.setattr(start, "_http_json", http_json)
     result = CliRunner().invoke(
         start.start_app,
-        ["claude", "--as-subagent", "--no-launch", "--model", "LAiM/Qwen3-1.7B-GGUF" + suffix],
+        ["claude", "--as-subagent", "--no-launch", "--model", "unsloth/Qwen3-1.7B-GGUF" + suffix],
     )
 
     assert result.exit_code == 0, result.output
@@ -1799,12 +1799,12 @@ def test_connect_claude_as_subagent_attaches_to_a_kept_model(
     assert "unloads" not in result.output
     loads = [payload for _, url, payload in fake_studio if url.endswith("/api/inference/load")]
     assert loads == (
-        [{"model_path": "LAiM/Qwen3-1.7B-GGUF", "gguf_variant": "Q8_0"}] if suffix else []
+        [{"model_path": "unsloth/Qwen3-1.7B-GGUF", "gguf_variant": "Q8_0"}] if suffix else []
     )
     assert "model LAiM/Qwen3-1.7B-GGUF:Q8_0" in result.output
     plugin = tmp_path / "agents" / "claude-subagent" / "LAiM-local-agent"
     mcp = json.loads((plugin / ".mcp.json").read_text())["mcpServers"]["LAiM"]
-    assert mcp["env"]["LAiM_CLAUDE_SUBAGENT_MODEL"] == "LAiM/Qwen3-1.7B-GGUF:Q8_0"
+    assert mcp["env"]["LAiM_CLAUDE_SUBAGENT_MODEL"] == "unsloth/Qwen3-1.7B-GGUF:Q8_0"
 
 
 def test_claude_auto_route_tells_the_parent_to_delegate_routine_work(fake_studio, tmp_path):
@@ -2752,7 +2752,7 @@ def test_connect_codex_matches_requested_model_case_insensitively(fake_studio, t
             "codex",
             "--no-launch",
             "--model",
-            "LAiM/gemma-4-26b-a4b-it-gguf",
+            "unsloth/gemma-4-26b-a4b-it-gguf",
         ],
     )
     assert result.exit_code == 0, result.output
@@ -2778,14 +2778,14 @@ def test_resolve_model_matches_loaded_canonical_case_after_load(monkeypatch, cap
             return {
                 "data": [
                     {
-                        "id": "LAiM/gemma-4-E2B-it-GGUF" if state["loaded"] else "other/model",
+                        "id": "unsloth/gemma-4-E2B-it-GGUF" if state["loaded"] else "other/model",
                         "context_length": 131072,
                     }
                 ]
             }
         if url.endswith("/api/inference/load"):
             state["loaded"] = True
-            return {"model": "LAiM/gemma-4-E2B-it-GGUF"}
+            return {"model": "unsloth/gemma-4-E2B-it-GGUF"}
         raise AssertionError(f"unexpected request: {method} {url}")
 
     monkeypatch.setattr(start, "_http_json", http_json)
@@ -2793,11 +2793,11 @@ def test_resolve_model_matches_loaded_canonical_case_after_load(monkeypatch, cap
     entry = start._resolve_model(
         BASE,
         "sk-test",
-        "LAiM/gemma-4-e2b-it-gguf",
+        "unsloth/gemma-4-e2b-it-gguf",
         start.LoadOptions(gguf_variant = "UD-Q4_K_XL"),
     )
 
-    assert entry["id"] == "LAiM/gemma-4-E2B-it-GGUF"
+    assert entry["id"] == "unsloth/gemma-4-E2B-it-GGUF"
     assert any(c[1].endswith("/api/inference/load") for c in calls)
     output = capsys.readouterr().out
     assert "please wait" not in output
@@ -2840,16 +2840,16 @@ def test_subagent_model_id_warns_when_a_path_load_cannot_pin_the_quant(capsys):
 
 def test_subagent_model_id_pins_the_quant_for_repo_ids(capsys):
     model_id = start._subagent_model_id(
-        BASE, "sk-test", {"id": "LAiM/gemma-4-E4B-it-GGUF"}, None, "UD-Q4_K_XL"
+        BASE, "sk-test", {"id": "unsloth/gemma-4-E4B-it-GGUF"}, None, "UD-Q4_K_XL"
     )
 
-    assert model_id == "LAiM/gemma-4-E4B-it-GGUF:UD-Q4_K_XL"
+    assert model_id == "unsloth/gemma-4-E4B-it-GGUF:UD-Q4_K_XL"
     assert capsys.readouterr().err == ""
 
 
 def test_public_model_id_leaves_repo_ids_alone():
     """Only paths are reduced, never repo ids; _looks_like_path is shadowed by a second definition."""
-    assert start._public_model_id("LAiM/gemma-4-E4B-it-GGUF") is None
+    assert start._public_model_id("unsloth/gemma-4-E4B-it-GGUF") is None
     assert start._public_model_id("org/model") is None
     assert start._public_model_id("/srv/models/Qwen3-Q4_K_M.gguf") == "Qwen3-Q4_K_M"
     assert start._public_model_id("/a/b/snapshots/rev1") == "rev1"
@@ -2875,7 +2875,7 @@ def test_resolve_model_loads_when_catalog_hit_is_not_loaded(monkeypatch):
             return {
                 "data": [
                     {
-                        "id": "LAiM/Gemma-4-GGUF",
+                        "id": "unsloth/Gemma-4-GGUF",
                         "loaded": state["loaded"],
                         "context_length": 131072,
                     }
@@ -2883,14 +2883,14 @@ def test_resolve_model_loads_when_catalog_hit_is_not_loaded(monkeypatch):
             }
         if url.endswith("/api/inference/load"):
             state["loaded"] = True
-            return {"model": "LAiM/Gemma-4-GGUF"}
+            return {"model": "unsloth/Gemma-4-GGUF"}
         raise AssertionError(f"unexpected request: {method} {url}")
 
     monkeypatch.setattr(start, "_http_json", http_json)
 
-    entry = start._resolve_model(BASE, "sk-test", "LAiM/gemma-4-gguf")
+    entry = start._resolve_model(BASE, "sk-test", "unsloth/gemma-4-gguf")
 
-    assert entry["id"] == "LAiM/Gemma-4-GGUF"
+    assert entry["id"] == "unsloth/Gemma-4-GGUF"
     assert any(u.endswith("/api/inference/load") for _, u in calls)
 
 
@@ -2907,20 +2907,20 @@ def test_resolve_model_does_not_attach_if_catalog_stays_unloaded(monkeypatch):
             return {
                 "data": [
                     {
-                        "id": "LAiM/Gemma-4-GGUF",
+                        "id": "unsloth/Gemma-4-GGUF",
                         "loaded": False,
                         "context_length": 131072,
                     }
                 ]
             }
         if url.endswith("/api/inference/load"):
-            return {"status": "loaded", "model": "LAiM/Gemma-4-GGUF"}
+            return {"status": "loaded", "model": "unsloth/Gemma-4-GGUF"}
         raise AssertionError(f"unexpected request: {method} {url}")
 
     monkeypatch.setattr(start, "_http_json", http_json)
 
     with pytest.raises(typer.Exit):
-        start._resolve_model(BASE, "sk-test", "LAiM/gemma-4-gguf")
+        start._resolve_model(BASE, "sk-test", "unsloth/gemma-4-gguf")
 
 
 def test_resolve_model_attaches_to_loaded_catalog_hit_without_reload(monkeypatch):
@@ -2937,15 +2937,15 @@ def test_resolve_model_attaches_to_loaded_catalog_hit_without_reload(monkeypatch
         calls.append((method, url))
         if url.endswith("/api/inference/loaded-models"):
             return {
-                "data": [{"id": "LAiM/Gemma-4-GGUF", "loaded": True, "context_length": 131072}]
+                "data": [{"id": "unsloth/Gemma-4-GGUF", "loaded": True, "context_length": 131072}]
             }
         raise AssertionError(f"unexpected request: {method} {url}")
 
     monkeypatch.setattr(start, "_http_json", http_json)
 
-    entry = start._resolve_model(BASE, "sk-test", "LAiM/gemma-4-gguf")
+    entry = start._resolve_model(BASE, "sk-test", "unsloth/gemma-4-gguf")
 
-    assert entry["id"] == "LAiM/Gemma-4-GGUF"
+    assert entry["id"] == "unsloth/Gemma-4-GGUF"
     assert not any(u.endswith("/api/inference/load") for _, u in calls)
 
 
@@ -2956,7 +2956,7 @@ def test_resolve_model_without_request_rejects_unloaded_catalog(monkeypatch):
         lambda *a, **k: {
             "data": [
                 {
-                    "id": "LAiM/Gemma-4-GGUF",
+                    "id": "unsloth/Gemma-4-GGUF",
                     "loaded": False,
                     "context_length": 131072,
                 }
@@ -2984,18 +2984,18 @@ def test_resolve_model_remote_studio_does_not_casefold_attach(monkeypatch):
         calls.append((method, url))
         if url.endswith("/api/inference/loaded-models"):
             return {
-                "data": [{"id": "LAiM/Gemma-4-GGUF", "loaded": True, "context_length": 131072}]
+                "data": [{"id": "unsloth/Gemma-4-GGUF", "loaded": True, "context_length": 131072}]
             }
         if url.endswith("/api/inference/load"):
             state["loaded"] = True
-            return {"model": "LAiM/Gemma-4-GGUF"}
+            return {"model": "unsloth/Gemma-4-GGUF"}
         raise AssertionError(f"unexpected request: {method} {url}")
 
     monkeypatch.setattr(start, "_http_json", http_json)
 
-    entry = start._resolve_model("http://10.0.0.5:8888", "sk-test", "LAiM/gemma-4-gguf")
+    entry = start._resolve_model("http://10.0.0.5:8888", "sk-test", "unsloth/gemma-4-gguf")
 
-    assert entry["id"] == "LAiM/Gemma-4-GGUF"
+    assert entry["id"] == "unsloth/Gemma-4-GGUF"
     assert any(u.endswith("/api/inference/load") for _, u in calls)
 
 
@@ -3009,12 +3009,12 @@ def test_model_id_matching_does_not_casefold_local_paths(tmp_path):
     assert not start._model_id_matches(r".\Models\Foo", r".\models\foo")
     assert not start._is_hub_model_id("models/Llama/Foo.gguf")
     assert not start._model_id_matches("models/Llama/Foo.gguf", "models/llama/foo.gguf")
-    assert start._is_hub_model_id("LAiM/Gemma-3-4b-it-GGUF")
-    assert start._model_id_matches("LAiM/Gemma-3-4b-it-GGUF", "LAiM/gemma-3-4b-it-gguf")
+    assert start._is_hub_model_id("unsloth/Gemma-3-4b-it-GGUF")
+    assert start._model_id_matches("unsloth/Gemma-3-4b-it-GGUF", "unsloth/gemma-3-4b-it-gguf")
     assert not start._model_id_matches(
-        "LAiM/Gemma-3-4b-it-GGUF", "LAiM/gemma-3-4b-it-gguf", allow_casefold = False
+        "unsloth/Gemma-3-4b-it-GGUF", "unsloth/gemma-3-4b-it-gguf", allow_casefold = False
     )
-    assert start._model_id_matches("LAiM/Foo", "LAiM/Foo", allow_casefold = False)
+    assert start._model_id_matches("unsloth/Foo", "unsloth/Foo", allow_casefold = False)
 
 
 def test_connect_codex_launch_uses_ephemeral_home(fake_studio, monkeypatch):
@@ -3107,7 +3107,7 @@ def test_https_loopback_never_auto_serves(fake_studio, monkeypatch):
     monkeypatch.setattr(
         start, "_start_studio_server", lambda *a, **k: started.__setitem__("called", True)
     )
-    result = CliRunner().invoke(start.start_app, ["claude", "--model", "LAiM/Qwen3-1.7B-GGUF"])
+    result = CliRunner().invoke(start.start_app, ["claude", "--model", "unsloth/Qwen3-1.7B-GGUF"])
     assert result.exit_code == 1
     assert "No running LAiM server" in result.output
     assert started["called"] is False
@@ -3216,17 +3216,17 @@ def test_connect_legacy_unscoped_cache_not_replayed(fake_studio, tmp_path):
 
 def test_connect_model_flag_loads_on_server(fake_studio):
     result = CliRunner().invoke(
-        start.start_app, ["claude", "--no-launch", "--model", "LAiM/Qwen3.5-35B-A3B"]
+        start.start_app, ["claude", "--no-launch", "--model", "unsloth/Qwen3.5-35B-A3B"]
     )
     assert result.exit_code == 0, result.output
     loads = [c for c in fake_studio if c[1].endswith("/api/inference/load")]
     assert loads == [
-        ("POST", f"{BASE}/api/inference/load", {"model_path": "LAiM/Qwen3.5-35B-A3B"})
+        ("POST", f"{BASE}/api/inference/load", {"model_path": "unsloth/Qwen3.5-35B-A3B"})
     ]
     assert result.output.index(
         f"Switching the LAiM server from {MODEL['id']} to LAiM/Qwen3.5-35B-A3B.\n"
     ) < result.output.index("This unloads the current model for every attached session.\n")
-    _assert_env_set(result.output, "ANTHROPIC_MODEL", "LAiM/Qwen3.5-35B-A3B")
+    _assert_env_set(result.output, "ANTHROPIC_MODEL", "unsloth/Qwen3.5-35B-A3B")
 
 
 def _fake_path_resident(
@@ -3273,7 +3273,7 @@ def _fake_path_resident(
         ("/models/old/foo-Q4_K_M.gguf", "foo-Q4_K_M"),
         (
             "/cache/hub/models--LAiM--Foo-GGUF/snapshots/abc123/Foo-UD-IQ1_S.gguf",
-            "LAiM/Foo-GGUF",
+            "unsloth/Foo-GGUF",
         ),
     ],
 )
@@ -3333,7 +3333,7 @@ def test_connect_model_flag_forwards_load_options(fake_studio):
             "claude",
             "--no-launch",
             "--model",
-            "LAiM/Qwen3-4B-GGUF",
+            "unsloth/Qwen3-4B-GGUF",
             "--gguf-variant",
             "UD-Q4_K_XL",
             "--context-length",
@@ -3349,7 +3349,7 @@ def test_connect_model_flag_forwards_load_options(fake_studio):
             "POST",
             f"{BASE}/api/inference/load",
             {
-                "model_path": "LAiM/Qwen3-4B-GGUF",
+                "model_path": "unsloth/Qwen3-4B-GGUF",
                 "gguf_variant": "UD-Q4_K_XL",
                 "max_seq_length": 8192,
                 "load_in_4bit": False,
@@ -3360,8 +3360,8 @@ def test_connect_model_flag_forwards_load_options(fake_studio):
 
 
 def test_connect_model_flag_matches_canonical_id(fake_studio, monkeypatch):
-    requested = "LAiM/Qwen3.5-35B-A3B"
-    canonical = "LAiM/Qwen3.5-35B-A3B"
+    requested = "unsloth/Qwen3.5-35B-A3B"
+    canonical = "unsloth/Qwen3.5-35B-A3B"
     inner = start._http_json
 
     def http_json(
@@ -3388,9 +3388,9 @@ def test_connect_model_flag_matches_canonical_id(fake_studio, monkeypatch):
 @pytest.mark.parametrize(
     "model, expected",
     [
-        ("LAiM/Qwen3-1.7B-GGUF:UD-Q4_K_XL", ("LAiM/Qwen3-1.7B-GGUF", "UD-Q4_K_XL")),
-        ("LAiM/gemma-4-E2B-it-GGUF:Q8_0", ("LAiM/gemma-4-E2B-it-GGUF", "Q8_0")),
-        ("LAiM/Qwen3-1.7B-GGUF", ("LAiM/Qwen3-1.7B-GGUF", None)),
+        ("unsloth/Qwen3-1.7B-GGUF:UD-Q4_K_XL", ("unsloth/Qwen3-1.7B-GGUF", "UD-Q4_K_XL")),
+        ("unsloth/gemma-4-E2B-it-GGUF:Q8_0", ("unsloth/gemma-4-E2B-it-GGUF", "Q8_0")),
+        ("unsloth/Qwen3-1.7B-GGUF", ("unsloth/Qwen3-1.7B-GGUF", None)),
         ("/models/local.gguf", ("/models/local.gguf", None)),
         ("./rel.gguf", ("./rel.gguf", None)),
         ("C:\\models\\x.gguf", ("C:\\models\\x.gguf", None)),
@@ -3405,8 +3405,8 @@ def test_split_repo_variant(model, expected):
 @pytest.mark.parametrize(
     "token, expected",
     [
-        ("LAiM/gemma-4-E2B-it-GGUF", True),
-        ("LAiM/gemma-4-E2B-it-GGUF:UD-Q4_K_XL", True),
+        ("unsloth/gemma-4-E2B-it-GGUF", True),
+        ("unsloth/gemma-4-E2B-it-GGUF:UD-Q4_K_XL", True),
         ("some-org/model.name_1", True),
         ("--continue", False),
         ("resume", False),
@@ -3422,8 +3422,8 @@ def test_looks_like_model(token, expected):
 
 
 def test_consume_positional_model_leading_token():
-    model, rest = start._consume_positional_model(None, ["LAiM/Model-GGUF", "--continue"])
-    assert model == "LAiM/Model-GGUF"
+    model, rest = start._consume_positional_model(None, ["unsloth/Model-GGUF", "--continue"])
+    assert model == "unsloth/Model-GGUF"
     assert rest == ["--continue"]
 
 
@@ -3485,9 +3485,9 @@ def test_start_positional_model_routes_to_model_on_auto_serve(fake_studio, monke
     monkeypatch.setattr(start.shutil, "which", lambda _: "/usr/local/bin/claude")
     monkeypatch.setattr(start.subprocess, "run", lambda command, env: SimpleNamespace(returncode = 0))
 
-    result = CliRunner().invoke(start.start_app, ["claude", "LAiM/gemma-4-E2B-it-GGUF"])
+    result = CliRunner().invoke(start.start_app, ["claude", "unsloth/gemma-4-E2B-it-GGUF"])
     assert result.exit_code == 0, result.output
-    assert captured["model"] == "LAiM/gemma-4-E2B-it-GGUF"
+    assert captured["model"] == "unsloth/gemma-4-E2B-it-GGUF"
     assert captured["load"].gguf_variant is None
 
 
@@ -3538,7 +3538,7 @@ def test_start_studio_server_forwards_tool_flags_via_command_and_env(monkeypatch
     monkeypatch.delenv("LAiM_DISABLE_TOOL_CALL_HEALING", raising = False)
     monkeypatch.delenv("LAiM_TOOL_CALL_NUDGE", raising = False)
 
-    start._start_studio_server("http://127.0.0.1:8888", "LAiM/M-GGUF", start.LoadOptions())
+    start._start_studio_server("http://127.0.0.1:8888", "unsloth/M-GGUF", start.LoadOptions())
     cmd, env = captured["command"], captured["kwargs"]["env"]
     assert "--disable-tools" in cmd and "--enable-tools" not in cmd
     assert "--reasoning" not in cmd
@@ -3549,7 +3549,7 @@ def test_start_studio_server_forwards_tool_flags_via_command_and_env(monkeypatch
 
     start._start_studio_server(
         "http://127.0.0.1:8888",
-        "LAiM/M-GGUF",
+        "unsloth/M-GGUF",
         start.LoadOptions(),
         start.ServerOptions(
             enable_tools = True,
@@ -3585,14 +3585,14 @@ def test_start_studio_server_respects_inherited_tool_call_env(monkeypatch):
     monkeypatch.setenv("LAiM_DISABLE_TOOL_CALL_HEALING", "1")
     monkeypatch.setenv("LAiM_TOOL_CALL_NUDGE", "0")
 
-    start._start_studio_server("http://127.0.0.1:8888", "LAiM/M-GGUF", start.LoadOptions())
+    start._start_studio_server("http://127.0.0.1:8888", "unsloth/M-GGUF", start.LoadOptions())
     env = captured["kwargs"]["env"]
     assert env["LAiM_DISABLE_TOOL_CALL_HEALING"] == "1"
     assert env["LAiM_TOOL_CALL_NUDGE"] == "0"
 
     start._start_studio_server(
         "http://127.0.0.1:8888",
-        "LAiM/M-GGUF",
+        "unsloth/M-GGUF",
         start.LoadOptions(),
         start.ServerOptions(tool_call_healing = True, tool_call_nudging = True),
     )
@@ -3620,7 +3620,7 @@ def test_start_studio_server_drops_an_inherited_pin_the_agent_overrides(monkeypa
     monkeypatch.setenv("LAiM_SAMPLING_TOP_P", "0.5")
     start._start_studio_server(
         "http://127.0.0.1:8888",
-        "LAiM/M-GGUF",
+        "unsloth/M-GGUF",
         start.LoadOptions(),
         start.ServerOptions(unpinned = frozenset({"temperature"})),
     )
@@ -3646,13 +3646,13 @@ def test_start_studio_server_forwards_sampling_via_env(monkeypatch):
     for _v in ("TEMPERATURE", "TOP_P", "TOP_K", "MIN_P", "REPETITION_PENALTY", "PRESENCE_PENALTY"):
         monkeypatch.delenv(f"LAiM_SAMPLING_{_v}", raising = False)
 
-    start._start_studio_server("http://127.0.0.1:8888", "LAiM/M-GGUF", start.LoadOptions())
+    start._start_studio_server("http://127.0.0.1:8888", "unsloth/M-GGUF", start.LoadOptions())
     env = captured["kwargs"]["env"]
     assert not any(k.startswith("LAiM_SAMPLING_") for k in env)
 
     start._start_studio_server(
         "http://127.0.0.1:8888",
-        "LAiM/M-GGUF",
+        "unsloth/M-GGUF",
         start.LoadOptions(),
         start.ServerOptions(temperature = 0.3, top_k = 40, min_p = 0.05),
     )
@@ -3666,7 +3666,7 @@ def test_start_studio_server_forwards_sampling_via_env(monkeypatch):
 def test_require_studio_warns_on_sampling_pin_when_reusing_server(monkeypatch, capsys):
     monkeypatch.setattr(start, "find_studio_server", lambda: BASE)
     base, server = start._require_studio(
-        "LAiM/M-GGUF",
+        "unsloth/M-GGUF",
         start.LoadOptions(),
         serve = True,
         launch = True,
@@ -3683,7 +3683,7 @@ def test_require_studio_warns_on_sampling_pin_when_reusing_server(monkeypatch, c
 def test_require_studio_no_warning_without_server_flags(monkeypatch, capsys):
     monkeypatch.setattr(start, "find_studio_server", lambda: BASE)
     base, server = start._require_studio(
-        "LAiM/M-GGUF",
+        "unsloth/M-GGUF",
         start.LoadOptions(),
         serve = True,
         server_options = start.ServerOptions(),
@@ -3695,7 +3695,7 @@ def test_require_studio_no_warning_without_server_flags(monkeypatch, capsys):
 def test_require_studio_warns_on_tool_flags_when_reusing_server(monkeypatch, capsys):
     monkeypatch.setattr(start, "find_studio_server", lambda: BASE)
     base, server = start._require_studio(
-        "LAiM/M-GGUF",
+        "unsloth/M-GGUF",
         start.LoadOptions(),
         serve = True,
         server_options = start.ServerOptions(
@@ -3716,7 +3716,7 @@ _SESSION_BODY = {"temperature": 0.3, "top_k": 40, "enable_thinking": False}
 def _session_request_body(agent, root, output):
     yaml = pytest.importorskip("yaml")
     home = root / "agents" / agent
-    model_ref = f"LAiM/{MODEL['id']}"
+    model_ref = f"unsloth/{MODEL['id']}"
     if agent == "pi":
         config = json.loads((home / ".pi" / "agent" / "models.json").read_text())
         return config["providers"]["LAiM"]["models"][0].get("samplingParams")
@@ -3764,7 +3764,7 @@ def test_openclaw_session_flags_keep_the_users_own_extra_body(fake_studio, tmp_p
     monkeypatch.chdir(tmp_path)
     config_path = tmp_path / "agents" / "openclaw" / "openclaw.json"
     config_path.parent.mkdir(parents = True)
-    model_ref = f"LAiM/{MODEL['id']}"
+    model_ref = f"unsloth/{MODEL['id']}"
     config_path.write_text(
         json.dumps(
             {
@@ -3914,7 +3914,7 @@ def test_spawned_server_keeps_only_what_the_agent_cannot_send(
     monkeypatch.setattr(start, "_codex_executable_version", lambda executable: (1, 0, 0))
     monkeypatch.setattr(start.subprocess, "run", lambda command, env: SimpleNamespace(returncode = 0))
     result = CliRunner().invoke(
-        start.start_app, [agent, "--model", "LAiM/Qwen3-1.7B-GGUF", *_SESSION_FLAGS]
+        start.start_app, [agent, "--model", "unsloth/Qwen3-1.7B-GGUF", *_SESSION_FLAGS]
     )
     assert result.exit_code == 0, result.output
     options = started["options"]
@@ -3935,7 +3935,7 @@ def test_require_studio_warns_when_the_started_server_pins_reasoning(
         start, "_start_studio_server", lambda base, model, load, server: (base, None)
     )
     start._require_studio(
-        "LAiM/M-GGUF", serve = True, server_options = start.ServerOptions(reasoning = reasoning)
+        "unsloth/M-GGUF", serve = True, server_options = start.ServerOptions(reasoning = reasoning)
     )
     assert ("every client" in capsys.readouterr().err) is warns
 
@@ -3953,7 +3953,7 @@ def test_require_studio_warns_when_a_flag_drops_an_inherited_pin(monkeypatch, ca
         start, "_start_studio_server", lambda base, model, load, server: (base, None)
     )
     options = start.ServerOptions(temperature = 0.3, carried = frozenset({"temperature"}))
-    start._require_studio("LAiM/M-GGUF", serve = True, server_options = options)
+    start._require_studio("unsloth/M-GGUF", serve = True, server_options = options)
     err = capsys.readouterr().err
     assert ("replace the inherited LAiM_SAMPLING_TEMPERATURE" in err) is bool(inherited)
     assert "LAiM_SAMPLING_TOP_P" not in err
@@ -3973,7 +3973,7 @@ def test_require_studio_warns_on_explicit_reasoning_when_reusing_server(
 ):
     monkeypatch.setattr(start, "find_studio_server", lambda: BASE)
     base, server = start._require_studio(
-        "LAiM/M-GGUF",
+        "unsloth/M-GGUF",
         start.LoadOptions(),
         serve = True,
         server_options = start.ServerOptions(reasoning = reasoning, carried = carried),
@@ -4003,7 +4003,7 @@ def test_start_studio_server_forwards_reasoning_effort(monkeypatch):
 
     start._start_studio_server(
         "http://127.0.0.1:8888",
-        "LAiM/M-GGUF",
+        "unsloth/M-GGUF",
         start.LoadOptions(),
         start.ServerOptions(reasoning_effort = "medium"),
     )
@@ -4029,14 +4029,14 @@ def test_start_studio_server_overrides_inherited_reasoning_effort(monkeypatch):
     monkeypatch.setattr(start, "_log_tail", lambda path, lines = 20: "API Key: sk-LAiM-x")
     monkeypatch.setattr(start.time, "sleep", lambda _s: None)
 
-    start._start_studio_server("http://127.0.0.1:8888", "LAiM/M-GGUF", start.LoadOptions())
+    start._start_studio_server("http://127.0.0.1:8888", "unsloth/M-GGUF", start.LoadOptions())
     assert captured["kwargs"]["env"]["LLAMA_ARG_REASONING_EFFORT"] == "default"
 
 
 def test_require_studio_warns_on_explicit_reasoning_effort_when_reusing_server(monkeypatch, capsys):
     monkeypatch.setattr(start, "find_studio_server", lambda: BASE)
     base, server = start._require_studio(
-        "LAiM/M-GGUF",
+        "unsloth/M-GGUF",
         start.LoadOptions(),
         serve = True,
         server_options = start.ServerOptions(reasoning = "on", reasoning_effort = "high"),
@@ -4077,7 +4077,7 @@ def test_start_claude_sends_sampling_flags_itself(fake_studio, monkeypatch):
         [
             "claude",
             "--model",
-            "LAiM/gemma-4-E2B-it-GGUF",
+            "unsloth/gemma-4-E2B-it-GGUF",
             "--temperature",
             "0.3",
             "--top-k",
@@ -4190,7 +4190,7 @@ def test_start_rejects_invalid_gpu_memory_mode(fake_studio):
 def test_connect_model_variant_suffix_loads_split_repo(fake_studio):
     result = CliRunner().invoke(
         start.start_app,
-        ["claude", "--no-launch", "--model", "LAiM/Qwen3-4B-GGUF:UD-Q4_K_XL"],
+        ["claude", "--no-launch", "--model", "unsloth/Qwen3-4B-GGUF:UD-Q4_K_XL"],
     )
     assert result.exit_code == 0, result.output
     loads = [c for c in fake_studio if c[1].endswith("/api/inference/load")]
@@ -4198,7 +4198,7 @@ def test_connect_model_variant_suffix_loads_split_repo(fake_studio):
         (
             "POST",
             f"{BASE}/api/inference/load",
-            {"model_path": "LAiM/Qwen3-4B-GGUF", "gguf_variant": "UD-Q4_K_XL"},
+            {"model_path": "unsloth/Qwen3-4B-GGUF", "gguf_variant": "UD-Q4_K_XL"},
         )
     ]
 
@@ -4210,7 +4210,7 @@ def test_connect_explicit_gguf_variant_wins_over_suffix(fake_studio):
             "claude",
             "--no-launch",
             "--model",
-            "LAiM/Qwen3-4B-GGUF:Q8_0",
+            "unsloth/Qwen3-4B-GGUF:Q8_0",
             "--gguf-variant",
             "UD-Q4_K_XL",
         ],
@@ -4221,7 +4221,7 @@ def test_connect_explicit_gguf_variant_wins_over_suffix(fake_studio):
         (
             "POST",
             f"{BASE}/api/inference/load",
-            {"model_path": "LAiM/Qwen3-4B-GGUF", "gguf_variant": "UD-Q4_K_XL"},
+            {"model_path": "unsloth/Qwen3-4B-GGUF", "gguf_variant": "UD-Q4_K_XL"},
         )
     ]
 
@@ -4260,10 +4260,10 @@ def test_connect_requested_model_not_loaded_fails(fake_studio, monkeypatch):
 
     monkeypatch.setattr(start, "_http_json", http_json)
     result = CliRunner().invoke(
-        start.start_app, ["claude", "--no-launch", "--model", "LAiM/Missing-7B"]
+        start.start_app, ["claude", "--no-launch", "--model", "unsloth/Missing-7B"]
     )
     assert result.exit_code == 1
-    assert "LAiM/Missing-7B" in result.output
+    assert "unsloth/Missing-7B" in result.output
 
 
 def test_connect_gguf_only_agents_reject_non_gguf_model(fake_studio, monkeypatch):
@@ -4278,7 +4278,7 @@ def test_connect_gguf_only_agents_reject_non_gguf_model(fake_studio, monkeypatch
         error = None,
     ):
         if url.split("?")[0].endswith("/api/inference/status"):
-            return {"is_gguf": False, "model_identifier": "LAiM/Qwen3-0.6B"}
+            return {"is_gguf": False, "model_identifier": "unsloth/Qwen3-0.6B"}
         return inner(method, url, token, payload, timeout, error)
 
     monkeypatch.setattr(start, "_http_json", http_json)
@@ -4590,7 +4590,7 @@ def test_start_studio_server_builds_command_and_waits(monkeypatch, capsys):
 
     returned_base, server = start._start_studio_server(
         "http://127.0.0.1:8888",
-        "LAiM/Qwen3-1.7B-GGUF:UD-Q4_K_XL",
+        "unsloth/Qwen3-1.7B-GGUF:UD-Q4_K_XL",
         start.LoadOptions(
             gguf_variant = "UD-Q4_K_XL",
             max_seq_length = 8192,
@@ -4604,7 +4604,7 @@ def test_start_studio_server_builds_command_and_waits(monkeypatch, capsys):
     assert "--disable-tools" in cmd and "--no-cloudflare" in cmd
     assert "--reasoning" not in cmd
     assert captured["kwargs"]["env"]["LLAMA_ARG_REASONING"] == "auto"
-    assert cmd[cmd.index("--model") + 1] == "LAiM/Qwen3-1.7B-GGUF:UD-Q4_K_XL"
+    assert cmd[cmd.index("--model") + 1] == "unsloth/Qwen3-1.7B-GGUF:UD-Q4_K_XL"
     assert cmd[cmd.index("--gguf-variant") + 1] == "UD-Q4_K_XL"
     assert cmd[cmd.index("--context-length") + 1] == "8192"
     assert "--tensor-parallel" in cmd
@@ -5025,8 +5025,8 @@ def test_resolve_model_same_quant_prints_no_switch_warning(monkeypatch, capsys):
 
 def test_resolve_model_kept_model_at_its_quant_lets_the_server_dedupe(monkeypatch, capsys):
     models = [
-        {"id": "LAiM/Qwen3-4B-GGUF", "loaded": True},
-        {"id": "LAiM/Qwen3-1.7B-GGUF", "loaded": True},
+        {"id": "unsloth/Qwen3-4B-GGUF", "loaded": True},
+        {"id": "unsloth/Qwen3-1.7B-GGUF", "loaded": True},
     ]
     payloads = []
 
@@ -5039,11 +5039,11 @@ def test_resolve_model_kept_model_at_its_quant_lets_the_server_dedupe(monkeypatc
     monkeypatch.setattr(start, "_load_model_with_progress", load)
 
     start._resolve_model(
-        BASE, "key", "LAiM/Qwen3-1.7B-GGUF", start.LoadOptions(gguf_variant = "Q8_0")
+        BASE, "key", "unsloth/Qwen3-1.7B-GGUF", start.LoadOptions(gguf_variant = "Q8_0")
     )
 
     # The server alone knows whether a retry or a changed server setting needs a relaunch.
-    assert payloads == [{"model_path": "LAiM/Qwen3-1.7B-GGUF", "gguf_variant": "Q8_0"}]
+    assert payloads == [{"model_path": "unsloth/Qwen3-1.7B-GGUF", "gguf_variant": "Q8_0"}]
     out = capsys.readouterr().out
     assert "Switching" not in out
     assert "unloads" not in out
@@ -5052,8 +5052,8 @@ def test_resolve_model_kept_model_at_its_quant_lets_the_server_dedupe(monkeypatc
 
 def test_resolve_model_loads_a_kept_model_at_another_quant(monkeypatch, capsys):
     models = [
-        {"id": "LAiM/Qwen3-4B-GGUF", "loaded": True},
-        {"id": "LAiM/Qwen3-1.7B-GGUF", "loaded": True},
+        {"id": "unsloth/Qwen3-4B-GGUF", "loaded": True},
+        {"id": "unsloth/Qwen3-1.7B-GGUF", "loaded": True},
     ]
     payloads, gated = [], []
 
@@ -5068,25 +5068,25 @@ def test_resolve_model_loads_a_kept_model_at_another_quant(monkeypatch, capsys):
     start._resolve_model(
         BASE,
         "key",
-        "LAiM/Qwen3-1.7B-GGUF",
+        "unsloth/Qwen3-1.7B-GGUF",
         start.LoadOptions(gguf_variant = "Q4_K_M"),
         preload_check = lambda *args: gated.append(args),
     )
 
-    assert payloads == [{"model_path": "LAiM/Qwen3-1.7B-GGUF", "gguf_variant": "Q4_K_M"}]
+    assert payloads == [{"model_path": "unsloth/Qwen3-1.7B-GGUF", "gguf_variant": "Q4_K_M"}]
     assert gated, "the kept model is at Q8_0, so the Q4_K_M load must pass the preload gate"
     out = capsys.readouterr().out
     assert (
         "Switching the LAiM server from LAiM/Qwen3-1.7B-GGUF:Q8_0 to "
-        "LAiM/Qwen3-1.7B-GGUF:Q4_K_M." in out
+        "unsloth/Qwen3-1.7B-GGUF:Q4_K_M." in out
     )
     assert "Qwen3-4B" not in out
 
 
 def test_resolve_model_reloading_a_kept_model_does_not_announce_the_primary(monkeypatch, capsys):
     models = [
-        {"id": "LAiM/Qwen3-4B-GGUF", "loaded": True},
-        {"id": "LAiM/Qwen3-1.7B-GGUF", "loaded": True},
+        {"id": "unsloth/Qwen3-4B-GGUF", "loaded": True},
+        {"id": "unsloth/Qwen3-1.7B-GGUF", "loaded": True},
     ]
     payloads = []
 
@@ -5099,7 +5099,7 @@ def test_resolve_model_reloading_a_kept_model_does_not_announce_the_primary(monk
     monkeypatch.setattr(start, "_load_model_with_progress", load)
 
     start._resolve_model(
-        BASE, "key", "LAiM/Qwen3-1.7B-GGUF", start.LoadOptions(max_seq_length = 16384)
+        BASE, "key", "unsloth/Qwen3-1.7B-GGUF", start.LoadOptions(max_seq_length = 16384)
     )
 
     out = capsys.readouterr().out
@@ -5107,14 +5107,14 @@ def test_resolve_model_reloading_a_kept_model_does_not_announce_the_primary(monk
     assert "Qwen3-4B" not in out
     assert "Applying new load settings to LAiM/Qwen3-1.7B-GGUF." in out
     assert payloads == [
-        {"model_path": "LAiM/Qwen3-1.7B-GGUF", "gguf_variant": "Q8_0", "max_seq_length": 16384}
+        {"model_path": "unsloth/Qwen3-1.7B-GGUF", "gguf_variant": "Q8_0", "max_seq_length": 16384}
     ]
 
 
 def test_resolve_model_kept_model_quant_and_context_warns_of_the_reload(monkeypatch, capsys):
     models = [
-        {"id": "LAiM/Qwen3-4B-GGUF", "loaded": True},
-        {"id": "LAiM/Qwen3-1.7B-GGUF", "loaded": True},
+        {"id": "unsloth/Qwen3-4B-GGUF", "loaded": True},
+        {"id": "unsloth/Qwen3-1.7B-GGUF", "loaded": True},
     ]
     payloads = []
 
@@ -5129,7 +5129,7 @@ def test_resolve_model_kept_model_quant_and_context_warns_of_the_reload(monkeypa
     start._resolve_model(
         BASE,
         "key",
-        "LAiM/Qwen3-1.7B-GGUF",
+        "unsloth/Qwen3-1.7B-GGUF",
         start.LoadOptions(gguf_variant = "Q8_0", max_seq_length = 16384),
     )
 
@@ -5137,7 +5137,7 @@ def test_resolve_model_kept_model_quant_and_context_warns_of_the_reload(monkeypa
     assert "Switching" not in out
     assert "Applying new load settings to LAiM/Qwen3-1.7B-GGUF." in out
     assert payloads == [
-        {"model_path": "LAiM/Qwen3-1.7B-GGUF", "gguf_variant": "Q8_0", "max_seq_length": 16384}
+        {"model_path": "unsloth/Qwen3-1.7B-GGUF", "gguf_variant": "Q8_0", "max_seq_length": 16384}
     ]
 
 
@@ -5151,8 +5151,8 @@ def test_resolve_model_kept_model_quant_and_context_warns_of_the_reload(monkeypa
 )
 def test_resolve_model_kept_model_with_a_pending_retry_still_loads(monkeypatch, pending):
     models = [
-        {"id": "LAiM/Qwen3-4B-GGUF", "loaded": True},
-        {"id": "LAiM/Qwen3-1.7B-GGUF", "loaded": True},
+        {"id": "unsloth/Qwen3-4B-GGUF", "loaded": True},
+        {"id": "unsloth/Qwen3-1.7B-GGUF", "loaded": True},
     ]
     payloads = []
 
@@ -5168,16 +5168,16 @@ def test_resolve_model_kept_model_with_a_pending_retry_still_loads(monkeypatch, 
     monkeypatch.setattr(start, "_load_model_with_progress", load)
 
     start._resolve_model(
-        BASE, "key", "LAiM/Qwen3-1.7B-GGUF", start.LoadOptions(gguf_variant = "Q8_0")
+        BASE, "key", "unsloth/Qwen3-1.7B-GGUF", start.LoadOptions(gguf_variant = "Q8_0")
     )
 
-    assert payloads == [{"model_path": "LAiM/Qwen3-1.7B-GGUF", "gguf_variant": "Q8_0"}]
+    assert payloads == [{"model_path": "unsloth/Qwen3-1.7B-GGUF", "gguf_variant": "Q8_0"}]
 
 
 def test_resolve_model_kept_model_at_the_same_settings_does_not_warn(monkeypatch, capsys):
     models = [
-        {"id": "LAiM/Qwen3-4B-GGUF", "loaded": True},
-        {"id": "LAiM/Qwen3-1.7B-GGUF", "loaded": True},
+        {"id": "unsloth/Qwen3-4B-GGUF", "loaded": True},
+        {"id": "unsloth/Qwen3-1.7B-GGUF", "loaded": True},
     ]
 
     def status(url):
@@ -5188,11 +5188,11 @@ def test_resolve_model_kept_model_at_the_same_settings_does_not_warn(monkeypatch
     monkeypatch.setattr(
         start,
         "_load_model_with_progress",
-        lambda *a, **k: {"status": "already_loaded", "model": "LAiM/Qwen3-1.7B-GGUF"},
+        lambda *a, **k: {"status": "already_loaded", "model": "unsloth/Qwen3-1.7B-GGUF"},
     )
 
     start._resolve_model(
-        BASE, "key", "LAiM/Qwen3-1.7B-GGUF", start.LoadOptions(max_seq_length = 16384)
+        BASE, "key", "unsloth/Qwen3-1.7B-GGUF", start.LoadOptions(max_seq_length = 16384)
     )
 
     out = capsys.readouterr().out
@@ -5414,10 +5414,10 @@ def test_auto_serves_when_no_server_then_keeps_server(fake_studio, monkeypatch):
     monkeypatch.setattr(start.subprocess, "run", lambda command, env: SimpleNamespace(returncode = 0))
 
     result = CliRunner().invoke(
-        start.start_app, ["claude", "--model", "LAiM/Qwen3-1.7B-GGUF:UD-Q4_K_XL"]
+        start.start_app, ["claude", "--model", "unsloth/Qwen3-1.7B-GGUF:UD-Q4_K_XL"]
     )
     assert result.exit_code == 0, result.output
-    assert started["model"] == "LAiM/Qwen3-1.7B-GGUF"
+    assert started["model"] == "unsloth/Qwen3-1.7B-GGUF"
     assert started["load"].gguf_variant == "UD-Q4_K_XL"
     assert started["base"] == BASE
     assert "down" not in started
@@ -5439,7 +5439,7 @@ def test_auto_served_session_uses_the_port_the_server_bound(fake_studio, monkeyp
     monkeypatch.setattr(start, "_start_studio_server", fake_start)
     monkeypatch.setattr(start, "_launch", lambda command, env, **_kwargs: launched.update(env) or 0)
 
-    result = CliRunner().invoke(start.start_app, ["claude", "--model", "LAiM/Qwen3-1.7B-GGUF"])
+    result = CliRunner().invoke(start.start_app, ["claude", "--model", "unsloth/Qwen3-1.7B-GGUF"])
 
     assert result.exit_code == 0, result.output
     assert f"LAiM ready at {bound} " in result.output
@@ -5468,7 +5468,7 @@ def test_auto_served_agent_launch_failure_stops_server(fake_studio, monkeypatch)
 
     result = CliRunner().invoke(
         start.start_app,
-        ["claude", "--model", "LAiM/Qwen3-1.7B-GGUF"],
+        ["claude", "--model", "unsloth/Qwen3-1.7B-GGUF"],
     )
 
     assert result.exit_code == 1
@@ -5489,7 +5489,7 @@ def test_auto_served_server_exit_is_not_reported_as_running(fake_studio, monkeyp
 
     result = CliRunner().invoke(
         start.start_app,
-        ["claude", "--model", "LAiM/Qwen3-1.7B-GGUF"],
+        ["claude", "--model", "unsloth/Qwen3-1.7B-GGUF"],
     )
 
     assert result.exit_code == 0, result.output
@@ -5606,7 +5606,7 @@ def test_codex_preflight_failure_tears_down_auto_served(fake_studio, monkeypatch
 
     monkeypatch.setattr(start, "_http_json", http_json)
     result = CliRunner().invoke(
-        start.start_app, ["codex", "--model", "LAiM/Qwen3-1.7B", "--launch"]
+        start.start_app, ["codex", "--model", "unsloth/Qwen3-1.7B", "--launch"]
     )
     assert result.exit_code != 0, result.output
     assert "GGUF" in result.output
@@ -5620,7 +5620,7 @@ def test_no_serve_preserves_error(fake_studio, monkeypatch):
         start, "_start_studio_server", lambda *a, **k: started.__setitem__("called", True)
     )
     result = CliRunner().invoke(
-        start.start_app, ["claude", "--model", "LAiM/Qwen3-1.7B-GGUF", "--no-serve"]
+        start.start_app, ["claude", "--model", "unsloth/Qwen3-1.7B-GGUF", "--no-serve"]
     )
     assert result.exit_code == 1
     assert "No running LAiM server" in result.output
@@ -5634,7 +5634,7 @@ def test_no_launch_never_serves(fake_studio, monkeypatch):
         start, "_start_studio_server", lambda *a, **k: started.__setitem__("called", True)
     )
     result = CliRunner().invoke(
-        start.start_app, ["claude", "--model", "LAiM/Qwen3-1.7B-GGUF", "--no-launch"]
+        start.start_app, ["claude", "--model", "unsloth/Qwen3-1.7B-GGUF", "--no-launch"]
     )
     assert result.exit_code == 1
     assert "No running LAiM server" in result.output
@@ -5686,7 +5686,7 @@ def test_auto_serve_normalizes_portless_url(fake_studio, monkeypatch):
     monkeypatch.setattr(start.shutil, "which", lambda _: "/usr/local/bin/claude")
     monkeypatch.setattr(start.subprocess, "run", lambda command, env: SimpleNamespace(returncode = 0))
 
-    result = CliRunner().invoke(start.start_app, ["claude", "--model", "LAiM/Qwen3-1.7B-GGUF"])
+    result = CliRunner().invoke(start.start_app, ["claude", "--model", "unsloth/Qwen3-1.7B-GGUF"])
     assert result.exit_code == 0, result.output
     assert started["base"] == "http://127.0.0.1:8888"
 
@@ -5717,7 +5717,7 @@ def test_write_openclaw_config_fresh(tmp_path):
             "maxTokens": 32000,
         }
     ]
-    assert config["agents"]["defaults"]["model"]["primary"] == f"LAiM/{MODEL['id']}"
+    assert config["agents"]["defaults"]["model"]["primary"] == f"unsloth/{MODEL['id']}"
     assert config["agents"]["defaults"]["workspace"] == str(tmp_path / "workspace")
     assert (tmp_path / "workspace").is_dir()
     assert config["gateway"]["mode"] == "local"
@@ -5853,7 +5853,7 @@ def test_write_openclaw_config_preserves_and_idempotent(tmp_path):
     config = json.loads(path.read_text())
     assert config["theme"] == "dark"
     assert config["agents"]["defaults"]["temperature"] == 0.5
-    assert config["agents"]["defaults"]["model"]["primary"] == f"LAiM/{MODEL['id']}"
+    assert config["agents"]["defaults"]["model"]["primary"] == f"unsloth/{MODEL['id']}"
     assert config["models"]["mode"] == "replace"
     assert config["models"]["providers"]["openrouter"]["baseUrl"] == "x"
     assert config["models"]["providers"]["LAiM"]["baseUrl"] == f"{BASE}/v1"
@@ -5884,12 +5884,12 @@ def test_connect_openclaw_no_launch(fake_studio, tmp_path, monkeypatch):
         _assert_env_unset(result.output, name)
     config = json.loads(config_path.read_text())
     assert config["models"]["providers"]["LAiM"]["apiKey"] == "sk-LAiM-feedfacefeedface"
-    assert config["agents"]["defaults"]["model"]["primary"] == f"LAiM/{MODEL['id']}"
+    assert config["agents"]["defaults"]["model"]["primary"] == f"unsloth/{MODEL['id']}"
     assert config["agents"]["defaults"]["skipBootstrap"] is True
     assert config["agents"]["defaults"]["workspace"] == "${OPENCLAW_WORKSPACE_DIR}"
     assert config["memory"]["search"] == {
         "provider": "openai-compatible",
-        "model": "LAiM/bge-small-en-v1.5",
+        "model": "unsloth/bge-small-en-v1.5",
         "fallback": "none",
         "remote": {"baseUrl": f"{BASE}/v1", "apiKey": "sk-LAiM-feedfacefeedface"},
     }
@@ -6650,7 +6650,7 @@ def test_a_failed_connection_listing_does_not_load_the_name(fake_studio, status)
 def test_a_server_without_connections_still_loads_the_name(fake_studio):
     fake_studio.state["providers_status"] = 404
     result = CliRunner().invoke(
-        start.start_app, ["opencode", "--no-launch", "--model", "LAiM/other-GGUF"]
+        start.start_app, ["opencode", "--no-launch", "--model", "unsloth/other-GGUF"]
     )
     assert result.exit_code == 0, result.output
     assert len(_loads(fake_studio)) == 1
@@ -6782,7 +6782,7 @@ def test_write_hermes_config_fresh(hermes_config):
 
 def test_write_hermes_config_small_window_claims_floor(hermes_config):
     yaml = pytest.importorskip("yaml")
-    small = {"id": "LAiM/Qwen3-1.7B-GGUF", "context_length": 40960}
+    small = {"id": "unsloth/Qwen3-1.7B-GGUF", "context_length": 40960}
     start.write_hermes_config(BASE, small, hermes_config)
     config = yaml.safe_load(hermes_config.read_text())
     # 0.5625 = 0.9 * 40960 / 65536: 90% of the real window.
@@ -7448,9 +7448,9 @@ def test_pi_and_dsh_output_limit_follows_the_context(tmp_path, window, expected)
 
 
 def test_write_dsh_patch_without_window_omits_limits(dsh_patch):
-    start.write_dsh_patch(BASE, {"id": "LAiM/unknown-window"}, dsh_patch)
+    start.write_dsh_patch(BASE, {"id": "unsloth/unknown-window"}, dsh_patch)
     provider = _dsh_entries(dsh_patch)["llm-pi-ai"]["config"]["providers"]["LAiM"]
-    assert provider["models"] == [{"id": "LAiM/unknown-window"}]
+    assert provider["models"] == [{"id": "unsloth/unknown-window"}]
 
 
 def test_write_dsh_patch_is_idempotent_and_follows_the_server(dsh_patch, capsys):
@@ -7658,7 +7658,7 @@ def test_vibe_sends_the_kept_models_recommended_temperature(fake_studio, monkeyp
     ):
         if model_id == MODEL["id"]:
             return {"active_model": MODEL["id"], "inference": {"temperature": 0.6}}
-        return {"active_model": "LAiM/Other-GGUF", "inference": {"temperature": 1.0}}
+        return {"active_model": "unsloth/Other-GGUF", "inference": {"temperature": 1.0}}
 
     monkeypatch.setattr(start, "_inference_status", status)
     monkeypatch.setattr(start.shutil, "which", lambda _: "/usr/local/bin/vibe")
@@ -7751,7 +7751,7 @@ def test_start_dsh_forwards_reasoning_effort(fake_studio, monkeypatch):
 
     result = CliRunner().invoke(
         start.start_app,
-        ["dsh", "--model", "LAiM/gemma-4-E2B-it-GGUF", "--reasoning-effort", "high"],
+        ["dsh", "--model", "unsloth/gemma-4-E2B-it-GGUF", "--reasoning-effort", "high"],
     )
     assert result.exit_code == 0, result.output
     assert captured["server_options"].reasoning_effort is None
@@ -7796,8 +7796,8 @@ def test_merge_wslenv_upgrades_existing_unflagged_entry():
 
 def test_powershell_quote_single_quotes_json():
     assert start._powershell_quote("--settings") == "--settings"
-    assert start._powershell_quote("LAiM/gemma-4-26B") == "LAiM/gemma-4-26B"
-    overlay = start._claude_settings_overlay("LAiM/gemma-4-26B")
+    assert start._powershell_quote("unsloth/gemma-4-26B") == "unsloth/gemma-4-26B"
+    overlay = start._claude_settings_overlay("unsloth/gemma-4-26B")
     quoted = start._powershell_quote(overlay)
     assert quoted == "'" + overlay + "'"
     assert "\\" not in quoted
@@ -8973,9 +8973,9 @@ def test_codex_preflight_rejects_non_gguf_repo(monkeypatch, capsys):
 
 
 def test_codex_preflight_passes_gguf_repo_and_splits_variant(monkeypatch):
-    calls = _fake_hub_listing(monkeypatch, {"LAiM/Qwen3-0.6B-GGUF": ["Qwen3-0.6B-Q4_K_M.gguf"]})
-    start._preflight_agent_gguf(start._CODEX_GGUF_AGENT, "LAiM/Qwen3-0.6B-GGUF:Q4_K_M")
-    assert calls == ["LAiM/Qwen3-0.6B-GGUF"]
+    calls = _fake_hub_listing(monkeypatch, {"unsloth/Qwen3-0.6B-GGUF": ["Qwen3-0.6B-Q4_K_M.gguf"]})
+    start._preflight_agent_gguf(start._CODEX_GGUF_AGENT, "unsloth/Qwen3-0.6B-GGUF:Q4_K_M")
+    assert calls == ["unsloth/Qwen3-0.6B-GGUF"]
 
 
 def test_codex_preflight_defers_when_listing_unavailable(monkeypatch):
@@ -9047,10 +9047,10 @@ def test_codex_rejects_non_gguf_model_before_connect(monkeypatch):
 
 
 def test_codex_preflight_normalizes_ownerless_shorthand(monkeypatch):
-    calls = _fake_hub_listing(monkeypatch, {"LAiM/Qwen3-0.6B": []})
+    calls = _fake_hub_listing(monkeypatch, {"unsloth/Qwen3-0.6B": []})
     with pytest.raises(typer.Exit):
         start._preflight_agent_gguf(start._CODEX_GGUF_AGENT, "Qwen3-0.6B")
-    assert calls[0] == "LAiM/Qwen3-0.6B"
+    assert calls[0] == "unsloth/Qwen3-0.6B"
 
 
 def test_codex_preflight_shorthand_skips_existing_local_dir(monkeypatch, tmp_path):
@@ -9165,7 +9165,7 @@ def test_codex_attach_check_rejects_on_empty_variants(monkeypatch, capsys):
 def test_codex_attach_check_passes_on_variants(monkeypatch):
     urls = _fake_variants(monkeypatch, {"variants": [{"quant": "Q4_K_M"}]})
     start._attach_gguf_check(
-        start._CODEX_GGUF_AGENT, BASE, "sk-test", "LAiM/Qwen3-0.6B-GGUF:Q4_K_M"
+        start._CODEX_GGUF_AGENT, BASE, "sk-test", "unsloth/Qwen3-0.6B-GGUF:Q4_K_M"
     )
     assert "repo_id=LAiM%2FQwen3-0.6B-GGUF" in urls[0]
 
@@ -9174,7 +9174,7 @@ def test_codex_attach_check_rejects_unavailable_variant(monkeypatch, capsys):
     _fake_variants(monkeypatch, {"variants": [{"quant": "Q4_K_M"}, {"quant": "Q8_0"}]})
     with pytest.raises(typer.Exit):
         start._attach_gguf_check(
-            start._CODEX_GGUF_AGENT, BASE, "sk-test", "LAiM/Qwen3-0.6B-GGUF:Q4_KM"
+            start._CODEX_GGUF_AGENT, BASE, "sk-test", "unsloth/Qwen3-0.6B-GGUF:Q4_KM"
         )
     err = capsys.readouterr().err
     assert "no GGUF variant Q4_KM" in err
@@ -9192,7 +9192,7 @@ def test_codex_attach_check_rejects_unavailable_variant(monkeypatch, capsys):
 def test_codex_attach_check_passes_resolvable_variants(monkeypatch, requested, rows):
     _fake_variants(monkeypatch, {"variants": rows})
     start._attach_gguf_check(
-        start._CODEX_GGUF_AGENT, BASE, "sk-test", f"LAiM/Qwen3-0.6B-GGUF:{requested}"
+        start._CODEX_GGUF_AGENT, BASE, "sk-test", f"unsloth/Qwen3-0.6B-GGUF:{requested}"
     )
 
 
@@ -9200,7 +9200,7 @@ def test_codex_attach_check_takes_the_variant_from_the_caller(monkeypatch):
     _fake_variants(monkeypatch, {"variants": [{"quant": "Q8_0"}]})
     with pytest.raises(typer.Exit):
         start._attach_gguf_check(
-            start._CODEX_GGUF_AGENT, BASE, "sk-test", "LAiM/Qwen3-0.6B-GGUF", "Q4_K_M"
+            start._CODEX_GGUF_AGENT, BASE, "sk-test", "unsloth/Qwen3-0.6B-GGUF", "Q4_K_M"
         )
 
 
@@ -9213,7 +9213,7 @@ def test_codex_attach_check_defers_on_server_error(monkeypatch):
         start._CODEX_GGUF_AGENT, BASE, "sk-test", "mlx-community/Qwen3-0.6B-4bit"
     )
     start._attach_gguf_check(
-        start._CODEX_GGUF_AGENT, BASE, "sk-test", "LAiM/Qwen3-0.6B-GGUF:Q4_K_M"
+        start._CODEX_GGUF_AGENT, BASE, "sk-test", "unsloth/Qwen3-0.6B-GGUF:Q4_K_M"
     )
 
 
@@ -9235,7 +9235,7 @@ def test_hub_gguf_files_skips_hub_when_offline(monkeypatch, var):
 
 
 def test_codex_preflight_defers_bare_names_to_attached_server(monkeypatch):
-    calls = _fake_hub_listing(monkeypatch, {"LAiM/Qwen3-0.6B": []})
+    calls = _fake_hub_listing(monkeypatch, {"unsloth/Qwen3-0.6B": []})
     monkeypatch.setattr(start, "find_studio_server", lambda: "http://127.0.0.1:8888")
     monkeypatch.setattr(start, "verify_studio_identity", lambda base: True)
     start._preflight_agent_gguf(start._CODEX_GGUF_AGENT, "Qwen3-0.6B")
@@ -9298,7 +9298,7 @@ def test_codex_attach_rejects_unavailable_variant_before_load(fake_studio, monke
     monkeypatch.setattr(start, "_http_json", http_json)
     result = CliRunner().invoke(
         start.start_app,
-        ["codex", "--model", "LAiM/Qwen3-0.6B-GGUF:Q4_KM", "--no-launch"],
+        ["codex", "--model", "unsloth/Qwen3-0.6B-GGUF:Q4_KM", "--no-launch"],
     )
     assert result.exit_code == 1
     assert "no GGUF variant Q4_KM" in result.output
@@ -10018,7 +10018,7 @@ def test_codex_attach_check_fails_all_partial_local_answers(monkeypatch, capsys)
         start._attach_gguf_check(start._CODEX_GGUF_AGENT, BASE, "sk-test", "./m")
     assert "incomplete GGUF weights" in capsys.readouterr().err
     _fake_variants(monkeypatch, {"variants": [{"quant": "Q4_K_M", "partial": True}]})
-    start._attach_gguf_check(start._CODEX_GGUF_AGENT, BASE, "sk-test", "LAiM/Qwen3-0.6B-GGUF")
+    start._attach_gguf_check(start._CODEX_GGUF_AGENT, BASE, "sk-test", "unsloth/Qwen3-0.6B-GGUF")
     _fake_variants(monkeypatch, {"variants": [{"quant": "Q4_K_M", "partial": True}]})
     with pytest.raises(typer.Exit):
         start._attach_gguf_check(start._CODEX_GGUF_AGENT, BASE, "sk-test", "./m")
@@ -10031,7 +10031,7 @@ def test_codex_attach_check_local_answers_take_exact_labels_only(monkeypatch):
         start._attach_gguf_check(start._CODEX_GGUF_AGENT, BASE, "sk-test", "./m", "Q4")
     _fake_variants(monkeypatch, rows)
     start._attach_gguf_check(
-        start._CODEX_GGUF_AGENT, BASE, "sk-test", "LAiM/Qwen3-0.6B-GGUF", "Q4"
+        start._CODEX_GGUF_AGENT, BASE, "sk-test", "unsloth/Qwen3-0.6B-GGUF", "Q4"
     )
 
 
@@ -10103,10 +10103,10 @@ def test_codex_attach_check_refuses_companion_gguf_files(monkeypatch, capsys, pa
 
 def test_codex_preflight_canonicalizes_missing_bare_gguf_names(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
-    calls = _fake_hub_listing(monkeypatch, {"LAiM/foo.gguf": []})
+    calls = _fake_hub_listing(monkeypatch, {"unsloth/foo.gguf": []})
     with pytest.raises(typer.Exit):
         start._preflight_agent_gguf(start._CODEX_GGUF_AGENT, "foo.gguf")
-    assert calls == ["LAiM/foo.gguf"]
+    assert calls == ["unsloth/foo.gguf"]
 
 
 @pytest.mark.parametrize("kwargs", [{"serve": False}, {"launch": False}])
@@ -10138,7 +10138,7 @@ def test_codex_attach_check_normalizes_shorthand_after_raw_probe(monkeypatch, ca
         start._attach_gguf_check(start._CODEX_GGUF_AGENT, BASE, "sk-test", "Qwen3-0.6B")
     assert len(urls) == 2
     assert "repo_id=LAiM%2FQwen3-0.6B" in urls[1]
-    assert "LAiM/Qwen3-0.6B" in capsys.readouterr().err
+    assert "unsloth/Qwen3-0.6B" in capsys.readouterr().err
 
 
 def test_codex_attach_check_trusts_raw_server_dir_answer(monkeypatch):
@@ -10224,7 +10224,7 @@ def test_gguf_agents_name_themselves_and_their_own_subcommand(monkeypatch, capsy
         (start._CLAUDE_GGUF_AGENT, "Claude Code", "claude"),
     ):
         with pytest.raises(typer.Exit) as excinfo:
-            start._fail_agent_needs_gguf(agent, "LAiM/gemma-3-4b-it")
+            start._fail_agent_needs_gguf(agent, "unsloth/gemma-3-4b-it")
         assert excinfo.value.exit_code == 1
         assert capsys.readouterr().err.strip() == (
             f"{label} needs a GGUF model served by llama-server, but LAiM/gemma-3-4b-it "
@@ -10236,42 +10236,42 @@ def test_require_gguf_for_agent_reads_the_servers_status(monkeypatch, capsys):
     monkeypatch.setattr(
         start,
         "_http_json",
-        lambda *a, **k: {"is_gguf": False, "active_model": "LAiM/gemma-3-4b-it"},
+        lambda *a, **k: {"is_gguf": False, "active_model": "unsloth/gemma-3-4b-it"},
     )
     with pytest.raises(typer.Exit):
         start._require_gguf_for_agent(
-            start._CLAUDE_GGUF_AGENT, BASE, "sk-test", "LAiM/gemma-3-4b-it"
+            start._CLAUDE_GGUF_AGENT, BASE, "sk-test", "unsloth/gemma-3-4b-it"
         )
     assert "Claude Code needs a GGUF model" in capsys.readouterr().err
     monkeypatch.setattr(start, "_http_json", lambda *a, **k: {"is_gguf": True})
     start._require_gguf_for_agent(
-        start._CLAUDE_GGUF_AGENT, BASE, "sk-test", "LAiM/gemma-3-4b-it-GGUF"
+        start._CLAUDE_GGUF_AGENT, BASE, "sk-test", "unsloth/gemma-3-4b-it-GGUF"
     )
 
 
 def test_require_gguf_for_agent_reads_the_requested_models_slot(monkeypatch, capsys):
     def http_json(method, url, key, **_):
         if "model=LAiM%2FQwen3-1.7B-GGUF" in url:
-            return {"is_gguf": True, "active_model": "LAiM/Qwen3-1.7B-GGUF"}
-        return {"is_gguf": False, "active_model": "LAiM/Qwen3-0.6B"}
+            return {"is_gguf": True, "active_model": "unsloth/Qwen3-1.7B-GGUF"}
+        return {"is_gguf": False, "active_model": "unsloth/Qwen3-0.6B"}
 
     monkeypatch.setattr(start, "_http_json", http_json)
     start._require_gguf_for_agent(
-        start._CLAUDE_GGUF_AGENT, BASE, "sk-test", "LAiM/Qwen3-1.7B-GGUF"
+        start._CLAUDE_GGUF_AGENT, BASE, "sk-test", "unsloth/Qwen3-1.7B-GGUF"
     )
 
     monkeypatch.setattr(
         start,
         "_http_json",
         lambda method, url, key, **_: (
-            {"is_gguf": False, "active_model": "LAiM/Qwen3-0.6B"}
+            {"is_gguf": False, "active_model": "unsloth/Qwen3-0.6B"}
             if "model=LAiM%2FQwen3-0.6B" in url
-            else {"is_gguf": True, "active_model": "LAiM/Qwen3-4B-GGUF"}
+            else {"is_gguf": True, "active_model": "unsloth/Qwen3-4B-GGUF"}
         ),
     )
     with pytest.raises(typer.Exit):
         start._require_gguf_for_agent(
-            start._CLAUDE_GGUF_AGENT, BASE, "sk-test", "LAiM/Qwen3-0.6B"
+            start._CLAUDE_GGUF_AGENT, BASE, "sk-test", "unsloth/Qwen3-0.6B"
         )
     assert "Claude Code needs a GGUF model" in capsys.readouterr().err
 
@@ -10326,7 +10326,7 @@ def test_a_rejected_model_never_offers_to_install_the_agent(
 
 
 def test_a_missing_agent_is_still_reported_for_a_model_that_passes(monkeypatch, tmp_path):
-    _fake_hub_listing(monkeypatch, {"LAiM/Qwen3-0.6B-GGUF": ["Q4_K_M.gguf"]})
+    _fake_hub_listing(monkeypatch, {"unsloth/Qwen3-0.6B-GGUF": ["Q4_K_M.gguf"]})
     monkeypatch.setattr(start, "_agents_config_root", lambda: tmp_path / "agents")
     monkeypatch.setattr(start, "_which_with_install_dirs", lambda name: None)
     monkeypatch.setattr(start, "_start_studio_server", lambda *a, **k: None)
@@ -10338,7 +10338,7 @@ def test_a_missing_agent_is_still_reported_for_a_model_that_passes(monkeypatch, 
     )
     result = CliRunner().invoke(
         start.start_app,
-        ["claude", "--model", "LAiM/Qwen3-0.6B-GGUF", "--launch"],
+        ["claude", "--model", "unsloth/Qwen3-0.6B-GGUF", "--launch"],
     )
     assert offered == ["claude"]
     assert result.exit_code == 1
@@ -10364,7 +10364,7 @@ def test_claude_preload_gate_rejects_before_an_evicting_load(fake_studio, monkey
 
     monkeypatch.setattr(start, "_http_json", http_json)
     result = CliRunner().invoke(
-        start.start_app, ["claude", "--model", "LAiM/Qwen3-1.7B", "--no-launch"]
+        start.start_app, ["claude", "--model", "unsloth/Qwen3-1.7B", "--no-launch"]
     )
     assert result.exit_code == 1
     assert "Claude Code needs a GGUF model" in result.output
@@ -10408,7 +10408,7 @@ def test_claude_post_connect_failure_tears_down_auto_served(fake_studio, monkeyp
 
     monkeypatch.setattr(start, "_http_json", http_json)
     result = CliRunner().invoke(
-        start.start_app, ["claude", "--model", "LAiM/Qwen3-1.7B", "--launch"]
+        start.start_app, ["claude", "--model", "unsloth/Qwen3-1.7B", "--launch"]
     )
     assert result.exit_code != 0, result.output
     assert "Claude Code needs a GGUF model" in result.output
@@ -10448,7 +10448,7 @@ def _status_raises(monkeypatch, exc):
 
 def _require_claude_gguf():
     start._require_gguf_for_agent(
-        start._CLAUDE_GGUF_AGENT, BASE, "sk-test", "LAiM/gemma-3-4b-it"
+        start._CLAUDE_GGUF_AGENT, BASE, "sk-test", "unsloth/gemma-3-4b-it"
     )
 
 
@@ -10491,7 +10491,7 @@ def test_require_gguf_never_rejects_on_a_transport_failure(monkeypatch, capsys, 
     "body",
     [
         {},
-        {"model_identifier": "LAiM/Qwen3-1.7B-GGUF"},
+        {"model_identifier": "unsloth/Qwen3-1.7B-GGUF"},
         {"error": "API endpoint not found"},
         {"is_gguf": None},
         ["not", "a", "dict"],
@@ -10517,7 +10517,7 @@ def test_require_gguf_still_rejects_a_definite_no(monkeypatch, capsys, agent, la
     )
     with pytest.raises(typer.Exit) as excinfo:
         start._require_gguf_for_agent(
-            getattr(start, agent), BASE, "sk-test", "LAiM/gemma-3-4b-it"
+            getattr(start, agent), BASE, "sk-test", "unsloth/gemma-3-4b-it"
         )
     assert excinfo.value.exit_code == 1
     assert capsys.readouterr().err.strip() == (
@@ -10537,7 +10537,7 @@ def test_require_gguf_still_rejects_a_definite_no(monkeypatch, capsys, agent, la
 def test_require_gguf_treats_an_idle_server_as_unknown(monkeypatch, body):
     monkeypatch.setattr(start, "_http_json", lambda *a, **k: body)
     start._require_gguf_for_agent(
-        start._CLAUDE_GGUF_AGENT, BASE, "sk-test", "LAiM/gemma-3-4b-it-GGUF"
+        start._CLAUDE_GGUF_AGENT, BASE, "sk-test", "unsloth/gemma-3-4b-it-GGUF"
     )
 
 
@@ -10545,11 +10545,11 @@ def test_require_gguf_still_rejects_a_named_non_gguf_model(monkeypatch, capsys):
     monkeypatch.setattr(
         start,
         "_http_json",
-        lambda *a, **k: {"is_gguf": False, "model_identifier": "LAiM/gemma-3-4b-it"},
+        lambda *a, **k: {"is_gguf": False, "model_identifier": "unsloth/gemma-3-4b-it"},
     )
     with pytest.raises(typer.Exit):
         start._require_gguf_for_agent(
-            start._CLAUDE_GGUF_AGENT, BASE, "sk-test", "LAiM/gemma-3-4b-it"
+            start._CLAUDE_GGUF_AGENT, BASE, "sk-test", "unsloth/gemma-3-4b-it"
         )
     assert "Claude Code needs a GGUF model" in capsys.readouterr().err
 
@@ -10605,7 +10605,7 @@ def test_an_unreadable_status_leaves_the_auto_served_server_alone(fake_studio, m
 
     monkeypatch.setattr(start, "_http_json", http_json)
     result = CliRunner().invoke(
-        start.start_app, [agent, "--model", "LAiM/Qwen3-1.7B-GGUF", "--launch"]
+        start.start_app, [agent, "--model", "unsloth/Qwen3-1.7B-GGUF", "--launch"]
     )
     assert result.exit_code == 0, result.output
     assert "needs a GGUF model" not in result.output
@@ -10717,7 +10717,7 @@ def test_openclaw_memory_search_drops_a_stale_remote_when_the_route_is_gone(
                 "memory": {
                     "search": {
                         "provider": "openai-compatible",
-                        "model": "LAiM/bge-small-en-v1.5",
+                        "model": "unsloth/bge-small-en-v1.5",
                         "fallback": "none",
                         "remote": {
                             "baseUrl": "http://127.0.0.1:8888/v1",
@@ -10747,7 +10747,7 @@ def test_openclaw_memory_search_model_is_stripped(fake_studio, tmp_path, monkeyp
     result = CliRunner().invoke(start.start_app, ["openclaw", "--no-launch"])
     assert result.exit_code == 0, result.output
     config = json.loads((tmp_path / "agents" / "openclaw" / "openclaw.json").read_text())
-    assert config["memory"]["search"]["model"] == "LAiM/bge-small-en-v1.5"
+    assert config["memory"]["search"]["model"] == "unsloth/bge-small-en-v1.5"
 
 
 def test_openclaw_memory_search_does_not_swallow_a_cli_abort(fake_studio, tmp_path, monkeypatch):

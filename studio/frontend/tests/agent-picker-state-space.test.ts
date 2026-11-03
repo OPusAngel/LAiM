@@ -246,10 +246,10 @@ function ggufState(
 
 test("an external selection makes GGUF-ness unknown, not stale-true", () => {
   assert.equal(
-    ggufState("LAiM/Qwen3-1.7B-GGUF", { variant: "Q4_K_M" }),
+    ggufState("unsloth/Qwen3-1.7B-GGUF", { variant: "Q4_K_M" }),
     true,
   );
-  assert.equal(ggufState("LAiM/Qwen3-1.7B", {}), false);
+  assert.equal(ggufState("unsloth/Qwen3-1.7B", {}), false);
   // Frozen fields from before the external switch must not read as a live verdict.
   assert.equal(
     ggufState("external::openai::gpt-5", { variant: "Q4_K_M" }),
@@ -314,10 +314,10 @@ test("an idle server decides nothing about a model it is not holding", () => {
 });
 
 test("a server that names what it holds still decides", () => {
-  assert.equal(statusGgufVerdict("LAiM/Qwen3-1.7B", false), false);
-  assert.equal(statusGgufVerdict("LAiM/Qwen3-1.7B-GGUF", true), true);
+  assert.equal(statusGgufVerdict("unsloth/Qwen3-1.7B", false), false);
+  assert.equal(statusGgufVerdict("unsloth/Qwen3-1.7B-GGUF", true), true);
   // Named, but the field is missing: an older server, so still unknown.
-  assert.equal(statusGgufVerdict("LAiM/Qwen3-1.7B", undefined), null);
+  assert.equal(statusGgufVerdict("unsloth/Qwen3-1.7B", undefined), null);
 });
 
 test("a verdict about one model never gates a different one", () => {
@@ -326,11 +326,11 @@ test("a verdict about one model never gates a different one", () => {
   // panel would otherwise pair a newly named safetensors model with the previous GGUF
   // verdict and go on offering a Claude command the CLI refuses.
   assert.equal(
-    verdictDescribesModel("LAiM/Qwen3-1.7B-GGUF", "LAiM/Qwen3-1.7B"),
+    verdictDescribesModel("unsloth/Qwen3-1.7B-GGUF", "unsloth/Qwen3-1.7B"),
     false,
   );
   assert.equal(
-    verdictDescribesModel("LAiM/Qwen3-1.7B-GGUF", "LAiM/Qwen3-1.7B-GGUF"),
+    verdictDescribesModel("unsloth/Qwen3-1.7B-GGUF", "unsloth/Qwen3-1.7B-GGUF"),
     true,
   );
 });
@@ -340,15 +340,15 @@ test("the quant suffix is not part of the model's identity", () => {
   // the repo. Treating that as a different model would discard every verdict.
   assert.equal(
     verdictDescribesModel(
-      "LAiM/Qwen3-1.7B-GGUF",
-      "LAiM/Qwen3-1.7B-GGUF:Q4_K_M",
+      "unsloth/Qwen3-1.7B-GGUF",
+      "unsloth/Qwen3-1.7B-GGUF:Q4_K_M",
     ),
     true,
   );
   assert.equal(
     verdictDescribesModel(
-      "LAiM/Qwen3-1.7B-GGUF ",
-      "LAiM/qwen3-1.7b-gguf",
+      "unsloth/Qwen3-1.7B-GGUF ",
+      "unsloth/qwen3-1.7b-gguf",
     ),
     true,
   );
@@ -357,8 +357,8 @@ test("the quant suffix is not part of the model's identity", () => {
 test("nothing named on either side is not a contradiction", () => {
   // An idle server names nothing, and the catalog names nothing until it answers. Neither
   // is evidence that the verdict is about some other model.
-  assert.equal(verdictDescribesModel(null, "LAiM/Qwen3-1.7B"), true);
-  assert.equal(verdictDescribesModel("LAiM/Qwen3-1.7B", null), true);
+  assert.equal(verdictDescribesModel(null, "unsloth/Qwen3-1.7B"), true);
+  assert.equal(verdictDescribesModel("unsloth/Qwen3-1.7B", null), true);
   assert.equal(verdictDescribesModel(null, null), true);
 });
 
@@ -385,7 +385,7 @@ test("a path-loaded model is compared on the identity the catalog publishes", ()
   assert.equal(
     statusMatchesCatalog(
       "~/.cache/huggingface/hub/models--LAiM--Qwen3-1.7B-GGUF/snapshots/abc123",
-      "LAiM/Qwen3-1.7B-GGUF",
+      "unsloth/Qwen3-1.7B-GGUF",
     ),
     true,
   );
@@ -399,16 +399,16 @@ test("polls that name different models leave the question unknown", () => {
   assert.equal(
     compatibilityFromSources(
       true,
-      { resident: "LAiM/Qwen3-1.7B", isGguf: false },
-      "LAiM/Qwen3-1.7B-GGUF",
+      { resident: "unsloth/Qwen3-1.7B", isGguf: false },
+      "unsloth/Qwen3-1.7B-GGUF",
     ),
     null,
   );
   assert.equal(
     compatibilityFromSources(
       false,
-      { resident: "LAiM/Qwen3-1.7B-GGUF", isGguf: true },
-      "LAiM/Qwen3-1.7B",
+      { resident: "unsloth/Qwen3-1.7B-GGUF", isGguf: true },
+      "unsloth/Qwen3-1.7B",
     ),
     null,
   );
@@ -418,14 +418,14 @@ test("an answer about the model on screen still decides, and the server wins", (
   assert.equal(
     compatibilityFromSources(
       true,
-      { resident: "LAiM/Qwen3-1.7B", isGguf: false },
-      "LAiM/Qwen3-1.7B",
+      { resident: "unsloth/Qwen3-1.7B", isGguf: false },
+      "unsloth/Qwen3-1.7B",
     ),
     false,
   );
   // No answer for this store state: the store carries it.
   assert.equal(
-    compatibilityFromSources(true, null, "LAiM/Qwen3-1.7B-GGUF"),
+    compatibilityFromSources(true, null, "unsloth/Qwen3-1.7B-GGUF"),
     true,
   );
   assert.equal(compatibilityFromSources(null, null, null), null);
@@ -434,7 +434,7 @@ test("an answer about the model on screen still decides, and the server wins", (
     compatibilityFromSources(
       true,
       { resident: null, isGguf: null },
-      "LAiM/X-GGUF",
+      "unsloth/X-GGUF",
     ),
     true,
   );

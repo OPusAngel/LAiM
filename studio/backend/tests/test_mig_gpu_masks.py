@@ -226,7 +226,7 @@ class TestAMigCardIsSizedByItsSlice:
                 ]
             },
         )
-        selected, metadata = hw.auto_select_gpu_ids("LAiM/test")
+        selected, metadata = hw.auto_select_gpu_ids("unsloth/test")
         # The 9.6 GB slice cannot hold 20 GB; card 1 can, alone.
         assert selected == [1]
         assert metadata["selection_mode"] == "auto"

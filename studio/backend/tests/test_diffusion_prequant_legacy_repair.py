@@ -97,12 +97,12 @@ def test_krea2_pipeline_picks_seed_their_hosted_denoiser():
     assert pipeline_seed_supported(krea) is True
     from core.inference.diffusion_families import family_prequant_repo
 
-    for raw in ("krea/Krea-2-Raw", "LAiM/Krea-2-Raw"):
+    for raw in ("krea/Krea-2-Raw", "unsloth/Krea-2-Raw"):
         assert family_prequant_repo(krea, "fp8", base_repo = raw) is None
         assert family_prequant_repo(krea, "int8", base_repo = raw) is None
     assert (
         family_prequant_repo(krea, "fp8", base_repo = "krea/Krea-2-Turbo")
-        == "LAiM/Krea-2-Turbo-FP8"
+        == "unsloth/Krea-2-Turbo-FP8"
     )
     ideogram = type("Fam", (), {"name": IDEOGRAM4_FAMILY_NAME})()
     assert pipeline_seed_supported(ideogram) is False

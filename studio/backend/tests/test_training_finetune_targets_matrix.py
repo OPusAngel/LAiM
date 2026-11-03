@@ -116,7 +116,7 @@ def _request_config(
     """Build the worker config the way /training/start does: through the request model, so
     an omitted field arrives as the request model's default rather than as a missing key."""
     request = TrainingStartRequest(
-        model_name = "LAiM/Llama-3.2-1B-Instruct",
+        model_name = "unsloth/Llama-3.2-1B-Instruct",
         training_type = training_type,
         format_type = "alpaca",
         target_modules = target_modules,

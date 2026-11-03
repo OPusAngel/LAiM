@@ -10,6 +10,8 @@ import { cachedTextAttachment } from "../text-attachment-accept.ts";
 import { attachmentContentText, isPastedTextFile } from "./pasted-text.ts";
 
 import { annotationsContentText, annotationsOfFile } from "./document-annotations.ts";
+import { translate } from "@/i18n";
+
 
 export type QueuedPrompt = {
   prompt: string;
@@ -29,7 +31,7 @@ export async function prepareQueuedPromptFiles(
     return item;
   }
   if (!attachments || attachments.length !== attachmentFiles.length) {
-    throw new Error("Queued attachment snapshot is inconsistent");
+    throw new Error(translate("uxChat.queuedAttachmentSnapshotIsnhhwo"));
   }
   return {
     ...item,
@@ -37,7 +39,7 @@ export async function prepareQueuedPromptFiles(
       attachments.map((attachment, index) => {
         const file = attachmentFiles[index];
         if (!file) {
-          throw new Error("Queued attachment snapshot is inconsistent");
+          throw new Error(translate("uxChat.queuedAttachmentSnapshotIsnhhwo"));
         }
         return prepare(file, attachment);
       }),
@@ -110,7 +112,7 @@ export function snapshotQueuedTextPrompt(
     attachments: completed,
     attachmentFiles: attachments.map((attachment) => {
       if (!attachment.file) {
-        throw new Error("Queued attachment snapshot is inconsistent");
+        throw new Error(translate("uxChat.queuedAttachmentSnapshotIsnhhwo"));
       }
       return attachment.file;
     }),

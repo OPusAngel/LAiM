@@ -2,7 +2,7 @@
 # Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Library API: one view over uploads, chat attachments, generated images and audio, fine-tuned
-models and sandbox files, plus folders, favorites and renames. See ``core.library`` for the sources."""
+models and workdir files, plus folders, favorites and renames. See ``core.library`` for the sources."""
 
 import hashlib
 import hmac
@@ -41,7 +41,7 @@ router = APIRouter()
 _MAX_UPLOAD_BYTES = LIBRARY_UPLOAD_MAX_BYTES
 _CHUNK_BYTES = 1024 * 1024
 # Raster images, audio and video render inline; anything else (svg and html included) downloads as
-# opaque bytes, as the sandbox route does, so a crafted upload cannot run script on the app origin.
+# opaque bytes, as the workdir route does, so a crafted upload cannot run script on the app origin.
 # Exact types, never a prefix: a stored "audio/x, text/html" is not audio.
 _INLINE_IMAGE_TYPES = frozenset(
     {"image/png", "image/jpeg", "image/gif", "image/webp", "image/avif"}
@@ -128,7 +128,7 @@ class ItemRef(_ItemIdModel):
 
 
 class ItemDelete(ItemRef):
-    # The file a sandbox item was listed as, so a delete never takes one made at its path since.
+    # The file a workdir item was listed as, so a delete never takes one made at its path since.
     fingerprint: Optional[str] = Field(default = None, max_length = 256)
 
 
@@ -381,7 +381,7 @@ def _send(
     span = None,
 ) -> Response:
     """The open file, or its (first, last) ``span`` as a 206, never past Content-Length even if the
-    file grows meanwhile, as the sandbox route streams; the headers alone for a HEAD."""
+    file grows meanwhile, as the workdir route streams; the headers alone for a HEAD."""
     start, end = span or (0, item.size - 1)
     headers["Content-Length"] = str(end - start + 1)
     status_code = 206 if span else 200
@@ -511,7 +511,7 @@ async def stream_item(
 ):
     """An audio or video item, gated by its link rather than the bearer so it can be a plain
     ``src``, and range-capable so it seeks. Opened once in the link's account and read from that
-    descriptor, so a sandbox name swapped for a link after the check is never followed."""
+    descriptor, so a workdir name swapped for a link after the check is never followed."""
     account = _stream_link_account(token, id)
     if account is None:
         raise HTTPException(status_code = 401, detail = "Invalid or expired media link.")

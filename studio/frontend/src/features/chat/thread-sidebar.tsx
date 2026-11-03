@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { useRef, useState } from "react";
 import {
   imeOwnsInputKeydown,
@@ -75,10 +76,10 @@ import {
 } from "./utils/chat-history-storage";
 
 const EXPORT_FORMATS = [
-  { label: "Training JSONL", fn: exportConversationRawJsonl },
-  { label: "Message JSONL", fn: exportConversationMessagesJsonl },
+  { get label() { return translate("composer.plus.exportTrainingJsonl"); }, fn: exportConversationRawJsonl },
+  { get label() { return translate("composer.plus.exportMessageJsonl"); }, fn: exportConversationMessagesJsonl },
   { label: "CSV", fn: exportConversationCsv },
-  { label: "ShareGPT JSONL", fn: exportConversationShareGPT },
+  { get label() { return translate("uxChat.shareGPTJSONL10utz"); }, fn: exportConversationShareGPT },
   { label: CONVERSATION_MARKDOWN_LABEL, fn: exportConversationMarkdown },
 ] as const;
 
@@ -134,7 +135,7 @@ export function ThreadSidebar({
     try {
       await renameChatItem(renamingItem, renameDraft);
     } catch {
-      toast.error("Failed to rename chat.");
+      toast.error(translate("uxChat.failedToRenameChat9ezvb"));
     } finally {
       setRenamingItem(null);
     }
@@ -151,7 +152,7 @@ export function ThreadSidebar({
       }
     } catch (error) {
       if (!isDownloadCancelled(error)) {
-        toast.error("Export failed.");
+        toast.error(translate("composer.plus.exportFailed"));
       }
     }
   }
@@ -171,7 +172,7 @@ export function ThreadSidebar({
   ) {
     try {
       const ids = await getBulkThreadIds(scope);
-      if (ids.length === 0) { toast.info("No conversations to export."); return; }
+      if (ids.length === 0) { toast.info(translate("uxChat.noConversationsToExport543qz")); return; }
       const ts = new Date().toISOString().slice(0, 10);
       const basename = `${scope === "all" ? "all-chats" : "recents"}-${ts}`;
       if (merged) {
@@ -181,7 +182,7 @@ export function ThreadSidebar({
       }
     } catch (error) {
       if (!isDownloadCancelled(error)) {
-        toast.error("Export failed.");
+        toast.error(translate("composer.plus.exportFailed"));
       }
     }
   }
@@ -198,7 +199,7 @@ export function ThreadSidebar({
               <SidebarMenuItem>
                 <SidebarMenuButton onClick={onNewThread}>
                   <HugeiconsIcon icon={PencilEdit02Icon} />
-                  <span>New Chat</span>
+                  <span>{translate("uxChat.newChat9tl93")}</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               {showCompare ? (
@@ -221,7 +222,7 @@ export function ThreadSidebar({
                 <button
                   type="button"
                   className="flex items-center justify-center rounded-sm p-0.5 text-muted-foreground hover:bg-accent focus:outline-none focus-visible:ring-0"
-                  title="Export options"
+                  title={translate("uxChat.exportOptionskobcn")}
                 >
                   <HugeiconsIcon icon={MoreHorizontalIcon} className="size-3.5" />
                 </button>
@@ -230,38 +231,30 @@ export function ThreadSidebar({
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger>
                     <HugeiconsIcon icon={Download01Icon} className="mr-2 size-4" />
-                    Export Recents
+                    {translate("uxChat.exportRecents1h62u")}
                   </DropdownMenuSubTrigger>
                   <DropdownMenuSubContent avoidCollisions={false} className="w-52">
                     {COMBINED_EXPORT_FORMATS_LIST.map(({ fmt, label }) => (
-                      <DropdownMenuItem key={`r-m-${fmt}`} onSelect={() => void handleBulkExport("recents", fmt, true)}>
-                        {label} — combined
-                      </DropdownMenuItem>
+                      <DropdownMenuItem key={`r-m-${fmt}`} onSelect={() => void handleBulkExport("recents", fmt, true)}>{translate("uxChat.combinedf2yos", { p1: label })}</DropdownMenuItem>
                     ))}
                     <DropdownMenuSeparator />
                     {EXPORT_FORMATS_LIST.map(({ fmt, label }) => (
-                      <DropdownMenuItem key={`r-s-${fmt}`} onSelect={() => void handleBulkExport("recents", fmt, false)}>
-                        {label} — per chat
-                      </DropdownMenuItem>
+                      <DropdownMenuItem key={`r-s-${fmt}`} onSelect={() => void handleBulkExport("recents", fmt, false)}>{translate("uxChat.perChat7lyfw", { p1: label })}</DropdownMenuItem>
                     ))}
                   </DropdownMenuSubContent>
                 </DropdownMenuSub>
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger>
                     <HugeiconsIcon icon={Download01Icon} className="mr-2 size-4" />
-                    Export Recents + Projects
+                    {translate("uxChat.exportRecentsProjects1yuzf")}
                   </DropdownMenuSubTrigger>
                   <DropdownMenuSubContent avoidCollisions={false} className="w-52">
                     {COMBINED_EXPORT_FORMATS_LIST.map(({ fmt, label }) => (
-                      <DropdownMenuItem key={`a-m-${fmt}`} onSelect={() => void handleBulkExport("all", fmt, true)}>
-                        {label} — combined
-                      </DropdownMenuItem>
+                      <DropdownMenuItem key={`a-m-${fmt}`} onSelect={() => void handleBulkExport("all", fmt, true)}>{translate("uxChat.combinedf2yos", { p1: label })}</DropdownMenuItem>
                     ))}
                     <DropdownMenuSeparator />
                     {EXPORT_FORMATS_LIST.map(({ fmt, label }) => (
-                      <DropdownMenuItem key={`a-s-${fmt}`} onSelect={() => void handleBulkExport("all", fmt, false)}>
-                        {label} — per chat
-                      </DropdownMenuItem>
+                      <DropdownMenuItem key={`a-s-${fmt}`} onSelect={() => void handleBulkExport("all", fmt, false)}>{translate("uxChat.perChat7lyfw", { p1: label })}</DropdownMenuItem>
                     ))}
                   </DropdownMenuSubContent>
                 </DropdownMenuSub>
@@ -279,7 +272,7 @@ export function ThreadSidebar({
                     {item.isFork ? (
                       <span
                         className="mr-1 rounded-sm bg-primary/10 px-1.5 py-0.5 text-ui-10 font-semibold uppercase tracking-wide text-primary"
-                        title="Forked from another chat"
+                        title={translate("uxChat.forkedFromAnotherChat1ulbw")}
                       >
                         fork
                       </span>
@@ -290,18 +283,18 @@ export function ThreadSidebar({
                     <DropdownMenuTrigger asChild>
                       <SidebarMenuAction showOnHover className="focus:outline-none focus-visible:ring-0" onClick={(e) => e.stopPropagation()}>
                         <HugeiconsIcon icon={MoreHorizontalIcon} className="size-4" />
-                        <span className="sr-only">More options</span>
+                        <span className="sr-only">{translate("uxChat.moreOptionsm3n84")}</span>
                       </SidebarMenuAction>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent side="bottom" align="end" className="w-44">
                       <DropdownMenuItem onSelect={() => openRename(item)}>
                         <HugeiconsIcon icon={PencilEdit02Icon} className="mr-2 size-4" />
-                        Rename
+                        {translate("browser.tabMenu.rename")}
                       </DropdownMenuItem>
                       <DropdownMenuSub>
                         <DropdownMenuSubTrigger>
                           <HugeiconsIcon icon={Download01Icon} className="mr-2 size-4" />
-                          Export
+                          {translate("browser.exportBookmarks")}
                         </DropdownMenuSubTrigger>
                         <DropdownMenuSubContent avoidCollisions={false} className="w-52">
                           {EXPORT_FORMATS.map(({ label, fn }) => (
@@ -320,7 +313,7 @@ export function ThreadSidebar({
                         onSelect={() => void handleDelete(item)}
                       >
                         <HugeiconsIcon icon={Delete02Icon} className="mr-2 size-4" />
-                        Delete
+                        {translate("common.delete")}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -329,7 +322,7 @@ export function ThreadSidebar({
             </SidebarMenu>
             {items.length === 0 && (
               <p className="px-2 py-6 text-center text-xs text-muted-foreground">
-                No threads yet
+                {translate("uxChat.noThreadsYetph2jr")}
               </p>
             )}
           </SidebarGroupContent>
@@ -343,7 +336,7 @@ export function ThreadSidebar({
           className="flex items-center gap-2 corner-squircle rounded-md px-2 py-1.5 text-xs font-medium text-primary bg-primary/10 transition-colors hover:bg-primary/20"
         >
           <HugeiconsIcon icon={BookOpen02Icon} className="size-4 shrink-0" strokeWidth={2} />
-          <span>Learn more in docs</span>
+          <span>{translate("uxCopy.learnMoreInDocswsxga")}</span>
         </a>
         <a
           href="https://LAiM.ai/docs/new/changelog"
@@ -352,7 +345,7 @@ export function ThreadSidebar({
           className="flex items-center gap-2 rounded-md px-2 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
         >
           <HugeiconsIcon icon={NewReleasesIcon} className="size-4 shrink-0" strokeWidth={2} />
-          <span>What&apos;s new</span>
+          <span>{translate("uxChat.whatSNewa9glr")}</span>
         </a>
       </SidebarFooter>
 
@@ -363,7 +356,7 @@ export function ThreadSidebar({
           onEscapeKeyDown={(e) => { if (e.isComposing || e.keyCode === 229) e.preventDefault(); }}
         >
           <DialogHeader>
-            <DialogTitle>Rename chat</DialogTitle>
+            <DialogTitle>{translate("uxChat.renameChat192x7")}</DialogTitle>
           </DialogHeader>
           <Input
             value={renameDraft}

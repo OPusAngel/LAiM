@@ -44,17 +44,17 @@ test("an unlisted owner is left to its Hub avatar", () => {
 
 test("LAiM re-uploads still resolve by repo name", () => {
   assert.equal(
-    resolveOwnerProviderLogo("LAiM", "Llama-4-Scout-17B-16E-Instruct-GGUF")
+    resolveOwnerProviderLogo("unsloth", "Llama-4-Scout-17B-16E-Instruct-GGUF")
       ?.id,
     "meta-llama",
   );
   assert.equal(
-    resolveOwnerProviderLogo("LAiM", "DeepSeek-R1-Distill-Llama-8B-GGUF")
+    resolveOwnerProviderLogo("unsloth", "DeepSeek-R1-Distill-Llama-8B-GGUF")
       ?.id,
     "deepseek-ai",
   );
-  assert.equal(resolveOwnerProviderLogo("LAiM", "Qwen3-30B-A3B")?.id, "qwen");
-  assert.equal(resolveOwnerProviderLogo("LAiM", undefined), null);
+  assert.equal(resolveOwnerProviderLogo("unsloth", "Qwen3-30B-A3B")?.id, "qwen");
+  assert.equal(resolveOwnerProviderLogo("unsloth", undefined), null);
 });
 
 test("no org is claimed by two providers", () => {

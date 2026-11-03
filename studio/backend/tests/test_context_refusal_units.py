@@ -20,7 +20,7 @@ from core.inference.context_window import fit_rolling_context
 
 
 # Measured on the real `studio/backend/assets/chat_templates/gemma-4.jinja` with the real
-# LAiM/gemma-3-270m-it tokenizer, so the fake counter below reproduces numbers that
+# unsloth/gemma-3-270m-it tokenizer, so the fake counter below reproduces numbers that
 # actually occur rather than numbers chosen to fail:
 #   empty prompt                               16 tokens
 #   the system prompt alone                  8009 tokens

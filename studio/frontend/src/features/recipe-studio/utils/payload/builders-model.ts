@@ -3,6 +3,8 @@
 
 import type { ModelConfig, ModelProviderConfig } from "../../types";
 import { parseJsonObject } from "./parse";
+import { translate } from "@/i18n";
+
 
 export function buildModelProvider(
   config: ModelProviderConfig,
@@ -30,12 +32,12 @@ export function buildModelProvider(
   const providerType = config.provider_type.trim().toLowerCase() || "openai";
   const extraHeaders = parseJsonObject(
     config.extra_headers,
-    `Provider ${config.name} extra_headers`,
+    translate("uxRecipestudio.providerExtraHeadersjzs8p", { p1: config.name }),
     errors,
   );
   const extraBody = parseJsonObject(
     config.extra_body,
-    `Provider ${config.name} extra_body`,
+    translate("uxRecipestudio.providerExtraBody2mcov", { p1: config.name }),
     errors,
   );
   return {
@@ -88,7 +90,7 @@ function buildInferenceParameters(
 
   const extraBody = parseJsonObject(
     config.inference_extra_body,
-    `Model ${config.name} inference extra_body`,
+    translate("uxRecipestudio.modelInferenceExtraBody2nsyg", { p1: config.name }),
     errors,
   );
   if (extraBody) {

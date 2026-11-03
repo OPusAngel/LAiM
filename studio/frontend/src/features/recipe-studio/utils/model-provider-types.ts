@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
+
 export const MODEL_PROVIDER_TYPE_OPTIONS = [
-  { value: "openai", label: "OpenAI-compatible" },
+  { value: "openai", get label() { return translate("uxRecipestudio.openAICompatible9rppy"); } },
   { value: "anthropic", label: "Anthropic" },
 ] as const;
 

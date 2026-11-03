@@ -2,6 +2,8 @@
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import type { ReactElement } from "react";
+import { translate } from "@/i18n";
+
 
 type ExecutionRawTabProps = {
   rawExecution: Record<string, unknown> | null;
@@ -12,7 +14,7 @@ export function ExecutionRawTab({
 }: ExecutionRawTabProps): ReactElement {
   return (
     <div className="mt-3 rounded-xl border p-3">
-      <p className="mb-2 text-sm font-semibold">Raw execution</p>
+      <p className="mb-2 text-sm font-semibold">{translate("uxRecipestudio.rawExecution8gekh")}</p>
       <pre className="max-h-96 overflow-auto scroll-rounded rounded-md bg-muted/40 p-3 text-xs">
         {JSON.stringify(rawExecution, null, 2)}
       </pre>

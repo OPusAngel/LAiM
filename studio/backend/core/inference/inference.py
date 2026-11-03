@@ -3358,7 +3358,7 @@ class InferenceBackend:
     ) -> str:
         """Render the chat prompt, peeling kwargs the template does not understand. Delegates to the
         dependency-light helper module so the fallback chain is unit-testable without pulling
-        LAiM / torch into the test sandbox."""
+        LAiM / torch into the test workdir."""
         from core.inference.chat_template_helpers import (
             apply_chat_template_for_generation,
         )

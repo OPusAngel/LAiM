@@ -14,6 +14,8 @@ import {
 import { scheduleRunConfigImport } from "./import-config";
 import { type RunConfigImport, runConfigInbox } from "./inbox";
 import { ShareRunConfigDialog } from "./share-dialog";
+import { translate } from "@/i18n";
+
 
 export function SharedRunConfigActions({
   target,
@@ -78,34 +80,34 @@ export function SharedRunConfigActions({
 
 function reviewTitle(changed: boolean, model?: string, ggufVariant?: string) {
   if (changed) {
-    return "Settings changed by link";
+    return translate("uxModelpicker.settingsChangedByLinkcgan6");
   }
   if (model) {
-    return "Model selected by link";
+    return translate("uxModelpicker.modelSelectedByLinkx9c6n");
   }
   return ggufVariant
-    ? "GGUF variant selected by link"
-    : "Link settings already match this editor";
+    ? translate("uxModelpicker.gGUFVariantSelectedByubnrf")
+    : translate("uxModelpicker.linkSettingsAlreadyMatcha6e8y");
 }
 
 function downloadNote(model?: string, ggufVariant?: string) {
   if (model) {
-    return "If the model isn’t on this device, loading downloads it from Hugging Face.";
+    return translate("uxModelpicker.ifTheModelIsnfki71");
   }
   return ggufVariant
-    ? "If this variant isn’t on this device, loading downloads it."
+    ? translate("uxModelpicker.ifThisVariantIsndtblu")
     : null;
 }
 
 function savedSettingsNote(remember: boolean, hasSavedSettings: boolean) {
   if (remember) {
     return hasSavedSettings
-      ? "Loading replaces your saved settings for this model. Close without loading to keep them."
-      : "Loading saves these settings for this model.";
+      ? translate("uxModelpicker.loadingReplacesYourSavedh73ui")
+      : translate("uxModelpicker.loadingSavesTheseSettings7ni2n");
   }
   return hasSavedSettings
-    ? "Loading clears your saved settings for this model. Close without loading to keep them."
-    : "To keep these settings for next time, tick “Remember for this model”.";
+    ? translate("uxModelpicker.loadingClearsYourSaved1flnf")
+    : translate("uxModelpicker.toKeepTheseSettingsxwrp4");
 }
 
 export function SharedRunConfigReview({
@@ -174,10 +176,7 @@ export function SharedRunConfigReview({
                 </dd>
                 {JSON.stringify(config[key]) !==
                   JSON.stringify(currentConfig[key]) && (
-                  <dd className="col-span-2 min-w-0 whitespace-pre-wrap text-ui-11 leading-relaxed text-muted-foreground/80 [overflow-wrap:anywhere]">
-                    Requested {formatSharedConfigValue(key, config)}, adjusted
-                    for this device or model.
-                  </dd>
+                  <dd className="col-span-2 min-w-0 whitespace-pre-wrap text-ui-11 leading-relaxed text-muted-foreground/80 [overflow-wrap:anywhere]">{translate("uxModelpicker.requestedAdjustedForThishmyu2", { p1: formatSharedConfigValue(key, config) })}</dd>
                 )}
               </div>
             ))}

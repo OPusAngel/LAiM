@@ -42,6 +42,8 @@ import {
 import { ThreadRecordWriteCoordinator } from "./thread-record-write-coordinator";
 // eslint-disable-next-line no-restricted-imports -- this file is in the startup cycle; the chat barrel closes it.
 import { setForkBoundary } from "../stores/fork-boundary-store";
+import { translate } from "@/i18n";
+
 
 // Thread ids belonging to a temporary/incognito session. A thread is tagged once at creation
 // and stays tagged for life; readers and writers consult this set, never the live toggle.
@@ -109,7 +111,7 @@ let legacyChatImportGeneration = 0;
 const threadRecordWrites = new ThreadRecordWriteCoordinator(
   (threadId) =>
     new Error(
-      `Chat history was cleared before thread ${threadId} could be persisted`,
+      translate("uxChat.chatHistoryWasClearedbr1np", { p1: threadId }),
     ),
   (error) => error instanceof ChatThreadDeletedError,
 );
@@ -292,7 +294,7 @@ export function isExpectedBackgroundChatStorageError(error: unknown): boolean {
   }
   return (
     error instanceof Error &&
-    (error.message === "Invalid or expired token" ||
+    (error.message === translate("uxChat.invalidOrExpiredTokenla098") ||
       error.message === "Not authenticated" ||
       error.message === "Request failed (401)")
   );
@@ -1024,7 +1026,7 @@ export async function createStoredChatProject(
 ): Promise<ProjectRecord> {
   const trimmed = name.trim();
   if (!trimmed) {
-    throw new Error("Project name is required.");
+    throw new Error(translate("uxChat.projectNameIsRequiredc0sdo"));
   }
   const now = Date.now();
   return saveChatProject({
@@ -1155,7 +1157,7 @@ export async function saveStoredChatMessage(
 ): Promise<MessageRecord> {
   if (isThreadIncognito(message.threadId)) return message;
   if (isChatThreadDeleted(message.threadId)) {
-    throw new Error(`Thread ${message.threadId} was deleted`);
+    throw new Error(translate("uxChat.threadWasDeletedb7e0y", { p1: message.threadId }));
   }
   const payload = stableStringify(message);
   if (rejectedChatMessagePayloads.get(message.threadId)?.get(message.id) === payload) {
@@ -1203,7 +1205,7 @@ export async function saveStoredChatThread(
 ): Promise<ThreadRecord> {
   if (isThreadIncognito(thread.id)) return thread;
   if (isChatThreadDeleted(thread.id)) {
-    throw new Error(`Thread ${thread.id} was deleted`);
+    throw new Error(translate("uxChat.threadWasDeletedb7e0y", { p1: thread.id }));
   }
   try {
     return await writeChatThreadRecord(thread);
@@ -1269,12 +1271,12 @@ export async function listStoredChatMessagesMany(
   return out;
 }
 
-/** Thread ids whose sandbox still holds files, passed through from the route. */
+/** Thread ids whose workdir still holds files, passed through from the route. */
 export async function deleteStoredChatThreads(
   idsToDelete: string[],
   args: { deleteFiles?: boolean } = {},
 ): Promise<string[]> {
-  // Incognito chats have no history row, but their ids still name sandboxes. Send every id to
+  // Incognito chats have no history row, but their ids still name workdirs. Send every id to
   // the backend for file cleanup while limiting Dexie work to stored chats.
   idsToDelete = Array.from(new Set(idsToDelete));
   const ids = idsToDelete.filter((id) => !isThreadIncognito(id));
@@ -1332,8 +1334,8 @@ export interface ClearStoredChatsResult {
   legacy: "cleared" | "failed" | "skipped";
   deletedThreadIds: string[];
   failedThreadIds: string[];
-  /** Ids whose sandbox still holds files, so the offer can be made once. */
-  sandboxesKept: string[];
+  /** Ids whose workdir still holds files, so the offer can be made once. */
+  workdirsKept: string[];
 }
 
 let clearStoredChatsPromise: Promise<ClearStoredChatsResult> | null = null;
@@ -1378,7 +1380,7 @@ async function clearStoredChatsWithAdmissionClosed(
     legacy: "skipped",
     deletedThreadIds: [],
     failedThreadIds: [],
-    sandboxesKept: [],
+    workdirsKept: [],
   };
   let backendDeletedThreadIds: string[] = [];
   const runBackendClear = () =>
@@ -1399,7 +1401,7 @@ async function clearStoredChatsWithAdmissionClosed(
       runBackendClear(),
     );
     backendDeletedThreadIds = backendResult.deletedThreadIds;
-    result.sandboxesKept = backendResult.sandboxesKept;
+    result.workdirsKept = backendResult.workdirsKept;
     result.backend = "cleared";
     threadRecordWrites.confirmFinalState(idsToFence);
   } catch (error) {
@@ -1441,7 +1443,7 @@ async function clearStoredChatsWithAdmissionClosed(
   notifyChatHistoryUpdated();
 
   if (result.backend === "failed" && result.legacy === "failed") {
-    throw new Error("clearStoredChats: both backend and legacy clear failed");
+    throw new Error(translate("uxChat.clearStoredChatsBothBackendAnd6cszk"));
   }
   return result;
 }

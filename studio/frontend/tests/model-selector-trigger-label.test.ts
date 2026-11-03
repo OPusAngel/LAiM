@@ -64,7 +64,7 @@ test("an LM Studio pick shows the model folder, not the publisher", () => {
 });
 
 test("an Ollama pick keeps the slashes in its repo name", () => {
-  // ollama pull hf.co/LAiM/Qwen3-8B-GGUF:Q4_K_M; repo_name keeps its host and
+  // ollama pull hf.co/unsloth/Qwen3-8B-GGUF:Q4_K_M; repo_name keeps its host and
   // namespace for anything outside registry.ollama.ai/library.
   const options = chatLocalModelOptions([
     localRow({
@@ -73,14 +73,14 @@ test("an Ollama pick keeps the slashes in its repo name", () => {
       // biome-ignore lint/style/useNamingConvention: API schema
       model_format: "gguf",
       // biome-ignore lint/style/useNamingConvention: API schema
-      display_name: "hf.co/LAiM/Qwen3-8B-GGUF:Q4_K_M (qwen3 Q4_K_M)",
+      display_name: "hf.co/unsloth/Qwen3-8B-GGUF:Q4_K_M (qwen3 Q4_K_M)",
     }),
   ]);
   const option = options[0];
   assert.ok(option);
   assert.equal(
     loraOptionLabel(option),
-    "hf.co/LAiM/Qwen3-8B-GGUF:Q4_K_M (qwen3 Q4_K_M)",
+    "hf.co/unsloth/Qwen3-8B-GGUF:Q4_K_M (qwen3 Q4_K_M)",
   );
 
   const namespaced = chatLocalModelOptions([

@@ -37,7 +37,7 @@ logger = get_logger(__name__)
 def _build_browse_allowlist(
     media_roots: Optional[list[Path]] = None, drive_roots: Optional[list[Path]] = None
 ) -> list[Path]:
-    """Root directories the browser may walk (also seeds the suggestion chips): HOME, resolved HF cache dirs, LAiM outputs/exports/root, registered scan folders, and well-known local-LLM dirs. Each is added only if it resolves to a real directory so the sandbox has no dead boundary.
+    """Root directories the browser may walk (also seeds the suggestion chips): HOME, resolved HF cache dirs, LAiM outputs/exports/root, registered scan folders, and well-known local-LLM dirs. Each is added only if it resolves to a real directory so the workdir has no dead boundary.
 
     *media_roots* / *drive_roots* let the caller pass already-probed
     removable-media and Windows drive roots so they aren't scanned again (a
@@ -114,7 +114,7 @@ def _build_browse_allowlist(
 
 
 def _is_path_inside_allowlist(target: Path, allowed_roots: list[Path]) -> bool:
-    """True if *target* equals or descends from any allowed root; uses ``os.path.realpath`` so symlinks cannot escape the sandbox.
+    """True if *target* equals or descends from any allowed root; uses ``os.path.realpath`` so symlinks cannot escape the workdir.
 
     A Windows drive root (``D:\\``) authorizes its descendants, but a bare POSIX
     root (``/``) must NOT: a single ``/`` allowlist entry (e.g. a legacy scan

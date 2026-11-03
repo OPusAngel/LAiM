@@ -18,7 +18,7 @@ const { applyActiveModelStatusToStore } = await import(
   "../src/features/chat/lib/apply-inference-status-to-store.ts"
 );
 
-const MODEL = "LAiM/Qwen3-8B";
+const MODEL = "unsloth/Qwen3-8B";
 
 function statusFor(requested: number | null, effective = requested) {
   return {
@@ -69,10 +69,10 @@ test("a remembered non-GGUF width is adopted into the control, not just the base
     modelLoading: false,
     loadedNParallel: null,
     nParallel: null,
-    params: { ...useChatRuntimeStore.getState().params, checkpoint: "LAiM/Other" },
+    params: { ...useChatRuntimeStore.getState().params, checkpoint: "unsloth/Other" },
   });
 
-  applyActiveModelStatusToStore(statusFor(2), { previousCheckpoint: "LAiM/Other" });
+  applyActiveModelStatusToStore(statusFor(2), { previousCheckpoint: "unsloth/Other" });
   setResidentInitialConfig(null);
 
   assert.equal(useChatRuntimeStore.getState().nParallel, 2);

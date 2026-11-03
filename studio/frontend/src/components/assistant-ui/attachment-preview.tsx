@@ -48,7 +48,7 @@ import {
   useLibraryFavorite,
   useLibraryFavoritesStore,
 } from "@/features/library";
-import { useT } from "@/i18n";
+import { translate, useT } from "@/i18n";
 import { MAX_HIGHLIGHT_CHARS } from "@/lib/markdown-plugins";
 import { asPng } from "@/lib/copy-to-clipboard";
 import { toast } from "@/lib/toast";
@@ -201,7 +201,7 @@ const ImageGalleryDialog: FC<
         <img
           key={current.id}
           src={src}
-          alt={current.name || "Image attachment"}
+          alt={current.name || translate("uxComponents.imageAttachmentlxv5n")}
           onError={() => setFailedId(current.id)}
           className="size-full object-contain shadow-[0_1px_10px_rgba(0,0,0,0.08)] dark:shadow-[0_1px_10px_rgba(0,0,0,0.3)]"
         />
@@ -232,11 +232,11 @@ const savedComposerImages = new WeakMap<File, Promise<string>>();
 
 const saveComposerImage = (image: GalleryImage): Promise<string> => {
   const file = image.file;
-  if (!file) return Promise.reject(new Error("This image has no file to save."));
+  if (!file) return Promise.reject(new Error(translate("uxComponents.thisImageHasNo3m7cl")));
   let saved = savedComposerImages.get(file);
   if (!saved) {
     saved = uploadLibraryFiles({ files: [file] }, null).then(([id]) => {
-      if (!id) throw new Error("The Library didn't keep the file.");
+      if (!id) throw new Error(translate("uxComponents.theLibraryDidnTo0d24"));
       return id;
     });
     savedComposerImages.set(file, saved);
@@ -491,8 +491,8 @@ const AttachmentTextDialog: FC<
   // A page's own HTML renders, as the Library shows it; text pulled out of a document never does.
   const webPage = Boolean(ready && !ready.label && !truncated && WEB_PAGE_NAME.test(source.name));
   const meta = useMemo(() => {
-    if (state.status === "error") return "This file could not be read";
-    if (!ready || !preview) return "Reading file";
+    if (state.status === "error") return translate("uxComponents.thisFileCouldNotBeddvx0");
+    if (!ready || !preview) return translate("uxComponents.readingFilefp4gh");
     // Counting the capped text, not ready.text: a sent attachment keeps its
     // full payload in memory and splitting all of it would stall the webview.
     const lines = countAttachmentTextLines(preview.text);
@@ -519,7 +519,7 @@ const AttachmentTextDialog: FC<
   if (!ready) {
     body =
       state.status === "error" ? (
-        <p className="m-auto text-sm text-muted-foreground">This file could not be read.</p>
+        <p className="m-auto text-sm text-muted-foreground">{translate("uxCopy.thisFileCouldNotx6ovl")}</p>
       ) : (
         <Spinner className="m-auto size-6" />
       );
@@ -527,8 +527,8 @@ const AttachmentTextDialog: FC<
     body = (
       <p className="m-auto text-sm text-muted-foreground">
         {truncated
-          ? "No readable text in the part of this file the preview reads."
-          : "No readable text in this file."}
+          ? translate("uxComponents.noReadableTextInPart80d31")
+          : translate("uxComponents.noReadableTextInThispt0y0")}
       </p>
     );
   } else if (webPage && !showCode) {

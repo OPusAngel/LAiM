@@ -3,13 +3,15 @@
 
 import type { ExpressionConfig, RecipeProcessorConfig } from "../../types";
 import { parseJsonObject } from "./parse";
+import { translate } from "@/i18n";
+
 
 export function buildExpressionColumn(
   config: ExpressionConfig,
   errors: string[],
 ): Record<string, unknown> {
   if (!config.expr.trim()) {
-    errors.push(`Expression ${config.name}: expr required.`);
+    errors.push(translate("uxRecipestudio.expressionExprRequired5xf57", { p1: config.name }));
   }
   return {
     // biome-ignore lint/style/useNamingConvention: api schema
@@ -32,12 +34,12 @@ export function buildProcessors(
     }
     const name = processor.name.trim();
     if (!name) {
-      errors.push("Schema transform: name is required.");
+      errors.push(translate("uxRecipestudio.schemaTransformNameIsv9hza"));
       continue;
     }
     const template = parseJsonObject(
       processor.template,
-      `Schema transform ${name} template`,
+      translate("uxRecipestudio.schemaTransformTemplateqcjqh", { p1: name }),
       errors,
     );
     if (!template) {

@@ -66,12 +66,12 @@ def test_trainer_records_16bit_when_bitsandbytes_unusable(tmp_path):
 @pytest.mark.parametrize("requested", [True, False])
 def test_worker_legacy_cpt_keeps_request(tmp_path, requested):
     # A pre-flag CPT adapter may have been quantized on the fly from a non-bnb repo.
-    mc = _adapter(tmp_path, {"LAiM_training_method": "CPT"}, "LAiM/Qwen3-4B")
+    mc = _adapter(tmp_path, {"LAiM_training_method": "CPT"}, "unsloth/Qwen3-4B")
     assert _resolve_lora_4bit(mc, requested) is requested
 
 
 def test_worker_cpt_on_bnb_base_keeps_4bit(tmp_path):
-    mc = _adapter(tmp_path, {"LAiM_training_method": "CPT"}, "LAiM/Qwen3-4B-LAiM-bnb-4bit")
+    mc = _adapter(tmp_path, {"LAiM_training_method": "CPT"}, "unsloth/Qwen3-4B-unsloth-bnb-4bit")
     assert _resolve_lora_4bit(mc, True) is True
 
 
@@ -79,7 +79,7 @@ def test_worker_cpt_on_bnb_base_keeps_4bit(tmp_path):
 @pytest.mark.parametrize("requested", [True, False])
 def test_worker_recorded_precision_wins(tmp_path, recorded, requested):
     payload = {"LAiM_training_method": "CPT", "LAiM_load_in_4bit": recorded}
-    mc = _adapter(tmp_path, payload, "LAiM/Qwen3-4B")
+    mc = _adapter(tmp_path, payload, "unsloth/Qwen3-4B")
     assert _resolve_lora_4bit(mc, requested) is recorded
 
 
@@ -88,7 +88,7 @@ def test_worker_recorded_precision_wins(tmp_path, recorded, requested):
     [("lora", True, False), ("lora", False, False), ("qlora", True, True), ("qlora", False, True)],
 )
 def test_worker_lora_qlora_unchanged(tmp_path, method, requested, expected):
-    mc = _adapter(tmp_path, {"LAiM_training_method": method}, "LAiM/Qwen3-4B")
+    mc = _adapter(tmp_path, {"LAiM_training_method": method}, "unsloth/Qwen3-4B")
     assert _resolve_lora_4bit(mc, requested) is expected
 
 
@@ -219,5 +219,5 @@ def test_forced_16bit_audio_run_reloads_in_16bit(tmp_path):
     _patch_adapter_config()(trainer, str(tmp_path))
     cfg = json.loads((tmp_path / "adapter_config.json").read_text())
     assert cfg["LAiM_load_in_4bit"] is False
-    mc = SimpleNamespace(is_lora = True, path = str(tmp_path), base_model = "LAiM/csm-1b")
+    mc = SimpleNamespace(is_lora = True, path = str(tmp_path), base_model = "unsloth/csm-1b")
     assert _resolve_lora_4bit(mc, True) is False

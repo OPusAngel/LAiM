@@ -244,7 +244,7 @@ _fail_uv_stall='error: Failed to download `torch==2.9.1+cu128`: Failed to downlo
 _fail_nover='  Caused by: Because there is no version of torch==1.0.99 [...] hint: `torch` was found on https://download.pytorch.org/whl/cu128, but not at the requested version (torch==1.0.99). A compatible version may be available on a subsequent index (e.g., https://pypi.org/simple).'
 _fail_uv_lag='  cause: Because only LAiM<=2026.9.9 is available and you require LAiM>=2026.9.10, we can conclude that your requirements are unsatisfiable.'
 _fail_pip_lag='ERROR: No matching distribution found for LAiM>=2026.9.10'
-_fail_git='error: Git operation failed: failed to fetch https://github.com/LAiMai/LAiM-zoo: Connection reset by peer (os error 54)'
+_fail_git='error: Git operation failed: failed to fetch https://github.com/OPusAngel/LAiM-zoo: Connection reset by peer (os error 54)'
 _failed_host() { printf '%s\n' "$1" > "$_WORK/fail.log"; sh -c ". '$_WORK/block.sh'; _mirror_failed_host '$_WORK/fail.log' '${2:-}'" || echo none; }
 assert_eq "failed host: the default each transport failure names; unsynced for a version or package not found; none for another host" "pypi torch pypi npm python unsynced unsynced unsynced none" "$(for _o in "$_fail_uv_timeout" "$_fail_uv_503" "$_fail_pip_timeout" "$_fail_npm" "$_fail_python" "$_fail_nover" "$_fail_uv_lag" "$_fail_pip_lag" "$_fail_git"; do _failed_host "$_o"; done | paste -sd' ' -)"
 assert_eq "failed host: a stalled download names no URL, so the host that ran it; none when another URL is named" "torch none none" "$({ _failed_host "$_fail_uv_stall" torch; _failed_host "$_fail_uv_stall"; _failed_host "$_fail_git" pypi; } | paste -sd' ' -)"

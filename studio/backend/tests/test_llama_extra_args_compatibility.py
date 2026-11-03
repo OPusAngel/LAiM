@@ -533,7 +533,7 @@ def test_the_loader_and_the_panel_resolve_the_same_row(monkeypatch):
 
     stored = {
         "/models/Foo.gguf:Q4_K_M": {"llama_extra_args": ["--numa", "distribute"]},
-        "LAiM/model-gguf": {"llama_extra_args": ["--top-k", "20"]},
+        "unsloth/model-gguf": {"llama_extra_args": ["--top-k", "20"]},
     }
     monkeypatch.setattr(oas, "get_model_overrides", lambda: dict(stored))
 
@@ -541,13 +541,13 @@ def test_the_loader_and_the_panel_resolve_the_same_row(monkeypatch):
     # path keeps its case (POSIX), while the quant folds, which is the rule a browser
     # mirroring this kept getting subtly wrong.
     key, override = oas.resolve_override_for_load(
-        "/models/Foo.gguf", "LAiM/model-gguf", "q4_k_m"
+        "/models/Foo.gguf", "unsloth/model-gguf", "q4_k_m"
     )
     assert override["llama_extra_args"] == ["--numa", "distribute"]
     assert key == "/models/Foo.gguf:Q4_K_M"
 
     # With no such row, the alias answers.
-    key, override = oas.resolve_override_for_load("/models/other.gguf", "LAiM/model-gguf", None)
+    key, override = oas.resolve_override_for_load("/models/other.gguf", "unsloth/model-gguf", None)
     assert override["llama_extra_args"] == ["--top-k", "20"]
 
 

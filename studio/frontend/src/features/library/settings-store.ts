@@ -121,7 +121,7 @@ export const useLibrarySettingsStore = create<LibrarySettingsState>()(
 
 const SOURCE_SETTING: Record<string, keyof LibrarySettings> = {
   attachment: "showChatAttachments",
-  sandbox: "showChatToolFiles",
+  workdir: "showChatToolFiles",
   image: "showGeneratedMedia",
   video: "showGeneratedMedia",
   audio: "showGeneratedMedia",

@@ -26,7 +26,7 @@ def timed(fn, runs):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model", default = "LAiM/Llama-3.2-1B-Instruct")
+    parser.add_argument("--model", default = "unsloth/Llama-3.2-1B-Instruct")
     parser.add_argument("--turns", type = int, nargs = "+", default = [4, 8, 16, 32])
     parser.add_argument("--max-new-tokens", type = int, default = 32)
     parser.add_argument("--runs", type = int, default = 5)

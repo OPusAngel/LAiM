@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pytest
 
-MODEL_DIR = Path(os.environ.get("LAiM_TEST_LOCAL_MODEL", "LAiM/gemma-3-270m-it"))
+MODEL_DIR = Path(os.environ.get("LAiM_TEST_LOCAL_MODEL", "unsloth/gemma-3-270m-it"))
 
 # Must be multimodal: a text-only repo's AutoProcessor returns a plain tokenizer.
 PROCESSOR_DIR = os.environ.get("LAiM_TEST_LOCAL_PROCESSOR")

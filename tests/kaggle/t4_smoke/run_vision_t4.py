@@ -211,7 +211,7 @@ def run(args) -> dict:
     model, tokenizer = FastVisionModel.from_pretrained(
         args.model,
         load_in_4bit = True,
-        use_gradient_checkpointing = "LAiM",
+        use_gradient_checkpointing = "unsloth",
     )
     result["load_seconds"] = round(time.time() - t0, 1)
     result["resolved_checkpoint"] = getattr(getattr(model, "config", None), "_name_or_path", None)
@@ -354,8 +354,8 @@ def run(args) -> dict:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--model", default = "LAiM/Qwen3.5-2B")
-    ap.add_argument("--dataset", default = "LAiM/LaTeX_OCR")
+    ap.add_argument("--model", default = "unsloth/Qwen3.5-2B")
+    ap.add_argument("--dataset", default = "unsloth/LaTeX_OCR")
     ap.add_argument("--outdir", required = True)
     ap.add_argument("--label", default = "vision")
     ap.add_argument("--samples", type = int, default = 16)

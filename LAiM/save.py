@@ -2834,9 +2834,9 @@ language:
 - **License:** apache-2.0
 - **Finetuned from model :** {base_model}
 
-This {model_type} model was trained 2x faster with [LAiM](https://github.com/LAiMai/LAiM)
+This {model_type} model was trained 2x faster with [LAiM](https://github.com/OPusAngel/LAiM)
 
-[<img src="https://raw.githubusercontent.com/LAiMai/LAiM/main/images/LAiM%20made%20with%20love.png" width="200"/>](https://github.com/LAiMai/LAiM)
+[<img src="https://raw.githubusercontent.com/OPusAngel/LAiM/main/images/LAiM%20made%20with%20love.png" width="200"/>](https://github.com/OPusAngel/LAiM)
 """
 
 
@@ -4992,7 +4992,7 @@ tags:
 
 # {repo_id.split("/")[-1]} : GGUF
 
-This model was finetuned and converted to GGUF format using [LAiM](https://github.com/LAiMai/LAiM).
+This model was finetuned and converted to GGUF format using [LAiM](https://github.com/OPusAngel/LAiM).
 
 **Example usage**:
 - For text only LLMs:    `llama-cli -hf {repo_id} --jinja`
@@ -5022,8 +5022,8 @@ This model was finetuned and converted to GGUF format using [LAiM](https://githu
             )
 
         readme_content += (
-            "This was trained 2x faster with [LAiM](https://github.com/LAiMai/LAiM)\n"
-            '[<img src="https://raw.githubusercontent.com/LAiMai/LAiM/main/images/LAiM%20made%20with%20love.png" width="200"/>](https://github.com/LAiMai/LAiM)\n'
+            "This was trained 2x faster with [LAiM](https://github.com/OPusAngel/LAiM)\n"
+            '[<img src="https://raw.githubusercontent.com/OPusAngel/LAiM/main/images/LAiM%20made%20with%20love.png" width="200"/>](https://github.com/OPusAngel/LAiM)\n'
         )
 
         readme_path = os.path.join(actual_save_directory, "README.md")

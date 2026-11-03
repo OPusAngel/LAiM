@@ -1,6 +1,6 @@
-# Model defaults for LAiM/Phi-4
+# Model defaults for unsloth/Phi-4
 # Based on Phi_4-Conversational.ipynb
-# Also applies to: LAiM/phi-4-LAiM-bnb-4bit, microsoft/phi-4, LAiM/phi-4-bnb-4bit
+# Also applies to: unsloth/phi-4-unsloth-bnb-4bit, microsoft/phi-4, unsloth/phi-4-bnb-4bit
 # added inference parameters from LAiM guides
 
 training:
@@ -17,7 +17,7 @@ training:
   random_seed: 3407
   packing: false
   train_on_completions: true
-  gradient_checkpointing: "LAiM"
+  gradient_checkpointing: "unsloth"
   optim: "adamw_8bit"
   lr_scheduler_type: "linear"
 

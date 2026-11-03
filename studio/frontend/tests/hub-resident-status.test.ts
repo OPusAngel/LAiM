@@ -13,7 +13,7 @@ import { subscribeResidentStatusRefresh } from "../src/features/hub/lib/resident
 import { emptyStore, fakeTargets, spies } from "./helpers/kit.ts";
 
 const RESIDENT = {
-  checkpointId: "LAiM/Qwen3-8B-GGUF",
+  checkpointId: "unsloth/Qwen3-8B-GGUF",
   ggufVariant: "Q4_K_M",
 };
 
@@ -44,7 +44,7 @@ test("landing on the Hub synchronizes the full resident status", () => {
   const adopted = adoptResidentModelStatus(RESIDENT, emptyStore(), actions);
   assert.equal(adopted, true);
   assert.deepEqual(calls, [
-    "setCheckpoint:LAiM/Qwen3-8B-GGUF:Q4_K_M",
+    "setCheckpoint:unsloth/Qwen3-8B-GGUF:Q4_K_M",
     "applyStatus",
   ]);
 });
@@ -55,7 +55,7 @@ test("a checkpoint that already matches is still hydrated", () => {
   adoptResidentModelStatus(
     RESIDENT,
     emptyStore({
-      checkpoint: "LAiM/Qwen3-8B-GGUF",
+      checkpoint: "unsloth/Qwen3-8B-GGUF",
       activeGgufVariant: "Q4_K_M",
     }),
     actions,
@@ -65,13 +65,13 @@ test("a checkpoint that already matches is still hydrated", () => {
 
 test("an API auto-switch under the tab re-pins the model and the quant", () => {
   for (const stale of [
-    { checkpoint: "LAiM/Llama-3.1-8B-GGUF", activeGgufVariant: "Q4_K_M" },
-    { checkpoint: "LAiM/Qwen3-8B-GGUF", activeGgufVariant: "Q8_0" },
+    { checkpoint: "unsloth/Llama-3.1-8B-GGUF", activeGgufVariant: "Q4_K_M" },
+    { checkpoint: "unsloth/Qwen3-8B-GGUF", activeGgufVariant: "Q8_0" },
   ]) {
     const { calls, actions } = spies();
     adoptResidentModelStatus(RESIDENT, emptyStore(stale), actions);
     assert.deepEqual(calls, [
-      "setCheckpoint:LAiM/Qwen3-8B-GGUF:Q4_K_M",
+      "setCheckpoint:unsloth/Qwen3-8B-GGUF:Q4_K_M",
       "applyStatus",
     ]);
   }
@@ -84,13 +84,13 @@ test("the status applied is the one from before the checkpoint moved", () => {
   adoptResidentModelStatus(
     RESIDENT,
     emptyStore({
-      checkpoint: "LAiM/Qwen3-8B-GGUF",
+      checkpoint: "unsloth/Qwen3-8B-GGUF",
       activeGgufVariant: "Q8_0",
     }),
     actions,
   );
   assert.deepEqual(previouslySeen, [
-    { checkpoint: "LAiM/Qwen3-8B-GGUF", ggufVariant: "Q8_0" },
+    { checkpoint: "unsloth/Qwen3-8B-GGUF", ggufVariant: "Q8_0" },
   ]);
 });
 
@@ -266,12 +266,12 @@ test("a tab going hidden does not read", () => {
 
 test("an auto-switch under a mounted Hub updates the mutation guard", () => {
   const store = emptyStore({
-    checkpoint: "LAiM/Qwen3-8B-GGUF",
+    checkpoint: "unsloth/Qwen3-8B-GGUF",
     activeGgufVariant: "Q4_K_M",
   });
   // What the server reports once the API request has switched it.
   let serverStatus = {
-    checkpointId: "LAiM/Llama-3.1-8B-Instruct-GGUF",
+    checkpointId: "unsloth/Llama-3.1-8B-Instruct-GGUF",
     ggufVariant: "Q8_0",
   };
   const readStatusAndAdopt = () => {
@@ -307,11 +307,11 @@ test("an auto-switch under a mounted Hub updates the mutation guard", () => {
   // must not re-pin the model being moved away from.
   store.modelLoading = true;
   serverStatus = {
-    checkpointId: "LAiM/Qwen3-8B-GGUF",
+    checkpointId: "unsloth/Qwen3-8B-GGUF",
     ggufVariant: "Q4_K_M",
   };
   targets.fire("window", "focus");
-  assert.equal(store.checkpoint, "LAiM/Llama-3.1-8B-Instruct-GGUF");
+  assert.equal(store.checkpoint, "unsloth/Llama-3.1-8B-Instruct-GGUF");
 });
 
 test("unsubscribing stops the reads and leaves no listener behind", () => {

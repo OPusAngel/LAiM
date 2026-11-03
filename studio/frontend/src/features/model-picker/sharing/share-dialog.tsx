@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -65,7 +66,7 @@ function linkPreview(value: SharedRunConfig, destination: string) {
     return {
       link: "",
       error:
-        cause instanceof Error ? cause.message : "Could not create this link.",
+        cause instanceof Error ? cause.message : translate("uxModelpicker.couldNotCreateThiswrkte"),
     };
   }
 }
@@ -99,7 +100,7 @@ export function ShareRunConfigDialog({
               : SHARED_CONFIG_FIELDS[key].valid(config[key])
                 ? null
                 : (SHARED_CONFIG_FIELDS[key].error ??
-                  "This value cannot be shared.");
+                  translate("uxModelpicker.thisValueCannotBed1d33"));
           const detail =
             error === null
               ? formatSharedConfigValue(key, config)
@@ -217,11 +218,8 @@ export function ShareRunConfigDialog({
     >
       <DialogContent className="grid-cols-1 grid-rows-[auto_minmax(0,1fr)_auto] gap-5 sm:max-w-xl">
         <DialogHeader>
-          <DialogTitle>Share run settings</DialogTitle>
-          <DialogDescription>
-            Choose what to include. Omitted settings use the recipient’s
-            existing defaults. Opening a link shows the settings before running.
-          </DialogDescription>
+          <DialogTitle>{translate("uxCopy.shareRunSettings172gl")}</DialogTitle>
+          <DialogDescription>{translate("uxModelpicker.chooseWhatToIncludeu7bms")}</DialogDescription>
         </DialogHeader>
         <div className="@container flex min-h-0 flex-col border-y border-border/60">
           <div className="border-b border-border/60 py-2">
@@ -229,14 +227,13 @@ export function ShareRunConfigDialog({
               choice("model", "Model", includeModel, setIncludeModel, model)
             ) : (
               <p className="py-1.5 text-ui-12 leading-snug text-muted-foreground">
-                This model uses a local path. The recipient can choose their own
-                model.
+                {translate("uxCopy.thisModelUsesA1jti3")}
               </p>
             )}
             {target.ggufVariant &&
               choice(
                 "variant",
-                "GGUF variant",
+                translate("uxModelpicker.gGUFVariantepwpg"),
                 includeVariant,
                 setIncludeVariant,
                 target.ggufVariant,
@@ -270,9 +267,9 @@ export function ShareRunConfigDialog({
             <div className="flex min-h-9 items-center justify-between gap-4">
               {isTauri ? (
                 <>
-                  <span className="text-ui-13 font-medium">Open in</span>
+                  <span className="text-ui-13 font-medium">{translate("uxModelpicker.openInv581u")}</span>
                   <span className="text-ui-13 text-muted-foreground">
-                    Desktop
+                    {translate("uxModelpicker.desktoprs698")}
                   </span>
                 </>
               ) : (
@@ -280,9 +277,7 @@ export function ShareRunConfigDialog({
                   <label
                     htmlFor={`${id}-destination`}
                     className="text-ui-13 font-medium"
-                  >
-                    Open in
-                  </label>
+                  >{translate("uxModelpicker.openInv581u")}</label>
                   <Select value={destination} onValueChange={setDestination}>
                     <SelectTrigger id={`${id}-destination`} className="w-32">
                       <SelectValue />
@@ -303,10 +298,10 @@ export function ShareRunConfigDialog({
               }
             >
               {destination !== "browser"
-                ? "The recipient needs LAiM Desktop installed."
+                ? translate("uxModelpicker.theRecipientNeedsLAiM1r6g6")
                 : remoteAddress
                   ? "This link contains this Studio's network address. Anyone with it and your password can sign in and control this computer. Share it only with people who should use this Studio; otherwise share a Desktop link."
-                  : "This link contains your LAiM Web address. Recipients need access to that address. A localhost address opens LAiM Web on their own computer."}
+                  : translate("uxModelpicker.thisLinkContainsYour7c280")}
             </p>
           </div>
           <div className="space-y-1.5">
@@ -315,7 +310,7 @@ export function ShareRunConfigDialog({
                 htmlFor={`${id}-link`}
                 className="flex h-9 min-w-0 flex-1 cursor-text items-center rounded-full border border-border bg-background px-3.5 transition-colors focus-within:border-ring dark:border-transparent dark:bg-[rgb(249_226_222_/_calc(0.06*var(--contrast-wash-gain,1)))] dark:focus-within:bg-[rgb(249_226_222_/_calc(0.12*var(--contrast-wash-gain,1)))]"
               >
-                <span className="sr-only">Shareable link</span>
+                <span className="sr-only">{translate("uxModelpicker.shareableLink95puu")}</span>
                 <Textarea
                   id={`${id}-link`}
                   readOnly={true}
@@ -337,19 +332,17 @@ export function ShareRunConfigDialog({
                   setCopying(true);
                   try {
                     if (await copyToClipboard(link)) {
-                      toast.success("Run settings link copied");
+                      toast.success(translate("uxModelpicker.runSettingsLinkCopied5knqu"));
                     } else {
                       toast.error(
-                        "Could not copy the link. Select and copy it from the link field.",
+                        translate("uxModelpicker.couldNotCopyThe1diuz"),
                       );
                     }
                   } finally {
                     setCopying(false);
                   }
                 }}
-              >
-                Copy link
-              </Button>
+              >{translate("uxModelpicker.copyLinkyp4fl")}</Button>
             </div>
             {error && (
               <p role="alert" className="text-ui-12 text-destructive">
@@ -358,15 +351,10 @@ export function ShareRunConfigDialog({
             )}
             {destination === "desktop" &&
               link.length > DESKTOP_RUN_CONFIG_URL_WARNING_LENGTH && (
-                <output className="block text-ui-12 text-amber-700 dark:text-amber-300">
-                  Long Desktop links may not open on Windows. Include fewer
-                  settings{!isTauri && " or open in Web"}.
-                </output>
+                <output className="block text-ui-12 text-amber-700 dark:text-amber-300">{translate("uxModelpicker.longDesktopLinksMayp1ky4", { p1: !isTauri && " or open in Web" })}</output>
               )}
             <p className="text-ui-12 leading-snug text-muted-foreground">
-              Anyone with the link can read the included settings. Custom text,
-              template code and file, network or tool arguments cannot be
-              shared.
+              {translate("uxCopy.anyoneWithTheLink2xgm6")}
             </p>
           </div>
         </div>

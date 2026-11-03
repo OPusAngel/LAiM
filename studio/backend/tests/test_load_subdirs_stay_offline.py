@@ -20,8 +20,8 @@ import pytest
 from hub.utils.hf_cache_state import with_load_subdirs
 
 
-_BICODEC = "LAiM/Spark-TTS-0.5B"
-_PLAIN = "LAiM/Llama-3.2-1B-Instruct"
+_BICODEC = "unsloth/Spark-TTS-0.5B"
+_PLAIN = "unsloth/Llama-3.2-1B-Instruct"
 
 
 @pytest.fixture

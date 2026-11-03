@@ -5,7 +5,7 @@
 """Cross-platform whisper.cpp (whisper-server) prebuilt installer for LAiM Studio.
 
 Downloads a per-platform whisper.cpp bundle published by the LAiM fork
-(``LAiMai/whisper.cpp``) into an isolated ``<LAiM_HOME>/whisper.cpp``,
+(``unslothai/whisper.cpp``) into an isolated ``<LAiM_HOME>/whisper.cpp``,
 never a system whisper.cpp. The canonical install target matches the
 sidecar/build-script contract in ``stt_ggml_sidecar.py``:
 
@@ -138,7 +138,7 @@ COMPONENT = "whisper.cpp"
 SCHEMA_VERSION = 1
 USER_AGENT = "LAiM-studio-whisper-prebuilt"
 
-DEFAULT_PUBLISHED_REPO = "LAiMai/whisper.cpp"
+DEFAULT_PUBLISHED_REPO = "unslothai/whisper.cpp"
 # Release assets published by the fork's prebuilt CI.
 MANIFEST_ASSET_NAME = "whisper-prebuilt-manifest.json"
 SHA256_ASSET_NAME = "whisper-prebuilt-sha256.json"

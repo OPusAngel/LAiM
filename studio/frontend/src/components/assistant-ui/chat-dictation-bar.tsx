@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Spinner } from "@/components/ui/spinner";
 import {
   cancelActiveStudioDictation,
@@ -222,7 +223,7 @@ export const ChatDictationBar: FC<{
       // order-2 places the bar in the input's slot after the left "+" tools.
       // No row gap: the wave padding and the timer margin set the spacing.
       className="LAiM-dictation-bar order-2 m-0 flex min-w-0 flex-1 items-center gap-0 border-0 p-0"
-      aria-label="Voice recording"
+      aria-label={translate("uxComponents.voiceRecording1cru4")}
     >
       <div
         ref={rowRef}
@@ -269,7 +270,7 @@ export const ChatDictationBar: FC<{
         <TooltipIconButton
           type="button"
           tooltip={transcribing === "send" ? "Transcribing…" : "Send message"}
-          aria-label="Send message"
+          aria-label={translate("promptQueue.sendLabel")}
           variant="default"
           onClick={send}
           disabled={transcribing !== null || sendDisabled}

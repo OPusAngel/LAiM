@@ -85,12 +85,11 @@ def test_code_interpreter_prefix_maps_to_workdir(workdir, path):
     assert view_image("/mnt/data/../../etc/passwd", str(workdir)).startswith("Error:")
 
 
-@pytest.mark.parametrize("bypass", [False, True])
-def test_cannot_read_outside_even_with_full_access(workdir, bypass):
+def test_cannot_read_outside_without_a_session(workdir):
     outside = workdir.parent / "outside.png"
     Image.new("RGB", (10, 10)).save(outside)
     for path in (str(outside), "../outside.png"):
-        result = tools.execute_tool("view_image", {"path": path}, disable_sandbox = bypass)
+        result = tools.execute_tool("view_image", {"path": path})
         assert result.startswith("Error:")
         assert not split_images(result)[1]
 

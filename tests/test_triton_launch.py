@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # Copyright 2023-present Daniel Han-Chen & the LAiM team. All rights reserved.
 
-"""LAiM/kernels/triton_launch.py launches a cached compiled Triton kernel directly. It must give
+"""unsloth/kernels/triton_launch.py launches a cached compiled Triton kernel directly. It must give
 the same result as Triton's own launch for every specialization (alignment, integers equal to 1 or
 divisible by 16), launch on the current stream, and step aside when a launch hook is registered."""
 

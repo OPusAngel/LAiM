@@ -4,14 +4,14 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { readSrc } from "./helpers/kit.ts";
+import { readSrc, readSrcExpanded } from "./helpers/kit.ts";
 
-const host = readSrc("features/audio/audio-page.tsx");
-const slot = readSrc("features/audio/hooks/use-audio-model-slot.ts");
-const handoff = readSrc("features/audio/hooks/use-audio-handoff.ts");
-const generation = readSrc("features/audio/hooks/use-speech-generation.ts");
-const gallery = readSrc("features/audio/hooks/use-audio-gallery.tsx");
-const tour = readSrc("features/audio/tour/steps.tsx");
+const host = readSrcExpanded("features/audio/audio-page.tsx");
+const slot = readSrcExpanded("features/audio/hooks/use-audio-model-slot.ts");
+const handoff = readSrcExpanded("features/audio/hooks/use-audio-handoff.ts");
+const generation = readSrcExpanded("features/audio/hooks/use-speech-generation.ts");
+const gallery = readSrcExpanded("features/audio/hooks/use-audio-gallery.tsx");
+const tour = readSrcExpanded("features/audio/tour/steps.tsx");
 
 test("the host calls its hooks in the order their effects ran in the single page", () => {
   const order = [
@@ -133,13 +133,13 @@ test("each page tours its own model and settings", () => {
 
 test("the rail heading switches pages from a menu of every workflow", () => {
   // A tab row of 5-7 pages truncated every label in the default rail; the title menu lists them all.
-  const host = readSrc("features/audio/audio-page.tsx");
+  const host = readSrcExpanded("features/audio/audio-page.tsx");
   assert.doesNotMatch(host, /ariaLabel="Audio workflow"/);
   assert.match(
     host,
     /<WorkflowTitleMenu\s+workflow=\{pageWorkflow\}\s+onSelect=\{transitionWorkflow\}/,
   );
-  const menu = readSrc("features/audio/components/workflow-title-menu.tsx");
+  const menu = readSrcExpanded("features/audio/components/workflow-title-menu.tsx");
   assert.match(menu, /data-tour="audio-mode"/);
   assert.match(menu, /AUDIO_WORKFLOWS\.map\(\(tab\) =>/);
   assert.match(menu, /\{tab\.hint\}/);
@@ -148,8 +148,8 @@ test("the rail heading switches pages from a menu of every workflow", () => {
 });
 
 test("results show as a clip card with a waveform, never autoplaying", () => {
-  const output = readSrc("features/audio/pages/tts-workspace.tsx");
-  const card = readSrc("features/audio/components/clip-card.tsx");
+  const output = readSrcExpanded("features/audio/pages/tts-workspace.tsx");
+  const card = readSrcExpanded("features/audio/components/clip-card.tsx");
   assert.doesNotMatch(output, /<audio\b/);
   assert.doesNotMatch(output + card, /autoPlay/);
   assert.match(output, /<ClipCard\s+\/\/[^\n]*\n\s*key=\{selectedClip\.id\}/);
@@ -167,7 +167,7 @@ test("results show as a clip card with a waveform, never autoplaying", () => {
 });
 
 test("Send to lists Audio pages from the shared workflow list", () => {
-  const card = readSrc("features/audio/components/clip-card.tsx");
+  const card = readSrcExpanded("features/audio/components/clip-card.tsx");
   // send-targets decides eligibility while the menu preserves page order
   assert.match(card, /AUDIO_WORKFLOWS\.filter\(\(tab\) => handlers\[tab\.id\]\)/);
   assert.match(

@@ -6,7 +6,7 @@
 
 Covers the high-risk classifier in tools.py and the loop-level behavior of
 run_safetensors_tool_loop: in "auto" mode only calls detected as high risk
-pause for confirmation, in "full" mode nothing pauses and the sandbox is
+pause for confirmation, in "full" mode nothing pauses and the workdir is
 dropped, and an unset mode normalizes to the "auto" default for the loop gate
 (an unknown mode falls back to "ask").
 """
@@ -141,12 +141,12 @@ def _clear_pending():
         ("cat ~/.aws/credentials", True),  # credential path
         ("cat /home/a/.azure/msal_token_cache.json", True),  # azure token store
         ("cat ~/.config/gh/hosts.yml", True),  # gh cli credentials
-        # A plain `~` IS the sandbox: both env builders set the child's HOME to the tool workdir.
+        # A plain `~` IS the workdir: both env builders set the child's HOME to the tool workdir.
         ("cat ~/.config/app/settings.json", False),
         ("cat /home/alice/.cache/huggingface/token", True),  # HF login token
         ("cat ~/.cache/huggingface/stored_tokens", True),  # HF multi-token store
         ("cat /home/alice/.huggingface/token", True),  # legacy HF token location
-        # Not the HF token store, so no credential match -- but another user's home is outside the sandbox, so the
+        # Not the HF token store, so no credential match -- but another user's home is outside the workdir, so the
         # read gate asks anyway.
         ("cat /home/alice/myhuggingface/token", True),
         (
@@ -196,7 +196,7 @@ def _clear_pending():
         ("grep -R TOKEN /home", True),  # recursive search escapes the workdir
         ("rg TOKEN /", True),
         ("fd pattern /etc", True),
-        ("grep -r foo src/", False),  # sandbox-relative search stays safe
+        ("grep -r foo src/", False),  # workdir-relative search stays safe
         ("rg TOKEN .", False),
         ("tree /home", True),  # always-recursive walker escapes onto host files
         ("du /", True),  # disk-usage walk of the whole host root
@@ -204,12 +204,12 @@ def _clear_pending():
         ("ls -R /home", True),  # ls recurses with -R onto host files
         ("ls -R /etc", True),
         ("ls -laR /", True),  # -R inside a short cluster still recurses
-        ("tree .", False),  # cwd walk stays in the sandbox
+        ("tree .", False),  # cwd walk stays in the workdir
         ("tree ./project", False),  # relative walk stays safe
         ("du -sh", False),  # du with no path defaults to cwd
         ("du -sh ./build", False),  # relative disk-usage stays safe
         ("ls -R subdir", False),  # relative recursive listing stays safe
-        ("ls -la /home", True),  # one level, but it is the host's home tree, not the sandbox
+        ("ls -la /home", True),  # one level, but it is the host's home tree, not the workdir
         ("sort --files0-from=list.txt", True),  # reads an indirect file list
         ("sort --files0-from list.txt", True),  # separate-value form
         ("sort -u data.txt", False),  # ordinary sort stays read only
@@ -234,7 +234,7 @@ def _clear_pending():
         (
             "ls /home/*/projects",
             True,
-        ),  # no credential dir, but an absolute listing outside the sandbox
+        ),  # no credential dir, but an absolute listing outside the workdir
         ("grep -R TOKEN ~root", True),  # tilde-user recursive root escapes
         ("grep -R TOKEN ~/logs", True),  # tilde-home recursive root escapes
         ("cat /etc/pass{w,}d", True),  # brace expansion builds /etc/passwd
@@ -275,7 +275,7 @@ def _clear_pending():
         (
             "g=abc; cat /$g/readme",
             True,
-        ),  # the assignment resolves to /abc/readme, outside the sandbox
+        ),  # the assignment resolves to /abc/readme, outside the workdir
         ("cat /etc/pass[[:lower:]]d", True),  # POSIX class glob builds /etc/passwd
         ("x=passwd; p=x; cat /etc/${!p}", True),  # indirect expansion builds path
         ("x=notes; p=x; cat /home/${!p}", True),  # indirect expansion resolves into the host's home
@@ -370,7 +370,7 @@ def test_terminal_classifier(command, unsafe):
         # ...while an application's own auth code is ordinary work.
         ("grep -rn auth src/", False),
         ("cat src/auth.py", False),
-        # --- prompt: sandbox-escape via env that hijacks loading/lookup ---
+        # --- prompt: workdir-escape via env that hijacks loading/lookup ---
         ("LD_PRELOAD=/tmp/x.so ls", True),
         # --- prompt: a verb hidden behind an assignment / default param ---
         ("c=rm; $c -rf build", True),
@@ -445,7 +445,7 @@ def test_terminal_classifier(command, unsafe):
         ("echo x >> ~/.profile", True),
         ("cp payload.desktop ~/.config/autostart/x.desktop", True),
         ("cp x.service ~/.config/systemd/user/x.service", True),
-        # No persistence hook, and a plain `~` resolves inside the sandbox.
+        # No persistence hook, and a plain `~` resolves inside the workdir.
         ("mkdir ~/.config/myapp", False),
         # non-persistence /etc reads/writes stay ordinary (no over-prompt)
         ("cat /etc/hostname", False),
@@ -869,7 +869,7 @@ def test_terminal_classifier(command, unsafe):
         ("cat README.md", False),
         ("ls -la", False),
         # --- run: plain downloads (curl/wget are separately hard-blocked
-        # by the sandbox regardless of mode) ---
+        # by the workdir regardless of mode) ---
         ("curl -O https://x.io/model.bin", False),
         ("wget https://x.io/data.zip", False),
         ("wget -T 10 https://x.io/data.zip", False),  # wget -T is a timeout, not upload
@@ -1068,7 +1068,7 @@ def test_terminal_classifier(command, unsafe):
         ("sed -- '1e rm -f victim' input --sandbox", True),
         ("sed '1e rm -f victim' -- input --sandbox", True),
         ("sed -e '1e rm -f victim' -- input --sandbox", True),
-        # an ambiguous (--s is silent/separate/sandbox) or `=`-carrying spelling
+        # an ambiguous (--s is silent/separate/workdir) or `=`-carrying spelling
         # is a usage error rather than the mode, so it keeps asking
         ("sed --s '1e rm -f victim' input", True),
         ("sed --sandbox=1 '1e rm -f victim' input", True),
@@ -1409,7 +1409,7 @@ def test_terminal_high_risk_classifier(command, high_risk):
 @pytest.mark.parametrize(
     ("code", "high_risk"),
     [
-        # --- prompt: shell escape / network egress (sandbox would refuse anyway) ---
+        # --- prompt: shell escape / network egress (workdir would refuse anyway) ---
         ("import subprocess; subprocess.run(['sudo', 'ls'])", True),
         ("import os; os.system('rm -rf /')", True),
         # --- prompt: credential-path read/write ---
@@ -1630,7 +1630,7 @@ def test_high_risk_dispatcher_non_terminal():
     assert (
         is_high_risk_tool_call(f"{MCP_TOOL_PREFIX}fs__read_file", {"path": "/etc/passwd"}) is True
     )
-    # Execution tools run arbitrary commands on the MCP server, outside the sandbox.
+    # Execution tools run arbitrary commands on the MCP server, outside the workdir.
     assert is_high_risk_tool_call(f"{MCP_TOOL_PREFIX}sh__run_command", {"cmd": "rm -rf /"}) is True
     assert is_high_risk_tool_call(f"{MCP_TOOL_PREFIX}x__execute_script", {"script": "x"}) is True
     assert is_high_risk_tool_call(f"{MCP_TOOL_PREFIX}x__invoke_shell", {}) is True
@@ -2163,7 +2163,7 @@ def test_high_risk_dispatcher_non_terminal():
         (
             "from pathlib import Path\nPath('/tmp/a').with_name('b.txt').read_text()",
             True,
-        ),  # not a secret, but /tmp is outside the sandbox (which has its own TMPDIR)
+        ),  # not a secret, but /tmp is outside the workdir (which has its own TMPDIR)
         (
             "from pathlib import Path\nPath('report.txt').with_suffix('.md').read_text()",
             False,
@@ -2173,17 +2173,17 @@ def test_high_risk_dispatcher_non_terminal():
         ("d, f = ('/etc', 'passwd')\nopen('/'.join([d, f])).read()", True),
         # destructured literals reused through str.join
         ("base, leaf = ('/tmp', 'x')\nopen(base + '/' + leaf).read()", True),
-        # destructured literals fold to /tmp/x: no secret, but outside the sandbox's own TMPDIR
+        # destructured literals fold to /tmp/x: no secret, but outside the workdir's own TMPDIR
         ("open(b'/etc/passwd').read()", True),  # bytes path literal
         ("open(b'data.txt').read()", False),  # benign bytes literal stays safe
         (
             "from pathlib import Path\n(Path.cwd().parent / 'other' / 'notes').read_text()",
             True,
-        ),  # pathlib parent escapes the sandbox
+        ),  # pathlib parent escapes the workdir
         (
             "from pathlib import Path\n(Path('data') / 'notes').read_text()",
             False,
-        ),  # in-sandbox pathlib read stays safe
+        ),  # in-workdir pathlib read stays safe
         ("import glob\nopen(glob.glob('/e??/passwd')[0]).read()", True),  # python glob to secret
         ("import glob\nfor f in glob.glob('*.py'):\n    print(f)", False),  # benign glob stays safe
         (
@@ -2725,7 +2725,6 @@ _DEFAULT_TOOLS = [
 class _FakeExecuteTool:
     def __init__(self):
         self.calls = []
-        self.disable_sandbox_seen = []
 
     def __call__(
         self,
@@ -2737,10 +2736,8 @@ class _FakeExecuteTool:
         session_id = None,
         thread_id = None,
         rag_scope = None,
-        disable_sandbox = False,
     ):
         self.calls.append((name, arguments))
-        self.disable_sandbox_seen.append(disable_sandbox)
         return f"RESULT[{name}]"
 
 
@@ -2792,7 +2789,7 @@ def _diag(events, exec_fn):
     assertions so a full-suite-only failure on CI (which does not reproduce when
     the file runs alone) reports the real event stream instead of a bare diff."""
     return (
-        f"calls={exec_fn.calls} sandbox_seen={exec_fn.disable_sandbox_seen} "
+        f"calls={exec_fn.calls} "
         f"events={[(e.get('type'), e.get('awaiting_confirmation'), e.get('tool_name')) for e in events]}"
     )
 
@@ -2808,9 +2805,6 @@ def test_auto_mode_does_not_gate_safe_calls():
     assert starts and starts[0]["awaiting_confirmation"] is False, _diag(events, exec_fn)
     assert starts[0]["approval_id"] == ""
     assert exec_fn.calls == [("python", {"code": "print(1)"})], _diag(events, exec_fn)
-    assert exec_fn.disable_sandbox_seen == [False], _diag(
-        events, exec_fn
-    )  # sandbox stays on in auto
 
 
 def test_auto_mode_gates_high_risk_calls():
@@ -2826,7 +2820,6 @@ def test_auto_mode_gates_high_risk_calls():
     assert starts and starts[0]["awaiting_confirmation"] is True, _diag(events, exec_fn)
     assert starts[0]["approval_id"]
     assert len(exec_fn.calls) == 1, _diag(events, exec_fn)
-    assert exec_fn.disable_sandbox_seen == [False], _diag(events, exec_fn)
 
 
 class _ApprovalRecordingExecuteTool(_FakeExecuteTool):
@@ -2843,7 +2836,7 @@ class _ApprovalRecordingExecuteTool(_FakeExecuteTool):
         **kwargs,
     ):
         self.approved_seen.append(host_access_approved)
-        return super().__call__(name, arguments, disable_sandbox = kwargs.get("disable_sandbox"))
+        return super().__call__(name, arguments, **kwargs)
 
 
 @pytest.mark.parametrize(
@@ -2886,7 +2879,6 @@ def test_auto_mode_does_not_gate_ordinary_mutation():
     assert starts and starts[0]["awaiting_confirmation"] is False, _diag(events, exec_fn)
     assert starts[0]["approval_id"] == ""
     assert len(exec_fn.calls) == 1, _diag(events, exec_fn)
-    assert exec_fn.disable_sandbox_seen == [False], _diag(events, exec_fn)
 
 
 def test_ask_mode_gates_even_safe_calls():
@@ -2933,10 +2925,7 @@ def test_unset_mode_behaves_as_auto():
     assert starts and starts[0]["awaiting_confirmation"] is False
 
 
-def test_off_mode_never_gates_under_os_isolation_and_keeps_sandbox():
-    from core.inference import os_sandbox
-
-    os_sandbox.note_tool_isolation("python", True, backend = "bubblewrap")
+def test_off_mode_never_gates():
     events, exec_fn = _drive(
         [_tool_call("python", '{"code": "import os; os.remove(\\"x\\")"}'), "final"],
         [],
@@ -2946,13 +2935,9 @@ def test_off_mode_never_gates_under_os_isolation_and_keeps_sandbox():
     starts = _tool_starts(events)
     assert starts and starts[0]["awaiting_confirmation"] is False, _diag(events, exec_fn)
     assert starts[0]["approval_id"] == ""
-    assert exec_fn.disable_sandbox_seen == [False], _diag(events, exec_fn)
 
 
-def test_off_mode_asks_for_a_risky_call_without_os_isolation():
-    from core.inference import os_sandbox
-
-    os_sandbox.note_tool_isolation("python", False, backend = "none")
+def test_off_mode_asks_for_a_risky_call():
     events, exec_fn = _drive(
         [_tool_call("python", '{"code": "import os; os.remove(\\"x\\")"}'), "final"],
         ["allow"],
@@ -2961,7 +2946,6 @@ def test_off_mode_asks_for_a_risky_call_without_os_isolation():
     )
     starts = _tool_starts(events)
     assert starts and starts[0]["awaiting_confirmation"] is True, _diag(events, exec_fn)
-    assert exec_fn.disable_sandbox_seen == [False], _diag(events, exec_fn)
 
 
 def test_off_mode_without_an_armed_gate_never_asks():
@@ -2975,7 +2959,7 @@ def test_off_mode_without_an_armed_gate_never_asks():
     assert starts and starts[0]["awaiting_confirmation"] is False, _diag(events, exec_fn)
 
 
-def test_full_mode_never_gates_and_drops_sandbox():
+def test_full_mode_never_gates():
     events, exec_fn = _drive(
         [_tool_call("python", '{"code": "import os; os.remove(\\"x\\")"}'), "final"],
         [],
@@ -2984,7 +2968,6 @@ def test_full_mode_never_gates_and_drops_sandbox():
     )
     starts = _tool_starts(events)
     assert starts and starts[0]["awaiting_confirmation"] is False, _diag(events, exec_fn)
-    assert exec_fn.disable_sandbox_seen == [True], _diag(events, exec_fn)
 
 
 def test_bypass_flag_implies_full_mode():
@@ -2997,7 +2980,6 @@ def test_bypass_flag_implies_full_mode():
     )
     starts = _tool_starts(events)
     assert starts and starts[0]["awaiting_confirmation"] is False, _diag(events, exec_fn)
-    assert exec_fn.disable_sandbox_seen == [True], _diag(events, exec_fn)
 
 
 def test_bypass_permissions_folds_to_full_on_request_models():
@@ -3449,21 +3431,21 @@ def test_a_separator_never_changes_what_an_mcp_name_classifies_as(dotted, unders
     assert is_potentially_unsafe_tool_call(alias, {}) is is_potentially_unsafe_tool_call(plain, {})
 
 
-# The reported sandbox escape (HF discussion #107, Desktop v0.1.808-beta): the session sandbox directory is a working
+# The reported workdir escape (HF discussion #107, Desktop v0.1.808-beta): the session workdir directory is a working
 # directory, not an OS boundary, so an ABSOLUTE path in a tool call reaches the user's real filesystem with their own
 # permissions. Deletion already prompted; reading and overwriting did not. These are the reporter's own operations,
 # plus the ones that reach the same files by another route.
 _OUTSIDE_DIR = "/media/kuser/MEDIA_SSD/MyProjects/local_ai_project_ternary"
 _OUTSIDE_FILE = _OUTSIDE_DIR + "/memory.md"
 
-_OUTSIDE_SANDBOX_TERMINAL = (
+_OUTSIDE_WORKDIR_TERMINAL = (
     f"cat {_OUTSIDE_FILE}",  # the read half of the report: no credential match, but the host's own data
     f"head -c 200 {_OUTSIDE_FILE}",
     f"tail -n 5 {_OUTSIDE_FILE}",
     f"wc -l {_OUTSIDE_FILE}",
     f"stat {_OUTSIDE_FILE}",
     f"ls -la {_OUTSIDE_DIR}",
-    f"cp {_OUTSIDE_FILE} ./stolen.md",  # exfiltration INTO the sandbox
+    f"cp {_OUTSIDE_FILE} ./stolen.md",  # exfiltration INTO the workdir
     f"cp ./payload.md {_OUTSIDE_FILE}",  # ... and the reverse, which overwrites
     f"mv {_OUTSIDE_FILE} {_OUTSIDE_FILE}.bak",
     f"sed -i 's/a/b/' {_OUTSIDE_FILE}",  # in-place rewrite of a host file
@@ -3473,11 +3455,11 @@ _OUTSIDE_SANDBOX_TERMINAL = (
     f"touch {_OUTSIDE_DIR}/new_file",
     f"mkdir {_OUTSIDE_DIR}/new_dir",
     "cat /home/kuser/Documents/taxes.pdf",  # another user's documents
-    "wc -l ~alice/notes.txt",  # a named account is the real home, not the sandbox
+    "wc -l ~alice/notes.txt",  # a named account is the real home, not the workdir
     "ls -la /home",
 )
 
-_OUTSIDE_SANDBOX_PYTHON = (
+_OUTSIDE_WORKDIR_PYTHON = (
     f"print(open({_OUTSIDE_FILE!r}).read())",  # the exact bypass the report used, read side
     f"open({_OUTSIDE_FILE!r}, 'w').write('clobbered')",  # overwrite, which used to run unprompted
     f"open({_OUTSIDE_FILE!r}, 'a').write('more')",
@@ -3501,7 +3483,7 @@ _OUTSIDE_SANDBOX_PYTHON = (
 )
 
 # The same shape of call, but pointed somewhere a tool reads all the time. These must NOT start prompting, or auto
-# mode becomes unusable and users turn the sandbox off -- which is what the reporter was advised to do.
+# mode becomes unusable and users turn the workdir off -- which is what the reporter was advised to do.
 _ALLOWLISTED_TERMINAL = (
     "cat /proc/cpuinfo",
     "cat /etc/os-release",
@@ -3576,9 +3558,9 @@ _ALLOWLISTED_PYTHON = (
 )
 
 
-# Routes that reach an out-of-sandbox path WITHOUT naming it in an operand position. Each of these ran silently
+# Routes that reach an out-of-workdir path WITHOUT naming it in an operand position. Each of these ran silently
 # before the operand scan learned about them.
-_OUTSIDE_SANDBOX_INDIRECT_TERMINAL = (
+_OUTSIDE_WORKDIR_INDIRECT_TERMINAL = (
     # Running a path-qualified binary READS that file before anything else it does.
     "/media/alice/tool --flag",
     # The interpreter payload writes through a RELATIVE path, under the directory the `cd` set.
@@ -3640,7 +3622,7 @@ _OUTSIDE_SANDBOX_INDIRECT_TERMINAL = (
     # discarded whole rather than exposing its value.
     f"curl --config={_OUTSIDE_FILE} https://example.com",
     # `jq --help`: `-L directory` searches modules there, so the filter includes a file from
-    # outside the sandbox without ever naming it.
+    # outside the workdir without ever naming it.
     f"jq -n -L {_OUTSIDE_DIR} 'include \"report\"; rows'",
     f"jq --library-path {_OUTSIDE_DIR} '.a' data.json",
     # Windows spellings a POSIX lexer destroys or a drive-letter pattern misses: root-relative on
@@ -3658,7 +3640,7 @@ _OUTSIDE_SANDBOX_INDIRECT_TERMINAL = (
     # `help test`: the unary expressions examine the status of a file.
     f"test -e {_OUTSIDE_FILE}",
     f"[ -r {_OUTSIDE_FILE} ]",
-    # `ln` hands the sandbox a name that WRITES to its target, so a relative write through the link
+    # `ln` hands the workdir a name that WRITES to its target, so a relative write through the link
     # lands outside afterwards.
     f"ln -s {_OUTSIDE_FILE} local.md",
     f"ln {_OUTSIDE_FILE} local.md",
@@ -3789,7 +3771,7 @@ _OUTSIDE_SANDBOX_INDIRECT_TERMINAL = (
     "wget --directory-prefix=/media/kuser/MEDIA_SSD/private https://example.com/payload",
 )
 
-_OUTSIDE_SANDBOX_INDIRECT_PYTHON = (
+_OUTSIDE_WORKDIR_INDIRECT_PYTHON = (
     # The filesystem root is silent for a LISTING, not for a walk that descends the whole host.
     "import os\nfor r, d, f in os.walk('/'):\n    print(f)",
     # `tempfile` creators write into `dir` when it is given.
@@ -3849,7 +3831,7 @@ _OUTSIDE_SANDBOX_INDIRECT_PYTHON = (
     f"from PIL import Image\nprint(Image.open(fp = {_OUTSIDE_FILE!r}).size)",
     # `executable` is what LAUNCHES; argv[0] is only the name the child sees.
     f"import subprocess\nsubprocess.run(['echo'], executable = {_OUTSIDE_FILE!r})",
-    # The call itself creates the escape: a name in the sandbox that writes to the target.
+    # The call itself creates the escape: a name in the workdir that writes to the target.
     f"import os\nos.symlink({_OUTSIDE_DIR!r}, 'local')",
     f"import os\nos.link({_OUTSIDE_FILE!r}, 'local')",
     # The constructor opens the workbook; the later `parse` never names it again.
@@ -3869,7 +3851,7 @@ _OUTSIDE_SANDBOX_INDIRECT_PYTHON = (
     f"from fileinput import FileInput\nprint(FileInput({_OUTSIDE_FILE!r}))",
     # Past the candidate cap, and reached by a constant index.
     f"paths = ['/usr/a', '/usr/b', '/usr/c', '/usr/d', '/usr/e', '/usr/f', '/usr/g', '/usr/h', {_OUTSIDE_FILE!r}]\nopen(paths[8]).read()",
-    # Existence, size, ownership and timestamps of a path outside the sandbox.
+    # Existence, size, ownership and timestamps of a path outside the workdir.
     f"import os\nprint(os.stat({_OUTSIDE_FILE!r}))",
     f"import os\nprint(os.lstat({_OUTSIDE_FILE!r}))",
     f"import pathlib\nprint(pathlib.Path({_OUTSIDE_FILE!r}).stat())",
@@ -4217,33 +4199,33 @@ _INDIRECT_BENIGN_PYTHON = (
 )
 
 
-@pytest.mark.parametrize("command", _OUTSIDE_SANDBOX_INDIRECT_TERMINAL)
-def test_auto_mode_prompts_on_indirect_out_of_sandbox_terminal(command):
+@pytest.mark.parametrize("command", _OUTSIDE_WORKDIR_INDIRECT_TERMINAL)
+def test_auto_mode_prompts_on_indirect_out_of_workdir_terminal(command):
     assert is_high_risk_tool_call("terminal", {"command": command}) is True
 
 
-@pytest.mark.parametrize("code", _OUTSIDE_SANDBOX_INDIRECT_PYTHON)
-def test_auto_mode_prompts_on_indirect_out_of_sandbox_python(code):
+@pytest.mark.parametrize("code", _OUTSIDE_WORKDIR_INDIRECT_PYTHON)
+def test_auto_mode_prompts_on_indirect_out_of_workdir_python(code):
     assert is_high_risk_tool_call("python", {"code": code}) is True
 
 
 @pytest.mark.parametrize("command", _INDIRECT_BENIGN_TERMINAL)
-def test_indirect_forms_stay_silent_inside_the_sandbox_terminal(command):
+def test_indirect_forms_stay_silent_inside_the_workdir_terminal(command):
     assert is_high_risk_tool_call("terminal", {"command": command}) is False
 
 
 @pytest.mark.parametrize("code", _INDIRECT_BENIGN_PYTHON)
-def test_indirect_forms_stay_silent_inside_the_sandbox_python(code):
+def test_indirect_forms_stay_silent_inside_the_workdir_python(code):
     assert is_high_risk_tool_call("python", {"code": code}) is False
 
 
-@pytest.mark.parametrize("command", _OUTSIDE_SANDBOX_TERMINAL)
-def test_auto_mode_prompts_on_out_of_sandbox_terminal_paths(command):
+@pytest.mark.parametrize("command", _OUTSIDE_WORKDIR_TERMINAL)
+def test_auto_mode_prompts_on_out_of_workdir_terminal_paths(command):
     assert is_high_risk_tool_call("terminal", {"command": command}) is True
 
 
-@pytest.mark.parametrize("code", _OUTSIDE_SANDBOX_PYTHON)
-def test_auto_mode_prompts_on_out_of_sandbox_python_paths(code):
+@pytest.mark.parametrize("code", _OUTSIDE_WORKDIR_PYTHON)
+def test_auto_mode_prompts_on_out_of_workdir_python_paths(code):
     assert is_high_risk_tool_call("python", {"code": code}) is True
 
 
@@ -4258,7 +4240,7 @@ def test_auto_mode_stays_silent_inside_allowlisted_roots_python(code):
 
 
 def test_configured_cache_reads_stay_silent():
-    """A read under THIS install's own sandbox / model cache is ordinary work, unlike the same path
+    """A read under THIS install's own workdir / model cache is ordinary work, unlike the same path
     shape under someone else's home."""
     from core.inference import tool_path_approval as path_gate
 
@@ -4286,7 +4268,7 @@ def test_credential_paths_outrank_the_allowlist():
 
 def test_relative_paths_never_prompt():
     """Relative paths resolve inside the per-session workdir, which is the whole reason ordinary
-    in-sandbox work stays silent."""
+    in-workdir work stays silent."""
     from core.inference import tool_path_approval as path_gate
     for path in ("out.txt", "./data/train.csv", "build/artifacts/model.gguf", "-", ""):
         assert path_gate._path_needs_approval(path, writing = True) is False, path
@@ -4315,7 +4297,7 @@ def test_parent_escape_sentinel_asks():
 
 
 # Every payload below reached a host path with no approval prompt in the first cut of the
-# out-of-sandbox gate, and was found by reviewing it. They are kept as regressions because each one
+# out-of-workdir gate, and was found by reviewing it. They are kept as regressions because each one
 # is a DIFFERENT way of losing the path or its access mode, not a variation on one mistake.
 _REVIEWED_BYPASS_PYTHON = (
     # The write mode was re-derived from a table that does not list `open`, so keyword writes were
@@ -4345,7 +4327,7 @@ _REVIEWED_BYPASS_PYTHON = (
     'import joblib\njoblib.dump(data, "/media/kuser/data.joblib")',
     # As a method, the receiver is the source being moved away.
     'from pathlib import Path\nPath("/media/x/memory.md").rename("stolen.md")',
-    # A single leading backslash is root-relative on Windows, not sandbox-relative.
+    # A single leading backslash is root-relative on Windows, not workdir-relative.
     'open(r"\\Users\\alice\\report.txt").read()',
     # .parent walking out of its root is an escape marker, not an unresolved path.
     'from pathlib import Path\np = Path("/media/x/sub/file").parent\nopen(p / "memory.md").read()',
@@ -4439,7 +4421,7 @@ def test_reviewed_false_positives_stay_silent(code):
 
 
 def test_high_risk_implies_potentially_unsafe():
-    """The stricter gate must stay a superset of the looser one. Gating the out-of-sandbox check on
+    """The stricter gate must stay a superset of the looser one. Gating the out-of-workdir check on
     a leading / or ~ broke that: every Windows spelling skipped the stricter classifier."""
     for command in (*_REVIEWED_BYPASS_TERMINAL, "cat 'C:\\Users\\alice\\notes.txt'"):
         if is_high_risk_tool_call("terminal", {"command": command}):
@@ -4467,7 +4449,7 @@ def test_credentials_inside_a_silent_root_still_ask():
 
 def test_studio_own_state_is_never_silent():
     """The studio home holds studio.db (chat history, provider and MCP configuration) and auth/
-    next to the sandbox. Several root producers fall back to that directory when their own
+    next to the workdir. Several root producers fall back to that directory when their own
     subdirectory is unset, and one such fallback would grant a tool everything Studio owns."""
     from core.inference import tool_path_approval as path_gate
     from utils.paths.storage_roots import studio_root
@@ -4479,7 +4461,7 @@ def test_studio_own_state_is_never_silent():
     assert is_high_risk_tool_call("terminal", {"command": f"cat {home}/studio.db"}) is True
     assert is_high_risk_tool_call("terminal", {"command": f"echo x > {home}/studio.db"}) is True
     # The output subdirectories under it stay silent, or ordinary tool work would prompt.
-    for path in (os.path.join(home, "sandbox", "out.txt"), os.path.join(home, "cache", "m.bin")):
+    for path in (os.path.join(home, "workdir", "out.txt"), os.path.join(home, "cache", "m.bin")):
         assert path_gate._path_needs_approval(path, writing = True) is False, path
 
 

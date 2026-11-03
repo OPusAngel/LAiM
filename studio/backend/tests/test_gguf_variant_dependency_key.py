@@ -13,7 +13,7 @@ the companion set moves and stay put when it does not.
 from hub.services.models.gguf_variants import _variant_dependency_key
 
 
-KLEIN_REPO = "LAiM/FLUX.2-klein-GGUF"
+KLEIN_REPO = "unsloth/FLUX.2-klein-GGUF"
 
 
 def test_klein_4b_and_9b_in_one_repo_get_different_keys():
@@ -70,7 +70,7 @@ def test_a_text_model_has_no_key():
     the client treats an unkeyed listing as one group, which is the old behavior."""
     assert (
         _variant_dependency_key(
-            "LAiM/Llama-3.2-1B-Instruct-GGUF", "Llama-3.2-1B-Instruct-Q4_K_M.gguf"
+            "unsloth/Llama-3.2-1B-Instruct-GGUF", "Llama-3.2-1B-Instruct-Q4_K_M.gguf"
         )
         is None
     )

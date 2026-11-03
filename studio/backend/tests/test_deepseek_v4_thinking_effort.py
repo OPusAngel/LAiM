@@ -89,7 +89,7 @@ def test_deepseek_v4_surfaces_high_as_plain_tier():
     """Sole 'max' escalation expands to ['high', 'max'] so None/High/Max show."""
     from core.inference.llama_cpp import detect_reasoning_flags
 
-    flags = detect_reasoning_flags(DEEPSEEK_V4_TEMPLATE, "LAiM/DeepSeek-V4-Flash")
+    flags = detect_reasoning_flags(DEEPSEEK_V4_TEMPLATE, "unsloth/DeepSeek-V4-Flash")
     assert flags["supports_reasoning"] is True
     assert flags["reasoning_style"] == "enable_thinking_effort"
     assert flags["reasoning_effort_levels"] == ["high", "max"]
@@ -108,7 +108,7 @@ def test_glm_style_two_level_template_unchanged():
     """A template that already names a sub-'max' tier is left as-is."""
     from core.inference.llama_cpp import detect_reasoning_flags
 
-    flags = detect_reasoning_flags(GLM_STYLE_TEMPLATE, "LAiM/GLM-5.2")
+    flags = detect_reasoning_flags(GLM_STYLE_TEMPLATE, "unsloth/GLM-5.2")
     assert flags["reasoning_style"] == "enable_thinking_effort"
     assert flags["reasoning_effort_levels"] == ["high", "max"]
 
@@ -147,7 +147,7 @@ def _kwargs_for(flags: dict, enable_thinking, reasoning_effort):
 
 def _flags():
     from core.inference.llama_cpp import detect_reasoning_flags
-    return detect_reasoning_flags(DEEPSEEK_V4_TEMPLATE, "LAiM/DeepSeek-V4-Flash")
+    return detect_reasoning_flags(DEEPSEEK_V4_TEMPLATE, "unsloth/DeepSeek-V4-Flash")
 
 
 def test_none_state_renders_non_thinking():

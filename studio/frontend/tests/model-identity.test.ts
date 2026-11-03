@@ -22,7 +22,7 @@ import {
 registerBundlerResolver();
 const { store, storage } = installLocalStorageFake();
 
-const REPO_KEY = 'v2:["LAiM/repo-gguf","q4_k_m"]';
+const REPO_KEY = 'v2:["unsloth/repo-gguf","q4_k_m"]';
 
 // The legacy import runs once on the first read, so it must be staged before the import.
 store.set(
@@ -31,7 +31,7 @@ store.set(
 );
 store.set(
   "LAiM_load_settings",
-  JSON.stringify({ "LAiM/Repo-GGUF::Q4_K_M": { contextLength: 8192 } }),
+  JSON.stringify({ "unsloth/Repo-GGUF::Q4_K_M": { contextLength: 8192 } }),
 );
 
 const { listPerModelConfigs, resolveInitialConfig, savePerModelConfig } =
@@ -74,7 +74,7 @@ test("publicModelId mirrors what /status reports for a path-loaded model", () =>
     publicModelId(
       "/home/u/.cache/huggingface/hub/models--LAiM--Qwen3-8B-GGUF/snapshots/abc123",
     ),
-    "LAiM/Qwen3-8B-GGUF",
+    "unsloth/Qwen3-8B-GGUF",
   );
   assert.equal(publicModelId("C:\\models\\Foo-Q4_K_M.gguf"), "Foo-Q4_K_M");
   // The selector's label for an unlisted model leans on the Windows cache path.
@@ -82,12 +82,12 @@ test("publicModelId mirrors what /status reports for a path-loaded model", () =>
     publicModelId(
       "C:\\Users\\u\\.cache\\huggingface\\hub\\models--LAiM--gemma-4-12B-it-qat-GGUF\\snapshots\\7102bdea",
     ),
-    "LAiM/gemma-4-12B-it-qat-GGUF",
+    "unsloth/gemma-4-12B-it-qat-GGUF",
   );
   assert.equal(publicModelId("~/models/Foo.gguf"), "Foo");
   assert.equal(publicModelId("/srv/models/repo/"), "repo");
   // A repo id and an already-clean name come back untouched.
-  assert.equal(publicModelId("LAiM/Qwen3-8B-GGUF"), "LAiM/Qwen3-8B-GGUF");
+  assert.equal(publicModelId("unsloth/Qwen3-8B-GGUF"), "unsloth/Qwen3-8B-GGUF");
   assert.equal(publicModelId("Qwen3-8B-Q4_K_M"), "Qwen3-8B-Q4_K_M");
   // "models--" alone is not the cache layout; only the snapshots sibling is.
   assert.equal(publicModelId("models--only--nosnapshots/blobs/x"), "x");
@@ -110,9 +110,9 @@ test("a resident path-loaded model is matched by the id /status reports", () => 
   // A repo in an inactive cache can be reconciled through its public id.
   assert.equal(
     residentModelIdMatches(
-      "LAiM/Qwen3-8B-GGUF",
+      "unsloth/Qwen3-8B-GGUF",
       "/mnt/old-cache/models--LAiM--Qwen3-8B-GGUF/snapshots/abc123",
-      "LAiM/Qwen3-8B-GGUF",
+      "unsloth/Qwen3-8B-GGUF",
     ),
     true,
   );
@@ -121,7 +121,7 @@ test("a resident path-loaded model is matched by the id /status reports", () => 
   assert.equal(
     residentModelIdMatches(
       pinnedSnapshot,
-      "LAiM/Qwen3-8B-GGUF",
+      "unsloth/Qwen3-8B-GGUF",
       "/mnt/old-cache/models--LAiM--Qwen3-8B-GGUF",
     ),
     false,
@@ -130,7 +130,7 @@ test("a resident path-loaded model is matched by the id /status reports", () => 
     residentModelIdMatches(
       pinnedSnapshot,
       pinnedSnapshot,
-      "LAiM/Qwen3-8B-GGUF",
+      "unsloth/Qwen3-8B-GGUF",
     ),
     true,
   );
@@ -154,9 +154,9 @@ test("a resident path-loaded model is matched by the id /status reports", () => 
   );
   assert.equal(
     residentModelIdMatches(
-      "LAiM/Qwen3-8B-GGUF",
+      "unsloth/Qwen3-8B-GGUF",
       "/mnt/old-cache/models--LAiM--Llama-3-GGUF/snapshots/abc123",
-      "LAiM/Llama-3-GGUF",
+      "unsloth/Llama-3-GGUF",
     ),
     false,
   );
@@ -186,7 +186,7 @@ test("a shared filename or folder name never marks a row resident", () => {
   // A cache snapshot still collapses onto its repo id, which names one model.
   assert.equal(
     residentModelIdMatches(
-      "LAiM/Qwen3-8B-GGUF",
+      "unsloth/Qwen3-8B-GGUF",
       "/mnt/old-cache/models--LAiM--Qwen3-8B-GGUF/snapshots/abc123",
       null,
     ),
@@ -211,7 +211,7 @@ test("Ollama link paths are recognised the way the resolver excludes them", () =
   // Only those exact segments, not a directory that merely contains the name.
   assert.equal(isOllamaLinkPath("/srv/studio_links_backup/a.gguf"), false);
   assert.equal(isOllamaLinkPath("/srv/models/Qwen3-8B-Q4_K_M.gguf"), false);
-  assert.equal(isOllamaLinkPath("LAiM/Qwen3-8B-GGUF"), false);
+  assert.equal(isOllamaLinkPath("unsloth/Qwen3-8B-GGUF"), false);
   assert.equal(isOllamaLinkPath(null), false);
   // A manifest reference is not one: the resolver indexes it and /v1/models advertises its tag.
   assert.equal(isOllamaLinkPath("ollama-manifest:%2Fh%2Fllama3"), false);
@@ -224,7 +224,7 @@ test("importing the legacy load settings never doubles up a model", () => {
   assert.deepEqual(listPerModelConfigs().length, 1);
   assert.deepEqual(storedKeys(), [REPO_KEY]);
   assert.equal(
-    resolveInitialConfig("LAiM/repo-gguf", "q4_k_m").config
+    resolveInitialConfig("unsloth/repo-gguf", "q4_k_m").config
       .customContextLength,
     null,
   );
@@ -232,8 +232,8 @@ test("importing the legacy load settings never doubles up a model", () => {
 
 test("two spellings of one model id keep a single stored record", () => {
   store.clear();
-  savePerModelConfig("LAiM/Repo-GGUF", "Q4_K_M", config(4096));
-  savePerModelConfig("LAiM/repo-gguf", "q4_k_m", config(32768, "q8_0"));
+  savePerModelConfig("unsloth/Repo-GGUF", "Q4_K_M", config(4096));
+  savePerModelConfig("unsloth/repo-gguf", "q4_k_m", config(32768, "q8_0"));
 
   assert.deepEqual(storedKeys(), [REPO_KEY]);
   const listed = listPerModelConfigs();
@@ -241,7 +241,7 @@ test("two spellings of one model id keep a single stored record", () => {
   assert.equal(listed[0]?.config.maxSeqLength, 32768);
   // What the picker applies and the only thing the backfill can see agree.
   assert.equal(
-    resolveInitialConfig("LAiM/Repo-GGUF", "Q4_K_M").config.maxSeqLength,
+    resolveInitialConfig("unsloth/Repo-GGUF", "Q4_K_M").config.maxSeqLength,
     32768,
   );
 });
@@ -369,7 +369,7 @@ const STANDALONE_GGUF_CASES: [string, boolean][] = [
   ["lex-au/Orpheus-3b-FT-Q8_0.gguf", false],
   ["NexesQuants/TeeZee_Kyllene-Yi-34B-v1.1-iMat.GGUF", false],
   ["Joshua65535/qwen2.5-1.5b-instruct-q4_k_m.gguf", false],
-  ["LAiM/Qwen3-8B-GGUF", false],
+  ["unsloth/Qwen3-8B-GGUF", false],
   ["", false],
 ];
 
@@ -462,7 +462,7 @@ test("labels a model id with the repo leaf, never the raw path", () => {
     modelDisplayName("/srv/models/Qwen3-30B-A3B-Q4_K_M.gguf"),
     "Qwen3-30B-A3B-Q4_K_M",
   );
-  assert.equal(modelDisplayName("LAiM/Qwen3-30B-A3B-GGUF"), "Qwen3-30B-A3B-GGUF");
+  assert.equal(modelDisplayName("unsloth/Qwen3-30B-A3B-GGUF"), "Qwen3-30B-A3B-GGUF");
   assert.equal(modelDisplayName("Qwen3-30B-A3B"), "Qwen3-30B-A3B");
   assert.equal(modelDisplayName(""), "");
 });

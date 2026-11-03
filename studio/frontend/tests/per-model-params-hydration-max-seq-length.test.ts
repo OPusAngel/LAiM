@@ -20,7 +20,7 @@ const { useChatRuntimeStore } = await import(
   "../src/features/chat/stores/chat-runtime-store.ts"
 );
 
-const QWEN = "LAiM/Qwen3.5-9B-GGUF";
+const QWEN = "unsloth/Qwen3.5-9B-GGUF";
 
 test("hydration does not replay a maxSeqLength an entry happens to carry", async () => {
   // maxSeqLength is persisted but never remembered: the context belongs to the

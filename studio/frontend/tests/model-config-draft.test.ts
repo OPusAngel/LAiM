@@ -24,7 +24,7 @@ import {
 } from "../src/features/model-picker/model-config/model-config-draft.ts";
 import type { PerModelConfig } from "../src/features/model-picker/model-config/per-model-config.ts";
 
-const MODEL = "LAiM/Qwen3-8B-GGUF";
+const MODEL = "unsloth/Qwen3-8B-GGUF";
 const VARIANT = "Q4_K_M";
 const KEY = modelConfigDraftKey(MODEL, VARIANT);
 
@@ -86,7 +86,7 @@ const SAME_MODEL_SPELLINGS: [string, string | null, string, string | null][] = [
   ["C:\\models\\Qwen3.gguf", null, "C:/models/Qwen3.gguf", null],
   ["c:\\models\\Qwen3.gguf", null, "C:\\models\\Qwen3.gguf", null],
   ["/models/qwen3-dir/", "Q4_K_M", "/models/qwen3-dir", "Q4_K_M"],
-  ["LAiM/Qwen3-8B-GGUF", "Q4_K_M", "LAiM/Qwen3-8B-GGUF", "q4_k_m"],
+  ["unsloth/Qwen3-8B-GGUF", "Q4_K_M", "unsloth/Qwen3-8B-GGUF", "q4_k_m"],
   ["\\\\share\\models\\Qwen3.gguf", null, "//SHARE/models/qwen3.gguf", null],
 ];
 
@@ -120,7 +120,7 @@ test("a colon in the model id is not read as a quant", () => {
 });
 
 test("the draft outlives one host but not the last one", () => {
-  const key = modelConfigDraftKey("LAiM/Lifetime-GGUF", VARIANT);
+  const key = modelConfigDraftKey("unsloth/Lifetime-GGUF", VARIANT);
   const sidebar = retainModelConfigDraft(key);
   const dropdown = retainModelConfigDraft(key);
   primeModelConfigDraft(key, { config: SEED, remembered: true }, "none");
@@ -136,7 +136,7 @@ test("the draft outlives one host but not the last one", () => {
 
 test("a release that fires twice does not drop another host's draft", () => {
   // StrictMode replays effects: a second decrement would go past the host still showing it.
-  const key = modelConfigDraftKey("LAiM/Double-Release-GGUF", VARIANT);
+  const key = modelConfigDraftKey("unsloth/Double-Release-GGUF", VARIANT);
   const dropdown = retainModelConfigDraft(key);
   const sidebar = retainModelConfigDraft(key);
   primeModelConfigDraft(
@@ -152,7 +152,7 @@ test("a release that fires twice does not drop another host's draft", () => {
 });
 
 test("the Extra Arguments box is shared, and an external replacement supersedes it", () => {
-  const key = modelConfigDraftKey("LAiM/Extra-Args-GGUF", VARIANT);
+  const key = modelConfigDraftKey("unsloth/Extra-Args-GGUF", VARIANT);
   const release = retainModelConfigDraft(key);
   // Half-typed: parseExtraArgs still yields tokens, which the other editor would re-quote.
   setExtraArgsEditForDraft(key, {
@@ -169,7 +169,7 @@ test("the Extra Arguments box is shared, and an external replacement supersedes 
 });
 
 test("the row's verdict travels with the edit, and a keystroke retires it", () => {
-  const key = modelConfigDraftKey("LAiM/Verdict-GGUF", VARIANT);
+  const key = modelConfigDraftKey("unsloth/Verdict-GGUF", VARIANT);
   const release = retainModelConfigDraft(key);
   setExtraArgsEditForDraft(key, {
     text: '--chat-template "a b',
@@ -193,7 +193,7 @@ test("the row's verdict travels with the edit, and a keystroke retires it", () =
 });
 
 test("a verdict without an edit is dropped rather than inventing one", () => {
-  const key = modelConfigDraftKey("LAiM/No-Edit-GGUF", VARIANT);
+  const key = modelConfigDraftKey("unsloth/No-Edit-GGUF", VARIANT);
   const release = retainModelConfigDraft(key);
   setExtraArgsEditLoadableForDraft(key, false);
   assert.equal(readExtraArgsEditForDraft(key), undefined);
@@ -201,7 +201,7 @@ test("a verdict without an edit is dropped rather than inventing one", () => {
 });
 
 test("a fresh editor re-reads the stored row, but not over an unsaved edit", () => {
-  const key = modelConfigDraftKey("LAiM/Refresh-GGUF", VARIANT);
+  const key = modelConfigDraftKey("unsloth/Refresh-GGUF", VARIANT);
   const sidebar = retainModelConfigDraft(key);
   primeModelConfigDraft(key, { config: SEED, remembered: false }, "none");
   markExtraArgsHydratedForDraft(key);
@@ -228,7 +228,7 @@ test("a fresh editor re-reads the stored row, but not over an unsaved edit", () 
 });
 
 test("re-seeding or replacing a draft retires the edited mark", () => {
-  const key = modelConfigDraftKey("LAiM/Edited-GGUF", VARIANT);
+  const key = modelConfigDraftKey("unsloth/Edited-GGUF", VARIANT);
   const release = retainModelConfigDraft(key);
   primeModelConfigDraft(key, { config: SEED, remembered: false }, "sig-a");
   markModelConfigDraftEdited(key);
@@ -241,7 +241,7 @@ test("re-seeding or replacing a draft retires the edited mark", () => {
 });
 
 test("an external replacement retires the raw edit, so an A to B to A round trip cannot resurrect it", () => {
-  const key = modelConfigDraftKey("LAiM/Aba-GGUF", VARIANT);
+  const key = modelConfigDraftKey("unsloth/Aba-GGUF", VARIANT);
   const release = retainModelConfigDraft(key);
   primeModelConfigDraft(key, { config: SEED, remembered: false }, "sig-a");
   // Noncanonical raw text whose tokens format back to something else, carrying a refusal.

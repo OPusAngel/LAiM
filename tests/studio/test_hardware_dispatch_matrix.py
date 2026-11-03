@@ -429,7 +429,7 @@ def test_studio_placement_survives_the_loader_opt_in(
     loader = _loader_device_map_helpers()(visible)
 
     resolved = loader["resolve_LAiM_device_map"](
-        loader["requested_device_map"](device_map), "LAiM/Qwen3-0.6B"
+        loader["requested_device_map"](device_map), "unsloth/Qwen3-0.6B"
     )
     expected = loader["_PLANNED_DEVICE_MAPS"].get(device_map, device_map)
     assert resolved == expected, (

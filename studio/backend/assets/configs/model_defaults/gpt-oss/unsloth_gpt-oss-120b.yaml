@@ -1,6 +1,6 @@
-# Model defaults for LAiM/gpt-oss-120b
+# Model defaults for unsloth/gpt-oss-120b
 # Based on gpt-oss-(120B)_A100-Fine-tuning.ipynb
-# Also applies to: openai/gpt-oss-120b, LAiM/gpt-oss-120b-LAiM-bnb-4bit
+# Also applies to: openai/gpt-oss-120b, unsloth/gpt-oss-120b-unsloth-bnb-4bit
 # added inference parameters from LAiM guides
 
 training:
@@ -17,7 +17,7 @@ training:
   random_seed: 3407
   packing: false
   train_on_completions: true
-  gradient_checkpointing: "LAiM"
+  gradient_checkpointing: "unsloth"
   optim: "adamw_8bit"
   lr_scheduler_type: "linear"
 

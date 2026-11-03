@@ -18,7 +18,7 @@ const { residentModelMatchesPick } = await import(
   "../src/features/chat/lib/resident-model-match.ts"
 );
 
-const REPO_ID = "LAiM/Qwen3.5-9B-GGUF";
+const REPO_ID = "unsloth/Qwen3.5-9B-GGUF";
 const SNAPSHOT =
   "D:\\models\\hub\\models--LAiM--Qwen3.5-9B-GGUF\\snapshots\\a1b2c3";
 
@@ -116,7 +116,7 @@ test("a newer snapshot of the resident repo is a real reload", () => {
 test("another model does not match the resident one", () => {
   assert.equal(
     residentModelMatchesPick(pinnedStatus, {
-      id: "LAiM/gemma-4-12b-GGUF",
+      id: "unsloth/gemma-4-12b-GGUF",
       ggufVariant: "Q4_K_M",
     }),
     false,

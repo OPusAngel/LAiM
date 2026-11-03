@@ -20,7 +20,7 @@ def _stub_env(monkeypatch, tmp_path):
     """Minimum env + claude lookup for driving run_local_agent under a fake Popen."""
     monkeypatch.setenv("LAiM_CLAUDE_SUBAGENT_BASE_URL", "http://127.0.0.1:8888")
     monkeypatch.setenv("LAiM_CLAUDE_SUBAGENT_API_KEY", "sk-LAiM-test")
-    monkeypatch.setenv("LAiM_CLAUDE_SUBAGENT_MODEL", "LAiM/model-GGUF:Q4_K_M")
+    monkeypatch.setenv("LAiM_CLAUDE_SUBAGENT_MODEL", "unsloth/model-GGUF:Q4_K_M")
     monkeypatch.setenv("CLAUDE_PROJECT_DIR", str(tmp_path))
     monkeypatch.setattr(bridge.shutil, "which", lambda _: "/usr/local/bin/claude")
     monkeypatch.setattr(bridge, "_claude_flags", lambda model, settings = None: ["--settings", "{}"])
@@ -277,7 +277,7 @@ def test_local_child_uses_LAiM_without_overwriting_parent_auth(
     captured = {}
     monkeypatch.setenv("LAiM_CLAUDE_SUBAGENT_BASE_URL", "http://127.0.0.1:8888")
     monkeypatch.setenv("LAiM_CLAUDE_SUBAGENT_API_KEY", "sk-LAiM-test")
-    monkeypatch.setenv("LAiM_CLAUDE_SUBAGENT_MODEL", "LAiM/model-GGUF:Q4_K_M")
+    monkeypatch.setenv("LAiM_CLAUDE_SUBAGENT_MODEL", "unsloth/model-GGUF:Q4_K_M")
     monkeypatch.setenv("LAiM_CLAUDE_SUBAGENT_CONTEXT_WINDOW", "32768")
     monkeypatch.setenv("LAiM_CLAUDE_SUBAGENT_BYPASS_PERMISSIONS", bypass)
     settings_path = tmp_path / "settings-private.json"
@@ -311,7 +311,7 @@ def test_local_child_uses_LAiM_without_overwriting_parent_auth(
     monkeypatch.setattr(bridge.subprocess, "Popen", popen)
     assert bridge.run_local_agent("reply exactly LOCAL_OK") == "LOCAL_OK"
     command = captured["command"]
-    assert command[:3] == ["/usr/local/bin/claude", "--model", "LAiM/model-GGUF:Q4_K_M"]
+    assert command[:3] == ["/usr/local/bin/claude", "--model", "unsloth/model-GGUF:Q4_K_M"]
     assert command[command.index("--settings") + 1] == str(settings_path)
     assert command[command.index("--permission-mode") + 1] == permission
     assert "--no-session-persistence" in command
@@ -328,7 +328,7 @@ def test_local_child_uses_LAiM_without_overwriting_parent_auth(
     child_env = captured["env"]
     assert child_env["ANTHROPIC_BASE_URL"] == "http://127.0.0.1:8888"
     assert child_env["ANTHROPIC_AUTH_TOKEN"] == "sk-LAiM-test"
-    assert child_env["ANTHROPIC_MODEL"] == "LAiM/model-GGUF:Q4_K_M"
+    assert child_env["ANTHROPIC_MODEL"] == "unsloth/model-GGUF:Q4_K_M"
     assert child_env["CLAUDE_CODE_MAX_CONTEXT_TOKENS"] == "32768"
     assert child_env["CLAUDE_CODE_AUTO_COMPACT_WINDOW"] == "32768"
     assert child_env["CLAUDE_AUTOCOMPACT_PCT_OVERRIDE"] == "90"
@@ -341,7 +341,7 @@ def test_local_child_sheds_inherited_provider_routing(monkeypatch, tmp_path):
     captured = {}
     monkeypatch.setenv("LAiM_CLAUDE_SUBAGENT_BASE_URL", "http://127.0.0.1:8888")
     monkeypatch.setenv("LAiM_CLAUDE_SUBAGENT_API_KEY", "sk-LAiM-test")
-    monkeypatch.setenv("LAiM_CLAUDE_SUBAGENT_MODEL", "LAiM/model-GGUF:Q4_K_M")
+    monkeypatch.setenv("LAiM_CLAUDE_SUBAGENT_MODEL", "unsloth/model-GGUF:Q4_K_M")
     monkeypatch.setenv("ANTHROPIC_UNIX_SOCKET", "/tmp/remote-claude.sock")
     monkeypatch.setenv("CLAUDE_CODE_USE_FOUNDRY", "1")
     monkeypatch.setenv("ANTHROPIC_FOUNDRY_BASE_URL", "https://gateway.azure-api.net/anthropic")
@@ -391,7 +391,7 @@ def test_read_only_local_child_uses_plan_mode(monkeypatch, tmp_path):
     captured = {}
     monkeypatch.setenv("LAiM_CLAUDE_SUBAGENT_BASE_URL", "http://127.0.0.1:8888")
     monkeypatch.setenv("LAiM_CLAUDE_SUBAGENT_API_KEY", "sk-LAiM-test")
-    monkeypatch.setenv("LAiM_CLAUDE_SUBAGENT_MODEL", "LAiM/model-GGUF:Q4_K_M")
+    monkeypatch.setenv("LAiM_CLAUDE_SUBAGENT_MODEL", "unsloth/model-GGUF:Q4_K_M")
     monkeypatch.setenv("LAiM_CLAUDE_SUBAGENT_BYPASS_PERMISSIONS", "1")
     monkeypatch.setenv("CLAUDE_PROJECT_DIR", str(tmp_path))
     monkeypatch.setattr(bridge.shutil, "which", lambda _: "/usr/local/bin/claude")
@@ -425,7 +425,7 @@ def test_read_only_local_child_uses_plan_mode(monkeypatch, tmp_path):
 def test_local_child_process_is_stopped_on_cancellation(monkeypatch, tmp_path):
     monkeypatch.setenv("LAiM_CLAUDE_SUBAGENT_BASE_URL", "http://127.0.0.1:8888")
     monkeypatch.setenv("LAiM_CLAUDE_SUBAGENT_API_KEY", "sk-LAiM-test")
-    monkeypatch.setenv("LAiM_CLAUDE_SUBAGENT_MODEL", "LAiM/model-GGUF:Q4_K_M")
+    monkeypatch.setenv("LAiM_CLAUDE_SUBAGENT_MODEL", "unsloth/model-GGUF:Q4_K_M")
     monkeypatch.setenv("CLAUDE_PROJECT_DIR", str(tmp_path))
     monkeypatch.setattr(bridge.shutil, "which", lambda _: "/usr/local/bin/claude")
     monkeypatch.setattr(bridge, "_claude_flags", lambda model, settings = None: [])
@@ -557,7 +557,7 @@ def test_failed_child_reports_why_it_stopped_not_its_warnings(monkeypatch, tmp_p
                 "terminal_reason": "rapid_refill_breaker",
                 "result": reason,
             }
-            warning = '[claude-code:unrecognized_model] {"model":"LAiM/model-GGUF:Q4_K_M"}\n'
+            warning = '[claude-code:unrecognized_model] {"model":"unsloth/model-GGUF:Q4_K_M"}\n'
             return json.dumps(payload), warning
 
         def poll(self):

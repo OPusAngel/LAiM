@@ -183,14 +183,14 @@ def test_a_plain_safetensors_build_derives_the_name_the_loader_now_asks_for_firs
         "fp8",
         rotated = False,
         safetensors = True,
-        upload_repo = "LAiM/Z-Image-Turbo-FP8",
+        upload_repo = "unsloth/Z-Image-Turbo-FP8",
     )
     assert name == "Z-Image-Turbo-FP8.safetensors", name
     # And it is really the first name the loader asks that repo for, read from the resolver
     # rather than restated here, so the two cannot drift apart.
     from core.inference.diffusion_prequant import derived_prequant_filenames
 
-    assert derived_prequant_filenames("LAiM/Z-Image-Turbo-FP8", "fp8")[0] == name
+    assert derived_prequant_filenames("unsloth/Z-Image-Turbo-FP8", "fp8")[0] == name
 
     # A ROTATED build still has no derived spelling that carries the marker, so it still refuses.
     with pytest.raises(ValueError, match = "prequant_filenames"):
@@ -199,7 +199,7 @@ def test_a_plain_safetensors_build_derives_the_name_the_loader_now_asks_for_firs
             "fp8",
             rotated = True,
             safetensors = True,
-            upload_repo = "LAiM/Z-Image-Turbo-FP8",
+            upload_repo = "unsloth/Z-Image-Turbo-FP8",
         )
     # No upload repo means nothing to derive from, so it refuses rather than guessing.
     with pytest.raises(ValueError, match = "prequant_filenames"):

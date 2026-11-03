@@ -7,6 +7,7 @@ import { register } from "node:module";
 
 import type { ResidentAdoptionState } from "../../src/features/hub/lib/adopt-inference-status.ts";
 import type { ResidentStatusRefreshTargets } from "../../src/features/hub/lib/resident-status-refresh.ts";
+import { en } from "../../src/i18n/locales/en.ts";
 
 /**
  * A module under `src` read as text, path relative to `src` so it survives a test
@@ -15,6 +16,69 @@ import type { ResidentStatusRefreshTargets } from "../../src/features/hub/lib/re
 export function readSrc(relative: string): string {
   return readFileSync(new URL(`../../src/${relative}`, import.meta.url), "utf8");
 }
+
+const EN_TEXTS = new Map<string, string>();
+{
+  const walk = (node: unknown, path: string) => {
+    if (typeof node === "string") {
+      EN_TEXTS.set(path, node);
+      return;
+    }
+    if (!node || typeof node !== "object") return;
+    for (const [key, value] of Object.entries(node))
+      walk(value, path ? `${path}.${key}` : key);
+  };
+  walk(en, "");
+}
+
+/**
+ * Source with every `translate("<key>")` folded back into the English text it renders.
+ *
+ * UI wording lives in the catalogs now, so a test that greps a component for the label
+ * it must show would be reading a key rather than the label. `readSrcExpanded` gives
+ * those tests the wording; tests about the i18n wiring itself keep using `readSrc`,
+ * which still shows the shipped file with its `translate()` calls.
+ */
+/** A wording getter folded back to the plain property the file had before i18n. */
+const GETTER_RETURN =
+  /get ([A-Za-z_$][\w$]*)\(\)\s*\{\s*return ("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`);?\s*\}/g;
+
+export function expandI18n(source: string): string {
+  if (!source.includes("translate(")) return source;
+  const KEY = `["']([A-Za-z0-9_.]+)["']`;
+  const attr = new RegExp(`=\\s*\\{\\s*translate\\(${KEY}(?:,[^}]*)?\\)\\s*\\}`, "g");
+  const child = new RegExp(`\\{\\s*translate\\(${KEY}(?:,[^}]*)?\\)\\s*\\}`, "g");
+  const call = new RegExp(`(?<![\\w.$])translate\\(${KEY}(?:,[^)]*)?\\)`, "g");
+  const value = (key: string) => EN_TEXTS.get(key);
+  return source
+    .replace(attr, (m, key) => (value(key) === undefined ? m : `=${JSON.stringify(value(key))}`))
+    .replace(child, (m, key) => value(key) ?? m)
+    .replace(call, (m, key) => (value(key) === undefined ? m : JSON.stringify(value(key))))
+    .replace(GETTER_RETURN, (_m, name, text) => `${name}: ${text}`);
+}
+
+/** `readSrc` with the copy the UI would render in English, for wording assertions. */
+export function readSrcExpanded(relative: string): string {
+  return expandI18n(readSrc(relative));
+}
+
+/**
+ * The English wording view a state module takes from its caller, so a node test can
+ * drive one without a React tree. `en-US` numbers are part of the contract: wording
+ * assertions were written against them, and the host's own locale would move them.
+ */
+export const englishView = {
+  t: (key: string, values?: Record<string, unknown>) => {
+    const text = EN_TEXTS.get(key) ?? key;
+    if (!values) return text;
+    return text.replace(/\{([a-zA-Z0-9_]+)\}/g, (match, name: string) =>
+      Object.prototype.hasOwnProperty.call(values, name)
+        ? String(values[name] ?? "")
+        : match,
+    );
+  },
+  locale: "en-US",
+};
 
 const UI_SPACE_SCALE =
   /calc\(\s*(-?[\d.]+(?:px|rem|em))\s*\*\s*var\(--ui-space-scale\s*,\s*1\)\s*\)/g;
@@ -36,6 +100,11 @@ export function readText(relative: string): string {
 
 export function readSrcAsync(relative: string): Promise<string> {
   return readFile(new URL(`../../src/${relative}`, import.meta.url), "utf8");
+}
+
+/** `readSrcAsync` with the copy the UI would render in English, for wording assertions. */
+export async function readSrcAsyncExpanded(relative: string): Promise<string> {
+  return expandI18n(await readSrcAsync(relative));
 }
 
 /**

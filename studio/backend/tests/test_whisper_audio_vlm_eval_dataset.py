@@ -58,7 +58,7 @@ def audio_trainer(monkeypatch):
     monkeypatch.setattr(tmod, "should_use_mlx_training_backend", lambda *a, **k: False)
     monkeypatch.setattr(tmod, "ensure_audio_decoding", lambda: True)
     t = tmod.LAiMTrainer()
-    t.model_name = "LAiM/whisper-small"
+    t.model_name = "unsloth/whisper-small"
     return t
 
 

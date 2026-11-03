@@ -29,7 +29,7 @@ from core.inference.sd_cpp_backend import SdCppDiffusionBackend
 
 from .test_sd_cpp_backend import _FakeEngine, _FakeServer
 
-FAM = detect_family("LAiM/Qwen-Image-2.1-GGUF")
+FAM = detect_family("unsloth/Qwen-Image-2.1-GGUF")
 FILES = SdCppModelFiles(
     diffusion_model = "/m/q.gguf",
     vae = "/m/vae.safetensors",
@@ -50,9 +50,9 @@ def _decode(blob: bytes) -> Image.Image:
 
 def test_the_projector_is_a_planned_companion_asset():
     specs = SdCppDiffusionBackend(engine = _FakeEngine())._asset_specs(
-        "LAiM/Qwen-Image-2.1-GGUF", "qwen-image-2.1-Q4_K_M.gguf", FAM
+        "unsloth/Qwen-Image-2.1-GGUF", "qwen-image-2.1-Q4_K_M.gguf", FAM
     )
-    assert ("LAiM/Qwen3-VL-8B-Instruct-GGUF", "mmproj-F16.gguf", "llm_vision") in specs
+    assert ("unsloth/Qwen3-VL-8B-Instruct-GGUF", "mmproj-F16.gguf", "llm_vision") in specs
     assert any(k == "llm_vision" for _r, _f, k in sd_cpp_text_encoders_for(FAM))
 
 
@@ -124,7 +124,7 @@ def _state(
     server = None,
 ):
     return bk._SdState(
-        repo_id = "LAiM/Qwen-Image-2.1-GGUF",
+        repo_id = "unsloth/Qwen-Image-2.1-GGUF",
         base_repo = FAM.base_repo,
         family = FAM,
         device = "cpu",

@@ -461,7 +461,7 @@ def test_a_finished_leg_gives_its_virtualenv_back(tmp_path):
 
 STUDIO = {
     "LAiM_ref": "main",
-    "repo_url": "https://github.com/LAiMai/LAiM",
+    "repo_url": "https://github.com/OPusAngel/LAiM",
     "payload_args": "--max-steps 8",
 }
 STUDIO_INSTALL = build_kernel.STUDIO_INSTALL_NOTEBOOK
@@ -756,7 +756,7 @@ def test_a_report_reaches_the_launcher_through_kaggles_structured_log(tmp_path, 
     """Kaggle's log is a JSON array of stream records; scanning it as text misses the report prefix."""
     payload = {
         "label": "control",
-        "model": "LAiM/Qwen2.5-0.5B",
+        "model": "unsloth/Qwen2.5-0.5B",
         "passed": False,
         "failures": ["reference band: out of band at step 3"],
     }
@@ -782,7 +782,7 @@ def test_a_report_reaches_the_launcher_through_kaggles_structured_log(tmp_path, 
 
 def test_a_log_record_that_splits_the_report_is_still_read(tmp_path):
     """Record boundaries are not line boundaries; join before scanning."""
-    payload = {"label": "canary", "model": "LAiM/Qwen2.5-0.5B", "passed": True}
+    payload = {"label": "canary", "model": "unsloth/Qwen2.5-0.5B", "passed": True}
     line = launch.RESULT_PREFIX + json.dumps(payload) + "\n"
     half = len(line) // 2
     kernel_dir = tmp_path / "LAiM-t4-ci-cafe"
@@ -2269,16 +2269,16 @@ def test_the_report_shows_what_the_prefetch_achieved(tmp_path):
     evidence = tmp_path / "evidence"
     evidence.mkdir()
     (evidence / "kernel.log").write_text(
-        'KAGGLE_CI_PREFETCH {"repo": "LAiM/gpt-oss-20b", "ok": true, "seconds": 141.0, '
+        'KAGGLE_CI_PREFETCH {"repo": "unsloth/gpt-oss-20b", "ok": true, "seconds": 141.0, '
         '"download_seconds": 141.0, "bytes": 12000000000, "mb_per_s": 85.1, '
         '"transport": "auto", "attempts": 1}\n'
-        'KAGGLE_CI_PREFETCH {"repo": "LAiM/Qwen2.5-0.5B-Instruct", "ok": false, '
+        'KAGGLE_CI_PREFETCH {"repo": "unsloth/Qwen2.5-0.5B-Instruct", "ok": false, '
         '"seconds": 9.0, "download_seconds": null, "bytes": 0, "mb_per_s": null, '
         '"transport": "http", "attempts": 3, "error": "nope"}\n',
         encoding = "utf-8",
     )
     lines = "\n".join(t4_report.prefetch_table(evidence))
-    assert "LAiM/gpt-oss-20b" in lines
+    assert "unsloth/gpt-oss-20b" in lines
     assert "141.0" in lines and "85.1" in lines and "12.0" in lines
     assert "**NO**" in lines, "a failed prefetch must be visible, not rounded away"
     assert "fallback" in lines, "a failed prefetch must say what it costs the schedule"
@@ -2311,7 +2311,7 @@ def test_the_report_shows_what_the_prefetch_achieved(tmp_path):
     assert proc.returncode == 0, proc.stdout
     rendered = summary.read_text(encoding = "utf-8")
     assert "model prefetch" in rendered, rendered
-    assert "LAiM/gpt-oss-20b" in rendered, rendered
+    assert "unsloth/gpt-oss-20b" in rendered, rendered
 
 
 def test_gptoss_never_shares_a_card(tmp_path):

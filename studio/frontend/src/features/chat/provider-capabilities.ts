@@ -451,7 +451,7 @@ export function providerSupportsFastMode(
 }
 
 /** Whether the provider/model exposes server-side code execution: Anthropic's
- *  `code_execution_20250825` sandbox, or OpenAI cloud's `shell` on /v1/responses.
+ *  `code_execution_20250825` workdir, or OpenAI cloud's `shell` on /v1/responses.
  *  False elsewhere; the backend also gates the shell tool on is_openai_cloud. */
 const ANTHROPIC_CODE_EXECUTION_MODEL_PREFIXES = [
   "claude-opus-5",
@@ -555,9 +555,9 @@ export function providerSupportsBuiltinCodeExecution(
   return false;
 }
 
-/** Whether this connection has its own code sandbox, model aside. Coarser than the
+/** Whether this connection has its own code workdir, model aside. Coarser than the
  *  per-model check: it asks whether running the code locally would be a relocation. */
-const PROVIDER_TYPES_WITH_CODE_SANDBOX = new Set(["openai", "anthropic", "gemini"]);
+const PROVIDER_TYPES_WITH_CODE_WORKDIR = new Set(["openai", "anthropic", "gemini"]);
 
 export function providerHostsCodeExecution(
   providerType: string | null | undefined,
@@ -565,7 +565,7 @@ export function providerHostsCodeExecution(
   apiType?: "chat_completions" | "responses",
 ): boolean {
   return (
-    PROVIDER_TYPES_WITH_CODE_SANDBOX.has(providerType ?? "") ||
+    PROVIDER_TYPES_WITH_CODE_WORKDIR.has(providerType ?? "") ||
     (providerType === "custom" &&
       usesOpenAIHostedResponses(providerType, baseUrl, apiType))
   );

@@ -140,7 +140,7 @@ def test_zoo_guard_branch_present():
     src = _read_source()
     assert "_LAiM_grpo_zoo_checked" in src
     assert "raise RuntimeError" in src
-    assert "https://github.com/LAiMai/LAiM-zoo/pull/613" in src
+    assert "https://github.com/OPusAngel/LAiM-zoo/pull/613" in src
     assert "Multi-image GRPO" in src
 
 

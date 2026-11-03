@@ -157,7 +157,7 @@ def get_models_folder(
 @router.get("/gguf-variants", response_model = GgufVariantsResponse)
 async def get_gguf_variants(
     repo_id: str = Query(
-        ..., description = "HuggingFace repo ID (e.g. 'LAiM/gemma-3-4b-it-GGUF')"
+        ..., description = "HuggingFace repo ID (e.g. 'unsloth/gemma-3-4b-it-GGUF')"
     ),
     prefer_local_cache: bool = Query(False),
     offline: bool = Query(False),

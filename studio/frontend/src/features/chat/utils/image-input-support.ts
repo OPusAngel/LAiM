@@ -5,6 +5,8 @@ import type { ChatModelSummary } from "../types/runtime";
 
 import type { MmprojFallbackReason } from "../types/api";
 import { isTextOnlyMmprojFallback } from "./mmproj-fallback.ts";
+import { translate } from "@/i18n";
+
 
 function textOnlyMmprojUnavailableReason(
   activeModel: ChatModelSummary | undefined,
@@ -13,7 +15,7 @@ function textOnlyMmprojUnavailableReason(
   if (!isTextOnlyMmprojFallback(reason)) {
     return null;
   }
-  const label = activeModel?.name || activeModel?.id || "This vision model";
+  const label = activeModel?.name || activeModel?.id || translate("uxChat.thisVisionModel4r44i");
   return `${label}'s vision projector failed to start, so LAiM reloaded it in text-only mode. Free memory or update LAiM, then reload the model before attaching images.`;
 }
 
@@ -56,7 +58,7 @@ export function getImageInputUnavailableReason({
         activeModel?.name ||
         externalModelLabel ||
         activeModel?.id ||
-        "Current model";
+        translate("uxChat.currentModelvyd7k");
       return `${label} cannot accept images.`;
     }
     return null;
@@ -64,9 +66,9 @@ export function getImageInputUnavailableReason({
   if (!modelLoaded) {
     // Distinguish a failed load from "no model picked yet".
     if (loadError) {
-      return "The last model failed to load. Check the server logs, then load a model before adding images.";
+      return translate("uxChat.theLastModelFailedec3ik");
     }
-    return "Load a model before adding images.";
+    return translate("uxChat.loadAModelBeforez8wa5");
   }
   const fallbackReason = textOnlyMmprojUnavailableReason(
     activeModel,
@@ -87,12 +89,12 @@ export function getImageInputUnavailableReason({
       return null;
     }
   }
-  const label = activeModel?.name || activeModel?.id || "Current model";
+  const label = activeModel?.name || activeModel?.id || translate("uxChat.currentModelvyd7k");
   // Before the generic message below, which would otherwise send someone who switched Vision off
   // hunting for a vision model with a valid mmproj. The model is capable and the projector is
   // fine; the setting is what is in the way.
   if (visionDisabledByUser) {
-    return `Vision is turned off for ${label}. Turn it back on in the model's Advanced Settings to attach images.`;
+    return translate("uxChat.visionIsTurnedOffnhzn0", { p1: label });
   }
   const suffix = activeModel?.isGguf
     ? " with a valid mmproj before attaching images."

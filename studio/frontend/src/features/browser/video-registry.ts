@@ -2,6 +2,8 @@
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { isTauri } from "@/lib/api-base";
+import { translate } from "@/i18n";
+
 
 // The player of each video tab, so the toolbar can act on the frame on screen.
 const videos = new Map<string, HTMLVideoElement>();
@@ -30,7 +32,7 @@ export async function copyVideoFrame(video: HTMLVideoElement): Promise<boolean> 
   canvas.height = video.videoHeight;
   canvas.getContext("2d")?.drawImage(video, 0, 0);
   const png = new Promise<Blob>((resolve, reject) =>
-    canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error("no frame"))), "image/png"),
+    canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error(translate("uxBrowser.noFramea528n")))), "image/png"),
   );
   try {
     await navigator.clipboard.write([new ClipboardItem({ "image/png": png })]);

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
+
 import { withLiteralUnknownTags } from "@/lib/markdown-data-images";
 import { markdownPluginNeeds } from "@/lib/markdown-plugins";
 import { openLink } from "@/lib/open-link";
@@ -119,7 +121,7 @@ function MarkdownPreviewImpl({
           controls={false}
           className={markdownClassName}
         >
-          {markdown.trim() ? markdown : "_Empty note_"}
+          {markdown.trim() ? markdown : translate("uxComponents.emptyNote8j57k")}
         </Streamdown>
       ) : (
         <div className={markdownClassName} aria-busy="true" />

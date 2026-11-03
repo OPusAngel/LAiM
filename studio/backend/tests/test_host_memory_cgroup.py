@@ -224,7 +224,7 @@ def test_malformed_stat_and_binary_files_never_raise(fake_cgroup, host):
 
 @reader
 def test_unreadable_proc_self_cgroup_reads_the_root_only(fake_cgroup, host):
-    # No /proc/self/cgroup (e.g. a sandbox): only the mount root is consulted.
+    # No /proc/self/cgroup (e.g. a workdir): only the mount root is consulted.
     _v2(fake_cgroup.root, "", limit = 12 * GIB, current = 2 * GIB)
     assert host_memory.cgroup_headroom_mib() == 10 * 1024
 

@@ -213,7 +213,7 @@ export function presetLoadSettingNames(
   }
   return isServedByMlx(isGguf, deviceType, chatOnlyReason)
     ? "max seq length, KV cache dtype"
-    : "max seq length";
+    : translate("uxModelpicker.maxSeqLengthq6rwd");
 }
 
 /** Whether llama.cpp serves the active model. `loadedIsGguf` is the backend's own answer; the rest identify a
@@ -417,6 +417,8 @@ export {
   SEPARATE_DRAFT_MODEL_SPEC_TYPES,
   SPECULATIVE_TYPES,
 } from "@/lib/speculative-modes";
+import { translate } from "@/i18n";
+
 
 /** Exported so cross-tab listeners can tell this key's storage event from the dozens of others Studio writes. */
 export const PER_MODEL_CONFIG_STORAGE_KEY = "LAiM_model_configs";

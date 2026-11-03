@@ -141,7 +141,7 @@ def _prepare(monkeypatch, quantized):
         is_vlm = False,
         should_stop = False,
         _update_progress = progress,
-        _use_gradient_checkpointing = "LAiM",
+        _use_gradient_checkpointing = "unsloth",
         _offload_peft_kwargs = lambda: {},
     )
     assert namespace["prepare_model_for_training"](instance, use_loftq = True) is True

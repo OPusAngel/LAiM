@@ -6,7 +6,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { readSrc, registerStoreStubResolver } from "./helpers/kit.ts";
+import { readSrc, readSrcExpanded, registerStoreStubResolver } from "./helpers/kit.ts";
 
 registerStoreStubResolver();
 
@@ -28,7 +28,7 @@ const { isRepoDownloadProgress } = await import(
 const { createScopedLiveGgufFilesSelector, isScopedLiveVariant } =
   await import("../src/features/hub/catalog/gguf-live-variant-states.ts");
 
-const REPO = "LAiM/Qwen-Image-2.1-FP8";
+const REPO = "unsloth/Qwen-Image-2.1-FP8";
 
 function job(over: Record<string, unknown> = {}) {
   const variant = (over.variant as string | null | undefined) ?? null;
@@ -113,7 +113,7 @@ test("the flag clears once the job leaves the running states", () => {
 
 test("repo matching ignores case, as the cache dir does", () => {
   const keys = activeDownloadRepoKeys([
-    { repoId: "LAiM/qwen-image-2.1-fp8", state: "cancelling" },
+    { repoId: "unsloth/qwen-image-2.1-fp8", state: "cancelling" },
   ]);
   const [row] = markDownloadingRows([scannedRow()], (r) => r.repoId, keys);
   assert.equal(row.downloading, true);
@@ -161,10 +161,10 @@ test("a GGUF quant job is not a repo-level download, and stopped scoped jobs are
 });
 
 test("a GGUF quant written by a scoped Model file job reads as downloading", () => {
-  const gguf = "LAiM/Qwen-Image-2.1-GGUF";
+  const gguf = "unsloth/Qwen-Image-2.1-GGUF";
   const scoped = job({
     repoId: gguf,
-    key: "model:LAiM/qwen-image-2.1-gguf#@images",
+    key: "model:unsloth/qwen-image-2.1-gguf#@images",
     variant: "@images",
     scopedFiles: ["qwen-image-2.1-Q8_0.gguf"],
   });
@@ -232,7 +232,7 @@ test("the Safetensors card's scoped fallback skips a GGUF-scoped job in the same
       ?.variant,
     "@hub-required-assets",
   );
-  const hook = readSrc("features/hub/download-manager/use-repo-download.ts");
+  const hook = readSrcExpanded("features/hub/download-manager/use-repo-download.ts");
   assert.match(hook, /findActiveScopedJobForRepo\(state\.jobs, kind, repoId, "model"\)/);
 });
 
@@ -241,18 +241,18 @@ function jsonJobs(...list: ReturnType<typeof job>[]) {
 }
 
 test("every partial marker on the hub has a downloading branch", () => {
-  const card = readSrc("features/hub/catalog/safetensors-download-card.tsx");
+  const card = readSrcExpanded("features/hub/catalog/safetensors-download-card.tsx");
   assert.match(card, /includeScopedJobs: true/);
   assert.match(card, /isRepoDownloadProgress\(progress\)/);
   assert.match(card, /tone="downloading" label="Downloading"/);
 
-  const rows = readSrc("features/hub/catalog/models-catalog-rows.tsx");
+  const rows = readSrcExpanded("features/hub/catalog/models-catalog-rows.tsx");
   // The amber dot is only drawn through PartialStatusDot, which picks Downloading when live.
   assert.equal(rows.match(/<StatusDot tone="warning" label="Partial download" \/>/g)?.length, 1);
   assert.match(rows, /<PartialStatusDot downloading=\{downloading\} \/>/);
 
   for (const file of ["models-table.tsx", "model-card.tsx"]) {
-    const source = readSrc(`features/hub/catalog/${file}`);
+    const source = readSrcExpanded(`features/hub/catalog/${file}`);
     assert.match(source, /partial && !downloading && \(/, file);
     assert.match(source, /aria-label="Downloading"/, file);
   }

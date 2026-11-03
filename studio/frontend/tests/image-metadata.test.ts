@@ -42,12 +42,12 @@ const RECIPE = JSON.stringify({
   seed: 6630007,
   batch_seed: 6630007,
   batch_size: 1,
-  model: "LAiM/FLUX.2-klein-4B-GGUF",
+  model: "unsloth/FLUX.2-klein-4B-GGUF",
   workflow: "txt2img",
   loras: ["sloth-style:0.8"],
 });
 const PARAMETERS =
-  "a sloth hiking, 日本語 ok\nNegative prompt: blurry\nSteps: 4, CFG scale: 1.0, Seed: 6630007, Size: 1024x768, Model: LAiM/FLUX.2-klein-4B-GGUF";
+  "a sloth hiking, 日本語 ok\nNegative prompt: blurry\nSteps: 4, CFG scale: 1.0, Seed: 6630007, Size: 1024x768, Model: unsloth/FLUX.2-klein-4B-GGUF";
 
 function chunk(type: string, data: number[] = []): number[] {
   const len = data.length;

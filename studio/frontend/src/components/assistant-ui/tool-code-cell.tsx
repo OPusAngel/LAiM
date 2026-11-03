@@ -3,6 +3,7 @@
 
 "use client";
 
+import { translate } from "@/i18n";
 import { copyToClipboard } from "@/lib/copy-to-clipboard";
 import { MAX_HIGHLIGHT_CHARS, codeFence } from "@/lib/markdown-plugins";
 import { downloadFile, isDownloadCancelled } from "@/lib/native-files";
@@ -62,13 +63,13 @@ function DownloadBtn({ code, name }: { code: string; name: string }) {
   const download = useCallback(() => {
     void downloadFile(code, name, "text/plain;charset=utf-8").catch((error) => {
       if (!isDownloadCancelled(error)) {
-        toast.error("Could not save file.");
+        toast.error(translate("uxComponents.couldNotSaveFile6d220"));
       }
     });
   }, [code, name]);
 
   return (
-    <IconActionButton label="Download" onClick={download}>
+    <IconActionButton label={translate("imageViewer.download")} onClick={download}>
       <HugeiconsIcon icon={Download01Icon} className="size-3" />
     </IconActionButton>
   );

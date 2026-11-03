@@ -34,7 +34,7 @@ from _playwright_robust import (  # noqa: E402
 BASE = os.environ["BASE_URL"]
 OLD = os.environ["STUDIO_OLD_PW"]
 NEW = os.environ.get("STUDIO_NEW_PW", "ExtraUi-NEW-2026!")
-GGUF_REPO = os.environ.get("GGUF_REPO", "LAiM/gemma-3-270m-it-GGUF")
+GGUF_REPO = os.environ.get("GGUF_REPO", "unsloth/gemma-3-270m-it-GGUF")
 GGUF_VARIANT = os.environ.get("GGUF_VARIANT", "UD-Q4_K_XL")
 ART_DIR = os.environ.get("PW_ART_DIR", "logs/playwright_extra")
 ART = Path(ART_DIR)

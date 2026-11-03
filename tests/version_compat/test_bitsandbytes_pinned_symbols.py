@@ -103,7 +103,7 @@ def test_bnb_matmul_4bit_top_level(tag: str):
         pytest.skip(f"{tag}: bitsandbytes/__init__.py missing")
     assert is_bound(src, "matmul_4bit"), (
         f"{tag}: bitsandbytes.matmul_4bit not exported at package root; "
-        f"LAiM/kernels/utils.py + zoo/temporary_patches/moe call paths break"
+        f"unsloth/kernels/utils.py + zoo/temporary_patches/moe call paths break"
     )
 
 
@@ -126,12 +126,12 @@ def test_bnb_functional_4bit_kernel_path(tag: str):
     assert legacy_path or new_path, (
         f"{tag}: bnb.functional has NEITHER legacy `lib.cdequantize_*` "
         f"NOR new `torch.ops.bitsandbytes.*` kernel path; "
-        f"LAiM/kernels/utils.py module-top binding will AttributeError"
+        f"unsloth/kernels/utils.py module-top binding will AttributeError"
     )
 
 
 def test_bnb_functional_get_ptr(tag: str):
-    """LAiM/kernels/utils.py top-level: `get_ptr = bnb.functional.get_ptr`."""
+    """unsloth/kernels/utils.py top-level: `get_ptr = bnb.functional.get_ptr`."""
     candidates = [
         "bitsandbytes/functional.py",
         "bitsandbytes/functional/__init__.py",
@@ -142,7 +142,7 @@ def test_bnb_functional_get_ptr(tag: str):
     _, src = hit
     assert is_bound(src, "get_ptr"), (
         f"{tag}: bnb.functional.get_ptr missing; "
-        f"LAiM/kernels/utils.py module-top ImportError"
+        f"unsloth/kernels/utils.py module-top ImportError"
     )
 
 
@@ -172,7 +172,7 @@ def test_bnb_nn_modules_fix_4bit_weight_optional(tag: str):
 
 
 def test_bnb_nn_linear8bitlt(tag: str):
-    """LAiM/__init__ probes both Linear4bit AND Linear8bitLt."""
+    """unsloth/__init__ probes both Linear4bit AND Linear8bitLt."""
     candidates = [
         "bitsandbytes/nn/modules.py",
         "bitsandbytes/nn/__init__.py",

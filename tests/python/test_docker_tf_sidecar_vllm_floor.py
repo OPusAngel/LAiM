@@ -170,7 +170,7 @@ def test_no_shipped_pin_can_reach_an_incompatible_sidecar(stale_root):
 
 def test_model_tier_fallback_is_clamped_too(stale_root):
     compat = _load_compat(stale_root)
-    tier = compat.tier_for_model("LAiM/Qwen3-Next-80B-A3B")
+    tier = compat.tier_for_model("unsloth/Qwen3-Next-80B-A3B")
     assert tier == "5.3.0"
     assert Path(compat.sidecar_for(tier)).name == "t_5_5_0"
 

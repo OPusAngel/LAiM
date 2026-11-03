@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import {
@@ -68,7 +69,7 @@ export function ProjectFolderPicker({
           expired.length === 1
             ? "A picked folder expired"
             : `${expired.length} picked folders expired`,
-          { description: "Add them again to link them." },
+          { description: translate("uxRag.addThemAgainTo17c76") },
         );
       },
       Math.max(0, soonest - EXPIRY_GRACE_MS - Date.now()),
@@ -86,7 +87,7 @@ export function ProjectFolderPicker({
       if (!selected || !mounted.current) return;
       onChange((current) => [...current, stageFolder(selected)]);
     } catch (error) {
-      toast.error("Could not add folder", {
+      toast.error(translate("uxRag.couldNotAddFolderajv4z"), {
         description: error instanceof Error ? error.message : String(error),
       });
     } finally {
@@ -99,7 +100,7 @@ export function ProjectFolderPicker({
 
   return (
     <div className="space-y-2.5">
-      <p className="text-ui-15 font-medium text-foreground">Linked folders</p>
+      <p className="text-ui-15 font-medium text-foreground">{translate("uxRag.linkedFoldersyhhq9")}</p>
       <div className={FOLDER_CARD_CLASS}>
         {folders.map((folder) => (
           <div key={folder.token} className={FOLDER_ROW_CLASS}>
@@ -117,7 +118,7 @@ export function ProjectFolderPicker({
               variant="ghost"
               className="shrink-0 rounded-full"
               disabled={disabled}
-              aria-label={`Remove ${folder.displayName}`}
+              aria-label={translate("uxRag.removecucki", { p1: folder.displayName })}
               onClick={() =>
                 onChange((current) =>
                   current.filter((f) => f.token !== folder.token),
@@ -132,7 +133,7 @@ export function ProjectFolderPicker({
           type="button"
           disabled={!supported || picking || disabled}
           onClick={() => void add()}
-          aria-label="Add folder"
+          aria-label={translate("uxHub.addFolder1pq0f")}
           title={
             supported
               ? "Choose a local folder"
@@ -152,7 +153,7 @@ export function ProjectFolderPicker({
               className="size-4 shrink-0 text-muted-foreground"
             />
           )}
-          <span>Add folder</span>
+          <span>{translate("uxRag.addFolderuot79")}</span>
         </button>
       </div>
       <p className="px-1 text-ui-11 text-muted-foreground">

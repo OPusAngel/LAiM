@@ -38,7 +38,7 @@ if _TESTS_DIR not in sys.path:
 # Reuse the in-memory override store and the route-level PUT helper.
 from test_openai_auto_switch import _put, override_store  # noqa: E402, F401
 
-MODEL = "LAiM/Repo-GGUF:Q4_K_M"
+MODEL = "unsloth/Repo-GGUF:Q4_K_M"
 
 # The group the settings route learned to forward. Named once, because every case
 # below is about the difference between a build that sends these and one that does not.
@@ -185,7 +185,7 @@ def test_tuning_carries_over_from_the_bare_repo_entry(override_store):
     # lookup on the sent id alone finds nothing here and the tuning goes down with the
     # row. Same shape for the snapshot-path and cached-alias spellings that walk beside
     # it, which need HF cache state to reach and are covered by the alias sweep tests.
-    bare_id = "LAiM/Repo-GGUF"
+    bare_id = "unsloth/Repo-GGUF"
     _put(bare_id, **PRE_TUNING_PAYLOAD, **TUNING_PAYLOAD, mirrors_server_tuning = True)
     assert settings.get_model_override(bare_id)["load_mode"] == TUNING_PAYLOAD["load_mode"]
 
@@ -203,7 +203,7 @@ def test_carry_over_does_not_activate_tuning_from_a_row_no_load_reads(override_s
     # them. So tuning sitting in a row the qualified key shadows is dormant, and pulling
     # it up into the winning row would switch it on -- from a save that was about
     # something else entirely, on a client with no control for these fields to show it.
-    bare_id = "LAiM/Repo-GGUF"
+    bare_id = "unsloth/Repo-GGUF"
     _put(bare_id, **PRE_TUNING_PAYLOAD, **TUNING_PAYLOAD, mirrors_server_tuning = True)
     # The qualified row exists and wins, and has none of the group.
     _put(MODEL, **PRE_TUNING_PAYLOAD, mirrors_server_tuning = True)
@@ -314,9 +314,9 @@ OVERRIDE_KEY_FOLDS = [
     # model's context and GPU pin onto the other is worse than finding nothing.
     ("/models/Foo.gguf", "/models/foo.gguf", False),
     # A repo id folds whole; the browser lowercases it before storing.
-    ("LAiM/Repo-GGUF", "LAiM/repo-gguf", True),
+    ("unsloth/Repo-GGUF", "unsloth/repo-gguf", True),
     # And the quant suffix folds with it.
-    ("LAiM/Repo-GGUF:Q4_K_M", "LAiM/repo-gguf:q4_k_m", True),
+    ("unsloth/Repo-GGUF:Q4_K_M", "unsloth/repo-gguf:q4_k_m", True),
     # A path never folds onto a repo id, in either direction: "models/foo.gguf" is a
     # legal repo id and "/models/foo.gguf" is a file, and one is not the other.
     ("/models/foo.gguf", "models/foo.gguf", False),
@@ -437,7 +437,7 @@ def test_a_reset_tombstone_outlives_a_later_default_save(override_store, fallbac
     """The -1/"" pair is stored so a qualified row shadows a reasoning flag on a broader entry.
     A later save with the controls at their defaults omits the pair, and the row must not empty
     out and be deleted, or the load falls back and hands the reset value straight back."""
-    bare = "LAiM/Repo-GGUF"
+    bare = "unsloth/Repo-GGUF"
     # The legacy fallback every quant without a row of its own reads.
     settings.set_model_override(bare, **fallback)
 

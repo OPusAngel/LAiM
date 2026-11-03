@@ -53,12 +53,12 @@ def test_pinned_training_load_restores_standard_model_identity():
     restored = restore_hf_cache_repo_identity(
         model,
         _SNAPSHOT,
-        expected_repo_id = "LAiM/Llama-3.2-1B-Instruct",
+        expected_repo_id = "unsloth/Llama-3.2-1B-Instruct",
     )
 
-    assert restored == "LAiM/Llama-3.2-1B-Instruct"
+    assert restored == "unsloth/Llama-3.2-1B-Instruct"
     assert vars(config) == {
-        "_name_or_path": "LAiM/Llama-3.2-1B-Instruct",
+        "_name_or_path": "unsloth/Llama-3.2-1B-Instruct",
         "model_type": "llama",
     }
 
@@ -90,11 +90,11 @@ def test_pinned_mlx_load_restores_saved_adapter_identity_only():
     restored = restore_hf_cache_repo_identity(
         model,
         _SNAPSHOT,
-        expected_repo_id = "LAiM/Llama-3.2-1B-Instruct",
+        expected_repo_id = "unsloth/Llama-3.2-1B-Instruct",
     )
 
-    assert restored == "LAiM/Llama-3.2-1B-Instruct"
-    assert model._hf_repo == "LAiM/Llama-3.2-1B-Instruct"
+    assert restored == "unsloth/Llama-3.2-1B-Instruct"
+    assert model._hf_repo == "unsloth/Llama-3.2-1B-Instruct"
     assert model._src_path == _SNAPSHOT
     assert model._LAiM_base_commit_hash == "0123456789abcdef"
 
@@ -179,10 +179,10 @@ def test_legacy_adapter_identity_is_repaired_only_in_memory():
 
     restored = restore_hf_cache_repo_identity(model, _SNAPSHOT)
 
-    assert restored == "LAiM/Llama-3.2-1B-Instruct"
+    assert restored == "unsloth/Llama-3.2-1B-Instruct"
     assert vars(model_config) == {"_name_or_path": "/outputs/run/checkpoint-100"}
     assert vars(adapter_config) == {
-        "base_model_name_or_path": "LAiM/Llama-3.2-1B-Instruct",
+        "base_model_name_or_path": "unsloth/Llama-3.2-1B-Instruct",
         "r": 16,
     }
 
@@ -204,13 +204,13 @@ def test_repo_mismatch_leaves_pinned_training_metadata_unchanged():
 def test_ordinary_local_model_and_existing_hub_id_are_unchanged():
     local_config = SimpleNamespace(_name_or_path = "/models/private-model")
     local_model = SimpleNamespace(config = local_config)
-    hub_config = SimpleNamespace(_name_or_path = "LAiM/Llama-3.2-1B-Instruct")
+    hub_config = SimpleNamespace(_name_or_path = "unsloth/Llama-3.2-1B-Instruct")
     hub_model = SimpleNamespace(config = hub_config)
 
     assert restore_hf_cache_repo_identity(local_model, "/models/private-model") is None
-    assert restore_hf_cache_repo_identity(hub_model, "LAiM/Llama-3.2-1B-Instruct") is None
+    assert restore_hf_cache_repo_identity(hub_model, "unsloth/Llama-3.2-1B-Instruct") is None
     assert local_config._name_or_path == "/models/private-model"
-    assert hub_config._name_or_path == "LAiM/Llama-3.2-1B-Instruct"
+    assert hub_config._name_or_path == "unsloth/Llama-3.2-1B-Instruct"
 
 
 def test_incomplete_cache_layout_is_not_treated_as_a_snapshot():
@@ -233,11 +233,11 @@ def test_windows_cache_snapshot_is_supported_but_regular_local_path_is_unchanged
         restore_hf_cache_repo_identity(
             SimpleNamespace(config = snapshot_config),
             snapshot,
-            expected_repo_id = "LAiM/Llama-3.2-1B-Instruct",
+            expected_repo_id = "unsloth/Llama-3.2-1B-Instruct",
         )
-        == "LAiM/Llama-3.2-1B-Instruct"
+        == "unsloth/Llama-3.2-1B-Instruct"
     )
-    assert snapshot_config._name_or_path == "LAiM/Llama-3.2-1B-Instruct"
+    assert snapshot_config._name_or_path == "unsloth/Llama-3.2-1B-Instruct"
     assert (
         restore_hf_cache_repo_identity(
             SimpleNamespace(config = local_config),

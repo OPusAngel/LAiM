@@ -20,6 +20,8 @@ import type {
 } from "@assistant-ui/react";
 import { useCallback, useEffect, useState } from "react";
 import { useChatActive, useChatNavigationStore } from "@/features/chat";
+import { translate } from "@/i18n";
+
 
 /**
  * Allow / Always allow / Deny controls for a tool call paused awaiting the
@@ -187,11 +189,7 @@ export function ToolConfirmationControls({
   return (
     <div className="flex flex-wrap items-center gap-2 pt-1">
       {disclosure ? (
-        <p className="w-full text-xs text-muted-foreground">
-          Send your attached image ({Math.ceil(disclosure.size_bytes / 1024)}{" "}
-          KB) to {disclosure.server} ({disclosure.tool}) at{" "}
-          {disclosure.destination}? The server may keep it.
-        </p>
+        <p className="w-full text-xs text-muted-foreground">{translate("uxComponents.sendYourAttachedImage1tkgx", { p1: Math.ceil(disclosure.size_bytes / 1024), p2: " ", p3: disclosure.server, p4: disclosure.tool, p5: " ", p6: disclosure.destination })}</p>
       ) : null}
       <Button
         size="xs"
@@ -206,9 +204,7 @@ export function ToolConfirmationControls({
           variant="outline"
           disabled={pending !== null || failure === "gone"}
           onClick={() => void resolve("allow", true)}
-        >
-          Always allow
-        </Button>
+        >{translate("uxComponents.alwaysAllow9wfra")}</Button>
       )}
       <Button
         size="xs"

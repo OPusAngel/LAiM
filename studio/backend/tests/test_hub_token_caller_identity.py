@@ -457,7 +457,7 @@ def test_could_not_ask_is_told_apart_from_told_no(exc_factory, is_timeout):
     [
         # A raw "?" ends the path at /api/models/{id}, the repo_info weakness this avoids.
         (None, "org/gated?ignored=", "/api/models/org/gated%3Fignored%3D/auth-check"),
-        (None, "LAiM/Llama-3.2-1B", "/api/models/LAiM/Llama-3.2-1B/auth-check"),
+        (None, "unsloth/Llama-3.2-1B", "/api/models/unsloth/Llama-3.2-1B/auth-check"),
         # HfApi().endpoint returns HF_ENDPOINT verbatim, so a scheme-less mirror built a URL
         # both clients reject, denying every explicit-token cache read on that machine.
         (

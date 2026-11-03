@@ -1,30 +1,35 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import type { TourStep } from "@/features/tour";
 
 const catalogStep: TourStep = {
   id: "catalog",
   target: "hub-catalog",
-  title: "Results",
-  body: (
+  get title() {
+    return translate("uxVideo.results17jx8");
+  },
+  get body() {
+    return (
     <>
-      Open any model for its files, quant variants and size. From there you
-      download it, run it in Chat, or delete it to free up space.
-    </>
-  ),
+      {translate("uxHub.openAnyModelForvitn7")}</>
+  );
+  },
 };
 
 const detailStep: TourStep = {
   id: "detail",
   target: "hub-detail",
-  title: "Model details",
-  body: (
+  get title() {
+    return translate("uxHub.modelDetails48huc");
+  },
+  get body() {
+    return (
     <>
-      Files, quant variants and sizes, with the README below. Download it here,
-      run it in Chat, or use Back to return to the results.
-    </>
-  ),
+      {translate("uxHub.filesQuantVariantsAnds8i7i")}</>
+  );
+  },
 };
 
 /** Outside split view an open model detail covers the catalog, so describe what is on top. */
@@ -37,35 +42,45 @@ export function buildHubTourSteps({
     {
       id: "tabs",
       target: "hub-tabs",
-      title: "Discover or On Device",
-      body: (
+      get title() {
+        return translate("uxHub.discoverOrOnDevice1ph5e");
+      },
+      get body() {
+        return (
         <>
-          Discover browses Hugging Face. On Device lists what is downloaded
-          here, including your own finetunes, with the disk each one uses.
-        </>
-      ),
+          {translate("uxHub.discoverBrowsesHuggingFacey6b1u")}</>
+      );
+      },
     },
     {
       id: "search",
       target: "hub-search",
-      title: "Search the Hub",
-      body: (
+      get title() {
+        return translate("uxHub.searchTheHubpjnzl");
+      },
+      get body() {
+        return (
         <>
-          Search by name, or paste <span className="font-mono">org/model</span>{" "}
-          to jump straight to a repo. LAiM's own quants rank first.
+          {translate("uxTour.searchByNameOr5l10l")}{" "}
+          <span className="font-mono">org/model</span>
+          {translate("uxTour.toJumpStraightToum4jg")}
         </>
-      ),
+      );
+      },
     },
     {
       id: "device",
       target: "hub-device",
-      title: "Your hardware",
-      body: (
+      get title() {
+        return translate("uxHub.yourHardware1uoki");
+      },
+      get body() {
+        return (
         <>
-          VRAM, RAM and cache size, so you know what will run before you
-          download. Add a Hugging Face token here for gated repos.
+          {translate("uxTour.vRAMRAMAndCachevymur")}
         </>
-      ),
+      );
+      },
     },
     catalogCovered ? detailStep : catalogStep,
   ];

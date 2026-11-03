@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+import os
 import re
 from datetime import datetime
 from pathlib import Path
@@ -20,6 +21,12 @@ logger = structlog.get_logger(__name__)
 STALENESS_THRESHOLD_DAYS = 3
 
 _INSTALL_MARKER_NAME = "LAiM_PREBUILT_INFO.json"
+
+# Where LAiM gets llama.cpp from. ggml-org/llama.cpp is the upstream project's own
+# spelling (a GitHub slug), so it is never rebranded: pointing it at LAiM's fork would
+# silently leave the app with no new-model support, which is exactly what users hit with
+# architectures the fork build predates. Same knob as the installer's LAiM_LLAMA_RELEASE_REPO.
+LLAMA_RELEASE_REPO = os.environ.get("LAiM_LLAMA_RELEASE_REPO", "ggml-org/llama.cpp")
 
 _marker_cache: dict[str, Optional[dict]] = {}
 _release_memo: dict[str, tuple[float, Optional[str]]] = {}
@@ -38,13 +45,26 @@ def _cache_dir() -> Path:
 
 
 def read_install_marker(binary_path: Optional[str]) -> Optional[dict]:
-    """Walk up from binary_path to find LAiM_PREBUILT_INFO.json. None = no marker (source build / custom path) or invalid JSON."""
-    return _flow.read_install_marker(
+    """Walk up from binary_path to find LAiM_PREBUILT_INFO.json. None = no marker (source build / custom path) or invalid JSON.
+
+    The recorded ``published_repo`` is rewritten to :data:`LLAMA_RELEASE_REPO`. An install
+    made before the switch carries the old fork slug in its marker, and every later check and
+    update is driven from that value, so honouring it would keep an existing LAiM install
+    pinned to the fork forever: no new model architectures, no matter how often it updates.
+    """
+    marker = _flow.read_install_marker(
         binary_path,
         marker_name = _INSTALL_MARKER_NAME,
         cache = _marker_cache,
         log_message = "failed to parse install marker",
     )
+    if marker is None:
+        return None
+    if marker.get("published_repo") != LLAMA_RELEASE_REPO:
+        marker = {**marker, "published_repo": LLAMA_RELEASE_REPO}
+        # The cache is keyed by the binary path and holds the object callers read again.
+        _marker_cache[binary_path] = marker
+    return marker
 
 
 def _load_disk_cache(repo: str) -> Optional[tuple[float, Optional[str]]]:

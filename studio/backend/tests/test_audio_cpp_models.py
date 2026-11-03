@@ -193,7 +193,7 @@ def test_ids_legacy_keys_and_subfolders_parse_without_io():
     )
     assert acm.split_variant_ref(r"C:\models\x.gguf") == (r"C:\models\x.gguf", None)
     assert acm.is_umbrella_id("audiocpp-qwen3-asr-0.6b")
-    assert not acm.is_umbrella_id("LAiM/Qwen3-0.6B-GGUF")
+    assert not acm.is_umbrella_id("unsloth/Qwen3-0.6B-GGUF")
     assert acm.repo_of("audiocpp-kokoro-82m") == AUDIO_CPP_REPO
     assert acm.repo_of("audio-cpp/Yue2-3B-GGUF:Q8_0") == "audio-cpp/Yue2-3B-GGUF"
 
@@ -284,14 +284,14 @@ def test_validate_options_drops_unknowns_and_clamps():
 
 
 def test_a_llama_gguf_is_not_audio_cpp(hub):
-    snap = _snapshot(hub, "LAiM/Qwen3-0.6B-GGUF")
+    snap = _snapshot(hub, "unsloth/Qwen3-0.6B-GGUF")
     _put(snap, "Qwen3-0.6B-Q4_K_M.gguf", _gguf_bytes(arch = "qwen3"))
-    assert acm.resolve("LAiM/Qwen3-0.6B-GGUF", network = False) is None
+    assert acm.resolve("unsloth/Qwen3-0.6B-GGUF", network = False) is None
     assert (
-        acm.resolve("LAiM/Qwen3-0.6B-GGUF", network = False, gguf_hint = "Qwen3-0.6B-Q4_K_M.gguf")
+        acm.resolve("unsloth/Qwen3-0.6B-GGUF", network = False, gguf_hint = "Qwen3-0.6B-Q4_K_M.gguf")
         is None
     )
-    assert not acm.looks_like_audio_cpp("LAiM/Qwen3-0.6B-GGUF")
+    assert not acm.looks_like_audio_cpp("unsloth/Qwen3-0.6B-GGUF")
 
 
 def test_a_dedicated_repo_resolves_by_header_with_its_quants(hub):

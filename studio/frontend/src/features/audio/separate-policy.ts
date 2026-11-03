@@ -3,6 +3,7 @@
 
 // Free of app imports so the node test runner can load it directly.
 
+import { translate } from "@/i18n";
 import type { AudioGenerationPresentation } from "./audio-page-policy";
 import type { AudioSourceSelection } from "./audio-run-request";
 import type { AudioToolPanel } from "./tools/types";
@@ -46,24 +47,25 @@ export function separateBlocker({
   if (sourceBusy) {
     return {
       kind: "source-busy",
-      reason: "Waiting for the track to finish uploading.",
+      get reason() { return translate("uxAudio.waitingForTheTrackyhv1i"); },
     };
   }
   if (sourceError) return { kind: "source-error", reason: sourceError };
-  if (!source) return { kind: "source", reason: "Add a track to separate." };
+  if (!source) return { kind: "source", get reason() { return translate("uxAudio.addATrackToe0ksr"); } };
   if (sourceExpired) {
     return {
       kind: "source-expired",
-      reason: "This track expired. Add it again.",
+      get reason() { return translate("uxAudio.thisTrackExpiredAddexr4u"); },
     };
   }
   if (
     source.durationS !== null &&
     source.durationS > SEPARATE_MAX_SECONDS + 0.5
   ) {
+    const durationS = source.durationS;
     return {
       kind: "too-long",
-      reason: `Separate tracks up to 10 minutes long. This one is ${clock(source.durationS)}.`,
+      get reason() { return translate("uxAudio.separateTracksUpTop868o", { p1: clock(durationS) }); },
     };
   }
   return null;
@@ -100,7 +102,7 @@ export function separateCpuWarning(
 ): string | null {
   if (device !== "cpu" || !family) return null;
   return ROFORMER_FAMILIES.has(family)
-    ? "RoFormer models are very slow on the CPU: expect minutes for a short clip. Load into GPU when you can."
+    ? translate("uxAudio.roFormerModelsAreVeryaj16x")
     : "Separating on the CPU is slower; expect about a second per second of audio.";
 }
 
@@ -130,16 +132,16 @@ export function separatePresentation(
   if (!presentation) return null;
   switch (phase) {
     case "preparing":
-      return { ...presentation, status: "Preparing the track…" };
+      return { ...presentation, get status() { return translate("uxAudio.preparingTheTrack42mde"); } };
     case "generating":
       return {
         ...presentation,
         status: reloading
-          ? "Reloading the model with the new overlap, then separating…"
+          ? translate("uxAudio.reloadingTheModelWithe6f4v")
           : "Separating…",
       };
     case "finishing":
-      return { ...presentation, status: "Saving stems…" };
+      return { ...presentation, get status() { return translate("uxAudio.savingStems2dltz"); } };
     case "stopping":
       return { ...presentation, status: "Stopping…" };
     default:
@@ -155,7 +157,9 @@ export const roformerOverlapLogic: Omit<
   id: "roformer-overlap",
   families: [...ROFORMER_FAMILIES],
   workflows: ["separate"],
-  title: "Overlap",
+  get title() {
+    return translate("uxAudio.overlap10pjo");
+  },
   claims: [],
   initial: () => ({ overlap: true }),
   toRequest: (value) => overlapRequest(value),

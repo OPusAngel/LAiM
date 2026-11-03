@@ -6,6 +6,8 @@ import test from "node:test";
 import vm from "node:vm";
 import ts from "@typescript/typescript6";
 
+import { enTranslate } from "./helpers/module-stubs.ts";
+
 import * as liveThreadHead from "../src/features/chat/utils/live-thread-head.ts";
 import { orderByParentChain } from "../src/features/chat/utils/message-order.ts";
 import {
@@ -77,6 +79,7 @@ function loadExporters(
     },
   ).outputText;
   const context = {
+    translate: enTranslate,
     exports: {},
     toast: { info: () => {} },
     listStoredChatMessages: async () => {

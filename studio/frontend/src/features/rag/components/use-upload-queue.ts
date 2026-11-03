@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { toast } from "@/lib/toast";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -27,7 +28,7 @@ export function useUploadQueue<T>(
           items.length === 1
             ? "A dropped file was not added"
             : `${items.length} dropped files were not added`,
-          { description: "You moved away before they finished reading." },
+          { description: translate("uxRag.youMovedAwayBeforexm42d") },
         );
         return;
       }
@@ -39,7 +40,7 @@ export function useUploadQueue<T>(
       setQueued(queue.current.items.length);
       toast.info(
         items.length === 1 ? "Queued 1 file" : `Queued ${items.length} files`,
-        { description: "They upload when the current upload finishes." },
+        { description: translate("uxRag.theyUploadWhenTheq40n5") },
       );
     },
     [busy, key],
@@ -55,7 +56,7 @@ export function useUploadQueue<T>(
         pending.items.length === 1
           ? "A queued file was not added"
           : `${pending.items.length} queued files were not added`,
-        { description: "You moved away before the earlier upload finished." },
+        { description: translate("uxRag.youMovedAwayBeforen2xl7") },
       );
       return;
     }

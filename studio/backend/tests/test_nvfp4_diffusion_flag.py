@@ -107,8 +107,8 @@ def test_only_nvfp4_is_blocked():
     for scheme in ("int8", "fp8", "mxfp8", "fp8_dynamic", "auto", None, ""):
         assert not flag.nvfp4_blocked(scheme)
     assert flag.without_nvfp4(("int8", "nvfp4", "fp8")) == ("int8", "fp8")
-    assert flag.nvfp4_repo_blocked("LAiM/Wan2.2-TI2V-5B-NVFP4")
-    assert not flag.nvfp4_repo_blocked("LAiM/Wan2.2-TI2V-5B-FP8")
+    assert flag.nvfp4_repo_blocked("unsloth/Wan2.2-TI2V-5B-NVFP4")
+    assert not flag.nvfp4_repo_blocked("unsloth/Wan2.2-TI2V-5B-FP8")
     assert not flag.nvfp4_repo_blocked(None)
 
 
@@ -283,7 +283,7 @@ def test_text_encoder_nvfp4_is_refused():
 def test_no_hosted_nvfp4_text_encoder_is_resolved():
     from core.inference.diffusion_te_prequant import family_te_prequant_repo
     fam = types.SimpleNamespace(
-        te_prequant_repos = (("nvfp4", "text_encoder", "LAiM/Some-Model-NVFP4"),)
+        te_prequant_repos = (("nvfp4", "text_encoder", "unsloth/Some-Model-NVFP4"),)
     )
     assert family_te_prequant_repo(fam, "nvfp4", "text_encoder") is None
 
@@ -350,7 +350,7 @@ _WAN_SIBLINGS = {
         _sib("text_encoder/model-00001-of-00001.safetensors", 11_000_000_000),
         _sib("vae/diffusion_pytorch_model.safetensors", 500_000_000),
     ],
-    "LAiM/Wan2.2-T2V-A14B-NVFP4": [
+    "unsloth/Wan2.2-T2V-A14B-NVFP4": [
         _sib("Wan2.2-T2V-A14B-NVFP4.pt", 8_000_000_000),
         _sib("Wan2.2-T2V-A14B-transformer_2-NVFP4.pt", 8_100_000_000),
     ],
@@ -412,7 +412,7 @@ def test_the_image_hub_entry_never_asks_about_an_nvfp4_repo(monkeypatch):
         "huggingface_hub.HfApi", lambda *a, **k: types.SimpleNamespace(model_info = asked.append)
     )
     source = types.SimpleNamespace(
-        kind = "repo", location = "LAiM/Z-Image-Turbo-NVFP4", filename = "x-NVFP4.pt"
+        kind = "repo", location = "unsloth/Z-Image-Turbo-NVFP4", filename = "x-NVFP4.pt"
     )
     assert DiffusionBackend._prequant_source_hub_entry(source, None, scheme = "nvfp4") is None
     assert DiffusionBackend._prequant_source_hub_entry(source, None) is None
@@ -454,17 +454,17 @@ def test_enabled_the_nvfp4_path_is_reachable_end_to_end(monkeypatch):
     assert tq.select_transformer_quant_scheme(target, "nvfp4", family = "z-image") == "nvfp4"
     assert dp.normalize_te_quant("nvfp4") == "nvfp4"
     fam = _wan_a14b()
-    assert video_family_prequant_repo(fam, "nvfp4") == "LAiM/Wan2.2-T2V-A14B-NVFP4"
+    assert video_family_prequant_repo(fam, "nvfp4") == "unsloth/Wan2.2-T2V-A14B-NVFP4"
     sources = denoiser_prequant_sources(fam, "nvfp4", _WAN_T2V)
     assert sources and set(sources) == {"transformer", "transformer_2"}
-    assert all(s.location == "LAiM/Wan2.2-T2V-A14B-NVFP4" for s in sources.values())
+    assert all(s.location == "unsloth/Wan2.2-T2V-A14B-NVFP4" for s in sources.values())
     assert all("nvfp4" in info["estimated_resident_gb"] for info in family_inference_infos())
 
 
 def test_enabled_the_video_plan_stages_the_hosted_nvfp4_denoisers(monkeypatch):
     _enable(monkeypatch)
     plan, staged, api = _wan_plan(monkeypatch)
-    assert "LAiM/Wan2.2-T2V-A14B-NVFP4" in api.asked
+    assert "unsloth/Wan2.2-T2V-A14B-NVFP4" in api.asked
     assert {"Wan2.2-T2V-A14B-NVFP4.pt", "Wan2.2-T2V-A14B-transformer_2-NVFP4.pt"} <= staged
     assert "transformer/diffusion_pytorch_model.safetensors" not in staged
 
@@ -544,10 +544,10 @@ def test_the_hosted_image_nvfp4_rows_resolve_to_nothing(monkeypatch):
         assert usable_prequant_source(fam, "nvfp4", base_repo = base) is None
     _enable(monkeypatch)
     assert family_prequant_repo(detect_family(schnell), "nvfp4", base_repo = schnell) == (
-        "LAiM/FLUX.1-schnell-NVFP4"
+        "unsloth/FLUX.1-schnell-NVFP4"
     )
     assert family_prequant_repo(detect_family(zimage), "nvfp4", base_repo = zimage) == (
-        "LAiM/Z-Image-Turbo-NVFP4"
+        "unsloth/Z-Image-Turbo-NVFP4"
     )
 
 
@@ -668,12 +668,12 @@ def _checkpoint_route_calls(image_path, video_path, monkeypatch):
 
 
 HOSTED_NVFP4 = [
-    "LAiM/Z-Image-Turbo-NVFP4",
-    "LAiM/FLUX.1-schnell-NVFP4",
-    "LAiM/Qwen-Image-2512-NVFP4",
-    "LAiM/Wan2.2-TI2V-5B-NVFP4",
-    "LAiM/Wan2.2-T2V-A14B-NVFP4",
-    "LAiM/HunyuanVideo-1.5-NVFP4",
+    "unsloth/Z-Image-Turbo-NVFP4",
+    "unsloth/FLUX.1-schnell-NVFP4",
+    "unsloth/Qwen-Image-2512-NVFP4",
+    "unsloth/Wan2.2-TI2V-5B-NVFP4",
+    "unsloth/Wan2.2-T2V-A14B-NVFP4",
+    "unsloth/HunyuanVideo-1.5-NVFP4",
 ]
 
 
@@ -700,8 +700,8 @@ def test_the_image_family_nvfp4_repos_are_recognised_by_the_table():
     from core.inference.diffusion_prequant import hosted_nvfp4_repo_ids
 
     ids = hosted_nvfp4_repo_ids()
-    assert "LAiM/z-image-turbo-nvfp4" in ids
-    assert "LAiM/flux.1-schnell-nvfp4" in ids
+    assert "unsloth/z-image-turbo-nvfp4" in ids
+    assert "unsloth/flux.1-schnell-nvfp4" in ids
     assert not any("fp8" in repo and "nvfp4" not in repo for repo in ids)
 
 
@@ -727,7 +727,7 @@ def test_the_routes_400_an_nvfp4_checkpoint_as_the_model(tmp_path, monkeypatch):
     from fastapi import HTTPException
     folder = _prequant_dir(tmp_path, "local-z-image", "nvfp4")
     for image_path, video_path in (
-        ("LAiM/Z-Image-Turbo-NVFP4", "LAiM/Wan2.2-TI2V-5B-NVFP4"),
+        ("unsloth/Z-Image-Turbo-NVFP4", "unsloth/Wan2.2-TI2V-5B-NVFP4"),
         (str(folder), str(folder)),
     ):
         for call in _checkpoint_route_calls(image_path, video_path, monkeypatch):
@@ -743,9 +743,9 @@ def test_the_routes_400_an_nvfp4_checkpoint_as_the_model(tmp_path, monkeypatch):
     "path",
     [
         "Tongyi-MAI/Z-Image-Turbo",
-        "LAiM/Z-Image-Turbo-FP8",
+        "unsloth/Z-Image-Turbo-FP8",
         "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
-        "LAiM/Qwen-Image-2512-GGUF",
+        "unsloth/Qwen-Image-2512-GGUF",
         "",
         None,
     ],
@@ -779,7 +779,7 @@ def test_enabled_an_nvfp4_checkpoint_as_the_model_proceeds(tmp_path, monkeypatch
         raise RuntimeError("reached the backend")
 
     monkeypatch.setattr("core.inference.diffusion.get_diffusion_backend", _stop)
-    calls = _checkpoint_route_calls("LAiM/Z-Image-Turbo-NVFP4", str(folder), monkeypatch)
+    calls = _checkpoint_route_calls("unsloth/Z-Image-Turbo-NVFP4", str(folder), monkeypatch)
     with pytest.raises(RuntimeError, match = "reached the backend"):
         _run(calls[0]())
     assert reached == [True]

@@ -15,6 +15,8 @@ import type {
   CachedInventoryRow,
   LocalInventoryRow,
 } from "./types";
+import { translate } from "@/i18n";
+
 
 export function localSourceLabel(source: LocalModelInfo["source"]): string {
   switch (source) {
@@ -27,21 +29,21 @@ export function localSourceLabel(source: LocalModelInfo["source"]): string {
     case "hermes":
       return "Hermes";
     case "custom":
-      return "Custom folder";
+      return translate("uxHub.customFolderkoi43");
     case "LAiM":
       return "LAiM";
     case "models_dir":
-      return "Models folder";
+      return translate("uxHub.modelsFoldert59fe");
     case "hf_cache":
       return "HF Cache";
     default:
-      return "Local model";
+      return translate("uxHub.localModelt5w5z");
   }
 }
 
 export function formatLocalUpdated(value?: number | null): string {
   const normalized = normalizeTimestamp(value);
-  if (!normalized) return "Unknown update";
+  if (!normalized) return translate("uxHub.unknownUpdatem6hpa");
   const formatter = new Intl.DateTimeFormat("en", {
     month: "short",
     day: "numeric",

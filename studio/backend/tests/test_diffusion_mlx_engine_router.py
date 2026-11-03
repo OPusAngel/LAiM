@@ -431,5 +431,5 @@ def test_auto_switch_planner_judges_mlx_with_the_picks_gguf(monkeypatch):
     _apple(monkeypatch)
     monkeypatch.setenv("LAiM_DIFFUSION_MLX", "1")
     monkeypatch.setattr(r, "engine_for", lambda name: name)
-    pick = MediaModelPick("LAiM/Z-Image-Turbo-GGUF", "LAiM/Z-Image-Turbo-GGUF", _Q4, "gguf")
+    pick = MediaModelPick("unsloth/Z-Image-Turbo-GGUF", "unsloth/Z-Image-Turbo-GGUF", _Q4, "gguf")
     assert media_locality.planners_for(DIFFUSION, pick) == [ENGINE_MLX]

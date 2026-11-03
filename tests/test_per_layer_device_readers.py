@@ -20,11 +20,11 @@ import torch
 # Keep in step with a grep for `_per_layer_device` across the repository.
 READERS = {
     # llama's reader is nested, so the scope is located from the call site.
-    "LAiM/models/llama.py": ("temp_gates", "temp_ups"),
-    "LAiM/models/granite.py": (),
-    "LAiM/models/gemma.py": ("out_weights",),
-    "LAiM/models/gemma2.py": ("out_weights",),
-    "LAiM/models/cohere.py": ("out_weights",),
+    "unsloth/models/llama.py": ("temp_gates", "temp_ups"),
+    "unsloth/models/granite.py": (),
+    "unsloth/models/gemma.py": ("out_weights",),
+    "unsloth/models/gemma2.py": ("out_weights",),
+    "unsloth/models/cohere.py": ("out_weights",),
 }
 
 REPOSITORY_ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -586,7 +586,7 @@ def test_the_fast_path_spells_the_memo_name_the_constant_holds():
     """Read as a literal, written through the constant: a rename is a silent miss."""
     from LAiM.models import _utils
 
-    source = (REPOSITORY_ROOT / "LAiM/models/_utils.py").read_text(encoding = "utf-8")
+    source = (REPOSITORY_ROOT / "unsloth/models/_utils.py").read_text(encoding = "utf-8")
     fast_path = source.split("def per_layer_device(")[1].split("\n    published =")[0]
     assert f"module.{_utils._PER_LAYER_DEVICE_MEMO}" in fast_path, (
         "the fast path does not read the attribute _PER_LAYER_DEVICE_MEMO names, so the "

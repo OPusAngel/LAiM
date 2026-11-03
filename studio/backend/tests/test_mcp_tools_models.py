@@ -9,13 +9,13 @@ CATALOG = {
     "object": "list",
     "data": [
         {
-            "id": "LAiM/Llama-3.2-1B-Instruct-GGUF",
+            "id": "unsloth/Llama-3.2-1B-Instruct-GGUF",
             "loaded": True,
             "quant": "Q4_K_M",
             "context_length": 8192,
             "display_name": "Llama 3.2 1B",
         },
-        {"id": "LAiM/Qwen3-0.6B", "object": "model", "loaded": False},
+        {"id": "unsloth/Qwen3-0.6B", "object": "model", "loaded": False},
         {
             "id": "black-forest-labs/FLUX.1-schnell",
             "task": "text-to-image",
@@ -25,7 +25,7 @@ CATALOG = {
         {"id": "Lightricks/LTX-Video", "task": "text-to-video", "loaded": True},
         {"id": "openai/whisper-small", "task": "automatic-speech-recognition", "loaded": False},
         {
-            "id": "LAiM/orpheus-3b",
+            "id": "unsloth/orpheus-3b",
             "task": "text-to-speech",
             "loaded": False,
             "audio_workflows": ["speak", "clone"],
@@ -40,10 +40,10 @@ CATALOG = {
 }
 LOADED = {
     "object": "list",
-    "data": [{"id": "LAiM/Llama-3.2-1B-Instruct-GGUF", "context_length": 8192, "loaded": True}],
+    "data": [{"id": "unsloth/Llama-3.2-1B-Instruct-GGUF", "context_length": 8192, "loaded": True}],
 }
 CONFIG = {
-    "id": "LAiM/Qwen3-0.6B",
+    "id": "unsloth/Qwen3-0.6B",
     "display_name": "Qwen3 0.6B",
     "config": {
         "training": {
@@ -60,7 +60,7 @@ CONFIG = {
 PAYLOADS = {
     ("GET", "/v1/models"): CATALOG,
     ("GET", "/api/inference/loaded-models"): LOADED,
-    ("GET", "/api/models/config/LAiM/Qwen3-0.6B"): CONFIG,
+    ("GET", "/api/models/config/unsloth/Qwen3-0.6B"): CONFIG,
 }
 
 
@@ -76,11 +76,11 @@ def _list(
 @pytest.mark.parametrize(
     "kind,expected",
     [
-        ("llm", {"LAiM/Llama-3.2-1B-Instruct-GGUF", "LAiM/Qwen3-0.6B"}),
+        ("llm", {"unsloth/Llama-3.2-1B-Instruct-GGUF", "unsloth/Qwen3-0.6B"}),
         ("image", {"black-forest-labs/FLUX.1-schnell"}),
         ("video", {"Lightricks/LTX-Video"}),
         ("stt", {"openai/whisper-small"}),
-        ("tts", {"LAiM/orpheus-3b"}),
+        ("tts", {"unsloth/orpheus-3b"}),
         ("audio", {"audio-separator/htdemucs"}),
     ],
 )
@@ -95,8 +95,8 @@ def test_kind_comes_from_the_task(monkeypatch, kind, expected):
 def test_entries_carry_only_the_allowlisted_fields(monkeypatch):
     result, studio = _list(monkeypatch)
     models = {model["id"]: model for model in result["structuredContent"]["models"]}
-    assert models["LAiM/Llama-3.2-1B-Instruct-GGUF"] == {
-        "id": "LAiM/Llama-3.2-1B-Instruct-GGUF",
+    assert models["unsloth/Llama-3.2-1B-Instruct-GGUF"] == {
+        "id": "unsloth/Llama-3.2-1B-Instruct-GGUF",
         "kind": "llm",
         "loaded": True,
         "display_name": "Llama 3.2 1B",
@@ -104,13 +104,13 @@ def test_entries_carry_only_the_allowlisted_fields(monkeypatch):
         "context_length": 8192,
         "audio_workflows": None,
     }
-    assert models["LAiM/orpheus-3b"]["audio_workflows"] == ["speak", "clone"]
+    assert models["unsloth/orpheus-3b"]["audio_workflows"] == ["speak", "clone"]
     assert result["structuredContent"]["training_defaults"] is None
     (_method, path, _headers, _body) = studio.state.calls[-1]
     assert path == "/v1/models"
 
 
-LLAMA = "LAiM/Llama-3.2-1B-Instruct-GGUF"
+LLAMA = "unsloth/Llama-3.2-1B-Instruct-GGUF"
 
 
 # The fast path knows only chat models; without a kind, resident media models are listed too.
@@ -131,12 +131,12 @@ def test_loaded_only_takes_the_fast_path_for_chat(monkeypatch, kind, expected, r
 
 # ``model`` narrows the list to that model and adds its scalar training defaults.
 @pytest.mark.parametrize(
-    "asked", ["LAiM/Qwen3-0.6B", "LAiM/qwen3-0.6b", "LAiM/Qwen3-0.6B:Q4_K_M"]
+    "asked", ["unsloth/Qwen3-0.6B", "unsloth/qwen3-0.6b", "unsloth/Qwen3-0.6B:Q4_K_M"]
 )
 def test_model_matches_whatever_case_or_variant_is_asked_for(monkeypatch, asked):
     routes = {**PAYLOADS, ("GET", f"/api/models/config/{asked}"): CONFIG}
     result, _studio = _list(monkeypatch, {"model": asked}, routes = routes)
-    assert [m["id"] for m in result["structuredContent"]["models"]] == ["LAiM/Qwen3-0.6B"]
+    assert [m["id"] for m in result["structuredContent"]["models"]] == ["unsloth/Qwen3-0.6B"]
     assert result["structuredContent"]["training_defaults"] == {
         "max_seq_length": 2048,
         "learning_rate": "2e-4",
@@ -148,7 +148,7 @@ def test_model_matches_whatever_case_or_variant_is_asked_for(monkeypatch, asked)
 @pytest.mark.parametrize("token", [None, "hf_secret"])
 def test_the_config_request_carries_the_hub_token_only_when_given(monkeypatch, token):
     headers = {"X-LAiM-HF-Token": token} if token else None
-    _result, studio = _list(monkeypatch, {"model": "LAiM/Qwen3-0.6B"}, headers = headers)
+    _result, studio = _list(monkeypatch, {"model": "unsloth/Qwen3-0.6B"}, headers = headers)
     calls = {path: h for _m, path, h, _b in studio.state.calls}
-    assert calls["/api/models/config/LAiM/Qwen3-0.6B"].get("x-LAiM-hf-token") == token
+    assert calls["/api/models/config/unsloth/Qwen3-0.6B"].get("x-LAiM-hf-token") == token
     assert "x-LAiM-hf-token" not in calls["/v1/models"]

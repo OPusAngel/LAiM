@@ -4,6 +4,8 @@
 import { isTauri } from "@/lib/api-base";
 import { copyToClipboard } from "@/lib/copy-to-clipboard";
 import { stripAnsi } from "@/lib/strip-ansi";
+import { translate } from "@/i18n";
+
 
 export interface FrontendSupportSnapshot {
   status?: string | null;
@@ -147,6 +149,6 @@ export async function copySupportDiagnostics(
     ok: false,
     report,
     source,
-    error: "Unable to write diagnostics to the clipboard. Select and copy the text manually.",
+    get error() { return translate("uxFeatures.unableToWriteDiagnosticsrcsub"); },
   };
 }

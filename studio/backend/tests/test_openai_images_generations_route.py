@@ -36,15 +36,15 @@ from utils.api_errors import install_api_error_handlers
 @pytest.mark.parametrize(
     "repo_id, expected",
     [
-        ("LAiM/Z-Image-Turbo-GGUF", (8, 0.0)),  # turbo entry, before the z-image fallback
-        ("LAiM/Z-Image-GGUF", (25, 3.0)),
-        ("LAiM/FLUX.1-schnell-GGUF", (4, 0.0)),  # schnell entry, before the flux.1 entry
+        ("unsloth/Z-Image-Turbo-GGUF", (8, 0.0)),  # turbo entry, before the z-image fallback
+        ("unsloth/Z-Image-GGUF", (25, 3.0)),
+        ("unsloth/FLUX.1-schnell-GGUF", (4, 0.0)),  # schnell entry, before the flux.1 entry
         ("black-forest-labs/FLUX.1-dev", (20, 3.5)),
-        ("LAiM/FLUX.2-klein-4B-GGUF", (4, 1.0)),
-        ("LAiM/Qwen-Image-2512-GGUF", (50, 4.0)),
+        ("unsloth/FLUX.2-klein-4B-GGUF", (4, 1.0)),
+        ("unsloth/Qwen-Image-2512-GGUF", (50, 4.0)),
         ("Qwen/Qwen-Image-Edit-2511", (40, 4.0)),
         ("Qwen/Qwen-Image-Edit-2509", (20, 4.0)),
-        ("LAiM/Qwen-Image-Edit-2509-GGUF", (20, 4.0)),
+        ("unsloth/Qwen-Image-Edit-2509-GGUF", (20, 4.0)),
         ("black-forest-labs/FLUX.1-Kontext-dev", (20, 2.5)),
         ("black-forest-labs/FLUX.2-dev", (20, 4.0)),
         ("stabilityai/stable-diffusion-xl-base-1.0", (25, 7.0)),
@@ -73,7 +73,7 @@ def test_default_generation_params_falls_back_to_base_repo():
     )
     assert default_generation_params("/models/my-ckpt", "Qwen/Qwen-Image") == (20, 4.0)
     # repo_id wins when it already names the model; base repo is only a fallback.
-    assert default_generation_params("LAiM/Z-Image-Turbo-GGUF", "Tongyi-MAI/Z-Image") == (8, 0.0)
+    assert default_generation_params("unsloth/Z-Image-Turbo-GGUF", "Tongyi-MAI/Z-Image") == (8, 0.0)
     # Nothing identifiable -> fallback; None identifiers are skipped.
     assert default_generation_params(None, None) == (9, 0.0)
     assert default_generation_params("/models/x", None) == (9, 0.0)
@@ -109,7 +109,7 @@ class _FakeBackend:
     def __init__(
         self,
         loaded = True,
-        repo_id = "LAiM/Z-Image-Turbo-GGUF",
+        repo_id = "unsloth/Z-Image-Turbo-GGUF",
         base_repo = None,
         generate_error = None,
         unload_on_generate = False,
@@ -250,7 +250,7 @@ def test_url_response_shape(client):
         steps = 8,
         guidance = 0.0,
         batch_size = 1,
-        expected_load = load_identity("LAiM/Z-Image-Turbo-GGUF", None, "z-image"),
+        expected_load = load_identity("unsloth/Z-Image-Turbo-GGUF", None, "z-image"),
     )
 
 
@@ -568,7 +568,7 @@ def test_generation_opens_a_monitor_row(client):
     assert rows[0]["status"] == "completed"
     assert rows[0]["prompt_preview"] == "a sloth in space"
     # Relabelled to what served, not the informational body.model.
-    assert rows[0]["model"] == "LAiM/Z-Image-Turbo-GGUF"
+    assert rows[0]["model"] == "unsloth/Z-Image-Turbo-GGUF"
 
 
 def test_no_loaded_model_records_an_error_row(monkeypatch):
@@ -629,7 +629,7 @@ def test_a_failed_generation_does_not_leak_a_local_path_label(monkeypatch):
     for sent, expected in (
         ("/home/ana/models/my-flux", "my-flux"),
         ("C:\\models\\my-flux", "my-flux"),
-        ("LAiM/Z-Image-Turbo-GGUF", "LAiM/Z-Image-Turbo-GGUF"),
+        ("unsloth/Z-Image-Turbo-GGUF", "unsloth/Z-Image-Turbo-GGUF"),
     ):
         api_monitor.clear()
         assert _post(cli, {"prompt": "a sloth", "model": sent}).status_code == 503
@@ -655,14 +655,14 @@ def test_generation_pins_the_status_read_it_derived_its_params_from(monkeypatch)
     cli, _ = _replacement_client(monkeypatch, backend)
     assert cli.post("/v1/images/generations", json = {"prompt": "p"}).status_code == 200
     assert backend.calls[0]["expected_load"] == load_identity(
-        "LAiM/Z-Image-Turbo-GGUF", None, "z-image"
+        "unsloth/Z-Image-Turbo-GGUF", None, "z-image"
     )
 
 
 def test_replacement_retries_once_with_the_new_models_params(monkeypatch):
     # Z-Image-Turbo (8 steps, guidance 0) is replaced by Z-Image (25 steps, guidance 3). The first
     # attempt is refused in-lock; the retry must re-derive from fresh state, not reuse the turbo's.
-    backend = _FakeBackend(replaced_by = [("LAiM/Z-Image-GGUF", None)])
+    backend = _FakeBackend(replaced_by = [("unsloth/Z-Image-GGUF", None)])
     cli, _ = _replacement_client(monkeypatch, backend)
     resp = cli.post("/v1/images/generations", json = {"prompt": "p", "size": "256x256"})
     assert resp.status_code == 200
@@ -684,10 +684,10 @@ def test_second_replacement_is_a_503_not_a_sanitized_500(monkeypatch):
 
 def test_replacement_into_an_edit_only_model_is_a_400(monkeypatch):
     # The retry re-decides eligibility too, not just the parameters.
-    edit_only = "LAiM/Qwen-Image-Edit-GGUF"
+    edit_only = "unsloth/Qwen-Image-Edit-GGUF"
     backend = _FakeBackend(
         replaced_by = [(edit_only, None)],
-        workflows = {"LAiM/Z-Image-Turbo-GGUF": ["txt2img"], edit_only: ["img2img"]},
+        workflows = {"unsloth/Z-Image-Turbo-GGUF": ["txt2img"], edit_only: ["img2img"]},
     )
     cli, _ = _replacement_client(monkeypatch, backend)
     resp = cli.post("/v1/images/generations", json = {"prompt": "p", "size": "256x256"})
@@ -740,9 +740,9 @@ def test_same_repo_reloaded_under_a_different_base_is_a_replacement(monkeypatch)
 def test_the_pin_covers_every_field_the_request_is_derived_from():
     # Whatever the route derives parameters or eligibility from has to be in the pin, or a
     # replacement that differs only there is accepted as the snapshot.
-    turbo, base = "LAiM/Z-Image-Turbo-GGUF", "Tongyi-MAI/Z-Image"
+    turbo, base = "unsloth/Z-Image-Turbo-GGUF", "Tongyi-MAI/Z-Image"
     pin = load_identity(turbo, base, "z-image")
-    assert pin != load_identity("LAiM/Z-Image-GGUF", base, "z-image")  # steps/guidance
+    assert pin != load_identity("unsloth/Z-Image-GGUF", base, "z-image")  # steps/guidance
     assert pin != load_identity(turbo, "black-forest-labs/FLUX.1-dev", "z-image")  # steps/guidance
     assert pin != load_identity(turbo, base, "qwen-image-edit")  # edit-only verdict
     # None and "" describe the same absent field, so they must not read as a replacement.

@@ -8,7 +8,7 @@ import {
   alignerDownloadEntry,
   type SttCapabilities,
 } from "../src/features/audio/transcribe-capabilities.ts";
-import { readSrc } from "./helpers/kit.ts";
+import { readSrc, readSrcExpanded } from "./helpers/kit.ts";
 
 const ALIGNER_ID = "audio-cpp/audio.cpp-gguf/Qwen3-ForcedAligner-0.6B-GGUF";
 const QWEN3: SttCapabilities = {
@@ -56,7 +56,7 @@ test("nothing is staged when the run can start now", () => {
 });
 
 test("the aligner download runs through the shared manager; cancel, Timestamps off or an untimestamped run drops the pending run", () => {
-  const hook = readSrc("features/audio/hooks/use-aligner-download.ts");
+  const hook = readSrcExpanded("features/audio/hooks/use-aligner-download.ts");
   assert.match(hook, /useStagedDownload\(\{\s*scopeId: "audio-aligner"/);
   assert.match(
     hook,
@@ -78,7 +78,7 @@ test("the aligner download runs through the shared manager; cancel, Timestamps o
 });
 
 test("only a timestamped Transcribe waits for the aligner download", () => {
-  const page = readSrc("features/audio/audio-page.tsx");
+  const page = readSrcExpanded("features/audio/audio-page.tsx");
   assert.match(
     page,
     /useAlignerDownload\(\s*transcribeCaps\.caps,\s*transcribeCaps\.refresh,\s*transcribeOptions\.request\.timestamps,\s*\)/,
@@ -104,7 +104,7 @@ test("only a timestamped Transcribe waits for the aligner download", () => {
 });
 
 test("a session reset drops a staged plan so Transcribe is not left blocked", () => {
-  const staged = readSrc(
+  const staged = readSrcExpanded(
     "features/hub/download-manager/use-staged-download.ts",
   );
   const start = staged.indexOf("useStagedDownloadQueues.subscribe(");
@@ -114,8 +114,8 @@ test("a session reset drops a staged plan so Transcribe is not left blocked", ()
   assert.match(subscriber, /!onResetRef\.current\s*\)\s*\{\s*return;/);
   assert.match(subscriber, /setQueue\(null\);\s*onResetRef\.current\?\.\(\);/);
   assert.doesNotMatch(subscriber, /onCancelled/);
-  const hook = readSrc("features/audio/hooks/use-aligner-download.ts");
+  const hook = readSrcExpanded("features/audio/hooks/use-aligner-download.ts");
   assert.match(hook, /onReset: \(\) => \{\s*pendingRun\.current = null;\s*\}/);
-  const slot = readSrc("features/audio/hooks/use-audio-model-slot.ts");
+  const slot = readSrcExpanded("features/audio/hooks/use-audio-model-slot.ts");
   assert.match(slot, /onReset: invalidatePendingStagedTts,/);
 });

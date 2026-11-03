@@ -66,7 +66,7 @@ async function withLoadServer(
           ? { detail: "Not enough memory to load this model." }
           : reply === "deferred"
             ? { _deferred_error: { status_code: 500, detail: "llama-server exited" } }
-            : { status: "loaded", model: "LAiM/gemma-3-270m-it-GGUF" };
+            : { status: "loaded", model: "unsloth/gemma-3-270m-it-GGUF" };
       res.writeHead(reply === "rejected" ? 500 : 200, {
         "Content-Type": "application/json",
       });
@@ -154,7 +154,7 @@ async function loadError(reply: Reply): Promise<unknown> {
     const { loadModel } = realLoadModel(realAuthFetch(port));
     try {
       await loadModel({
-        model_path: "LAiM/gemma-3-270m-it-GGUF",
+        model_path: "unsloth/gemma-3-270m-it-GGUF",
         gguf_variant: "UD-Q4_K_XL",
         max_seq_length: 4096,
       });

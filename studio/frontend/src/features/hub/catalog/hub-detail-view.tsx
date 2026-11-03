@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { cn } from "@/lib/utils";
 import { type ComponentProps, useEffect, useRef, useState } from "react";
 import { ModelInspector } from "./model-inspector";
@@ -75,7 +76,7 @@ export function HubDetailView({
                 strokeWidth={1.75}
                 className="size-3.5"
               />
-              Back to Hub
+              {translate("uxHub.backToHub1cu89")}
             </button>
           </div>
         </div>

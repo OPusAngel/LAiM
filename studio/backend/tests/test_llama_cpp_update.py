@@ -126,7 +126,7 @@ def _patch_installer_popen(
 def _write_install(
     dir_: Path,
     tag: str,
-    repo: str = "LAiMai/llama.cpp",
+    repo: str = "unslothai/llama.cpp",
     asset: str | None = None,
     release_tag: str | None = None,
     force_cpu: bool | None = None,
@@ -167,7 +167,7 @@ def _clean_state(monkeypatch, tmp_path):
     monkeypatch.setattr(freshness, "_cache_dir", lambda: tmp_path / ".freshness_cache")
     # Deterministic markerless paths: no host-pinned binary, no custom dir.
     monkeypatch.delenv("LLAMA_SERVER_PATH", raising = False)
-    monkeypatch.delenv("LAiM_LLAMA_CPP_PATH", raising = False)
+    monkeypatch.delenv("UNSLOTH_LLAMA_CPP_PATH", raising = False)
     # Never hit the network in these tests.
     monkeypatch.setattr(freshness, "_fetch_latest_release_tag", lambda repo, timeout = 5.0: None)
     # Keep the whisper piggyback out of the llama-only tests: no host probe, no
@@ -188,7 +188,7 @@ def _no_prebuilt(monkeypatch):
 def _prebuilt(
     monkeypatch,
     *,
-    repo = "LAiMai/llama.cpp",
+    repo = "unslothai/llama.cpp",
     release_tag = "b9585",
     llama_tag = None,
     asset = None,
@@ -233,7 +233,7 @@ def test_status_source_build_offers_prebuilt(monkeypatch, tmp_path):
     assert st["update_available"] is True
     assert st["source_build"] is True
     assert st["latest_tag"] == "b9585"
-    assert st["published_repo"] == "LAiMai/llama.cpp"
+    assert st["published_repo"] == "unslothai/llama.cpp"
 
 
 def test_status_source_build_compares_llama_tag(monkeypatch, tmp_path):
@@ -453,11 +453,11 @@ def test_start_update_source_build_installs_prebuilt(monkeypatch, tmp_path):
     binary = install_dir / "build" / "bin" / "llama-server"
     binary.parent.mkdir(parents = True)
     binary.write_text("stub")  # no marker
-    monkeypatch.delenv("LAiM_LLAMA_CPP_PATH", raising = False)
+    monkeypatch.delenv("UNSLOTH_LLAMA_CPP_PATH", raising = False)
     monkeypatch.setattr(upd, "_find_binary", lambda: str(binary))
     monkeypatch.setattr(upd, "_installer_script", lambda: tmp_path / "install_llama_prebuilt.py")
     _prebuilt(
-        monkeypatch, repo = "LAiMai/llama.cpp", asset = "app-b9585-linux-x64-rocm-gfx110X.tar.gz"
+        monkeypatch, repo = "unslothai/llama.cpp", asset = "app-b9585-linux-x64-rocm-gfx110X.tar.gz"
     )
 
     captured = {}
@@ -483,7 +483,8 @@ def test_start_update_source_build_installs_prebuilt(monkeypatch, tmp_path):
         time.sleep(0.05)
     cmd = captured["cmd"]
     assert "--install-dir" in cmd and str(install_dir) in cmd
-    assert "--published-repo" in cmd and "LAiMai/llama.cpp" in cmd
+    # The apply reuses whatever repo the prebuilt probe answered with.
+    assert "--published-repo" in cmd and "unslothai/llama.cpp" in cmd
     assert "--llama-tag" in cmd and "latest" in cmd
     assert cmd[cmd.index("--rocm-gfx") + 1] == "gfx110x"
     assert "--simple-policy" not in cmd and "--cpu-fallback" not in cmd
@@ -535,7 +536,7 @@ def test_start_update_happy_path(monkeypatch, tmp_path):
     assert "--install-dir" in captured["cmd"]
     assert str(install_dir) in captured["cmd"]
     assert "--llama-tag" in captured["cmd"] and "latest" in captured["cmd"]
-    assert "LAiMai/llama.cpp" in captured["cmd"]
+    assert freshness.LLAMA_RELEASE_REPO in captured["cmd"]
     assert job["progress"] == 1.0
     assert popen_kwargs["env"]["LAiM_PROGRESS_PERCENT_STEP"] == "5"
 
@@ -762,16 +763,17 @@ def test_start_update_pinned_tag_mismatch_fails(monkeypatch, tmp_path):
     assert "b9601-mix-a0e2906" in (job["error"] or "")
 
 
-def test_start_update_pinned_reroute_to_other_repo_ok(monkeypatch, tmp_path):
-    # A Vulkan/Intel host reroutes fork->upstream and drops the pin, installing a
-    # different-repo tag. Legitimate: the pin check must not flag the repo switch.
+def test_start_update_from_a_fork_marker_lands_laimes_own_repo(monkeypatch, tmp_path):
+    # An install recorded before LAiM switched its llama.cpp source still names the old fork.
+    # The update goes to LAiM's own release repo anyway, so the post-install check must accept
+    # both the repo change and the bare upstream tag it produces.
     monkeypatch.setattr(sys, "platform", "linux")
     install_dir = tmp_path / "llama.cpp"
-    binary = _write_install(install_dir, "b9595", repo = "LAiMai/llama.cpp")
+    binary = _write_install(install_dir, "b9595", repo = "unslothai/llama.cpp")
     monkeypatch.setattr(upd, "_find_binary", lambda: binary)
     monkeypatch.setattr(upd, "_installer_script", lambda: tmp_path / "install_llama_prebuilt.py")
     monkeypatch.setattr(
-        freshness, "_fetch_latest_release_tag", lambda repo, timeout = 5.0: "b9601-mix-a0e2906"
+        freshness, "_fetch_latest_release_tag", lambda repo, timeout = 5.0: "b9601"
     )
     _patch_installer_popen(
         monkeypatch,
@@ -813,8 +815,8 @@ def test_start_update_rate_limit_reports_actionable_error(monkeypatch, tmp_path)
 
     lines = [
         "[llama-prebuilt] prebuilt fallback reason: failed to inspect published "
-        "releases in LAiMai/llama.cpp: GitHub API returned 403 for "
-        "https://api.github.com/repos/LAiMai/llama.cpp/releases/tags/b9518; "
+        "releases in unslothai/llama.cpp: GitHub API returned 403 for "
+        "https://api.github.com/repos/unslothai/llama.cpp/releases/tags/b9518; "
         "set GH_TOKEN or GITHUB_TOKEN to avoid GitHub API rate limits\n",
         "windows_runtime_dirs=C:\\\\very\\\\long\\\\path\n",
     ]
@@ -845,8 +847,8 @@ def test_start_update_reports_a_github_429_as_a_rate_limit(monkeypatch, tmp_path
 
     lines = [
         "[llama-prebuilt] prebuilt fallback reason: failed to inspect published "
-        "releases in LAiMai/llama.cpp: GitHub API returned 429 for "
-        "https://api.github.com/repos/LAiMai/llama.cpp/releases/tags/b9518; "
+        "releases in unslothai/llama.cpp: GitHub API returned 429 for "
+        "https://api.github.com/repos/unslothai/llama.cpp/releases/tags/b9518; "
         "set GH_TOKEN or GITHUB_TOKEN to avoid GitHub API rate limits\n",
     ]
     _patch_installer_popen(monkeypatch, returncode = 2, lines = lines)
@@ -875,8 +877,8 @@ def test_start_update_tells_an_authenticated_run_to_wait_for_the_limit(monkeypat
 
     lines = [
         "[llama-prebuilt] prebuilt fallback reason: failed to inspect published "
-        "releases in LAiMai/llama.cpp: GitHub API returned 429 for "
-        "https://api.github.com/repos/LAiMai/llama.cpp/releases/tags/b9518\n",
+        "releases in unslothai/llama.cpp: GitHub API returned 429 for "
+        "https://api.github.com/repos/unslothai/llama.cpp/releases/tags/b9518\n",
     ]
     _patch_installer_popen(monkeypatch, returncode = 2, lines = lines)
 
@@ -961,7 +963,7 @@ def _capture_install_cmd(
     tmp_path,
     *,
     tag = "b9493",
-    repo = "LAiMai/llama.cpp",
+    repo = "unslothai/llama.cpp",
     asset = None,
     latest = "b9518",
 ) -> list:
@@ -1005,7 +1007,7 @@ def test_install_cmd_rocm_marker_forwards_gfx(monkeypatch, tmp_path):
     assert "--has-rocm" not in cmd
     assert "--force-cpu" not in cmd
     assert "--simple-policy" not in cmd
-    assert "--published-repo" in cmd and "LAiMai/llama.cpp" in cmd
+    assert "--published-repo" in cmd and freshness.LLAMA_RELEASE_REPO in cmd
 
 
 def test_install_cmd_fork_rocm_marker_forwards_has_rocm(monkeypatch, tmp_path):
@@ -1276,7 +1278,7 @@ def test_resolve_prebuilt_parses_and_caches(monkeypatch, tmp_path):
         returncode = 0
         # stderr noise plus the JSON line on stdout (installer logs to stderr).
         stdout = (
-            '{"prebuilt_available": true, "repo": "LAiMai/llama.cpp", "release_tag": "b9585"}'
+            '{"prebuilt_available": true, "repo": "unslothai/llama.cpp", "release_tag": "b9585"}'
         )
         stderr = "[llama-prebuilt] some log\n"
 
@@ -1338,7 +1340,7 @@ def test_llama_install_root_finds_llama_cpp_ancestor(monkeypatch, tmp_path):
     binary = root / "build" / "bin" / "llama-server"
     binary.parent.mkdir(parents = True)
     binary.write_text("stub")
-    monkeypatch.delenv("LAiM_LLAMA_CPP_PATH", raising = False)
+    monkeypatch.delenv("UNSLOTH_LLAMA_CPP_PATH", raising = False)
     assert upd._llama_install_root(str(binary)) == root
 
 
@@ -1348,22 +1350,22 @@ def test_llama_install_root_unmanaged_path_returns_none(monkeypatch, tmp_path):
     binary = tmp_path / "usr" / "local" / "bin" / "llama-server"
     binary.parent.mkdir(parents = True)
     binary.write_text("stub")
-    monkeypatch.delenv("LAiM_LLAMA_CPP_PATH", raising = False)
+    monkeypatch.delenv("UNSLOTH_LLAMA_CPP_PATH", raising = False)
     assert upd._llama_install_root(str(binary)) is None
 
 
 def test_llama_install_root_LAiM_env_dir(monkeypatch, tmp_path):
-    # LAiM_LLAMA_CPP_PATH dir holding the active binary is the managed root.
+    # UNSLOTH_LLAMA_CPP_PATH dir holding the active binary is the managed root.
     root = tmp_path / "vendor" / "llama"
     binary = root / "llama-server"
     binary.parent.mkdir(parents = True)
     binary.write_text("stub")
-    monkeypatch.setenv("LAiM_LLAMA_CPP_PATH", str(root))
+    monkeypatch.setenv("UNSLOTH_LLAMA_CPP_PATH", str(root))
     assert upd._llama_install_root(str(binary)) == root
 
 
 def test_llama_install_root_ignores_inactive_env_root(monkeypatch, tmp_path):
-    # LAiM_LLAMA_CPP_PATH set but the active binary is not under it: do not
+    # UNSLOTH_LLAMA_CPP_PATH set but the active binary is not under it: do not
     # target the stale env root, resolve from the binary's own llama.cpp tree.
     inactive = tmp_path / "custom-empty"
     inactive.mkdir()
@@ -1371,7 +1373,7 @@ def test_llama_install_root_ignores_inactive_env_root(monkeypatch, tmp_path):
     binary = active / "build" / "bin" / "llama-server"
     binary.parent.mkdir(parents = True)
     binary.write_text("stub")
-    monkeypatch.setenv("LAiM_LLAMA_CPP_PATH", str(inactive))
+    monkeypatch.setenv("UNSLOTH_LLAMA_CPP_PATH", str(inactive))
     assert upd._llama_install_root(str(binary)) == active
 
 
@@ -1383,7 +1385,7 @@ def test_llama_install_root_refuses_pinned_checkout_under_llama_cpp(monkeypatch,
     binary.parent.mkdir(parents = True)
     binary.write_text("stub")
     monkeypatch.setenv("LLAMA_SERVER_PATH", str(binary))
-    monkeypatch.delenv("LAiM_LLAMA_CPP_PATH", raising = False)
+    monkeypatch.delenv("UNSLOTH_LLAMA_CPP_PATH", raising = False)
     assert upd._llama_install_root(str(binary)) is None
 
 
@@ -1467,7 +1469,7 @@ def test_status_source_build_includes_update_size(monkeypatch, tmp_path):
     monkeypatch.setattr(upd, "_find_binary", lambda: str(binary))
     _prebuilt(
         monkeypatch,
-        repo = "LAiMai/llama.cpp",
+        repo = "unslothai/llama.cpp",
         release_tag = "b9585",
         asset = "app-b9585-linux-x64-cpu.tar.gz",
     )
@@ -1477,7 +1479,7 @@ def test_status_source_build_includes_update_size(monkeypatch, tmp_path):
         "latest_release_assets",
         lambda repo, *, force_refresh = False: (
             {"app-b9585-linux-x64-cpu.tar.gz": 77_000_000}
-            if repo == "LAiMai/llama.cpp"
+            if repo == "unslothai/llama.cpp"
             else None
         ),
     )
@@ -1518,7 +1520,7 @@ def test_update_changelog_uses_full_installed_release_identity(monkeypatch, tmp_
             "changes": [{"summary": "New model", "links": []}],
             "total_changes": 1,
             "truncated": False,
-            "release_url": "https://github.com/LAiMai/llama.cpp/releases/tag/new",
+            "release_url": "https://github.com/unslothai/llama.cpp/releases/tag/new",
         }
 
     monkeypatch.setattr(upd, "changelog_for_update", fake_changelog)
@@ -1530,7 +1532,7 @@ def test_update_changelog_uses_full_installed_release_identity(monkeypatch, tmp_
     assert result["latest_tag"] == "b10715-mix-new"
     assert result["changes"][0]["summary"] == "New model"
     assert seen == {
-        "repo": "LAiMai/llama.cpp",
+        "repo": freshness.LLAMA_RELEASE_REPO,
         "installed": "b10698-mix-old",
         "latest": "b10715-mix-new",
         "force_refresh": True,
@@ -1549,7 +1551,7 @@ def test_update_changelog_retry_keeps_the_banner_target(monkeypatch, tmp_path):
         lambda repo, timeout = 5.0: published["tag"],
     )
     # The banner rendered this target on its last hourly status check.
-    assert freshness.latest_published_release("LAiMai/llama.cpp") == "b10715-mix-new"
+    assert freshness.latest_published_release(freshness.LLAMA_RELEASE_REPO) == "b10715-mix-new"
     published["tag"] = "b10800-mix-newer"  # published while the banner sat open
     monkeypatch.setattr(
         upd,
@@ -1558,7 +1560,7 @@ def test_update_changelog_retry_keeps_the_banner_target(monkeypatch, tmp_path):
             "changes": [{"summary": "New model", "links": []}],
             "total_changes": 1,
             "truncated": False,
-            "release_url": "https://github.com/LAiMai/llama.cpp/releases/tag/new",
+            "release_url": "https://github.com/unslothai/llama.cpp/releases/tag/new",
         },
     )
 
@@ -1592,7 +1594,7 @@ def test_update_changelog_answers_the_pair_the_caller_asked_about(monkeypatch, t
             "changes": [],
             "total_changes": 0,
             "truncated": False,
-            "release_url": "https://github.com/LAiMai/llama.cpp/releases/tag/x",
+            "release_url": "https://github.com/unslothai/llama.cpp/releases/tag/x",
         }
 
     monkeypatch.setattr(upd, "changelog_for_update", fake_changelog)
@@ -1626,7 +1628,7 @@ def test_update_changelog_ignores_a_pair_from_a_different_install(monkeypatch, t
             "changes": [],
             "total_changes": 0,
             "truncated": False,
-            "release_url": "https://github.com/LAiMai/llama.cpp/releases/tag/x",
+            "release_url": "https://github.com/unslothai/llama.cpp/releases/tag/x",
         },
     )
 

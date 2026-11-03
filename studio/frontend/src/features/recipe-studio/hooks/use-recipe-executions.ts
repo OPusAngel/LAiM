@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { usePlatformStore } from "@/config/env";
 import {
   getInferenceStatus,
@@ -139,7 +140,7 @@ function readLocalModelSelection(
   boundConfig: Record<string, unknown>,
 ): LocalModelLoadPlan {
   const alias =
-    typeof boundConfig.alias === "string" ? boundConfig.alias : "local model";
+    typeof boundConfig.alias === "string" ? boundConfig.alias : translate("uxRecipestudio.localModelkwjf2");
   const target =
     typeof boundConfig.model === "string" ? boundConfig.model.trim() : "";
   const ggufVariant =
@@ -149,7 +150,7 @@ function readLocalModelSelection(
   if (!target) {
     return {
       selection: null,
-      error: `Model config ${alias}: choose a local model before validating or running this recipe.`,
+      get error() { return translate("uxRecipestudio.modelConfigChooseAce8rb", { p1: alias }); },
     };
   }
   if (target.toLowerCase() === "local") {
@@ -330,8 +331,8 @@ async function loadLocalModelSelection(
   } = selection;
   const modelLabel = ggufVariant ? `${target} (${ggufVariant})` : target;
   let loadToastDismissed = false;
-  const toastId = toast.message(`Loading ${modelLabel}...`, {
-    description: "Starting the local inference server for this recipe.",
+  const toastId = toast.message(translate("uxRecipestudio.loading3zbvn", { p1: modelLabel }), {
+    description: translate("uxRecipestudio.startingTheLocalInference1g37p"),
     duration: Number.POSITIVE_INFINITY,
     closeButton: true,
     icon: createLoadingToastIcon(),
@@ -384,7 +385,10 @@ async function loadLocalModelSelection(
       duration: offloadNotice ? 8000 : 2000,
       icon: undefined,
     };
-    const title = `Loaded ${modelLabel}${offloadNotice?.titleSuffix ?? ""}`;
+    const title = translate("uxRecipestudio.loadedModelSuffixU29mv", {
+      p1: modelLabel,
+      p2: offloadNotice?.titleSuffix ?? "",
+    });
     const showToast = offloadNotice ? toast.warning : toast.success;
     if (loadToastDismissed) {
       showToast(title, successOptions);
@@ -487,7 +491,7 @@ async function ensureLocalModelLoaded(
     const activeSelection = await getActiveLocalModelSelection();
     return activeSelection
       ? null
-      : `Existing recipe uses legacy local model for ${loadPlan.legacyAliases.join(", ")}. Select a concrete local model or load one in Chat.`;
+      : translate("uxRecipestudio.existingRecipeUsesLegacyw02ho", { p1: loadPlan.legacyAliases.join(", ") });
   }
   if (!loadPlan.selection) {
     return loadPlan.error;
@@ -511,7 +515,7 @@ async function prepareLocalModelForRun(payload: RecipePayload): Promise<{
     return activeSelection
       ? { error: null, restorePrevious: null }
       : {
-          error: `Existing recipe uses legacy local model for ${loadPlan.legacyAliases.join(", ")}. Select a concrete local model or load one in Chat.`,
+          get error() { return translate("uxRecipestudio.existingRecipeUsesLegacyvb9p7", { p1: loadPlan.legacyAliases.join(", ") }); },
           restorePrevious: null,
         };
   }
@@ -537,13 +541,13 @@ async function prepareLocalModelForRun(payload: RecipePayload): Promise<{
       ? async () => {
           const restoreError = await loadLocalModelSelection(previousSelection);
           if (restoreError) {
-            toastError("Could not restore previous local model", restoreError);
+            toastError(translate("uxRecipestudio.couldNotRestorePrevious58nwj"), restoreError);
           }
         }
       : previousSnapshot.unrestorableLabel
         ? () => {
-            toast.warning("Previous local model was not restored", {
-              description: `${previousSnapshot.unrestorableLabel} was selected from a native file path. Reopen it in Chat to continue with that model.`,
+            toast.warning(translate("uxRecipestudio.previousLocalModelWas1hb1j"), {
+              get description() { return translate("uxRecipestudio.wasSelectedFromAqrln0", { p1: previousSnapshot.unrestorableLabel }); },
             });
             return Promise.resolve();
           }
@@ -681,7 +685,7 @@ export function useRecipeExecutions({
       resetForRecipe: state.resetForRecipe,
     })),
   );
-  const payloadErrorMessage = payloadResult.errors[0] ?? "Invalid payload.";
+  const payloadErrorMessage = payloadResult.errors[0] ?? translate("uxRecipestudio.invalidPayloadnp69g");
 
   const upsertAndPersist = useCallback(
     (record: RecipeExecutionRecord): void => {
@@ -689,7 +693,7 @@ export function useRecipeExecutions({
       upsertExecution(normalizedRecord);
       saveRecipeExecution(normalizedRecord).catch((error) => {
         // biome-ignore lint/suspicious/noConsole: background persistence failures should not interrupt the UI
-        console.error("Save recipe execution failed:", error);
+        console.error(translate("uxRecipestudio.saveRecipeExecutionFailedygbya"), error);
       });
     },
     [upsertExecution],
@@ -738,7 +742,7 @@ export function useRecipeExecutions({
         });
       } catch (error) {
         // biome-ignore lint/suspicious/noConsole: hydration failures are non-blocking diagnostics
-        console.error("Load recipe executions failed:", error);
+        console.error(translate("uxRecipestudio.loadRecipeExecutionsFailedte6s3"), error);
       }
     }
 
@@ -772,7 +776,7 @@ export function useRecipeExecutions({
     }
 
     setRunErrors(payloadResult.errors);
-    toastError("Invalid recipe payload", payloadErrorMessage);
+    toastError(translate("uxRecipestudio.invalidRecipePayloaduhqc1"), payloadErrorMessage);
     return null;
   }, [payloadErrorMessage, payloadResult.errors, readPayload, setRunErrors]);
 
@@ -843,7 +847,7 @@ export function useRecipeExecutions({
           finishedAt: Date.now(),
         });
         setRunErrors([message]);
-        toastError(`${label} failed`, message);
+        toastError(translate("uxRecipestudio.failedvskkh", { p1: label }), message);
         if (!jobCreated) {
           shouldRestorePrevious = true;
         }
@@ -877,7 +881,7 @@ export function useRecipeExecutions({
         return restorePrevious;
       }
       setRunErrors([error]);
-      toastError("Local model failed to load", error);
+      toastError(translate("uxRecipestudio.localModelFailedTo1y61h"), error);
       return false;
     },
     [setRunErrors],
@@ -895,15 +899,15 @@ export function useRecipeExecutions({
         const errors = formatValidationMessages({
           errors: validation.errors,
         });
-        const fallback = validation.raw_detail ?? "Validation failed.";
+        const fallback = validation.raw_detail ?? translate("uxRecipestudio.validationFailed7n78j");
         const nextErrors = errors.length > 0 ? errors : [fallback];
         setRunErrors(nextErrors);
-        toastError("Validation failed", nextErrors[0]);
+        toastError(translate("uxRecipestudio.validationFailedtt77h"), nextErrors[0]);
         return false;
       } catch (error) {
-        const message = toErrorMessage(error, "Validation failed.");
+        const message = toErrorMessage(error, translate("uxRecipestudio.validationFailed7n78j"));
         setRunErrors([message]);
-        toastError("Validation failed", message);
+        toastError(translate("uxRecipestudio.validationFailedtt77h"), message);
         return false;
       }
     },
@@ -918,9 +922,9 @@ export function useRecipeExecutions({
     ): Promise<boolean> => {
       const trimmedRunName = typeof runName === "string" ? runName.trim() : "";
       if (kind === "full" && !trimmedRunName) {
-        const message = "Run name required for full runs.";
+        const message = translate("uxRecipestudio.runNameRequiredForv6fcv");
         setRunErrors([message]);
-        toastError("Run name required", message);
+        toastError(translate("uxRecipestudio.runNameRequireduj92k"), message);
         return false;
       }
 
@@ -1040,7 +1044,7 @@ export function useRecipeExecutions({
           errors: [localLoadError],
           rawDetail: null,
         });
-        toastError("Local model failed to load", localLoadError);
+        toastError(translate("uxRecipestudio.localModelFailedTo1y61h"), localLoadError);
         return false;
       }
 
@@ -1051,7 +1055,7 @@ export function useRecipeExecutions({
       });
       return true;
     } catch (error) {
-      const message = toErrorMessage(error, "Validation failed.");
+      const message = toErrorMessage(error, translate("uxRecipestudio.validationFailed7n78j"));
       setValidateResult({
         valid: false,
         errors: [message],
@@ -1109,8 +1113,8 @@ export function useRecipeExecutions({
           status: "cancelling",
         });
       } catch (error) {
-        const message = toErrorMessage(error, "Could not cancel execution.");
-        toastError("Cancel failed", message);
+        const message = toErrorMessage(error, translate("uxRecipestudio.couldNotCancelExecutionw8ac5"));
+        toastError(translate("uxRecipestudio.cancelFaileddj7mt"), message);
       }
     },
     [executions, upsertAndPersist],
@@ -1147,8 +1151,8 @@ export function useRecipeExecutions({
           datasetPage: page,
         });
       } catch (error) {
-        const message = toErrorMessage(error, "Could not load dataset page.");
-        toastError("Dataset page failed", message);
+        const message = toErrorMessage(error, translate("uxRecipestudio.couldNotLoadDatasetuvq7y"));
+        toastError(translate("uxRecipestudio.datasetPageFailedowmv9"), message);
       }
     },
     [executions, upsertAndPersist],

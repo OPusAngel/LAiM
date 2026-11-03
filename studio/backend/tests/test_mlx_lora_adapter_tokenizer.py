@@ -62,7 +62,7 @@ def adapter_dir(tmp_path):
     adapter = tmp_path / "LAiM_Qwen3-0.6B-Base_1"
     trained.save_pretrained(adapter)
     (adapter / "adapter_config.json").write_text(
-        json.dumps({"base_model_name_or_path": "LAiM/Qwen3-0.6B-Base", "fine_tune_type": "lora"})
+        json.dumps({"base_model_name_or_path": "unsloth/Qwen3-0.6B-Base", "fine_tune_type": "lora"})
     )
     return adapter
 
@@ -130,7 +130,7 @@ def _export_backend(monkeypatch, base_tokenizer):
     loader = SimpleNamespace(from_pretrained = lambda **k: (SimpleNamespace(), base_tokenizer))
     monkeypatch.setattr(mod, "FastLanguageModel", loader)
     monkeypatch.setattr(mod, "_IS_MLX", True)
-    monkeypatch.setattr(mod, "get_base_model_from_lora", lambda *a, **k: "LAiM/Qwen3-0.6B-Base")
+    monkeypatch.setattr(mod, "get_base_model_from_lora", lambda *a, **k: "unsloth/Qwen3-0.6B-Base")
     monkeypatch.setattr(mod, "detect_audio_type", lambda *a, **k: None)
     monkeypatch.setattr(mod, "is_vision_model", lambda *a, **k: False)
     monkeypatch.setattr(mod, "_hf_offline", lambda *a, **k: False)

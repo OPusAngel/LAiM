@@ -21,16 +21,16 @@ OLD_BODY = """Automated prebuild, merged with:
 
 - DiffusionGemma ([#24423](https://github.com/ggml-org/llama.cpp/pull/24423), commit [old0000](https://github.com/ggml-org/llama.cpp/pull/24423/commits/old0000))
 - Add TML Inkling architecture ([#25731](https://github.com/ggml-org/llama.cpp/pull/25731), commit [old1111](https://github.com/ggml-org/llama.cpp/pull/25731/commits/old1111))
-- kimi-k3 loading fixes ([LAiMai/llama.cpp#70](https://github.com/LAiMai/llama.cpp/pull/70), commit [old2222](https://github.com/LAiMai/llama.cpp/pull/70/commits/old2222))
+- kimi-k3 loading fixes ([unslothai/llama.cpp#70](https://github.com/unslothai/llama.cpp/pull/70), commit [old2222](https://github.com/unslothai/llama.cpp/pull/70/commits/old2222))
 """
 
 LATEST_BODY = """Automated prebuild, merged with:
 
-- Carry ggml-org#24423 (DiffusionGemma) ([LAiMai/llama.cpp#107](https://github.com/LAiMai/llama.cpp/pull/107), commit [new0000](https://github.com/LAiMai/llama.cpp/pull/107/commits/new0000))
+- Carry ggml-org#24423 (DiffusionGemma) ([unslothai/llama.cpp#107](https://github.com/unslothai/llama.cpp/pull/107), commit [new0000](https://github.com/unslothai/llama.cpp/pull/107/commits/new0000))
 - Add TML Inkling architecture, rebased ([#25731](https://github.com/ggml-org/llama.cpp/pull/25731), commit [new1111](https://github.com/ggml-org/llama.cpp/pull/25731/commits/new1111))
-- kimi-k3 loading fixes ([LAiMai/llama.cpp#70](https://github.com/LAiMai/llama.cpp/pull/70), commit [new2222](https://github.com/LAiMai/llama.cpp/pull/70/commits/new2222))
+- kimi-k3 loading fixes ([unslothai/llama.cpp#70](https://github.com/unslothai/llama.cpp/pull/70), commit [new2222](https://github.com/unslothai/llama.cpp/pull/70/commits/new2222))
 - model: add GLM-5-Next (GLM-5.3-Flash) ([#27754](https://github.com/ggml-org/llama.cpp/pull/27754), commit [949f7ef](https://github.com/ggml-org/llama.cpp/pull/27754/commits/949f7ef))
-- MTP for Qwen3.8-Flash-Next ([LAiMai/llama.cpp#144](https://github.com/LAiMai/llama.cpp/pull/144), commit [586b15e](https://github.com/LAiMai/llama.cpp/pull/144/commits/586b15e))
+- MTP for Qwen3.8-Flash-Next ([unslothai/llama.cpp#144](https://github.com/unslothai/llama.cpp/pull/144), commit [586b15e](https://github.com/unslothai/llama.cpp/pull/144/commits/586b15e))
 """
 
 
@@ -39,7 +39,7 @@ def test_delta_excludes_old_prs_after_rebase(monkeypatch):
         "b10698-mix-old": {"body": OLD_BODY},
         "b10715-mix-new": {
             "body": LATEST_BODY,
-            "html_url": "https://github.com/LAiMai/llama.cpp/releases/tag/b10715-mix-new",
+            "html_url": "https://github.com/unslothai/llama.cpp/releases/tag/b10715-mix-new",
         },
     }
     monkeypatch.setattr(
@@ -48,7 +48,7 @@ def test_delta_excludes_old_prs_after_rebase(monkeypatch):
         lambda _repo, tag, *, force_refresh = False: releases.get(tag),
     )
 
-    result = changes.changelog_for_update("LAiMai/llama.cpp", "b10698-mix-old", "b10715-mix-new")
+    result = changes.changelog_for_update("unslothai/llama.cpp", "b10698-mix-old", "b10715-mix-new")
 
     assert result is not None
     assert [item["summary"] for item in result["changes"]] == [
@@ -75,7 +75,7 @@ def test_delta_fails_closed_when_either_release_is_unavailable(monkeypatch):
         ),
     )
 
-    assert changes.changelog_for_update("LAiMai/llama.cpp", "installed", "latest") is None
+    assert changes.changelog_for_update("unslothai/llama.cpp", "installed", "latest") is None
 
 
 def test_text_identity_filters_old_unlinked_bullets(monkeypatch):
@@ -89,7 +89,7 @@ def test_text_identity_filters_old_unlinked_bullets(monkeypatch):
         lambda _repo, tag, *, force_refresh = False: releases[tag],
     )
 
-    result = changes.changelog_for_update("LAiMai/llama.cpp", "old", "new")
+    result = changes.changelog_for_update("unslothai/llama.cpp", "old", "new")
 
     assert result is not None
     assert result["changes"] == [{"summary": "Add a new backend", "links": []}]
@@ -102,7 +102,7 @@ def test_delta_fails_closed_when_installed_notes_have_no_bullets(monkeypatch):
         "b9596-mix-e6f2453": {
             "body": (
                 "Automated LAiM llama.cpp prebuild for upstream b9596 "
-                "+ PR #24423 @ 10a2613 (LAiMai/llama.cpp@7bbfff8)."
+                "+ PR #24423 @ 10a2613 (unslothai/llama.cpp@7bbfff8)."
             )
         },
         "b10715-mix-new": {"body": LATEST_BODY},
@@ -114,7 +114,7 @@ def test_delta_fails_closed_when_installed_notes_have_no_bullets(monkeypatch):
     )
 
     result = changes.changelog_for_update(
-        "LAiMai/llama.cpp", "b9596-mix-e6f2453", "b10715-mix-new"
+        "unslothai/llama.cpp", "b9596-mix-e6f2453", "b10715-mix-new"
     )
 
     assert result is None
@@ -132,7 +132,7 @@ def test_delta_reports_no_changes_when_target_drops_every_carried_pr(monkeypatch
         lambda _repo, tag, *, force_refresh = False: releases[tag],
     )
 
-    result = changes.changelog_for_update("LAiMai/llama.cpp", "old", "new")
+    result = changes.changelog_for_update("unslothai/llama.cpp", "old", "new")
 
     assert result is not None
     assert result["changes"] == []
@@ -190,12 +190,12 @@ def test_pull_and_issue_urls_share_one_identity_namespace():
 def test_a_title_containing_the_metadata_delimiter_is_not_truncated():
     entry = changes._entry(
         "vulkan: handle ([a],[b]) tuples "
-        "([LAiMai/llama.cpp#5](https://github.com/LAiMai/llama.cpp/pull/5))"
+        "([unslothai/llama.cpp#5](https://github.com/unslothai/llama.cpp/pull/5))"
     )
 
     assert entry["summary"] == "vulkan: handle ([a],[b]) tuples"
     assert [link["url"] for link in entry["links"]] == [
-        "https://github.com/LAiMai/llama.cpp/pull/5"
+        "https://github.com/unslothai/llama.cpp/pull/5"
     ]
 
 
@@ -206,9 +206,9 @@ def test_a_bullet_with_no_summary_does_not_suppress_a_later_real_one(monkeypatch
             "body": (
                 "Automated prebuild, merged with:\n\n"
                 "- Unrelated carry\n"
-                "- [ ](https://github.com/LAiMai/llama.cpp/pull/900)\n"
+                "- [ ](https://github.com/unslothai/llama.cpp/pull/900)\n"
                 "- Real change for PR 900 "
-                "([LAiMai/llama.cpp#900](https://github.com/LAiMai/llama.cpp/pull/900))\n"
+                "([unslothai/llama.cpp#900](https://github.com/unslothai/llama.cpp/pull/900))\n"
             ),
         },
     }
@@ -218,7 +218,7 @@ def test_a_bullet_with_no_summary_does_not_suppress_a_later_real_one(monkeypatch
         lambda _repo, tag, *, force_refresh = False: releases[tag],
     )
 
-    result = changes.changelog_for_update("LAiMai/llama.cpp", "old", "new")
+    result = changes.changelog_for_update("unslothai/llama.cpp", "old", "new")
 
     assert [item["summary"] for item in result["changes"]] == ["Real change for PR 900"]
 
@@ -232,7 +232,7 @@ def test_a_missing_target_body_fails_closed(monkeypatch):
         lambda _repo, tag, *, force_refresh = False: releases[tag],
     )
 
-    assert changes.changelog_for_update("LAiMai/llama.cpp", "old", "new") is None
+    assert changes.changelog_for_update("unslothai/llama.cpp", "old", "new") is None
 
 
 def test_forced_refresh_is_floored_to_one_fetch_per_interval(monkeypatch):
@@ -247,14 +247,14 @@ def test_forced_refresh_is_floored_to_one_fetch_per_interval(monkeypatch):
     )
 
     for _ in range(10):
-        changes._release_for_tag("LAiMai/llama.cpp", "b1", force_refresh = True)
+        changes._release_for_tag("unslothai/llama.cpp", "b1", force_refresh = True)
 
     # Without the floor this was ten uncached GitHub round trips per ten clicks.
     assert len(calls) == 1
 
 
 def test_an_expired_body_is_not_resurrected_by_a_recent_failure(monkeypatch):
-    key = ("LAiMai/llama.cpp", "b1")
+    key = ("unslothai/llama.cpp", "b1")
     stale = time.monotonic() - (changes.RELEASE_CACHE_TTL_SECONDS * 2)
     monkeypatch.setattr(changes, "_release_memo", {key: (stale, {"body": "- ancient"})})
     monkeypatch.setattr(changes, "_release_failed_at", {key: time.monotonic()})
@@ -264,11 +264,11 @@ def test_an_expired_body_is_not_resurrected_by_a_recent_failure(monkeypatch):
 
 
 def test_release_page_url_is_github_or_nothing():
-    assert changes.release_page_url("LAiMai/llama.cpp", "b1/2") == (
-        "https://github.com/LAiMai/llama.cpp/releases/tag/b1%2F2"
+    assert changes.release_page_url("unslothai/llama.cpp", "b1/2") == (
+        "https://github.com/unslothai/llama.cpp/releases/tag/b1%2F2"
     )
     assert changes.release_page_url("owner/..", "b1") is None
-    assert changes.release_page_url("LAiMai/llama.cpp", "") is None
+    assert changes.release_page_url("unslothai/llama.cpp", "") is None
 
 
 def test_unavailable_reason_separates_permanent_from_transient(monkeypatch):
@@ -284,11 +284,11 @@ def test_unavailable_reason_separates_permanent_from_transient(monkeypatch):
     )
 
     assert (
-        changes.unavailable_reason("LAiMai/llama.cpp", "prose", "itemised")
+        changes.unavailable_reason("unslothai/llama.cpp", "prose", "itemised")
         == "notes_not_itemised"
     )
     assert (
-        changes.unavailable_reason("LAiMai/llama.cpp", "missing", "itemised")
+        changes.unavailable_reason("unslothai/llama.cpp", "missing", "itemised")
         == "release_notes_unavailable"
     )
 
@@ -325,7 +325,7 @@ def test_a_case_variant_of_the_official_repo_is_still_official(monkeypatch):
         lambda _repo, tag, *, force_refresh = False: releases.get(tag),
     )
 
-    result = changes.changelog_for_update("LAiMAI/Llama.cpp", "old", "new")
+    result = changes.changelog_for_update("UnslothAI/LLaMA.cpp", "old", "new")
 
     assert result is not None
     assert [item["summary"] for item in result["changes"]] == [
@@ -345,7 +345,7 @@ def test_a_bodyless_target_is_transient_not_permanent(monkeypatch):
     )
 
     assert (
-        changes.unavailable_reason("LAiMai/llama.cpp", "itemised", "bodyless")
+        changes.unavailable_reason("unslothai/llama.cpp", "itemised", "bodyless")
         == "release_notes_unavailable"
     )
 
@@ -364,7 +364,7 @@ def test_a_truncated_response_does_not_escape_to_the_caller(monkeypatch):
     monkeypatch.setattr(changes, "auth_safe_open", lambda *_a, **_k: _Response())
 
     # IncompleteRead is an HTTPException, not an OSError.
-    assert changes._fetch_release_blocking("LAiMai/llama.cpp", "b1", 5.0) is None
+    assert changes._fetch_release_blocking("unslothai/llama.cpp", "b1", 5.0) is None
 
 
 def test_an_oversized_release_body_is_rejected(monkeypatch):
@@ -380,7 +380,7 @@ def test_an_oversized_release_body_is_rejected(monkeypatch):
 
     monkeypatch.setattr(changes, "auth_safe_open", lambda *_a, **_k: _Response())
 
-    assert changes._fetch_release_blocking("LAiMai/llama.cpp", "b1", 5.0) is None
+    assert changes._fetch_release_blocking("unslothai/llama.cpp", "b1", 5.0) is None
 
 
 def test_a_rate_limit_holds_the_changelog_even_for_a_forced_refresh(monkeypatch):
@@ -400,7 +400,7 @@ def test_a_rate_limit_holds_the_changelog_even_for_a_forced_refresh(monkeypatch)
         raise urllib.error.HTTPError("url", 403, "rate limited", headers, None)
 
     monkeypatch.setattr(changes, "auth_safe_open", refused)
-    assert changes._fetch_release_blocking("LAiMai/llama.cpp", "b1", 5.0) is None
+    assert changes._fetch_release_blocking("unslothai/llama.cpp", "b1", 5.0) is None
     assert 85 < freshness_flow.github_rate_limit_remaining() <= 90
-    assert changes._release_for_tag("LAiMai/llama.cpp", "b2", force_refresh = True) is None
+    assert changes._release_for_tag("unslothai/llama.cpp", "b2", force_refresh = True) is None
     assert calls == [1]

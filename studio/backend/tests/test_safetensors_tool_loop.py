@@ -1106,7 +1106,6 @@ class FakeExecuteTool:
         session_id = None,
         thread_id = None,
         rag_scope = None,
-        disable_sandbox = False,
     ):
         self.calls.append((name, arguments))
         result = self.results.pop(0) if self.results else "OK"
@@ -3472,7 +3471,7 @@ class TestLoopCanonicalHealKey:
         "chunk, answer, exec_result, expected_name, expected_key, expected_value",
         [
             # The bare string must heal to {"code": "print(1)"}, not
-            # {"query": ...}, so the python sandbox actually executes it.
+            # {"query": ...}, so the python workdir actually executes it.
             pytest.param(
                 '<tool_call>{"name":"python","arguments":"print(1)"}</tool_call>',
                 "done",
@@ -4298,7 +4297,7 @@ class TestGuardrails:
 
 class TestGptOssNameDetection:
     def test_substring_match(self):
-        assert is_gpt_oss_model_name("LAiM/gpt-oss-20b") is True
+        assert is_gpt_oss_model_name("unsloth/gpt-oss-20b") is True
 
     def test_negative_known_non_oss_model(self):
         assert is_gpt_oss_model_name("meta-llama/Llama-3.1-8B-Instruct") is False

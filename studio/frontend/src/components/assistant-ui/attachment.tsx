@@ -9,7 +9,7 @@ import {
   attachmentPreview,
 } from "@/components/assistant-ui/attachment-card-preview";
 import { AttachmentPreviewDialog } from "@/components/assistant-ui/attachment-preview";
-import { useT } from "@/i18n";
+import { translate, useT } from "@/i18n";
 import { TooltipIconButton } from "@/components/assistant-ui/tooltip-icon-button";
 import { Button } from "@/components/ui/button";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
@@ -161,7 +161,7 @@ const CardImageOrBody: FC<{
     return (
       <img
         src={src}
-        alt={name || "Attachment preview"}
+        alt={name || translate("uxComponents.attachmentPreviewm3wza")}
         onLoad={(event) => {
           const { naturalWidth, naturalHeight } = event.currentTarget;
           if (naturalWidth > 0 && naturalHeight > 0) onRatio?.(naturalWidth / naturalHeight);
@@ -330,12 +330,10 @@ const PastedTextPreviewDialog: FC<
           className="aui-pasted-text-dialog-body rounded-lg border bg-muted/40 p-3"
           scrollerClassName="max-h-[72dvh] overflow-auto whitespace-pre-wrap break-words text-left font-mono text-xs leading-relaxed"
         >
-          {preview?.text ?? "Loading…"}
+          {preview?.text ?? translate("uxChat.loadingkapgw")}
         </ScrollPane>
         {preview && preview.remaining > 0 ? (
-          <p className="text-muted-foreground text-xs">
-            {`First ${PASTED_TEXT_PREVIEW_MAX_CHARS.toLocaleString()} characters shown. ${preview.remaining.toLocaleString()} more were sent with the message.`}
-          </p>
+          <p className="text-muted-foreground text-xs">{translate("uxComponents.firstCharactersShownMorepm1u2", { p1: PASTED_TEXT_PREVIEW_MAX_CHARS.toLocaleString(), p2: preview.remaining.toLocaleString() })}</p>
         ) : null}
       </DialogContent>
     </Dialog>
@@ -393,7 +391,7 @@ const PastedTextAttachmentUI: FC<{
       });
   }, [attachment, attachmentId, aui, inlining]);
 
-  const sizeLabel = bytes === undefined ? "Pasted text" : formatBytes(bytes);
+  const sizeLabel = bytes === undefined ? translate("uxComponents.pastedTextxmpxr") : formatBytes(bytes);
   const ariaLabel = canInline
     ? `Pasted text: ${name}. Show in text field`
     : `Pasted text: ${name}. Show contents`;
@@ -431,7 +429,7 @@ const PastedTextAttachmentUI: FC<{
               </span>
               {canInline ? (
                 <span className="hidden items-center gap-0.5 underline underline-offset-2 group-hover:inline-flex">
-                  Show in text field
+                  {translate("uxComponents.showInTextField1tode")}
                   <ChevronRightIcon className="size-3" />
                 </span>
               ) : null}
@@ -501,7 +499,7 @@ const AttachmentCardRemove: FC = () => {
       <Button
         variant="ghost"
         size="icon"
-        aria-label="Remove file"
+        aria-label={translate("uxComponents.removeFile1bo2u")}
         className="aui-attachment-card-remove absolute top-1.5 right-1.5 size-5 rounded-full bg-foreground p-0 opacity-0 shadow-sm transition-opacity hover:bg-foreground! focus-visible:opacity-100 group-hover/attachment-card:opacity-100 group-focus-within/attachment-card:opacity-100 [@media(pointer:coarse)]:opacity-100 [&_svg]:text-background"
       >
         <XIcon className="aui-attachment-remove-icon size-3 stroke-[2.5px]" />
@@ -611,7 +609,7 @@ const SentImageThumb: FC<{ name: string; kind: AttachmentFileKind }> = ({
     return (
       <img
         src={src}
-        alt={name || "Attachment preview"}
+        alt={name || translate("uxComponents.attachmentPreviewm3wza")}
         className="h-full w-full object-cover"
       />
     );
@@ -825,12 +823,12 @@ export const ComposerAddAttachment: FC = () => {
   return (
     <ComposerPrimitive.AddAttachment asChild={true}>
       <TooltipIconButton
-        tooltip="Add Attachment"
+        tooltip={translate("uxComponents.addAttachmentlfnf5")}
         side="bottom"
         variant="ghost"
         size="icon"
         className="aui-composer-add-attachment size-8.5 rounded-full p-1 font-semibold text-xs hover:bg-muted-foreground/15 dark:hover:bg-muted-foreground/30"
-        aria-label="Add Attachment"
+        aria-label={translate("uxComponents.addAttachmentlfnf5")}
       >
         <PlusIcon className="aui-attachment-add-icon size-5 stroke-[1.5px]" />
       </TooltipIconButton>

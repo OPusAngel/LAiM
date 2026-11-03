@@ -493,7 +493,7 @@ def _build_parser() -> argparse.ArgumentParser:
         formatter_class = argparse.ArgumentDefaultsHelpFormatter,
     )
     p.add_argument(
-        "--model", default = "LAiM/Z-Image-Turbo-GGUF", help = "GGUF repo id or local path"
+        "--model", default = "unsloth/Z-Image-Turbo-GGUF", help = "GGUF repo id or local path"
     )
     p.add_argument(
         "--gguf",

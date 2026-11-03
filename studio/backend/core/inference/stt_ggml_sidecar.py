@@ -11,7 +11,7 @@ the weights in f16 where PyTorch MPS requires fp32.
 Owns a single `whisper-server` subprocess bound to 127.0.0.1 on an ephemeral
 port; the model loads on demand, stays warm between dictations, and unloads
 after the same keep-alive as the Transformers sidecar. Curated GGML checkpoints
-are single files from `LAiMai/whisper-*-GGUF`, downloaded directly rather
+are single files from `unslothai/whisper-*-GGUF`, downloaded directly rather
 than through the Model Hub (whose variant planner only handles `.gguf` chat
 layouts).
 
@@ -87,11 +87,11 @@ logger = get_logger(__name__)
 # Curated GGML checkpoints, one repo per model. Keys match the Transformers sidecar's ids so the frontend reuses one
 # picker; values are the single file inside each repo.
 GGML_STT_REPOS: dict[str, str] = {
-    "tiny": "LAiMai/whisper-tiny-GGUF",
-    "base": "LAiMai/whisper-base-GGUF",
-    "small": "LAiMai/whisper-small-GGUF",
-    "large-v3-turbo": "LAiMai/whisper-large-v3-turbo-GGUF",
-    "large-v3": "LAiMai/whisper-large-v3-GGUF",
+    "tiny": "unslothai/whisper-tiny-GGUF",
+    "base": "unslothai/whisper-base-GGUF",
+    "small": "unslothai/whisper-small-GGUF",
+    "large-v3-turbo": "unslothai/whisper-large-v3-turbo-GGUF",
+    "large-v3": "unslothai/whisper-large-v3-GGUF",
 }
 GGML_STT_MODELS: dict[str, str] = {
     "tiny": "whisper-tiny.bin",
@@ -739,8 +739,8 @@ def _supports_request_path(binary: str) -> bool:
         return False
     cached = _REQUEST_PATH_SUPPORT.get(key)
     marker = _whisper_install_marker(binary) if cached is None else None
-    if marker is not None and marker.get("published_repo") == "LAiMai/whisper.cpp":
-        # Every LAiMai/whisper.cpp release has the flag: skip the ~0.6 s --help probe.
+    if marker is not None and marker.get("published_repo") == "unslothai/whisper.cpp":
+        # Every unslothai/whisper.cpp release has the flag: skip the ~0.6 s --help probe.
         cached = _REQUEST_PATH_SUPPORT[key] = True
     if cached is None:
         try:

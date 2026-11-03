@@ -91,7 +91,7 @@ def _armed_backend(proc, extra_args = None):
     b._mtp_runtime_fallback_active = True
     b._process = proc
     b._last_load_intent = GgufLoadIntent(
-        model_identifier = "LAiM/gemma-4-E2B-it-GGUF",
+        model_identifier = "unsloth/gemma-4-E2B-it-GGUF",
         speculative_type = "auto",
         extra_args = extra_args,
     )

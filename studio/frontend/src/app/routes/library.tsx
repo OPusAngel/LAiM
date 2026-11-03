@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { createRoute, lazyRouteComponent } from "@tanstack/react-router";
 import { validateLibrarySearch } from "@/features/library";
 import { requireAuth } from "../auth-guards";
@@ -14,7 +15,7 @@ const LibraryPage = lazyRouteComponent(
 export const Route = createRoute({
   getParentRoute: () => rootRoute,
   path: "/library",
-  staticData: { title: "Library" },
+  staticData: { title: translate("shell.navigation.library") },
   validateSearch: validateLibrarySearch,
   beforeLoad: () => requireAuth(),
   component: LibraryPage,

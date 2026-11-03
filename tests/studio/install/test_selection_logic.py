@@ -192,7 +192,7 @@ def make_cpu_artifact(asset_name, **overrides):
 
 def make_release(artifacts, **overrides):
     defaults = dict(
-        repo = "LAiMai/llama.cpp",
+        repo = "unslothai/llama.cpp",
         release_tag = "v1.0",
         upstream_tag = "b8508",
         source_repo = None,
@@ -229,7 +229,7 @@ def checksum_payload(release_tag, upstream_tag):
 
 def make_checksums(asset_names):
     return ApprovedReleaseChecksums(
-        repo = "LAiMai/llama.cpp",
+        repo = "unslothai/llama.cpp",
         release_tag = "v1.0",
         upstream_tag = "b8508",
         source_repo = None,
@@ -243,7 +243,7 @@ def make_checksums(asset_names):
             name: ApprovedArtifactHash(
                 asset_name = name,
                 sha256 = "a" * 64,
-                repo = "LAiMai/llama.cpp",
+                repo = "unslothai/llama.cpp",
                 kind = "prebuilt",
             )
             for name in asset_names
@@ -268,7 +268,7 @@ def make_checksums_with_source(
             name: ApprovedArtifactHash(
                 asset_name = name,
                 sha256 = "a" * 64,
-                repo = "LAiMai/llama.cpp",
+                repo = "unslothai/llama.cpp",
                 kind = "prebuilt",
             )
             for name in asset_names
@@ -291,7 +291,7 @@ def make_checksums_with_source(
             )
         )
     return ApprovedReleaseChecksums(
-        repo = "LAiMai/llama.cpp",
+        repo = "unslothai/llama.cpp",
         release_tag = release_tag,
         upstream_tag = upstream_tag,
         source_repo = source_repo,
@@ -593,7 +593,7 @@ class TestApplyApprovedHashes:
             source_label = "upstream",
         )
         checksums = ApprovedReleaseChecksums(
-            repo = "LAiMai/llama.cpp",
+            repo = "unslothai/llama.cpp",
             release_tag = "r1",
             upstream_tag = "b9000",
             artifacts = {
@@ -618,7 +618,7 @@ class TestApplyApprovedHashes:
             source_label = "upstream",
         )
         checksums = ApprovedReleaseChecksums(
-            repo = "LAiMai/llama.cpp",
+            repo = "unslothai/llama.cpp",
             release_tag = "r1",
             upstream_tag = "b9000",
             artifacts = {
@@ -643,7 +643,7 @@ class TestApplyApprovedHashes:
             source_label = "upstream",
         )
         checksums = ApprovedReleaseChecksums(
-            repo = "LAiMai/llama.cpp",
+            repo = "unslothai/llama.cpp",
             release_tag = "r1",
             upstream_tag = "b9000",
             artifacts = {
@@ -693,7 +693,7 @@ class TestPublishedReleaseResolution:
             fake_load,
         )
 
-        resolved = resolve_published_release("latest", "LAiMai/llama.cpp")
+        resolved = resolve_published_release("latest", "unslothai/llama.cpp")
         assert resolved.bundle.release_tag == "v1.0"
         assert resolved.bundle.upstream_tag == "b8999"
         assert resolved.checksums.release_tag == "v1.0"
@@ -715,7 +715,7 @@ class TestPublishedReleaseResolution:
             ),
         )
 
-        assert resolve_requested_install_tag("b8508", "", "LAiMai/llama.cpp") == "b8508"
+        assert resolve_requested_install_tag("b8508", "", "unslothai/llama.cpp") == "b8508"
 
     def test_concrete_tag_without_matching_release_raises(self, monkeypatch):
         release = make_release([], release_tag = "release-b9000", upstream_tag = "b9000")
@@ -726,7 +726,7 @@ class TestPublishedReleaseResolution:
         )
 
         with pytest.raises(PrebuiltFallback, match = "matched upstream tag b8508"):
-            resolve_requested_install_tag("b8508", "", "LAiMai/llama.cpp")
+            resolve_requested_install_tag("b8508", "", "unslothai/llama.cpp")
 
     def test_pinned_release_must_match_requested_upstream_tag(self, monkeypatch):
         bundle = make_release([], release_tag = "llama-prebuilt-latest", upstream_tag = "b9000")
@@ -749,7 +749,7 @@ class TestPublishedReleaseResolution:
             resolve_requested_install_tag(
                 "b8508",
                 "llama-prebuilt-latest",
-                "LAiMai/llama.cpp",
+                "unslothai/llama.cpp",
             )
 
     def test_request_matches_requested_source_ref(self, monkeypatch):
@@ -777,7 +777,7 @@ class TestPublishedReleaseResolution:
             ),
         )
 
-        resolved = resolve_published_release("main", "LAiMai/llama.cpp")
+        resolved = resolve_published_release("main", "unslothai/llama.cpp")
         assert resolved.bundle.release_tag == "release-main"
 
     def test_request_matches_source_commit(self, monkeypatch):
@@ -805,12 +805,12 @@ class TestPublishedReleaseResolution:
             ),
         )
 
-        resolved = resolve_published_release(commit, "LAiMai/llama.cpp")
+        resolved = resolve_published_release(commit, "unslothai/llama.cpp")
         assert resolved.bundle.release_tag == "release-commit"
 
     def test_walk_back_reads_checksums_from_the_listing(self, monkeypatch):
         tags = ["b3", "b2", "b1"]
-        cdn = "https://github.com/LAiMai/llama.cpp/releases/download"
+        cdn = "https://github.com/unslothai/llama.cpp/releases/download"
         manifest = INSTALL_LLAMA_PREBUILT.DEFAULT_PUBLISHED_MANIFEST_ASSET
         sha = INSTALL_LLAMA_PREBUILT.DEFAULT_PUBLISHED_SHA256_ASSET
         listing = [
@@ -849,7 +849,7 @@ class TestPublishedReleaseResolution:
         monkeypatch.setenv("LAiM_LLAMA_DISABLE_DOWNLOAD_HOST_RESOLVE", "1")
 
         resolved = list(
-            INSTALL_LLAMA_PREBUILT.iter_resolved_published_releases("latest", "LAiMai/llama.cpp")
+            INSTALL_LLAMA_PREBUILT.iter_resolved_published_releases("latest", "unslothai/llama.cpp")
         )
 
         assert [entry.bundle.release_tag for entry in resolved] == tags
@@ -858,7 +858,7 @@ class TestPublishedReleaseResolution:
     def test_walk_back_skips_a_release_whose_listing_omits_the_checksum_asset(self, monkeypatch):
         # A half-published release is judged on the listing snapshot: degrade, do not fail.
         tags = ["b3", "b2", "b1"]
-        cdn = "https://github.com/LAiMai/llama.cpp/releases/download"
+        cdn = "https://github.com/unslothai/llama.cpp/releases/download"
         manifest = INSTALL_LLAMA_PREBUILT.DEFAULT_PUBLISHED_MANIFEST_ASSET
         sha = INSTALL_LLAMA_PREBUILT.DEFAULT_PUBLISHED_SHA256_ASSET
         listing = []
@@ -891,7 +891,7 @@ class TestPublishedReleaseResolution:
         monkeypatch.setenv("LAiM_LLAMA_DISABLE_DOWNLOAD_HOST_RESOLVE", "1")
 
         resolved = list(
-            INSTALL_LLAMA_PREBUILT.iter_resolved_published_releases("latest", "LAiMai/llama.cpp")
+            INSTALL_LLAMA_PREBUILT.iter_resolved_published_releases("latest", "unslothai/llama.cpp")
         )
 
         assert [entry.bundle.release_tag for entry in resolved] == ["b2", "b1"]
@@ -952,7 +952,7 @@ class TestSourceBuildPlanResolution:
             lambda requested_tag, published_repo, published_release_tag = "": resolved,
         )
 
-        plan = resolve_source_build_plan("main", "LAiMai/llama.cpp")
+        plan = resolve_source_build_plan("main", "unslothai/llama.cpp")
         assert plan.source_url == "https://github.com/example/custom-llama.cpp"
         assert plan.source_ref_kind == "commit"
         assert plan.source_ref == commit
@@ -988,7 +988,7 @@ class TestSourceBuildPlanResolution:
             lambda requested_tag, published_repo, published_release_tag = "": resolved,
         )
 
-        plan = resolve_source_build_plan("main", "LAiMai/llama.cpp")
+        plan = resolve_source_build_plan("main", "unslothai/llama.cpp")
         assert plan.source_url == "https://github.com/example/custom-llama.cpp"
         assert plan.source_ref_kind == "branch"
         assert plan.source_ref == "main"
@@ -1003,7 +1003,7 @@ class TestSourceBuildPlanResolution:
             ),
         )
 
-        plan = resolve_source_build_plan("main", "LAiMai/llama.cpp")
+        plan = resolve_source_build_plan("main", "unslothai/llama.cpp")
         assert plan.source_url == "https://github.com/ggml-org/llama.cpp"
         assert plan.source_ref_kind == "branch"
         assert plan.source_ref == "main"
@@ -1079,7 +1079,7 @@ class TestValidatedChecksumsForBundle:
         checksums.artifacts[bundle.manifest_asset_name] = ApprovedArtifactHash(
             asset_name = bundle.manifest_asset_name,
             sha256 = "b" * 64,
-            repo = "LAiMai/llama.cpp",
+            repo = "unslothai/llama.cpp",
             kind = "published-manifest",
         )
         monkeypatch.setattr(
@@ -1089,7 +1089,7 @@ class TestValidatedChecksumsForBundle:
         )
 
         with pytest.raises(PrebuiltFallback, match = "manifest checksum"):
-            validated_checksums_for_bundle("LAiMai/llama.cpp", bundle)
+            validated_checksums_for_bundle("unslothai/llama.cpp", bundle)
 
     def test_rejects_exact_source_without_repo(self, monkeypatch):
         # An exact source archive with no repo to clone from would silently fall back to upstream source at the tag.
@@ -1104,7 +1104,7 @@ class TestValidatedChecksumsForBundle:
         )
 
         with pytest.raises(PrebuiltFallback, match = "exact source archive"):
-            validated_checksums_for_bundle("LAiMai/llama.cpp", bundle)
+            validated_checksums_for_bundle("unslothai/llama.cpp", bundle)
 
     def test_accepts_exact_source_when_only_bundle_has_repo(self, monkeypatch):
         # The source repo can live only in the manifest bundle, not the checksums, so validation must accept it.
@@ -1124,7 +1124,7 @@ class TestValidatedChecksumsForBundle:
             lambda repo, release_tag, assets: checksums,
         )
 
-        assert validated_checksums_for_bundle("LAiMai/llama.cpp", bundle) is checksums
+        assert validated_checksums_for_bundle("unslothai/llama.cpp", bundle) is checksums
         plan = INSTALL_LLAMA_PREBUILT.source_build_plan_for_release(
             INSTALL_LLAMA_PREBUILT.ResolvedPublishedRelease(bundle = bundle, checksums = checksums)
         )
@@ -1134,7 +1134,7 @@ class TestValidatedChecksumsForBundle:
 
     def test_reads_the_checksum_asset_from_the_listing(self, monkeypatch):
         bundle = make_release([], release_tag = "r1", upstream_tag = "b8508")
-        sha_url = "https://github.com/LAiMai/llama.cpp/releases/download/r1/sha.json"
+        sha_url = "https://github.com/unslothai/llama.cpp/releases/download/r1/sha.json"
         bundle.assets[INSTALL_LLAMA_PREBUILT.DEFAULT_PUBLISHED_SHA256_ASSET] = sha_url
         fetched = []
 
@@ -1148,7 +1148,7 @@ class TestValidatedChecksumsForBundle:
         monkeypatch.setattr(INSTALL_LLAMA_PREBUILT, "fetch_json", fake_fetch_json)
         monkeypatch.setattr(INSTALL_LLAMA_PREBUILT, "github_release", no_release_api)
 
-        checksums = validated_checksums_for_bundle("LAiMai/llama.cpp", bundle)
+        checksums = validated_checksums_for_bundle("unslothai/llama.cpp", bundle)
 
         assert checksums.release_tag == "r1"
         assert fetched == [sha_url]
@@ -1162,7 +1162,7 @@ class TestValidatedChecksumsForBundle:
         monkeypatch.setattr(INSTALL_LLAMA_PREBUILT, "github_release", no_release_api)
 
         with pytest.raises(PrebuiltFallback, match = "did not expose"):
-            validated_checksums_for_bundle("LAiMai/llama.cpp", bundle)
+            validated_checksums_for_bundle("unslothai/llama.cpp", bundle)
 
 
 class TestLinuxCudaChoiceFromRelease:
@@ -1712,7 +1712,7 @@ class TestResolveInstallAttempts:
         requested_tag, resolved_tag, attempts, approved = resolve_install_attempts(
             "latest",
             host,
-            "LAiMai/llama.cpp",
+            "unslothai/llama.cpp",
             "",
         )
 
@@ -1749,7 +1749,7 @@ class TestResolveInstallAttempts:
         monkeypatch.setattr(INSTALL_LLAMA_PREBUILT, "github_release_assets", _assets)
 
         with pytest.raises(PrebuiltFallback, match = "no published Windows CUDA bundle"):
-            resolve_install_attempts("latest", host, "LAiMai/llama.cpp", "")
+            resolve_install_attempts("latest", host, "unslothai/llama.cpp", "")
         assert UPSTREAM_REPO not in listed
 
     def test_linux_cpu_fork_without_bundle_raises_no_upstream_fallback(self, monkeypatch):
@@ -1776,7 +1776,7 @@ class TestResolveInstallAttempts:
         )
 
         with pytest.raises(PrebuiltFallback, match = "no compatible Linux prebuilt asset was found"):
-            resolve_install_attempts("latest", host, "LAiMai/llama.cpp", "")
+            resolve_install_attempts("latest", host, "unslothai/llama.cpp", "")
 
     def test_linux_cuda_does_not_fall_back_to_upstream_cpu(self, monkeypatch):
         host = make_host(system = "Linux", machine = "x86_64", compute_caps = ["86"])
@@ -1791,7 +1791,7 @@ class TestResolveInstallAttempts:
         mock_linux_runtime(monkeypatch, ["cuda12"])
 
         with pytest.raises(PrebuiltFallback, match = "no compatible Linux prebuilt asset was found"):
-            resolve_install_attempts("latest", host, "LAiMai/llama.cpp", "")
+            resolve_install_attempts("latest", host, "unslothai/llama.cpp", "")
 
     def test_windows_cpu_prefers_published_asset(self, monkeypatch):
         host = make_host(
@@ -1826,7 +1826,7 @@ class TestResolveInstallAttempts:
         _requested_tag, resolved_tag, attempts, _approved = resolve_install_attempts(
             "latest",
             host,
-            "LAiMai/llama.cpp",
+            "unslothai/llama.cpp",
             "",
         )
 
@@ -1895,7 +1895,7 @@ class TestResolveInstallAttempts:
         _requested_tag, resolved_tag, attempts, _approved = resolve_install_attempts(
             "latest",
             host,
-            "LAiMai/llama.cpp",
+            "unslothai/llama.cpp",
             "",
         )
 
@@ -1936,7 +1936,7 @@ class TestResolveInstallAttempts:
         mock_published_releases(monkeypatch, release, checksums)
 
         with pytest.raises(PrebuiltFallback, match = "no compatible Linux prebuilt asset was found"):
-            resolve_install_attempts("latest", host, "LAiMai/llama.cpp", "")
+            resolve_install_attempts("latest", host, "unslothai/llama.cpp", "")
 
     def test_macos_prefers_published_asset(self, monkeypatch):
         host = make_host(
@@ -1973,7 +1973,7 @@ class TestResolveInstallAttempts:
         _requested_tag, resolved_tag, attempts, _approved = resolve_install_attempts(
             "latest",
             host,
-            "LAiMai/llama.cpp",
+            "unslothai/llama.cpp",
             "",
         )
 
@@ -2019,12 +2019,12 @@ class TestResolveInstallAttempts:
 
         with pytest.raises(
             PrebuiltFallback,
-            match = "no compatible published prebuilt in LAiMai/llama.cpp",
+            match = "no compatible published prebuilt in unslothai/llama.cpp",
         ):
             resolve_install_attempts(
                 "latest",
                 host,
-                "LAiMai/llama.cpp",
+                "unslothai/llama.cpp",
                 "",
             )
 
@@ -2063,7 +2063,7 @@ class TestResolveInstallReleasePlans:
         requested_tag, plans = _fork_manifest_release_plans(
             "latest",
             host,
-            "LAiMai/llama.cpp",
+            "unslothai/llama.cpp",
             "",
             max_release_fallbacks = 2,
         )
@@ -2092,7 +2092,7 @@ class TestResolveInstallReleasePlans:
         _requested_tag, plans = _fork_manifest_release_plans(
             "latest",
             host,
-            "LAiMai/llama.cpp",
+            "unslothai/llama.cpp",
             "",
             max_release_fallbacks = 2,
         )
@@ -2561,7 +2561,7 @@ class TestBlackwellCuda124Exclusion:
     def test_keeps_manifest_cuda12_bundle_with_sm120(self):
         # Published cuda12 app bundles are toolkit-12.8 with sm_120.
         bundle = AssetChoice(
-            repo = "LAiMai/llama.cpp",
+            repo = "unslothai/llama.cpp",
             tag = "b9585",
             name = "app-b9585-windows-x64-cuda12-portable.zip",
             url = "https://example.com/app",
@@ -2579,7 +2579,7 @@ class TestBlackwellCuda124Exclusion:
 
     def test_manifest_bundle_without_sm120_dropped(self):
         bundle = AssetChoice(
-            repo = "LAiMai/llama.cpp",
+            repo = "unslothai/llama.cpp",
             tag = "b9585",
             name = "app-b9585-windows-x64-cuda12-older.zip",
             url = "https://example.com/app",
@@ -2807,7 +2807,7 @@ class TestLinuxPublishedAttemptsNvidiaCpuGate:
         )
 
     def _vulkan_and_cpu_bundle(self):
-        """What LAiMai/llama.cpp publishes: app-<tag>-linux-x64-vulkan.tar.gz and -cpu.tar.gz."""
+        """What unslothai/llama.cpp publishes: app-<tag>-linux-x64-vulkan.tar.gz and -cpu.tar.gz."""
         return make_release(
             [
                 make_cpu_artifact(
@@ -3670,7 +3670,7 @@ class TestPublishedRocmBundleCoverage:
     """Every arch the installer routes torch for needs a llama.cpp bundle or a KNOWN_GAPS entry. The gap is silent:
     the GPU trains fine and inference drops to a HIP source build, which is correct but much slower to install."""
 
-    # Mirrors LAiMai/llama.cpp's llama-prebuilt-manifest.json mapped_targets.
+    # Mirrors unslothai/llama.cpp's llama-prebuilt-manifest.json mapped_targets.
     PUBLISHED = {
         "gfx103X": ["gfx1030", "gfx1031", "gfx1032", "gfx1034"],
         "gfx110X": ["gfx1100", "gfx1101", "gfx1102", "gfx1103"],
@@ -3787,7 +3787,7 @@ class TestApplyApprovedHashesRuntimePair:
 
     def _runtime_paired_attempt(self) -> AssetChoice:
         return AssetChoice(
-            repo = "LAiMai/llama.cpp",
+            repo = "unslothai/llama.cpp",
             tag = self.TAG,
             name = f"llama-{self.TAG}-bin-win-cuda-13.1-x64.zip",
             url = f"https://x/llama-{self.TAG}-bin-win-cuda-13.1-x64.zip",
@@ -3801,20 +3801,20 @@ class TestApplyApprovedHashesRuntimePair:
     def test_runtime_hash_threaded_when_present(self):
         attempt = self._runtime_paired_attempt()
         checksums = ApprovedReleaseChecksums(
-            repo = "LAiMai/llama.cpp",
+            repo = "unslothai/llama.cpp",
             release_tag = self.TAG,
             upstream_tag = self.TAG,
             artifacts = {
                 attempt.name: ApprovedArtifactHash(
                     asset_name = attempt.name,
                     sha256 = "0" * 64,
-                    repo = "LAiMai/llama.cpp",
+                    repo = "unslothai/llama.cpp",
                     kind = "windows-cuda",
                 ),
                 "cudart-llama-bin-win-cuda-13.1-x64.zip": ApprovedArtifactHash(
                     asset_name = "cudart-llama-bin-win-cuda-13.1-x64.zip",
                     sha256 = "1" * 64,
-                    repo = "LAiMai/llama.cpp",
+                    repo = "unslothai/llama.cpp",
                     kind = "windows-cuda",
                 ),
             },
@@ -3829,14 +3829,14 @@ class TestApplyApprovedHashesRuntimePair:
         # Drop the pair rather than install an unverified runtime.
         attempt = self._runtime_paired_attempt()
         checksums = ApprovedReleaseChecksums(
-            repo = "LAiMai/llama.cpp",
+            repo = "unslothai/llama.cpp",
             release_tag = self.TAG,
             upstream_tag = self.TAG,
             artifacts = {
                 attempt.name: ApprovedArtifactHash(
                     asset_name = attempt.name,
                     sha256 = "0" * 64,
-                    repo = "LAiMai/llama.cpp",
+                    repo = "unslothai/llama.cpp",
                     kind = "windows-cuda",
                 ),
             },
@@ -4129,8 +4129,8 @@ class TestLinuxArm64ForkFallsBackToSource:
 
         monkeypatch.setattr(INSTALL_LLAMA_PREBUILT, "_fork_manifest_release_plans", _full)
         host = make_host(system = "Linux", machine = "aarch64")
-        tag, plans = resolve_simple_install_release_plans("latest", host, "LAiMai/llama.cpp", "")
-        assert called.get("args") == ("aarch64", "LAiMai/llama.cpp")
+        tag, plans = resolve_simple_install_release_plans("latest", host, "unslothai/llama.cpp", "")
+        assert called.get("args") == ("aarch64", "unslothai/llama.cpp")
         assert plans == ["plan"]
 
     def test_x86_64_fork_delegates_to_manifest_resolver(self, monkeypatch):
@@ -4142,8 +4142,8 @@ class TestLinuxArm64ForkFallsBackToSource:
 
         monkeypatch.setattr(INSTALL_LLAMA_PREBUILT, "_fork_manifest_release_plans", _full)
         host = make_host(system = "Linux", machine = "x86_64")
-        tag, plans = resolve_simple_install_release_plans("latest", host, "LAiMai/llama.cpp", "")
-        assert called.get("args") == ("x86_64", "LAiMai/llama.cpp")
+        tag, plans = resolve_simple_install_release_plans("latest", host, "unslothai/llama.cpp", "")
+        assert called.get("args") == ("x86_64", "unslothai/llama.cpp")
         assert plans == ["plan"]
 
     def test_arm64_cpu_on_ggml_org_is_not_blocked(self, monkeypatch):
@@ -4252,7 +4252,7 @@ class TestCpuFallback:
         end = source.index(")", start)
         block = source[start:end]
         assert "--cpu-fallback" in block
-        assert '--published-repo "LAiMai/llama.cpp"' in block
+        assert '--published-repo "unslothai/llama.cpp"' in block
         assert '--published-repo "ggml-org/llama.cpp"' not in block
         assert "_LLAMA_CPP_DEGRADED" in source
 
@@ -4689,7 +4689,7 @@ class TestExactSourceAssetUrl:
             repo = repo,
             release_tag = release_tag,
             upstream_tag = "b9616",
-            source_repo = "LAiMai/llama.cpp",
+            source_repo = "unslothai/llama.cpp",
             source_commit = self.COMMIT,
             artifacts = {},
         )
@@ -4701,40 +4701,40 @@ class TestExactSourceAssetUrl:
         )
 
     def test_uses_manifest_repo_and_tag_when_present(self):
-        checksums = self._checksums(repo = "LAiMai/llama.cpp", release_tag = self.INSTALL_TAG)
+        checksums = self._checksums(repo = "unslothai/llama.cpp", release_tag = self.INSTALL_TAG)
         url = INSTALL_LLAMA_PREBUILT.exact_source_asset_url(
-            checksums, "LAiMai/llama.cpp", self._artifact(repo = None), True, "ignored-tag"
+            checksums, "unslothai/llama.cpp", self._artifact(repo = None), True, "ignored-tag"
         )
-        assert url == self._expected("LAiMai/llama.cpp", self.INSTALL_TAG)
+        assert url == self._expected("unslothai/llama.cpp", self.INSTALL_TAG)
 
     def test_falls_back_to_install_tag_when_manifest_tag_missing(self):
         # Regression: an empty manifest release_tag returned None, and hydration then 404'd on the merge commit.
-        checksums = self._checksums(repo = "LAiMai/llama.cpp", release_tag = "")
+        checksums = self._checksums(repo = "unslothai/llama.cpp", release_tag = "")
         url = INSTALL_LLAMA_PREBUILT.exact_source_asset_url(
-            checksums, "LAiMai/llama.cpp", self._artifact(repo = None), True, self.INSTALL_TAG
+            checksums, "unslothai/llama.cpp", self._artifact(repo = None), True, self.INSTALL_TAG
         )
-        assert url == self._expected("LAiMai/llama.cpp", self.INSTALL_TAG)
+        assert url == self._expected("unslothai/llama.cpp", self.INSTALL_TAG)
 
     def test_falls_back_to_source_repo_when_manifest_repo_missing(self):
         checksums = self._checksums(repo = "", release_tag = self.INSTALL_TAG)
         url = INSTALL_LLAMA_PREBUILT.exact_source_asset_url(
-            checksums, "LAiMai/llama.cpp", self._artifact(repo = None), True, self.INSTALL_TAG
+            checksums, "unslothai/llama.cpp", self._artifact(repo = None), True, self.INSTALL_TAG
         )
-        assert url == self._expected("LAiMai/llama.cpp", self.INSTALL_TAG)
+        assert url == self._expected("unslothai/llama.cpp", self.INSTALL_TAG)
 
     def test_prefers_artifact_repo_over_manifest_repo(self):
-        checksums = self._checksums(repo = "LAiMai/checksums-only", release_tag = self.INSTALL_TAG)
+        checksums = self._checksums(repo = "unslothai/checksums-only", release_tag = self.INSTALL_TAG)
         url = INSTALL_LLAMA_PREBUILT.exact_source_asset_url(
             checksums,
-            "LAiMai/llama.cpp",
-            self._artifact(repo = "LAiMai/llama.cpp"),
+            "unslothai/llama.cpp",
+            self._artifact(repo = "unslothai/llama.cpp"),
             True,
             self.INSTALL_TAG,
         )
-        assert url == self._expected("LAiMai/llama.cpp", self.INSTALL_TAG)
+        assert url == self._expected("unslothai/llama.cpp", self.INSTALL_TAG)
 
     def test_returns_none_for_non_exact_source(self):
-        checksums = self._checksums(repo = "LAiMai/llama.cpp", release_tag = self.INSTALL_TAG)
+        checksums = self._checksums(repo = "unslothai/llama.cpp", release_tag = self.INSTALL_TAG)
         assert (
             INSTALL_LLAMA_PREBUILT.exact_source_asset_url(
                 checksums, UPSTREAM_REPO, None, False, self.INSTALL_TAG
@@ -4743,10 +4743,10 @@ class TestExactSourceAssetUrl:
         )
 
     def test_returns_none_without_source_archive(self):
-        checksums = self._checksums(repo = "LAiMai/llama.cpp", release_tag = self.INSTALL_TAG)
+        checksums = self._checksums(repo = "unslothai/llama.cpp", release_tag = self.INSTALL_TAG)
         assert (
             INSTALL_LLAMA_PREBUILT.exact_source_asset_url(
-                checksums, "LAiMai/llama.cpp", None, True, self.INSTALL_TAG
+                checksums, "unslothai/llama.cpp", None, True, self.INSTALL_TAG
             )
             is None
         )
@@ -4758,7 +4758,7 @@ class TestExactSourceAssetUrl:
             "component": "llama.cpp",
             "release_tag": self.INSTALL_TAG,
             "upstream_tag": "b9616",
-            "source_repo": "LAiMai/llama.cpp",
+            "source_repo": "unslothai/llama.cpp",
             "source_commit": self.COMMIT,
             "artifacts": {
                 exact_source_archive_logical_name(self.COMMIT): {
@@ -4768,7 +4768,7 @@ class TestExactSourceAssetUrl:
             },
         }
         checksums = INSTALL_LLAMA_PREBUILT.parse_approved_release_checksums(
-            "LAiMai/llama.cpp", self.INSTALL_TAG, payload
+            "unslothai/llama.cpp", self.INSTALL_TAG, payload
         )
         source_repo, _source_ref, source_archive, exact_source = (
             INSTALL_LLAMA_PREBUILT.preferred_source_archive(checksums, "b9616")
@@ -4778,7 +4778,7 @@ class TestExactSourceAssetUrl:
         url = INSTALL_LLAMA_PREBUILT.exact_source_asset_url(
             checksums, source_repo, source_archive, exact_source, self.INSTALL_TAG
         )
-        assert url == self._expected("LAiMai/llama.cpp", self.INSTALL_TAG)
+        assert url == self._expected("unslothai/llama.cpp", self.INSTALL_TAG)
 
 
 class TestDirectUpstreamRequiresAssetDigests:
@@ -4884,7 +4884,7 @@ class TestUpstreamDigestKeepsTheFunctionalSmokeTest:
         monkeypatch.setattr(INSTALL_LLAMA_PREBUILT, "_RUN_STAGED_PREBUILT_VALIDATION", False)
         monkeypatch.delenv("LAiM_LLAMA_STAGED_VALIDATION", raising = False)
         approved = AssetChoice(
-            repo = "LAiMai/llama.cpp",
+            repo = "unslothai/llama.cpp",
             tag = self.TAG,
             name = "llama-app-bin-win-cuda-x64.zip",
             url = "https://example.com/a.zip",
@@ -4931,7 +4931,7 @@ class TestUpstreamDigestKeepsTheFunctionalSmokeTest:
 
 
 class TestForkOnlyPrebuilts:
-    """Prebuilt binaries and converter scripts come only from LAiMai/llama.cpp releases."""
+    """Prebuilt binaries and converter scripts come only from unslothai/llama.cpp releases."""
 
     TAG = "b11443-mix-d65395f"
     UPSTREAM = "b11443"
@@ -4996,7 +4996,7 @@ class TestForkOnlyPrebuilts:
             make_checksums([self.ARM64_CUDA, self.ARM64_CPU]),
         )
         assert [a.name for a in result] == [self.ARM64_CUDA]
-        assert result[0].repo == "LAiMai/llama.cpp"
+        assert result[0].repo == "unslothai/llama.cpp"
         assert result[0].install_kind == "windows-arm64-cuda"
         assert listed == []
 
@@ -5011,7 +5011,7 @@ class TestForkOnlyPrebuilts:
             make_checksums([self.ARM64_CUDA, self.ARM64_CPU]),
         )
         assert [a.name for a in result] == [self.ARM64_CPU]
-        assert result[0].repo == "LAiMai/llama.cpp"
+        assert result[0].repo == "unslothai/llama.cpp"
         assert UPSTREAM_REPO not in listed
 
     def test_fork_release_without_a_platform_bundle_never_lists_upstream(self, monkeypatch):
@@ -5032,10 +5032,10 @@ class TestForkOnlyPrebuilts:
 
         monkeypatch.setattr(INSTALL_LLAMA_PREBUILT, "download_bytes", _download)
         INSTALL_LLAMA_PREBUILT.ensure_converter_scripts(
-            tmp_path, self.UPSTREAM, repo = "LAiMai/llama.cpp", release_tag = self.TAG
+            tmp_path, self.UPSTREAM, repo = "unslothai/llama.cpp", release_tag = self.TAG
         )
         assert urls == [
-            f"https://raw.githubusercontent.com/LAiMai/llama.cpp/{self.TAG}/convert_hf_to_gguf.py"
+            f"https://raw.githubusercontent.com/unslothai/llama.cpp/{self.TAG}/convert_hf_to_gguf.py"
         ]
         assert (tmp_path / "convert_hf_to_gguf.py").read_bytes() == b"import sys\n"
 
@@ -5048,7 +5048,7 @@ class TestForkOnlyPrebuilts:
         )
         INSTALL_LLAMA_PREBUILT.ensure_converter_scripts(tmp_path, self.TAG)
         assert urls and "ggml-org" not in urls[0]
-        assert urls[0].startswith("https://raw.githubusercontent.com/LAiMai/llama.cpp/")
+        assert urls[0].startswith("https://raw.githubusercontent.com/unslothai/llama.cpp/")
 
     def test_linux_arm64_vulkan_stays_on_the_fork(self, monkeypatch):
         host = make_host(
@@ -5059,9 +5059,9 @@ class TestForkOnlyPrebuilts:
             nvidia_smi = None,
         )
         _host, repo, tag, _persist = INSTALL_LLAMA_PREBUILT._route_to_vulkan_prebuilt(
-            host, "LAiMai/llama.cpp", self.TAG, force_cpu = False, llama_backend = "vulkan"
+            host, "unslothai/llama.cpp", self.TAG, force_cpu = False, llama_backend = "vulkan"
         )
-        assert (repo, tag) == ("LAiMai/llama.cpp", self.TAG)
+        assert (repo, tag) == ("unslothai/llama.cpp", self.TAG)
         release = make_release(
             [
                 make_cpu_artifact(

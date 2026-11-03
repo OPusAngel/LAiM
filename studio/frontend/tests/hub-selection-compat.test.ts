@@ -70,7 +70,7 @@ function resolve(
 
 
 test("a pre-encoding deep link still selects its row", () => {
-  const repoId = "LAiM/gemma-3-270m-it";
+  const repoId = "unsloth/gemma-3-270m-it";
   const row = cachedRow(repoId, "gguf");
 
   assert.equal(row.id, "cache:gguf:LAiM%2Fgemma-3-270m-it");
@@ -78,15 +78,15 @@ test("a pre-encoding deep link still selects its row", () => {
 });
 
 test("a raw Org/Repo deep link still selects its row", () => {
-  const row = cachedRow("LAiM/gemma-3-270m-it", "safetensors");
+  const row = cachedRow("unsloth/gemma-3-270m-it", "safetensors");
   assert.equal(
-    resolve("LAiM/gemma-3-270m-it", [row], []).selectedId,
+    resolve("unsloth/gemma-3-270m-it", [row], []).selectedId,
     row.id,
   );
 });
 
 test("percent escapes resolve regardless of hex case", () => {
-  const row = cachedRow("LAiM/gemma-3-270m-it", "gguf");
+  const row = cachedRow("unsloth/gemma-3-270m-it", "gguf");
   assert.equal(
     resolve("cache:gguf:LAiM%2fgemma-3-270m-it", [row], []).selectedId,
     row.id,
@@ -99,9 +99,9 @@ test("percent escapes resolve regardless of hex case", () => {
 
 test("repo IDs survive characters encodeURIComponent leaves alone", () => {
   for (const repoId of [
-    "LAiM/model-v1.5",
-    "LAiM/model_v2",
-    "LAiM/model.gguf-test",
+    "unsloth/model-v1.5",
+    "unsloth/model_v2",
+    "unsloth/model.gguf-test",
     "org/repo!name",
     "org/repo~name",
     "org/repo'name",
@@ -226,7 +226,7 @@ test("a locally selected path row keeps its exact selection", () => {
 // inventory-dedupe reads a truthy partialTransport as model family and a missing one as gguf; the resolver must not contradict it.
 
 test("a gguf download does not adopt a snapshot partial the deduper kept apart", () => {
-  const repoId = "LAiM/hybrid-repo";
+  const repoId = "unsloth/hybrid-repo";
   const snapshot = localRow({
     id: repoId,
     inventory_id: `hf_cache:unknown:${encodeURIComponent(repoId)}`,
@@ -263,7 +263,7 @@ test("a gguf download does not adopt a snapshot partial the deduper kept apart",
 });
 
 test("a gguf download still adopts an unclassified gguf partial", () => {
-  const repoId = "LAiM/gguf-repo";
+  const repoId = "unsloth/gguf-repo";
   const partial = localRow({
     id: repoId,
     inventory_id: `hf_cache:unknown:${encodeURIComponent(repoId)}`,
@@ -286,7 +286,7 @@ test("a gguf download still adopts an unclassified gguf partial", () => {
 test("a transport-less partial is still adopted, in either direction", () => {
   // Only the positive direction is provable: the backend never writes a transport for a GGUF partial, but a
   // snapshot partial with no cancel marker and no manifest also reports none, so an absent transport is not evidence.
-  const repoId = "LAiM/gguf-repo";
+  const repoId = "unsloth/gguf-repo";
   const partial = localRow({
     id: repoId,
     inventory_id: `hf_cache:unknown:${encodeURIComponent(repoId)}`,
@@ -309,7 +309,7 @@ test("a transport-less partial is still adopted, in either direction", () => {
 });
 
 test("a known-format selection does not fall back onto a proven other family", () => {
-  const repoId = "LAiM/hybrid-repo";
+  const repoId = "unsloth/hybrid-repo";
   const snapshot = localRow({
     id: repoId,
     inventory_id: `hf_cache:unknown:${encodeURIComponent(repoId)}`,
@@ -339,7 +339,7 @@ test("a known-format selection does not fall back onto a proven other family", (
 test("a complete unclassified local row is suppressed by any complete cache row", () => {
   // partialTransport is null on every complete row, so reading it as "gguf family" would retain the duplicate beside safetensors and drop it beside gguf.
   for (const format of ["gguf", "safetensors"] as const) {
-    const repoId = "LAiM/complete-repo";
+    const repoId = "unsloth/complete-repo";
     const complete = cachedRow(repoId, format);
     const unknownLocal = localRow({
       id: repoId,

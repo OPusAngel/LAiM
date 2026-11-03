@@ -19,17 +19,17 @@ def _config(tmp_path, payload, base_model):
 @pytest.mark.parametrize("recorded", [True, False])
 def test_recorded_precision_wins(tmp_path, recorded):
     payload = {"LAiM_training_method": "CPT", "LAiM_load_in_4bit": recorded}
-    assert _get_base_load_in_4bit(_config(tmp_path, payload, "LAiM/Qwen3-4B")) is recorded
+    assert _get_base_load_in_4bit(_config(tmp_path, payload, "unsloth/Qwen3-4B")) is recorded
 
 
 @pytest.mark.parametrize(
     "method, base_model, expected",
     [
-        ("CPT", "LAiM/Qwen3-4B", True),
-        ("CPT", "LAiM/Qwen3-4B-LAiM-bnb-4bit", True),
-        ("lora", "LAiM/Qwen3-4B-LAiM-bnb-4bit", False),
-        ("qlora", "LAiM/Qwen3-4B", True),
-        (None, "LAiM/Qwen3-4B", False),
+        ("CPT", "unsloth/Qwen3-4B", True),
+        ("CPT", "unsloth/Qwen3-4B-unsloth-bnb-4bit", True),
+        ("lora", "unsloth/Qwen3-4B-unsloth-bnb-4bit", False),
+        ("qlora", "unsloth/Qwen3-4B", True),
+        (None, "unsloth/Qwen3-4B", False),
     ],
 )
 def test_matches_studio_resolver(tmp_path, method, base_model, expected):

@@ -199,7 +199,7 @@ def test_the_notebook_tooling_matches_the_cuda_core_image():
 
 def test_the_notebooks_are_baked_where_the_sync_script_looks():
     text = _read(ROCM_STUDIO)
-    assert "https://github.com/LAiMai/notebooks" in text
+    assert "https://github.com/unslothai/notebooks" in text
     assert "/opt/LAiM-notebooks/.LAiM_template_commit" in text
     assert "/opt/LAiM-notebooks" in _read(DOCKER / "LAiM_sync_notebooks.sh")
     assert "ARG LAiM_NOTEBOOKS_REF" in text, "CI has to be able to pin the notebooks commit"

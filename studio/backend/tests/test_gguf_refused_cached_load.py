@@ -27,7 +27,7 @@ from hub.utils.hf_tokens import (
 )
 from utils.models.model_config import GgufRepoUnreadableError, ModelConfig
 
-REPO = "LAiM/Qwen3-0.6B-GGUF"
+REPO = "unsloth/Qwen3-0.6B-GGUF"
 VARIANT = "UD-Q4_K_XL"
 GGUF = f"Qwen3-0.6B-{VARIANT}.gguf"
 REV = "a" * 40

@@ -2417,7 +2417,7 @@ def test_an_explicit_tensor_split_leaves_the_shared_heap_uncredited(tmp_path, mo
 def test_auto_tensor_parallel_honors_user_tensor_split_when_planner_returns_none(tmp_path):
     """When auto tensor planning decides an even split is safe, the user's
     per-GPU ratio must still be emitted instead of being silently ignored.
-    Regression for LAiMai/LAiM#10355."""
+    Regression for OPusAngel/LAiM#10355."""
     backend, gguf = _backend_non_vulkan(
         tmp_path,
         memory = [(0, 24_000, 24_000), (1, 24_000, 24_000)],

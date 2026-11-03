@@ -8,7 +8,7 @@ Puts the backend root on sys.path (mirrors app launch) and provides a hybrid
 external server (``LAiM_E2E_BASE_URL``/``LAiM_E2E_API_KEY``) for fast
 iteration, or a fixture-managed server started/torn down per session for CI.
 Model/variant for the managed mode resolve from ``--LAiM-model`` /
-``--LAiM-gguf-variant``, then env vars, then ``test_studio_api.py`` defaults.
+``--unsloth-gguf-variant``, then env vars, then ``test_studio_api.py`` defaults.
 """
 
 # --- torch.compile cache isolation -------------------------------------------------
@@ -72,10 +72,10 @@ for _up in Path(__file__).resolve().parents:
 
 # Let the diffusion patch backend lazily import LAiM_zoo on a CPU-only test host: LAiM_zoo runs accelerator
 # detection at import and raises without a GPU unless this is set. setdefault so an explicit override wins.
-os.environ.setdefault("LAiM_ALLOW_CPU", "1")
+os.environ.setdefault("UNSLOTH_ALLOW_CPU", "1")
 # The other half of the same guard: LAiM_zoo.__init__ refuses to import unless this is present, normally set by `import LAiM`. Without it
 # the patch backend's only route to the helpers is that ~940 MB import, which a CPU-only host cannot complete. run.py and main.py do the same.
-os.environ.setdefault("LAiM_IS_PRESENT", "1")
+os.environ.setdefault("UNSLOTH_IS_PRESENT", "1")
 # The on-demand attention-backend installer defaults to "auto", so ANY test that loads a
 # pipeline with attention_backend="xformers"/"sage"/"flash" would shell out to a real pip
 # (up to 600s) and, for xformers, a real torch probe. test_diffusion_attention.py disables
@@ -120,47 +120,12 @@ _skills_home_counter = itertools.count()
 
 
 @pytest.fixture(autouse = True)
-def _no_real_mxc_drive_aliases(monkeypatch):
-    # A Windows test host would otherwise map real drive letters; test_mxc_drive_alias.py and the native
-    # MXC tests opt back in.
-    monkeypatch.setenv("LAiM_MXC_DRIVE_ALIAS", "0")
-
-
-@pytest.fixture(autouse = True)
-def _forget_mxc_isolation_settings():
-    # Held for a second across tests that each get their own Studio home; only when already imported.
-    def _forget():
-        settings = sys.modules.get("utils.mxc_isolation_settings")
-        if settings is not None:
-            settings.forget_cached_setting()
-
-    _forget()
-    yield
-    _forget()
-
-
-@pytest.fixture(autouse = True)
 def _forget_embedding_device_setting():
     # Same one-store-per-test reason as above.
     def _forget():
         settings = sys.modules.get("utils.embedding_model_settings")
         if settings is not None:
             settings.forget_cached_embedding_device()
-
-    _forget()
-    yield
-    _forget()
-
-
-@pytest.fixture(autouse = True)
-def _no_background_sandbox_probes(monkeypatch):
-    # No warm-up thread and no background re-probe; each test starts with no cached tool answer.
-    monkeypatch.setenv("LAiM_DISABLE_SANDBOX_WARMUP", "1")
-
-    def _forget():
-        os_sandbox = sys.modules.get("core.inference.os_sandbox")
-        if os_sandbox is not None:
-            os_sandbox.forget_tool_isolation()
 
     _forget()
     yield
@@ -263,6 +228,14 @@ def _isolate_studio_home(_studio_home_root, monkeypatch):
     home = _studio_home_root / f"home-{next(_studio_home_counter)}"
     home.mkdir()
     monkeypatch.setenv("LAiM_STUDIO_HOME", str(home))
+    # A chat's tools run on the owner's own computer, so a test that resolves "~" lands in this
+    # developer's real profile. Pin the account home here too, or fixtures write files into it.
+    for var in ("HOME", "USERPROFILE"):
+        monkeypatch.setenv(var, str(home))
+    monkeypatch.delenv("HOMEDRIVE", raising = False)
+    monkeypatch.delenv("HOMEPATH", raising = False)
+    # Project workspaces default to the real Documents folder; keep them inside this test home.
+    monkeypatch.setenv("LAiM_STUDIO_PROJECTS_HOME", str(home / "Projects"))
     for name, module in tuple(sys.modules.items()):
         if name.startswith(("storage.", "hub.storage.")) and hasattr(module, "_schema_ready"):
             monkeypatch.setattr(module, "_schema_ready", set())
@@ -300,7 +273,7 @@ def pytest_addoption(parser):
         ),
     )
     group.addoption(
-        "--LAiM-gguf-variant",
+        "--unsloth-gguf-variant",
         action = "store",
         default = None,
         help = (
@@ -997,7 +970,7 @@ def studio_server(request):
         or _e2e.DEFAULT_MODEL
     )
     variant = (
-        request.config.getoption("--LAiM-gguf-variant")
+        request.config.getoption("--unsloth-gguf-variant")
         or os.environ.get("LAiM_E2E_VARIANT")
         or _e2e.DEFAULT_VARIANT
     )

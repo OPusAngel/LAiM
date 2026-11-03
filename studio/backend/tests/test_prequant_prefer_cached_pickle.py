@@ -19,7 +19,7 @@ from huggingface_hub.errors import EntryNotFoundError, LocalEntryNotFoundError
 import core.inference.diffusion_prequant as pq
 import core.inference.diffusion_te_prequant as tpq
 
-REPO = "LAiM/Model-FP8"
+REPO = "unsloth/Model-FP8"
 KILL_SWITCH = "LAiM_PREQUANT_PREFER_SAFETENSORS"
 NO_EXIST = object()  # stands in for huggingface_hub's recorded-404 sentinel
 

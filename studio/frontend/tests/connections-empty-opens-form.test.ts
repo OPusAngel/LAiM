@@ -8,9 +8,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { readSrc } from "./helpers/kit.ts";
+import { readSrc, readSrcExpanded } from "./helpers/kit.ts";
 
-const dialog = readSrc("features/chat/chat-providers-dialog.tsx");
+const dialog = readSrcExpanded("features/chat/chat-providers-dialog.tsx");
 
 test("an empty connection list opens the add-connection form", () => {
   // Both operands matter: `syncedProviders` is the backend answer, and

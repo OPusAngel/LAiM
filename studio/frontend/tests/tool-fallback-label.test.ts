@@ -102,7 +102,10 @@ test("the document search header stays one line, with the summary first and the 
   assert.match(kb, /singleLine=\{true\}/);
   assert.match(kb, /icon=\{LibraryGlyph\}/);
   assert.match(kb, /icon=\{LibrariesIcon\}/);
-  const summary = kb.indexOf("Retrieved {citations.length} passage");
+  // Headings are localized; these match the translation keys, not English literals.
+  const summary = kb.indexOf(
+    'translate("uxComponents.retrievedPassageFromDocumentipdpw"',
+  );
   const fullQuery = kb.indexOf('data-slot="knowledge-base-query"');
   assert.ok(
     summary >= 0 && fullQuery >= 0,
@@ -110,7 +113,9 @@ test("the document search header stays one line, with the summary first and the 
   );
   assert.ok(summary < fullQuery);
   // The query renders after every outcome (hits, raw result, no hits), not only with citations.
-  assert.ok(kb.indexOf("No matching passages.") < fullQuery);
+  assert.ok(
+    kb.indexOf('translate("uxComponents.noMatchingPassages16880")') < fullQuery,
+  );
   const fallback = readFileSync(
     new URL(
       "../src/components/assistant-ui/tool-fallback.tsx",
@@ -134,7 +139,10 @@ test("a document search lists each document once in the card, with its cited pag
   assert.ok(!kb.includes("{citation.text}"), "passage snippets are not shown");
   // A model-chosen top_k has no ceiling: the rest wait behind "Show N more".
   assert.match(kb, /documents\.slice\(0, DOCUMENTS_SHOWN\)/);
-  assert.match(kb, /Show \{documents\.length - shown\.length\} more/);
+  assert.match(
+    kb,
+    /translate\("uxComponents\.showMoresyb0o", \{ p1: documents\.length - shown\.length \}\)/,
+  );
   assert.match(kb, /<RagDocumentTrigger/);
   const trigger = read("features/rag/components/rag-document-trigger.tsx");
   // Browser first; without its panel (mobile) the attachment viewer, else a new tab.

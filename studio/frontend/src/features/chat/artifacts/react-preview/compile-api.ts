@@ -4,6 +4,8 @@
 import { authFetch } from "@/features/auth";
 import { apiUrl } from "@/lib/api-base";
 import type { CompileDiagnostic } from "./build-html";
+import { translate } from "@/i18n";
+
 
 export type UnavailableReason = "node_missing" | "transform_missing" | "timeout" | "failed";
 
@@ -36,7 +38,7 @@ export async function compileReactPreview(
     if (response.status === 413) {
       return {
         status: "error",
-        diagnostics: [{ message: "This component is too large to preview (256 KB limit).", line: 0, column: 0 }],
+        diagnostics: [{ get message() { return translate("uxChat.thisComponentIsToo41pcx"); }, line: 0, column: 0 }],
       };
     }
     if (!response.ok) return { status: "unavailable", reason: "failed" };

@@ -104,12 +104,12 @@ def test_no_marker_is_empty_or_whitespace():
 #    rendered two-turn fixture, and the final EOS label must never be -100. ──
 
 REPRESENTATIVES = {
-    "mistral": ["LAiM/mistral-7b-instruct-v0.3"],
-    "llama": ["LAiM/llama-2-7b-chat"],
-    "starling": ["LAiM/Starling-LM-7B-beta"],
-    "glm": ["LAiM/GLM-4.7-Flash"],
-    "qwen3-thinking": ["LAiM/Qwen3-4B-Thinking-2507", "Qwen/QwQ-32B"],
-    "zephyr": ["LAiM/zephyr-sft"],
+    "mistral": ["unsloth/mistral-7b-instruct-v0.3"],
+    "llama": ["unsloth/llama-2-7b-chat"],
+    "starling": ["unsloth/Starling-LM-7B-beta"],
+    "glm": ["unsloth/GLM-4.7-Flash"],
+    "qwen3-thinking": ["unsloth/Qwen3-4B-Thinking-2507", "Qwen/QwQ-32B"],
+    "zephyr": ["unsloth/zephyr-sft"],
 }
 
 FIXTURE = [

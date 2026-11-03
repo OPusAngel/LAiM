@@ -8,6 +8,8 @@ import type {
   ConvertStyle,
 } from "./audio-run-request";
 import type { AudioModelContext } from "./tools/types";
+import { translate } from "@/i18n";
+
 
 export const CONVERT_MODEL_ORDER: string[] = [
   "SeedVC-MLX-GGUF",
@@ -108,17 +110,24 @@ function inputBlocker(
   error: string | null,
   side: "source" | "target",
 ): ConvertBlocker | null {
-  const what = side === "source" ? "recording" : "target voice";
+  const expiredKey =
+    side === "source"
+      ? "uxAudio.theRecordingIsNoLongerP37xn"
+      : "uxAudio.theTargetVoiceIsNoLongerL52qb";
+  const busyKey =
+    side === "source"
+      ? "uxAudio.waitingForTheRecordingToH64md"
+      : "uxAudio.waitingForTheTargetVoiceT19fz";
   if (expired) {
     return {
       kind: `${side}-expired`,
-      reason: `The ${what} is no longer on the server.`,
+      reason: translate(expiredKey),
     };
   }
   if (busy) {
     return {
       kind: side,
-      reason: `Waiting for the ${what} to finish uploading.`,
+      reason: translate(busyKey),
     };
   }
   if (error && !selection) return { kind: `${side}-error`, reason: error };
@@ -179,7 +188,7 @@ export function convertBlocker(
   if (source?.kind === "source-expired" && target?.kind === "target-expired") {
     return {
       kind: "source-expired",
-      reason: "The recording and target voice are no longer on the server.",
+      get reason() { return translate("uxAudio.theRecordingAndTarget0pjy4"); },
     };
   }
   const blocker = source ?? target;
@@ -198,10 +207,10 @@ export function convertBlocker(
 
 // Measured on GPU; families missing here get no estimate.
 const CONVERT_RELOAD_SECONDS: Readonly<Record<string, string>> = {
-  seed_vc: "about 4–8 s",
-  vevo2: "about 6 s",
-  chatterbox: "about 2 s",
-  meanvc2: "about 2 s",
+  seed_vc: "4–8",
+  vevo2: "6",
+  chatterbox: "2",
+  meanvc2: "2",
 };
 
 export interface ConvertSwitchInput {
@@ -219,17 +228,20 @@ export function convertSwitchNotice(
     input.loadedTask && input.nextTask && input.loadedTask !== input.nextTask,
   );
   if (!taskChange && !input.routeChange) return null;
-  const name = input.modelName.trim() || "the model";
+  const name = input.modelName.trim() || translate("uxAudio.theModel4h1ky");
   const what = !taskChange
-    ? "the new engine"
+    ? translate("uxAudio.theNewEnginecx8sk")
     : input.nextTask === "svc"
-      ? "singing"
-      : "Convert";
-  const seconds = input.family
-    ? CONVERT_RELOAD_SECONDS[input.family]
-    : undefined;
+      ? translate("uxAudio.singingTasknw2dr")
+      : translate("uxAudio.convertTaskvb6hq");
+  const estimate = input.family ? CONVERT_RELOAD_SECONDS[input.family] : undefined;
+  const tail = estimate
+    ? `, ${translate("uxAudio.aboutSecondsxq7vn", { p1: estimate })}`
+    : "";
   return {
-    before: `Reloads ${name} ${taskChange ? "for" : "with"} ${what}${seconds ? `, ${seconds}` : ""}.`,
-    during: `Switching ${name} to ${what}…`,
+    before: taskChange
+      ? translate("uxAudio.reloadsForModejk4wt", { p1: name, p2: what, p3: tail })
+      : translate("uxAudio.reloadsNewEnginepm9zc", { p1: name, p2: tail }),
+    during: translate("uxAudio.switchingTomg61m", { p1: name, p2: what }),
   };
 }

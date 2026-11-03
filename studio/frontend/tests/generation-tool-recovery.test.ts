@@ -383,7 +383,7 @@ test("the live adapter saves identities for ordinary, approval and provider card
         ),
         toolConfirmationIdsByBackendId: new Map(),
         toolConfirmationScopeId: "session:thread",
-        sandboxSessionId: "session",
+        workdirSessionId: "session",
         generationRunId,
         generationSeq: 7,
         cumulativeText: "",
@@ -1140,7 +1140,7 @@ test("a full identity replay does not republish the saved history", async () => 
 test("recovery rebuilds the Sources panel from a replayed web search", async () => {
   const result = [
     "Title: LAiM docs",
-    "URL: https://docs.LAiM.ai/",
+    "URL: https://docs.laim.ai/",
     "Snippet: fine-tuning guide",
   ].join("\n");
   const { content } = await recoverRun(
@@ -1153,7 +1153,7 @@ test("recovery rebuilds the Sources panel from a replayed web search", async () 
   const sources = content.filter((part) => part.type === "source");
   assert.deepEqual(
     sources.map((part) => [part.url, part.title]),
-    [["https://docs.LAiM.ai/", "LAiM docs"]],
+    [["https://docs.laim.ai/", "LAiM docs"]],
   );
   assert.equal(
     content.at(-1)?.type,
@@ -1163,7 +1163,7 @@ test("recovery rebuilds the Sources panel from a replayed web search", async () 
 });
 
 test("rebuilt sources do not duplicate ones already saved", async () => {
-  const result = "Title: Docs\nURL: https://docs.LAiM.ai/\nSnippet: guide";
+  const result = "Title: Docs\nURL: https://docs.laim.ai/\nSnippet: guide";
   const saved = [
     {
       type: "tool-call",
@@ -1177,8 +1177,8 @@ test("rebuilt sources do not duplicate ones already saved", async () => {
     {
       type: "source",
       sourceType: "url",
-      id: "https://docs.LAiM.ai/",
-      url: "https://docs.LAiM.ai/",
+      id: "https://docs.laim.ai/",
+      url: "https://docs.laim.ai/",
       title: "Docs",
     },
   ];
@@ -1206,7 +1206,7 @@ test("an unsafe search URL never reaches the Sources panel", async () => {
 test("a web search completed twice keeps the citation list", async () => {
   const citations = [
     "Title: LAiM docs",
-    "URL: https://docs.LAiM.ai/",
+    "URL: https://docs.laim.ai/",
     "Snippet: guide",
   ].join("\n");
   const { content } = await recoverRun(
@@ -1221,7 +1221,7 @@ test("a web search completed twice keeps the citation list", async () => {
   assert.equal(card?.result, citations);
   assert.deepEqual(
     content.filter((part) => part.type === "source").map((part) => part.url),
-    ["https://docs.LAiM.ai/"],
+    ["https://docs.laim.ai/"],
   );
 });
 
@@ -1272,7 +1272,7 @@ test("a legacy id-less pending card is matched through replay", async () => {
 test("a citation result reaches a card whose placeholder was already saved", async () => {
   const citations = [
     "Title: LAiM docs",
-    "URL: https://docs.LAiM.ai/",
+    "URL: https://docs.laim.ai/",
     "Snippet: guide",
   ].join("\n");
   const saved = {
@@ -1293,7 +1293,7 @@ test("a citation result reaches a card whose placeholder was already saved", asy
   assert.equal(cards[0].result, citations);
   assert.deepEqual(
     content.filter((part) => part.type === "source").map((part) => part.url),
-    ["https://docs.LAiM.ai/"],
+    ["https://docs.laim.ai/"],
   );
 });
 
@@ -1339,7 +1339,7 @@ test("a settled recovery reports the tool calls it restored", async () => {
 });
 
 test("repeated source ids pair one to one instead of multiplying", () => {
-  const url = "https://docs.LAiM.ai/";
+  const url = "https://docs.laim.ai/";
   const source = () => ({ type: "source", sourceType: "url", id: url, url });
   const view = [{ type: "text", text: "answer" }, source(), source()];
   const recovered = [{ type: "text", text: "answer" }, source(), source()];
@@ -1359,7 +1359,7 @@ test("repeated source ids pair one to one instead of multiplying", () => {
 });
 
 test("a legacy completed card takes its citation result", async () => {
-  const citations = "Title: Docs\nURL: https://docs.LAiM.ai/\nSnippet: g";
+  const citations = "Title: Docs\nURL: https://docs.laim.ai/\nSnippet: g";
   const legacy = {
     type: "tool-call",
     toolCallId: "ws_0:9f1c-legacy-uuid",
@@ -1377,7 +1377,7 @@ test("a legacy completed card takes its citation result", async () => {
   assert.equal(cards[0].result, citations);
   assert.deepEqual(
     content.filter((part) => part.type === "source").map((part) => part.url),
-    ["https://docs.LAiM.ai/"],
+    ["https://docs.laim.ai/"],
   );
 });
 
@@ -1430,7 +1430,7 @@ test("the id-less sentinel keeps the file searchable and cannot collide", () => 
 });
 
 test("a source an earlier recovery saved stays behind text replayed after it", async () => {
-  const citations = "Title: Docs\nURL: https://docs.LAiM.ai/\nSnippet: g";
+  const citations = "Title: Docs\nURL: https://docs.laim.ai/\nSnippet: g";
   // What a previous recovery session persisted: the card, then the source it appended.
   const saved = [
     { type: "text", text: "Searching." },
@@ -1446,8 +1446,8 @@ test("a source an earlier recovery saved stays behind text replayed after it", a
     {
       type: "source",
       sourceType: "url",
-      id: "https://docs.LAiM.ai/",
-      url: "https://docs.LAiM.ai/",
+      id: "https://docs.laim.ai/",
+      url: "https://docs.laim.ai/",
       title: "Docs",
     },
   ];
@@ -1460,7 +1460,7 @@ test("a source an earlier recovery saved stays behind text replayed after it", a
   assert.equal(content.at(-1)?.type, "source");
   assert.deepEqual(
     content.filter((part) => part.type === "source").map((part) => part.url),
-    ["https://docs.LAiM.ai/"],
+    ["https://docs.laim.ai/"],
   );
   assert.equal(
     content
@@ -1477,8 +1477,8 @@ test("a source an earlier recovery saved stays behind text replayed after it", a
 });
 
 test("two rounds finding the same page keep a source each, with their own titles", async () => {
-  const first = "Title: Docs v1\nURL: https://docs.LAiM.ai/\nSnippet: first";
-  const second = "Title: Docs v2\nURL: https://docs.LAiM.ai/\nSnippet: second";
+  const first = "Title: Docs v1\nURL: https://docs.laim.ai/\nSnippet: first";
+  const second = "Title: Docs v2\nURL: https://docs.laim.ai/\nSnippet: second";
   const { content } = await recoverRun(
     [],
     [

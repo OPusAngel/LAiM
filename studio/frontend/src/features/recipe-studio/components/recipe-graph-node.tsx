@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { MarkdownPreview } from "@/components/markdown/markdown-preview";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -174,7 +175,7 @@ function resolveNodeIcon(
 
 function getConfigSummary(config: NodeConfig | undefined): string {
   if (!config) {
-    return "Open settings";
+    return translate("uxRecipestudio.openSettings4ojox");
   }
 
   if (config.kind === "sampler") {
@@ -184,9 +185,9 @@ function getConfigSummary(config: NodeConfig | undefined): string {
     }
     if (config.sampler_type === "subcategory") {
       if (config.subcategory_parent?.trim()) {
-        return `Based on ${config.subcategory_parent}`;
+        return translate("uxRecipestudio.basedOnan39h", { p1: config.subcategory_parent });
       }
-      return "Choose the main field";
+      return translate("uxRecipestudio.chooseTheMainFieldnonlc");
     }
     if (config.sampler_type === "datetime") {
       const start = config.datetime_start?.trim() || "?";
@@ -195,9 +196,9 @@ function getConfigSummary(config: NodeConfig | undefined): string {
     }
     if (config.sampler_type === "timedelta") {
       if (config.reference_column_name?.trim()) {
-        return `From ${config.reference_column_name}`;
+        return translate("uxRecipestudio.fromvfu7i", { p1: config.reference_column_name });
       }
-      return "Choose a date field";
+      return translate("uxRecipestudio.chooseADateFields0d51");
     }
     if (
       config.sampler_type === "person" ||
@@ -210,12 +211,12 @@ function getConfigSummary(config: NodeConfig | undefined): string {
       }
       return locale;
     }
-    return "Open settings";
+    return translate("uxRecipestudio.openSettings4ojox");
   }
 
   if (config.kind === "llm") {
     if (config.llm_type === "structured") {
-      return "Set the response format in settings";
+      return translate("uxRecipestudio.setTheResponseFormatc2yyl");
     }
     if (config.llm_type === "judge") {
       const scoreCount = config.scores?.length ?? 0;
@@ -224,7 +225,7 @@ function getConfigSummary(config: NodeConfig | undefined): string {
     if (config.tool_alias?.trim()) {
       return `Tools: ${config.tool_alias.trim()}`;
     }
-    return "Add your prompt in settings";
+    return translate("uxRecipestudio.addYourPromptIn7c4s8");
   }
 
   if (config.kind === "tool_config") {
@@ -242,9 +243,9 @@ function getConfigSummary(config: NodeConfig | undefined): string {
   if (config.kind === "validator") {
     const target = config.target_columns[0]?.trim();
     if (target) {
-      return `Checks ${target}`;
+      return translate("uxRecipestudio.checkstffuj", { p1: target });
     }
-    return "Choose code to check";
+    return translate("uxRecipestudio.chooseCodeToCheckobc0c");
   }
 
   if (config.kind === "seed") {
@@ -266,22 +267,22 @@ function getConfigSummary(config: NodeConfig | undefined): string {
       return config.hf_path.trim();
     }
     if (seedSourceType === "hf") {
-      return "Choose a dataset";
+      return translate("uxRecipestudio.chooseADatasetzoxqg");
     }
     if (seedSourceType === "local") {
-      return "Upload a table file";
+      return translate("uxRecipestudio.uploadATableFile3xlvv");
     }
-    return "Upload a document";
+    return translate("uxRecipestudio.uploadADocumentn9q2x");
   }
 
   if (config.kind === "markdown_note") {
     if (config.markdown.trim()) {
-      return "Note preview";
+      return translate("uxRecipestudio.notePreviewax808");
     }
-    return "Add note text";
+    return translate("uxRecipestudio.addNoteText251qc");
   }
 
-  return "Open settings";
+  return translate("uxRecipestudio.openSettings4ojox");
 }
 
 function renderNodeBody(
@@ -524,7 +525,7 @@ function RecipeGraphNodeBase({
                 setLlmAuxVisibility(id, !llmAuxVisible);
               }}
             >
-              {llmAuxVisible ? "Hide inputs" : "Show inputs"}
+              {llmAuxVisible ? translate("uxRecipestudio.hideInputst71cs") : translate("uxRecipestudio.showInputsqlqxm")}
             </Button>
           )}
           <Button
@@ -557,7 +558,7 @@ function RecipeGraphNodeBase({
         <>
           <LabeledHandle
             id={HANDLE_IDS.dataIn}
-            title="Data input"
+            title={translate("uxRecipestudio.dataInput1b50r")}
             type="target"
             position={Position.Left}
             className="absolute inset-0 pointer-events-none"
@@ -566,7 +567,7 @@ function RecipeGraphNodeBase({
           />
           <LabeledHandle
             id={HANDLE_IDS.dataOutLeft}
-            title="Data output"
+            title={translate("uxRecipestudio.dataOutput29j9x")}
             type="source"
             position={Position.Left}
             className="absolute inset-0 pointer-events-none opacity-0"
@@ -575,7 +576,7 @@ function RecipeGraphNodeBase({
           />
           <LabeledHandle
             id={HANDLE_IDS.dataInTop}
-            title="Data input"
+            title={translate("uxRecipestudio.dataInput1b50r")}
             type="target"
             position={Position.Top}
             className="absolute inset-0 pointer-events-none"
@@ -584,7 +585,7 @@ function RecipeGraphNodeBase({
           />
           <LabeledHandle
             id={HANDLE_IDS.dataOutTop}
-            title="Data output"
+            title={translate("uxRecipestudio.dataOutput29j9x")}
             type="source"
             position={Position.Top}
             className="absolute inset-0 pointer-events-none opacity-0"
@@ -593,7 +594,7 @@ function RecipeGraphNodeBase({
           />
           <LabeledHandle
             id={HANDLE_IDS.dataOut}
-            title="Data output"
+            title={translate("uxRecipestudio.dataOutput29j9x")}
             type="source"
             position={Position.Right}
             className="absolute inset-0 pointer-events-none"
@@ -602,7 +603,7 @@ function RecipeGraphNodeBase({
           />
           <LabeledHandle
             id={HANDLE_IDS.dataInRight}
-            title="Data input"
+            title={translate("uxRecipestudio.dataInput1b50r")}
             type="target"
             position={Position.Right}
             className="absolute inset-0 pointer-events-none opacity-0"
@@ -611,7 +612,7 @@ function RecipeGraphNodeBase({
           />
           <LabeledHandle
             id={HANDLE_IDS.dataOutBottom}
-            title="Data output"
+            title={translate("uxRecipestudio.dataOutput29j9x")}
             type="source"
             position={Position.Bottom}
             className="absolute inset-0 pointer-events-none"
@@ -620,7 +621,7 @@ function RecipeGraphNodeBase({
           />
           <LabeledHandle
             id={HANDLE_IDS.dataInBottom}
-            title="Data input"
+            title={translate("uxRecipestudio.dataInput1b50r")}
             type="target"
             position={Position.Bottom}
             className="absolute inset-0 pointer-events-none opacity-0"
@@ -634,7 +635,7 @@ function RecipeGraphNodeBase({
         <>
           <LabeledHandle
             id={HANDLE_IDS.semanticIn}
-            title="Semantic input"
+            title={translate("uxRecipestudio.semanticInput1do5b")}
             type="target"
             position={Position.Left}
             className="absolute inset-0 pointer-events-none"
@@ -643,7 +644,7 @@ function RecipeGraphNodeBase({
           />
           <LabeledHandle
             id={HANDLE_IDS.semanticInTop}
-            title="Semantic input"
+            title={translate("uxRecipestudio.semanticInput1do5b")}
             type="target"
             position={Position.Top}
             className="absolute inset-0 pointer-events-none"
@@ -657,7 +658,7 @@ function RecipeGraphNodeBase({
         <>
           <LabeledHandle
             id={HANDLE_IDS.semanticOut}
-            title="Semantic output"
+            title={translate("uxRecipestudio.semanticOutputb6aqw")}
             type="source"
             position={Position.Right}
             className="absolute inset-0 pointer-events-none"
@@ -666,7 +667,7 @@ function RecipeGraphNodeBase({
           />
           <LabeledHandle
             id={HANDLE_IDS.semanticOutBottom}
-            title="Semantic output"
+            title={translate("uxRecipestudio.semanticOutputb6aqw")}
             type="source"
             position={Position.Bottom}
             className="absolute inset-0 pointer-events-none"

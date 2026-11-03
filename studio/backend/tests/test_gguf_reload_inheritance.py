@@ -491,8 +491,8 @@ class TestRepeatLoadMatchesTheEffectiveCache:
 def test_reasoning_budget_rejects_booleans(model):
     # bool subclasses int and pydantic parses lax, so `true` would launch a one-token budget.
     with pytest.raises(ValueError, match = "Expected a number, got a boolean"):
-        model(model_path = "LAiM/x", reasoning_budget = True)
-    assert model(model_path = "LAiM/x", reasoning_budget = 1).reasoning_budget == 1
+        model(model_path = "unsloth/x", reasoning_budget = True)
+    assert model(model_path = "unsloth/x", reasoning_budget = 1).reasoning_budget == 1
 
 
 def test_the_reuse_check_compares_the_request_not_the_environment():
@@ -556,18 +556,18 @@ def test_an_inherited_env_budget_does_not_force_a_reload():
 def test_canonical_model_identity_resolves_snapshot_to_repo():
     from routes.inference import _canonical_model_identity
     snapshot = "/models--LAiM--Qwen3.8-27B-GGUF/snapshots/abc123"
-    assert _canonical_model_identity(snapshot) == "LAiM/qwen3.8-27b-gguf"
+    assert _canonical_model_identity(snapshot) == "unsloth/qwen3.8-27b-gguf"
 
 
 def test_canonical_model_identity_folds_repo_id_case():
     from routes.inference import _canonical_model_identity
-    assert _canonical_model_identity("LAiM/Qwen3.8-27B-GGUF") == "LAiM/qwen3.8-27b-gguf"
+    assert _canonical_model_identity("unsloth/Qwen3.8-27B-GGUF") == "unsloth/qwen3.8-27b-gguf"
 
 
 def test_canonical_model_identity_reads_windows_snapshot_path():
     from routes.inference import _canonical_model_identity
     snapshot = r"C:\hub\models--LAiM--Qwen3.8-27B-GGUF\snapshots\abc123"
-    assert _canonical_model_identity(snapshot) == "LAiM/qwen3.8-27b-gguf"
+    assert _canonical_model_identity(snapshot) == "unsloth/qwen3.8-27b-gguf"
 
 
 def test_canonical_model_identity_empty_and_none():
@@ -593,7 +593,7 @@ def test_inheritance_works_when_stored_is_snapshot_and_load_is_repo():
     from routes.inference import _resolve_inherited_extra_args
 
     class FakeRequest:
-        model_path = "LAiM/Qwen3.8-27B-GGUF"
+        model_path = "unsloth/Qwen3.8-27B-GGUF"
         gguf_variant = None
         llama_extra_args = None
         model_fields_set = set()
@@ -601,7 +601,7 @@ def test_inheritance_works_when_stored_is_snapshot_and_load_is_repo():
     class FakeConfig:
         is_gguf = True
         gguf_variant = "ud-q6_k_l"
-        identifier = "LAiM/Qwen3.8-27B-GGUF"
+        identifier = "unsloth/Qwen3.8-27B-GGUF"
 
     class FakeBackend:
         extra_args = ["--rope-scaling", "yarn", "-c", "300000"]
@@ -613,7 +613,7 @@ def test_inheritance_works_when_stored_is_snapshot_and_load_is_repo():
     _routes.get_llama_cpp_backend = lambda: FakeBackend()
     try:
         result = _resolve_inherited_extra_args(
-            FakeRequest(), FakeConfig(), "LAiM/Qwen3.8-27B-GGUF", None
+            FakeRequest(), FakeConfig(), "unsloth/Qwen3.8-27B-GGUF", None
         )
         assert result == [
             "--rope-scaling",
@@ -631,7 +631,7 @@ def test_inheritance_works_when_case_differs():
     from routes.inference import _resolve_inherited_extra_args
 
     class FakeRequest:
-        model_path = "LAiM/Qwen3.8-27B-GGUF"
+        model_path = "unsloth/Qwen3.8-27B-GGUF"
         gguf_variant = None
         llama_extra_args = None
         model_fields_set = set()
@@ -639,7 +639,7 @@ def test_inheritance_works_when_case_differs():
     class FakeConfig:
         is_gguf = True
         gguf_variant = "ud-q6_k_l"
-        identifier = "LAiM/Qwen3.8-27B-GGUF"
+        identifier = "unsloth/Qwen3.8-27B-GGUF"
 
     class FakeBackend:
         extra_args = ["--rope-scaling", "yarn", "-c", "300000"]
@@ -651,7 +651,7 @@ def test_inheritance_works_when_case_differs():
     _routes.get_llama_cpp_backend = lambda: FakeBackend()
     try:
         result = _resolve_inherited_extra_args(
-            FakeRequest(), FakeConfig(), "LAiM/qwen3.8-27b-gguf", None
+            FakeRequest(), FakeConfig(), "unsloth/qwen3.8-27b-gguf", None
         )
         assert result == [
             "--rope-scaling",
@@ -698,7 +698,7 @@ def test_inheritance_refuses_different_variant():
     from routes.inference import _resolve_inherited_extra_args
 
     class FakeRequest:
-        model_path = "LAiM/Qwen3.8-27B-GGUF"
+        model_path = "unsloth/Qwen3.8-27B-GGUF"
         gguf_variant = "Q4_K_M"
         llama_extra_args = None
         model_fields_set = set()
@@ -706,7 +706,7 @@ def test_inheritance_refuses_different_variant():
     class FakeConfig:
         is_gguf = True
         gguf_variant = "Q4_K_M"
-        identifier = "LAiM/Qwen3.8-27B-GGUF"
+        identifier = "unsloth/Qwen3.8-27B-GGUF"
 
     class FakeBackend:
         extra_args = ["--rope-scaling", "yarn"]
@@ -718,7 +718,7 @@ def test_inheritance_refuses_different_variant():
     _routes.get_llama_cpp_backend = lambda: FakeBackend()
     try:
         result = _resolve_inherited_extra_args(
-            FakeRequest(), FakeConfig(), "LAiM/Qwen3.8-27B-GGUF", None
+            FakeRequest(), FakeConfig(), "unsloth/Qwen3.8-27B-GGUF", None
         )
         assert result == [], f"Expected empty extras for variant mismatch, got: {result}"
     finally:
@@ -730,7 +730,7 @@ def test_explicit_empty_extras_still_clears():
     from routes.inference import _resolve_inherited_extra_args
 
     class FakeRequest:
-        model_path = "LAiM/Qwen3.8-27B-GGUF"
+        model_path = "unsloth/Qwen3.8-27B-GGUF"
         gguf_variant = None
         llama_extra_args = []
         model_fields_set = set()
@@ -738,11 +738,11 @@ def test_explicit_empty_extras_still_clears():
     class FakeConfig:
         is_gguf = True
         gguf_variant = None
-        identifier = "LAiM/Qwen3.8-27B-GGUF"
+        identifier = "unsloth/Qwen3.8-27B-GGUF"
 
     class FakeBackend:
         extra_args = ["--rope-scaling", "yarn"]
-        extra_args_source = ("LAiM/Qwen3.8-27B-GGUF", "ud-q6_k_l")
+        extra_args_source = ("unsloth/Qwen3.8-27B-GGUF", "ud-q6_k_l")
 
     import routes.inference as _routes
 
@@ -750,7 +750,7 @@ def test_explicit_empty_extras_still_clears():
     _routes.get_llama_cpp_backend = lambda: FakeBackend()
     try:
         result = _resolve_inherited_extra_args(
-            FakeRequest(), FakeConfig(), "LAiM/Qwen3.8-27B-GGUF", None
+            FakeRequest(), FakeConfig(), "unsloth/Qwen3.8-27B-GGUF", None
         )
         assert result is None  # early return because llama_extra_args is not None (it's [])
     finally:
@@ -764,7 +764,7 @@ def test_missing_extra_args_source_refuses_without_raising():
     import routes.inference as _routes
 
     class FakeRequest:
-        model_path = "LAiM/Qwen3.8-27B-GGUF"
+        model_path = "unsloth/Qwen3.8-27B-GGUF"
         gguf_variant = None
         llama_extra_args = None
         model_fields_set = set()
@@ -772,7 +772,7 @@ def test_missing_extra_args_source_refuses_without_raising():
     class FakeConfig:
         is_gguf = True
         gguf_variant = "ud-q6_k_l"
-        identifier = "LAiM/Qwen3.8-27B-GGUF"
+        identifier = "unsloth/Qwen3.8-27B-GGUF"
 
     original = _routes.get_llama_cpp_backend
     try:
@@ -784,7 +784,7 @@ def test_missing_extra_args_source_refuses_without_raising():
 
             _routes.get_llama_cpp_backend = lambda: FakeBackend()
             result = _resolve_inherited_extra_args(
-                FakeRequest(), FakeConfig(), "LAiM/Qwen3.8-27B-GGUF", None
+                FakeRequest(), FakeConfig(), "unsloth/Qwen3.8-27B-GGUF", None
             )
             assert result == [], (source, result)
     finally:

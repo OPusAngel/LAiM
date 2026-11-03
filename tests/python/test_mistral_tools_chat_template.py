@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # Copyright 2026-present the LAiM AI Inc. team. All rights reserved.
 
-"""Mistral Small 3.2 tool definitions must survive training-shaped rows (LAiMai/LAiM#3096).
+"""Mistral Small 3.2 tool definitions must survive training-shaped rows (OPusAngel/LAiM#3096).
 
 The 2025 LAiM template only emitted [AVAILABLE_TOOLS] when the conversation ended on a user or
 tool turn, so every SFT row ending in an assistant reply silently dropped the tool list.

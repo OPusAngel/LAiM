@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -78,7 +79,7 @@ function isAbsoluteFolderPath(path: string): boolean {
 
 const PHASE_LABELS: Record<string, string> = {
   idle: "Ready",
-  loading: "Loading model",
+  get loading() { return translate("uxExport.loadingModel6u0z6"); },
   exporting: "Exporting",
   success: "Complete",
   error: "Failed",
@@ -90,9 +91,9 @@ const PHASE_LABELS: Record<string, string> = {
 // never looks stuck while the progress bar is already advancing.
 function waitingMessage(phase: string, stage: string | null): string {
   if (stage) return stage;
-  if (phase === "loading") return "Loading model into the export worker...";
-  if (phase === "exporting") return "Preparing export...";
-  return "Starting...";
+  if (phase === "loading") return translate("uxExport.loadingModelIntogenqt");
+  if (phase === "exporting") return translate("uxExport.preparingExport8a00b");
+  return translate("uxExport.startingEllipsisyzn1n");
 }
 
 export interface ExportRunPanelProps {
@@ -229,12 +230,12 @@ export function ExportRunPanel(props: ExportRunPanelProps) {
       <div className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-0.5">
           <h3 className="text-sm font-semibold">
-            {showConfig ? "Export Model" : "Export"}
+            {showConfig ? translate("uxExport.exportModelwvczs") : "Export"}
           </h3>
           <p className="text-xs text-muted-foreground">
             {showConfig
-              ? "Choose where to save your exported model."
-              : "Runs in the background. You can keep training and chatting while it exports."}
+              ? translate("uxExport.chooseWhereToSaven129s")
+              : translate("uxExport.runsInTheBackgroundvoafh")}
           </p>
         </div>
         {(showConfig || isTerminal) && (
@@ -242,7 +243,7 @@ export function ExportRunPanel(props: ExportRunPanelProps) {
             type="button"
             variant="ghost"
             size="icon-sm"
-            aria-label="Close export panel"
+            aria-label={translate("uxExport.closeExportPanel15vgm")}
             onClick={onClose}
           >
             <HugeiconsIcon icon={CancelCircleIcon} className="size-4" />
@@ -263,15 +264,13 @@ export function ExportRunPanel(props: ExportRunPanelProps) {
               variant={destination === "local" ? "dark" : "outline"}
               onClick={() => onDestinationChange("local")}
               className="flex-1"
-            >
-              Save Locally
-            </Button>
+            >{translate("uxExport.saveLocallyhvq2s")}</Button>
             <Button
               variant={destination === "hub" ? "dark" : "outline"}
               onClick={() => onDestinationChange("hub")}
               className="flex-1"
             >
-              Push to Hub
+              {translate("uxCopy.pushToHub14gep")}
             </Button>
           </div>
 
@@ -279,7 +278,7 @@ export function ExportRunPanel(props: ExportRunPanelProps) {
             <div className="flex flex-col gap-1.5">
               <div className="flex items-center justify-between gap-2">
                 <label className="text-xs font-medium text-muted-foreground">
-                  Save folder
+                  {translate("uxExport.saveFolderspb3e")}
                 </label>
                 {saveDirectoryOverridden && (
                   <Button
@@ -287,9 +286,7 @@ export function ExportRunPanel(props: ExportRunPanelProps) {
                     variant="ghost"
                     size="xs"
                     onClick={() => onSaveDirectoryChange(null)}
-                  >
-                    Use default
-                  </Button>
+                  >{translate("uxExport.useDefault8lyur")}</Button>
                 )}
               </div>
               <div className="flex items-stretch gap-2">
@@ -308,7 +305,7 @@ export function ExportRunPanel(props: ExportRunPanelProps) {
                       variant="outline"
                       size="icon"
                       onClick={() => setFolderBrowserOpen(true)}
-                      aria-label="Browse save folder"
+                      aria-label={translate("uxExport.browseSaveFolderfkwsj")}
                     >
                       <HugeiconsIcon
                         icon={FolderSearchIcon}
@@ -321,12 +318,10 @@ export function ExportRunPanel(props: ExportRunPanelProps) {
               </div>
               <p className="text-ui-11 text-muted-foreground/70">
                 {saveDirectory !== defaultSaveDirectory ? (
-                  <>Default: {defaultSaveDirectory}</>
+                  <>{translate("uxExport.defaultpb3sj", { p1: defaultSaveDirectory })}</>
                 ) : (
                   <>
-                    Paste an absolute path if the folder browser cannot reach
-                    the drive.
-                  </>
+                    {translate("uxExport.pasteAnAbsolutePath1epkq")}</>
                 )}
               </p>
             </div>
@@ -337,7 +332,7 @@ export function ExportRunPanel(props: ExportRunPanelProps) {
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <div className="flex flex-col gap-1.5">
                       <label className="text-xs font-medium text-muted-foreground">
-                        Username / Org
+                        {translate("uxExport.usernameOrg69kzj")}
                       </label>
                       <Input
                         placeholder="your-username"
@@ -347,7 +342,7 @@ export function ExportRunPanel(props: ExportRunPanelProps) {
                     </div>
                     <div className="flex flex-col gap-1.5">
                       <label className="text-xs font-medium text-muted-foreground">
-                        Model Name
+                        {translate("uxExport.modelName81e5w")}
                       </label>
                       <Input
                         placeholder="my-model-GGUF"
@@ -358,23 +353,21 @@ export function ExportRunPanel(props: ExportRunPanelProps) {
                   </div>
                   {hubRepoMissing && (
                     <p className="-mt-2 text-ui-11 text-muted-foreground/70">
-                      Enter a Username / Org and Model Name to push to the Hub.
+                      {translate("uxExport.enterAUsernameOrgxse5n")}
                     </p>
                   )}
 
                   <div className="flex flex-col gap-1.5">
                     <div className="flex items-center justify-between">
                       <label className="text-xs font-medium text-muted-foreground">
-                        HF Write Token
+                        {translate("uxExport.hFWriteTokenqeuvg")}
                       </label>
                       <a
                         href="https://huggingface.co/settings/tokens"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-1 text-ui-11 text-emerald-600 hover:text-emerald-700 transition-colors"
-                      >
-                        Get token
-                        <ChevronRightIcon className="size-3" />
+                      >{translate("uxExport.getTokens2627")}<ChevronRightIcon className="size-3" />
                       </a>
                     </div>
                     <InputGroup>
@@ -385,13 +378,13 @@ export function ExportRunPanel(props: ExportRunPanelProps) {
                         type="password"
                         autoComplete="new-password"
                         name="hf-token"
-                        placeholder="hf_..."
+                        placeholder={translate("uxRecipestudio.hfdcawb")}
                         value={hfToken}
                         onChange={(e) => onHfTokenChange(e.target.value)}
                       />
                     </InputGroup>
                     <p className="text-ui-11 text-muted-foreground/70">
-                      Leave empty if already logged in via CLI.
+                      {translate("uxExport.leaveEmptyIfAlready6i07y")}
                     </p>
                   </div>
 
@@ -405,9 +398,7 @@ export function ExportRunPanel(props: ExportRunPanelProps) {
                     <label
                       htmlFor="export-private-repo"
                       className="text-xs font-medium cursor-pointer"
-                    >
-                      Private Repository
-                    </label>
+                    >{translate("uxExport.privateRepositoryqodtg")}</label>
                   </div>
                 </div>
           )}
@@ -424,8 +415,8 @@ export function ExportRunPanel(props: ExportRunPanelProps) {
           <div className="flex min-w-0 flex-col gap-1">
             <span>
               {run.result?.destination === "hub"
-                ? "Export finished and pushed to Hugging Face Hub."
-                : "Export finished successfully."}
+                ? translate("uxExport.exportFinishedAndPushed880f4")
+                : translate("uxExport.exportFinishedSuccessfullyv4y8t")}
             </span>
             {(() => {
               // List every folder written; a multi-format merged run created one per format.
@@ -470,8 +461,7 @@ export function ExportRunPanel(props: ExportRunPanelProps) {
             className="mt-0.5 size-4 shrink-0"
           />
           <span>
-            Export canceled. Training and inference were not affected.
-          </span>
+            {translate("uxExport.exportCanceledTrainingAnd1yxrg")}</span>
         </div>
       )}
 
@@ -488,7 +478,7 @@ export function ExportRunPanel(props: ExportRunPanelProps) {
       {/* Summary */}
       <div className="rounded-xl bg-muted/50 p-3 text-xs text-muted-foreground flex flex-col gap-1">
         <div className="flex justify-between">
-          <span>Base Model</span>
+          <span>{translate("uxExport.baseModelqnz4t")}</span>
           <span className="font-medium text-foreground">
             {summaryBaseModel}
           </span>
@@ -500,7 +490,7 @@ export function ExportRunPanel(props: ExportRunPanelProps) {
           </span>
         </div>
         <div className="flex justify-between">
-          <span>Export Method</span>
+          <span>{translate("uxExport.exportMethodn5swp")}</span>
           <span className="font-medium text-foreground">
             {summaryMethodLabel}
           </span>
@@ -574,7 +564,7 @@ export function ExportRunPanel(props: ExportRunPanelProps) {
         <div className="flex flex-col gap-1.5 pt-1">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-medium text-muted-foreground">
-                  Export output
+                  {translate("uxExport.exportOutput1yhg8")}
                 </label>
                 <div className="flex items-center gap-2 text-ui-11 text-muted-foreground/80">
                   <span
@@ -627,16 +617,16 @@ export function ExportRunPanel(props: ExportRunPanelProps) {
         {showConfig && (
           <>
             <Button variant="outline" onClick={onClose}>
-              Cancel
+              {translate("browser.agentSettings.cancel")}
             </Button>
             <Button onClick={onStart} disabled={hubRepoMissing}>
-              Start Export
+              {translate("uxExport.startExportk1u9c")}
             </Button>
           </>
         )}
         {isExporting && (
           <Button variant="destructive" onClick={() => void requestCancel()}>
-            Cancel Export
+            {translate("uxExport.cancelExporti1773")}
           </Button>
         )}
         {isTerminal && <Button onClick={onClose}>Done</Button>}
@@ -657,9 +647,7 @@ export function ExportRunPanel(props: ExportRunPanelProps) {
 function ExportDrafterNote({ drafter }: { drafter: ExportDrafterInfo }) {
   return (
     <div className="flex min-w-0 flex-col gap-0.5">
-      <span>
-        Includes trained drafter ({drafter.strategy === "mtp" ? "MTP" : "EAGLE-3"})
-      </span>
+      <span>{translate("uxExport.includesTrainedDrafterg3gk4", { p1: drafter.strategy === "mtp" ? "MTP" : "EAGLE-3" })}</span>
       {drafter.vllm_command ? (
         <code
           className="select-all whitespace-pre-wrap break-all font-mono text-ui-12 text-foreground/90"

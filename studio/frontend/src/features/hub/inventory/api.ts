@@ -20,6 +20,8 @@ import {
 import type { ScanFolderStatus } from "../lib/scan-folder-status";
 import type { LocalSource } from "./constants";
 import { bumpGgufVariantsCacheVersion } from "./gguf-variants-cache-events";
+import { translate } from "@/i18n";
+
 
 export type ModelInventoryFormat =
   | "gguf"
@@ -348,7 +350,7 @@ export async function deleteCachedDataset(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
-  await throwIfNotOk(response, `Failed to delete dataset (${response.status})`);
+  await throwIfNotOk(response, translate("uxHub.failedToDeleteDatasetg2x72", { p1: response.status }));
   discardDeletedInventoryHints(repoId, ["dataset"]);
   bumpInventoryVersion();
 }

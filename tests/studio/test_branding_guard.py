@@ -53,8 +53,8 @@ def _stage(tmp_path):
     (js_dir / "templates" / "login.html").write_text(
         "Built by the LAiM team. Apache 2.0, AGPLv3 License Link\n"
         "Copyright 2026-Present the LAiM team.\n"
-        "https://github.com/LAiMai/LAiM#license\n"
-        "https://github.com/LAiMai/LAiM\n",
+        "https://github.com/OPusAngel/LAiM#license\n"
+        "https://github.com/OPusAngel/LAiM\n",
         encoding = "utf-8",
     )
 

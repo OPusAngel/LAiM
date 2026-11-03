@@ -85,7 +85,7 @@ def _format(dataset_info, tokenizer, monkeypatch):
     return apply_chat_template_to_dataset(
         dataset_info,
         tokenizer,
-        model_name = "LAiM/gemma-4-E4B-it",
+        model_name = "unsloth/gemma-4-E4B-it",
         num_proc = 1,
     )
 

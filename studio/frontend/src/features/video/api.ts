@@ -7,6 +7,8 @@ import { authFetch } from "@/features/auth";
 import type { DiffusionDownloadPlan } from "@/features/images/api";
 import { apiUrl } from "@/lib/api-base";
 import { readFastApiError } from "@/lib/format-fastapi-error";
+import { translate } from "@/i18n";
+
 
 // One Advanced control's resolved value plus provenance, same shape as the diffusion status.
 // `value` is engaged, `requested` is what the caller asked for (null = left to the backend),
@@ -425,7 +427,7 @@ export async function fetchGalleryVideoSignedUrl(id: string): Promise<string> {
   );
   if (!res.ok) throw new Error(await readFastApiError(res));
   const body = (await res.json()) as { url?: string };
-  if (!body.url) throw new Error("The server returned no video link.");
+  if (!body.url) throw new Error(translate("uxVideo.theServerReturnedNod3109"));
   // Absolute because consumers bypass authFetch, and a relative path under Tauri resolves
   // against the webview origin. No-op in the browser (empty apiBase).
   return apiUrl(body.url);
@@ -442,7 +444,7 @@ export async function fetchGalleryVideoThumbnail(
   if (!res.ok) throw new Error(await readFastApiError(res));
   const blob = await res.blob();
   // An empty 200 would cache a card that can never render, and the cache hit ends every retry.
-  if (blob.size === 0) throw new Error("The thumbnail response was empty.");
+  if (blob.size === 0) throw new Error(translate("uxVideo.theThumbnailResponseWasmvay9"));
   return { url: URL.createObjectURL(blob), bytes: blob.size };
 }
 

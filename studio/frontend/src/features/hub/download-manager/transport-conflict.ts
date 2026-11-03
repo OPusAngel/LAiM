@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { checkDiskSpace } from "@/features/settings/low-disk-check";
 import { toast } from "@/lib/toast";
 import { disposableTimeoutSignal } from "../lib/abort-signals";
@@ -42,8 +43,8 @@ import { ACTIVE_STATES, TRANSPORT_STATUS_TIMEOUT_MS } from "./download-manager-c
 
 function reportConflictStartError(error: unknown): void {
   const description =
-    error instanceof Error ? error.message : String(error || "Unknown error");
-  toast.error("Couldn't start download", { description });
+    error instanceof Error ? error.message : String(error || translate("uxHub.unknownErrorcz3w8"));
+  toast.error(translate("uxHub.couldnTStartDownload116hb"), { description });
 }
 
 function pendingStartKey(req: DownloadRequest): string {
@@ -211,11 +212,11 @@ export async function requestStart(
         siblingTransport !== mode &&
         preferred !== TRANSPORT.AUTO
       ) {
-        toast.info("Another variant is already downloading", {
+        toast.info(translate("uxHub.anotherVariantIsAlready15wrl"), {
           description:
             siblingTransport === TRANSPORT.XET
-              ? "This repository is currently downloading with Xet. Switch to Xet or wait for it to finish."
-              : "This repository is currently downloading with HTTP. Switch to HTTP or wait for it to finish.",
+              ? translate("uxHub.thisRepositoryIsCurrentlysa1le")
+              : translate("uxHub.thisRepositoryIsCurrentlykinnh"),
         });
         return "busy";
       }
@@ -268,9 +269,9 @@ export async function requestStart(
       // the Xet preference is kept for next time. Only downgrade once we confirmed no sibling
       // variant is downloading, since a live sibling may be mid-transfer on Xet.
       if (mode === TRANSPORT.XET && siblingProbed && !siblingTransport) {
-        toast.warning("Couldn't verify existing partial download", {
+        toast.warning(translate("uxHub.couldnTVerifyExisting1aouw"), {
           description:
-            "Starting with HTTP so an existing partial is not discarded. Switch transport to retry with Xet.",
+            translate("uxHub.startingWithHTTPSom1mo1"),
         });
         await startJob(req, {
           useXet: false,
@@ -280,17 +281,17 @@ export async function requestStart(
         });
         return isJobActiveFor(req) ? "started" : "error";
       }
-      toast.warning("Couldn't verify existing partial download", {
+      toast.warning(translate("uxHub.couldnTVerifyExisting1aouw"), {
         description:
-          "Starting with the selected transport. If a partial from another transport exists, it may be restarted from the beginning.",
+          translate("uxHub.startingWithTheSelectedvmpu0"),
       });
     }
     if (siblingProbed && siblingTransport && siblingTransport !== mode) {
-      toast.info("Another variant is already downloading", {
+      toast.info(translate("uxHub.anotherVariantIsAlready15wrl"), {
         description:
           siblingTransport === TRANSPORT.XET
-            ? "This repository is currently downloading with Xet. Switch to Xet or wait for it to finish."
-            : "This repository is currently downloading with HTTP. Switch to HTTP or wait for it to finish.",
+            ? translate("uxHub.thisRepositoryIsCurrentlysa1le")
+            : translate("uxHub.thisRepositoryIsCurrentlykinnh"),
       });
       return "busy";
     }

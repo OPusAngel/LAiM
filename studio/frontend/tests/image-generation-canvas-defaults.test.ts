@@ -25,7 +25,7 @@ test("a quantised Qwen-Image-2.1 pipeline defaults to 512", () => {
 test("the single-file FP8 route gets it too", () => {
   // The hosted FP8 checkpoint loads as single_file, not pipeline. Only GGUF is excluded.
   assert.deepEqual(
-    resolutionFor("LAiM/Qwen-Image-2.1-FP8", {
+    resolutionFor("unsloth/Qwen-Image-2.1-FP8", {
       modelKind: "single_file",
       transformerQuant: "fp8",
     }),

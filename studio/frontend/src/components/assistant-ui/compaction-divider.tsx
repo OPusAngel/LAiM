@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { ArchiveIcon } from "lucide-react";
 import type { FC, ReactNode } from "react";
 
@@ -33,9 +34,7 @@ export const CompactionDivider: FC<
     return (
       <DividerRule className={className}>
         <p className="max-w-72 text-xs leading-snug">
-          Your next message starts a fresh context. Older messages stay here,
-          and the parts relevant to each question are brought back
-          automatically.
+          {translate("uxCopy.yourNextMessageStarts42ljv")}
         </p>
       </DividerRule>
     );
@@ -65,11 +64,11 @@ export const CompactionDivider: FC<
           value={dropped}
         />
         {recalled > 0 && (
-          <DetailRow label="Passages recalled" value={recalled} />
+          <DetailRow label={translate("uxComponents.passagesRecalled1ww90")} value={recalled} />
         )}
         {before !== undefined && after !== undefined && (
           <DetailRow
-            label="Prompt tokens"
+            label={translate("uxComponents.promptTokens5gng6")}
             value={`${before.toLocaleString()} → ${after.toLocaleString()}`}
           />
         )}
@@ -100,7 +99,7 @@ const DividerRule: FC<{ children: ReactNode; className?: string }> = ({
           className="relative -mx-2 -my-2.5 inline-flex shrink-0 cursor-default items-center gap-1.5 whitespace-nowrap rounded-md px-2 py-2.5 leading-none transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring"
         >
           <ArchiveIcon className="size-3.5" aria-hidden={true} />
-          Context compacted
+          {translate("uxComponents.contextCompactedldwqf")}
         </button>
       </TooltipTrigger>
       <TooltipContent side="top" sideOffset={8} variant="rich">

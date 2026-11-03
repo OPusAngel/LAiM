@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { isLAiMProtocol } from "@/config/deep-link";
 import type { ModelConfigHandoffRequest } from "../model-config/model-config-handoff";
 import type { PerModelConfig } from "../model-config/per-model-config";
 import type { SharedRunConfig } from "./links";
@@ -124,7 +125,7 @@ export function isRunConfigLink(raw: string): boolean {
   try {
     const url = new URL(raw);
     return (
-      (url.protocol === "LAiM:" && url.hostname.toLowerCase() === "run") ||
+      (isLAiMProtocol(url.protocol) && url.hostname.toLowerCase() === "run") ||
       ((url.protocol === "http:" || url.protocol === "https:") &&
         runConfigHash.test(url.hash))
     );

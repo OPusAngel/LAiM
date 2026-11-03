@@ -207,7 +207,7 @@ test("every field, the complete payload and safe identities round-trip in browse
       config: { [key]: fullConfig[key] },
     })),
     {
-      model: "LAiM/Model-GGUF",
+      model: "unsloth/Model-GGUF",
       ggufVariant: "Q4_K_M/model-00001-of-00002.gguf",
       config: fullConfig,
     },

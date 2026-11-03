@@ -26,7 +26,7 @@ const TAB = readFileSync(
 
 test("the default model demonstrates reasoning effort without sampling flags", () => {
   assert.ok(
-    TAB.includes('const EXAMPLE_MODEL_REPO = "LAiM/Qwen3.8-27B-GGUF";'),
+    TAB.includes('const EXAMPLE_MODEL_REPO = "unsloth/Qwen3.8-27B-GGUF";'),
   );
   assert.ok(TAB.includes('const EXAMPLE_MODEL_VARIANT = "UD-Q4_K_XL";'));
   const start = TAB.indexOf("const EXAMPLE_MODEL_FLAGS");
@@ -147,7 +147,7 @@ test("the agent feed excludes classifier and reranker models", () => {
     assert.equal(isClassifierOrRerankerHubModel({ pipelineTag }), true);
   }
   assert.equal(
-    isClassifierOrRerankerHubModel({ id: "LAiM/Qwen3-Reranker-GGUF" }),
+    isClassifierOrRerankerHubModel({ id: "unsloth/Qwen3-Reranker-GGUF" }),
     true,
   );
   assert.equal(
@@ -163,7 +163,7 @@ test("the agent feed excludes classifier and reranker models", () => {
   );
   assert.equal(
     isClassifierOrRerankerHubModel({
-      id: "LAiM/Qwen3.8-27B-GGUF",
+      id: "unsloth/Qwen3.8-27B-GGUF",
       pipelineTag: "text-generation",
     }),
     false,

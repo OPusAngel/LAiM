@@ -85,7 +85,7 @@ def test_fallback_revisions_prefers_refs_main_and_skips_junk(tmp_path):
 @pytest.mark.parametrize(
     "module, state_factory, model_id",
     [
-        (snapshot_mod, snapshot_mod._SnapshotDownloadState, "LAiM/whisper-tiny"),
+        (snapshot_mod, snapshot_mod._SnapshotDownloadState, "unsloth/whisper-tiny"),
         (ggml_mod, ggml_mod._GgmlDownloadState, "tiny"),
         (mtmd_mod, mtmd_mod._MtmdDownloadState, "qwen3-asr-0.6b"),
     ],
@@ -132,7 +132,7 @@ def test_a_cancel_during_metadata_leaves_the_shared_cache_alone(
 @pytest.mark.parametrize(
     "state_factory, model_id",
     [
-        (snapshot_mod._SnapshotDownloadState, "LAiM/whisper-tiny"),
+        (snapshot_mod._SnapshotDownloadState, "unsloth/whisper-tiny"),
         (ggml_mod._GgmlDownloadState, "tiny"),
         (mtmd_mod._MtmdDownloadState, "qwen3-asr-0.6b"),
     ],
@@ -156,7 +156,7 @@ def test_restarting_a_cancelling_download_is_not_a_silent_no_op(state_factory, m
 @pytest.mark.parametrize(
     "state_factory, active_model, stale_model",
     [
-        (snapshot_mod._SnapshotDownloadState, "LAiM/whisper-small", "LAiM/whisper-tiny"),
+        (snapshot_mod._SnapshotDownloadState, "unsloth/whisper-small", "unsloth/whisper-tiny"),
         (ggml_mod._GgmlDownloadState, "small", "tiny"),
         (mtmd_mod._MtmdDownloadState, "qwen3-asr-1.7b", "qwen3-asr-0.6b"),
         (
@@ -201,7 +201,7 @@ def test_a_stale_cancel_cannot_stop_a_newer_download(
 @pytest.mark.parametrize(
     "state_factory, model_id",
     [
-        (snapshot_mod._SnapshotDownloadState, "LAiM/whisper-tiny"),
+        (snapshot_mod._SnapshotDownloadState, "unsloth/whisper-tiny"),
         (ggml_mod._GgmlDownloadState, "tiny"),
         (mtmd_mod._MtmdDownloadState, "qwen3-asr-0.6b"),
         (audiocpp_mod._AudioCppDownloadState, "homebrew/repo:Q4_K_M"),
@@ -350,7 +350,7 @@ def test_a_worker_that_ignores_sigterm_is_killed():
 @pytest.mark.parametrize(
     "state_factory, model_id",
     [
-        (snapshot_mod._SnapshotDownloadState, "LAiM/whisper-tiny"),
+        (snapshot_mod._SnapshotDownloadState, "unsloth/whisper-tiny"),
         (ggml_mod._GgmlDownloadState, "tiny"),
         (mtmd_mod._MtmdDownloadState, "qwen3-asr-0.6b"),
     ],
@@ -382,7 +382,7 @@ def test_status_never_stats_the_cache_under_the_download_lock(state_factory, mod
     [
         (
             snapshot_mod._SnapshotDownloadState,
-            "LAiM/whisper-tiny",
+            "unsloth/whisper-tiny",
             lambda s: setattr(s, "_repo", "org/next") or setattr(s, "_selected_files", ()),
         ),
         (ggml_mod._GgmlDownloadState, "tiny", lambda s: setattr(s, "_etag", None)),

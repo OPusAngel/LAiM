@@ -6,6 +6,8 @@ import { authFetch } from "@/features/auth/api";
 import { formatFastApiDetail } from "@/lib/format-fastapi-error";
 import type { ModelCatalogSnapshotEntry } from "../model-catalog-snapshot";
 import type { CustomReasoningConfig } from "../custom-reasoning";
+import { translate } from "@/i18n";
+
 
 
 export type ProviderAuthKind = "api_key" | "chatgpt_oauth";
@@ -104,7 +106,7 @@ function parseErrorText(status: number, body: unknown): string {
     const message = (body as { message?: unknown }).message;
     if (typeof message === "string" && message) return message;
   }
-  return `Request failed (${status})`;
+  return translate("uxChat.requestFailedb9a7f", { p1: status });
 }
 
 async function parseJsonOrThrow<T>(response: Response): Promise<T> {
@@ -142,7 +144,7 @@ async function importProviderPublicKey(
   const body = await parseJsonOrThrow<{ public_key: string }>(response);
   const publicKeyPem = body.public_key?.trim();
   if (!publicKeyPem) {
-    throw new Error("Provider public key is missing.");
+    throw new Error(translate("uxChat.providerPublicKeyIssu20c"));
   }
   if (!forceRefresh && cachedPublicKeyPem === publicKeyPem && cachedForgeKey) {
     return cachedForgeKey;
@@ -178,7 +180,7 @@ export async function encryptProviderApiKey(
   // forge ciphers take bytes: without encodeUtf8 a non-ASCII key loses all but each low byte.
   cipher.update(forge.util.createBuffer(forge.util.encodeUtf8(plaintextApiKey)));
   if (!cipher.finish()) {
-    throw new Error("Failed to encrypt API key.");
+    throw new Error(translate("uxChat.failedToEncryptAPIqnbln"));
   }
 
   const wrappedKey = key.encrypt(aesKey, "RSA-OAEP", {

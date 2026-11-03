@@ -106,7 +106,7 @@ def test_explicit_whisper_model_passes_through(monkeypatch):
         "audio-cpp/audio.cpp-gguf/Qwen3-ASR-0.6B",
         # Fine-tuned for transcription only: it answers in the source language.
         "large-v3-turbo",
-        "LAiM/whisper-large-v3-turbo",
+        "unsloth/whisper-large-v3-turbo",
     ],
 )
 def test_models_without_a_translate_task_are_refused_before_any_work(monkeypatch, model):

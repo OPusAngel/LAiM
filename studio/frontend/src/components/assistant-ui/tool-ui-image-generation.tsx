@@ -3,6 +3,7 @@
 
 "use client";
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { FIND_SKIP_ATTRIBUTE } from "@/features/find-in-page";
 import { cn } from "@/lib/utils";
@@ -94,7 +95,7 @@ const imageFilenameFromPrompt = (prompt: string, mime: string): string => {
 
 const formatGeneratedImageLabel = (prompt: string): string => {
   if (!prompt) {
-    return "Generated image";
+    return translate("uxComponents.generatedImagezcu9j");
   }
   return prompt.length > 80
     ? `Generated image: ${prompt.slice(0, 80)}…`
@@ -196,7 +197,7 @@ const ImageGenerationToolUIImpl: ToolCallMessagePartComponent = ({
     ? `data:${mime};base64,${imageResult.image_b64}`
     : null;
   const resultPrompt = toolArgText(imageResult?.prompt).trim();
-  const imageTitle = resultPrompt || prompt.trim() || "Generated image";
+  const imageTitle = resultPrompt || prompt.trim() || translate("uxComponents.generatedImagezcu9j");
   const captionPrompt = resultPrompt || prompt.trim();
   const promptLikelyNeedsExpansion = captionPrompt.length > 220;
   const imageMetadata = [size, quality, mime].filter(Boolean).join(" · ");
@@ -273,7 +274,7 @@ const ImageGenerationToolUIImpl: ToolCallMessagePartComponent = ({
     (promptOverflowMeasured ? promptCanExpand : promptLikelyNeedsExpansion) &&
     !promptExpanded;
 
-  const runningLabel = "Generating image…";
+  const runningLabel = translate("uxComponents.generatingImage9smvj");
   const completedLabel = formatGeneratedImageLabel(prompt);
 
   const showPreview = () => {
@@ -342,7 +343,7 @@ const ImageGenerationToolUIImpl: ToolCallMessagePartComponent = ({
                   imageDimensions ? "size-full" : "max-w-full",
                 )}
                 onClick={showPreview}
-                aria-label="Open generated image preview"
+                aria-label={translate("uxComponents.openGeneratedImagePreview1rmd5")}
               >
                 <img
                   src={imagePart.image}
@@ -374,7 +375,7 @@ const ImageGenerationToolUIImpl: ToolCallMessagePartComponent = ({
                   onClick={handleEditClick}
                 >
                   <PencilIcon className="size-3.5" />
-                  Edit
+                  {translate("uxImages.edit1i1lc")}
                 </Button>
                 <Button
                   type="button"
@@ -382,7 +383,7 @@ const ImageGenerationToolUIImpl: ToolCallMessagePartComponent = ({
                   size="icon-sm"
                   className="pointer-events-auto rounded-full bg-[#061d21]/70 text-[#f9e2de] hover:bg-[#061d21]/85"
                   onClick={handleDownload}
-                  aria-label="Download generated image"
+                  aria-label={translate("uxComponents.downloadGeneratedImage1ott0")}
                 >
                   <HugeiconsIcon icon={Download01Icon} className="size-4" />
                 </Button>
@@ -410,7 +411,7 @@ const ImageGenerationToolUIImpl: ToolCallMessagePartComponent = ({
                     }
                     aria-expanded={promptExpanded}
                   >
-                    {promptExpanded ? "Show less" : "Show more"}
+                    {promptExpanded ? translate("uxRag.showLessqn712") : translate("uxComponents.showMorebdeer")}
                   </button>
                 ) : null}
               </figcaption>

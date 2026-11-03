@@ -2,6 +2,7 @@
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { useHfEndpoint } from "@/lib/hf-endpoint";
+import { translate } from "@/i18n";
 import { Spinner } from "@/components/ui/spinner";
 import { useOnlineStatus } from "@/features/hub/hooks/use-online-status";
 import { LruMap } from "@/features/hub/lib/lru-map";
@@ -175,7 +176,7 @@ function ReadmeLink({
     return (
       <span
         aria-disabled="true"
-        title={title ?? "Unavailable offline"}
+        title={title ?? translate("uxHub.unavailableOffline0m3iu")}
         className={cn(className, "cursor-not-allowed opacity-60")}
       >
         {children}
@@ -226,37 +227,37 @@ const README_COMPONENTS: Components = {
 };
 
 function readmeLoadingMessage(subject: ReadmeSubject): string {
-  if (subject === "dataset") return "Loading dataset card...";
-  if (subject === "baseModel") return "Loading base model card...";
-  return "Loading model card...";
+  if (subject === "dataset") return translate("uxHub.loadingDatasetCard19d7y");
+  if (subject === "baseModel") return translate("uxHub.loadingBaseModelCardgcm7m");
+  return translate("uxHub.loadingModelCardygmzc");
 }
 
 function readmePreparingMessage(subject: ReadmeSubject): string {
-  if (subject === "dataset") return "Preparing dataset card...";
-  if (subject === "baseModel") return "Preparing base model card...";
-  return "Preparing model card...";
+  if (subject === "dataset") return translate("uxHub.preparingDatasetCardrnniv");
+  if (subject === "baseModel") return translate("uxHub.preparingBaseModelCardfq2jy");
+  return translate("uxHub.preparingModelCardcawcn");
 }
 
 function readmeOfflineMessage(subject: ReadmeSubject): string {
-  if (subject === "dataset") return "Dataset card unavailable offline.";
-  if (subject === "baseModel") return "Base model card unavailable offline.";
-  return "Model card unavailable offline.";
+  if (subject === "dataset") return translate("uxHub.datasetCardUnavailableOffline2dqa1");
+  if (subject === "baseModel") return translate("uxHub.baseModelCardUnavailable25a5o");
+  return translate("uxHub.modelCardUnavailableOfflineppwlb");
 }
 
 function readmeMissingMessage(subject: ReadmeSubject): string {
-  if (subject === "dataset") return "This dataset has no README.";
-  if (subject === "baseModel") return "This base model has no README.";
-  return "This repository has no README.";
+  if (subject === "dataset") return translate("uxHub.thisDatasetHasNogm9ls");
+  if (subject === "baseModel") return translate("uxHub.thisBaseModelHasts58g");
+  return translate("uxHub.thisRepositoryHasNofyrzz");
 }
 
 function readmeUnavailableMessage(subject: ReadmeSubject): string {
   if (subject === "dataset") {
-    return "Dataset card unavailable. It may be private, gated, or temporarily unreachable.";
+    return translate("uxHub.datasetCardUnavailableItvcand");
   }
   if (subject === "baseModel") {
-    return "Base model card unavailable. It may be private, gated, or temporarily unreachable.";
+    return translate("uxHub.baseModelCardUnavailableby380");
   }
-  return "Model card unavailable. It may be private, gated, or temporarily unreachable.";
+  return translate("uxHub.modelCardUnavailableItgjliv");
 }
 
 function isMissingReadmeError(error: string): boolean {
@@ -278,7 +279,7 @@ function ReadmePlaceholder({
     >
       <div className="flex items-center gap-2 text-ui-12p5 text-muted-foreground">
         <Spinner className="size-3.5" />
-        {message ?? `Loading ${kind === "dataset" ? "dataset" : "model"} card…`}
+        {message ?? translate("uxHub.loadingCardrk6s1", { p1: kind === "dataset" ? "dataset" : "model" })}
       </div>
       <div className="space-y-2" aria-hidden="true">
         <div className="h-2.5 w-11/12 rounded-full bg-muted/60" />
@@ -312,7 +313,10 @@ async function loadReadmeFromCache({
       return {
         body: null,
         baseUrl: null,
-        error: `No ${kind === "dataset" ? "dataset" : "model"} card available.`,
+        error:
+          kind === "dataset"
+            ? translate("uxHub.noDatasetCardQ85we")
+            : translate("uxHub.noModelCardT37ry"),
       };
     }
     return {
@@ -442,7 +446,7 @@ export function ModelReadme({
             baseUrl: null,
             loading: false,
             error:
-              err instanceof Error ? err.message : "Failed to load model card",
+              err instanceof Error ? err.message : translate("uxHub.failedToLoadModel0jbxx"),
             plugins: null,
           });
         });

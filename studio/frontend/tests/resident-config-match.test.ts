@@ -1905,7 +1905,7 @@ test("a runtime_error resident does not claim its draft depth is the default", (
 });
 
 /**
- * Auto tensor-parallel now reports a split (LAiMai/LAiM#10884): the backend emits
+ * Auto tensor-parallel now reports a split (OPusAngel/LAiM#10884): the backend emits
  * one whenever the planner sizes the load itself, and the /status echo carries it. The
  * store never holds a split in auto mode -- applyInferenceStatusToStore nulls it unless
  * the mode is manual -- so comparing the two sides here compares a cleared field against

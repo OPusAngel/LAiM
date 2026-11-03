@@ -6,6 +6,8 @@ import type {
   DownloadPresentation,
   ManagedDownload,
 } from "./download-manager-types";
+import { translate } from "@/i18n";
+
 
 /** Describe a sole missing drafter as the transfer, not as the cached model. */
 export function pendingDrafterPresentation(
@@ -19,10 +21,10 @@ export function pendingDrafterPresentation(
   const basename = filename.replaceAll("\\", "/").split("/").at(-1) ?? filename;
   const lower = basename.toLowerCase();
   const label = lower.startsWith("mtp-")
-    ? "MTP companion"
+    ? translate("uxHub.mTPCompanion7rfac")
     : lower.startsWith("dspark-") || lower.startsWith("dflash-")
-      ? "Draft companion"
-      : "Model companion";
+      ? translate("uxHub.draftCompanionmrcfg")
+      : translate("uxHub.modelCompanionvx3n8");
   return { label, filename: basename, expectedBytes };
 }
 

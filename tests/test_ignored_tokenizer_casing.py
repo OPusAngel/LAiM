@@ -34,7 +34,7 @@ def _fake_auto_tokenizer():
 
 
 def test_ignored_tokenizer_name_matched_case_insensitively():
-    name = "LAiM/Qwen2.5-Coder-7B-Instruct"  # name.lower() is in IGNORED_TOKENIZER_NAMES
+    name = "unsloth/Qwen2.5-Coder-7B-Instruct"  # name.lower() is in IGNORED_TOKENIZER_NAMES
     assert name.lower() in tu.IGNORED_TOKENIZER_NAMES
 
     with (

@@ -91,7 +91,7 @@ class TestCanLoadAutoHF(_GpuCacheResetMixin, unittest.TestCase):
             patch("utils.hardware.auto_select_gpu_ids", return_value = ([0], meta)) as auto_mock,
         ):
             ok, info = tv.can_load_chat_during_training(
-                model_name = "LAiM/Qwen3-1.7B",
+                model_name = "unsloth/Qwen3-1.7B",
                 hf_token = None,
                 load_in_4bit = True,
                 max_seq_length = 0,
@@ -213,7 +213,7 @@ class TestCanLoadGGUF(_GpuCacheResetMixin, unittest.TestCase):
             patch("utils.hardware.auto_select_gpu_ids") as auto_mock,
         ):
             ok, info = tv.can_load_chat_during_training(
-                model_name = "LAiM/gemma-GGUF",
+                model_name = "unsloth/gemma-GGUF",
                 hf_token = None,
                 load_in_4bit = True,
                 max_seq_length = 0,
@@ -536,7 +536,7 @@ class TestChatLoadGuardRoute(unittest.TestCase):
             training_active = training_active, decision = decision, captured = captured
         ):
             request = SimpleNamespace(
-                model_path = "LAiM/Qwen3-1.7B",
+                model_path = "unsloth/Qwen3-1.7B",
                 hf_token = None,
                 max_seq_length = 0,
                 cache_type_kv = cache_type_kv,
@@ -563,8 +563,8 @@ class TestChatLoadGuardRoute(unittest.TestCase):
 
     def test_diffusion_detection_uses_name_before_download(self):
         config = SimpleNamespace(
-            identifier = "LAiM/DiffusionGemma-GGUF",
-            gguf_hf_repo = "LAiM/DiffusionGemma-GGUF",
+            identifier = "unsloth/DiffusionGemma-GGUF",
+            gguf_hf_repo = "unsloth/DiffusionGemma-GGUF",
             gguf_file = None,
         )
         self.assertTrue(self.route._classify_diffusion_gguf(config))
@@ -870,7 +870,7 @@ class TestChatLoadGuardRoute(unittest.TestCase):
 
     def test_gguf_config_passes_is_gguf_and_override(self):
         captured = []
-        config = SimpleNamespace(identifier = "LAiM/Canonical-Repo", is_gguf = True)
+        config = SimpleNamespace(identifier = "unsloth/Canonical-Repo", is_gguf = True)
         with patch.object(self.route, "_estimate_gguf_required_gb", return_value = 12.5):
             self._guard(
                 config = config,
@@ -953,7 +953,7 @@ class TestEffectiveLoadIn4bit(unittest.TestCase):
         import tempfile
         with tempfile.TemporaryDirectory() as d:
             self._write_adapter(d, {"LAiM_training_method": "CPT"})
-            cfg = SimpleNamespace(is_lora = True, path = d, base_model = "LAiM/Qwen3-4B")
+            cfg = SimpleNamespace(is_lora = True, path = d, base_model = "unsloth/Qwen3-4B")
             self.assertTrue(self.route._effective_load_in_4bit(cfg, True))
 
     def test_cpt_method_bnb_base_keeps_4bit(self):
@@ -961,7 +961,7 @@ class TestEffectiveLoadIn4bit(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             self._write_adapter(d, {"LAiM_training_method": "CPT"})
             cfg = SimpleNamespace(
-                is_lora = True, path = d, base_model = "LAiM/Qwen3-4B-LAiM-bnb-4bit"
+                is_lora = True, path = d, base_model = "unsloth/Qwen3-4B-unsloth-bnb-4bit"
             )
             self.assertTrue(self.route._effective_load_in_4bit(cfg, True))
 
@@ -973,7 +973,7 @@ class TestEffectiveLoadIn4bit(unittest.TestCase):
                     self._write_adapter(
                         d, {"LAiM_training_method": "CPT", "LAiM_load_in_4bit": recorded}
                     )
-                    cfg = SimpleNamespace(is_lora = True, path = d, base_model = "LAiM/Qwen3-4B")
+                    cfg = SimpleNamespace(is_lora = True, path = d, base_model = "unsloth/Qwen3-4B")
                     self.assertIs(self.route._effective_load_in_4bit(cfg, requested), recorded)
 
     def test_malformed_adapter_config_returns_request(self):
@@ -1028,7 +1028,7 @@ class TestEffectiveLoadIn4bit(unittest.TestCase):
         )
         adapter = self._model_dir(outputs, "a", adapter = {})
         outside = self._model_dir(home / "exports", "merged")
-        for path in (quantized, adapter, outside, "LAiM/Qwen3-0.6B"):
+        for path in (quantized, adapter, outside, "unsloth/Qwen3-0.6B"):
             cfg = SimpleNamespace(is_lora = False, path = path, base_model = None)
             self.assertTrue(self.route._effective_load_in_4bit(cfg, True), path)
         qlora = self._model_dir(outputs, "qlora", adapter = {"LAiM_training_method": "qlora"})
@@ -1210,14 +1210,14 @@ class TestValidateRefusesDuringTraining(unittest.TestCase):
         from models.inference import ValidateModelRequest
 
         request = ValidateModelRequest(
-            model_path = "LAiM/Qwen3-1.7B", load_in_4bit = load_in_4bit, max_seq_length = 4096
+            model_path = "unsloth/Qwen3-1.7B", load_in_4bit = load_in_4bit, max_seq_length = 4096
         )
-        cfg = _model_cfg(identifier = "LAiM/Qwen3-1.7B", display_name = "Qwen3-1.7B")
+        cfg = _model_cfg(identifier = "unsloth/Qwen3-1.7B", display_name = "Qwen3-1.7B")
         with (
             patch.object(
                 self.route,
                 "_resolve_model_identifier_for_request",
-                return_value = ("LAiM/Qwen3-1.7B", "LAiM/Qwen3-1.7B", False),
+                return_value = ("unsloth/Qwen3-1.7B", "unsloth/Qwen3-1.7B", False),
             ),
             patch.object(self.route.ModelConfig, "from_identifier", return_value = cfg),
             patch.object(self.route, "load_inference_config", return_value = {}),
@@ -1249,17 +1249,17 @@ class TestValidateRefusesDuringTraining(unittest.TestCase):
         from models.inference import ValidateModelRequest
 
         request = ValidateModelRequest(
-            model_path = "LAiM/model-GGUF",
+            model_path = "unsloth/model-GGUF",
             gguf_variant = "Q4_K_M",
             gpu_memory_mode = "manual",
         )
-        cfg = _model_cfg(identifier = "LAiM/model-GGUF", display_name = "model-GGUF", is_gguf = True)
+        cfg = _model_cfg(identifier = "unsloth/model-GGUF", display_name = "model-GGUF", is_gguf = True)
         captured = {}
         with (
             patch.object(
                 self.route,
                 "_resolve_model_identifier_for_request",
-                return_value = ("LAiM/model-GGUF", "LAiM/model-GGUF", False),
+                return_value = ("unsloth/model-GGUF", "unsloth/model-GGUF", False),
             ),
             patch.object(self.route.ModelConfig, "from_identifier", return_value = cfg),
             patch.object(self.route, "load_inference_config", return_value = {}),
@@ -1277,18 +1277,18 @@ class TestValidateRefusesDuringTraining(unittest.TestCase):
         from models.inference import ValidateModelRequest
 
         request = ValidateModelRequest(
-            model_path = "LAiM/Qwen3-1.7B",
+            model_path = "unsloth/Qwen3-1.7B",
             max_seq_length = 4096,
             cache_type_kv = "f32",
             tensor_parallel = True,
         )
-        cfg = _model_cfg(identifier = "LAiM/Qwen3-1.7B", display_name = "Qwen3-1.7B")
+        cfg = _model_cfg(identifier = "unsloth/Qwen3-1.7B", display_name = "Qwen3-1.7B")
         captured = {}
         with (
             patch.object(
                 self.route,
                 "_resolve_model_identifier_for_request",
-                return_value = ("LAiM/Qwen3-1.7B", "LAiM/Qwen3-1.7B", False),
+                return_value = ("unsloth/Qwen3-1.7B", "unsloth/Qwen3-1.7B", False),
             ),
             patch.object(self.route.ModelConfig, "from_identifier", return_value = cfg),
             patch.object(self.route, "load_inference_config", return_value = {}),
@@ -1310,17 +1310,17 @@ class TestValidateRefusesDuringTraining(unittest.TestCase):
         from models.inference import ValidateModelRequest
 
         request = ValidateModelRequest(
-            model_path = "LAiM/Qwen3-1.7B",
+            model_path = "unsloth/Qwen3-1.7B",
             max_seq_length = 4096,
             include_context_length = True,
         )
-        cfg = _model_cfg(identifier = "LAiM/Qwen3-1.7B", display_name = "Qwen3-1.7B")
+        cfg = _model_cfg(identifier = "unsloth/Qwen3-1.7B", display_name = "Qwen3-1.7B")
         guard_called = []
         with (
             patch.object(
                 self.route,
                 "_resolve_model_identifier_for_request",
-                return_value = ("LAiM/Qwen3-1.7B", "LAiM/Qwen3-1.7B", False),
+                return_value = ("unsloth/Qwen3-1.7B", "unsloth/Qwen3-1.7B", False),
             ),
             patch.object(self.route.ModelConfig, "from_identifier", return_value = cfg),
             patch.object(self.route, "load_inference_config", return_value = {}),
@@ -1337,15 +1337,15 @@ class TestValidateRefusesDuringTraining(unittest.TestCase):
         from models.inference import ValidateModelRequest
 
         request = ValidateModelRequest(
-            model_path = "LAiM/DiffusionGemma-GGUF",
+            model_path = "unsloth/DiffusionGemma-GGUF",
             include_context_length = True,
         )
         cfg = _model_cfg(
-            identifier = "LAiM/DiffusionGemma-GGUF",
+            identifier = "unsloth/DiffusionGemma-GGUF",
             display_name = "DiffusionGemma-GGUF",
             is_gguf = True,
             gguf_file = None,
-            gguf_hf_repo = "LAiM/DiffusionGemma-GGUF",
+            gguf_hf_repo = "unsloth/DiffusionGemma-GGUF",
             gguf_variant = None,
         )
         with (
@@ -1353,8 +1353,8 @@ class TestValidateRefusesDuringTraining(unittest.TestCase):
                 self.route,
                 "_resolve_model_identifier_for_request",
                 return_value = (
-                    "LAiM/DiffusionGemma-GGUF",
-                    "LAiM/DiffusionGemma-GGUF",
+                    "unsloth/DiffusionGemma-GGUF",
+                    "unsloth/DiffusionGemma-GGUF",
                     False,
                 ),
             ),
@@ -1669,7 +1669,7 @@ class TestEstimateGgufRequiredGb(unittest.TestCase):
         from models.inference import ValidateModelRequest
 
         req = ValidateModelRequest(
-            model_path = "LAiM/DeepSeek-V4-Flash-0731-GGUF",
+            model_path = "unsloth/DeepSeek-V4-Flash-0731-GGUF",
             speculative_type = "off",
             spec_draft_n_max = 3,
         )
@@ -3304,9 +3304,9 @@ class TestLoadModelGuardIntegration(unittest.TestCase):
             is_lora = False,
             path = None,
             base_model = None,
-            identifier = "LAiM/Qwen3-1.7B",
+            identifier = "unsloth/Qwen3-1.7B",
         )
-        request = LoadRequest(model_path = "LAiM/Qwen3-1.7B")
+        request = LoadRequest(model_path = "unsloth/Qwen3-1.7B")
         info = {"required_gb": 40.0, "usable_gb": 5.0, "needed_gb": 50.0, "mode": "auto"}
 
         with (
@@ -3316,7 +3316,7 @@ class TestLoadModelGuardIntegration(unittest.TestCase):
             patch.object(
                 self.route,
                 "_resolve_model_identifier_for_request",
-                return_value = ("LAiM/Qwen3-1.7B", "LAiM/Qwen3-1.7B", False),
+                return_value = ("unsloth/Qwen3-1.7B", "unsloth/Qwen3-1.7B", False),
             ),
             patch.object(self.route, "resolve_effective_chat_template_override", return_value = None),
             patch.object(self.route, "get_inference_backend", return_value = inf),

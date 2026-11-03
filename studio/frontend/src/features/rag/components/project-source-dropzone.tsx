@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   consumeNativePathToken,
   nativeFileName,
@@ -120,7 +121,7 @@ async function uploadStaged(
   for (const entry of staged) {
     try {
       if (isExpired(entry, Date.now())) {
-        throw new Error("The drop expired. Add it again from the project.");
+        throw new Error(translate("uxRag.theDropExpiredAdd8d78t"));
       }
       // Leases are short-lived, so mint one per file as its turn comes up.
       const source =
@@ -137,7 +138,7 @@ async function uploadStaged(
       if (documentIds.has(result.documentId)) merged.push(entry.name);
       else documentIds.add(result.documentId);
     } catch (error) {
-      toast.error(`Couldn't upload ${entry.name}`, {
+      toast.error(translate("uxRag.couldnTUploadgsrdr", { p1: entry.name }), {
         description: error instanceof Error ? error.message : String(error),
       });
     }
@@ -147,7 +148,7 @@ async function uploadStaged(
       merged.length === 1
         ? `${merged[0]} matched a file already added`
         : `${merged.length} files matched files already added`,
-      { description: "Identical contents are stored once." },
+      { description: translate("uxRag.identicalContentsAreStoredywrvu") },
     );
   }
 }
@@ -236,7 +237,7 @@ export function ProjectSourceDropzone({
           dropped === 1
             ? "A dropped file expired"
             : `${dropped} dropped files expired`,
-          { description: "Drag them in again to add them." },
+          { description: translate("uxRag.dragThemInAgainiagd1") },
         );
       },
       Math.max(0, Math.min(...expiries) - EXPIRY_GRACE_MS - Date.now()),
@@ -317,8 +318,8 @@ export function ProjectSourceDropzone({
       // Claimed but refusing, so say so: returning quietly made the file
       // vanish with no border and no message (#9036).
       if (disabled) {
-        toast.error("Sources are still uploading", {
-          description: "Wait for them to finish, then drop again.",
+        toast.error(translate("uxRag.sourcesAreStillUploadingbdsuc"), {
+          description: translate("uxRag.waitForThemTo1ysfk"),
         });
         return;
       }
@@ -383,7 +384,7 @@ export function ProjectSourceDropzone({
         {staged.length === 0 ? (
           <button
             type="button"
-            aria-label="Add sources"
+            aria-label={translate("uxRag.addSources1bgj4")}
             disabled={disabled}
             onClick={() => inputRef.current?.click()}
             className="flex w-full cursor-pointer flex-col items-center justify-center gap-3 rounded-[22px] px-6 py-12 text-center transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
@@ -394,7 +395,7 @@ export function ProjectSourceDropzone({
               className="size-6 text-muted-foreground"
             />
             <span className="text-sm text-muted-foreground">
-              Add files every chat in this project can read
+              {translate("uxRag.addFilesEveryChatwlmcx")}
             </span>
           </button>
         ) : (
@@ -423,7 +424,7 @@ export function ProjectSourceDropzone({
                   <button
                     type="button"
                     data-reload-snapshot-sensitive
-                    aria-label={`Remove ${entry.name}`}
+                    aria-label={translate("uxRag.removecucki", { p1: entry.name })}
                     disabled={disabled}
                     onClick={() =>
                       commit(staged.filter((row) => row.id !== entry.id))
@@ -446,7 +447,7 @@ export function ProjectSourceDropzone({
                 strokeWidth={1.75}
                 className="size-4"
               />
-              Add files
+              {translate("uxRag.addFiles1pe8a")}
             </button>
           </div>
         )}

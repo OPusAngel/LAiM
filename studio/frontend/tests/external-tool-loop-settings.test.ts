@@ -39,6 +39,9 @@ function find<T extends ts.Node>(
   return found;
 }
 
+// The label is localized now; "composer.pill.tools" is the Tools heading's key.
+const TOOLS_LABEL = /^(?:"Tools"|\{translate\("composer\.pill\.tools"\)\})$/;
+
 function toolsSection(): ts.JsxElement {
   const section = find(
     SHEET,
@@ -49,7 +52,7 @@ function toolsSection(): ts.JsxElement {
         (a) =>
           ts.isJsxAttribute(a) &&
           a.name.getText() === "label" &&
-          a.initializer?.getText() === '"Tools"',
+          TOOLS_LABEL.test(a.initializer?.getText() ?? ""),
       ),
   );
   assert.ok(section, "Tools section not found");

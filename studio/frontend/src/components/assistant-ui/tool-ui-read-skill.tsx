@@ -20,6 +20,8 @@ import {
 } from "./tool-fallback";
 import { useToolActivityOpen } from "./use-tool-activity-open";
 import { ScrollPane } from "./scroll-pane";
+import { translate } from "@/i18n";
+
 
 // ToolFallbackTrigger renders whatever component it is handed, so the glyph is bound here.
 // `strokeWidth` is dropped, not forwarded: SVG types it `string | number`, HugeiconsIcon wants a number.
@@ -73,7 +75,7 @@ const ReadSkillToolUIImpl: ToolCallMessagePartComponent = ({
         {isRunning ? (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Spinner className="size-3.5" />
-            <span>Reading {name}&hellip;</span>
+            <span>{translate("uxComponents.readingnzoac", { p1: name })}</span>
           </div>
         ) : resultText ? (
           <ScrollPane
@@ -83,9 +85,7 @@ const ReadSkillToolUIImpl: ToolCallMessagePartComponent = ({
             {resultText}
           </ScrollPane>
         ) : (
-          <div className="text-sm text-muted-foreground">
-            Loaded {resource}.
-          </div>
+          <div className="text-sm text-muted-foreground">{translate("uxComponents.loadedk9cbh", { p1: resource })}</div>
         )}
       </ToolFallbackContent>
     </ToolFallbackRoot>

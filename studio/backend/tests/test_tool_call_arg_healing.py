@@ -114,7 +114,7 @@ def test_broken_json_is_not_healed_even_for_a_single_string_tool():
 
     A truncated call arrived as `{"code":"html = ...`, healing wrapped the whole fragment
     as the PROGRAM, and the model then read its own file back as `{"code":"html = ...` and
-    spent the rest of the turn convinced the sandbox had mangled its content.
+    spent the rest of the turn convinced the workdir had mangled its content.
     """
     coerced = coerce_tool_arguments(_TRUNCATED_PYTHON, heal = True, tool_name = "python")
 

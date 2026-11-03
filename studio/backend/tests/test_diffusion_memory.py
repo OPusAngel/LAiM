@@ -1945,7 +1945,7 @@ def test_apply_memory_plan_threads_the_stream_flag_to_the_group_applier(monkeypa
 # The Z-Image-Turbo GGUF hint from the report: the base repo carries the distilled marker, so the
 # estimate here is the discounted one (0.85), which is the honest 13,872 MiB the issue measured.
 _TURBO_HINT = (
-    "z-image Z-Image-Turbo-Q4_K_S.gguf LAiM/Z-Image-Turbo-GGUF Tongyi-MAI/Z-Image-Turbo"
+    "z-image Z-Image-Turbo-Q4_K_S.gguf unsloth/Z-Image-Turbo-GGUF Tongyi-MAI/Z-Image-Turbo"
 )
 
 

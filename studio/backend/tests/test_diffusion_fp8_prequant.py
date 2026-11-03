@@ -215,7 +215,7 @@ def test_resolve_downloads_the_inference_file_into_the_live_cache(monkeypatch, t
 
     monkeypatch.setattr(dp, "_download_checkpoint_name", _dl)
     assert pq.resolve_fp8_checkpoint("z-image", _BASE) == str(path)
-    assert calls == [("LAiM/Z-Image-Turbo-FP8", "Z-Image-Turbo-FP8.safetensors", "/live/cache")]
+    assert calls == [("unsloth/Z-Image-Turbo-FP8", "Z-Image-Turbo-FP8.safetensors", "/live/cache")]
 
 
 def test_resolve_never_raises(monkeypatch):

@@ -3,6 +3,8 @@
 
 // Import-free so node tests can load it.
 
+import { translate } from "@/i18n";
+
 export interface SttCapabilities {
   engine: string | null;
   family: string | null;
@@ -69,10 +71,10 @@ export function transcribeSwitches(
 ): TranscribeSwitches {
   if (!caps) {
     const hint = state.loading
-      ? "Checking what this model supports…"
+      ? translate("uxAudio.checkingWhatThisModelt7839")
       : state.hasModel
-        ? "Could not check what this model supports. Transcribing still works."
-        : "Pick a speech-to-text model to see what it can add.";
+        ? translate("uxAudio.couldNotCheckWhatipwe0")
+        : translate("uxAudio.pickASpeechTobh5cp");
     const off = { checked: false, disabled: true, hint };
     return {
       timestamps: off,
@@ -93,30 +95,32 @@ export function transcribeSwitches(
           checked: true,
           disabled: true,
           always: true,
-          hint: "This model always adds timestamps.",
+          get hint() { return translate("uxAudio.thisModelAlwaysAddsm0iug"); },
         }
       : onRequest
         ? {
             checked: prefs.timestamps,
             disabled: false,
-            hint: `Adds the time of each line, using a separate timing aligner.${size ? ` The first run downloads it (${size}).` : ""}`,
+            hint: size
+              ? translate("uxAudio.addsLineTimesWithDownload73mn", { p1: size })
+              : translate("uxAudio.addsLineTimesG28vk"),
           }
         : {
             checked: false,
             disabled: true,
-            hint: `This model returns plain text. Timestamps need Qwen3-ASR (audio.cpp), Parakeet-TDT, ${SPEAKERS_MODEL_NAME} or VibeVoice-ASR.`,
+            get hint() { return translate("uxAudio.thisModelReturnsPlaintz104", { p1: SPEAKERS_MODEL_NAME }); },
             suggestSpeakersModel: true,
           };
   const speakers: TranscribeSwitch = caps.speakers
     ? {
         checked: prefs.speakers,
         disabled: false,
-        hint: "Labels who is speaking. You can rename speakers afterwards.",
+        get hint() { return translate("uxAudio.labelsWhoIsSpeaking9tk7k"); },
       }
     : {
         checked: false,
         disabled: true,
-        hint: `Only ${SPEAKERS_MODEL_NAME} and VibeVoice-ASR can tell speakers apart.`,
+        get hint() { return translate("uxAudio.onlyAndVibeVoiceASRvsq3w", { p1: SPEAKERS_MODEL_NAME }); },
         suggestSpeakersModel: true,
       };
   const request = {
@@ -126,12 +130,12 @@ export function transcribeSwitches(
   const aligner = !request.timestamps
     ? null
     : size
-      ? `Downloads the timing aligner (${size}) and reloads the model.`
-      : "Reloads the model with its timing aligner if it is not loaded yet.";
+      ? translate("uxAudio.downloadsTheTimingAligner576ty", { p1: size })
+      : translate("uxAudio.reloadsTheModelWith4b8d2");
   const notice = !caps.cpu_only
     ? aligner
     : aligner
       ? `${aligner} Runs on the CPU.`
-      : "This model runs on the CPU.";
+      : translate("uxAudio.thisModelRunsOnf31fp");
   return { timestamps, speakers, notice, request };
 }

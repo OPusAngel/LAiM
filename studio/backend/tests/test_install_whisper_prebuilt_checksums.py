@@ -30,7 +30,7 @@ if not hasattr(iwp, "parse_release_checksums"):
 _A = "0" * 64
 _B = "1" * 64
 _TAG = "v1.9.1-LAiM.1"
-_REPO = "LAiMai/whisper.cpp"
+_REPO = "unslothai/whisper.cpp"
 
 
 def _index(**overrides) -> dict:

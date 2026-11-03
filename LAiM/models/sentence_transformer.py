@@ -564,7 +564,7 @@ tags:
 
 # {model_name} - GGUF
 
-This sentence-transformers model was finetuned and converted to GGUF format using [LAiM](https://github.com/LAiMai/LAiM).
+This sentence-transformers model was finetuned and converted to GGUF format using [LAiM](https://github.com/OPusAngel/LAiM).
 
 ## Available Model files:
 """
@@ -582,8 +582,8 @@ This sentence-transformers model was finetuned and converted to GGUF format usin
             )
 
         readme_content += (
-            "\nThis was trained 2x faster with [LAiM](https://github.com/LAiMai/LAiM)\n"
-            '[<img src="https://raw.githubusercontent.com/LAiMai/LAiM/main/images/LAiM%20made%20with%20love.png" width="200"/>](https://github.com/LAiMai/LAiM)\n'
+            "\nThis was trained 2x faster with [LAiM](https://github.com/OPusAngel/LAiM)\n"
+            '[<img src="https://raw.githubusercontent.com/OPusAngel/LAiM/main/images/LAiM%20made%20with%20love.png" width="200"/>](https://github.com/OPusAngel/LAiM)\n'
         )
 
         readme_path = os.path.join(temp_dir, "README.md")
@@ -1056,8 +1056,8 @@ class FastSentenceTransformer(FastModel):
                 content = re.sub(pattern, r"\1- LAiM\n", content, count = 1, flags = re.MULTILINE)
 
         branding = (
-            "\n\nThis model was finetuned with [LAiM](https://github.com/LAiMai/LAiM).\n\n"
-            '[<img src="https://raw.githubusercontent.com/LAiMai/LAiM/main/images/LAiM%20made%20with%20love.png" width="200"/>](https://github.com/LAiMai/LAiM)\n'
+            "\n\nThis model was finetuned with [LAiM](https://github.com/OPusAngel/LAiM).\n\n"
+            '[<img src="https://raw.githubusercontent.com/OPusAngel/LAiM/main/images/LAiM%20made%20with%20love.png" width="200"/>](https://github.com/OPusAngel/LAiM)\n'
         )
 
         if "# SentenceTransformer" in content:
@@ -2439,6 +2439,8 @@ class FastSentenceTransformer(FastModel):
                 st_model[0].unpad_inputs = st_model[0].unpad_inputs
             _apply_max_seq_length(st_model, max_seq_length)
             st_model._LAiM_trust_remote_code = trust_remote_code
+            # LAiM_zoo's saving_utils looks the marker up under the upstream spelling.
+            st_model._unsloth_trust_remote_code = trust_remote_code
             return st_model
 
         if "auto_model" not in kwargs:
@@ -2645,6 +2647,10 @@ class FastSentenceTransformer(FastModel):
             st_model.push_to_hub_merged = types.MethodType(_push_to_hub_merged, st_model)
 
             st_model._LAiM_trust_remote_code = trust_remote_code
+
+            # LAiM_zoo's saving_utils looks the marker up under the upstream spelling.
+
+            st_model._unsloth_trust_remote_code = trust_remote_code
             return st_model
 
         # Warn if using 4-bit with an encoder: it is slow due to dequantization overhead.
@@ -2927,6 +2933,8 @@ class FastSentenceTransformer(FastModel):
 
         st_model.push_to_hub_merged = types.MethodType(_push_to_hub_merged, st_model)
         st_model._LAiM_trust_remote_code = trust_remote_code
+        # LAiM_zoo's saving_utils looks the marker up under the upstream spelling.
+        st_model._unsloth_trust_remote_code = trust_remote_code
         FastSentenceTransformer._enable_unpadding(st_model, use_unpadding)
         return st_model
 

@@ -64,7 +64,7 @@ def modules_json(tmp_path, monkeypatch):
 
 def test_embeddinggemma_layout_is_detected(modules_json):
     modules_json(EMBEDDINGGEMMA)
-    assert U._repo_has_weighted_st_subfolders("LAiM/embeddinggemma-300m") is True
+    assert U._repo_has_weighted_st_subfolders("unsloth/embeddinggemma-300m") is True
 
 
 def test_a_root_only_st_model_is_not(modules_json):
@@ -79,7 +79,7 @@ def test_a_repo_without_modules_json_is_not(modules_json):
     behaviour exactly, so a fix for one notebook does not enlarge 400 other
     downloads."""
     modules_json(None)
-    assert U._repo_has_weighted_st_subfolders("LAiM/Qwen3-0.6B") is False
+    assert U._repo_has_weighted_st_subfolders("unsloth/Qwen3-0.6B") is False
 
 
 @pytest.mark.parametrize(
@@ -159,7 +159,7 @@ def _ignores(
 
 def test_the_subdir_weight_patterns_are_dropped_for_such_a_repo(modules_json, monkeypatch):
     modules_json(EMBEDDINGGEMMA)
-    got = _ignores("LAiM/embeddinggemma-300m", monkeypatch)
+    got = _ignores("unsloth/embeddinggemma-300m", monkeypatch)
     assert "*/*.safetensors" not in got, got
 
 
@@ -167,16 +167,16 @@ def test_the_subdir_weight_patterns_are_kept_for_everything_else(modules_json, m
     """The other half of the claim. Without this, the test above would pass
     just as well if the patterns had been deleted outright."""
     modules_json(None)
-    got = _ignores("LAiM/Qwen3-0.6B", monkeypatch)
+    got = _ignores("unsloth/Qwen3-0.6B", monkeypatch)
     assert "*/*.safetensors" in got, got
 
 
 def test_only_the_subdir_weight_patterns_differ(modules_json, monkeypatch):
     """The fix must not quietly change anything else about the request."""
     modules_json(None)
-    plain = set(_ignores("LAiM/Qwen3-0.6B", monkeypatch))
+    plain = set(_ignores("unsloth/Qwen3-0.6B", monkeypatch))
     modules_json(EMBEDDINGGEMMA)
-    st = set(_ignores("LAiM/embeddinggemma-300m", monkeypatch))
+    st = set(_ignores("unsloth/embeddinggemma-300m", monkeypatch))
     assert plain - st == set(U._SUBDIR_WEIGHT_IGNORE_PATTERNS)
     assert st - plain == set()
 
@@ -198,10 +198,10 @@ def test_an_older_LAiM_zoo_degrades_instead_of_crashing(modules_json):
     saved = HCS._ST_WEIGHTED_MODULE_TYPES
     del HCS._ST_WEIGHTED_MODULE_TYPES
     try:
-        assert U._repo_has_weighted_st_subfolders("LAiM/embeddinggemma-300m") is False
+        assert U._repo_has_weighted_st_subfolders("unsloth/embeddinggemma-300m") is False
     finally:
         HCS._ST_WEIGHTED_MODULE_TYPES = saved
-    assert U._repo_has_weighted_st_subfolders("LAiM/embeddinggemma-300m") is True
+    assert U._repo_has_weighted_st_subfolders("unsloth/embeddinggemma-300m") is True
 
 
 def test_both_weights_at_root_call_sites_go_through_the_check():

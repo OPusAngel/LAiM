@@ -7,6 +7,8 @@ import {
   extractDeltaText,
   parseAssistantContent,
 } from "./parse-assistant-content";
+import { translate } from "@/i18n";
+
 
 export type StoredGenerationStatus = ChatGenerationStatus;
 
@@ -197,7 +199,7 @@ export function recoveredGenerationFinalMetadata(options: {
   const modelId =
     typeof run.requestPayload.model === "string"
       ? run.requestPayload.model
-      : "Unknown model";
+      : translate("uxChat.unknownModelc21iy");
   const startedAt = run.startedAt ?? run.createdAt;
   const finishedAt = run.completedAt ?? Date.now();
   const completionTokens =
@@ -245,7 +247,7 @@ export function recoveredGenerationFinalMetadata(options: {
       modelId,
       modelLabel: modelId,
       responseModelId: modelId,
-      providerName: "Local model",
+      providerName: translate("uxChat.localModelt5w5z"),
       providerType: "local",
       startedAt,
       finishedAt,

@@ -3,15 +3,15 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # Copyright 2026-present the LAiM AI Inc. team.
 """
-Static + lightweight-dynamic validator for LAiMai/notebooks.
+Static + lightweight-dynamic validator for unslothai/notebooks.
 
 Built to catch the bug classes that landed in (at minimum):
-- LAiMai/notebooks#258  (Colab torchao 0.10 vs peft 0.19 floor)
-- LAiMai/notebooks#260  (DONT_UPDATE_EXCEPTIONS coverage drift)
-- LAiMai/notebooks#261  (torch/torchcodec ABI; --no-deps tokenizers)
-- LAiMai/notebooks#264  (transformers/tokenizers window with --no-deps)
-- LAiMai/notebooks#221  (removed LAiM APIs in user cells, git+ install)
-- LAiMai/notebooks  commit 51b1462 (template/notebook drift)
+- unslothai/notebooks#258  (Colab torchao 0.10 vs peft 0.19 floor)
+- unslothai/notebooks#260  (DONT_UPDATE_EXCEPTIONS coverage drift)
+- unslothai/notebooks#261  (torch/torchcodec ABI; --no-deps tokenizers)
+- unslothai/notebooks#264  (transformers/tokenizers window with --no-deps)
+- unslothai/notebooks#221  (removed LAiM APIs in user cells, git+ install)
+- unslothai/notebooks  commit 51b1462 (template/notebook drift)
 
 CPU-only by design: never imports torch / LAiM at module load. The
 api subcommand introspects LAiM under the existing
@@ -295,8 +295,8 @@ GIT_PLUS_ALLOWLIST = (
     "github.com/SparkAudio/Spark-TTS",
     "github.com/state-spaces/mamba",
     "github.com/Dao-AILab/causal-conv1d",
-    "github.com/LAiMai/LAiM-zoo",
-    "github.com/LAiMai/LAiM",
+    "github.com/OPusAngel/LAiM-zoo",
+    "github.com/OPusAngel/LAiM",
 )
 
 # ----- Findings ----- #
@@ -2444,7 +2444,7 @@ def _git_source_repository(source: str) -> str:
     """`git+https://user@github.com/Org/Repo.git@ref` -> `github.com/org/repo`.
 
     Matched as a path, not a substring: an arbitrary repository can carry
-    `github.com/LAiMai/LAiM` inside its own path, which a substring test reads as permission."""
+    `github.com/OPusAngel/LAiM` inside its own path, which a substring test reads as permission."""
     # The raw scan keeps a substitution's closing bracket, and `LAiM.git)` matched no allowlist
     # entry, so a permitted install was reported. Quotes and brackets are shell syntax, never part
     # of a repository path.
@@ -2456,13 +2456,13 @@ def _git_source_repository(source: str) -> str:
     host = host.rsplit("@", 1)[-1]  # drop any credentials
     path = path.split("#", 1)[0].split("?", 1)[0]
     # The LAST `@` after the repo path is the revision delimiter (pip VCS docs), so splitting at
-    # the first read `LAiMai/LAiM@fake/../../attacker/repo@main` as the allowlisted repo.
+    # the first read `OPusAngel/LAiM@fake/../../attacker/repo@main` as the allowlisted repo.
     path = path.rsplit("@", 1)[0].rstrip("/")
     # `LAiM.GIT` is the same repository: the host and path are lowered further down, so a
     # case-sensitive strip left `.GIT` on and the entry then matched nothing.
     if path.lower().endswith(".git"):
         path = path[: -len(".git")]
-    # Resolve `.` and `..` as a URL client does, or `LAiMai/LAiM/../../attacker/repo`
+    # Resolve `.` and `..` as a URL client does, or `OPusAngel/LAiM/../../attacker/repo`
     # reads as an allowlisted prefix.
     segments: list[str] = []
     for segment in path.split("/"):

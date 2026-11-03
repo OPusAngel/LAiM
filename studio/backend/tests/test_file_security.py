@@ -336,7 +336,7 @@ def test_no_first_party_exemption():
         "filesWithIssues": [{"path": "pytorch_model.bin", "level": "unsafe"}],
     }
     with _patch_status(status):
-        d = evaluate_file_security("LAiM/some-model")
+        d = evaluate_file_security("unsloth/some-model")
     assert d.blocked is True
 
 
@@ -624,13 +624,13 @@ def _patch_status_capture(status):
 
 
 def test_spark_tts_llm_alias_scans_real_repo():
-    # "Spark-TTS-0.5B/LLM" loads as LAiM/Spark-TTS-0.5B with LLM as load root; the literal alias 404s.
+    # "Spark-TTS-0.5B/LLM" loads as unsloth/Spark-TTS-0.5B with LLM as load root; the literal alias 404s.
     status = {"filesWithIssues": [{"path": "LLM/pytorch_model.bin", "level": "unsafe"}]}
     cap, seen = _patch_status_capture(status)
     with cap, patch("utils.paths.is_local_path", return_value = False), _patch_no_index():
         d = evaluate_file_security("Spark-TTS-0.5B/LLM", load_subdirs = ())
-    assert seen["repo"] == "LAiM/Spark-TTS-0.5B"  # scanned the real repo, not the alias
-    assert d.model_name == "LAiM/Spark-TTS-0.5B"
+    assert seen["repo"] == "unsloth/Spark-TTS-0.5B"  # scanned the real repo, not the alias
+    assert d.model_name == "unsloth/Spark-TTS-0.5B"
     assert d.blocked is True
     assert d.unsafe_files == [{"path": "LLM/pytorch_model.bin", "level": "unsafe"}]
 
@@ -663,11 +663,11 @@ def test_security_load_subdirs_yaml_fallback(monkeypatch):
 
     monkeypatch.setattr(mc, "detect_audio_type", lambda *_a, **_k: None)
     monkeypatch.setattr(mc, "load_model_defaults", lambda *_a, **_k: {"audio_type": "bicodec"})
-    assert security_load_subdirs("LAiM/Spark-TTS-0.5B") == ("LLM",)
+    assert security_load_subdirs("unsloth/Spark-TTS-0.5B") == ("LLM",)
 
     # A non-bicodec default contributes no subdir.
     monkeypatch.setattr(mc, "load_model_defaults", lambda *_a, **_k: {"audio_type": None})
-    assert security_load_subdirs("LAiM/Llama-3.2-1B") == ()
+    assert security_load_subdirs("unsloth/Llama-3.2-1B") == ()
 
 
 @pytest.mark.parametrize(

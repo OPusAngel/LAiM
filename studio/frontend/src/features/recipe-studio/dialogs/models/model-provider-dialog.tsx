@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   Collapsible,
   CollapsibleContent,
@@ -69,14 +70,14 @@ export function ModelProviderDialog({
   return (
     <div className="space-y-4">
       <NameField
-        label="Connection name"
+        label={translate("uxRecipestudio.connectionNamecau9z")}
         value={config.name}
         onChange={(value) => onUpdate({ name: value })}
       />
 
       {/* Model source toggle */}
       <div className="grid gap-1.5">
-        <p className="text-sm font-semibold text-foreground">Model source</p>
+        <p className="text-sm font-semibold text-foreground">{translate("uxRecipestudio.modelSource7dhc3")}</p>
         <div className="grid grid-cols-2 gap-2">
           <button
             type="button"
@@ -96,9 +97,9 @@ export function ModelProviderDialog({
               })
             }
           >
-            <p className="text-sm font-semibold text-foreground">Local model</p>
+            <p className="text-sm font-semibold text-foreground">{translate("uxRecipestudio.localModelq5nfe")}</p>
             <p className="mt-0.5 text-xs text-muted-foreground">
-              Use the model loaded in the Chat tab
+              {translate("uxRecipestudio.useTheModelLoaded1w4t4")}
             </p>
           </button>
           <button
@@ -111,38 +112,36 @@ export function ModelProviderDialog({
             onClick={() => onUpdate({ is_local: false })}
           >
             <p className="text-sm font-semibold text-foreground">
-              External endpoint
+              {translate("uxRecipestudio.externalEndpointa5lzv")}
             </p>
             <p className="mt-0.5 text-xs text-muted-foreground">
-              Connect to an API like OpenAI, Together, or a custom server
+              {translate("uxRecipestudio.connectToAnAPI1l4ol")}
             </p>
           </button>
         </div>
       </div>
       {isLocal ? (
         <div className="rounded-2xl border border-border/60 bg-muted/10 px-4 py-3">
-          <p className="text-sm font-semibold text-foreground">Ready to go</p>
+          <p className="text-sm font-semibold text-foreground">{translate("uxRecipestudio.readyToGo8dqx9")}</p>
           <p className="mt-1 text-xs text-muted-foreground">
-            Recipes will use whatever model is loaded in the Chat tab when you
-            hit run. No endpoint or API key needed.
+            {translate("uxCopy.recipesWillUseWhatever10zv0")}
           </p>
         </div>
       ) : (
         <>
           <div className="rounded-2xl border border-border/60 bg-muted/10 px-4 py-3">
             <p className="text-sm font-semibold text-foreground">
-              Start with the endpoint you want this model to use
+              {translate("uxRecipestudio.startWithTheEndpoint14orz")}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
-              Most connections only need an endpoint. Add an API key if that
-              service requires one.
+              {translate("uxCopy.mostConnectionsOnlyNeed1gpc6")}
             </p>
           </div>
           <div className="grid gap-1.5">
             <FieldLabel
-              label="Endpoint"
+              label={translate("uxModelpicker.endpointb2lti")}
               htmlFor={endpointId}
-              hint="Base URL for the model service or gateway."
+              hint={translate("uxRecipestudio.baseURLForThe10t62")}
             />
             <Input
               id={endpointId}
@@ -154,9 +153,9 @@ export function ModelProviderDialog({
           </div>
           <div className="grid gap-1.5">
             <FieldLabel
-              label="Provider type"
+              label={translate("uxRecipestudio.providerType1cguj")}
               htmlFor={providerTypeId}
-              hint="SDK used for API calls. Most providers are OpenAI-compatible."
+              hint={translate("uxRecipestudio.sDKUsedForAPI343ua")}
             />
             <Select
               value={providerType}
@@ -176,9 +175,9 @@ export function ModelProviderDialog({
           </div>
           <div className="grid gap-1.5">
             <FieldLabel
-              label="API key (optional)"
+              label={translate("uxRecipestudio.aPIKeyOptionalz5r6e")}
               htmlFor={apiKeyId}
-              hint="Paste a key here, or use an environment variable below."
+              hint={translate("uxRecipestudio.pasteAKeyHerepao6w")}
             />
             <Input
               id={apiKeyId}
@@ -191,16 +190,16 @@ export function ModelProviderDialog({
           <Collapsible open={optionalOpen} onOpenChange={setOptionalOpen}>
             <CollapsibleTrigger asChild={true}>
               <CollapsibleSectionTriggerButton
-                label="Advanced request overrides"
+                label={translate("uxRecipestudio.advancedRequestOverridesamoix")}
                 open={optionalOpen}
               />
             </CollapsibleTrigger>
             <CollapsibleContent className="mt-3 space-y-4">
               <div className="grid gap-1.5">
                 <FieldLabel
-                  label="API key environment variable"
+                  label={translate("uxRecipestudio.aPIKeyEnvironmentVariableas26h")}
                   htmlFor={apiKeyEnvId}
-                  hint="Name of the environment variable that stores the key."
+                  hint={translate("uxRecipestudio.nameOfTheEnvironmentn1q6g")}
                 />
                 <Input
                   id={apiKeyEnvId}
@@ -214,9 +213,9 @@ export function ModelProviderDialog({
               </div>
               <div className="grid gap-1.5">
                 <FieldLabel
-                  label="Extra headers (JSON)"
+                  label={translate("uxRecipestudio.extraHeadersJSON17c1d")}
                   htmlFor={extraHeadersId}
-                  hint="Optional headers to send with every request."
+                  hint={translate("uxRecipestudio.optionalHeadersToSendagzth")}
                 />
                 <Textarea
                   id={extraHeadersId}
@@ -231,9 +230,9 @@ export function ModelProviderDialog({
               </div>
               <div className="grid gap-1.5">
                 <FieldLabel
-                  label="Extra body (JSON)"
+                  label={translate("uxRecipestudio.extraBodyJSONp9oxz")}
                   htmlFor={extraBodyId}
-                  hint="Optional request fields to send every time."
+                  hint={translate("uxRecipestudio.optionalRequestFieldsTo14u5t")}
                 />
                 <Textarea
                   id={extraBodyId}

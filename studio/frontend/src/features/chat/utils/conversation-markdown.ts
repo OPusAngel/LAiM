@@ -6,6 +6,7 @@ import {
   mcpServerFromProvenance,
   mcpToolFromProvenance,
 } from "./mcp-tool-name.ts";
+import { translate } from "@/i18n";
 
 export type ConversationMarkdownMessage = {
   readonly role: string;
@@ -582,9 +583,9 @@ export function contentBlocksToMarkdownBlocks(
     ) {
       blocks.push({ kind: "source", title: p.title, url: p.url });
     } else if (p.type === "image") {
-      blocks.push({ kind: "attachment", label: "[image attachment]" });
+      blocks.push({ kind: "attachment", get label() { return translate("uxChat.imageAttachment9tklv"); } });
     } else if (p.type === "audio") {
-      blocks.push({ kind: "attachment", label: "[audio attachment]" });
+      blocks.push({ kind: "attachment", get label() { return translate("uxChat.audioAttachmentom5x6"); } });
     }
   }
   return blocks;

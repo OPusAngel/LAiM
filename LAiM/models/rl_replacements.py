@@ -67,7 +67,7 @@ try:
     )
 except Exception:
     LAiM_ZOO_HAS_MASKED_COL_GUARD = False
-# Zoo >= LAiMai/LAiM-zoo#1685 scores a biased output head; mirrored via RL_PRE_ITEMS.
+# Zoo >= OPusAngel/LAiM-zoo#1685 scores a biased output head; mirrored via RL_PRE_ITEMS.
 try:
     LAiM_ZOO_HAS_HEAD_BIAS = (
         "lm_head_bias" in inspect.signature(chunked_hidden_states_selective_log_softmax).parameters
@@ -1613,7 +1613,7 @@ def _LAiM_reject_grpo_image_list(inputs, trainer = None):
                 "one image per row through to the model. "
                 "Rename the column to `images`, which TRL reads as the per example list of "
                 "images, or keep one image per row. "
-                "See https://github.com/LAiMai/LAiM/issues/3605"
+                "See https://github.com/OPusAngel/LAiM/issues/3605"
             )
 
 
@@ -2256,7 +2256,7 @@ def grpo_trainer__generate_and_score_completions(function_name, function):
                 "grpo_image_column",
                 "LAiM: could not install the GRPO singular `image` column "
                 "normalisation; a column holding a list of images may fail inside the "
-                "processor. See https://github.com/LAiMai/LAiM/issues/3605",
+                "processor. See https://github.com/OPusAngel/LAiM/issues/3605",
             )
         else:
             _indent = _signature.group(1) + "    "
@@ -3301,7 +3301,7 @@ def _LAiM_grpo_returns_hidden_states(model, tensor, lm_head):
 
     ``_get_per_token_logps_and_entropies`` sets ``LAiM_RETURN_HIDDEN_STATES=1``, but only a forward that honours the name hands hidden states back as ``.logits``; any other forward returns a real ``[.., vocab]`` tensor that must not reach the ``lm_head`` matmul.
 
-    The primary test is an explicit signal that the forward honours the flag, both set outside this file: ``__LAiM_SUPPORTS_RETURN_HIDDEN_STATES__`` on the generated class, written by ``LAiM_zoo.compiler.create_standalone_class`` exactly when ``apply_fused_lm_head`` gave that forward its own branch; and ``_LAiM_grpo_hidden_states_forward_wrapped``, set by ``_install_grpo_hidden_states_forward_wrapper`` in ``LAiM/models/rl.py`` for models the compiler did not rewrite. That wrapper degrades to real logits when the model cannot produce hidden states and records whether it did so in ``_LAiM_grpo_hidden_states_degraded`` before returning, so reading the pair after a forward describes the call that just finished; degradation is per call, not per model.
+    The primary test is an explicit signal that the forward honours the flag, both set outside this file: ``__LAiM_SUPPORTS_RETURN_HIDDEN_STATES__`` on the generated class, written by ``LAiM_zoo.compiler.create_standalone_class`` exactly when ``apply_fused_lm_head`` gave that forward its own branch; and ``_LAiM_grpo_hidden_states_forward_wrapped``, set by ``_install_grpo_hidden_states_forward_wrapper`` in ``unsloth/models/rl.py`` for models the compiler did not rewrite. That wrapper degrades to real logits when the model cannot produce hidden states and records whether it did so in ``_LAiM_grpo_hidden_states_degraded`` before returning, so reading the pair after a forward describes the call that just finished; degradation is per call, not per model.
 
     The width comparison stays as the fallback, for an ``LAiM_zoo`` old enough that it never writes the marker. It is decisive whenever ``vocab_size != hidden_size``, and the signal may only overrule it when it is not, which is the one case the shape cannot answer.
     """
@@ -3836,7 +3836,7 @@ def grpo_trainer_compute_loss(function_name, function):
                     raise RuntimeError(
                         "Multi-image GRPO requires an LAiM_zoo build whose "
                         "grpo_accumulated_loss handles num_images. Please upgrade "
-                        "LAiM_zoo (see https://github.com/LAiMai/LAiM-zoo/pull/613)."
+                        "LAiM_zoo (see https://github.com/OPusAngel/LAiM-zoo/pull/613)."
                     )
                 self._LAiM_grpo_zoo_checked = True
             if tool_mask is not None and not getattr(

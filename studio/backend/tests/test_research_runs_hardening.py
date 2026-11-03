@@ -1416,7 +1416,7 @@ def test_code_keeps_its_urls_and_brackets():
     sources = [{"url": "https://a.com", "title": "A"}, {"url": "https://b.com", "title": "B"}]
     code = (
         "```bash\n"
-        "git clone https://github.com/LAiMai/LAiM\n"
+        "git clone https://github.com/OPusAngel/LAiM\n"
         "pip install torch --index-url https://download.pytorch.org/whl/cu121\n"
         "curl http://localhost:8888/api/health\n"
         "```\n"
@@ -3621,10 +3621,10 @@ def test_note_server_address_defers_to_run_server_published_state():
 @pytest.mark.parametrize(
     "code",
     [
-        "    git clone https://github.com/LAiMai/LAiM\n    print(x[1])",
-        "\tgit clone https://github.com/LAiMai/LAiM\n\tprint(x[1])",
-        "1. Install:\n\n    ```sh\n    git clone https://github.com/LAiMai/LAiM\n    ```",
-        "- Install:\n\n      git clone https://github.com/LAiMai/LAiM",
+        "    git clone https://github.com/OPusAngel/LAiM\n    print(x[1])",
+        "\tgit clone https://github.com/OPusAngel/LAiM\n\tprint(x[1])",
+        "1. Install:\n\n    ```sh\n    git clone https://github.com/OPusAngel/LAiM\n    ```",
+        "- Install:\n\n      git clone https://github.com/OPusAngel/LAiM",
     ],
 )
 def test_report_preserves_indented_and_list_code(code):

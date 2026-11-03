@@ -25,12 +25,12 @@ import {
   isMcpUiToolResult,
 } from "@/features/chat/mcp-apps/mcp-ui";
 import {
-  SANDBOX_FILE_TOOLS,
-  type SandboxFile,
-  isSandboxToolResult,
-  sandboxSessionIdFor,
-} from "@/components/assistant-ui/sandbox-files";
-import { SandboxFiles } from "@/components/assistant-ui/sandbox-files-view";
+  WORKDIR_FILE_TOOLS,
+  type WorkdirFile,
+  isWorkdirToolResult,
+  workdirSessionIdFor,
+} from "@/components/assistant-ui/workdir-files";
+import { WorkdirFiles } from "@/components/assistant-ui/workdir-files-view";
 import { useChatProjectScope } from "@/features/chat/chat-project-scope";
 import { stripAnsi, stringifyToolResult } from "@/lib/strip-ansi";
 import { cn } from "@/lib/utils";
@@ -66,6 +66,8 @@ import {
   syncToolActivityPreference,
   toolActivityOpen,
 } from "./tool-activity-open-state";
+import { translate } from "@/i18n";
+
 
 const ANIMATION_DURATION = 200;
 
@@ -378,7 +380,7 @@ function ToolFallbackMcpApp({
       argsText={argsText}
       resultImages={result.images}
       threadId={threadId}
-      sessionId={sandboxSessionIdFor(threadId, projectId)}
+      sessionId={workdirSessionIdFor(threadId, projectId)}
     />
   );
 }
@@ -405,7 +407,7 @@ function ToolFallbackResult({
       className={cn("aui-tool-fallback-result pt-2", className)}
       {...props}
     >
-      <p className="aui-tool-fallback-result-header font-semibold">Result:</p>
+      <p className="aui-tool-fallback-result-header font-semibold">{translate("uxComponents.resultd82hp")}</p>
       {imageResult ? (
         <>
           {imageResult.text && (
@@ -418,7 +420,7 @@ function ToolFallbackResult({
               <img
                 key={i}
                 src={`data:${img.mimeType};base64,${img.data}`}
-                alt={`Tool result ${i + 1}`}
+                alt={translate("uxComponents.toolResultjboxt", { p1: i + 1 })}
                 loading="lazy"
                 className="max-w-full rounded border border-border"
               />
@@ -457,7 +459,9 @@ function ToolFallbackError({
   }
 
   const isCancelled = status.reason === "cancelled";
-  const headerText = isCancelled ? "Cancelled reason:" : "Error:";
+  const headerText = isCancelled
+    ? translate("uxComponents.cancelledReason5e8ls")
+    : translate("uxComponents.errorHeadert818n");
 
   return (
     <div
@@ -491,8 +495,8 @@ const ToolFallbackImpl: ToolCallMessagePartComponent = ({
   const widget = isMcpUiToolResult(result, toolName) ? result : null;
   // edit_file comes wrapped when it created a file: the pane shows its text, the file row sits below.
   const created =
-    SANDBOX_FILE_TOOLS.has(toolName) && isSandboxToolResult(result)
-      ? (result as { text: string; sessionId: string; files?: SandboxFile[] })
+    WORKDIR_FILE_TOOLS.has(toolName) && isWorkdirToolResult(result)
+      ? (result as { text: string; sessionId: string; files?: WorkdirFile[] })
       : null;
   const shown = created
     ? created.text
@@ -528,7 +532,7 @@ const ToolFallbackImpl: ToolCallMessagePartComponent = ({
       </ToolFallbackContent>
       {/* Files stay outside even when the card is collapsed (#10425) */}
       {created && (
-        <SandboxFiles
+        <WorkdirFiles
           className="ml-5"
           sessionId={created.sessionId}
           files={created.files ?? []}

@@ -39,7 +39,7 @@ def test_examples_never_print_a_hardcoded_model_id():
     # The catalog is tri-state: a `[]` printed a snippet before /v1/models answered.
     src = USAGE_EXAMPLES_TSX.read_text(encoding = "utf-8")
     assert "MODEL_FALLBACK" not in src
-    assert re.search(r'"LAiM/[^"]+"', src) is None
+    assert re.search(r'"unsloth/[^"]+"', src) is None
     assert "function useExampleModelName(keylessOnly: boolean): string | null" in src
     assert "useState<OpenAIModel[] | null>(null)" in src
     assert "(model ? buildSnippets(base, key, toolsKey, model, os) : null)" in src

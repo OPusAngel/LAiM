@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   type KeyboardEvent as ReactKeyboardEvent,
   type PointerEvent as ReactPointerEvent,
@@ -132,7 +133,7 @@ export function ReferenceImageEditor({
       if (size.width <= 0 || size.height <= 0) {
         setLoadError({
           dataUrl,
-          message: "The picture has no readable pixels.",
+          get message() { return translate("uxComponents.thePictureHasNonsgym"); },
         });
         return;
       }
@@ -149,7 +150,7 @@ export function ReferenceImageEditor({
       if (loadClaim.isCurrent()) {
         setLoadError({
           dataUrl,
-          message: "Could not open this picture for cropping.",
+          get message() { return translate("uxComponents.couldNotOpenThisffikh"); },
         });
       }
     };
@@ -306,10 +307,9 @@ export function ReferenceImageEditor({
     >
       <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Crop {name}</DialogTitle>
+          <DialogTitle>{translate("uxComponents.cropxvolv", { p1: name })}</DialogTitle>
           <DialogDescription>
-            Drag over the picture to choose what to keep. Move the selection or
-            resize it from its corners. Choose Use full image to clear any crop.
+            {translate("uxCopy.dragOverThePicturei9024")}
           </DialogDescription>
         </DialogHeader>
 
@@ -327,7 +327,7 @@ export function ReferenceImageEditor({
                   <div
                     role="group"
                     tabIndex={0}
-                    aria-label={`Crop selection for ${lowerName}. Drag to select an area. Drag the selection to move it, or drag a corner to resize it.`}
+                    aria-label={translate("uxComponents.cropSelectionForDrag5ledk", { p1: lowerName })}
                     onPointerDown={handlePointerDown}
                     onPointerMove={handlePointerMove}
                     onPointerUp={finishPointer}
@@ -402,7 +402,7 @@ export function ReferenceImageEditor({
               className="sm:mr-auto"
               onClick={() => editorActions.apply(picture.originalDataUrl, null)}
             >
-              Use full image
+              {translate("uxCopy.useFullImagejom0i")}
             </Button>
           )}
           <Button

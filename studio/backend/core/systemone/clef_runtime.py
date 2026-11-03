@@ -140,8 +140,8 @@ class ClefAgent:
         self._lock = threading.Lock()
         self._broken: str | None = None
         self._conn, child = _CTX.Pipe()
-        env = os.environ.get("LAiM_IS_PRESENT")
-        os.environ["LAiM_IS_PRESENT"] = "1"
+        env = os.environ.get("UNSLOTH_IS_PRESENT")
+        os.environ["UNSLOTH_IS_PRESENT"] = "1"
         try:
             self._process = _CTX.Process(
                 target = run_clef_worker,
@@ -152,7 +152,7 @@ class ClefAgent:
             self._process.start()
         finally:
             if env is None:
-                os.environ.pop("LAiM_IS_PRESENT", None)
+                os.environ.pop("UNSLOTH_IS_PRESENT", None)
         child.close()
         try:
             # Polled in slices so a training run starting mid-load stops the worker before both need the GPU.

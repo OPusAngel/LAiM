@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Spinner } from "@/components/ui/spinner";
 import {
   makePinRank,
@@ -73,10 +74,7 @@ export function InventoryWarningRow({
   return (
     <div className="mx-5 mt-2 rounded-[8px] border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-ui-12p5 text-muted-foreground">
       <div className="flex items-center justify-between gap-3">
-        <span>
-          Some on-device sources couldn't be scanned. Showing available{" "}
-          {isDataset ? "datasets" : "models"}.
-        </span>
+        <span>{translate("uxHub.someOnDeviceSourcesxajqb", { p1: " ", p2: isDataset ? "datasets" : "models" })}</span>
         <button
           type="button"
           className="shrink-0 text-ui-12 font-medium text-foreground transition-colors hover:text-primary"
@@ -232,13 +230,13 @@ export function DiscoverList({
             icon={query.trim() ? Search01Icon : CubeIcon}
             title={
               query.trim()
-                ? `No matching ${isDataset ? "datasets" : "models"}`
-                : `No ${isDataset ? "datasets" : "models"} available`
+                ? translate("uxHub.noMatching8vt0j", { p1: isDataset ? "datasets" : "models" })
+                : translate("uxHub.noAvailableig8en", { p1: isDataset ? "datasets" : "models" })
             }
             body={
               query.trim()
-                ? "Try a broader search or remove some filters."
-                : "The current filters are excluding every result."
+                ? translate("uxHub.tryABroaderSearchz6ns0")
+                : translate("uxHub.theCurrentFiltersAre1txm8")
             }
           />
         )
@@ -425,7 +423,7 @@ export function DownloadedList({
     return (
       <div className="flex min-h-[calc(240px*var(--ui-space-scale,1))] items-center justify-center gap-3 text-ui-13 text-muted-foreground">
         <Spinner className="size-4" />
-        Loading local inventory...
+        {translate("uxHub.loadingLocalInventory1m9ub")}
       </div>
     );
   }
@@ -444,8 +442,8 @@ export function DownloadedList({
       return (
         <EmptyState
           icon={Search01Icon}
-          title="No matching models on device"
-          body="No downloaded or local model matches the selected type filter."
+          title={translate("uxHub.noMatchingModelsOn15qjr")}
+          body={translate("uxHub.noDownloadedOrLocal705ry")}
           action={
             onClearFilters && (
               <button
@@ -453,7 +451,7 @@ export function DownloadedList({
                 onClick={onClearFilters}
                 className="inline-flex h-8 items-center gap-1.5 rounded-full bg-transparent px-3 text-ui-12 font-medium text-foreground transition-colors hover:bg-[color-mix(in_oklab,var(--foreground)_calc(4%*var(--contrast-wash-gain,1)),transparent)] dark:hover:bg-[rgb(249_226_222_/_calc(0.05*var(--contrast-wash-gain,1)))]"
               >
-                Show all types
+                {translate("uxCopy.showAllTypesdszhw")}
               </button>
             )
           }
@@ -463,13 +461,13 @@ export function DownloadedList({
     return (
       <EmptyState
         icon={query.trim() ? Search01Icon : Download01Icon}
-        title={query.trim() ? "No matches on device" : "Nothing on device yet"}
+        title={query.trim() ? translate("uxHub.noMatchesOnDeviceur1j7") : translate("uxHub.nothingOnDeviceYets0s5c")}
         body={
           query.trim()
-            ? `Clear the search or try a different query. No cached or local ${isDataset ? "dataset" : "model"} matches it.`
+            ? translate("uxHub.clearTheSearchOrbioig", { p1: isDataset ? "dataset" : "model" })
             : isDataset
-              ? "Downloaded datasets, recipe outputs, and uploaded files will appear here."
-              : "Downloaded repositories and indexed local folders will appear here."
+              ? translate("uxHub.downloadedDatasetsRecipeOutputs9zf1s")
+              : translate("uxHub.downloadedRepositoriesAndIndexedoakq8")
         }
       />
     );
@@ -485,7 +483,7 @@ export function DownloadedList({
               strokeWidth={1.75}
               className="size-3.5"
             />
-            Pinned
+            {translate("library.chats.toolbar.pinned")}
           </div>
           {/* Pinned rows are few, so render them as a plain grid matching the
               virtualized list's lane count and row spacing. */}
@@ -564,9 +562,7 @@ export function DownloadedList({
             })}
           </div>
           {unpinnedItems.length > 0 && (
-            <div className="px-1 pb-2 pt-2 text-ui-11 font-semibold uppercase tracking-wider text-muted-foreground">
-              All {isDataset ? "datasets" : "models"}
-            </div>
+            <div className="px-1 pb-2 pt-2 text-ui-11 font-semibold uppercase tracking-wider text-muted-foreground">{translate("uxHub.allo03zb", { p1: isDataset ? "datasets" : "models" })}</div>
           )}
         </>
       )}

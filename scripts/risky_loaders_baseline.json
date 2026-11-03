@@ -427,7 +427,7 @@
       "reason": "Iterates fixed packaging / pip._vendor.packaging module names."
     },
     {
-      "file": "LAiM/__init__.py",
+      "file": "unsloth/__init__.py",
       "rule": "dynamic-import",
       "sink": "spec_from_file_location",
       "digest": "27bf0ec897678cb9",
@@ -435,7 +435,7 @@
       "reason": "Loads LAiM's own _mlx_raw_text.py from the installed package directory; the path is derived from __file__."
     },
     {
-      "file": "LAiM/__init__.py",
+      "file": "unsloth/__init__.py",
       "rule": "dynamic-import",
       "sink": "spec_from_file_location",
       "digest": "5f461f0c8175f45a",
@@ -443,7 +443,7 @@
       "reason": "Loads LAiM/models/decision_mlx.py from a fixed path inside this package on Apple Silicon, where importing LAiM.models would import torch; never a downloaded or user-supplied file."
     },
     {
-      "file": "LAiM/_gpu_init.py",
+      "file": "unsloth/_gpu_init.py",
       "rule": "dynamic-import",
       "sink": "spec_from_file_location",
       "digest": "8c9ff15e7eed9db1",
@@ -451,7 +451,7 @@
       "reason": "Loads LAiM's own hf cache helper from the installed package directory; the path is derived from __file__."
     },
     {
-      "file": "LAiM/dataset_num_proc.py",
+      "file": "unsloth/dataset_num_proc.py",
       "rule": "dynamic-import",
       "sink": "__import__",
       "digest": "fd6171fa78fd5a1e",
@@ -459,7 +459,7 @@
       "reason": "Called with the stdlib multiprocessing module names only, to read their start method."
     },
     {
-      "file": "LAiM/import_fixes.py",
+      "file": "unsloth/import_fixes.py",
       "rule": "dynamic-import",
       "sink": "import_module",
       "digest": "1cf4f547b72b3f63",
@@ -467,7 +467,7 @@
       "reason": "Iterates the fixed _VLLM_COMPILED_EXTENSIONS tuple to surface ABI-broken vLLM extensions."
     },
     {
-      "file": "LAiM/import_fixes.py",
+      "file": "unsloth/import_fixes.py",
       "rule": "dynamic-import",
       "sink": "import_module",
       "digest": "228679880d1b3db7",
@@ -475,7 +475,7 @@
       "reason": "Iterates a fixed dict of vLLM LoRA op module paths."
     },
     {
-      "file": "LAiM/import_fixes.py",
+      "file": "unsloth/import_fixes.py",
       "rule": "dynamic-import",
       "sink": "import_module",
       "digest": "59e72c01edb14c86",
@@ -483,7 +483,7 @@
       "reason": "Module names come from fixed in-file tables (_PEFT_TORCHAO_TENSOR_SUBCLASSES and the transformers symbol homes); remote code can only name an attribute, which resolves inside an already installed transformers module."
     },
     {
-      "file": "LAiM/import_fixes.py",
+      "file": "unsloth/import_fixes.py",
       "rule": "dynamic-import",
       "sink": "import_module",
       "digest": "8a43c55c018acccf",
@@ -491,7 +491,7 @@
       "reason": "Names come from the fixed _PEFT_CONVERSION_SYMBOLS table and the transformers conversion module list."
     },
     {
-      "file": "LAiM/import_fixes.py",
+      "file": "unsloth/import_fixes.py",
       "rule": "dynamic-import",
       "sink": "import_module",
       "digest": "c19dff67fe237be9",
@@ -499,7 +499,7 @@
       "reason": "Imports the torchao NF4 module at a fixed relocated path (_TORCHAO_NF4_NEW constant)."
     },
     {
-      "file": "LAiM/import_fixes.py",
+      "file": "unsloth/import_fixes.py",
       "rule": "dynamic-import",
       "sink": "import_module",
       "digest": "cbc2c89aff4d7aaf",
@@ -507,7 +507,7 @@
       "reason": "Iterates the fixed _IMAGE_PROCESSING_SYMBOL_HOMES tuple of transformers modules."
     },
     {
-      "file": "LAiM/import_fixes.py",
+      "file": "unsloth/import_fixes.py",
       "rule": "dynamic-import",
       "sink": "import_module",
       "digest": "e79cc5aade79e54d",
@@ -515,7 +515,7 @@
       "reason": "Imports the fixed literal peft.utils.transformers_weight_conversion held in a local."
     },
     {
-      "file": "LAiM/models/_decision_common.py",
+      "file": "unsloth/models/_decision_common.py",
       "rule": "dynamic-import",
       "sink": "spec_from_file_location",
       "digest": "3738585f7559a2ad",
@@ -523,7 +523,7 @@
       "reason": "Imports the laya copy vendored in this repository at a fixed path (studio/backend/vendor/laya/__init__.py); never a downloaded or user-supplied file."
     },
     {
-      "file": "LAiM/models/_utils.py",
+      "file": "unsloth/models/_utils.py",
       "rule": "dynamic-import",
       "sink": "get_class_from_dynamic_module",
       "digest": "1bf1ae2e2285284f",
@@ -531,7 +531,7 @@
       "reason": "Returns None unless hub_kwargs carries trust_remote_code, same contract as from_pretrained."
     },
     {
-      "file": "LAiM/models/_utils.py",
+      "file": "unsloth/models/_utils.py",
       "rule": "dynamic-import",
       "sink": "get_class_from_dynamic_module",
       "digest": "281f4ae0ed10fad9",
@@ -539,7 +539,7 @@
       "reason": "Returns early unless trust_remote_code is set (resolve_remote_code_model_class)."
     },
     {
-      "file": "LAiM/models/_utils.py",
+      "file": "unsloth/models/_utils.py",
       "rule": "dynamic-import",
       "sink": "get_class_from_dynamic_module",
       "digest": "b7a268bb9c7ebe2c",
@@ -547,7 +547,7 @@
       "reason": "Returns early unless trust_remote_code is set, and refuses cross-repo (--) references."
     },
     {
-      "file": "LAiM/models/_utils.py",
+      "file": "unsloth/models/_utils.py",
       "rule": "dynamic-import",
       "sink": "import_module",
       "digest": "ed81224ea9382685",
@@ -555,7 +555,7 @@
       "reason": "Sibling of the config class's own module: only resolves inside an installed transformers package or an already trusted remote-code module."
     },
     {
-      "file": "LAiM/models/_utils.py",
+      "file": "unsloth/models/_utils.py",
       "rule": "unsafe-deserialize",
       "sink": "torch.load",
       "digest": "7de1f016ac2d1555",
@@ -563,7 +563,7 @@
       "reason": "Reads back a .pt file this function just wrote with torch.save into the local offload folder; never a downloaded file."
     },
     {
-      "file": "LAiM/models/decision_gguf.py",
+      "file": "unsloth/models/decision_gguf.py",
       "rule": "dynamic-import",
       "sink": "spec_from_file_location",
       "digest": "6894b59960c95a35",
@@ -571,7 +571,7 @@
       "reason": "Loads Studio's standard-library gguf_export_contract.py from a constant path beside the LAiM package; nothing caller-supplied picks the file."
     },
     {
-      "file": "LAiM/models/decision_mlx.py",
+      "file": "unsloth/models/decision_mlx.py",
       "rule": "dynamic-import",
       "sink": "spec_from_file_location",
       "digest": "d4eff4fdda8d4ae4",
@@ -579,7 +579,7 @@
       "reason": "Loads the sibling _decision_common.py by a fixed name beside this file, so the MLX path shares the torch-free helpers without importing LAiM.models; nothing caller-supplied picks the file."
     },
     {
-      "file": "LAiM/models/decision_mlx.py",
+      "file": "unsloth/models/decision_mlx.py",
       "rule": "dynamic-import",
       "sink": "spec_from_file_location",
       "digest": "e1987e041e60a061",
@@ -587,7 +587,7 @@
       "reason": "Loads the sibling decision_gguf.py by a fixed name beside this file for GGUF export on MLX, without importing LAiM.models; nothing caller-supplied picks the file."
     },
     {
-      "file": "LAiM/models/diffusion_masked.py",
+      "file": "unsloth/models/diffusion_masked.py",
       "rule": "dynamic-import",
       "sink": "get_class_from_dynamic_module",
       "digest": "9fc70fcf03d7ec35",
@@ -595,7 +595,7 @@
       "reason": "Falls back to the auto class unless the caller passed trust_remote_code; revision pinned to the config commit hash."
     },
     {
-      "file": "LAiM/models/loader.py",
+      "file": "unsloth/models/loader.py",
       "rule": "dynamic-import",
       "sink": "import_module",
       "digest": "ebe737f7f7773a19",
@@ -603,7 +603,7 @@
       "reason": "Prefix-bounded to transformers.models.<type>.modeling_<type>; can only import a module transformers already ships."
     },
     {
-      "file": "LAiM/models/loader_utils.py",
+      "file": "unsloth/models/loader_utils.py",
       "rule": "dynamic-import",
       "sink": "import_module",
       "digest": "bbec50d33c36333c",
@@ -611,7 +611,7 @@
       "reason": "Iterates the fixed (loraga, corda) pair under peft.tuners.lora."
     },
     {
-      "file": "LAiM/models/loader_utils.py",
+      "file": "unsloth/models/loader_utils.py",
       "rule": "unpinned-code-fetch",
       "sink": "branch-head-url",
       "digest": "da770f64b1008f75",
@@ -619,7 +619,7 @@
       "reason": "mapper.py from LAiM main is parsed as data with ast (tables and literal strings only), never imported or executed."
     },
     {
-      "file": "LAiM/models/rl.py",
+      "file": "unsloth/models/rl.py",
       "rule": "dynamic-import",
       "sink": "import_module",
       "digest": "705322645c08649e",
@@ -627,7 +627,7 @@
       "reason": "Prefix-bounded to trl.experimental.<name>; names come from walking the installed TRL package."
     },
     {
-      "file": "LAiM/models/rl.py",
+      "file": "unsloth/models/rl.py",
       "rule": "dynamic-import",
       "sink": "import_module",
       "digest": "7c2f62e557f23dba",
@@ -635,7 +635,7 @@
       "reason": "Home module of an installed TRL config class (its __module__), not external input."
     },
     {
-      "file": "LAiM/models/rl.py",
+      "file": "unsloth/models/rl.py",
       "rule": "dynamic-import",
       "sink": "import_module",
       "digest": "fe73e10b8cc4e18a",
@@ -643,7 +643,7 @@
       "reason": "Prefix-bounded to trl.trainer.<config module>; name comes from the installed TRL trainer classes."
     },
     {
-      "file": "LAiM/models/sentence_transformer.py",
+      "file": "unsloth/models/sentence_transformer.py",
       "rule": "dynamic-import",
       "sink": "import_from_string",
       "digest": "180573f5aeefdb98",
@@ -651,7 +651,7 @@
       "reason": "Gated: classes outside sentence_transformers.* need trust_remote_code; inside it the path must be dotted identifiers resolving to a module class (#12436)."
     },
     {
-      "file": "LAiM/models/sentence_transformer.py",
+      "file": "unsloth/models/sentence_transformer.py",
       "rule": "trust-remote-code",
       "sink": "keyword",
       "digest": "9a08f32d1af83ea3",
@@ -659,7 +659,7 @@
       "reason": "Reached only after the trust_remote_code gate in _resolve_module_class raises for an untrusted non sentence_transformers class."
     },
     {
-      "file": "LAiM/save.py",
+      "file": "unsloth/save.py",
       "rule": "trust-remote-code",
       "sink": "setdefault",
       "digest": "c6f8db768c498be7",
@@ -667,7 +667,7 @@
       "reason": "Only when the model itself was already loaded via approved remote code (_loaded_via_remote_code), so the export reload follows that decision."
     },
     {
-      "file": "LAiM/save.py",
+      "file": "unsloth/save.py",
       "rule": "unpinned-code-fetch",
       "sink": "git-clone-unpinned",
       "digest": "6030da6ce18569c3",
@@ -675,7 +675,7 @@
       "reason": "Known residual: the legacy GGUF save path clones llama.cpp from upstream master (install_llama_cpp_clone_non_blocking / install_llama_cpp_blocking), the same upstream trust as installing llama.cpp; pinning is a separate change."
     },
     {
-      "file": "LAiM/save.py",
+      "file": "unsloth/save.py",
       "rule": "unpinned-code-fetch",
       "sink": "git-clone-unpinned",
       "digest": "72fcdff75af05310",
@@ -683,7 +683,7 @@
       "reason": "Known residual: the legacy GGUF save path clones llama.cpp from upstream master (install_llama_cpp_clone_non_blocking / install_llama_cpp_blocking), the same upstream trust as installing llama.cpp; pinning is a separate change."
     },
     {
-      "file": "LAiM/save.py",
+      "file": "unsloth/save.py",
       "rule": "unsafe-deserialize",
       "sink": "torch.load",
       "digest": "7de1f016ac2d1555",
@@ -691,7 +691,7 @@
       "reason": "Reads back a .pt file this function just wrote with torch.save into temporary_location; never a downloaded file."
     },
     {
-      "file": "LAiM/tokenizers_v1.py",
+      "file": "unsloth/tokenizers_v1.py",
       "rule": "dynamic-import",
       "sink": "spec_from_file_location",
       "digest": "71f24ac068b052d3",
@@ -699,7 +699,7 @@
       "reason": "Opt-in only (LAiM_TOKENIZERS_V1=1): loads the tokenizers 1.0 extension module from the directory the user installed it into (LAiM_TOKENIZERS_V1_PATH, default ~/.cache/LAiM/tokenizers_v1); never a downloaded or model-supplied file."
     },
     {
-      "file": "LAiM/trainer.py",
+      "file": "unsloth/trainer.py",
       "rule": "dynamic-import",
       "sink": "get_class_from_dynamic_module",
       "digest": "553d43d8ed624697",
@@ -707,7 +707,7 @@
       "reason": "Returns None unless trust_remote_code is granted, and remote code is tried last."
     },
     {
-      "file": "LAiM/trainer.py",
+      "file": "unsloth/trainer.py",
       "rule": "dynamic-import",
       "sink": "import_module",
       "digest": "d78c0ba207ccee5a",

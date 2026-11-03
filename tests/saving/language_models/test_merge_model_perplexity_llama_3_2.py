@@ -114,7 +114,7 @@ if __name__ == "__main__":
     attn_implementation = "flash_attention_2" if HAS_FLASH_ATTENTION else "sdpa"
 
     model, tokenizer = FastLanguageModel.from_pretrained(
-        model_name = "LAiM/Llama-3.2-3B-Instruct",
+        model_name = "unsloth/Llama-3.2-3B-Instruct",
         max_seq_length = 2048,
         dtype = compute_dtype,
         load_in_4bit = True,
@@ -153,7 +153,7 @@ if __name__ == "__main__":
         lora_alpha = 16,
         lora_dropout = 0,
         bias = "none",
-        use_gradient_checkpointing = "LAiM",
+        use_gradient_checkpointing = "unsloth",
         random_state = 3407,
         use_rslora = False,
         loftq_config = None,

@@ -272,7 +272,7 @@ def test_evict_chat_cancels_an_in_flight_safetensors_load(monkeypatch):
 
     class _FakeOrchestrator:
         active_model_name = None  # not published yet: the load is still running
-        loading_models = {"LAiM/Qwen3-4B"}
+        loading_models = {"unsloth/Qwen3-4B"}
 
         def unload_model(self, name):
             raise AssertionError("unload_model must not run for an unpublished load")
@@ -289,7 +289,7 @@ def test_evict_chat_cancels_an_in_flight_safetensors_load(monkeypatch):
 
     arb._evict_chat()
 
-    assert cancelled == ["LAiM/Qwen3-4B"]
+    assert cancelled == ["unsloth/Qwen3-4B"]
 
 
 def test_evict_chat_cancels_every_pending_load_over_a_live_snapshot(monkeypatch):

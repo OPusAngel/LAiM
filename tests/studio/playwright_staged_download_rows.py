@@ -24,8 +24,8 @@ from playwright_image_model_footprint import (
 )
 from playwright_image_download_cancel_retry import _open_quant
 
-ENCODER = "LAiM/FLUX.2-klein-4B-FP8"
-DECODER = "LAiM/FLUX.2-klein-4B"
+ENCODER = "unsloth/FLUX.2-klein-4B-FP8"
+DECODER = "unsloth/FLUX.2-klein-4B"
 ENTRIES = [
     {
         "repo_id": ENCODER,

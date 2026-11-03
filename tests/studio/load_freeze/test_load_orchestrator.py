@@ -36,7 +36,7 @@ _REPO_ROOT = _find_repo_root()
 if _REPO_ROOT is None:
     pytest.skip(
         "Could not locate studio/backend. Set LAiM_REPO_ROOT or clone "
-        "LAiMai/LAiM into a parent directory.",
+        "OPusAngel/LAiM into a parent directory.",
         allow_module_level = True,
     )
 

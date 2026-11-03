@@ -8,6 +8,8 @@
  * so the row has to say which it is and where to fix it.
  */
 
+import { translate } from "@/i18n";
+
 export type ScanFolderStatus =
   | "ok"
   | "permission_denied"
@@ -32,9 +34,9 @@ function permissionHint(userAgent: string): string {
     case "mac":
       return "Grant access in System Settings > Privacy & Security > Files and Folders, then reopen this dialog.";
     case "windows":
-      return "Check the folder's security permissions, or allow LAiM in Controlled Folder Access, then reopen this dialog.";
+      return translate("uxHub.checkTheFolderS12nib");
     default:
-      return "Check the folder's permissions, then reopen this dialog.";
+      return translate("uxHub.checkTheFolderSoq6rg");
   }
 }
 
@@ -45,23 +47,23 @@ export function scanFolderStatusCopy(
   switch (status) {
     case "permission_denied":
       return {
-        title: "LAiM is not allowed to read this folder",
+        get title() { return translate("uxHub.lAiMIsNotAllowednhw5w"); },
         hint: permissionHint(userAgent),
       };
     case "partial":
       return {
-        title: "Some models in this folder could not be read",
+        get title() { return translate("uxHub.someModelsInThissqthg"); },
         hint: permissionHint(userAgent),
       };
     case "missing":
       return {
-        title: "This folder is no longer there",
-        hint: "It was moved, renamed, or is on a drive that is not connected.",
+        get title() { return translate("uxHub.thisFolderIsNok7yu0"); },
+        get hint() { return translate("uxHub.itWasMovedRenamedv5b99"); },
       };
     case "unreadable":
       return {
-        title: "This folder could not be read",
-        hint: "The drive may be disconnected or failing. Check it, then reopen this dialog.",
+        get title() { return translate("uxHub.thisFolderCouldNotnsk6b"); },
+        get hint() { return translate("uxHub.theDriveMayBebeg99"); },
       };
     default:
       return null;

@@ -140,7 +140,7 @@ def test_cached_folder_target_scopes_keys_to_the_folder(hub):
     assert acm.cached_folder_target(QWEN, "Q4_K_M") == (AUDIO_CPP_REPO, [])
     assert acm.cached_folder_target(f"{AUDIO_CPP_REPO}/Missing-GGUF", None) == (AUDIO_CPP_REPO, [])
     assert acm.cached_folder_target(AUDIO_CPP_REPO, "Q8_0") is None
-    assert acm.cached_folder_target("LAiM/Qwen3-0.6B-GGUF", "Q8_0") is None
+    assert acm.cached_folder_target("unsloth/Qwen3-0.6B-GGUF", "Q8_0") is None
 
 
 @pytest.mark.parametrize("variant", ["Q8_0", None])

@@ -117,7 +117,7 @@ def seed_legacy_install(home: Path) -> dict[str, bytes]:
         conn.commit()
     for leaf in (
         "outputs/my-finetune/checkpoint-100/adapter_model.safetensors",
-        "sandbox/legacy-thread/workspace/notes.txt",
+        "workdir/legacy-thread/workspace/notes.txt",
         "rag/documents/legacy-document/original.pdf",
         "assets/uploads/legacy-dataset.jsonl",
     ):

@@ -19,7 +19,7 @@ from utils import audio_cpp_freshness
 from utils import audio_cpp_update as aupd
 from utils.prebuilt import update_flow
 
-_REPO = "LAiMai/audio.cpp"
+_REPO = "unslothai/audio.cpp"
 _LATEST = "v0.9.1-LAiM.1"
 # The newest release's assets: the bundle the recorded one renames to, another host's, and a Windows CUDA pair.
 _ASSETS = {
@@ -34,7 +34,7 @@ _SETUP_SKIPS = ("AUDIOCPP_SERVER_PATH", "LAiM_AUDIO_CPP_PATH", "LAiM_SKIP_AUDIO_
 
 def _write_record(tree, **fields):
     record = {
-        "published_repo": "LAiMai/audio.cpp",
+        "published_repo": "unslothai/audio.cpp",
         "release_tag": "v0.9.0-LAiM.1",
         "asset": "audio-v0.9.0-LAiM.1-bin-ubuntu-x64-cpu-portable.tar.gz",
         "accelerator": "cpu",
@@ -616,8 +616,8 @@ def test_a_rate_limit_gets_token_advice(run_env, monkeypatch):
 
 def test_an_unreachable_release_fails_the_update_and_says_the_install_was_kept(run_env):
     tail = (
-        "installer exited 1: audio.cpp: LAiMai/audio.cpp release lookup failed (network is unreachable)\n"
-        "error: no audio.cpp release lookup answered (LAiMai/audio.cpp v0.9.1-LAiM.1: network is unreachable)\n"
+        "installer exited 1: audio.cpp: unslothai/audio.cpp release lookup failed (network is unreachable)\n"
+        "error: no audio.cpp release lookup answered (unslothai/audio.cpp v0.9.1-LAiM.1: network is unreachable)\n"
     )
     run_env.installer(error = update_flow.InstallerExit(1, tail))
     with pytest.raises(RuntimeError) as info:

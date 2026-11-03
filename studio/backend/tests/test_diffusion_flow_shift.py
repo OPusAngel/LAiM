@@ -86,12 +86,12 @@ def test_qwen_image_edit_2509_keeps_its_template_shift():
     assert comfy_flow_shift_for(fam, None, "Qwen/Qwen-Image-Edit-2509", None) == 3.0
     assert (
         comfy_flow_shift_for(
-            fam, "qwen-image-edit-2509-Q4_K_M.gguf", "LAiM/Qwen-Image-Edit-2509-GGUF", None
+            fam, "qwen-image-edit-2509-Q4_K_M.gguf", "unsloth/Qwen-Image-Edit-2509-GGUF", None
         )
         == 3.0
     )
     assert comfy_flow_shift_for(fam, None, "Qwen/Qwen-Image-Edit-2511", None) == 3.1
-    assert comfy_flow_shift_for(fam, None, "LAiM/Qwen-Image-Edit-2511-GGUF", None) == 3.1
+    assert comfy_flow_shift_for(fam, None, "unsloth/Qwen-Image-Edit-2511-GGUF", None) == 3.1
     assert comfy_flow_shift_for(detect_family("Qwen/Qwen-Image"), "Qwen/Qwen-Image") == 3.1
 
 

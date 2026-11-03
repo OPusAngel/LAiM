@@ -11,7 +11,7 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Lesser General Public License for more details.
 
-"""Drift detectors for the upstream pathologies ``LAiM/import_fixes.py``
+"""Drift detectors for the upstream pathologies ``unsloth/import_fixes.py``
 works around; one test per ``fix_*`` / ``patch_*``, each fails (never skips)
 when the pathology is active. Runs under the GPU-free ``tests/conftest.py``."""
 
@@ -776,7 +776,7 @@ def test_torchao_safe_int_mm_still_uses_the_repr_probe():
         pytest.fail(
             "upstream fixed the probe, delete fix_torchao_safe_int_mm_repr_probe: "
             "torchao's safe_int_mm no longer reprs its input, so the replacement in "
-            "LAiM/import_fixes.py (and its Studio copy in "
+            "unsloth/import_fixes.py (and its Studio copy in "
             "studio/backend/core/inference/diffusion_torchao_patches.py) is dead weight."
         )
 

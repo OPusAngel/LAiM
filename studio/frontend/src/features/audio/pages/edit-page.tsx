@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ParamSlider } from "@/features/chat";
@@ -128,7 +129,7 @@ function EditInputs({
             {EDIT_COPY.transcriptLabel}
             {mode === "delivery" ? (
               <span className="ml-1.5 font-normal text-muted-foreground">
-                Optional
+                {translate("studio.params.optional")}
               </span>
             ) : null}
           </label>
@@ -141,7 +142,7 @@ function EditInputs({
             onClick={() => void transcriber.transcribe(source)}
           >
             <HugeiconsIcon icon={SpeechToTextIcon} className="size-3.5" />
-            {transcriber.transcribing ? "Transcribing…" : "Transcribe"}
+            {transcriber.transcribing ? translate("uxAudio.transcribingEllipsislwgf7") : translate("uxAudio.transcribeActionm87c0")}
           </Button>
         </div>
         <Textarea
@@ -154,8 +155,8 @@ function EditInputs({
           }
           placeholder={
             transcriber.transcribing
-              ? "Listening to the recording…"
-              : "What the recording says. It fills in once you add one."
+              ? translate("uxAudio.listeningToTheRecordinget098")
+              : translate("uxAudio.whatTheRecordingSaysgolt4")
           }
           className="min-h-16"
         />
@@ -170,9 +171,7 @@ function EditInputs({
               variant="link"
               className="h-auto p-0 text-ui-11p5 font-medium text-foreground"
               onClick={() => void transcriber.transcribe(source)}
-            >
-              Try again
-            </Button>
+            >{translate("uxAudio.tryAgainqnlxc")}</Button>
           </p>
         ) : (
           <p className="text-ui-11p5 leading-snug text-muted-foreground">
@@ -183,7 +182,7 @@ function EditInputs({
 
       {deliveryRange ? (
         <PillTabs
-          ariaLabel="What to change"
+          ariaLabel={translate("uxAudio.whatToChange5ln52")}
           value={mode}
           onValueChange={(next) => setMode(next as "words" | "delivery")}
           disabled={disabled}
@@ -210,7 +209,7 @@ function EditInputs({
             dataTour="audio-edit-changes"
           />
           {edit.transcript.trim() && edit.edited === edit.transcript ? (
-            <div className="flex flex-wrap gap-1.5" aria-label="Examples">
+            <div className="flex flex-wrap gap-1.5" aria-label={translate("studio.params.drafterMaxExamples")}>
               <Button
                 type="button"
                 variant="outline"
@@ -219,7 +218,7 @@ function EditInputs({
                 disabled={disabled}
                 onClick={() => selectLastWord(edit.changesRef.current)}
               >
-                Change one word
+                {translate("uxCopy.changeOneWordf4ixo")}
               </Button>
             </div>
           ) : null}
@@ -365,13 +364,13 @@ function EditComparePlayer({
       original={{
         src: originalSrc,
         fileUrl: sourceId ? galleryFileUrl(sourceId) : null,
-        label: "Original",
+        label: translate("uxAudio.original1983n"),
         durationS: null,
       }}
       edited={{
         src,
         fileUrl: galleryFileUrl(clip.id),
-        label: "Edited",
+        label: translate("uxAudio.editedpc4lq"),
         durationS: clip.duration_s ?? null,
       }}
       autoFocusRef={focusRef}
@@ -406,7 +405,7 @@ export function EditOutput({
         picks.length > 0 ? (
           <div
             className="flex flex-wrap justify-center gap-2"
-            aria-label="Recommended models"
+            aria-label={translate("uxAudio.recommendedModelsu5i1l")}
           >
             {picks.map((model) => (
               <Button
@@ -415,9 +414,7 @@ export function EditOutput({
                 variant="outline"
                 size="sm"
                 onClick={() => onPickModel?.(model.id)}
-              >
-                Use {model.name}
-              </Button>
+              >{translate("uxAudio.usejk2qp", { p1: model.name })}</Button>
             ))}
           </div>
         ) : null
@@ -425,7 +422,7 @@ export function EditOutput({
       emptyText={
         modelReady
           ? EDIT_COPY.emptyText
-          : "Edited speech lands here. Load a model that can edit speech, add a recording, and press Generate."
+          : translate("uxAudio.editedSpeechLandsHereykkmc")
       }
     />
   );

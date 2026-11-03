@@ -506,7 +506,7 @@ def test_studio_lists_its_decision_models_only_when_asked(monkeypatch, studio):
     from routes import inference
 
     async def chat_catalog(quant_pins = False):
-        return [{"id": "LAiM/Qwen3-0.6B", "object": "model"}]
+        return [{"id": "unsloth/Qwen3-0.6B", "object": "model"}]
 
     monkeypatch.setattr(inference, "_openai_catalog_objects", chat_catalog)
 
@@ -521,13 +521,13 @@ def test_studio_lists_its_decision_models_only_when_asked(monkeypatch, studio):
     assert gguf_only and ids("decisions") == ["default", *gguf_only]
     monkeypatch.setattr(systemone_settings, "runtime_unavailable_reason", lambda: None)
     laya = ["default", *catalog.CHECKPOINTS]
-    assert ids() == ["LAiM/Qwen3-0.6B"]
-    assert ids("text") == ids("image") == ["LAiM/Qwen3-0.6B"]
+    assert ids() == ["unsloth/Qwen3-0.6B"]
+    assert ids("text") == ids("image") == ["unsloth/Qwen3-0.6B"]
     assert ids("decisions") == laya
-    assert ids("text,decisions") == ids("all") == ["LAiM/Qwen3-0.6B", *laya]
+    assert ids("text,decisions") == ids("all") == ["unsloth/Qwen3-0.6B", *laya]
     studio[systemone_settings.ENABLED_KEY] = False
     assert ids("decisions") == []
-    assert ids() == ["LAiM/Qwen3-0.6B"]
+    assert ids() == ["unsloth/Qwen3-0.6B"]
 
 
 @pytest.mark.parametrize(

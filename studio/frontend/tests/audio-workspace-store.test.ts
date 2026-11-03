@@ -70,10 +70,10 @@ test("any committed switch settles a pending request, so it never fires later", 
 
 test("forgetting a deleted model clears it from every page, whatever its casing", () => {
   const state = useAudioWorkspaceStore.getState();
-  state.rememberModel("speak", "LAiM/orpheus-3b-0.1-ft");
-  state.rememberModel("clone", "LAiM/Orpheus-3B-0.1-ft");
+  state.rememberModel("speak", "unsloth/orpheus-3b-0.1-ft");
+  state.rememberModel("clone", "unsloth/Orpheus-3B-0.1-ft");
   state.rememberModel("transcribe", "moonshine/tiny");
-  useAudioWorkspaceStore.getState().forgetModel("LAiM/orpheus-3b-0.1-FT");
+  useAudioWorkspaceStore.getState().forgetModel("unsloth/orpheus-3b-0.1-FT");
   assert.deepEqual(useAudioWorkspaceStore.getState().lastModelByWorkflow, {
     transcribe: "moonshine/tiny",
   });

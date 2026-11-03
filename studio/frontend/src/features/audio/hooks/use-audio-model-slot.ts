@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   cancelPreStreamRunReservations,
@@ -205,7 +206,7 @@ export function useAudioModelSlot({
       if (lifecycleLease === null) {
         ttsLoadInFlight.current = false;
         pendingRoutedTtsPick.current = null;
-        toast.info("Wait for the current model to finish loading.");
+        toast.info(translate("uxAudio.waitForTheCurrent1mgs9"));
         return;
       }
       const releaseLifecycle = () =>
@@ -250,7 +251,7 @@ export function useAudioModelSlot({
       ttsLoadInFlight.current = true;
       busyRef.current = "loading";
       setBusy("loading");
-      const toastId = toast.loading(`Loading ${audioModelLabel(repoId)}…`);
+      const toastId = toast.loading(translate("uxAudio.loadinghxnta", { p1: audioModelLabel(repoId) }));
       try {
         const hfToken = hfApiToken(getHfToken()) ?? null;
         let trustRemoteCode = remoteCodeApproval?.trustRemoteCode ?? false;
@@ -271,7 +272,7 @@ export function useAudioModelSlot({
           });
           if (!approved)
             throw new Error(
-              "Custom code approval is required to load this model.",
+              translate("uxAudio.customCodeApprovalIstaz3p"),
             );
           if (controller.signal.aborted || !isCurrent()) return;
         }
@@ -316,7 +317,10 @@ export function useAudioModelSlot({
           const offloadNotice = offloadWarning(offloadCountsFrom(res));
           const showToast = offloadNotice ? toast.warning : toast.success;
           showToast(
-            `Model loaded (${loadedAudioKind(res.audio_type)})${offloadNotice?.titleSuffix ?? ""}`,
+            translate("uxAudio.modelLoadedWithKindL83pq", {
+              p1: loadedAudioKind(res.audio_type),
+              p2: offloadNotice?.titleSuffix ?? "",
+            }),
             {
               id: toastId,
               description: offloadNotice?.description,
@@ -337,19 +341,19 @@ export function useAudioModelSlot({
             !usesNativeAudioRuntime(repoId, res.audio_type)
           ) {
             toast.info(
-              "This model does not support CPU RAM yet, so it loaded on the GPU.",
+              translate("uxAudio.thisModelDoesNotp7xlg"),
               { duration: 6000 },
             );
           }
         } else {
-          toast.error(`${repoId} loaded but is not a supported TTS model.`, {
+          toast.error(translate("uxAudio.loadedButIsNotmzwqa", { p1: repoId }), {
             id: toastId,
           });
         }
       } catch (error) {
         if (isCurrent()) {
           toast.error(
-            error instanceof Error ? error.message : "Model load failed.",
+            error instanceof Error ? error.message : translate("uxAudio.modelLoadFailed0om5k"),
             { id: toastId },
           );
         } else {
@@ -407,7 +411,7 @@ export function useAudioModelSlot({
         !canTransitionAudioMode(busyRef.current, generationPhaseRef.current)
       ) {
         toast.info(
-          "Wait for the active audio task to finish before switching modes.",
+          translate("uxAudio.waitForTheActive1m0xq"),
         );
         return false;
       }
@@ -423,7 +427,7 @@ export function useAudioModelSlot({
             toast.error(
               error instanceof Error
                 ? error.message
-                : "Failed to release the transcription model.",
+                : translate("uxAudio.failedToReleaseThe53a9j"),
             );
             return false;
           },
@@ -458,7 +462,7 @@ export function useAudioModelSlot({
           !canTransitionAudioMode(busyRef.current, generationPhaseRef.current)
         ) {
           toast.info(
-            "Wait for the active audio task to finish before switching modes.",
+            translate("uxAudio.waitForTheActive1m0xq"),
           );
           return false;
         }
@@ -572,7 +576,7 @@ export function useAudioModelSlot({
           });
           if (generation !== stagedTtsGeneration.current) return;
           if (!approved) {
-            toast.error("Custom code approval is required to load this model.");
+            toast.error(translate("uxFeatures.customCodeApprovalIswxfhp"));
             return;
           }
         } catch (error) {
@@ -580,7 +584,7 @@ export function useAudioModelSlot({
           toast.error(
             error instanceof Error
               ? error.message
-              : `Could not verify the code for ${repoId}.`,
+              : translate("uxAudio.couldNotVerifyThepzwem", { p1: repoId }),
           );
           return;
         }
@@ -610,7 +614,7 @@ export function useAudioModelSlot({
           toast.error(
             error instanceof Error
               ? error.message
-              : `Could not prepare the download for ${repoId}.`,
+              : translate("uxAudio.couldNotPrepareThed6wc2", { p1: repoId }),
           );
           return;
         }
@@ -785,7 +789,7 @@ export function useAudioModelSlot({
         if (selectionGeneration !== ttsPickGeneration.current) return;
         if (system?.device_backend !== "cuda") {
           toast.error(
-            `${id} requires a verified NVIDIA CUDA GPU for local generation.`,
+            translate("uxAudio.requiresAVerifiedNVIDIAoozuk", { p1: id }),
             { duration: 7000 },
           );
           return;
@@ -834,15 +838,15 @@ export function useAudioModelSlot({
       if (macAction === "reject") {
         toast.error(
           cudaMusicPick
-            ? `${id} currently requires an NVIDIA CUDA GPU and cannot run locally on this Mac.`
-            : `${id} has no runnable GGUF TTS build. MLX cannot generate text-to-speech from its safetensors checkpoint on this Mac.`,
+            ? translate("uxAudio.currentlyRequiresAnNVIDIAadz40", { p1: id })
+            : translate("uxAudio.hasNoRunnableGGUF6bwo2", { p1: id }),
           { duration: 7000 },
         );
         return;
       }
       if (macAction === "use-gguf-sibling" && ggufSibling) {
         toast.info(
-          `Loading the GGUF build of ${id}. MLX has no text-to-speech decoder, so the safetensors build cannot generate on this Mac.`,
+          translate("uxAudio.loadingTheGGUFBuildgdvqq", { p1: id }),
           { duration: 7000 },
         );
         ttsInspectionGeneration.current = selectionGeneration;
@@ -860,7 +864,7 @@ export function useAudioModelSlot({
           );
           if (!variant) {
             toast.error(
-              `${ggufSibling} does not publish a runnable GGUF file.`,
+              translate("uxAudio.doesNotPublishAkmafe", { p1: ggufSibling }),
             );
             return;
           }
@@ -883,7 +887,7 @@ export function useAudioModelSlot({
           toast.error(
             error instanceof Error
               ? error.message
-              : `Could not inspect ${ggufSibling}.`,
+              : translate("uxAudio.couldNotInspecta8vjg", { p1: ggufSibling }),
           );
         } finally {
           if (ttsInspectionGeneration.current === selectionGeneration) {
@@ -924,7 +928,7 @@ export function useAudioModelSlot({
 
   const handleEject = useCallback(() => {
     if (busy !== null) {
-      toast.info("Stop the active audio task before ejecting its model.");
+      toast.info(translate("uxAudio.stopTheActiveAudio8w3li"));
       return;
     }
 
@@ -937,18 +941,18 @@ export function useAudioModelSlot({
       }
 
       setBusy("unloading");
-      const toastId = toast.loading("Unloading transcription model…");
+      const toastId = toast.loading(translate("uxAudio.unloadingTranscriptionModeltkafu"));
       void (async () => {
         try {
           const outcome = await ejectTranscribeModel();
           if (outcome === "unloaded") {
-            toast.success("Transcription model unloaded", {
+            toast.success(translate("uxAudio.transcriptionModelUnloaded1ll14"), {
               id: toastId,
               duration: 1200,
             });
           } else if (outcome === "kept") {
             toast.info(
-              "A different transcription model is loaded, so nothing was unloaded.",
+              translate("uxAudio.aDifferentTranscriptionModel1fg2t"),
               { id: toastId },
             );
           } else {
@@ -958,7 +962,7 @@ export function useAudioModelSlot({
           toast.error(
             error instanceof Error
               ? error.message
-              : "Failed to unload transcription model.",
+              : translate("uxAudio.failedToUnloadTranscriptionnxb8n"),
             { id: toastId },
           );
         } finally {
@@ -973,7 +977,7 @@ export function useAudioModelSlot({
 
     const lifecycleLease = useChatRuntimeStore.getState().beginModelLoading();
     if (lifecycleLease === null) {
-      toast.info("Wait for the current model to finish loading.");
+      toast.info(translate("uxAudio.waitForTheCurrent1mgs9"));
       return;
     }
 
@@ -981,7 +985,7 @@ export function useAudioModelSlot({
     void (async () => {
       try {
         const stopDecision = await confirmStopRunningChatsIfNeeded(
-          "Unloading the model",
+          translate("uxAudio.unloadingTheModelxfnf5"),
           "unload",
         );
         if (!stopDecision.proceed) {
@@ -994,7 +998,7 @@ export function useAudioModelSlot({
         invalidatePendingStagedTts();
         stageTtsDownload([]);
 
-        const toastId = toast.loading("Unloading model…");
+        const toastId = toast.loading(translate("uxAudio.unloadingModelngz6q"));
         try {
           cancelPreStreamRunReservations(stopDecision.preStreamRunTokens);
           requestLocalPromptQueueStop(stopDecision.promptQueueThreadIds);
@@ -1004,10 +1008,10 @@ export function useAudioModelSlot({
           });
           requestLocalPromptQueueStop();
           await refreshStatus();
-          toast.success("Model unloaded", { id: toastId, duration: 1200 });
+          toast.success(translate("uxAudio.modelUnloaded1moc6"), { id: toastId, duration: 1200 });
         } catch (error) {
           toast.error(
-            error instanceof Error ? error.message : "Failed to unload model.",
+            error instanceof Error ? error.message : translate("uxAudio.failedToUnloadModel16462"),
             { id: toastId },
           );
         } finally {
@@ -1060,8 +1064,8 @@ export function useAudioModelSlot({
               name: audioModelLabel(lora.adapter_path),
               description:
                 lora.export_type === "merged"
-                  ? `Fine-tuned - ${lora.base_model || "unknown base"}`
-                  : `LoRA - ${lora.base_model || "unknown base"}`,
+                  ? `Fine-tuned - ${lora.base_model || translate("uxAudio.unknownBasewgsbr")}`
+                  : translate("uxAudio.loRAde9vx", { p1: lora.base_model || "unknown base" }),
               audioType: lora.audio_type ?? null,
             })),
         );
@@ -1084,7 +1088,7 @@ export function useAudioModelSlot({
           listing.default_variant,
         );
         if (!variant) {
-          toast.error(`${id} does not publish a runnable GGUF file.`);
+          toast.error(translate("uxAudio.doesNotPublishAkmafe", { p1: id }));
           return;
         }
         await handleModelSelect(id, {
@@ -1098,7 +1102,7 @@ export function useAudioModelSlot({
         });
       } catch (error) {
         toast.error(
-          error instanceof Error ? error.message : `Could not inspect ${id}.`,
+          error instanceof Error ? error.message : translate("uxAudio.couldNotInspecta8vjg", { p1: id }),
         );
       }
     },

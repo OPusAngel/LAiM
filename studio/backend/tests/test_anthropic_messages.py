@@ -6296,7 +6296,7 @@ class TestPreserveThinkingHonoursTheBackendDefault:
             is_vision = False,
             supports_tools = False,
             supports_tool_passthrough = False,
-            model_identifier = "LAiM/Qwen3.8-8B-GGUF",
+            model_identifier = "unsloth/Qwen3.8-8B-GGUF",
             context_length = 4096,
             supports_reasoning = True,
             reasoning_always_on = False,

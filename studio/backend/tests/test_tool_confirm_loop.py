@@ -44,7 +44,6 @@ class _FakeExecuteTool:
         session_id = None,
         thread_id = None,
         rag_scope = None,
-        disable_sandbox = False,
     ):
         self.calls.append((name, arguments))
         return f"RESULT[{name}]"

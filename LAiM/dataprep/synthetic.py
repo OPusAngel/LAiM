@@ -222,7 +222,7 @@ class SyntheticDataKit:
 
     def __init__(
         self,
-        model_name = "unsloth/Llama-3.1-8B-Instruct-LAiM-bnb-4bit",
+        model_name = "unsloth/Llama-3.1-8B-Instruct-unsloth-bnb-4bit",
         max_seq_length = 2048,
         gpu_memory_utilization = 0.98,
         float8_kv_cache = False,
@@ -437,7 +437,7 @@ class SyntheticDataKit:
 
     @staticmethod
     def from_pretrained(
-        model_name = "unsloth/Llama-3.1-8B-Instruct-LAiM-bnb-4bit",
+        model_name = "unsloth/Llama-3.1-8B-Instruct-unsloth-bnb-4bit",
         max_seq_length = 2048,
         gpu_memory_utilization = 0.9,
         float8_kv_cache = False,

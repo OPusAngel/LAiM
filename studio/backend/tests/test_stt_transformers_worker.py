@@ -771,7 +771,7 @@ def test_closing_a_handle_that_ignores_shutdown_escalates_to_a_kill(monkeypatch)
 
 
 class _RefusingProcess:
-    """A child that cannot be created: a sandbox, or a frozen POSIX build."""
+    """A child that cannot be created: a workdir, or a frozen POSIX build."""
 
     def __init__(self, error) -> None:
         self.pid = None

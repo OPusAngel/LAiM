@@ -4,6 +4,7 @@
 // Loads through the Chat runtime's selectModel, so the API board gets the same context, quant,
 // GPU placement, trust and running-chat guards as Chat.
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import {
   chatLocalModelOptions,
@@ -71,18 +72,18 @@ async function startStagedDownload(
     expectedBytes: meta?.expectedBytes ?? 0,
     presentation: meta?.downloadPresentation,
     callerToast: {
-      title: "Downloading model",
-      description: "It'll load once the download finishes.",
+      title: translate("studio.progress.phase.downloadingModel"),
+      description: translate("uxApimonitor.itLlLoadOnce1fi40"),
     },
   });
   if (outcome === "conflict") {
-    return "Resume this download from the Model hub.";
+    return translate("uxApimonitor.resumeThisDownloadkkyjj");
   }
   if (outcome === "busy") {
-    return "A download for this model is already in progress.";
+    return translate("uxApimonitor.aDownloadFor3dhe2");
   }
   if (outcome === "error") {
-    return "Failed to start the download.";
+    return translate("uxApimonitor.failedToStartyqkri");
   }
   return null;
 }
@@ -195,14 +196,14 @@ function reloadTitle(
   loaded: boolean,
 ): string {
   if (lastLoadLabel === undefined) {
-    return "Checking previously loaded model...";
+    return translate("uxApimonitor.checkingPreviouslyLoadedal9b5");
   }
   if (!lastLoadLabel) {
     return RELOAD_MISSING_HISTORY_MESSAGE;
   }
   return loaded
-    ? `Reload ${lastLoadLabel}`
-    : `Reload ${lastLoadLabel} (no model loaded)`;
+    ? translate("uxApimonitor.reloadModelramb7", { p1: lastLoadLabel })
+    : translate("uxApimonitor.reloadModelNone4wd97", { p1: lastLoadLabel });
 }
 
 function toModelOptions(
@@ -453,7 +454,7 @@ export function ApiModelLoadControls({
         deleteDisabled={modelLoading}
         variant="outline"
         size="sm"
-        placeholder="Load model"
+        placeholder={translate("uxApimonitor.loadModel7bgzr")}
         open={selectorOpen && !unloading}
         onOpenChange={setSelectorOpen}
         className={cn("h-9 rounded-full")}

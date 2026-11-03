@@ -213,7 +213,7 @@ def add_scan_folder_with_status(path: str, recursive: bool | None = None) -> tup
 
 
 def add_scan_folder(path: str, recursive: bool | None = None) -> dict:
-    """Add a readable directory for the local OS user; not a multi-user sandbox."""
+    """Add a readable directory for the local OS user; not a multi-user workdir."""
     row, _ = add_scan_folder_with_status(path, recursive)
     return row
 

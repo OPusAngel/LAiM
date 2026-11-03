@@ -153,7 +153,7 @@ def _run_llama_step(script: str, tmp_path: Path, *, curl_exit: int):
         stub.write_text(
             "#!/usr/bin/env bash\n"
             "printf '%s' "
-            "'https://github.com/LAiMai/llama.cpp/releases/tag/b10107-mix-1911198'\n",
+            "'https://github.com/unslothai/llama.cpp/releases/tag/b10107-mix-1911198'\n",
             encoding = "utf-8",
         )
     stub.chmod(0o755)

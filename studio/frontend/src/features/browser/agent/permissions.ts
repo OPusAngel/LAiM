@@ -13,10 +13,12 @@ export type UnlabelledRule = "ask" | "allow";
 export type SiteRule = { browsing: BrowsingRule; actions: ActionsRule; downloads: DownloadsRule; unlabelled: UnlabelledRule };
 export type AgentPermissions = { defaults: SiteRule; sites: Record<string, SiteRule> };
 export type HistoryAccess = "ask" | "allow" | "never";
-/** No "allow": approving each script is the only check a script passes. */
-export type ScriptAccess = "ask" | "never";
+/** `ask` approves each injected script; `allow` runs them with the rest of the site's rights. */
+export type ScriptAccess = "ask" | "allow" | "never";
 
-export const DEFAULT_RULE: SiteRule = { browsing: "ask", actions: "ask", downloads: "ask", unlabelled: "ask" };
+/** LAiM gives the agent the run of the browser out of the box: nothing is asked, nothing is blocked.
+ *  The user can tighten any of these per site from Settings > Browser. */
+export const DEFAULT_RULE: SiteRule = { browsing: "allow", actions: "allow", downloads: "allow", unlabelled: "allow" };
 export const DEFAULT_PERMISSIONS: AgentPermissions = { defaults: DEFAULT_RULE, sites: {} };
 export const MAX_SITE_RULES = 200;
 
@@ -72,8 +74,12 @@ const ACTIONS = new Set(["ask", "allow"]);
 const DOWNLOADS = new Set(["ask", "allow", "block"]);
 const UNLABELLED = new Set(["ask", "allow"]);
 
-/** Persisted values, checked: an unknown value falls back to the default rather than to allow. */
-export function checkedRule(value: unknown, fallback: SiteRule = DEFAULT_RULE): SiteRule {
+/** What a rule the app can't read becomes: everything asked, never everything allowed. A profile with
+ *  no stored permissions at all is a fresh install and gets DEFAULT_PERMISSIONS instead. */
+const ASK_RULE: SiteRule = { browsing: "ask", actions: "ask", downloads: "ask", unlabelled: "ask" };
+
+/** Persisted values, checked: an unknown value falls back to asking rather than to allow. */
+export function checkedRule(value: unknown, fallback: SiteRule = ASK_RULE): SiteRule {
   const raw = value && typeof value === "object" ? (value as Record<string, unknown>) : {};
   return {
     browsing: BROWSING.has(raw.browsing as string) ? (raw.browsing as BrowsingRule) : fallback.browsing,
@@ -84,7 +90,8 @@ export function checkedRule(value: unknown, fallback: SiteRule = DEFAULT_RULE): 
 }
 
 export function checkedPermissions(value: unknown): AgentPermissions {
-  const raw = value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+  if (!value || typeof value !== "object") return DEFAULT_PERMISSIONS;
+  const raw = value as Record<string, unknown>;
   const sites: Record<string, SiteRule> = {};
   const listed = raw.sites && typeof raw.sites === "object" ? Object.entries(raw.sites as Record<string, unknown>) : [];
   for (const [pattern, rule] of listed.slice(0, MAX_SITE_RULES)) {

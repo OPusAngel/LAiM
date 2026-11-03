@@ -1417,7 +1417,7 @@ def test_codex_studio_tool_loop_executes_and_continues(monkeypatch):
                 run = tool_loop.CodexRunContext(
                     provider_id = "provider",
                     thread_id = "thread",
-                    session_id = "sandbox",
+                    session_id = "workdir",
                     messages = [{"role": "user", "content": "calculate"}],
                     model = "gpt-5.6-sol",
                     reasoning_effort = "medium",

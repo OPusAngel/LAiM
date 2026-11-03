@@ -24,13 +24,19 @@ test("LAiM's uploads by default, every uploader once a search is typed", () => {
 
 test("the popover's uploader toggle picks LAiM or every uploader", () => {
   assert.match(readSrc("features/hub/lib/model-search-filters.ts"), /"LAiM",\s*"organization",\s*"personal",/);
-  assert.match(popover, /\["all", "All uploaders"\]/);
+  assert.match(
+    popover,
+    /\["all", translate\("uxHub\.allUploadersr01y3"\)\]/,
+  );
   assert.doesNotMatch(popover, /Organizations only|Non-organization/);
 });
 
 test("the range notes are hover tooltips beside Parameters and Context length", () => {
   assert.doesNotMatch(popover, /Ranges include both limits/);
-  assert.match(popover, /aria-label=\{`About \$\{label\.toLowerCase\(\)\}`\}/);
+  assert.match(
+    popover,
+    /aria-label=\{translate\("uxHub\.aboutqqrzm", \{ p1: label\.toLowerCase\(\) \}\)\}/,
+  );
   assert.match(popover, /icon=\{InformationCircleIcon\}/);
 });
 

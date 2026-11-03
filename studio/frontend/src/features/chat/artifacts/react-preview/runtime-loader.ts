@@ -3,6 +3,8 @@
 
 // The frame is an opaque origin, so the parent fetches (once per session) and inlines the files.
 
+import { translate } from "@/i18n";
+
 export type PreviewRuntimeManifest = {
   files: Record<string, { url: string; bytes: number; version: string }>;
   modules: Record<string, string>;
@@ -31,11 +33,11 @@ export function createRuntimeLoader(manifest: PreviewRuntimeManifest, fetchBytes
 
   const fetchFile = async (name: string): Promise<string> => {
     const file = manifest.files[name];
-    if (!file) throw new Error(`Unknown preview library "${name}"`);
+    if (!file) throw new Error(translate("uxChat.unknownPreviewLibrarystjps", { p1: name }));
     const bytes = await fetchBytes(file.url);
     // A stale or wrong path can come back as the app's index.html; never inline that as a script.
     if (bytes.byteLength !== file.bytes || bytes[0] === 0x3c) {
-      throw new Error(`Preview library "${name}" didn't load correctly`);
+      throw new Error(translate("uxChat.previewLibraryDidnTnhygb", { p1: name }));
     }
     return new TextDecoder().decode(bytes);
   };

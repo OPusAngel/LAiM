@@ -79,7 +79,7 @@ try:
         torch.cuda.mem_get_info = lambda *a, **k: (0, 80 * 1024**3)
 except Exception:
     pass
-os.environ["LAiM_IS_PRESENT"] = "1"
+os.environ["UNSLOTH_IS_PRESENT"] = "1"
 
 # Stub 5.x sidecar: activation only edits sys.path, so a package that merely exports __version__ is
 # enough to prove the resident transformers switched to it.

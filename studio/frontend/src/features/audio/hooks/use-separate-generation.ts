@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { toast } from "@/lib/toast";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AudioApiError, runAudio } from "../api";
@@ -154,7 +155,7 @@ export function useSeparateGeneration({
     sourceError: sourceStatus.phase === "error" ? sourceStatus.message : null,
   });
   const addTrack = {
-    label: "Add a track",
+    label: translate("uxAudio.addATrack1hyqa"),
     onClick: () => sourceHandle.current?.focus(),
   };
   const blockerActions: Partial<
@@ -164,7 +165,7 @@ export function useSeparateGeneration({
     "source-error": [addTrack],
     "source-expired": [
       {
-        label: "Add it again",
+        label: translate("uxAudio.addItAgain1rlob"),
         onClick: () => {
           useAudioSeparateStore.getState().setSource(null);
           sourceHandle.current?.browse();
@@ -173,7 +174,7 @@ export function useSeparateGeneration({
     ],
     "too-long": [
       {
-        label: "Pick a shorter track",
+        label: translate("uxAudio.pickAShorterTrack1hplp"),
         onClick: () => sourceHandle.current?.browse(),
       },
     ],
@@ -255,7 +256,7 @@ export function useSeparateGeneration({
           ? SEPARATE_TRACK_EXPIRED_MESSAGE
           : error instanceof Error
             ? error.message
-            : "Separation failed.";
+            : translate("uxAudio.separationFailedrmx0d");
         setGenerationError(message);
         if (!expired) toast.error(message);
         await refreshStatus();

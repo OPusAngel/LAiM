@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
+
 export const H3_REFERENCE_MIN_SECONDS = 2;
 export const H3_REFERENCE_MAX_SECONDS = 15;
 // Matches validate_h3_reference_trim's slack. Exact comparison refused intervals the server
@@ -43,12 +45,12 @@ export function referenceVideoTrimError(
     return `${label} is shorter than the 2 second minimum`;
   }
   if ((start === null) !== (end === null)) {
-    return `Set both start and end times for ${label}`;
+    return translate("uxVideo.setBothStartAnd1f6if", { p1: label });
   }
   if (start === null || end === null) {
     return sourceDuration !== undefined &&
       sourceDuration > H3_REFERENCE_MAX_SECONDS
-      ? `Select a 2 to 15 second section for ${label}`
+      ? translate("uxVideo.selectA2Toclmc7", { p1: label })
       : null;
   }
   const duration = end - start;
@@ -61,7 +63,7 @@ export function referenceVideoTrimError(
     duration - DURATION_EPSILON > H3_REFERENCE_MAX_SECONDS ||
     (sourceDuration !== undefined && end > sourceDuration + DURATION_EPSILON)
   ) {
-    return `Choose 2 to 15 seconds within ${label}`;
+    return translate("uxVideo.choose2To15gw30v", { p1: label });
   }
   return null;
 }
@@ -89,7 +91,7 @@ export function referenceVideoTrimFeedback(
       end === H3_REFERENCE_MAX_SECONDS
     ) {
       return {
-        message: `${source}First ${H3_REFERENCE_MAX_SECONDS.toFixed(1)}s selected automatically. Adjust the times to use another section.`,
+        get message() { return translate("uxVideo.firstSSelectedAutomaticallyyjh41", { p1: source, p2: H3_REFERENCE_MAX_SECONDS.toFixed(1) }); },
         invalid: false,
       };
     }
@@ -102,8 +104,8 @@ export function referenceVideoTrimFeedback(
   }
   return {
     message: source
-      ? `${source}Trim is optional.`
-      : "Trim is optional for clips up to 15 seconds.",
+      ? translate("uxVideo.trimIsOptionalypwql", { p1: source })
+      : translate("uxVideo.trimIsOptionalForisesc"),
     invalid: false,
   };
 }

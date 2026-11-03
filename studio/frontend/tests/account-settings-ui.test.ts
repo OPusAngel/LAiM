@@ -526,13 +526,13 @@ test("model access edits one account's allowlist and an empty list restores ever
   tree = view.render();
   assert.ok(content(tree).includes(en.settings.accounts.modelAccessLimited));
   await click(tree, en.settings.accounts.modelAccess);
-  assert.equal(textarea()!.props.value, "LAiM/*\nGoogle/gemma-3-1b-it");
+  assert.equal(textarea()!.props.value, "unsloth/*\nGoogle/gemma-3-1b-it");
   (textarea()!.props.onChange as (event: unknown) => void)({ target: { value: "  " } });
   await submit();
   assert.deepEqual(
     view.calls.filter((call) => call.startsWith("models:")),
     [
-      'models:alice-id:["LAiM/*","Google/gemma-3-1b-it"]',
+      'models:alice-id:["unsloth/*","Google/gemma-3-1b-it"]',
       "models:alice-id:null",
     ],
   );

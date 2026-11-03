@@ -5,6 +5,8 @@
 // (WebKitGTK < 2.44) are missing on older engines Tauri embeds and throw synchronously if called.
 // These ponyfills delegate to the native impl when present, else fall back to an AbortController.
 
+import { translate } from "@/i18n";
+
 export interface PollSignal {
   signal: AbortSignal;
   dispose: () => void;
@@ -20,7 +22,7 @@ export function disposableTimeoutSignal(ms: number): PollSignal {
   const timer = setTimeout(
     () =>
       controller.abort(
-        new DOMException("The operation timed out.", "TimeoutError"),
+        new DOMException(translate("uxHub.theOperationTimedOut54am1"), "TimeoutError"),
       ),
     ms,
   );
@@ -70,7 +72,7 @@ export function pollSignal(parent: AbortSignal, timeoutMs: number): PollSignal {
 export function abortError(signal: AbortSignal): DOMException {
   return signal.reason instanceof DOMException
     ? signal.reason
-    : new DOMException("The operation was aborted.", "AbortError");
+    : new DOMException(translate("uxHub.theOperationWasAborted8ab5k"), "AbortError");
 }
 
 // Rejects the returned promise on abort but never aborts the wrapped promise,

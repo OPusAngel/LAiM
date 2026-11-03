@@ -82,7 +82,7 @@ def _drive_handle_load(
 
 def _mc(audio_type, is_audio, has_audio_input):
     return SimpleNamespace(
-        identifier = "LAiM/orpheus-3b-0.1-ft",
+        identifier = "unsloth/orpheus-3b-0.1-ft",
         display_name = "orpheus",
         is_vision = False,
         is_lora = False,

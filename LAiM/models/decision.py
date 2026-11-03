@@ -615,7 +615,7 @@ def _laya_decide(
     }
 
 
-# Kept in 16-bit like LAiM/Qwen3.8-27B-LAiM-bnb-4bit: Clef's backbone is a merged
+# Kept in 16-bit like LAiM/Qwen3.8-27B-unsloth-bnb-4bit: Clef's backbone is a merged
 # fine-tune, not stock Qwen, so it is quantized on load with the same dynamic list.
 CLEF_4BIT_SKIP_MODULES = (
     "model.visual",

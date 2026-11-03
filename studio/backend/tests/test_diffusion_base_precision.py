@@ -30,7 +30,7 @@ from models.training import DiffusionTrainingStartRequest
 
 # A dense (non-prequant) DiT base and a prequant bnb-4bit base. Both resolve a family from their names alone, so normalized() runs offline.
 _FLUX_DENSE = "black-forest-labs/FLUX.1-dev"
-_Z_PREQUANT = "LAiM/Z-Image-Turbo-LAiM-bnb-4bit"
+_Z_PREQUANT = "unsloth/Z-Image-Turbo-unsloth-bnb-4bit"
 # An SDXL base whose name LOOKS prequant: SDXL ignores base_precision, so the dense-mode gates must not fire for it.
 _SDXL_PREQUANT_NAME = "some/sdxl-model-bnb-4bit"
 # A dense Qwen-Image base: its DiT is corrupted by fp8, so fp8 is denied for training the same way the inference path denies it.
@@ -81,7 +81,7 @@ def test_normalized_config_keeps_the_canonical_base_and_pins_its_fetch_mirror(mo
     from core.inference import diffusion_families
 
     upstream = "black-forest-labs/FLUX.2-klein-base-9B"
-    mirror = "LAiM/FLUX.2-klein-base-9B"
+    mirror = "unsloth/FLUX.2-klein-base-9B"
     seen = []
 
     def _prefer(base, token = None):
@@ -336,7 +336,7 @@ def test_base_precision_gates_skip_sdxl():
 @pytest.mark.parametrize(
     "repo, expected",
     [
-        ("LAiM/Qwen-Image-2512-LAiM-bnb-4bit", True),
+        ("unsloth/Qwen-Image-2512-unsloth-bnb-4bit", True),
         ("some/model-4bit", True),
         ("some/model-int4", True),
         ("some/model-nf4", True),
@@ -451,7 +451,7 @@ def test_resolve_auto_uses_klein_variant_size(monkeypatch):
         mixed_precision = "bf16",
     )
     nine_b = _cfg(
-        base_model = "LAiM/FLUX.2-klein-base-9B",
+        base_model = "unsloth/FLUX.2-klein-base-9B",
         base_precision = "auto",
         mixed_precision = "bf16",
     )
@@ -505,8 +505,8 @@ def _fake_cuda_with_free_gb(monkeypatch, free_gb: float):
         "black-forest-labs/FLUX.2-klein-9B",
         "black-forest-labs/FLUX.2-klein-base-9B",
         # The LAiM mirrors resolve to the same upstream ids, and they are what the Train tab sends.
-        "LAiM/FLUX.2-klein-9B",
-        "LAiM/FLUX.2-klein-base-9B",
+        "unsloth/FLUX.2-klein-9B",
+        "unsloth/FLUX.2-klein-base-9B",
     ],
 )
 def test_auto_sizes_flux2_klein_9b_off_its_own_weights(monkeypatch, base_model):
@@ -564,7 +564,7 @@ def test_dense_bf16_gb_keeps_every_base_without_an_override_exactly_where_it_was
     for base in (
         "black-forest-labs/FLUX.2-klein-4B",
         "black-forest-labs/FLUX.2-klein-base-4B",
-        "LAiM/FLUX.2-klein-4B",
+        "unsloth/FLUX.2-klein-4B",
     ):
         assert dit._dense_bf16_gb(klein, base) == klein.dense_bf16_gb
 
@@ -579,7 +579,7 @@ def test_dense_bf16_gb_survives_a_broken_lookup(monkeypatch):
 
     monkeypatch.setattr(ap, "base_repo_bf16_components_gb", _boom)
     spec = dit._SPECS["flux.2-klein"]
-    assert dit._dense_bf16_gb(spec, "LAiM/FLUX.2-klein-base-9B") == pytest.approx(
+    assert dit._dense_bf16_gb(spec, "unsloth/FLUX.2-klein-base-9B") == pytest.approx(
         spec.dense_bf16_gb
     )
 

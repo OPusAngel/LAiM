@@ -28,7 +28,7 @@ def _load_helper():
             exec(compile(ast.Module([node], []), str(_SAVE_PY), "exec"), namespace)
             return namespace["_model_basename"]
     raise AssertionError(
-        "LAiM/save.py does not define a module-level _model_basename helper. "
+        "unsloth/save.py does not define a module-level _model_basename helper. "
         "GGUF filenames are still derived with .split('/')[-1], which keeps the "
         "whole path for Windows base-model directories (issue #7897)."
     )
@@ -37,7 +37,7 @@ def _load_helper():
 # (label, config._name_or_path, expected model_name). REGRESSION rows must match the old
 # .split("/")[-1] byte for byte.
 _TABLE_A = [
-    ("hf_id", "LAiM/Qwen3-8B", "Qwen3-8B"),
+    ("hf_id", "unsloth/Qwen3-8B", "Qwen3-8B"),
     ("hf_id_nested", "meta-llama/Llama-2-7b-hf", "Llama-2-7b-hf"),
     ("bare_name", "Qwen3-8B", "Qwen3-8B"),
     ("posix_abs", "/home/u/models/MyModel", "MyModel"),

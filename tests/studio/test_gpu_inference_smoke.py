@@ -12,7 +12,7 @@ from real_accelerator import (
 
 torch = pytest.importorskip("torch")
 
-MODEL_ID = "LAiM/gemma-3-270m-it"
+MODEL_ID = "unsloth/gemma-3-270m-it"
 MIN_NEW_TOKENS = 4
 MAX_NEW_TOKENS = 16
 

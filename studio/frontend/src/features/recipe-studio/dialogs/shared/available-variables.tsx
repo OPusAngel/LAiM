@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Badge } from "@/components/ui/badge";
 import { ChevronDownStandardIcon } from "@/lib/chevron-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -46,7 +47,7 @@ export function AvailableVariables({
   return (
     <div className="corner-squircle rounded-2xl border border-border/60 px-3 py-2">
       <p className="mb-2 text-xs font-semibold uppercase text-muted-foreground">
-        Available references
+        {translate("uxRecipestudio.availableReferencesdah4w")}
       </p>
       <div className="flex flex-wrap gap-1.5">
         {vars.map((v) => {
@@ -75,7 +76,7 @@ export function AvailableVariables({
               className="cursor-pointer"
               aria-expanded={showUserFields}
               aria-label={
-                showUserFields ? "Hide user fields" : "Show user fields"
+                showUserFields ? translate("uxRecipestudio.hideUserFieldsqnnh0") : translate("uxRecipestudio.showUserFields805kb")
               }
             >
               <Badge variant="secondary" className={className}>

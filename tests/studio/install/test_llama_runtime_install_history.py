@@ -111,7 +111,7 @@ def _marker_for(asset: str, backend: str | None, tag: str, source: str) -> dict:
         "requested_tag": "latest",
         "tag": tag,
         "release_tag": tag,
-        "published_repo": "LAiMai/llama.cpp",
+        "published_repo": "unslothai/llama.cpp",
         "asset": asset,
         "source": source,
         "llama_backend": backend,

@@ -127,7 +127,7 @@ test("a Windows model path stays opaque while its display name is portable", () 
 });
 
 test("a GGUF handoff preserves its public identity and exact variant", () => {
-  const id = "LAiM/Llama-GGUF";
+  const id = "unsloth/Llama-GGUF";
   const loadId = "/cache/models--LAiM--Llama-GGUF/snapshots/revision";
   const target = modelConfigTarget(id, {
     source: "hub",
@@ -328,7 +328,7 @@ test("the resident settings key a cached non-GGUF repo by its repo id", () => {
 
 test("submitting a cached handoff adopts legacy path-keyed settings", () => {
   store.clear();
-  const id = "LAiM/Llama-GGUF";
+  const id = "unsloth/Llama-GGUF";
   const loadId = "/cache/models--LAiM--Llama-GGUF/snapshots/legacy";
   const ggufVariant = "Q4_K_M";
   savePerModelConfig(loadId, ggufVariant, {
@@ -358,6 +358,6 @@ test("submitting a cached handoff adopts legacy path-keyed settings", () => {
 
 test("full checkpoints mirror remembered engine settings to API loads", () => {
   const meta = { source: "hub", isLora: false, isGguf: false, isDownloaded: true } as const;
-  assert.equal(modelConfigTarget("LAiM/Qwen3.5-0.8B", meta).apiLoadable, true);
+  assert.equal(modelConfigTarget("unsloth/Qwen3.5-0.8B", meta).apiLoadable, true);
   assert.equal(modelConfigTarget("local-adapter", { ...meta, isLora: true }).apiLoadable, false);
 });

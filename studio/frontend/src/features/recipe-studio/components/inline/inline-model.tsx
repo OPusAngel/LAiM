@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Input } from "@/components/ui/input";
 import type { ReactElement } from "react";
 import { LocalRecipeModelSelector } from "../../dialogs/models/local-recipe-model-selector";
@@ -21,14 +22,14 @@ export function InlineModel(props: InlineModelProps): ReactElement {
       return (
         <div className="flex items-center gap-2 px-1 py-0.5">
           <span className="text-xs font-medium text-muted-foreground">
-            Local model (Chat)
+            {translate("uxRecipestudio.localModelChat152ye")}
           </span>
         </div>
       );
     }
     return (
       <div className="grid gap-3 sm:grid-cols-2">
-        <InlineField label="Endpoint">
+        <InlineField label={translate("uxModelpicker.endpointb2lti")}>
           <Input
             className="nodrag h-8 w-full text-xs"
             placeholder="https://api.example.com/v1"
@@ -38,11 +39,11 @@ export function InlineModel(props: InlineModelProps): ReactElement {
             }
           />
         </InlineField>
-        <InlineField label="API key">
+        <InlineField label={translate("uxRecipestudio.aPIKeyrxain")}>
           <Input
             className="nodrag h-8 w-full text-xs"
             data-reload-snapshot-sensitive
-            placeholder="Optional"
+            placeholder={translate("studio.params.optional")}
             value={props.config.api_key ?? ""}
             onChange={(event) =>
               props.onUpdate({
@@ -85,15 +86,15 @@ export function InlineModel(props: InlineModelProps): ReactElement {
 
   return (
     <div className="grid gap-3 sm:grid-cols-2">
-      <InlineField label="Provider">
+      <InlineField label={translate("uxRecipestudio.providerevz7q")}>
         <Input
           className="nodrag h-8 w-full text-xs"
-          placeholder="provider alias"
+          placeholder={translate("uxRecipestudio.providerAlias75u1x")}
           value={modelConfig.provider}
           onChange={(event) => handleProviderChange(event.target.value)}
         />
       </InlineField>
-      <InlineField label="Model">
+      <InlineField label={translate("settings.voice.dictation.customModelLabel")}>
         {isLinkedToLocal ? (
           <LocalRecipeModelSelector
             compact={true}
@@ -115,7 +116,7 @@ export function InlineModel(props: InlineModelProps): ReactElement {
         ) : (
           <Input
             className="nodrag h-8 w-full text-xs"
-            placeholder="gpt-4o-mini"
+            placeholder={translate("uxRecipestudio.gpt4oMininzetj")}
             value={modelConfig.model}
             onChange={(event) =>
               props.onUpdate({
@@ -127,7 +128,7 @@ export function InlineModel(props: InlineModelProps): ReactElement {
           />
         )}
       </InlineField>
-      <InlineField label="Temperature" className="sm:col-span-2">
+      <InlineField label={translate("settings.resources.liveMonitor.temperature")} className="sm:col-span-2">
         <Input
           className="nodrag h-8 w-full text-xs"
           type="number"

@@ -24,18 +24,18 @@ _OFF = {"zero_cond_t": False}
         (
             (
                 "qwen-image-edit-2509-Q6_K.gguf",
-                "LAiM/Qwen-Image-Edit-2509-GGUF",
+                "unsloth/Qwen-Image-Edit-2509-GGUF",
                 "Qwen/Qwen-Image-Edit-2511",
             ),
             _OFF,
         ),
-        ((None, "LAiM/Qwen-Image-Edit-2509-GGUF", "Qwen/Qwen-Image-Edit-2511"), _OFF),
+        ((None, "unsloth/Qwen-Image-Edit-2509-GGUF", "Qwen/Qwen-Image-Edit-2511"), _OFF),
         ((None, "/models/local", "Qwen/Qwen-Image-Edit-2509"), _OFF),
         (("qwen_image_edit_2509_Q4_K_M.gguf", "/models/unet", "Qwen/Qwen-Image-Edit-2511"), _OFF),
         (
             (
                 "qwen-image-edit-Q4_K_M.gguf",
-                "LAiM/Qwen-Image-Edit-GGUF",
+                "unsloth/Qwen-Image-Edit-GGUF",
                 "Qwen/Qwen-Image-Edit-2511",
             ),
             _OFF,
@@ -44,7 +44,7 @@ _OFF = {"zero_cond_t": False}
         (
             (
                 "qwen-image-edit-2511-Q4_K_M.gguf",
-                "LAiM/Qwen-Image-Edit-2511-GGUF",
+                "unsloth/Qwen-Image-Edit-2511-GGUF",
                 "Qwen/Qwen-Image-Edit-2511",
             ),
             {},
@@ -69,10 +69,10 @@ def test_variant_lookup_returns_a_fresh_dict():
 @pytest.mark.parametrize(
     "repo_id, gguf_filename",
     [
-        ("LAiM/Qwen-Image-2512-GGUF", "qwen-image-2512-Q4_K_M.gguf"),
-        ("LAiM/Qwen-Image-GGUF", "qwen-image-Q4_K_M.gguf"),
-        ("LAiM/FLUX.1-Kontext-dev-GGUF", "flux1-kontext-dev-Q4_K_M.gguf"),
-        ("LAiM/Z-Image-Turbo-GGUF", "z-image-turbo-Q4_K_M.gguf"),
+        ("unsloth/Qwen-Image-2512-GGUF", "qwen-image-2512-Q4_K_M.gguf"),
+        ("unsloth/Qwen-Image-GGUF", "qwen-image-Q4_K_M.gguf"),
+        ("unsloth/FLUX.1-Kontext-dev-GGUF", "flux1-kontext-dev-Q4_K_M.gguf"),
+        ("unsloth/Z-Image-Turbo-GGUF", "z-image-turbo-Q4_K_M.gguf"),
     ],
 )
 def test_other_families_get_no_config_override(repo_id, gguf_filename):
@@ -87,24 +87,24 @@ def test_qwen_edit_flow_shift_per_variant():
     base = fam.base_repo
     assert (
         comfy_flow_shift_for(
-            fam, "qwen-image-edit-Q4_K_M.gguf", "LAiM/Qwen-Image-Edit-GGUF", base
+            fam, "qwen-image-edit-Q4_K_M.gguf", "unsloth/Qwen-Image-Edit-GGUF", base
         )
         == 3.0
     )
     assert comfy_flow_shift_for(fam, None, "Qwen/Qwen-Image-Edit", None) == 3.0
     assert (
         comfy_flow_shift_for(
-            fam, "qwen-image-edit-2509-Q6_K.gguf", "LAiM/Qwen-Image-Edit-2509-GGUF", base
+            fam, "qwen-image-edit-2509-Q6_K.gguf", "unsloth/Qwen-Image-Edit-2509-GGUF", base
         )
         == 3.0
     )
     assert (
         comfy_flow_shift_for(
-            fam, "qwen-image-edit-2511-Q4_K_M.gguf", "LAiM/Qwen-Image-Edit-2511-GGUF", base
+            fam, "qwen-image-edit-2511-Q4_K_M.gguf", "unsloth/Qwen-Image-Edit-2511-GGUF", base
         )
         == 3.1
     )
-    assert comfy_flow_shift_for(fam, None, "LAiM/Qwen-Image-Edit-2511", None) == 3.1
+    assert comfy_flow_shift_for(fam, None, "unsloth/Qwen-Image-Edit-2511", None) == 3.1
     assert comfy_flow_shift_for(fam, "model.gguf", "/models/unet", base) == 3.1
     assert comfy_flow_shift_for(fam, None, None, None) == 3.1
 
@@ -176,6 +176,6 @@ def test_download_plan_skips_the_2511_transformer_for_a_variant(
 
     monkeypatch.setattr(dmod.DiffusionBackend, "_estimate_download_bytes", staticmethod(estimate))
     dmod.DiffusionBackend().download_plan(
-        "LAiM/Qwen-Image-Edit-GGUF", gguf_filename = gguf_filename, transformer_quant = "fp8"
+        "unsloth/Qwen-Image-Edit-GGUF", gguf_filename = gguf_filename, transformer_quant = "fp8"
     )
     assert asked == [stages_transformer]

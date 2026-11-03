@@ -31,10 +31,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { BulbIcon } from "@/lib/bulb-icon";
-import { InternetGlyph } from "@/lib/internet-icon";
 import { MicIcon } from "@/lib/mic-icon";
 import { MenuTickIcon, Tick02Icon } from "@/lib/tick-icon";
-import { BrowserAgentMenuItem, BrowserAgentPill } from "@/features/browser/agent/lazy-composer-toggle";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -118,7 +116,6 @@ import {
 import {
   AttachmentIcon,
   Bookmark02Icon,
-  CodeIcon,
   Download01Icon,
   FileDatabaseIcon,
   Folder01Icon,
@@ -209,7 +206,7 @@ import { useExternalProvidersStore } from "./stores/external-providers-store";
 import { useComposerPillFit } from "@/hooks/use-composer-pill-fit";
 import { useUiSpaceScale } from "@/hooks/use-ui-space-scale";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useT } from "@/i18n";
+import { translate, useT } from "@/i18n";
 import {
   splitPlusMenuItems,
   type PlusMenuItemId,
@@ -229,7 +226,7 @@ import {
   persistGpuMemoryModeOnLoad,
   resolveSpeculativeSettingsForLoad,
   saveSpeculativeType,
-  codeToolsOn,
+  selectToolsSelectable,
   useChatRuntimeStore,
 } from "./stores/chat-runtime-store";
 import {
@@ -296,7 +293,7 @@ function fileToBase64DataURL(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result as string);
-    reader.onerror = () => reject(new Error("Failed to read image file"));
+    reader.onerror = () => reject(new Error(translate("uxChat.failedToReadImagexy7x4")));
     reader.readAsDataURL(file);
   });
 }
@@ -314,7 +311,7 @@ function formatReasoningEffortLabel(
     ) {
       return "Max";
     }
-    return "Extra High";
+    return translate("uxChat.extraHigh4o3k2");
   }
   return level.charAt(0).toUpperCase() + level.slice(1);
 }
@@ -401,7 +398,7 @@ function useDictation(
     // Keep the session and dictation state alive while its final audio segment is transcribed; onEnd
     // clears both after the transcript callbacks run.
     void session.stop().catch((error) => {
-      console.error("Could not stop dictation:", error);
+      console.error(translate("uxChat.couldNotStopDictationzrra1"), error);
       session.cancel();
       if (sessionRef.current === session) sessionRef.current = null;
       finalizingRef.current = false;
@@ -501,7 +498,7 @@ export function RegisterCompareHandle({
             }
           }
           if (!thread) {
-            reject(new Error("Comparison thread is unavailable"));
+            reject(new Error(translate("uxChat.comparisonThreadIsUnavailablekynm1")));
             return;
           }
           let wasRunning = thread.getState().isRunning;
@@ -552,7 +549,7 @@ function PendingImageThumb({
         type="button"
         onClick={onRemove}
         className="absolute top-1 right-1 flex size-5 items-center justify-center rounded-full bg-[#f9e2de] text-muted-foreground shadow-sm hover:bg-destructive hover:text-destructive-foreground"
-        aria-label="Remove attachment"
+        aria-label={translate("uxChat.removeAttachmentcl8v8")}
       >
         <XIcon className="size-3" />
       </button>
@@ -841,7 +838,7 @@ export function SharedComposer({
   );
   const preserveThinking = useChatRuntimeStore((s) => s.preserveThinking);
   const setPreserveThinking = useChatRuntimeStore((s) => s.setPreserveThinking);
-  const supportsTools = useChatRuntimeStore((s) => s.supportsTools);
+  const supportsTools = useChatRuntimeStore(selectToolsSelectable);
   const [skillsSwitchOn] = useSkillsSwitch();
 
   const mentionOpenRef = useRef(false);
@@ -858,8 +855,6 @@ export function SharedComposer({
   );
   const toolsEnabled = useChatRuntimeStore((s) => s.toolsEnabled);
   const setToolsEnabled = useChatRuntimeStore((s) => s.setToolsEnabled);
-  const codeToolsEnabled = useChatRuntimeStore(codeToolsOn);
-  const setCodeToolsEnabled = useChatRuntimeStore((s) => s.setCodeToolsEnabled);
   const imageToolsEnabled = useChatRuntimeStore((s) => s.imageToolsEnabled);
   const setImageToolsEnabled = useChatRuntimeStore(
     (s) => s.setImageToolsEnabled,
@@ -992,8 +987,6 @@ export function SharedComposer({
       ? reasoningLockedOn || (effectiveReasoningVisualEnabled && !reasoningDisabled)
       : reasoningLockedOn || (effectiveReasoningEnabled && !reasoningDisabled);
   // Search can use LAiM tools or provider web search independently of Code.
-  // Code follows the provider's sandbox placement and never falls back to local
-  // execution when a hosted model lacks code support.
   const supportsBuiltinCodeExecution = providerSupportsBuiltinCodeExecution(
     selectedExternalProvider?.providerType,
     effectiveExternalModelId,
@@ -1013,20 +1006,14 @@ export function SharedComposer({
   // ids but allowed on Gemini 3 image models, so only Code is disabled unconditionally there.
   const isExternalGemini = selectedExternalProvider?.providerType === "gemini";
   const imageDisabled = !modelLoaded || !supportsBuiltinImageGeneration;
-  const imageModeDisablesCode =
-    isExternalGemini && imageToolsEnabled && !imageDisabled;
   // Image-tier Gemini models always reject codeExecution and reject web_search on older ids, so gate
   // strictly on provider builtin support: local `supportsTools` must not re-enable a pill the
   // Gemini backend silently drops.
   const isGeminiImageTier =
     isExternalGemini && supportsBuiltinImageGeneration;
-  // Disable only when a loaded model lacks the capability; with no model the tool can still be
-  // pre-selected, matching the + menu.
-  const searchDisabled =
-    modelLoaded &&
-    (isGeminiImageTier
-      ? !supportsBuiltinWebSearch
-      : !(supportsTools || supportsBuiltinWebSearch));
+  // Internet stays usable for every local checkpoint: LAiM's own loop runs web_search and reads
+  // tool calls out of the model's text when the template cannot emit them. Only a cloud provider
+  // without server-side search is gated.
   const externalUsesStudioTools =
     providerModelSupportsStudioTools(
       selectedExternalProvider?.providerType,
@@ -1043,9 +1030,8 @@ export function SharedComposer({
         supportsStudioTools: externalUsesStudioTools,
       })
     : supportsTools;
-  const codeDisabled =
-    (modelLoaded && (isGeminiImageTier || !canRunCode)) ||
-    imageModeDisablesCode;
+  // Local models never show the toggle: every local checkpoint runs LAiM's code tools.
+  const showCodePill = isExternalModel;
   // Images pill lights only on OpenAI cloud Responses-API models and the Gemini Nano Banana
   // family. No local tool runtime fallback.
   const showImagePill = supportsBuiltinImageGeneration;
@@ -1055,11 +1041,12 @@ export function SharedComposer({
   const ragDisabled =
     modelLoaded && ((!externalUsesStudioTools && isExternalModel) || !supportsTools);
   const showRagPill = !isExternalModel || externalUsesStudioTools;
-  // Above 4 pills, collapse to icons only. Compare, Search, Tools and permissions always show.
+  // Above 4 pills, collapse to icons only. Compare, Search and permissions always show, plus the
+  // cloud-only Tools pill.
   // Narrow viewports collapse too: the labelled row is wider than a phone-width composer.
   const isMobile = useIsMobile();
   const pillCount =
-    4 +
+    (showCodePill ? 4 : 3) +
     (showImagePill ? 1 : 0) +
     (showRagPill && ragEnabled ? 1 : 0) +
     (showWebFetchPill ? 1 : 0) +
@@ -1069,8 +1056,6 @@ export function SharedComposer({
   const { pillRowRef, pillCompact } = useComposerPillFit(
     isMobile || pillCount > 4,
   );
-  // Backwards-compatible alias for call sites still referencing `toolsDisabled`.
-  const toolsDisabled = codeDisabled;
   const setPendingAudioStore = useChatRuntimeStore((s) => s.setPendingAudio);
   const clearPendingAudioStore = useChatRuntimeStore(
     (s) => s.clearPendingAudio,
@@ -1146,13 +1131,13 @@ export function SharedComposer({
     const nextIndex = queueIndexRef.current + 1;
     if (nextIndex >= queueRef.current.length) {
       resetPromptQueue();
-      toast.success("Prompt queue complete");
+      toast.success(translate("uxChat.promptQueueComplete14k1t"));
       return;
     }
     queueIndexRef.current = nextIndex;
     setQueueProgress({ current: nextIndex + 1, total: queueRef.current.length });
     const next = queueRef.current[nextIndex];
-    toast(`Prompt ${nextIndex + 1} / ${queueRef.current.length}`, {
+    toast(translate("uxChat.promptxye97", { p1: nextIndex + 1, p2: queueRef.current.length }), {
       description: next.length > 80 ? next.slice(0, 80) + "…" : next,
     });
     setCurrentText(next);
@@ -1167,8 +1152,8 @@ export function SharedComposer({
     if (!isQueueRunningRef.current || !wasComparing || comparing) return;
     if (!compareStepSucceededRef.current) {
       resetPromptQueue();
-      toast.error("Prompt queue stopped", {
-        description: "A compare step failed; remaining prompts were not sent.",
+      toast.error(translate("uxChat.promptQueueStopped7bk9h"), {
+        description: translate("uxChat.aCompareStepFailedspueo"),
       });
       return;
     }
@@ -1287,7 +1272,7 @@ export function SharedComposer({
           try {
             clip.base64 = await fileToBase64(file);
           } catch {
-            toast.error("Could not read that audio file.");
+            toast.error(translate("uxChat.couldNotReadThat10v2y"));
             continue;
           } finally {
             readingAudioRef.current.delete(clip.id);
@@ -1332,8 +1317,8 @@ export function SharedComposer({
         toast.error(conversionError);
       }
       if (videoUnsupported) {
-        toast.error("Video can't be attached in compare mode", {
-          description: "Open a single chat with a video-capable model instead.",
+        toast.error(translate("uxChat.videoCanTBe3lmsv"), {
+          description: translate("uxChat.openASingleChatmrau3"),
         });
       }
       setPendingImages((prev) => [...prev, ...next]);
@@ -1375,12 +1360,12 @@ export function SharedComposer({
                 isAudioAttachmentFile(file) ||
                 (isChatImageFile(file) && file.size <= MAX_IMAGE_SIZE),
             );
-            if (!supported) throw new Error("Unsupported compare attachment");
+            if (!supported) throw new Error(translate("uxChat.unsupportedCompareAttachment98dfp"));
             await addFilesUntracked(files);
           }),
         () =>
-          toast.error("Could not paste files.", {
-            description: "Compare supports images and audio within the attachment size limits.",
+          toast.error(translate("uxChat.couldNotPasteFiles1d8k6"), {
+            description: translate("uxChat.compareSupportsImagesAnd16ust"),
           }),
       );
     },
@@ -1440,7 +1425,7 @@ export function SharedComposer({
     }
     if (sendUnavailableReason) {
       resetPromptQueue();
-      toast.error("Compare unavailable", {
+      toast.error(translate("uxChat.compareUnavailablerbc41"), {
         description: sendUnavailableReason,
       });
       return;
@@ -1459,9 +1444,9 @@ export function SharedComposer({
     // empty bubble with bogus tok/s (#5569) or leaves the empty pane with a dangling prompt.
     // hasCompareHandles is true only in GeneralCompareContent.
     if (hasCompareHandles && !isGeneralizedCompare) {
-      toast.error("Pick a model in each pane to compare", {
+      toast.error(translate("uxChat.pickAModelIn16b03"), {
         description:
-          "Use the model dropdown above each pane, then send your prompt.",
+          translate("uxChat.useTheModelDropdowno0cpv"),
       });
       resetPromptQueue();
       return;
@@ -1508,8 +1493,8 @@ export function SharedComposer({
         .getState()
         .beginModelLoading("preparing");
       if (compareLifecycleLease === null) {
-        toast.info("A model is loading", {
-          description: "Wait for it to finish or cancel it first.",
+        toast.info(translate("uxChat.aModelIsLoading1xlm4"), {
+          description: translate("uxChat.waitForItTo1xiu7"),
         });
         resetPromptQueue();
         return;
@@ -1530,7 +1515,7 @@ export function SharedComposer({
         .getState()
         .beginModelLoading("preparing");
       if (compareLifecycleLease === null) {
-        throw new Error("Another model load started during comparison");
+        throw new Error(translate("uxChat.anotherModelLoadStarted0vopy"));
       }
     };
     const submittedDraftIsCurrent = () =>
@@ -1540,8 +1525,8 @@ export function SharedComposer({
     const keepChangedDraft = () => {
       releaseCompareModelLifecycle();
       resetPromptQueue();
-      toast.info("Message changed while preparing", {
-        description: "Your updated draft was kept. Send it again when ready.",
+      toast.info(translate("uxChat.messageChangedWhilePreparingmgxkh"), {
+        description: translate("uxChat.yourUpdatedDraftWaspg4ta"),
       });
     };
     const clearSubmittedDraft = () => {
@@ -1559,14 +1544,14 @@ export function SharedComposer({
     if (isGeneralizedCompare) {
       try {
         compareStopDecision = await confirmStopRunningChatsIfNeeded(
-          "Loading models for comparison",
+          translate("uxChat.loadingModelsForComparisonsdlia"),
           "reload",
         );
       } catch (error) {
         releaseCompareModelLifecycle();
         resetPromptQueue();
-        toast.error("Compare failed", {
-          description: error instanceof Error ? error.message : "Unknown error",
+        toast.error(translate("uxChat.compareFailed15wak"), {
+          description: error instanceof Error ? error.message : translate("uxChat.unknownErrorb575w"),
         });
         return;
       }
@@ -1599,8 +1584,8 @@ export function SharedComposer({
       } catch (error) {
         releaseCompareModelLifecycle();
         resetPromptQueue();
-        toast.error("Compare failed", {
-          description: error instanceof Error ? error.message : "Unknown error",
+        toast.error(translate("uxChat.compareFailed15wak"), {
+          description: error instanceof Error ? error.message : translate("uxChat.unknownErrorb575w"),
         });
         return;
       }
@@ -1675,7 +1660,7 @@ export function SharedComposer({
             currentStore.hfToken,
           );
           if (!preparedToken.proceed) {
-            throw new Error("Model load cancelled.");
+            throw new Error(translate("uxChat.modelLoadCancelledfwwlw"));
           }
           const staged = await fetchGgufStagedMetadata({
             model_path: sel.id,
@@ -1908,7 +1893,7 @@ export function SharedComposer({
           throwIfCompareCancelled(compareSignal);
           if (!engine) {
             throw new Error(
-              `${compareModelDisplayName(sel.id)} is quantized with ${engineOffer.quantization}, which the default engine cannot run. Set Inference engine to ${engineOffer.engines[0] === "sglang" ? "SGLang" : "vLLM"} in its run settings to load it.`,
+              translate("uxChat.isQuantizedWithWhich3sai3", { p1: compareModelDisplayName(sel.id), p2: engineOffer.quantization, p3: engineOffer.engines[0] === "sglang" ? "SGLang" : "vLLM" }),
             );
           }
           paneEngineFields = {
@@ -1956,7 +1941,7 @@ export function SharedComposer({
           }
           if (!upgraded) {
             throw new Error(
-              `${compareModelDisplayName(sel.id)} needs a newer transformers release to load.`,
+              translate("uxChat.needsANewerTransformers26zf0", { p1: compareModelDisplayName(sel.id) }),
             );
           }
         }
@@ -1975,7 +1960,7 @@ export function SharedComposer({
           });
           if (!approved) {
             throw new Error(
-              `${compareModelDisplayName(sel.id)} needs custom code approval to load.`,
+              translate("uxChat.needsCustomCodeApprovalcpz5u", { p1: compareModelDisplayName(sel.id) }),
             );
           }
         }
@@ -2055,7 +2040,10 @@ export function SharedComposer({
         const compareOffload = offloadWarning(offloadCountsFrom(resp));
         if (compareOffload) {
           toast.warning(
-            `${compareModelDisplayName(sel.id)} loaded${compareOffload.titleSuffix}`,
+            translate("uxChat.modelLoadedSuffixN73dw", {
+              p1: compareModelDisplayName(sel.id),
+              p2: compareOffload.titleSuffix,
+            }),
             { description: compareOffload.description, duration: 8000 },
           );
         }
@@ -2251,13 +2239,13 @@ export function SharedComposer({
 
       const name1 = model1?.id ? compareModelDisplayName(model1.id) : "";
       const name2 = model2?.id ? compareModelDisplayName(model2.id) : "";
-      const toastId = toast("Comparing models…", { duration: Infinity });
+      const toastId = toast(translate("uxChat.comparingModelsutoci"), { duration: Infinity });
 
       setComparing(true);
       onComparingChange?.(true);
       try {
         if (handle1 && model1?.id) {
-          toast("Loading Model 1…", {
+          toast(translate("uxChat.loadingModel1aztag"), {
             id: toastId,
             description: name1,
             duration: Infinity,
@@ -2265,7 +2253,7 @@ export function SharedComposer({
           const status1 = await ensureModelLoaded(model1);
           throwIfCompareCancelled(compareSignal);
           releaseCompareModelLifecycle();
-          toast("Generating with Model 1…", {
+          toast(translate("uxChat.generatingWithModel1z16s1"), {
             id: toastId,
             description: `${name1} (${status1})`,
             duration: Infinity,
@@ -2282,15 +2270,15 @@ export function SharedComposer({
           if (needsLoad) {
             const currentStopDecision =
               await confirmStopRunningChatsIfNeeded(
-                "Loading the second model for comparison",
+                translate("uxChat.loadingTheSecondModeln14aa"),
                 "reload",
               );
             if (!currentStopDecision.proceed) {
-              throw new Error("Second comparison model load cancelled.");
+              throw new Error(translate("uxChat.secondComparisonModelLoadpxllg"));
             }
             throwIfCompareCancelled(compareSignal);
             compareStopDecision = currentStopDecision;
-            toast("Loading Model 2…", {
+            toast(translate("uxChat.loadingModel2wmmmg"), {
               id: toastId,
               description: name2,
               duration: Infinity,
@@ -2299,7 +2287,7 @@ export function SharedComposer({
           const status2 = await ensureModelLoaded(model2);
           throwIfCompareCancelled(compareSignal);
           releaseCompareModelLifecycle();
-          toast("Generating with Model 2…", {
+          toast(translate("uxChat.generatingWithModel2l5h6v"), {
             id: toastId,
             description: `${name2} (${status2})`,
             duration: Infinity,
@@ -2311,7 +2299,7 @@ export function SharedComposer({
         }
 
         compareStepSucceededRef.current = true;
-        toast.success("Compare complete", { id: toastId, duration: 2000 });
+        toast.success(translate("uxChat.compareComplete4xpft"), { id: toastId, duration: 2000 });
       } catch (err) {
         compareStepSucceededRef.current = false;
         resetPromptQueue();
@@ -2320,7 +2308,7 @@ export function SharedComposer({
         if (run.cleanup) {
           cleanupError = await run.cleanup.then(
             () => null,
-            (error: unknown) => error ?? new Error("Model unload failed"),
+            (error: unknown) => error ?? new Error(translate("uxChat.modelUnloadFailedmfmrr")),
           );
           // The load keeps running when its cancel failed; resyncing before it settles would pin the
           // outgoing model while the replacement becomes resident.
@@ -2336,18 +2324,18 @@ export function SharedComposer({
           useChatRuntimeStore.getState().clearCheckpoint();
         }
         if (cancelled && !cleanupError) {
-          toast.info("Compare stopped", { id: toastId, duration: 2000 });
+          toast.info(translate("uxChat.compareStopped1uuly"), { id: toastId, duration: 2000 });
           return;
         }
         const failure = cancelled ? cleanupError : err;
         toast.error(
           cancelled
-            ? "Compare stopped, but the model load could not be cancelled"
-            : "Compare failed",
+            ? translate("uxChat.compareStoppedButTheb5udy")
+            : translate("uxChat.compareFailedu5csb"),
           {
             id: toastId,
             description:
-              failure instanceof Error ? failure.message : "Unknown error",
+              failure instanceof Error ? failure.message : translate("uxChat.unknownErrorb575w"),
             duration: cancelled ? 5000 : 4000,
           },
         );
@@ -2368,8 +2356,8 @@ export function SharedComposer({
           ))
       ) {
         resetPromptQueue();
-        toast.error("Compare unavailable", {
-          description: "The loaded model changed while preparing the message.",
+        toast.error(translate("uxChat.compareUnavailablerbc41"), {
+          description: translate("uxChat.theLoadedModelChanged1eamn"),
         });
         return;
       }
@@ -2386,8 +2374,8 @@ export function SharedComposer({
               releasePreStreamRunReservation(reservation);
             }
             resetPromptQueue();
-            toast.error("Compare unavailable", {
-              description: "A comparison run is already starting.",
+            toast.error(translate("uxChat.compareUnavailablerbc41"), {
+              description: translate("uxChat.aComparisonRunIs1tisr"),
             });
             return;
           }
@@ -2548,23 +2536,23 @@ export function SharedComposer({
       const liveRunning =
         busy || Object.values(handlesRef.current).some((h) => h.isRunning());
       if (liveRunning || isQueueRunningRef.current) {
-        toast.error("Wait for the current response to finish");
+        toast.error(translate("rewind.waitForResponse"));
         return;
       }
       // A compare send holds the loading lease while it prepares, before `comparing` is set.
       if (useChatRuntimeStore.getState().modelLoading) {
-        toast.info("A model is loading", {
-          description: "Wait for it to finish or cancel it first.",
+        toast.info(translate("uxChat.aModelIsLoading1xlm4"), {
+          description: translate("uxChat.waitForItTo1xiu7"),
         });
         return;
       }
       if (isDictating) {
-        toast.error("Finish dictating before running a list");
+        toast.error(translate("uxChat.finishDictatingBeforeRunninghnsl4"));
         return;
       }
       // send() cancels an in-flight transcription, which would discard it.
       if (audioUpload.busy) {
-        toast.error("Wait for the transcription to finish before running a list");
+        toast.error(translate("uxChat.waitForTheTranscription1xh3r"));
         return;
       }
       // Only the first send would carry staged attachments; refuse rather than clear.
@@ -2573,8 +2561,8 @@ export function SharedComposer({
         pendingAudioRef.current.length > 0 ||
         attachingRef.current > 0
       ) {
-        toast.error("Remove the staged attachment before running a list", {
-          description: "Only the first prompt in the list would carry it.",
+        toast.error(translate("uxChat.removeTheStagedAttachmenthzm6d"), {
+          description: translate("uxChat.onlyTheFirstPrompt1hu3e"),
         });
         return;
       }
@@ -2584,9 +2572,9 @@ export function SharedComposer({
       const isGeneralizedCompare =
         hasCompareHandles && Boolean(model1?.id && model2?.id);
       if (hasCompareHandles && !isGeneralizedCompare) {
-        toast.error("Pick a model in each pane to compare", {
+        toast.error(translate("uxChat.pickAModelIn16b03"), {
           description:
-            "Use the model dropdown above each pane, then send your prompt.",
+            translate("uxChat.useTheModelDropdowno0cpv"),
         });
         return;
       }
@@ -2596,7 +2584,7 @@ export function SharedComposer({
       isQueueRunningRef.current = true;
       setIsQueueRunning(true);
       setQueueProgress({ current: 1, total: filtered.length });
-      toast(`Prompt 1 / ${filtered.length}`, {
+      toast(translate("uxChat.prompt1szj9i", { p1: filtered.length }), {
         description:
           filtered[0].length > 80 ? `${filtered[0].slice(0, 80)}…` : filtered[0],
       });
@@ -2613,7 +2601,6 @@ export function SharedComposer({
   const plusMenuNodes: Record<PlusMenuItemId, ReactNode> = {
     // Compare runs no research, so the item has nothing to offer here.
     deepResearch: null,
-    browserUse: <BrowserAgentMenuItem />,
     chatWithFiles: (
       <DropdownMenuItem
         disabled={ragDisabled}
@@ -2631,7 +2618,7 @@ export function SharedComposer({
         }}
       >
         <HugeiconsIcon icon={FileDatabaseIcon} strokeWidth={2} />
-        Chat with files
+{t("settings.chat.menu.chatWithFiles")}
         {ragEnabled && !ragDisabled ? (
           <HugeiconsIcon icon={MenuTickIcon} strokeWidth={2} className="ml-auto" />
         ) : null}
@@ -2644,7 +2631,7 @@ export function SharedComposer({
         onSelect={() => setMcpEnabledForChat(!mcpEnabledForChat)}
       >
         <HugeiconsIcon icon={McpServerIcon} strokeWidth={2} />
-        MCP
+{t("settings.chat.menu.mcp")}
         {mcpEnabledForChat ? (
           <HugeiconsIcon icon={MenuTickIcon} strokeWidth={2} className="ml-auto" />
         ) : null}
@@ -2656,7 +2643,7 @@ export function SharedComposer({
         onSelect={() => setSkillsOn(!skillsOn)}
       >
         <HugeiconsIcon icon={Scroll01Icon} strokeWidth={2} />
-        Skills
+{t("settings.chat.menu.skills")}
         {skillsOn ? (
           <HugeiconsIcon icon={MenuTickIcon} strokeWidth={2} className="ml-auto" />
         ) : null}
@@ -2666,7 +2653,7 @@ export function SharedComposer({
       <DropdownMenuSub>
         <DropdownMenuSubTrigger>
           <HugeiconsIcon icon={Bookmark02Icon} strokeWidth={2} />
-          Saved prompts
+{t("settings.chat.menu.savedPrompts")}
         </DropdownMenuSubTrigger>
         <DropdownMenuSubContent
           collisionPadding={16}
@@ -2693,7 +2680,7 @@ export function SharedComposer({
             <DropdownMenuSeparator />
           ) : null}
           <DropdownMenuItem onSelect={() => setPromptStorageOpen(true)}>
-            All saved prompts…
+            {t("composer.plus.allSavedPrompts")}
           </DropdownMenuItem>
         </DropdownMenuSubContent>
       </DropdownMenuSub>
@@ -2705,7 +2692,7 @@ export function SharedComposer({
         onSelect={handleExitCompare}
       >
         <Columns2Icon />
-        Compare chat
+{t("settings.chat.menu.compareChat")}
         <HugeiconsIcon icon={MenuTickIcon} strokeWidth={2} className="ml-auto" />
       </DropdownMenuItem>
     ),
@@ -2713,17 +2700,23 @@ export function SharedComposer({
       <DropdownMenuSub>
         <DropdownMenuSubTrigger disabled={exportThreadIds.length === 0}>
           <HugeiconsIcon icon={Download01Icon} strokeWidth={2} />
-          Export chat
+{t("settings.chat.menu.exportChat")}
         </DropdownMenuSubTrigger>
         <DropdownMenuSubContent
           collisionPadding={16}
           className="LAiM-plus-menu w-[calc(208px*var(--ui-space-scale,1))]"
         >
           {[
-            { label: "Training JSONL", fn: exportConversationRawJsonl },
-            { label: "Message JSONL", fn: exportConversationMessagesJsonl },
+            {
+              label: t("composer.plus.exportTrainingJsonl"),
+              fn: exportConversationRawJsonl,
+            },
+            {
+              label: t("composer.plus.exportMessageJsonl"),
+              fn: exportConversationMessagesJsonl,
+            },
             { label: "CSV", fn: exportConversationCsv },
-            { label: "ShareGPT JSONL", fn: exportConversationShareGPT },
+            { label: translate("uxChat.shareGPTJSONL10utz"), fn: exportConversationShareGPT },
             {
               label: CONVERSATION_MARKDOWN_LABEL,
               fn: exportConversationMarkdown,
@@ -2734,7 +2727,7 @@ export function SharedComposer({
               disabled={exportThreadIds.length === 0}
               onSelect={() => {
                 if (!exportThreadIds.length) {
-                  toast.error("No conversation to export yet.");
+                  toast.error(t("composer.plus.nothingToExport"));
                   return;
                 }
                 (async () => {
@@ -2742,7 +2735,7 @@ export function SharedComposer({
                     await fn(id);
                   }
                 })().catch((error) => {
-                  if (!isDownloadCancelled(error)) toast.error("Export failed.");
+                  if (!isDownloadCancelled(error)) toast.error(t("composer.plus.exportFailed"));
                 });
               }}
             >
@@ -2756,14 +2749,14 @@ export function SharedComposer({
       <DropdownMenuSub>
         <DropdownMenuSubTrigger>
           <HugeiconsIcon icon={Folder01Icon} strokeWidth={2} />
-          Projects
+{t("shell.navigation.projects")}
         </DropdownMenuSubTrigger>
         <DropdownMenuSubContent className="LAiM-plus-menu w-[calc(232px*var(--ui-space-scale,1))]">
           <DropdownMenuItem onSelect={() => setNewProjectOpen(true)}>
             <HugeiconsIcon icon={FolderAddIcon} strokeWidth={2} />
-            New project
+{t("library.chats.toolbar.newProject")}
           </DropdownMenuItem>
-          <DropdownMenuLabel>Recents</DropdownMenuLabel>
+          <DropdownMenuLabel>{t("shell.navigation.recents")}</DropdownMenuLabel>
           {recentProjects.length > 0 ? (
             recentProjects.map((project) => (
               <DropdownMenuItem
@@ -2776,7 +2769,7 @@ export function SharedComposer({
             ))
           ) : (
             <DropdownMenuItem disabled={true}>
-              No recent projects
+              {t("composer.plus.noRecentProjects")}
             </DropdownMenuItem>
           )}
         </DropdownMenuSubContent>
@@ -2831,7 +2824,7 @@ export function SharedComposer({
             strokeWidth={2}
             className="size-6 text-primary"
           />
-          <span className="text-sm font-medium text-primary">Drop files here</span>
+          <span className="text-sm font-medium text-primary">{translate("uxChat.dropFilesHerersjuz")}</span>
         </div>
         {/* Always mounted and hidden while empty, the way the assistant-ui composer's own
             attachment strip is, so "no attachments" and "this markup moved" are different
@@ -2866,7 +2859,7 @@ export function SharedComposer({
                   );
                 }}
                 className="flex size-4 items-center justify-center rounded-full hover:bg-destructive hover:text-destructive-foreground"
-                aria-label="Remove audio"
+                aria-label={translate("uxChat.removeAudiogzgml")}
               >
                 <XIcon className="size-3" />
               </button>
@@ -2922,7 +2915,7 @@ export function SharedComposer({
               <DropdownMenuTrigger asChild={true}>
                 <button
                   type="button"
-                  aria-label="Tools and attachments"
+                  aria-label={translate("uxChat.toolsAndAttachments1mnow")}
                   className="LAiM-composer-plus"
                 >
                   <PlusIcon className="size-[calc(22px*var(--ui-space-scale,1))] stroke-[1.75px]" />
@@ -2938,67 +2931,16 @@ export function SharedComposer({
               >
                 <DropdownMenuItem onSelect={() => fileInputRef.current?.click()}>
                   <HugeiconsIcon icon={AttachmentIcon} strokeWidth={2} />
-                  Add photos &amp; files
+                  {translate("uxChat.addPhotosAmpFiles127in")}
                 </DropdownMenuItem>
                 {activeModel?.hasAudioInput && (
                   <DropdownMenuItem
                     onSelect={() => audioInputRef.current?.click()}
                   >
                     <HeadphonesIcon />
-                    Upload audio
+                    {translate("uxChat.uploadAudio1sdwk")}
                   </DropdownMenuItem>
                 )}
-                <DropdownMenuItem
-                  disabled={searchDisabled}
-                  className={
-                    toolsEnabled && !searchDisabled
-                      ? "text-primary font-medium"
-                      : undefined
-                  }
-                  onSelect={() => {
-                    const next = !toolsEnabled;
-                    setToolsEnabled(next);
-                    // Mirror the Search pill: Kimi forbids search + thinking together.
-                    if (isKimiExternal) {
-                      setReasoningEnabled(!next, { persist: false });
-                      applyQwenThinkingParams(!next);
-                    }
-                  }}
-                >
-                  <InternetGlyph />
-                  Web search
-                  {toolsEnabled && !searchDisabled ? (
-                    <HugeiconsIcon
-                      icon={MenuTickIcon}
-                      strokeWidth={2}
-                      className="ml-auto"
-                    />
-                  ) : null}
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  disabled={codeDisabled}
-                  className={
-                    codeToolsEnabled && !codeDisabled
-                      ? "text-primary font-medium"
-                      : undefined
-                  }
-                  onSelect={() => setCodeToolsEnabled(!codeToolsEnabled)}
-                >
-                  {/* Scale, not width: an oversized box pushed the label out of line. */}
-                  <HugeiconsIcon
-                    icon={CodeIcon}
-                    strokeWidth={2}
-                    className="scale-[1.12]"
-                  />
-                  Tools
-                  {codeToolsEnabled && !codeDisabled ? (
-                    <HugeiconsIcon
-                      icon={MenuTickIcon}
-                      strokeWidth={2}
-                      className="ml-auto"
-                    />
-                  ) : null}
-                </DropdownMenuItem>
                 {showImagePill && (
                   <DropdownMenuItem
                     disabled={imageDisabled}
@@ -3010,7 +2952,7 @@ export function SharedComposer({
                     onSelect={() => setImageToolsEnabled(!imageToolsEnabled)}
                   >
                     <HugeiconsIcon icon={Image03Icon} strokeWidth={2} />
-                    Images
+                    {t("composer.pill.images")}
                     {imageToolsEnabled && !imageDisabled ? (
                       <HugeiconsIcon
                         icon={MenuTickIcon}
@@ -3028,7 +2970,7 @@ export function SharedComposer({
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger>
                     <MoreHorizontalIcon className="size-4" />
-                    More
+                    {t("settings.chat.menu.more")}
                   </DropdownMenuSubTrigger>
                   <DropdownMenuSubContent className="LAiM-plus-menu w-[calc(248px*var(--ui-space-scale,1))]">
                     {overflowPlusItems.map((id) => (
@@ -3053,79 +2995,31 @@ export function SharedComposer({
               onClick={handleExitCompare}
               className="composer-pill-btn"
               data-active="true"
-              data-keep-label="true"
-              aria-label="Exit compare chat"
+              data-keep-label={translate("uxChat.truelk2v3")}
+              aria-label={translate("uxChat.exitCompareChat1t8g4")}
             >
               <PillGlyph>
                 <Columns2Icon className="size-[calc(14px*var(--ui-space-scale,1))]" />
               </PillGlyph>
-              <span>Compare</span>
+              <span>{t("composer.pill.compare")}</span>
             </button>
             {/* Permission-level pill sits immediately after Compare and ahead of every other tool pill so the
                 Full access danger state reads first. */}
             <PermissionModeComposerPill side="top" />
-            <button
-              type="button"
-              disabled={searchDisabled}
-              onClick={() => {
-                const next = !toolsEnabled;
-                setToolsEnabled(next);
-                // Kimi's $web_search builtin requires thinking=disabled, so toggle the Think pill off when Search is
-                // on, mirroring the backend. Per https://platform.kimi.ai/docs/guide/use-web-search.
-                if (isKimiExternal) {
-                  setReasoningEnabled(!next, { persist: false });
-                  applyQwenThinkingParams(!next);
-                }
-              }}
-              className="composer-pill-btn"
-              data-pill-label="Search"
-              data-active={toolsEnabled && !searchDisabled ? "true" : "false"}
-              aria-label={
-                toolsEnabled ? "Disable web search" : "Enable web search"
-              }
-            >
-              <PillGlyph>
-                <InternetGlyph className="size-[calc(15px*var(--ui-space-scale,1))]" />
-              </PillGlyph>
-              <span>Search</span>
-            </button>
-            <button
-              type="button"
-              disabled={codeDisabled}
-              onClick={() => setCodeToolsEnabled(!codeToolsEnabled)}
-              className="composer-pill-btn"
-              data-pill-label="Tools"
-              data-active={codeToolsEnabled && !codeDisabled ? "true" : "false"}
-              aria-label={
-                codeToolsEnabled
-                  ? "Disable tools"
-                  : "Enable tools"
-              }
-            >
-              <PillGlyph>
-                <HugeiconsIcon
-                  icon={CodeIcon}
-                  className="size-[calc(18.5px*var(--ui-space-scale,1))]"
-                  strokeWidth={2}
-                />
-              </PillGlyph>
-              <span>Tools</span>
-            </button>
-            <BrowserAgentPill glyph={(icon) => <PillGlyph>{icon}</PillGlyph>} />
             {showImagePill && (
               <button
                 type="button"
                 disabled={imageDisabled}
                 onClick={() => setImageToolsEnabled(!imageToolsEnabled)}
                 className="composer-pill-btn"
-                data-pill-label="Images"
+                data-pill-label={t("composer.pill.images")}
                 data-active={
                   imageToolsEnabled && !imageDisabled ? "true" : "false"
                 }
                 aria-label={
                   imageToolsEnabled
-                    ? "Disable image generation"
-                    : "Enable image generation"
+                    ? translate("uxChat.disableImageGeneration1rvt9")
+                    : translate("uxChat.enableImageGeneration8ev1w")
                 }
               >
                 <PillGlyph>
@@ -3135,7 +3029,7 @@ export function SharedComposer({
                     strokeWidth={2}
                   />
                 </PillGlyph>
-                <span>Images</span>
+                <span>{t("composer.pill.images")}</span>
               </button>
             )}
             {showRagPill && <KnowledgeBaseComposerButton side="top" hasFilesPanel={false} />}
@@ -3145,18 +3039,18 @@ export function SharedComposer({
                 disabled={webFetchDisabled}
                 onClick={() => setWebFetchToolsEnabled(!webFetchToolsEnabled)}
                 className="composer-pill-btn"
-                data-pill-label="Fetch"
+                data-pill-label={t("composer.pill.fetch")}
                 data-active={
                   webFetchToolsEnabled && !webFetchDisabled ? "true" : "false"
                 }
                 aria-label={
-                  webFetchToolsEnabled ? "Disable URL fetch" : "Enable URL fetch"
+                  webFetchToolsEnabled ? translate("uxChat.disableURLFetcheny94") : translate("uxChat.enableURLFetchlrhw3")
                 }
               >
                 <PillGlyph>
                   <HugeiconsIcon icon={Download01Icon} className="size-3.5" />
                 </PillGlyph>
-                <span>Fetch</span>
+                <span>{t("composer.pill.fetch")}</span>
               </button>
             )}
             {mcpEnabledForChat ? <McpComposerButton side="top" /> : null}
@@ -3221,7 +3115,7 @@ export function SharedComposer({
 
                   skillMentions.close();
                 }}
-                placeholder="Send to both models..."
+                placeholder={t("composer.plus.sendToBoth")}
                 // dir="auto" detects RTL from the first strong character; no effect on LTR scripts. Kept next to
                 // the placeholder: the IME smoke reads this pair out of the source.
                 dir="auto"
@@ -3235,7 +3129,7 @@ export function SharedComposer({
               <TooltipIconButton
                 type="button"
                 tooltip={
-                  isWritingExpanded ? "Collapse composer" : "Expand composer"
+                  isWritingExpanded ? translate("uxChat.collapseComposereuusd") : translate("uxChat.expandComposero9d96")
                 }
                 aria-expanded={isWritingExpanded}
                 aria-controls={inputId}
@@ -3280,7 +3174,7 @@ export function SharedComposer({
                       type="button"
                       disabled={reasoningDisabled}
                       className="LAiM-thinking-pill"
-                      data-pill-label="Thinking settings"
+                      data-pill-label={t("composer.pill.thinkingSettings")}
                       data-active={thinkingActiveLook ? "true" : "false"}
                       aria-label={thinkEffortAriaLabel({
                         modelLoaded,
@@ -3404,9 +3298,7 @@ export function SharedComposer({
                           applyQwenThinkingParams(true);
                         }
                       }}
-                    >
-                      Preserve thinking
-                      <HugeiconsIcon
+                    >{translate("uxChat.preserveThinking3a06e")}<HugeiconsIcon
                     icon={Tick02Icon}
                     strokeWidth={2}
                         className={cn(
@@ -3424,7 +3316,7 @@ export function SharedComposer({
                   aria-disabled={reasoningDisabled || reasoningLockedOn}
                   title={
                     reasoningLockedOn
-                      ? "This model requires reasoning to stay on."
+                      ? translate("uxChat.thisModelRequiresReasoningmwccd")
                       : undefined
                   }
                   onClick={() => {
@@ -3439,7 +3331,7 @@ export function SharedComposer({
                     }
                   }}
                   className="LAiM-thinking-pill"
-                  data-pill-label="Thinking"
+                  data-pill-label={t("composer.pill.thinking")}
                   data-active={thinkingActiveLook ? "true" : "false"}
                   aria-label={thinkToggleAriaLabel({
                     reasoningLockedOn,
@@ -3476,13 +3368,13 @@ export function SharedComposer({
                     </Button>
                   ) : (
                     <TooltipIconButton
-                      tooltip="Dictate"
+                      tooltip={translate("browser.annotate.dictate")}
                       type="button"
                       variant="ghost"
                       className="size-9 rounded-full text-foreground"
                       disabled={!chatActive}
                       onClick={startDictation}
-                      aria-label="Dictate"
+                      aria-label={translate("browser.annotate.dictate")}
                     >
                       <MicIcon className="LAiM-dictate-icon size-6" />
                     </TooltipIconButton>
@@ -3491,8 +3383,8 @@ export function SharedComposer({
                   <TooltipIconButton
                     tooltip={
                       isDictationFinalizing
-                        ? "Cancel transcription"
-                        : "Stop dictation"
+                        ? translate("uxChat.cancelTranscription6hsix")
+                        : translate("uxChat.stopDictationcw2qg")
                     }
                     type="button"
                     variant="ghost"
@@ -3500,8 +3392,8 @@ export function SharedComposer({
                     onClick={stopDictation}
                     aria-label={
                       isDictationFinalizing
-                        ? "Cancel transcription"
-                        : "Stop dictation"
+                        ? translate("uxChat.cancelTranscription6hsix")
+                        : translate("uxChat.stopDictationcw2qg")
                     }
                   >
                     <SquareIcon className="size-3 animate-pulse fill-current" />
@@ -3518,13 +3410,11 @@ export function SharedComposer({
                     resetPromptQueue();
                     stop();
                   }}
-                  aria-label="Stop prompt queue"
+                  aria-label={translate("uxChat.stopPromptQueue10xxn")}
                   className="flex items-center gap-1.5 rounded-full border border-border/60 bg-muted/60 px-2.5 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                 >
                   <SquareIcon className="size-2.5 shrink-0 fill-current" />
-                  <span className="tabular-nums">
-                    Stop queue {queueProgress.current}/{queueProgress.total}
-                  </span>
+                  <span className="tabular-nums">{translate("uxChat.stopQueueqcofm", { p1: queueProgress.current, p2: queueProgress.total })}</span>
                 </button>
               </div>
             ) : busy ? (
@@ -3533,7 +3423,7 @@ export function SharedComposer({
                 variant="default"
                 size="icon"
                 className="aui-composer-cancel ml-1.5 size-9 rounded-full"
-                aria-label="Stop generating"
+                aria-label={translate("uxChat.stopGeneratings60c8")}
                 onClick={stop}
               >
                 <SquareIcon className="size-3 fill-current" />

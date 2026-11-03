@@ -665,7 +665,7 @@ def test_request_sanitization_pins_server_owned_fields():
     assert sanitized["thread_id"] == "thread-1"
 
 
-def test_run_automatically_replays_with_the_no_sandbox_gate_armed():
+def test_run_automatically_replays_with_the_no_workdir_gate_armed():
     from models.inference import ChatCompletionRequest
 
     sanitized = _sanitize_request(_model(permission_mode = "off"))

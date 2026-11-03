@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { isTauri } from "@/lib/api-base";
 import {
   downloadBlobStreaming,
@@ -27,10 +28,10 @@ export async function saveAudio(
     } else if (url) {
       await downloadUrl(url, filename);
     }
-    if (isTauri) toast.success("Audio saved", { description: filename });
+    if (isTauri) toast.success(translate("uxAudio.audioSavedrrp7y"), { description: filename });
   } catch (error) {
     if (isDownloadCancelled(error)) return;
-    toast.error("Could not save audio", {
+    toast.error(translate("uxAudio.couldNotSaveAudiol77n8"), {
       description: error instanceof Error ? error.message : undefined,
     });
   }

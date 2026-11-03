@@ -26,7 +26,7 @@ if "structlog" not in sys.modules:
 import routes.models as models_route
 from hub.services.models import local_inventory
 
-REPO = "LAiM/Tiny-GGUF"
+REPO = "unsloth/Tiny-GGUF"
 REV = "0123456789abcdef0123456789abcdef01234567"
 GGUF = "Tiny-UD-Q4_K_XL.gguf"
 
@@ -143,7 +143,7 @@ def test_dangling_snapshot_link_does_not_count_as_content(tmp_path):
 
 def test_unreadable_snapshot_tree_does_not_break_the_scan(tmp_path, monkeypatch):
     _copy_layout(tmp_path)
-    other = _repo_dir(tmp_path, "LAiM/Other-GGUF")
+    other = _repo_dir(tmp_path, "unsloth/Other-GGUF")
     _write(other / "blobs" / "b")
     real_iterdir = Path.iterdir
 
@@ -153,7 +153,7 @@ def test_unreadable_snapshot_tree_does_not_break_the_scan(tmp_path, monkeypatch)
         return real_iterdir(self)
 
     monkeypatch.setattr(Path, "iterdir", iterdir)
-    assert _discovered_ids(tmp_path) == ["LAiM/Other-GGUF"]
+    assert _discovered_ids(tmp_path) == ["unsloth/Other-GGUF"]
 
 
 def test_finder_metadata_alone_does_not_count_as_content(tmp_path):

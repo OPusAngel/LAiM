@@ -90,7 +90,7 @@ def current_marker(host, backend: str) -> dict:
         "requested_tag": "latest",
         "tag": "b10698",
         "release_tag": "b10698-mix-67dfc8b",
-        "published_repo": "LAiMai/llama.cpp",
+        "published_repo": "unslothai/llama.cpp",
         "asset": MF._ASSET_TOKEN[backend],
         "asset_sha256": "d4" * 32,
         "backend": ILP.backend_for_install_kind(kind),
@@ -182,7 +182,7 @@ def offline_repair(root: Path, host, monkeypatch, *, shell_stage: bool) -> str:
     """Runs the offline branch for real: returning means kept; EXIT_FALLBACK means source fallback."""
     monkeypatch.setattr(ILP, "detect_host", lambda *a, **k: host)
     try:
-        ILP.install_prebuilt(root, "latest", "LAiMai/llama.cpp", "")
+        ILP.install_prebuilt(root, "latest", "unslothai/llama.cpp", "")
         return "python-kept"
     except SystemExit as exc:
         code = exc.code

@@ -109,7 +109,7 @@ def test_ai_assist_service_still_calls_on_demand_advisor(monkeypatch):
             columns = ["prompt", "answer"],
             samples = [{"prompt": "x" * 250, "answer": "ok", "extra": "ignored"}],
             dataset_name = "owner/dataset",
-            model_name = "LAiM/test",
+            model_name = "unsloth/test",
             model_type = "text",
         ),
         hf_token = "hf_test",
@@ -124,7 +124,7 @@ def test_ai_assist_service_still_calls_on_demand_advisor(monkeypatch):
             "samples": [{"prompt": "x" * 200, "answer": "ok"}],
             "dataset_name": "owner/dataset",
             "hf_token": "hf_test",
-            "model_name": "LAiM/test",
+            "model_name": "unsloth/test",
             "model_type": "text",
         }
     ]

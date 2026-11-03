@@ -39,6 +39,10 @@ urllib3>=2.3.0; python_version < "3.10"
 # arrives there, and Hermes-3's tool_use branch fails to compile below it.
 jinja2>=3.1.0
 structlog>=24.1.0
+# /api/system reads CPU, RAM and GPU memory through psutil and answers 500 without it, which
+# blanks the CPU/RAM/VRAM tiles at once. It used to arrive transitively from peft, which the
+# desktop install pulls with --no-deps, so it has to be declared here.
+psutil==7.2.2
 diceware==1.0.1
 ddgs==9.14.4; python_version >= "3.10"
 ddgs==9.8.0; python_version < "3.10"

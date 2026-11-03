@@ -325,7 +325,7 @@ def test_chat_projects_delete_cascades_threads_and_messages(tmp_path, monkeypatc
     project = studio_db.upsert_chat_project(_project())
     assert project["rootPath"].startswith(str(tmp_path / "Projects"))
     assert (tmp_path / "Projects" / "Research-project").exists()
-    assert (tmp_path / "Projects" / "Research-project" / "sandbox").is_dir()
+    assert (tmp_path / "Projects" / "Research-project").is_dir()
     assert not (tmp_path / "Projects" / "Research-project" / "chats").exists()
     assert not (tmp_path / "Projects" / "Research-project" / "files").exists()
     assert not (tmp_path / "Projects" / "Research-project" / "exports").exists()
@@ -410,7 +410,7 @@ def test_chat_project_delete_files_removes_workspace(
     project = studio_db.upsert_chat_project(_project())
     # Derive root from the created project so it tracks the projects home.
     root = Path(project["rootPath"])
-    marker = root / "sandbox" / "marker.txt"
+    marker = root / "workdir" / "marker.txt"
     marker.write_text("created by code execution", encoding = "utf-8")
 
     deleted = studio_db.delete_chat_project(project["id"], delete_files = True)
@@ -604,8 +604,8 @@ def test_settings_compare_and_set_fences_a_model_row_added_after_the_read(tmp_pa
     The subset compare only checks the spelling that was read, so the exact key
     needs its own absence fence or a newer tab's row is overwritten wholesale."""
     _reset_studio_db(tmp_path, monkeypatch)
-    lower = "LAiM/qwen3.8-27b-gguf"
-    exact = "LAiM/Qwen3.8-27B-GGUF"
+    lower = "unsloth/qwen3.8-27b-gguf"
+    exact = "unsloth/Qwen3.8-27B-GGUF"
     legacy = {"temperature": 0.6, "minP": 0.01, "presencePenalty": 0.0}
     studio_db.upsert_chat_settings_merge({"inferenceParamsByModel": {lower: legacy}})
     newer = {"temperature": 0.31, "presencePenalty": 0.4}

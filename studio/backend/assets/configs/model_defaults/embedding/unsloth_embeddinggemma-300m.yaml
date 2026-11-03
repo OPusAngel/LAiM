@@ -1,4 +1,4 @@
-# Model defaults for LAiM/embeddinggemma-300m
+# Model defaults for unsloth/embeddinggemma-300m
 # Based on EmbeddingGemma_(300M).py embedding notebook
 
 training:
@@ -15,7 +15,7 @@ training:
   random_seed: 3407
   packing: false
   train_on_completions: false
-  gradient_checkpointing: "LAiM"
+  gradient_checkpointing: "unsloth"
   optim: "adamw_8bit"
   lr_scheduler_type: "linear"
 

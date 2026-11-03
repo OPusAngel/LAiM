@@ -73,8 +73,8 @@ for _name in reversed(_STUBBED):
 
 
 UPSTREAM = "Qwen/Qwen3-VL-4B-Instruct"
-PREQUANT = "LAiM/qwen3-vl-4b-instruct-LAiM-bnb-4bit"
-LAiM_16BIT = "LAiM/Qwen3-VL-4B-Instruct"
+PREQUANT = "unsloth/qwen3-vl-4b-instruct-unsloth-bnb-4bit"
+LAiM_16BIT = "unsloth/Qwen3-VL-4B-Instruct"
 
 
 @pytest.fixture
@@ -98,7 +98,7 @@ def mapper(monkeypatch):
     loader.ALLOW_BITSANDBYTES = True
     loader.ALLOW_PREQUANTIZED_MODELS = True
     loader.USE_MODELSCOPE = False
-    loader._strip_LAiM_bnb_4bit_suffix = lambda name: name.removesuffix("-LAiM-bnb-4bit")
+    loader._strip_LAiM_bnb_4bit_suffix = lambda name: name.removesuffix("-unsloth-bnb-4bit")
     loader_utils.loader = loader
     models = types.ModuleType("LAiM.models")
     models.loader_utils = loader_utils
@@ -206,7 +206,7 @@ def test_without_prequantized_models_the_stripped_target_decides(mapper, hub_cac
     _cache_repo(hub_cache, PREQUANT)
     assert _exact_model_name_for_load(_config(), True) == UPSTREAM
 
-    _cache_repo(hub_cache, PREQUANT.removesuffix("-LAiM-bnb-4bit"))
+    _cache_repo(hub_cache, PREQUANT.removesuffix("-unsloth-bnb-4bit"))
     assert _exact_model_name_for_load(_config(), True) is None
 
 

@@ -7,9 +7,14 @@ import { test } from "node:test";
 
 register("./helpers/browser-executor-resolver.mjs", import.meta.url);
 const { runBrowserAction } = await import("../src/features/browser/agent/executor.ts");
-const { agentChat, answerQuestion, stopBrowserAgent } = await import("../src/features/browser/agent/agent-store.ts");
+const { agentChat, answerQuestion, stopBrowserAgent, useBrowserAgentStore } = await import("../src/features/browser/agent/agent-store.ts");
 // Actions without a scope act for the chat on screen.
 const CHAT = "new";
+
+// LAiM ships the agent with full rights, so the prompt checked here needs the asking rules put back.
+useBrowserAgentStore.setState({
+  permissions: { defaults: { browsing: "ask", actions: "ask", downloads: "ask", unlabelled: "ask" }, sites: {} },
+});
 
 const globals = globalThis as Record<string, unknown>;
 const policy = { allowedDomains: [], blockedDomains: [] };

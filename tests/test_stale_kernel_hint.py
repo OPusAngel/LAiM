@@ -80,7 +80,7 @@ def test_a_published_cell_names_our_matching_wheel(monkeypatch, fixes, package, 
     assert "built for a different torch than 2.14.0+cu130" in hint
     assert hint.endswith(
         "pip install --no-deps --force-reinstall "
-        f"https://github.com/LAiMai/LAiM/releases/download/prebuilt-wheels-cu13/{wheel}"
+        f"https://github.com/unslothai/unsloth/releases/download/prebuilt-wheels-cu13/{wheel}"
     )
 
 

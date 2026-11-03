@@ -168,14 +168,14 @@ def test_revision_survives_when_the_repo_is_unchanged():
 
 
 def test_revision_survives_a_spelling_only_change():
-    assert _load_gate()("release", "LAiM/Qwen3-30B-A3B", "LAiM/qwen3-30b-a3b") == "release"
+    assert _load_gate()("release", "unsloth/Qwen3-30B-A3B", "unsloth/qwen3-30b-a3b") == "release"
 
 
 @pytest.mark.parametrize(
     "model_name, old_model_name",
     [
-        ("LAiM/llama-3-8b-bnb-4bit", "meta-llama/Meta-Llama-3-8B"),
-        ("LAiM/Qwen3-30B-A3B", "LAiM/Qwen3-30B-A3B-bnb-4bit"),
+        ("unsloth/llama-3-8b-bnb-4bit", "meta-llama/Meta-Llama-3-8B"),
+        ("unsloth/Qwen3-30B-A3B", "unsloth/Qwen3-30B-A3B-bnb-4bit"),
         ("/tmp/LAiM-fp8-cache/model", "meta-llama/Meta-Llama-3-8B"),
     ],
 )
@@ -186,7 +186,7 @@ def test_revision_is_dropped_once_the_repo_is_remapped(model_name, old_model_nam
 
 def test_no_revision_stays_none_even_when_remapped():
     gate = _load_gate()
-    assert gate(None, "LAiM/llama-3-8b-bnb-4bit", "meta-llama/Meta-Llama-3-8B") is None
+    assert gate(None, "unsloth/llama-3-8b-bnb-4bit", "meta-llama/Meta-Llama-3-8B") is None
 
 
 def _gate_with_warnings():
@@ -202,10 +202,10 @@ def _gate_with_warnings():
 
 def test_the_gate_warns_exactly_once_when_it_drops_a_revision():
     gate, warnings = _gate_with_warnings()
-    gate("abc123", "LAiM/x-bnb-4bit", "org/x", True)
+    gate("abc123", "unsloth/x-bnb-4bit", "org/x", True)
     assert len(warnings) == 1
     message = warnings[0]
-    assert "abc123" in message and "org/x" in message and "LAiM/x-bnb-4bit" in message
+    assert "abc123" in message and "org/x" in message and "unsloth/x-bnb-4bit" in message
 
 
 def test_exact_name_mode_is_only_offered_when_it_would_help():
@@ -213,7 +213,7 @@ def test_exact_name_mode_is_only_offered_when_it_would_help():
     ALLOW_PREQUANTIZED_MODELS strip and fast_inference_setup all ignore it, so
     recommending it there sends the caller round the same loop."""
     gate, warnings = _gate_with_warnings()
-    gate("abc123", "LAiM/x-bnb-4bit", "org/x", True)
+    gate("abc123", "unsloth/x-bnb-4bit", "org/x", True)
     assert "use_exact_model_name" in warnings[0]
 
     gate, warnings = _gate_with_warnings()
@@ -454,12 +454,12 @@ def test_a_remapped_plain_load_drops_the_tokenizer_pin_too():
     weights now come off a mirror's default branch, and a pinned tokenizer beside them is
     the ref mismatch the gate exists to prevent. Only a PEFT adapter is a separate repo."""
     gate = _load_tokenizer_gate()
-    assert gate("org/model", "LAiM/model-bnb-4bit", "org/model", "v2", None) is None
+    assert gate("org/model", "unsloth/model-bnb-4bit", "org/model", "v2", None) is None
 
 
 def test_a_case_only_tokenizer_name_keeps_the_model_ref():
     gate = _load_tokenizer_gate()
-    requested, resolved = "LAiM/qwen3-30b-a3b", "LAiM/Qwen3-30B-A3B"
+    requested, resolved = "unsloth/qwen3-30b-a3b", "unsloth/Qwen3-30B-A3B"
     assert gate(requested, resolved, requested, "v2", "v2") == "v2"
 
 
@@ -576,7 +576,7 @@ def _simulate_loader():
         (
             "remapped to a prequant mirror",
             "org/m",
-            "LAiM/m-bnb-4bit",
+            "unsloth/m-bnb-4bit",
             False,
             None,
             "v2",
@@ -610,7 +610,7 @@ def _simulate_loader():
         (
             "remapped, tokenizer named as the requested repo",
             "org/m",
-            "LAiM/m-bnb-4bit",
+            "unsloth/m-bnb-4bit",
             False,
             "org/m",
             "v2",
@@ -618,7 +618,7 @@ def _simulate_loader():
             None,
             None,
         ),
-        ("no revision at all", "org/m", "LAiM/m-bnb-4bit", False, None, None, True, None, None),
+        ("no revision at all", "org/m", "unsloth/m-bnb-4bit", False, None, None, True, None, None),
     ],
     ids = lambda v: v if isinstance(v, str) and " " in v else None,
 )

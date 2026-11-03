@@ -22,6 +22,8 @@ import {
 } from "react";
 import { AttachmentBrowserOpenContext } from "./attachment-browser-open-context";
 import { FileContextMenu } from "./link-context-menu";
+import { translate } from "@/i18n";
+
 
 type Opened = { blob: Blob; plainText?: boolean };
 
@@ -75,7 +77,7 @@ function opener(source: AttachmentSource, id: string, load: () => Promise<Opened
           key: `${id}:${source.name}`,
         });
       })
-      .catch(() => toast.error(`Could not open ${source.name || "attachment"}`));
+      .catch(() => toast.error(translate("uxComponents.couldNotOpenf9nq5", { p1: source.name || "attachment" })));
 }
 
 /** Provides `open` under a stable identity, so the attachment's consumers don't re-render with it. */

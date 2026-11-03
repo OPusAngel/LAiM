@@ -3,6 +3,7 @@
 
 // No app imports: the node test runner loads this directly.
 
+import { translate } from "@/i18n";
 import type { AudioOptionSpec } from "../audio-options";
 import type { AudioToolPanel } from "./types";
 
@@ -56,7 +57,9 @@ export const aceStepMusicalLogic: MusicPanelLogic<AceStepMusicalValue> = {
   id: "ace-step-musical",
   families: ["ace_step"],
   workflows: ["music"],
-  title: "Musical controls",
+  get title() {
+    return translate("uxAudio.musicalControls1vsxu");
+  },
   claims: [
     "bpm",
     "keyscale",
@@ -97,11 +100,15 @@ export const aceStepMusicalLogic: MusicPanelLogic<AceStepMusicalValue> = {
 export type YueCot = "off" | "melody" | "full";
 
 export const YUE_COT_LABELS: Record<YueCot, { label: string; hint: string }> = {
-  off: { label: "Off", hint: "Fastest. Writes the audio directly." },
-  melody: { label: "Melody", hint: "Plans the melody first." },
+  off: { label: "Off", get hint() { return translate("uxAudio.fastestWritesTheAudio1wd29"); } },
+  melody: { get label() { return translate("uxAudio.melody1sled"); }, get hint() { return translate("uxAudio.plansTheMelodyFirst173yf"); } },
   full: {
-    label: "Full",
-    hint: "Plans melody and arrangement first. Slowest, most structured.",
+    get label() {
+      return translate("uxAudio.fullzf1lr");
+    },
+    get hint() {
+      return translate("uxAudio.plansMelodyAndArrangement167tm");
+    },
   },
 };
 
@@ -113,7 +120,9 @@ export const yueCompositionLogic: MusicPanelLogic<YueCompositionValue> = {
   id: "yue2-composition",
   families: ["yue2"],
   workflows: ["music"],
-  title: "Composition",
+  get title() {
+    return translate("uxAudio.composition12g7e");
+  },
   claims: ["cot"],
   initial: (specs) => {
     const fallback = specDefault(specs, "cot");
@@ -128,8 +137,8 @@ export const yueCompositionLogic: MusicPanelLogic<YueCompositionValue> = {
 };
 
 export const STABLE_AUDIO_SAMPLERS = [
-  { value: "pingpong", label: "Ping-pong" },
-  { value: "euler", label: "Euler" },
+  { value: "pingpong", get label() { return translate("uxAudio.pingPong1p1q5"); } },
+  { value: "euler", get label() { return translate("uxAudio.euler6qzbb"); } },
 ] as const;
 
 export interface StableAudioSamplerValue {
@@ -142,7 +151,9 @@ export const stableAudioSamplerLogic: MusicPanelLogic<StableAudioSamplerValue> =
     id: "stable-audio-sampler",
     families: ["stable_audio"],
     workflows: ["music"],
-    title: "Sampler",
+    get title() {
+      return translate("uxImages.sampler1419s");
+    },
     claims: ["sampler", "num_inference_steps"],
     initial: () => ({ sampler: "", steps: null }),
     toRequest: (value) => {

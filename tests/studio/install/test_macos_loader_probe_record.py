@@ -25,7 +25,7 @@ ILP = load_studio_module(
 
 RELEASE_TAG = "release-1"
 UPSTREAM_TAG = "b9001"
-PUBLISHED_REPO = "LAiMai/llama.cpp"
+PUBLISHED_REPO = "unslothai/llama.cpp"
 INSTALL_KIND = "macos-arm64"
 
 

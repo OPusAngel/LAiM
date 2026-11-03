@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { useLayoutEffect, useRef, useState } from "react";
 
 import { PanelResizeHandle } from "@/components/ui/panel-resize-handle";
@@ -82,7 +83,7 @@ export function MediaRailResizeHandle({
       target={root}
       cssVar="--media-rail-width"
       measure={() => width}
-      label="Resize settings panel"
+      label={translate("uxComponents.resizeSettingsPanel4wsqk")}
       toggleLabel="Resize settings panel"
       hideTooltip={true}
       dataSlot="media-rail-resize-handle"

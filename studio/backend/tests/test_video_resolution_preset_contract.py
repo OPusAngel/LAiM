@@ -103,7 +103,7 @@ def test_presets_are_unique_and_land_in_the_status_payload(name):
     backend._state = video_module._VideoLoadState(
         pipe = object(),
         family = fam,
-        repo_id = f"LAiM/{name}",
+        repo_id = f"unsloth/{name}",
         base_repo = fam.base_repo,
         device = "cpu",
         dtype = "bfloat16",

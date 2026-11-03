@@ -1956,7 +1956,7 @@ def test_tool_choice_auto_maps_to_function_calling_mode_auto(monkeypatch):
 
 
 def test_code_exec_inline_image_attaches_to_code_execution_card(monkeypatch):
-    """A codeExecution sandbox plot (matplotlib) ships as an inline image part
+    """A codeExecution workdir plot (matplotlib) ships as an inline image part
     right after the codeExecutionResult. Instead of a separate empty
     image_generation card, attach to the same code_execution tool_end via the
     `__IMAGES__:` marker the chat adapter already understands."""

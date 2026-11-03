@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
+
 "use client";
 
 import { FileGlyph } from "@/lib/file-icon";
@@ -115,21 +117,21 @@ const CodeExecutionToolUIImpl: ToolCallMessagePartComponent = ({
   if (kind === "text_editor") {
     Icon = FileGlyph;
     if (command === "view") {
-      runningLabel = path ? `Viewing ${path}…` : "Viewing file…";
-      completedLabel = path ? `Viewed ${path}` : "Viewed file";
+      runningLabel = path ? translate("uxComponents.viewingPathdvrnt", { p1: path }) : translate("uxComponents.viewingFilebwe5k");
+      completedLabel = path ? translate("uxComponents.viewedPathcutgu", { p1: path }) : translate("uxComponents.viewedFilecx59r");
     } else if (command === "create") {
-      runningLabel = path ? `Writing ${path}…` : "Writing file…";
-      completedLabel = path ? `Wrote ${path}` : "Wrote file";
+      runningLabel = path ? translate("uxComponents.writingPathnr49o", { p1: path }) : translate("uxComponents.writingFile66lfh");
+      completedLabel = path ? translate("uxComponents.wrotePathy7q3d", { p1: path }) : translate("uxComponents.wroteFileyhcwo");
     } else if (command === "str_replace") {
-      runningLabel = path ? `Editing ${path}…` : "Editing file…";
-      completedLabel = path ? `Edited ${path}` : "Edited file";
+      runningLabel = path ? translate("uxComponents.editingPathmq23c", { p1: path }) : translate("uxComponents.editingFile58cah");
+      completedLabel = path ? translate("uxComponents.editedPathsekov", { p1: path }) : translate("uxComponents.editedFilet0cfy");
     } else {
-      runningLabel = "Running file operation…";
-      completedLabel = "File operation";
+      runningLabel = translate("uxComponents.runningFileOperation9ph07");
+      completedLabel = translate("uxComponents.fileOperationqsb2u");
     }
   } else {
-    runningLabel = "Running command…";
-    completedLabel = commandLabel ? `Ran \`${commandLabel}\`` : "Ran command";
+    runningLabel = translate("uxComponents.runningCommandtbtkz");
+    completedLabel = commandLabel ? translate("uxComponents.ranCommandLabelaumlb", { p1: commandLabel }) : translate("uxComponents.ranCommand2gftr");
   }
 
   // Collapse the card once the model resumes streaming prose after the tool

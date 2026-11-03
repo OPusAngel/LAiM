@@ -1,6 +1,6 @@
-# Model defaults for LAiM/Qwen2-VL-7B-Instruct
+# Model defaults for unsloth/Qwen2-VL-7B-Instruct
 # Based on Qwen2_VL_(7B)-Vision.ipynb 
-# Also applies to: LAiM/Qwen2-VL-7B-Instruct-LAiM-bnb-4bit, Qwen/Qwen2-VL-7B-Instruct, LAiM/Qwen2-VL-7B-Instruct-bnb-4bit
+# Also applies to: unsloth/Qwen2-VL-7B-Instruct-unsloth-bnb-4bit, Qwen/Qwen2-VL-7B-Instruct, unsloth/Qwen2-VL-7B-Instruct-bnb-4bit
 # added inference parameters from LAiM notebook
 
 training:
@@ -17,7 +17,7 @@ training:
   random_seed: 3407
   packing: false
   train_on_completions: true
-  gradient_checkpointing: "LAiM"
+  gradient_checkpointing: "unsloth"
   optim: "adamw_8bit"
   lr_scheduler_type: "linear"
 

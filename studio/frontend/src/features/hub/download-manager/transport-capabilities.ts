@@ -5,6 +5,8 @@
 // load, so anything defined there is untestable. That is how a normalizer silently dropping the
 // backend's Auto verdict shipped green.
 
+import { translate } from "@/i18n";
+
 export interface DownloadTransportCapability {
   available: boolean | null;
   reason: string | null;
@@ -26,7 +28,7 @@ export const DOWNLOAD_TRANSPORT_CAPABILITIES_FALLBACK: DownloadTransportCapabili
   http: { available: true, reason: null },
   xet: {
     available: null,
-    reason: "Couldn't verify Xet support with the LAiM backend.",
+    get reason() { return translate("uxHub.couldnTVerifyXetaqsq5"); },
   },
   // Unknown backend state: stay on Xet, the download-time ladder still falls back to HTTP.
   auto_resolves_to: "xet",

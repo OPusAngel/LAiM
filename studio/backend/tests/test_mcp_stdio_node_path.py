@@ -332,7 +332,7 @@ def test_managed_node_check_is_memoized_on_success(managed_node_install, monkeyp
 
 
 def test_explicit_empty_path_is_preserved(managed_node, monkeypatch):
-    """PATH: "" is a deliberate sandbox; the inherited PATH must not replace it."""
+    """PATH: "" is a deliberate workdir; the inherited PATH must not replace it."""
     monkeypatch.setenv("PATH", "/usr/bin")
     env = mcp_client._stdio_env({"API_KEY": "sk-1", "PATH": ""})
     assert env["PATH"] == ""
@@ -583,7 +583,7 @@ def test_windows_lowercase_path_key_is_recognized(managed_node, monkeypatch, win
     assert "PATH" not in env
 
 
-def test_windows_lowercase_empty_path_is_still_a_sandbox(managed_node, monkeypatch, windows_env):
+def test_windows_lowercase_empty_path_is_still_a_workdir(managed_node, monkeypatch, windows_env):
     monkeypatch.setenv("PATH", "/usr/bin")
     assert mcp_client._stdio_env({"Path": ""}, "npx") == {"Path": ""}
 

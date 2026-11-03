@@ -3,8 +3,8 @@
 
 """Trusted-org checks for the ``trust_remote_code`` auto-enable paths.
 
-A bare ``name.startswith("LAiM/")`` is spoofable by a local path like
-``./LAiM/evil``. ``is_trusted_org_repo`` rejects local paths, requires an
+A bare ``name.startswith("unsloth/")`` is spoofable by a local path like
+``./unsloth/evil``. ``is_trusted_org_repo`` rejects local paths, requires an
 ``org/repo`` under a trusted org, and (online) confirms via the Hub. Fails CLOSED
 on any uncertainty and never raises; a False just means "do not auto-enable".
 """
@@ -21,7 +21,7 @@ from utils.paths import is_local_path
 logger = get_logger(__name__)
 
 # Orgs we auto-enable remote code for.
-TRUSTED_ORGS: frozenset[str] = frozenset({"LAiM", "nvidia"})
+TRUSTED_ORGS: frozenset[str] = frozenset({"unsloth", "nvidia"})
 
 # Keyed on (name, verify_remote, token) so an unauthenticated failure cannot poison a later
 # authenticated lookup; the token is hashed, never stored raw. And on the endpoint, which

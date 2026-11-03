@@ -42,7 +42,7 @@ class TestExportSizeEndpoint(unittest.TestCase):
     def setUp(self):
         self.models_route._EXPORT_SIZE_CACHE.clear()
 
-    def _call(self, model: str = "LAiM/Qwen3.6-35B-A3B"):
+    def _call(self, model: str = "unsloth/Qwen3.6-35B-A3B"):
         with (
             patch.object(self.models_route, "is_local_path", return_value = False),
             patch.object(self.models_route, "resolve_cached_repo_id_case", side_effect = lambda m: m),
@@ -62,7 +62,7 @@ class TestExportSizeEndpoint(unittest.TestCase):
         self.assertEqual(resp.fp16_bytes, _QWEN35_FP16_BYTES)
         self.assertEqual(resp.total_params, _QWEN35_PARAMS)
         self.assertEqual(resp.source, "safetensors")
-        self.assertEqual(resp.model, "LAiM/Qwen3.6-35B-A3B")
+        self.assertEqual(resp.model, "unsloth/Qwen3.6-35B-A3B")
 
     def test_moe_via_config_fallback(self):
         # MoE sized via the sizer's config path -> source "config".
@@ -136,7 +136,7 @@ class TestExportSizeEndpoint(unittest.TestCase):
         ):
             asyncio.run(
                 self.models_route.get_export_size(
-                    model = "LAiM/Private",
+                    model = "unsloth/Private",
                     hf_token = "secret-token",
                     current_subject = "test-user",
                 )
@@ -660,7 +660,7 @@ def test_a_direct_safetensors_file_outranks_a_stale_index(tmp_path):
 
 
 def test_an_index_that_names_the_direct_file_is_not_stale(tmp_path):
-    # LAiM/Qwen3.8-27B-NVFP4 ships model.safetensors beside an 0.85 GB MTP head its index
+    # unsloth/Qwen3.8-27B-NVFP4 ships model.safetensors beside an 0.85 GB MTP head its index
     # names too, so reading the direct file as the whole archive would drop the head.
     _write(tmp_path / "model.safetensors", 1000)
     _write(tmp_path / "model_mtp.safetensors", 50)

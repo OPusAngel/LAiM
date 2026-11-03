@@ -56,7 +56,7 @@ def _write_marker(install_dir: Path, **overrides) -> Path:
         "requested_tag": "latest",
         "tag": "b9190",
         "release_tag": "b9190",
-        "published_repo": "LAiMai/llama.cpp",
+        "published_repo": "unslothai/llama.cpp",
         "asset": "app-b9190-linux-x64-cuda13-newer.tar.gz",
         "asset_sha256": None,
         "source": "published",
@@ -113,7 +113,7 @@ def test_read_install_marker_finds_cmake_layout(tmp_path):
     marker = fr.read_install_marker(str(bin_path))
     assert marker is not None
     assert marker["tag"] == "b9190"
-    assert marker["published_repo"] == "LAiMai/llama.cpp"
+    assert marker["published_repo"] == fr.LLAMA_RELEASE_REPO
 
 
 def test_read_install_marker_finds_root_layout(tmp_path):
@@ -136,17 +136,18 @@ def test_read_install_marker_finds_windows_cmake_layout(tmp_path):
     assert marker["tag"] == "b8888"
 
 
-@pytest.mark.parametrize("repo", ["LAiMai/llama.cpp", "ggml-org/llama.cpp"])
-def test_read_install_marker_carries_published_repo_dynamically(tmp_path, repo):
-    # The freshness check queries whichever release repo the marker records:
-    # new installs record the fork, legacy CPU/macOS markers still say ggml-org,
-    # and both must get the right "latest" tag.
+@pytest.mark.parametrize("repo", ["unslothai/llama.cpp", "ggml-org/llama.cpp", "mirror.example/llama.cpp"])
+def test_the_release_repo_is_laimes_whatever_the_marker_recorded(tmp_path, repo):
+    # LAiM checks and installs from its own source repo (upstream llama.cpp), so an install
+    # made before the switch — or by a different route — cannot pin the app to a stale fork
+    # build forever. That pinning was silent: the banner compared against the recorded repo
+    # and a new architecture simply failed to load.
     install_dir = tmp_path / "llama.cpp"
     _write_marker(install_dir, tag = "b9000", published_repo = repo)
     bin_path = _fake_binary(install_dir, layout = "cmake")
     marker = fr.read_install_marker(str(bin_path))
     assert marker is not None
-    assert marker["published_repo"] == repo
+    assert marker["published_repo"] == fr.LLAMA_RELEASE_REPO
 
 
 def test_read_install_marker_missing_returns_none(tmp_path):
@@ -205,8 +206,8 @@ def test_latest_published_release_uses_disk_cache(monkeypatch):
         return "b9999"
 
     monkeypatch.setattr(fr, "_fetch_latest_release_tag", _fake_fetch)
-    first = fr.latest_published_release("LAiMai/llama.cpp")
-    second = fr.latest_published_release("LAiMai/llama.cpp")
+    first = fr.latest_published_release("unslothai/llama.cpp")
+    second = fr.latest_published_release("unslothai/llama.cpp")
     assert first == "b9999"
     assert second == "b9999"
     # Memo + disk cache -> only one fetch.
@@ -221,9 +222,9 @@ def test_latest_published_release_returns_none_on_network_failure(monkeypatch):
         return None
 
     monkeypatch.setattr(fr, "_fetch_latest_release_tag", _failed_fetch)
-    assert fr.latest_published_release("LAiMai/llama.cpp") is None
-    assert fr.latest_published_release("LAiMai/llama.cpp") is None
-    assert calls == ["LAiMai/llama.cpp"]
+    assert fr.latest_published_release("unslothai/llama.cpp") is None
+    assert fr.latest_published_release("unslothai/llama.cpp") is None
+    assert calls == ["unslothai/llama.cpp"]
 
 
 def test_latest_published_release_retries_after_failure_ttl(monkeypatch):
@@ -239,14 +240,14 @@ def test_latest_published_release_retries_after_failure_ttl(monkeypatch):
         return None if len(calls) == 1 else "b9999"
 
     monkeypatch.setattr(fr, "_fetch_latest_release_tag", _fetch)
-    assert fr.latest_published_release("LAiMai/llama.cpp") is None
-    assert fr.latest_published_release("LAiMai/llama.cpp") is None
+    assert fr.latest_published_release("unslothai/llama.cpp") is None
+    assert fr.latest_published_release("unslothai/llama.cpp") is None
 
     # A wall-clock rollback must not extend this in-process failure TTL.
     wall_now[0] -= 500
     monotonic_now[0] += fr._flow.RELEASE_FAILURE_CACHE_TTL_SECONDS + 1
-    assert fr.latest_published_release("LAiMai/llama.cpp") == "b9999"
-    assert calls == ["LAiMai/llama.cpp", "LAiMai/llama.cpp"]
+    assert fr.latest_published_release("unslothai/llama.cpp") == "b9999"
+    assert calls == ["unslothai/llama.cpp", "unslothai/llama.cpp"]
 
 
 def test_latest_published_release_force_refresh_bypasses_failure_ttl(monkeypatch):
@@ -257,10 +258,10 @@ def test_latest_published_release_force_refresh_bypasses_failure_ttl(monkeypatch
         return None if len(calls) == 1 else "b9999"
 
     monkeypatch.setattr(fr, "_fetch_latest_release_tag", _fetch)
-    assert fr.latest_published_release("LAiMai/llama.cpp") is None
-    assert fr.latest_published_release("LAiMai/llama.cpp", force_refresh = True) == "b9999"
-    assert fr.latest_published_release("LAiMai/llama.cpp") == "b9999"
-    assert calls == ["LAiMai/llama.cpp", "LAiMai/llama.cpp"]
+    assert fr.latest_published_release("unslothai/llama.cpp") is None
+    assert fr.latest_published_release("unslothai/llama.cpp", force_refresh = True) == "b9999"
+    assert fr.latest_published_release("unslothai/llama.cpp") == "b9999"
+    assert calls == ["unslothai/llama.cpp", "unslothai/llama.cpp"]
 
 
 def test_reset_caches_clears_release_failure_memo(monkeypatch):
@@ -271,20 +272,21 @@ def test_reset_caches_clears_release_failure_memo(monkeypatch):
         return None
 
     monkeypatch.setattr(fr, "_fetch_latest_release_tag", _failed_fetch)
-    assert fr.latest_published_release("LAiMai/llama.cpp") is None
-    assert fr.latest_published_release("LAiMai/llama.cpp") is None
+    assert fr.latest_published_release("unslothai/llama.cpp") is None
+    assert fr.latest_published_release("unslothai/llama.cpp") is None
 
     fr.reset_caches()
 
-    assert fr.latest_published_release("LAiMai/llama.cpp") is None
-    assert calls == ["LAiMai/llama.cpp", "LAiMai/llama.cpp"]
+    assert fr.latest_published_release("unslothai/llama.cpp") is None
+    assert calls == ["unslothai/llama.cpp", "unslothai/llama.cpp"]
 
 
 def test_latest_published_release_keeps_old_cache_on_transient_failure(monkeypatch, tmp_path):
     # Disk entry older than TTL + network fail -> return cached value.
     cache_dir = tmp_path / ".freshness"
     cache_dir.mkdir()
-    cache_file = cache_dir / "LAiMai__llama.cpp.json"
+    # The name comes from the repo the check asks about, exactly as the module derives it.
+    cache_file = fr._flow.cache_path_for("unslothai/llama.cpp", cache_dir)
     yesterday = time.time() - 25 * 60 * 60  # > 24h
     cache_file.write_text(json.dumps({"fetched_at": yesterday, "latest_tag": "b9000"}))
     calls = []
@@ -294,9 +296,9 @@ def test_latest_published_release_keeps_old_cache_on_transient_failure(monkeypat
         return None
 
     monkeypatch.setattr(fr, "_fetch_latest_release_tag", _failed_fetch)
-    assert fr.latest_published_release("LAiMai/llama.cpp") == "b9000"
-    assert fr.latest_published_release("LAiMai/llama.cpp") == "b9000"
-    assert calls == ["LAiMai/llama.cpp"]
+    assert fr.latest_published_release("unslothai/llama.cpp") == "b9000"
+    assert fr.latest_published_release("unslothai/llama.cpp") == "b9000"
+    assert calls == ["unslothai/llama.cpp"]
 
 
 # check_prebuilt_freshness end-to-end.
@@ -319,7 +321,7 @@ def test_check_prebuilt_freshness_reports_stale_when_old_and_behind(monkeypatch,
     assert info["installed_tag"] == "b9190"
     assert info["latest_tag"] == "b9300"
     assert info["age_days"] == 5
-    assert info["published_repo"] == "LAiMai/llama.cpp"
+    assert info["published_repo"] == fr.LLAMA_RELEASE_REPO
 
 
 def test_check_prebuilt_freshness_not_stale_when_tag_matches(monkeypatch, tmp_path):
@@ -547,17 +549,18 @@ def test_fetch_latest_release_tag_uses_publish_time(monkeypatch):
         },
     ]
     monkeypatch.setattr(freshness_flow, "auth_safe_open", lambda req, timeout = 5.0: _Resp(payload))
-    assert fr._fetch_latest_release_tag("LAiMai/llama.cpp") == "b9596-mix-e6f2453"
+    assert fr._fetch_latest_release_tag("unslothai/llama.cpp") == "b9596-mix-e6f2453"
 
 
 # reset_caches(drop_disk=...) -- post-update stale same-base mix disk cache.
 
 
 def _seed_disk_cache(tmp_path: Path, latest_tag: str) -> Path:
-    # Matches _cache_path_for under the fixture's stubbed _cache_dir.
+    # Matches _cache_path_for under the fixture's stubbed _cache_dir, for the release repo
+    # the rewritten marker reports.
     cache_dir = tmp_path / ".freshness"
     cache_dir.mkdir(exist_ok = True)
-    cache_file = cache_dir / "LAiMai__llama.cpp.json"
+    cache_file = fr._flow.cache_path_for(fr.LLAMA_RELEASE_REPO, cache_dir)
     cache_file.write_text(json.dumps({"fetched_at": time.time(), "latest_tag": latest_tag}))
     return cache_file
 
@@ -654,18 +657,18 @@ def test_update_size_LAiM_prebuilt_exact_match(monkeypatch):
     # on app-<latest>-<suffix> wins.
     marker = {
         "asset": "app-b9190-linux-x64-cuda13-newer.tar.gz",
-        "published_repo": "LAiMai/llama.cpp",
+        "published_repo": "unslothai/llama.cpp",
     }
     _patch_assets(
         monkeypatch,
         {
-            "LAiMai/llama.cpp": {
+            "unslothai/llama.cpp": {
                 "app-b9300-linux-x64-cuda13-newer.tar.gz": 123_456_789,
                 "app-b9300-windows-x64-cuda13-newer.zip": 999,
             }
         },
     )
-    assert fr.update_download_size_bytes(marker, "b9300", "LAiMai/llama.cpp") == 123_456_789
+    assert fr.update_download_size_bytes(marker, "b9300", "unslothai/llama.cpp") == 123_456_789
 
 
 def test_update_size_macos_fork_asset_suffix_fallback(monkeypatch):
@@ -673,13 +676,13 @@ def test_update_size_macos_fork_asset_suffix_fallback(monkeypatch):
     # endswith fallback in the publish repo.
     marker = {
         "asset": "llama-b9190-bin-macos-arm64.tar.gz",
-        "published_repo": "LAiMai/llama.cpp",
+        "published_repo": "unslothai/llama.cpp",
     }
     _patch_assets(
         monkeypatch,
-        {"LAiMai/llama.cpp": {"llama-b9300-bin-macos-arm64.tar.gz": 55_000_000}},
+        {"unslothai/llama.cpp": {"llama-b9300-bin-macos-arm64.tar.gz": 55_000_000}},
     )
-    assert fr.update_download_size_bytes(marker, "b9300", "LAiMai/llama.cpp") == 55_000_000
+    assert fr.update_download_size_bytes(marker, "b9300", "unslothai/llama.cpp") == 55_000_000
 
 
 def test_update_size_upstream_ubuntu_uses_binary_repo(monkeypatch):
@@ -687,34 +690,34 @@ def test_update_size_upstream_ubuntu_uses_binary_repo(monkeypatch):
     # publish repo. The size must still resolve.
     marker = {
         "asset": "llama-b9190-bin-ubuntu-x64.tar.gz",
-        "published_repo": "LAiMai/llama.cpp",
+        "published_repo": "unslothai/llama.cpp",
         "binary_repo": "ggml-org/llama.cpp",
     }
     _patch_assets(
         monkeypatch,
         {
-            "LAiMai/llama.cpp": {"app-b9300-linux-x64-cuda13-newer.tar.gz": 1},
+            "unslothai/llama.cpp": {"app-b9300-linux-x64-cuda13-newer.tar.gz": 1},
             "ggml-org/llama.cpp": {
                 "llama-b9673-bin-ubuntu-x64.tar.gz": 42_000_000,
                 "llama-b9673-bin-ubuntu-vulkan-x64.tar.gz": 7,
             },
         },
     )
-    assert fr.update_download_size_bytes(marker, "b9300", "LAiMai/llama.cpp") == 42_000_000
+    assert fr.update_download_size_bytes(marker, "b9300", "unslothai/llama.cpp") == 42_000_000
 
 
 def test_update_size_upstream_windows_uses_binary_repo(monkeypatch):
     # Regression (#6338 P2): the Windows upstream CPU prebuilt uses a win-* token.
     marker = {
         "asset": "llama-b9190-bin-win-cpu-x64.zip",
-        "published_repo": "LAiMai/llama.cpp",
+        "published_repo": "unslothai/llama.cpp",
         "binary_repo": "ggml-org/llama.cpp",
     }
     _patch_assets(
         monkeypatch,
         {"ggml-org/llama.cpp": {"llama-b9673-bin-win-cpu-x64.zip": 33_000_000}},
     )
-    assert fr.update_download_size_bytes(marker, "b9300", "LAiMai/llama.cpp") == 33_000_000
+    assert fr.update_download_size_bytes(marker, "b9300", "unslothai/llama.cpp") == 33_000_000
 
 
 def test_update_size_no_matching_asset_fails_open(monkeypatch):
@@ -722,30 +725,30 @@ def test_update_size_no_matching_asset_fails_open(monkeypatch):
     # the helper fails open to None rather than guessing a wrong artifact.
     marker = {
         "asset": "llama-b9190-bin-ubuntu-rocm-6.4-x64.tar.gz",
-        "published_repo": "LAiMai/llama.cpp",
+        "published_repo": "unslothai/llama.cpp",
         "binary_repo": "ggml-org/llama.cpp",
     }
     _patch_assets(
         monkeypatch,
         {"ggml-org/llama.cpp": {"llama-b9673-bin-ubuntu-rocm-7.2-x64.tar.gz": 9}},
     )
-    assert fr.update_download_size_bytes(marker, "b9300", "LAiMai/llama.cpp") is None
+    assert fr.update_download_size_bytes(marker, "b9300", "unslothai/llama.cpp") is None
 
 
 def test_update_size_missing_inputs_fail_open(monkeypatch):
     _patch_assets(
         monkeypatch,
-        {"LAiMai/llama.cpp": {"app-b9300-linux-x64-cpu.tar.gz": 5}},
+        {"unslothai/llama.cpp": {"app-b9300-linux-x64-cpu.tar.gz": 5}},
     )
     # No marker, no latest tag, or no asset string -> None (never raise).
-    assert fr.update_download_size_bytes(None, "b9300", "LAiMai/llama.cpp") is None
+    assert fr.update_download_size_bytes(None, "b9300", "unslothai/llama.cpp") is None
     assert (
         fr.update_download_size_bytes(
-            {"asset": "app-b9190-linux-x64-cpu.tar.gz"}, None, "LAiMai/llama.cpp"
+            {"asset": "app-b9190-linux-x64-cpu.tar.gz"}, None, "unslothai/llama.cpp"
         )
         is None
     )
-    assert fr.update_download_size_bytes({"asset": None}, "b9300", "LAiMai/llama.cpp") is None
+    assert fr.update_download_size_bytes({"asset": None}, "b9300", "unslothai/llama.cpp") is None
 
 
 @pytest.mark.parametrize("fetch", ["_fetch_latest_release_tag", "_fetch_latest_release_assets"])
@@ -760,7 +763,7 @@ def test_release_fetch_cannot_outlive_its_deadline(monkeypatch, fetch):
 
     monkeypatch.setattr(freshness_flow, "auth_safe_open", _stalls)
     started = time.monotonic()
-    assert getattr(fr, fetch)("LAiMai/llama.cpp", timeout = 0.25) is None
+    assert getattr(fr, fetch)("unslothai/llama.cpp", timeout = 0.25) is None
     # Pins the implemented timeout + 1, not merely "faster than the 30s stall".
     assert time.monotonic() - started < 2.0
 
@@ -819,12 +822,12 @@ def test_a_rate_limit_parks_every_github_fetch_until_it_resets(monkeypatch):
         raise _refusal(403, {"Retry-After": "1800"})
 
     monkeypatch.setattr(fr._flow, "auth_safe_open", refuse)
-    assert fr._fetch_latest_release_tag("LAiMai/llama.cpp") is None
-    assert fr._fetch_latest_release_tag("LAiMai/llama.cpp") is None
-    assert fr._fetch_latest_release_assets("LAiMai/llama.cpp") is None
+    assert fr._fetch_latest_release_tag("unslothai/llama.cpp") is None
+    assert fr._fetch_latest_release_tag("unslothai/llama.cpp") is None
+    assert fr._fetch_latest_release_assets("unslothai/llama.cpp") is None
     assert len(calls) == 1
     fr._flow.hold_github_api(60)
     assert fr._flow.github_rate_limit_remaining() == 1800
     mono[0] += 1801
-    assert fr._fetch_latest_release_tag("LAiMai/llama.cpp") is None
+    assert fr._fetch_latest_release_tag("unslothai/llama.cpp") is None
     assert len(calls) == 2

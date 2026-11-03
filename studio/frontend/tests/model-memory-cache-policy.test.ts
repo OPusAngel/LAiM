@@ -17,7 +17,7 @@ const { estimateCacheKey, estimateIsUnsized } = await import(
   "../src/lib/model-memory.ts"
 );
 
-const BASE = { repoId: "LAiM/gemma-4-12b-it-GGUF", quant: "Q4_K_M" };
+const BASE = { repoId: "unsloth/gemma-4-12b-it-GGUF", quant: "Q4_K_M" };
 
 test("an omitted slot count is not the same request as an explicit one slot", () => {
   // The request omits n_parallel when there is no override, and the backend
@@ -55,7 +55,7 @@ test("every input that changes the answer changes the key", () => {
     { ...BASE, speculativeType: "mtp" },
     { ...BASE, nParallel: 2 },
     { ...BASE, quant: "Q5_K_M" },
-    { ...BASE, repoId: "LAiM/other-GGUF" },
+    { ...BASE, repoId: "unsloth/other-GGUF" },
   ];
   for (const v of variants) {
     assert.notEqual(estimateCacheKey(v), base);

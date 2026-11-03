@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { type GgufVariantsResponse, listGgufVariants } from "../inventory/api";
@@ -49,11 +50,11 @@ export function MlxPrecisionCard({
   return (
     <div className="hub-download-card" data-mlx-precision-card={true}>
       <div className="px-3 pt-2 text-ui-12 text-muted-foreground">
-        Precision
+        {translate("uxVideo.precisionjks6g")}
       </div>
       <div
         role="radiogroup"
-        aria-label="Precision"
+        aria-label={translate("uxVideo.precisionjks6g")}
         className="flex flex-col px-1.5 pb-1.5 pt-1"
       >
         {listing.variants.map((v) => (
@@ -72,10 +73,10 @@ export function MlxPrecisionCard({
           >
             <span className="font-medium text-foreground">{v.quant}</span>
             {listing.default_variant === v.quant && (
-              <span>same as the repo root</span>
+              <span>{translate("uxHub.sameAsTheRepogwxwn")}</span>
             )}
             <span className="ml-auto flex items-center gap-2">
-              {v.downloaded && <DotTag tone="success" label="On device" />}
+              {v.downloaded && <DotTag tone="success" label={translate("settings.general.rag.onDevice")} />}
               <span className="tabular-nums">{formatBytes(v.size_bytes)}</span>
             </span>
           </button>
@@ -86,7 +87,7 @@ export function MlxPrecisionCard({
           <CardDivider />
           <div className="flex items-center justify-end">
             <ModelRunActionButton
-              label={`Configure and run ${repoId} ${chosen.quant}`}
+              label={translate("uxHub.configureAndRuniw83n", { p1: repoId, p2: chosen.quant })}
               loading={runPending}
               onClick={() =>
                 onRun({

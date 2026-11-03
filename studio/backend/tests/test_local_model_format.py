@@ -955,11 +955,11 @@ def test_local_classification_probes_the_hf_cache_snapshot(tmp_path):
         encoding = "utf-8",
     )
     model = LocalModelInfo(
-        id = "LAiM/csm-1b",
+        id = "unsloth/csm-1b",
         display_name = "csm-1b",
         path = str(repo),
         source = "hf_cache",
-        model_id = "LAiM/csm-1b",
+        model_id = "unsloth/csm-1b",
     )
 
     assert classification._local_model_classification(model) == ("text-to-speech", "csm")
@@ -1225,7 +1225,7 @@ def test_a_single_file_video_repo_is_flagged_diffusers(monkeypatch):
     info = SimpleNamespace(repo_id = repo_id, repo_path = "/nonexistent")
     assert classification._repo_is_diffusers(info) is True
     # A plain chat repo must not be swept up by the same rule.
-    chat = SimpleNamespace(repo_id = "LAiM/Qwen3-0.6B", repo_path = "/nonexistent")
+    chat = SimpleNamespace(repo_id = "unsloth/Qwen3-0.6B", repo_path = "/nonexistent")
     assert classification._repo_is_diffusers(chat) is False
 
 

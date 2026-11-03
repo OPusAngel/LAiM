@@ -102,7 +102,7 @@ def _run(run_id, folder):
     return {
         "id": run_id,
         "status": "completed",
-        "model_name": "LAiM/Qwen3-0.6B",
+        "model_name": "unsloth/Qwen3-0.6B",
         "dataset_name": "mlabonne/FineTome-100k",
         "started_at": "2026-10-08T10:00:00Z",
         "final_step": 30,
@@ -116,7 +116,7 @@ RUNS = {"runs": [_run("run-1", "qwen-lora"), _run("run-2", "qwen-lora-2")], "tot
 DETAIL = {
     "run": _run("run-1", "qwen-lora"),
     "config": {
-        "model_name": "LAiM/Qwen3-0.6B",
+        "model_name": "unsloth/Qwen3-0.6B",
         "learning_rate": 0.0002,
         "max_steps": 30,
         "output_dir": "/srv/out",
@@ -147,7 +147,7 @@ def test_runs_name_their_folder_and_checkpoints_by_name(monkeypatch):
         "run": "qwen-lora",
         "name": "qwen-lora",
         "loss": 0.9,
-        "base_model": "LAiM/Qwen3-0.6B",
+        "base_model": "unsloth/Qwen3-0.6B",
         "peft_type": "LORA",
         "lora_rank": 16,
         "is_quantized": True,
@@ -173,7 +173,7 @@ def test_a_run_detail_keeps_only_scalar_settings(monkeypatch):
     result = _runs(monkeypatch, {"run_id": "run-1"})
     run = result["structuredContent"]["run"]
     assert run["config"] == {
-        "model_name": "LAiM/Qwen3-0.6B",
+        "model_name": "unsloth/Qwen3-0.6B",
         "learning_rate": 0.0002,
         "max_steps": 30,
     }

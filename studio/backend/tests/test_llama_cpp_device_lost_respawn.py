@@ -118,7 +118,7 @@ def harness():
         backend._process = first
         backend._port = broken.server_address[1]
         backend._healthy = True
-        backend._model_identifier = "LAiM/test-GGUF"
+        backend._model_identifier = "unsloth/test-GGUF"
         backend._last_load_intent = object()
         loads = []
 
@@ -301,7 +301,7 @@ def test_a_device_loss_in_the_server_log_retires_the_server(monkeypatch, line, r
     try:
         backend = LlamaCppBackend()
         backend._process = child
-        backend._model_identifier = "LAiM/test-GGUF"
+        backend._model_identifier = "unsloth/test-GGUF"
         drain = threading.Thread(target = backend._drain_stdout, daemon = True)
         drain.start()
         try:

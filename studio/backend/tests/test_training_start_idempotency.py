@@ -227,7 +227,7 @@ def test_cancel_pending_start_prevents_worker_spawn():
         backend.start_training(
             "job-pending",
             start_request_id = "request-pending",
-            model_name = "LAiM/test",
+            model_name = "unsloth/test",
         )
         is False
     )
@@ -303,7 +303,7 @@ def test_cancel_during_validation_blocks_the_final_worker_spawn(monkeypatch):
                 "job-validating",
                 start_request_id = "request-validating",
                 before_spawn = before_spawn,
-                model_name = "LAiM/test",
+                model_name = "unsloth/test",
                 training_type = "LoRA/QLoRA",
             )
         ),
@@ -358,7 +358,7 @@ def test_cancel_racing_proc_start_uses_the_committed_job_scope():
         result["start"] = backend.start_training(
             "job-spawning",
             start_request_id = "request-spawning",
-            model_name = "LAiM/test",
+            model_name = "unsloth/test",
             training_type = "LoRA/QLoRA",
         )
 
@@ -663,7 +663,7 @@ def test_adopt_failure_terminates_the_spawned_worker(monkeypatch):
     started = backend.start_training(
         "job-adopt",
         start_request_id = "request-adopt",
-        model_name = "LAiM/test",
+        model_name = "unsloth/test",
         training_type = "LoRA/QLoRA",
     )
 
@@ -724,7 +724,7 @@ def test_start_training_reserves_early_and_rejects_an_overlapping_start(monkeypa
             first = backend.start_training(
                 "job-1",
                 start_request_id = "request-1",
-                model_name = "LAiM/test",
+                model_name = "unsloth/test",
             )
         ),
         daemon = True,
@@ -736,7 +736,7 @@ def test_start_training_reserves_early_and_rejects_an_overlapping_start(monkeypa
         backend.start_training(
             "job-2",
             start_request_id = "request-2",
-            model_name = "LAiM/test",
+            model_name = "unsloth/test",
         )
         is False
     )
@@ -760,7 +760,7 @@ def test_start_training_cleans_early_reservation_after_validation_error(monkeypa
     monkeypatch.setattr(backend, "_start_training_with_lifecycle_reserved", fail_start)
 
     with pytest.raises(RuntimeError, match = "validation failed"):
-        backend.start_training("job-1", model_name = "LAiM/test")
+        backend.start_training("job-1", model_name = "unsloth/test")
 
     assert backend._spawn_in_progress is False
     assert backend._new_job_spawn_id is None
@@ -869,7 +869,7 @@ def test_cancelled_route_during_spawn_keeps_the_worker_result_authoritative():
     backend.start_training = start_training
     backend.is_training_active = lambda: backend.current_job_id is not None
     request = TrainingStartRequest(
-        model_name = "LAiM/test",
+        model_name = "unsloth/test",
         start_request_id = "cancelled-start-request",
         training_type = "LoRA/QLoRA",
         hf_dataset = "org/dataset",

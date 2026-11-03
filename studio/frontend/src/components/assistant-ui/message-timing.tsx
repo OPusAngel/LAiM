@@ -1,5 +1,6 @@
 "use client";
 
+import { translate } from "@/i18n";
 import { useMessageTiming, useMessage } from "@assistant-ui/react";
 import {
   Tooltip,
@@ -84,7 +85,7 @@ export const MessageTiming: FC<{
         <button
           type="button"
           data-slot="message-timing-trigger"
-          aria-label="Message timing"
+          aria-label={translate("uxComponents.messageTimingxsvcc")}
           className={cn(
             "flex items-center rounded-[10px] p-1 font-mono text-chat-icon-fg text-ui-13 tabular-nums transition-colors hover:bg-chat-icon-bg-hover hover:text-chat-icon-fg-hover",
             className,
@@ -107,7 +108,7 @@ export const MessageTiming: FC<{
               {/* DiffusionGemma: honest throughput (no autoregressive prompt speed) */}
               {timing.firstTokenTime !== undefined && (
                 <div className="flex items-center justify-between gap-4">
-                  <span className="text-muted-foreground">First token</span>
+                  <span className="text-muted-foreground">{translate("uxComponents.firstTokenlzswf")}</span>
                   <span className="font-mono tabular-nums">
                     {formatTimingMs(timing.firstTokenTime)}
                   </span>
@@ -115,7 +116,7 @@ export const MessageTiming: FC<{
               )}
               {st?.diffusion_parallel_tok_s != null && (
                 <div className="flex items-center justify-between gap-4">
-                  <span className="text-muted-foreground">Speed (in-step)</span>
+                  <span className="text-muted-foreground">{translate("uxComponents.speedInSteptvx7u")}</span>
                   <span className="font-mono tabular-nums">
                     {formatRate(st.diffusion_parallel_tok_s)}
                   </span>
@@ -151,9 +152,7 @@ export const MessageTiming: FC<{
               {st?.diffusion_canvas != null && (
                 <div className="flex items-center justify-between gap-4">
                   <span className="text-muted-foreground">Canvas</span>
-                  <span className="font-mono tabular-nums">
-                    {formatNumber(st.diffusion_canvas)} tokens
-                  </span>
+                  <span className="font-mono tabular-nums">{translate("uxComponents.tokensqbwuv", { p1: formatNumber(st.diffusion_canvas) })}</span>
                 </div>
               )}
               {(st?.diffusion_wall_ms ?? st?.predicted_ms) != null && (
@@ -166,7 +165,7 @@ export const MessageTiming: FC<{
               )}
               {timing.tokenCount !== undefined && (
                 <div className="flex items-center justify-between gap-4">
-                  <span className="text-muted-foreground">Answer tokens</span>
+                  <span className="text-muted-foreground">{translate("uxComponents.answerTokenstk8zd")}</span>
                   <span className="font-mono tabular-nums">
                     {formatNumber(timing.tokenCount)}
                   </span>
@@ -175,9 +174,7 @@ export const MessageTiming: FC<{
               {(st?.diffusion_prompt_n ?? st?.prompt_n) != null && (
                 <div className="flex items-center justify-between gap-4">
                   <span className="text-muted-foreground">Prompt</span>
-                  <span className="font-mono tabular-nums">
-                    {formatNumber(st.diffusion_prompt_n ?? st.prompt_n)} tokens
-                  </span>
+                  <span className="font-mono tabular-nums">{translate("uxComponents.tokensqbwuv", { p1: formatNumber(st.diffusion_prompt_n ?? st.prompt_n) })}</span>
                 </div>
               )}
               <div className="my-0.5 border-t border-border/40" />
@@ -199,7 +196,7 @@ export const MessageTiming: FC<{
               {/* Server-side metrics (GGUF, MLX, safetensors) */}
               {st?.prompt_ms != null && (
                 <div className="flex items-center justify-between gap-4">
-                  <span className="text-muted-foreground">Prompt eval</span>
+                  <span className="text-muted-foreground">{translate("uxComponents.promptEvalnklw2")}</span>
                   <span className="font-mono tabular-nums">
                     {formatTimingMs(st.prompt_ms)}
                   </span>
@@ -209,10 +206,8 @@ export const MessageTiming: FC<{
                 st?.prompt_per_second != null &&
                 st.prompt_per_second > 0 && (
                 <div className="flex items-center justify-between gap-4">
-                  <span className="text-muted-foreground">Prompt speed</span>
-                  <span className="font-mono tabular-nums">
-                    {st.prompt_per_second.toFixed(1)} tok/s
-                  </span>
+                  <span className="text-muted-foreground">{translate("uxComponents.promptSpeed6v0e4")}</span>
+                  <span className="font-mono tabular-nums">{translate("uxComponents.tokSimulr", { p1: st.prompt_per_second.toFixed(1) })}</span>
                 </div>
               )}
               {hasPredicted && st?.predicted_ms != null && (
@@ -226,9 +221,7 @@ export const MessageTiming: FC<{
               {predictedRate != null && (
                 <div className="flex items-center justify-between gap-4">
                   <span className="text-muted-foreground">Speed</span>
-                  <span className="font-mono tabular-nums">
-                    {predictedRate.toFixed(1)} tok/s
-                  </span>
+                  <span className="font-mono tabular-nums">{translate("uxComponents.tokSimulr", { p1: predictedRate.toFixed(1) })}</span>
                 </div>
               )}
               {timing.tokenCount !== undefined && (
@@ -241,7 +234,7 @@ export const MessageTiming: FC<{
               )}
               {timing.firstTokenTime !== undefined && (
                 <div className="flex items-center justify-between gap-4">
-                  <span className="text-muted-foreground">First token</span>
+                  <span className="text-muted-foreground">{translate("uxComponents.firstTokenlzswf")}</span>
                   <span className="font-mono tabular-nums">
                     {formatTimingMs(timing.firstTokenTime)}
                   </span>
@@ -249,7 +242,7 @@ export const MessageTiming: FC<{
               )}
               {st?.diffusion_steps != null && (
                 <div className="flex items-center justify-between gap-4">
-                  <span className="text-muted-foreground">Denoising steps</span>
+                  <span className="text-muted-foreground">{translate("uxComponents.denoisingStepsmgt8l")}</span>
                   <span className="font-mono tabular-nums">
                     {formatNumber(st.diffusion_steps)}
                   </span>
@@ -265,7 +258,7 @@ export const MessageTiming: FC<{
               )}
               {cacheHits > 0 && (
                 <div className="flex items-center justify-between gap-4">
-                  <span className="text-muted-foreground">Cache hits</span>
+                  <span className="text-muted-foreground">{translate("uxComponents.cacheHitsdjokb")}</span>
                   <span className="font-mono tabular-nums">
                     {formatNumber(cacheHits)}
                   </span>
@@ -273,7 +266,7 @@ export const MessageTiming: FC<{
               )}
               {cacheWrites > 0 && (
                 <div className="flex items-center justify-between gap-4">
-                  <span className="text-muted-foreground">Cache writes</span>
+                  <span className="text-muted-foreground">{translate("uxComponents.cacheWritespqh6e")}</span>
                   <span className="font-mono tabular-nums">
                     {formatNumber(cacheWrites)}
                   </span>
@@ -299,7 +292,7 @@ export const MessageTiming: FC<{
               {/* Client-side metrics (external provider fallback) */}
               {timing.firstTokenTime !== undefined && (
                 <div className="flex items-center justify-between gap-4">
-                  <span className="text-muted-foreground">First token</span>
+                  <span className="text-muted-foreground">{translate("uxComponents.firstTokenlzswf")}</span>
                   <span className="font-mono tabular-nums">
                     {formatTimingMs(timing.firstTokenTime)}
                   </span>
@@ -307,7 +300,7 @@ export const MessageTiming: FC<{
               )}
               {cacheHits > 0 && (
                 <div className="flex items-center justify-between gap-4">
-                  <span className="text-muted-foreground">Cache hits</span>
+                  <span className="text-muted-foreground">{translate("uxComponents.cacheHitsdjokb")}</span>
                   <span className="font-mono tabular-nums">
                     {formatNumber(cacheHits)}
                   </span>
@@ -315,7 +308,7 @@ export const MessageTiming: FC<{
               )}
               {cacheWrites > 0 && (
                 <div className="flex items-center justify-between gap-4">
-                  <span className="text-muted-foreground">Cache writes</span>
+                  <span className="text-muted-foreground">{translate("uxComponents.cacheWritespqh6e")}</span>
                   <span className="font-mono tabular-nums">
                     {formatNumber(cacheWrites)}
                   </span>

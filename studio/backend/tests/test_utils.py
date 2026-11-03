@@ -660,8 +660,8 @@ class TestPrintCudaDeviceList:
 
 class TestFormatErrorMessage:
     def test_not_found(self):
-        err = Exception("Repository not found for LAiM/test")
-        msg = format_error_message(err, "LAiM/test")
+        err = Exception("Repository not found for unsloth/test")
+        msg = format_error_message(err, "unsloth/test")
         assert "not found" in msg.lower()
         assert "test" in msg
 
@@ -711,7 +711,7 @@ class TestFormatErrorMessage:
     def test_mlx_oom(self):
         err = Exception("MLX backend out of memory")
         with patch("utils.hardware.get_device", return_value = DeviceType.MLX):
-            msg = format_error_message(err, "LAiM/huge-model")
+            msg = format_error_message(err, "unsloth/huge-model")
         assert "Apple Silicon" in msg
 
     # --- OOM on CPU ---

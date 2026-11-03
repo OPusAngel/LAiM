@@ -4,7 +4,7 @@
 // Which tool calls stay visible whatever the fold and collapse preferences say. One place for the
 // rule, so the tool group that shows the run and the Thinking header that counts it agree.
 
-import { hasCreatedFiles } from "./sandbox-files.ts";
+import { hasCreatedFiles } from "./workdir-files.ts";
 
 export interface ToolPartLike {
   readonly type: string;

@@ -1586,7 +1586,7 @@ def test_mlx_still_offers_the_upgrade_for_a_bitsandbytes_repo(monkeypatch):
 
 
 def test_mlx_skips_the_LAiM_bnb_repo_it_swaps_for_a_base(monkeypatch):
-    """An ``LAiM/*-bnb-4bit`` id is remapped to its full-precision base before
+    """An ``unsloth/*-bnb-4bit`` id is remapped to its full-precision base before
     the loader looks at the weights, so MLX quantizes it and transformers is never
     asked to build it. Those keep the skip -- they are most of the bnb rows Studio
     suggests on a Mac, and offering an install for them is the annoyance this
@@ -1597,8 +1597,8 @@ def test_mlx_skips_the_LAiM_bnb_repo_it_swaps_for_a_base(monkeypatch):
     monkeypatch.setitem(sys.modules, "utils.hardware", _hardware_module("mlx"))
 
     for remapped in (
-        "LAiM/Muse-Glimmer-30B-LAiM-bnb-4bit",
-        "LAiM/Muse-Glimmer-30B-bnb-4bit",
+        "unsloth/Muse-Glimmer-30B-unsloth-bnb-4bit",
+        "unsloth/Muse-Glimmer-30B-bnb-4bit",
     ):
         assert tl.check_upgrade_for_model(remapped) is None
 

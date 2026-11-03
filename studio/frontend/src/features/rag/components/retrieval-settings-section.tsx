@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { InfoHint } from "@/components/ui/info-hint";
 import {
   Select,
@@ -22,7 +23,7 @@ import { cn } from "@/lib/utils";
 
 const MODE_LABEL: Record<RagMode, string> = {
   hybrid: "Hybrid",
-  dense: "Semantic only",
+  get dense() { return translate("uxRag.semanticOnlyhor7p"); },
   lexical: "BM25 only",
 };
 
@@ -99,7 +100,7 @@ export function RetrievalSettingsSection() {
     <div className="flex flex-col gap-5">
       <div className="flex flex-col gap-2">
         <span className="text-ui-13 font-medium leading-[1.25] tracking-nav text-nav-fg">
-          Search mode
+          {translate("uxRag.searchModesqd81")}
         </span>
         <Select
           value={ragMode}
@@ -109,7 +110,7 @@ export function RetrievalSettingsSection() {
             icon={ChevronDownStandardIcon}
             iconClassName="size-3.5"
             className="panel-select-trigger w-full"
-            aria-label="Search mode"
+            aria-label={translate("uxRag.searchModesqd81")}
           >
             <SelectValue />
           </SelectTrigger>
@@ -124,7 +125,7 @@ export function RetrievalSettingsSection() {
       <div className="flex flex-col gap-2">
         <div className="flex min-h-8 items-center justify-between">
           <span className="text-ui-13 font-medium leading-[1.25] tracking-nav text-nav-fg">
-            Passages (top K)
+            {translate("uxRag.passagesTopKlrd4q")}
           </span>
           <span className="text-ui-13 tabular-nums text-muted-foreground">
             {ragTopK}
@@ -136,7 +137,7 @@ export function RetrievalSettingsSection() {
           max={20}
           step={1}
           onValueChange={([value]) => setRagTopK(value)}
-          aria-label="Number of passages to retrieve"
+          aria-label={translate("uxRag.numberOfPassagesTotzz0v")}
           className="panel-slider"
         />
       </div>
@@ -144,15 +145,13 @@ export function RetrievalSettingsSection() {
       <div className="flex flex-col gap-2">
         <div className="flex flex-col">
           <span className="flex items-center gap-1.5 text-ui-13 font-medium leading-[1.25] tracking-nav text-nav-fg">
-            Auto-retrieve documents
+            {translate("uxRag.autoRetrieveDocumentsh0yj3")}
             <InfoHint>
-              Auto turns retrieval on for smaller models (9B and below), which
-              tend to answer from memory instead of searching, and leaves it to
-              larger ones. On and Off force it either way.
+              {translate("uxCopy.autoTurnsRetrievalOn1ba0u")}
             </InfoHint>
           </span>
           <span className="text-ui-12 leading-[1.3] text-muted-foreground">
-            Search attached documents before answering.
+            {translate("uxRag.searchAttachedDocumentsBefore1i874")}
           </span>
         </div>
         <ToggleGroup
@@ -166,10 +165,10 @@ export function RetrievalSettingsSection() {
             }
           }}
           className="w-full"
-          aria-label="Auto-retrieve documents"
+          aria-label={translate("uxRag.autoRetrieveDocumentsh0yj3")}
         >
           <ToggleGroupItem value="auto" className="flex-1">
-            Auto
+            {translate("settings.appearance.custom.sentAttachments.auto")}
           </ToggleGroupItem>
           <ToggleGroupItem value="on" className="flex-1">
             On
@@ -179,7 +178,7 @@ export function RetrievalSettingsSection() {
           </ToggleGroupItem>
         </ToggleGroup>
         <SliderRow
-          label="Auto-retrieve threshold"
+          label={translate("uxRag.autoRetrieveThreshold42oem")}
           value={ragAutoInjectMinScore}
           min={0}
           max={1}
@@ -193,22 +192,19 @@ export function RetrievalSettingsSection() {
       <div className="flex items-start justify-between gap-3">
         <div className="flex flex-col">
           <span className="flex items-center gap-1.5 text-ui-13 font-medium leading-[1.25] tracking-nav text-nav-fg">
-            OCR scanned pages
+            {translate("uxRag.oCRScannedPagess4p9e")}
             <InfoHint>
-              Read scanned or image-only PDF pages at upload time using the
-              loaded vision model or local Tesseract OCR. Local OCR requires
-              installed language data. Selectable headers alone may not cover a
-              scanned page's body.
+              {translate("uxCopy.readScannedOrImage1wyr7")}
             </InfoHint>
           </span>
           <span className="text-ui-12 leading-[1.3] text-muted-foreground">
-            Transcribe image-only PDF pages when attaching.
+            {translate("uxRag.transcribeImageOnlyPDF1tvsh")}
           </span>
         </div>
         <Switch
           checked={ragOcrScanned}
           onCheckedChange={setRagOcrScanned}
-          aria-label="OCR scanned pages"
+          aria-label={translate("uxRag.oCRScannedPagess4p9e")}
           className="panel-switch mt-0.5"
         />
       </div>
@@ -216,21 +212,17 @@ export function RetrievalSettingsSection() {
       <div className="flex items-start justify-between gap-3">
         <div className="flex flex-col">
           <span className="flex items-center gap-1.5 text-ui-13 font-medium leading-[1.25] tracking-nav text-nav-fg">
-            Describe figures &amp; charts
-            <InfoHint>
-              Caption PDF figures, charts, tables and diagrams at upload with
-              the loaded model's vision, so their content becomes searchable.
-              Needs a vision model; adds vision calls for detected figures.
-            </InfoHint>
+            {translate("uxRag.describeFiguresAmpChartsfmuu7")}
+            <InfoHint>{translate("uxRag.captionPDFFiguresChartshgn3g")}</InfoHint>
           </span>
           <span className="text-ui-12 leading-[1.3] text-muted-foreground">
-            Optional vision pass; can take several minutes.
+            {translate("uxRag.optionalVisionPassCan15osn")}
           </span>
         </div>
         <Switch
           checked={ragCaptionFigures}
           onCheckedChange={setRagCaptionFigures}
-          aria-label="Describe figures and charts"
+          aria-label={translate("uxRag.describeFiguresAndCharts1dyb6")}
           className="panel-switch mt-0.5"
         />
       </div>

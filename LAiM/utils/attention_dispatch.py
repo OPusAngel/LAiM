@@ -457,7 +457,7 @@ def _configured_softcap(config) -> Optional[float]:
 
     Only flash and the xformers ops take a `softcap`; the SDPA branch below has no way to
     apply one. Gemma 2 passes it exclusively through these kwargs
-    (`LAiM/models/gemma2.py`), so a backend swap that ignores them would train on
+    (`unsloth/models/gemma2.py`), so a backend swap that ignores them would train on
     uncapped logits.
     """
     for kwargs in (

@@ -500,44 +500,44 @@ test("deleting a repo drops its quant pins, not just the repo's own", () => {
   // repo key was being cleared, so the quant pins stayed in localStorage with no row left to
   // unpin them -- and came back pinned the day that quant was downloaded again.
   setPinned([
-    "LAiM/Qwen3-8B-GGUF::Q4_K_M",
-    "LAiM/Qwen3-8B-GGUF",
-    "LAiM/Qwen3-8B-GGUF::UD-Q4_K_XL",
-    "LAiM/Gemma-3-4B-GGUF::Q8_0",
-    "LAiM/Gemma-3-4B-GGUF",
+    "unsloth/Qwen3-8B-GGUF::Q4_K_M",
+    "unsloth/Qwen3-8B-GGUF",
+    "unsloth/Qwen3-8B-GGUF::UD-Q4_K_XL",
+    "unsloth/Gemma-3-4B-GGUF::Q8_0",
+    "unsloth/Gemma-3-4B-GGUF",
   ]);
-  usePinnedModelsStore.getState().unpinRepo("LAiM/Qwen3-8B-GGUF");
+  usePinnedModelsStore.getState().unpinRepo("unsloth/Qwen3-8B-GGUF");
   const left = usePinnedModelsStore.getState().pinned;
   assert.deepEqual(left, [
-    "LAiM/Gemma-3-4B-GGUF::Q8_0",
-    "LAiM/Gemma-3-4B-GGUF",
+    "unsloth/Gemma-3-4B-GGUF::Q8_0",
+    "unsloth/Gemma-3-4B-GGUF",
   ]);
   // One write, and the survivors keep their order.
   assert.deepEqual(storedPinned(), left);
 });
 
 test("unpinning a repo leaves a longer repo id that merely starts the same", () => {
-  // Prefix matching on the bare id would take "LAiM/Qwen3-8B-GGUF-128K" with it. The `::`
+  // Prefix matching on the bare id would take "unsloth/Qwen3-8B-GGUF-128K" with it. The `::`
   // is what makes the boundary, so it belongs in the filter rather than beside it.
   setPinned([
-    "LAiM/Qwen3-8B-GGUF-128K",
-    "LAiM/Qwen3-8B-GGUF-128K::Q4_K_M",
-    "LAiM/Qwen3-8B-GGUF",
+    "unsloth/Qwen3-8B-GGUF-128K",
+    "unsloth/Qwen3-8B-GGUF-128K::Q4_K_M",
+    "unsloth/Qwen3-8B-GGUF",
   ]);
-  usePinnedModelsStore.getState().unpinRepo("LAiM/Qwen3-8B-GGUF");
+  usePinnedModelsStore.getState().unpinRepo("unsloth/Qwen3-8B-GGUF");
   assert.deepEqual(usePinnedModelsStore.getState().pinned, [
-    "LAiM/Qwen3-8B-GGUF-128K",
-    "LAiM/Qwen3-8B-GGUF-128K::Q4_K_M",
+    "unsloth/Qwen3-8B-GGUF-128K",
+    "unsloth/Qwen3-8B-GGUF-128K::Q4_K_M",
   ]);
 });
 
 test("unpinning a repo that was never pinned writes nothing", () => {
   // Every repo-level delete calls this, pinned or not; a write per delete would churn the
   // record and wake every other window's storage listener for no change.
-  setPinned(["LAiM/Gemma-3-4B-GGUF"]);
-  usePinnedModelsStore.getState().unpinRepo("LAiM/Nothing-Here");
+  setPinned(["unsloth/Gemma-3-4B-GGUF"]);
+  usePinnedModelsStore.getState().unpinRepo("unsloth/Nothing-Here");
   assert.deepEqual(usePinnedModelsStore.getState().pinned, [
-    "LAiM/Gemma-3-4B-GGUF",
+    "unsloth/Gemma-3-4B-GGUF",
   ]);
   assert.equal(storedPinned(), null, "no write, so the record is untouched");
 });

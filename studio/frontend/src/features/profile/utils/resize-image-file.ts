@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
+
 const MAX_EDGE = 256;
 // Smallest edge we shrink a transparent image to before giving up on WebP.
 const MIN_EDGE = 96;
@@ -22,7 +24,7 @@ function loadImage(file: File): Promise<HTMLImageElement> {
     };
     img.onerror = () => {
       URL.revokeObjectURL(url);
-      reject(new Error("Could not load image"));
+      reject(new Error(translate("uxFeatures.couldNotLoadImagedcejh")));
     };
     img.src = url;
   });
@@ -84,7 +86,7 @@ function drawScaled(
   canvas.width = cw;
   canvas.height = ch;
   const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("Canvas not available");
+  if (!ctx) throw new Error(translate("uxFeatures.canvasNotAvailablev143p"));
   ctx.drawImage(img, 0, 0, cw, ch);
   return { canvas, ctx, cw, ch };
 }
@@ -94,7 +96,7 @@ export async function resizeImageFileToDataUrl(file: File): Promise<string> {
   const img = await loadImage(file);
   const w = img.naturalWidth;
   const h = img.naturalHeight;
-  if (!w || !h) throw new Error("Invalid image dimensions");
+  if (!w || !h) throw new Error(translate("uxFeatures.invalidImageDimensions1asia"));
 
   const base = drawScaled(img, w, h, MAX_EDGE);
   const hasTransparency = canvasHasTransparency(base.ctx, base.cw, base.ch);
@@ -115,7 +117,7 @@ export async function resizeImageFileToDataUrl(file: File): Promise<string> {
       if (pngDataUrl) return pngDataUrl;
     }
     throw new Error(
-      "Image is still too large after compression. Try a smaller file.",
+      translate("uxFeatures.imageIsStillTooop6wf"),
     );
   }
 
@@ -127,6 +129,6 @@ export async function resizeImageFileToDataUrl(file: File): Promise<string> {
   if (jpegDataUrl) return jpegDataUrl;
 
   throw new Error(
-    "Image is still too large after compression. Try a smaller file.",
+    translate("uxFeatures.imageIsStillTooop6wf"),
   );
 }

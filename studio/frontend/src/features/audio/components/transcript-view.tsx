@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -40,8 +41,8 @@ import { Waveform, type WaveformControl } from "./waveform";
 import { decodePeaks } from "./waveform-decode";
 
 const VIEW_TABS = [
-  { value: "text", label: "Text" },
-  { value: "segments", label: "Segments" },
+  { value: "text", get label() { return translate("uxAudio.texth8361"); } },
+  { value: "segments", get label() { return translate("uxAudio.segments1va4m"); } },
 ];
 
 const SPEAKER_COLORS = 5;
@@ -119,7 +120,7 @@ function SpeakerChip({
       <PopoverTrigger asChild={true}>
         <button
           type="button"
-          aria-label={`Rename ${label}`}
+          aria-label={translate("uxAudio.renameo4egn", { p1: label })}
           className="inline-flex max-w-full shrink-0 items-center gap-1.5 rounded-full bg-muted px-2 py-0.5 text-ui-11p5 font-medium text-foreground transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <span
@@ -132,7 +133,7 @@ function SpeakerChip({
       </PopoverTrigger>
       <PopoverContent align="start" className="w-64 gap-2 p-3">
         <label htmlFor={inputId} className="text-ui-13 font-medium">
-          Name
+          {translate("browser.bookmarks.name")}
         </label>
         <Input
           id={inputId}
@@ -149,7 +150,7 @@ function SpeakerChip({
           }}
         />
         <p className="text-ui-11p5 leading-snug text-muted-foreground">
-          Renames every line by this speaker.
+          {translate("uxAudio.renamesEveryLineBy1enuk")}
         </p>
         <div className="flex justify-end gap-2">
           <Button
@@ -161,7 +162,7 @@ function SpeakerChip({
             Cancel
           </Button>
           <Button type="button" variant="secondary" size="sm" onClick={save}>
-            Save
+            {translate("browser.downloadPrompt.save")}
           </Button>
         </div>
       </PopoverContent>
@@ -211,9 +212,9 @@ export function TranscriptView({
     stampWidth,
   );
   const tabsHint = !hasSegments
-    ? "No timestamps in this transcript. Turn on Timestamps with a model that supports them and transcribe again."
+    ? translate("uxAudio.noTimestampsInThismha89")
     : shown === "segments" && player
-      ? "Select a time to play from there."
+      ? translate("uxAudio.selectATimeTogyx0q")
       : null;
   const activeRow = useRef<HTMLLIElement | null>(null);
 
@@ -239,15 +240,14 @@ export function TranscriptView({
     <>
       {!source ? null : audio.status === "missing" ? (
         <p className="text-ui-11p5 leading-snug text-muted-foreground">
-          The audio for this transcript is no longer available. Timestamps still
-          export.
+          {translate("uxCopy.theAudioForThis1k2hu")}
         </p>
       ) : (
         <Waveform
           peaks={ready?.peaks ?? null}
           durationS={ready?.durationS ?? durationS}
           src={ready?.url ?? null}
-          label={source.name || "Transcript audio"}
+          label={source.name || translate("uxAudio.transcriptAudiokff60")}
           controlRef={control}
           onPositionChange={handlePosition}
         />
@@ -256,7 +256,7 @@ export function TranscriptView({
       <div className="flex flex-col gap-3">
         <div className="flex flex-col gap-1.5">
           <PillTabs
-            ariaLabel="Transcript view"
+            ariaLabel={translate("uxAudio.transcriptViewcvd01")}
             tabs={VIEW_TABS}
             value={shown}
             onValueChange={(next) =>
@@ -296,7 +296,7 @@ export function TranscriptView({
                   {player ? (
                     <button
                       type="button"
-                      aria-label={`Play from ${stamp}`}
+                      aria-label={translate("uxAudio.playFromhuuv3", { p1: stamp })}
                       onClick={() => player.current?.seek(segment.start, true)}
                       className={cn(
                         stampClass,

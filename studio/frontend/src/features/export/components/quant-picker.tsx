@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   Tooltip,
   TooltipContent,
@@ -44,7 +45,7 @@ export function QuantPicker({
           className="size-4 text-muted-foreground"
         />
         <span className="text-xs font-medium text-muted-foreground">
-          Quantization Levels
+          {translate("uxExport.quantizationLevels14v05")}
         </span>
         <Tooltip>
           <TooltipTrigger asChild={true}>
@@ -55,22 +56,15 @@ export function QuantPicker({
               <HugeiconsIcon icon={InformationCircleIcon} className="size-3" />
             </button>
           </TooltipTrigger>
-          <TooltipContent className="max-w-xs">
-            Lower quantization (Q2, Q3) = smaller files but reduced quality.
-            Q4–Q5 is a good balance.{" "}
-            <a
+          <TooltipContent className="max-w-xs">{translate("uxExport.lowerQuantizationQ2Q3hr6yl", { p1: " " })}<a
               href="https://LAiM.ai/docs/basics/inference-and-deployment/saving-to-gguf"
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary underline"
-            >
-              Read more
-            </a>
+            >{translate("uxExport.readMoreivesk")}</a>
           </TooltipContent>
         </Tooltip>
-        <span className="text-ui-11 text-muted-foreground/70">
-          — select one or more
-        </span>
+        <span className="text-ui-11 text-muted-foreground/70">{translate("uxExport.selectOneOrMoreiqprk")}</span>
       </div>
       <div className="flex flex-wrap gap-2 py-1 pl-1">
         {options.map((q) => {
@@ -110,16 +104,12 @@ export function QuantPicker({
       </div>
       {value.length > 0 && (
         <div className="flex items-center gap-3">
-          <span className="text-ui-11 text-muted-foreground">
-            {value.length} selected
-          </span>
+          <span className="text-ui-11 text-muted-foreground">{translate("uxExport.selectedd5zkt", { p1: value.length })}</span>
           <button
             type="button"
             onClick={() => onChange([])}
             className="text-ui-11 text-muted-foreground/70 hover:text-foreground transition-colors"
-          >
-            Clear all
-          </button>
+          >{translate("uxExport.clearAllyye4n")}</button>
         </div>
       )}
     </div>

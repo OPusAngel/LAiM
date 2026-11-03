@@ -53,8 +53,8 @@ const WIRE_AS_PIN =
 /** An empty Context Length pair: the control on Auto with a matching baseline. */
 const CLEARED = { customContextLength: null, loadedCustomContextLength: null };
 
-const MODEL = "LAiM/Some-Huge-MoE-GGUF";
-const OTHER_MODEL = "LAiM/Something-Else-GGUF";
+const MODEL = "unsloth/Some-Huge-MoE-GGUF";
+const OTHER_MODEL = "unsloth/Something-Else-GGUF";
 const VARIANT = "UD-Q4_K_XL";
 const REQUESTED = 262144;
 const PRESET_SOURCES = ["builtin-default", "custom", "modified"] as const;

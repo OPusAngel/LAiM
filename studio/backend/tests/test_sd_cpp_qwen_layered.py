@@ -33,7 +33,7 @@ from core.inference.sd_cpp_backend import SdCppDiffusionBackend
 
 from .test_sd_cpp_backend import _FakeEngine, _FakeServer
 
-LAYERED = detect_family("LAiM/Qwen-Image-Layered-GGUF")
+LAYERED = detect_family("unsloth/Qwen-Image-Layered-GGUF")
 FILES = SdCppModelFiles(
     diffusion_model = "/m/qwen-image-layered-Q4_K_M.gguf",
     vae = "/m/qwen_image_layered_vae.safetensors",
@@ -65,7 +65,7 @@ def _blob(color) -> bytes:
 
 def _state(*, mode = "oneshot", server = None):
     return bk._SdState(
-        repo_id = "LAiM/Qwen-Image-Layered-GGUF",
+        repo_id = "unsloth/Qwen-Image-Layered-GGUF",
         base_repo = LAYERED.base_repo,
         family = LAYERED,
         device = "cpu",
@@ -79,11 +79,11 @@ def _state(*, mode = "oneshot", server = None):
 
 def test_layered_maps_to_its_own_vae_and_the_qwen_encoder():
     fam = detect_family_for_pick(
-        "LAiM/Qwen-Image-Layered-GGUF", "qwen-image-layered-Q4_K_M.gguf"
+        "unsloth/Qwen-Image-Layered-GGUF", "qwen-image-layered-Q4_K_M.gguf"
     )
     assert fam is LAYERED and family_sd_cpp_supported(fam)
     specs = SdCppDiffusionBackend(engine = _FakeEngine())._asset_specs(
-        "LAiM/Qwen-Image-Layered-GGUF", "qwen-image-layered-Q4_K_M.gguf", fam
+        "unsloth/Qwen-Image-Layered-GGUF", "qwen-image-layered-Q4_K_M.gguf", fam
     )
     # The vendor base's own VAE file (no community repack), the one the diffusers route fetches too.
     assert specs[1] == ("Qwen/Qwen-Image-Layered", "vae/diffusion_pytorch_model.safetensors", "vae")

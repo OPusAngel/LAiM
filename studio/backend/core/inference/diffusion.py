@@ -8,7 +8,7 @@ GGUF transformer dequantised on-device via ``GGUFQuantizationConfig``, a single-
 transformer (e.g. fp8), or a full diffusers pipeline via ``from_pretrained`` (which re-applies an
 embedded quant config such as bnb-4bit). The single-file kinds pull the rest of the pipeline (VAE,
 text encoders, scheduler) from the matching base repo; the pipeline kind pulls everything from the
-repo itself. Pipeline loads are gated to the ``LAiM/*`` org, the official bases, or a local path
+repo itself. Pipeline loads are gated to the ``unsloth/*`` org, the official bases, or a local path
 for safety; a single ``.safetensors`` file is trusted per file from any repo (see
 ``diffusion_single_file_trust``).
 
@@ -837,7 +837,7 @@ def _is_trusted_diffusion_repo(repo_id: str) -> bool:
 
     Making ``gguf_filename`` optional opens a ``from_pretrained`` / ``from_single_file`` on an
     arbitrary repo, which fetches and deserialises third-party weights. So the non-GGUF paths are
-    gated to the ``LAiM/*`` org, a short allowlist of official safetensors-only base repos
+    gated to the ``unsloth/*`` org, a short allowlist of official safetensors-only base repos
     (``_TRUSTED_NON_GGUF_REPOS``), and local paths the user explicitly pointed at. The GGUF path
     stays open to any repo, and so does a single ``.safetensors`` file, which is trusted per file
     instead (``diffusion_single_file_trust.single_file_load_allowed``); this predicate still decides
@@ -853,7 +853,7 @@ def _is_trusted_diffusion_repo(repo_id: str) -> bool:
     except OSError:
         pass
     rid = repo_id.strip().lower()
-    return rid.startswith("LAiM/") or rid in _TRUSTED_NON_GGUF_REPOS
+    return rid.startswith("unsloth/") or rid in _TRUSTED_NON_GGUF_REPOS
 
 
 def _assert_local_base_is_pipeline(
@@ -3686,14 +3686,14 @@ class DiffusionBackend:
         ):
             raise ValueError(
                 f"Non-GGUF diffusion loads from '{repo_id}' are limited to a single .safetensors "
-                f"checkpoint; full pipelines and other weight formats load only from LAiM/* "
+                f"checkpoint; full pipelines and other weight formats load only from unsloth/* "
                 f"repos, the official base repos, or a local path. Pass a gguf_filename to load "
                 f"a GGUF instead."
             )
         # The companion base repo also loads via from_pretrained, so it must clear the same trust bar
         if base_repo and base_repo.strip() and not _is_trusted_diffusion_repo(base_repo):
             raise ValueError(
-                f"base_repo is restricted to LAiM/* repos (or a local path); got '{base_repo}'."
+                f"base_repo is restricted to unsloth/* repos (or a local path); got '{base_repo}'."
             )
         # A local base_repo loads as a full pipeline; reject a non-pipeline one before eviction
         whole_file = kind in ("single_file", "gguf") and fam.single_file_is_pipeline
@@ -12228,7 +12228,7 @@ def _resolve_base_repo(
     if not base:
         tag = _hf_base_model(repo_id, hf_token)
         if tag and _is_trusted_diffusion_repo(tag):
-            # A card tag can now name a mirror (they are real LAiM/* repos) and clear the trust bar. Map it back:
+            # A card tag can now name a mirror (they are real unsloth/* repos) and clear the trust bar. Map it back:
             # this becomes status()["base_repo"] and a trained adapter's default base_model, both of which must stay
             # the vendor id. An EXPLICIT base_repo is verbatim.
             base = canonical_base(tag)

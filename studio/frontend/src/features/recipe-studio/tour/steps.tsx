@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import type { TourStep } from "@/features/tour";
 
 /** Without an Easy form the tabs read Editor and Runs, so neither "three" nor "Advanced" fits. */
@@ -8,17 +9,13 @@ function viewsStep(supportsEasyMode: boolean): TourStep {
   return {
     id: "views",
     target: "recipe-views",
-    title: supportsEasyMode ? "Three views" : "Two views",
+    title: supportsEasyMode ? translate("uxRecipestudio.threeViewsb43zx") : translate("uxRecipestudio.twoViewsxv8na"),
     body: supportsEasyMode ? (
       <>
-        Easy is a plain form, Advanced is the node graph, and Runs keeps every
-        execution with the dataset it produced.
-      </>
+        {translate("uxRecipestudio.easyIsAPlainv0cq5")}</>
     ) : (
       <>
-        Editor is the node graph. Runs keeps every execution with the dataset it
-        produced.
-      </>
+        {translate("uxRecipestudio.editorIsTheNode1mcof")}</>
     ),
   };
 }
@@ -26,8 +23,12 @@ function viewsStep(supportsEasyMode: boolean): TourStep {
 const saveStep: TourStep = {
   id: "save",
   target: "recipe-save",
-  title: "Save",
-  body: <>Recipes are stored on this device. Save before a long run.</>,
+  get title() {
+    return translate("browser.downloadPrompt.save");
+  },
+  get body() {
+    return <>{translate("uxTour.recipesAreStoredOn1p6oi")}</>;
+  },
 };
 
 /** Only the graph view mounts the canvas and its controls, and only once the recipe has loaded. */
@@ -47,35 +48,41 @@ export function buildRecipeEditorTourSteps({
     {
       id: "canvas",
       target: "recipe-canvas",
-      title: "The graph",
-      body: (
+      get title() {
+        return translate("uxRecipestudio.theGraphw1hey");
+      },
+      get body() {
+        return (
         <>
-          Each node is one step, and the wires carry rows forward. A source node
-          in, a dataset you can train on out.
-        </>
-      ),
+          {translate("uxRecipestudio.eachNodeIsOnecaxhv")}</>
+      );
+      },
     },
     {
       id: "add-step",
       target: "recipe-add-step",
-      title: "Add a step",
-      body: (
+      get title() {
+        return translate("uxRecipestudio.addAStepm84xt");
+      },
+      get body() {
+        return (
         <>
-          Source data, samplers, model calls, validators and expressions. Import
-          is where a PDF or a folder of text enters the graph.
-        </>
-      ),
+          {translate("uxRecipestudio.sourceDataSamplersModeltpxvo")}</>
+      );
+      },
     },
     {
       id: "run",
       target: "recipe-run",
-      title: "Check and run",
-      body: (
+      get title() {
+        return translate("uxRecipestudio.checkAndRun1k8dt");
+      },
+      get body() {
+        return (
         <>
-          Check reports broken wires and missing settings without spending
-          tokens. Run lands the result in Runs, ready for the Train page.
-        </>
-      ),
+          {translate("uxRecipestudio.checkReportsBrokenWiresjg1qd")}</>
+      );
+      },
     },
   ];
 }

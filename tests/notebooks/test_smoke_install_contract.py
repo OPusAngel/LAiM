@@ -309,17 +309,17 @@ def test_every_file_the_seed_step_reads_is_a_cache_key_input():
 def test_the_mapping_is_a_cache_key_input():
     """Named explicitly, so deleting the rule above cannot quietly drop the one file
     that caused the bug."""
-    assert "LAiM/scripts/data/colab_to_cpu_pin.json" in _restore_step()["key-files"].split()
+    assert "unsloth/scripts/data/colab_to_cpu_pin.json" in _restore_step()["key-files"].split()
 
 
 def test_the_cache_key_inputs_exist():
     """A glob that matches nothing makes hashFiles return empty, which pip-cache-restore
     fails on by design -- but it fails in CI, not here, and only on the next run."""
     for rel in _restore_step()["key-files"].split():
-        # key-files resolve from GITHUB_WORKSPACE and this job checks out under `LAiM/`.
-        assert rel.startswith("LAiM/"), f"{rel} is not prefixed for this job's checkout layout"
+        # key-files resolve from GITHUB_WORKSPACE and this job checks out under `unsloth/`.
+        assert rel.startswith("unsloth/"), f"{rel} is not prefixed for this job's checkout layout"
         assert (
-            REPO / rel[len("LAiM/") :]
+            REPO / rel[len("unsloth/") :]
         ).exists(), f"key-files names {rel}, which does not exist"
 
 

@@ -130,7 +130,7 @@ def _render(
         "github.ref": ref,
         "github.sha": sha,
         "github.event_name": event_name,
-        "github.repository": "LAiMai/LAiM",
+        "github.repository": "OPusAngel/LAiM",
         "github.ref_name": ref.rsplit("/", 1)[-1],
     }
     return _INTERPOLATION.sub(lambda m: _evaluate(m.group(1), context), group)

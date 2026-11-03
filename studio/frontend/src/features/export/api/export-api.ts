@@ -4,6 +4,8 @@
 import { authFetch } from "@/features/auth";
 import { readFastApiError } from "@/lib/format-fastapi-error";
 import { openStreamResponse } from "@/lib/open-stream-response";
+import { translate } from "@/i18n";
+
 
 const readError = (r: Response): Promise<string> => readFastApiError(r);
 
@@ -463,7 +465,7 @@ export async function streamExportLogs(options: {
     throw new Error(await readError(response));
   }
   if (!response.body) {
-    throw new Error("Export log stream unavailable");
+    throw new Error(translate("uxExport.exportLogStreamUnavailablebhsx6"));
   }
 
   options.onOpen?.();
@@ -518,7 +520,7 @@ export async function streamExportLogs(options: {
             options.onEvent({ event: "complete", id: parsed.id });
             return;
           } else if (parsed.event === "error") {
-            let errorMessage = "Export log stream error";
+            let errorMessage = translate("uxExport.exportLogStreamErrorp8wjc");
             try {
               const payload = JSON.parse(parsed.data) as { error?: string };
               if (payload.error) errorMessage = payload.error;

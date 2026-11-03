@@ -1,6 +1,6 @@
-# Model defaults for LAiM/orpheus-3b-0.1-ft
+# Model defaults for unsloth/orpheus-3b-0.1-ft
 # Based on Orpheus_(3B)-TTS.ipynb
-# Also applies to: LAiM/orpheus-3b-0.1-ft-LAiM-bnb-4bit, canopylabs/orpheus-3b-0.1-ft, LAiM/orpheus-3b-0.1-ft-bnb-4bit
+# Also applies to: unsloth/orpheus-3b-0.1-ft-unsloth-bnb-4bit, canopylabs/orpheus-3b-0.1-ft, unsloth/orpheus-3b-0.1-ft-bnb-4bit
 # added inference parameters from LAiM notebook
 
 audio_type: snac
@@ -20,7 +20,7 @@ training:
   random_seed: 3407
   packing: false
   train_on_completions: true
-  gradient_checkpointing: "LAiM"
+  gradient_checkpointing: "unsloth"
   optim: "adamw_8bit"
   lr_scheduler_type: "linear"
 

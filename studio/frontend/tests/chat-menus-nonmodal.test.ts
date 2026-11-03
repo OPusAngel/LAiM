@@ -11,7 +11,7 @@ import test from "node:test";
 
 import ts from "@typescript/typescript6";
 
-import { readSrc } from "./helpers/kit.ts";
+import { expandI18n, readSrc, readSrcExpanded } from "./helpers/kit.ts";
 
 /** Keyed by a marker on the menu's trigger. */
 const NON_MODAL = [
@@ -32,7 +32,7 @@ const MENU_ROOTS = new Set(["NonModalDropdownMenu", "DropdownMenu"]);
 const parse = (relative: string): ts.SourceFile =>
   ts.createSourceFile(
     relative,
-    readFileSync(new URL(`../src/${relative}`, import.meta.url), "utf8"),
+    expandI18n(readFileSync(new URL(`../src/${relative}`, import.meta.url), "utf8")),
     ts.ScriptTarget.ESNext,
     true,
     ts.ScriptKind.TSX,
@@ -116,6 +116,6 @@ test("the dismiss guard is mounted only while the menu is open", () => {
 
 test("the menu content still animates out, which is why the guard is gated", () => {
   // Without the animation the gate above is merely harmless; revisit it rather than drop it.
-  const content = readSrc("components/ui/dropdown-menu.tsx");
+  const content = readSrcExpanded("components/ui/dropdown-menu.tsx");
   assert.match(content, /data-closed:animate-out/);
 });

@@ -166,7 +166,7 @@ def test_the_worker_reports_the_repos_a_lora_load_fetches(monkeypatch):
     models = types.ModuleType("LAiM.models")
     loader_utils = types.ModuleType("LAiM.models.loader_utils")
     loader_utils.get_model_name = (
-        lambda name, load_in_4bit = True: "LAiM/base-bnb-4bit" if load_in_4bit else name
+        lambda name, load_in_4bit = True: "unsloth/base-bnb-4bit" if load_in_4bit else name
     )
     loader = types.ModuleType("LAiM.models.loader")
     loader.ALLOW_PREQUANTIZED_MODELS = True
@@ -186,18 +186,18 @@ def test_the_worker_reports_the_repos_a_lora_load_fetches(monkeypatch):
     assert worker._load_download_repos(adapter, True, cuda) == [
         "owner/adapter",
         "owner/base",
-        "LAiM/base-bnb-4bit",
+        "unsloth/base-bnb-4bit",
     ]
     assert worker._load_download_repos(adapter, False, cuda) == ["owner/adapter", "owner/base"]
     assert worker._load_download_repos(adapter, True, SimpleNamespace(device = "mlx")) == [
         "owner/adapter",
         "owner/base",
     ]
-    bnb = SimpleNamespace(identifier = "owner/adapter", base_model = "LAiM/base-LAiM-bnb-4bit")
+    bnb = SimpleNamespace(identifier = "owner/adapter", base_model = "unsloth/base-unsloth-bnb-4bit")
     assert worker._load_download_repos(bnb, True, SimpleNamespace(device = "mlx")) == [
         "owner/adapter",
-        "LAiM/base-LAiM-bnb-4bit",
-        "LAiM/base",
+        "unsloth/base-unsloth-bnb-4bit",
+        "unsloth/base",
     ]
     local = SimpleNamespace(identifier = "/models/adapter", base_model = "owner/base")
     assert worker._load_download_repos(local, True, SimpleNamespace(device = "mlx")) == ["owner/base"]
@@ -210,7 +210,7 @@ def test_the_worker_reports_the_repos_a_lora_load_fetches(monkeypatch):
     assert worker._load_download_repos(adapter, True, cuda) == [
         "owner/adapter",
         "owner/base",
-        "LAiM/base",
+        "unsloth/base",
     ]
     loader.ALLOW_PREQUANTIZED_MODELS = True
 
@@ -236,10 +236,10 @@ def test_the_worker_reports_the_repos_a_lora_load_fetches(monkeypatch):
     assert worker._load_download_repos(audio_vlm, True, cuda) == [
         "owner/avlm-lora",
         "owner/base",
-        "LAiM/base-bnb-4bit",
+        "unsloth/base-bnb-4bit",
     ]
     spark = SimpleNamespace(
-        identifier = "owner/spark-lora", base_model = "LAiM/Spark-TTS-0.5B/LLM", audio_type = "bicodec"
+        identifier = "owner/spark-lora", base_model = "unsloth/Spark-TTS-0.5B/LLM", audio_type = "bicodec"
     )
     monkeypatch.setattr(worker, "_load_download_repos", worker._load_download_repos)
     import utils.security.file_security as file_security
@@ -247,11 +247,11 @@ def test_the_worker_reports_the_repos_a_lora_load_fetches(monkeypatch):
     monkeypatch.setattr(
         file_security,
         "load_scan_target",
-        lambda name, subdirs: ("LAiM/Spark-TTS-0.5B", ("LLM",))
+        lambda name, subdirs: ("unsloth/Spark-TTS-0.5B", ("LLM",))
         if name.endswith("/LLM")
         else (name, subdirs),
     )
     assert worker._load_download_repos(spark, True, SimpleNamespace(device = "mlx")) == [
         "owner/spark-lora",
-        "LAiM/Spark-TTS-0.5B",
+        "unsloth/Spark-TTS-0.5B",
     ]

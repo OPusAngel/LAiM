@@ -3,6 +3,7 @@
 
 "use client";
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/features/settings/stores/theme-store";
 import { apiUrl, isTauri } from "@/lib/api-base";
@@ -203,7 +204,7 @@ export function McpAppFrame(props: McpAppFrameProps) {
         }
       }
       if (pendingRef.current.length >= MAX_PENDING_TOOL_CALLS) {
-        throw new RpcError("Too many tool requests are waiting");
+        throw new RpcError(translate("uxChat.tooManyToolRequests9fxyv"));
       }
       const preview = argsPreview(args);
       const [allow, always] = await new Promise<[boolean, boolean]>((done) =>
@@ -273,12 +274,12 @@ export function McpAppFrame(props: McpAppFrameProps) {
           const url = String(params.url);
           if (!isHttpUrl(url)) {
             throw new RpcError(
-              "Only http(s) links can be opened",
+              translate("uxChat.onlyHttpSLinksex0tp"),
               INVALID_PARAMS,
             );
           }
           if (pendingRef.current.length >= MAX_PENDING_TOOL_CALLS) {
-            throw new RpcError("Too many requests are waiting");
+            throw new RpcError(translate("uxChat.tooManyRequestsArew2bnt"));
           }
           // Asked like a tool call: the widget is untrusted and Desktop has no popup blocker.
           const opened = await new Promise<boolean>((done) =>
@@ -462,7 +463,7 @@ export function McpAppFrame(props: McpAppFrameProps) {
         referrerPolicy="no-referrer"
         onLoad={onLoad}
         style={{ height }}
-        title={`${toolName} app`}
+        title={translate("uxChat.appe0w62", { p1: toolName })}
         className={cn(
           "mt-2 block w-full rounded border border-border bg-background",
           className,
@@ -471,11 +472,11 @@ export function McpAppFrame(props: McpAppFrameProps) {
       {asking ? (
         <div
           role="group"
-          aria-label="Tool request from this app"
+          aria-label={translate("uxChat.toolRequestFromThis1uf0p")}
           className="mt-1 rounded border border-border bg-muted/30 px-3 py-2 text-ui-12p5"
         >
           <div>
-            {asking.link ? "This app wants to open " : "This app wants to run "}
+            {asking.link ? translate("uxChat.thisAppWantsTo9300r") : translate("uxChat.thisAppWantsTojids7")}
             <span className="font-mono break-all">{asking.name}</span>
             {pendingCalls.length > 1
               ? ` (+${pendingCalls.length - 1} more waiting)`
@@ -495,9 +496,7 @@ export function McpAppFrame(props: McpAppFrameProps) {
                 size="xs"
                 variant="outline"
                 onClick={() => answer(true, true)}
-              >
-                Always allow
-              </Button>
+              >{translate("uxChat.alwaysAllow5lyum")}</Button>
             )}
             <Button
               size="xs"

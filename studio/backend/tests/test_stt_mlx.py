@@ -178,7 +178,7 @@ def test_an_mlx_checkpoint_never_falls_back_to_the_in_process_whisper_engine(
 
     class NoSpawn:
         def start(self, *args, **kwargs):
-            raise worker_module.SttWorkerSpawnError("sandboxed")
+            raise worker_module.SttWorkerSpawnError("unrestricted")
 
     monkeypatch.setattr(worker_module, "WhisperWorker", NoSpawn)
     with pytest.raises(worker_module.SttWorkerSpawnError):

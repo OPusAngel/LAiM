@@ -367,8 +367,8 @@ def _mlx_revision_fallback_error(config: dict) -> RuntimeError | None:
     revision = config.get("model_revision")
     if (
         revision
-        and model_name.startswith("LAiM/")
-        and model_name.endswith(("-LAiM-bnb-4bit", "-bnb-4bit"))
+        and model_name.startswith("unsloth/")
+        and model_name.endswith(("-unsloth-bnb-4bit", "-bnb-4bit"))
     ):
         return RuntimeError(
             "The cached model snapshot is incomplete, but MLX cannot safely retry "
@@ -1053,7 +1053,7 @@ def _strip_LAiM_bnb_4bit_suffix(model_name: str) -> str:
     """LAiM.models.loader._strip_LAiM_bnb_4bit_suffix, copied rather than imported: that
     module pulls in torch, and this runs before the worker is allowed to."""
     stripped = model_name
-    for suffix in ("-LAiM-bnb-4bit", "-bnb-4bit"):
+    for suffix in ("-unsloth-bnb-4bit", "-bnb-4bit"):
         if len(stripped) >= len(suffix) and stripped.lower().endswith(suffix):
             stripped = stripped[: -len(suffix)]
     return stripped
@@ -4002,8 +4002,8 @@ def run_training_process(*, event_queue: Any, stop_queue: Any, config: dict) -> 
     _lowered = model_name.lower()
     if (
         any(sub in _lowered for sub in _NEMOTRON_TRUST_SUBSTRINGS)
-        and (_lowered.startswith("LAiM/") or _lowered.startswith("nvidia/"))
-        # Confirm a genuine first-party Hub repo (not a spoofed "LAiM/" name); authenticated.
+        and (_lowered.startswith("unsloth/") or _lowered.startswith("nvidia/"))
+        # Confirm a genuine first-party Hub repo (not a spoofed "unsloth/" name); authenticated.
         and is_trusted_org_repo(model_name, hf_token = _worker_hf_token(config))
         and not config.get("trust_remote_code", False)
     ):
@@ -4848,7 +4848,7 @@ def run_training_process(*, event_queue: Any, stop_queue: Any, config: dict) -> 
                 local_files_only = model_local_only,
                 actual_model_repo_id = config.get("actual_model_repo_id"),
                 model_revision = model_revision,
-                use_gradient_checkpointing = config.get("gradient_checkpointing", "LAiM"),
+                use_gradient_checkpointing = config.get("gradient_checkpointing", "unsloth"),
                 offload_layers = config.get("offload_layers", 0),
                 prefetch_depth = config.get("prefetch_depth", 2),
                 offload_plan_shape = _offload_plan_shape(config),
@@ -4917,7 +4917,7 @@ def run_training_process(*, event_queue: Any, stop_queue: Any, config: dict) -> 
                         local_files_only = model_local_only,
                         actual_model_repo_id = config.get("actual_model_repo_id"),
                         model_revision = model_revision,
-                        use_gradient_checkpointing = config.get("gradient_checkpointing", "LAiM"),
+                        use_gradient_checkpointing = config.get("gradient_checkpointing", "unsloth"),
                         offload_layers = config.get("offload_layers", 0),
                         prefetch_depth = config.get("prefetch_depth", 2),
                         offload_plan_shape = _offload_plan_shape(config),
@@ -4989,7 +4989,7 @@ def run_training_process(*, event_queue: Any, stop_queue: Any, config: dict) -> 
                 lora_r = config.get("lora_r", 128),
                 lora_alpha = config.get("lora_alpha", 32),
                 lora_dropout = config.get("lora_dropout", 0.0),
-                use_gradient_checkpointing = config.get("gradient_checkpointing", "LAiM"),
+                use_gradient_checkpointing = config.get("gradient_checkpointing", "unsloth"),
                 use_rslora = config.get("use_rslora", False),
                 use_loftq = _lora_uses_loftq(config),
                 use_dora = config.get("use_dora", False),
@@ -5007,7 +5007,7 @@ def run_training_process(*, event_queue: Any, stop_queue: Any, config: dict) -> 
                 lora_r = config.get("lora_r", 16),
                 lora_alpha = config.get("lora_alpha", 16),
                 lora_dropout = config.get("lora_dropout", 0.0),
-                use_gradient_checkpointing = config.get("gradient_checkpointing", "LAiM"),
+                use_gradient_checkpointing = config.get("gradient_checkpointing", "unsloth"),
                 use_rslora = config.get("use_rslora", False),
                 use_loftq = _lora_uses_loftq(config),
                 use_dora = config.get("use_dora", False),
@@ -5017,7 +5017,7 @@ def run_training_process(*, event_queue: Any, stop_queue: Any, config: dict) -> 
             _send_status(event_queue, "Preparing model for full finetuning...")
             success = trainer.prepare_model_for_training(
                 use_lora = False,
-                use_gradient_checkpointing = config.get("gradient_checkpointing", "LAiM"),
+                use_gradient_checkpointing = config.get("gradient_checkpointing", "unsloth"),
             )
 
         if not success or trainer.should_stop:

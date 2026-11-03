@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { useSettingsDialogStore } from "@/features/settings/stores/settings-dialog-store";
 import {
   applyDictationDictionary,
@@ -76,17 +77,17 @@ export const describeMediaError = (error: unknown): string => {
     // The desktop WebView has no site-permission UI, so Settings is the only way back.
     return isTauri
       ? "Microphone access is blocked. Open Settings > Voice and click Allow microphone."
-      : "Microphone access is blocked. Allow microphone access for this LAiM page, then try again.";
+      : translate("uxChat.microphoneAccessIsBlockedc32zj");
   }
   if (name === "NotFoundError" || name === "OverconstrainedError") {
-    return "No microphone was found for dictation.";
+    return translate("uxChat.noMicrophoneWasFoundplunq");
   }
   if (name === "NotReadableError" || name === "AbortError") {
-    return "The microphone is already in use or unavailable.";
+    return translate("uxChat.theMicrophoneIsAlreadyi0j1l");
   }
   return error instanceof Error && error.message
     ? error.message
-    : "Dictation could not access the microphone.";
+    : translate("uxChat.dictationCouldNotAccessd7onq");
 };
 
 export const describeSpeechError = (
@@ -94,16 +95,16 @@ export const describeSpeechError = (
   message?: string,
 ): string => {
   if (error === "not-allowed") {
-    return "Speech recognition was blocked by the browser. Check microphone permissions for this LAiM page.";
+    return translate("uxChat.speechRecognitionWasBlockedsf0h0");
   }
   if (error === "service-not-allowed") {
-    return "Speech recognition is blocked by the browser speech service.";
+    return translate("uxChat.speechRecognitionIsBlocked82fca");
   }
   if (error === "network") {
-    return "Speech recognition could not reach the browser speech service.";
+    return translate("uxChat.speechRecognitionCouldNot6w1a8");
   }
   if (error === "language-not-supported") {
-    return "Speech recognition does not support the current language.";
+    return translate("uxChat.speechRecognitionDoesNotcyuq9");
   }
   return message || `Speech recognition failed: ${error}`;
 };
@@ -144,7 +145,7 @@ export class StudioWebSpeechDictationAdapter implements DictationAdapter {
   listen(): DictationAdapter.Session {
     const SpeechRecognitionAPI = getSpeechRecognitionAPI();
     if (!SpeechRecognitionAPI || !navigator.mediaDevices?.getUserMedia) {
-      throw new Error("Speech recognition is not supported in this browser.");
+      throw new Error(translate("uxChat.speechRecognitionIsNot0fg4z"));
     }
 
     beginDictationSession();
@@ -363,16 +364,16 @@ export class StudioWebSpeechDictationAdapter implements DictationAdapter {
         errorEvent.error,
         errorEvent.message,
       );
-      console.error("Dictation error:", errorEvent.error, errorEvent.message);
+      console.error(translate("uxChat.dictationError8ebj6"), errorEvent.error, errorEvent.message);
       if (errorEvent.error === "network") {
         // Online speech service unreachable; point the user to the offline local engine (the toast
         // opens Voice settings).
-        toast.error("No internet connection", {
+        toast.error(translate("uxChat.noInternetConnectionzazvl"), {
           id: NETWORK_TOAST_ID,
           description:
-            "Browser dictation needs the online speech service. Switch to Local in Voice settings and pick a local STT model to dictate offline.",
+            translate("uxChat.browserDictationNeedsThejzp69"),
           action: {
-            label: "Open Voice settings",
+            label: translate("settings.voice.dictation.sttOpenVoiceSettings"),
             onClick: () =>
               useSettingsDialogStore.getState().openDialog("voice"),
           },
@@ -418,7 +419,7 @@ export class StudioWebSpeechDictationAdapter implements DictationAdapter {
         const audioTrack = stream.getAudioTracks()[0];
         if (!audioTrack || audioTrack.readyState !== "live") {
           throw new DOMException(
-            "No live microphone track is available.",
+            translate("uxChat.noLiveMicrophoneTrackhbkyt"),
             "NotFoundError",
           );
         }
@@ -440,7 +441,7 @@ export class StudioWebSpeechDictationAdapter implements DictationAdapter {
         started = true;
       } catch (error) {
         const description = describeMediaError(error);
-        console.error("Dictation microphone error:", error);
+        console.error(translate("uxChat.dictationMicrophoneErrorlohs2"), error);
         toast.error(description);
         finish("error");
       }

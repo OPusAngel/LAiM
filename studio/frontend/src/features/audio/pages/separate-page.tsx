@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   GalleryItemMenu,
   GalleryPinBadge,
@@ -144,15 +145,15 @@ function SeparateInputs({
       <div data-tour="audio-separate-source">
         <AudioSourceInput
           id="separate-source"
-          label="Track"
-          hint="Converted to 44.1 kHz automatically. Up to 10 minutes."
+          label={translate("uxAudio.track95ckw")}
+          hint={translate("uxAudio.convertedTo4411w792")}
           value={separate.source}
           onChange={setSource}
           disabled={disabled}
           allowSavedVoice={false}
           usesFirstSeconds={null}
           expiredMessage={SEPARATE_TRACK_EXPIRED_MESSAGE}
-          recordHint="Play the track near the mic, up to 10 minutes."
+          recordHint={translate("uxAudio.playTheTrackNear7fvxk")}
           // A second under the cap: the timer fires late, and the server allows no overrun.
           maxRecordSeconds={SEPARATE_MAX_SECONDS - 1}
           handleRef={separate.sourceHandle}
@@ -162,7 +163,7 @@ function SeparateInputs({
       {outputs ? <StemChips stems={outputs} /> : null}
       {pageModelLoaded ? null : (
         <p className="text-ui-11p5 leading-snug text-muted-foreground">
-          Loading a separation model replaces the model in the main slot.
+          {translate("uxAudio.loadingASeparationModelyh0ge")}
         </p>
       )}
       {pageModelLoaded && separate.cpuWarning ? (
@@ -257,16 +258,14 @@ export function SeparateFooter({
       {ready && !presentation && !props.error ? (
         <p className="text-center text-ui-11p5 leading-snug text-muted-foreground">
           {separate.willReload
-            ? "Reloads the model with the new overlap first (a few seconds). "
+            ? translate("uxAudio.reloadsTheModelWithnc90b")
             : ""}
           {separate.estimateSeconds !== null && !separate.cpuWarning ? (
             <>
               About{" "}
               <span className="font-mono tabular-nums">
                 {separate.estimateSeconds}
-              </span>{" "}
-              s on the GPU.
-            </>
+              </span>{translate("uxAudio.sOnTheGPU75h4q", { p1: " " })}</>
           ) : null}
         </p>
       ) : null}
@@ -351,17 +350,12 @@ function SelectedSeparation({
         }}
       />
       {sources.failedIds.length > 0 ? (
-        <p role="alert" className="mt-2 text-ui-11p5 text-muted-foreground">
-          Could not load {sources.failedIds.length} of {group.stems.length}{" "}
-          stems.{" "}
-          <Button
+        <p role="alert" className="mt-2 text-ui-11p5 text-muted-foreground">{translate("uxAudio.couldNotLoadOfi9qdh", { p1: sources.failedIds.length, p2: group.stems.length, p3: " ", p4: " " })}<Button
             variant="link"
             size="sm"
             className="h-auto p-0"
             onClick={() => setAttempt((n) => n + 1)}
-          >
-            Try again
-          </Button>
+          >{translate("uxAudio.tryAgainqnlxc")}</Button>
         </p>
       ) : null}
     </>
@@ -441,7 +435,7 @@ export function SeparateOutput({
     if (fresh && selected) setFocusedGroup(selected.groupId);
   }, [fresh, selected]);
   const announcement = lastResult
-    ? `Separated into ${lastResult.stems} stem${lastResult.stems === 1 ? "" : "s"}.`
+    ? translate("uxAudio.separatedIntoStems6miyd", { p1: lastResult.stems, p2: lastResult.stems === 1 ? "" : "s" })
     : "";
   const picks = modelReady || !onPickModel ? [] : recommendedModels.slice(0, 3);
 
@@ -456,7 +450,7 @@ export function SeparateOutput({
       );
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Could not archive the stems.",
+        error instanceof Error ? error.message : translate("uxAudio.couldNotArchiveThefttcv"),
       );
       return;
     }
@@ -493,7 +487,7 @@ export function SeparateOutput({
             </span>
             <span className="block text-ui-11p5 text-muted-foreground">
               {pendingRun.model
-                ? `Separating with ${audioModelLabel(pendingRun.model)}…`
+                ? translate("uxAudio.separatingWith3rdl8", { p1: audioModelLabel(pendingRun.model) })
                 : "Separating…"}{" "}
               The stems appear here when they are ready.
             </span>
@@ -511,16 +505,13 @@ export function SeparateOutput({
               }}
             />
             {selected.complete ? null : (
-              <p className="mt-2 text-ui-11p5 text-muted-foreground">
-                {selected.stems.length} of {selected.expectedStems} stems; the
-                others were deleted.
-              </p>
+              <p className="mt-2 text-ui-11p5 text-muted-foreground">{translate("uxAudio.ofStemsTheOthers0ozyq", { p1: selected.stems.length, p2: selected.expectedStems })}</p>
             )}
           </div>
         ) : fallbackClip ? (
           <div className="flex w-full max-w-xl flex-col gap-3">
             <p className="text-ui-13 text-muted-foreground">
-              Stems saved, waiting for the history to list them.
+              {translate("uxAudio.stemsSavedWaitingFor1gqje")}
             </p>
             <Button
               variant="outline"
@@ -529,20 +520,20 @@ export function SeparateOutput({
               onClick={handleDownloadFallbackClip}
             >
               <HugeiconsIcon icon={Download01Icon} className="size-3.5" />
-              Download the first stem
+              {translate("uxAudio.downloadTheFirstStemm6kzz")}
             </Button>
           </div>
         ) : (
           <div className="grid justify-items-center gap-3">
             <p className="text-ui-13 text-muted-foreground">
               {modelReady
-                ? "Stems land here. Add a track and press Generate."
-                : "Stems land here. Load a separation model, add a track, and press Generate."}
+                ? translate("uxAudio.stemsLandHereAddslfep")
+                : translate("uxAudio.stemsLandHereLoady4jta")}
             </p>
             {picks.length > 0 ? (
               <div
                 className="flex flex-wrap justify-center gap-2"
-                aria-label="Recommended models"
+                aria-label={translate("uxAudio.recommendedModelsu5i1l")}
               >
                 {picks.map((model) => (
                   <Button
@@ -551,9 +542,7 @@ export function SeparateOutput({
                     variant="outline"
                     size="sm"
                     onClick={() => onPickModel?.(model.id)}
-                  >
-                    Use {model.name}
-                  </Button>
+                  >{translate("uxAudio.usejk2qp", { p1: model.name })}</Button>
                 ))}
               </div>
             ) : null}
@@ -564,15 +553,13 @@ export function SeparateOutput({
         <div className="flex shrink-0 flex-col gap-2">
           <div className="flex items-center justify-between">
             <span className="text-ui-11p5 font-medium text-muted-foreground">
-              History
+              {translate("browser.pages.history")}
             </span>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => void handleClearGallery()}
-            >
-              Clear all
-            </Button>
+            >{translate("uxAudio.clearAllyye4n")}</Button>
           </div>
           <div
             className="hover-scrollbar flex max-h-40 flex-col gap-1 overflow-y-auto py-1"

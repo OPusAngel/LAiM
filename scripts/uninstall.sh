@@ -3,7 +3,7 @@
 # Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 # LAiM Studio uninstaller (macOS / Linux / WSL). Run --help for details.
 # Custom roots (LAiM_STUDIO_HOME / STUDIO_HOME) come from studio.conf.
-# Usage: curl -fsSL https://raw.githubusercontent.com/LAiMai/LAiM/main/scripts/uninstall.sh | sh
+# Usage: curl -fsSL https://raw.githubusercontent.com/OPusAngel/LAiM/main/scripts/uninstall.sh | sh
 
 set -e
 
@@ -12,12 +12,12 @@ _usage() {
 LAiM Studio uninstaller (macOS / Linux / WSL).
 
 Usage:
-  curl -fsSL https://raw.githubusercontent.com/LAiMai/LAiM/main/scripts/uninstall.sh | sh
+  curl -fsSL https://raw.githubusercontent.com/OPusAngel/LAiM/main/scripts/uninstall.sh | sh
   sh scripts/uninstall.sh
 
 To read this help from the piped form, sh needs -s so the arguments reach the
 script instead of the shell. Spelled out, with the same URL as above:
-  curl -fsSL https://raw.githubusercontent.com/LAiMai/LAiM/main/scripts/uninstall.sh | sh -s -- --help
+  curl -fsSL https://raw.githubusercontent.com/OPusAngel/LAiM/main/scripts/uninstall.sh | sh -s -- --help
 
 Never pipe to `sh -h` expecting help. Neither form prints this message: where
 -h is accepted (bash, zsh, macOS /bin/sh) it is the shell's own hashall option,
@@ -1269,7 +1269,7 @@ _LAiM_uninstall_main() {
         echo "If you installed LAiM Studio with LAiM_STUDIO_HOME or STUDIO_HOME"
         echo "pointing at a custom directory, re-run this script with the same variable"
         echo "set to also remove that install tree, e.g.:"
-        echo "  LAiM_STUDIO_HOME=/your/path sh -c \"\$(curl -fsSL https://raw.githubusercontent.com/LAiMai/LAiM/main/scripts/uninstall.sh)\""
+        echo "  LAiM_STUDIO_HOME=/your/path sh -c \"\$(curl -fsSL https://raw.githubusercontent.com/OPusAngel/LAiM/main/scripts/uninstall.sh)\""
     fi
 }
 

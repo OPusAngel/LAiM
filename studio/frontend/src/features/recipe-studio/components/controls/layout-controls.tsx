@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { type ReactElement, useCallback } from "react";
 import {
   Panel,
@@ -57,7 +58,7 @@ export function LayoutControls({
   return (
     <Panel position="top-left" className="m-3 flex items-center gap-2">
       <Button size="sm" className="corner-squircle" variant="secondary" onClick={handleLayout}>
-        Auto layout
+        {translate("uxRecipestudio.autoLayout8dtqy")}
       </Button>
       <Button size="sm" className="corner-squircle" variant="outline" onClick={handleToggleDirection}>
         {direction}

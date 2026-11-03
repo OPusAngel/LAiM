@@ -25,7 +25,7 @@ REVIEWED_VENDORED_OFFENDERS = {
     "studio/backend/vendor/laya/agent.py:156: open()",
     # Cloudflare's Clef loader (sha256 in LAiM/_vendor/clef/clef_manifest.json) reading
     # joint_head_config.json, which json.dumps writes as ASCII, so every locale decodes it.
-    "LAiM/_vendor/clef/joint_schema_model.py:515: read_text()",
+    "unsloth/_vendor/clef/joint_schema_model.py:515: read_text()",
 }
 # keyed on path + expression, not line, so unrelated edits above it do not break the scan.
 REVIEWED_NON_FILE_OPEN = (

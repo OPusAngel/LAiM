@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { requestSttDownload } from "@/features/settings/stores/stt-download-prompt-store";
 import {
   type DictationEngine,
@@ -98,7 +99,7 @@ export class StudioDictationAdapter implements DictationAdapter {
     if (usesRecordedAudio(dictationEngine)) {
       if (dictationEngine === "custom" && !customSttConfigured()) {
         throw new Error(
-          "Custom transcription is not configured. Pick a connection and model in Settings → Voice.",
+          translate("uxChat.customTranscriptionIsNotqkera"),
         );
       }
       if (StudioModelDictationAdapter.isSupported()) {
@@ -108,8 +109,8 @@ export class StudioDictationAdapter implements DictationAdapter {
       }
       throw new Error(
         dictationEngine === "custom"
-          ? "Voice recording is not supported in this browser."
-          : "Local model dictation is not supported in this browser.",
+          ? translate("uxChat.voiceRecordingIsNotwkgfo")
+          : translate("uxChat.localModelDictationIs08g4n"),
       );
     }
     if (StudioWebSpeechDictationAdapter.isSupported()) {
@@ -117,7 +118,7 @@ export class StudioDictationAdapter implements DictationAdapter {
         chatId: this.chatId,
       }).listen();
     }
-    throw new Error("Browser dictation is not supported in this browser.");
+    throw new Error(translate("uxChat.browserDictationIsNotsyz11"));
   }
 }
 
@@ -136,19 +137,19 @@ export function notifyStudioDictationUnavailable(
 ): void {
   // Both engines need a secure context (localhost or HTTPS).
   if (typeof window !== "undefined" && !window.isSecureContext) {
-    toast.error("Voice typing needs a secure connection.", {
+    toast.error(translate("uxChat.voiceTypingNeedsA1f7ip"), {
       description: insecureDictationGuidance(currentDictationEntryMode()),
     });
     return;
   }
   if (dictationEngine === "custom" && !customSttConfigured()) {
-    toast.error("Custom transcription isn't configured.", {
-      description: "Pick a connection and model in Voice settings.",
+    toast.error(translate("uxChat.customTranscriptionIsnT14l5g"), {
+      description: translate("uxChat.pickAConnectionAnddhhsb"),
     });
     return;
   }
   if (usesRecordedAudio(dictationEngine)) {
-    toast.error("Voice recording isn't available in this browser.");
+    toast.error(translate("uxChat.voiceRecordingIsnT19i6b"));
     return;
   }
   // Firefox lacks Web Speech, so offer local dictation.
@@ -165,9 +166,8 @@ async function offerLocalDictation(): Promise<void> {
     const engine = sttEngineStatusFor(status, sttModel);
     // avoid offering a large download when the runtime cannot load it.
     if (engine && !engine.available) {
-      toast.error("Local transcription isn't installed on this server.", {
-        description:
-          "Run `LAiM studio update` to install it, then choose a model in Voice settings.",
+      toast.error(translate("uxChat.localTranscriptionIsnTvqbyg"), {
+        get description() { return translate("uxChat.runLAiMStudioUpdate3yll1"); },
       });
       return;
     }
@@ -176,9 +176,9 @@ async function offerLocalDictation(): Promise<void> {
       (await sttQuantDownloaded(sttModel, ggufVariant))
     ) {
       setDictationEngine("model");
-      toast.success("Switched to local transcription.", {
+      toast.success(translate("uxChat.switchedToLocalTranscriptioncvm5e"), {
         description:
-          "Voice typing isn't available in this browser. Press the mic again to dictate.",
+          translate("uxChat.voiceTypingIsnT1wm38"),
       });
       return;
     }

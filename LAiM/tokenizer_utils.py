@@ -67,7 +67,7 @@ os.environ["LAiM_IGNORED_TOKENIZER_NAMES"] = "\n".join(IGNORED_TOKENIZER_NAMES)
 
 # gemma-4 base mirrors do not prepend <bos> (post_processor.single = [A], google's is [<bos>, A]).
 # Not keyed on add_bos_token (google omits it on E4B/31B/26B-A4B and still prepends) nor on repo
-# name. -it is skipped: its chat_template emits BOS. LAiMai/LAiM#7903
+# name. -it is skipped: its chat_template emits BOS. OPusAngel/LAiM#7903
 _GEMMA4_INSTRUCT_EOS = "<turn|>"
 
 # Anchored: a future gemma-4.5 / gemma_45 has its own BOS policy, and DiffusionGemma4... is not gemma 4.
@@ -253,7 +253,7 @@ def _enable_add_bos_token(tokenizer):
         if not _tokenizer_auto_adds_bos(obj):
             logger.warning(
                 "LAiM: add_bos_token was set for this Gemma 4 base tokenizer but it still "
-                "does not prepend <bos>. See LAiMai/LAiM#7903."
+                "does not prepend <bos>. See OPusAngel/LAiM#7903."
             )
 
 
@@ -402,7 +402,7 @@ def _literal_regex(text):
 
 # LAiM's 2025 Mistral Small 3.2 template emitted [AVAILABLE_TOOLS] only when the last message was a
 # user or tool turn, so training rows ending in an assistant reply lost the tool list. mistral_common
-# (serving and finetuning) puts it before the last user message; rewrite to that (LAiMai/LAiM#3096).
+# (serving and finetuning) puts it before the last user message; rewrite to that (OPusAngel/LAiM#3096).
 _MISTRAL_TOOLS_REWRITES = (
     (
         re.compile(

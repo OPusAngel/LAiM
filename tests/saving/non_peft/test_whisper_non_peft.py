@@ -28,7 +28,7 @@ print("🔍 PHASE 1: Loading Base Model")
 print(f"{'='*80}")
 
 model, tokenizer = FastModel.from_pretrained(
-    model_name = "LAiM/whisper-large-v3",
+    model_name = "unsloth/whisper-large-v3",
     dtype = None,
     load_in_4bit = False,
     auto_model = WhisperForConditionalGeneration,

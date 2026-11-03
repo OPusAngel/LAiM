@@ -10,6 +10,11 @@ const { runBrowserAction } = await import("../src/features/browser/agent/executo
 const { answerQuestion, stopBrowserAgent, useBrowserAgentStore } = await import("../src/features/browser/agent/agent-store.ts");
 const { chatKeyOfThread, useBrowserStore } = await import("../src/features/browser/store.ts");
 
+// LAiM ships the agent with full rights, so the prompts checked here need the asking rules put back.
+useBrowserAgentStore.setState({
+  permissions: { defaults: { browsing: "ask", actions: "ask", downloads: "ask", unlabelled: "ask" }, sites: {} },
+});
+
 const globals = globalThis as Record<string, unknown>;
 // The stub page loads at once, as tab-view marks a real tab loaded; else each action waits out LOAD_TIMEOUT_MS.
 useBrowserStore.subscribe(({ tabs }) => {

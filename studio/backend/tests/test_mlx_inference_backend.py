@@ -1987,7 +1987,7 @@ def _delivered(snapshots):
 @pytest.mark.parametrize(
     "pieces, expected",
     [
-        # 🎉 and ✨ are byte-fallback pairs in Qwen3's vocab (LAiMai/LAiM#8594).
+        # 🎉 and ✨ are byte-fallback pairs in Qwen3's vocab (OPusAngel/LAiM#8594).
         (
             [b"Party ", b"\xf0\x9f\x8e", b"\x89", b" sparkle ", b"\xe2\x9c", b"\xa8", b" done"],
             "Party \U0001f389 sparkle \u2728 done",

@@ -12,6 +12,8 @@ import { type SendAction, sendActionsFor } from "../music/music-edit-rules";
 import { useAudioMusicStore } from "../stores/audio-music-store";
 import { useAudioWorkspaceStore } from "../stores/audio-workspace-store";
 import { clipWorkflow } from "../workflows";
+import { translate } from "@/i18n";
+
 
 // history is scoped per page, so these actions appear only on Music.
 const SEND_LABEL: Record<SendAction, string> = {
@@ -27,7 +29,7 @@ const SEND_ICON = {
 export function sendClipToMusic(
   clip: AudioGalleryClip,
   action: SendAction,
-  name = clip.prompt || "Generated clip",
+  name = clip.prompt || translate("uxAudio.generatedClipkbw6f"),
 ): void {
   useAudioMusicStore.getState().pushClipToEdit(
     {

@@ -3,10 +3,11 @@
 
 "use client";
 
+import { translate } from "@/i18n";
 import { Spinner } from "@/components/ui/spinner";
 
-import { SandboxFiles } from "./sandbox-files-view";
-import { isSandboxFileList, type SandboxFile } from "./sandbox-files";
+import { WorkdirFiles } from "./workdir-files-view";
+import { isWorkdirFileList, type WorkdirFile } from "./workdir-files";
 import {
   preferSanitizedFullToolOutput,
   toolResultText,
@@ -21,7 +22,7 @@ import { useToolArgsStatus } from "@assistant-ui/react";
 import { CodeIcon } from "lucide-react";
 import { memo } from "react";
 import { pythonToolImagePath } from "./python-tool-image-path";
-import { useSandboxImage } from "./use-sandbox-image";
+import { useWorkdirImage } from "./use-workdir-image";
 import { CopyBtn, ToolCodeCell } from "./tool-code-cell";
 import { isToolCallRunning, toolArgText } from "./tool-arg-text";
 import {
@@ -36,7 +37,7 @@ interface StructuredResult {
   text: string;
   images: string[];
   sessionId: string;
-  files?: SandboxFile[];
+  files?: WorkdirFile[];
 }
 
 function isStructuredResult(val: unknown): val is StructuredResult {
@@ -48,7 +49,7 @@ function isStructuredResult(val: unknown): val is StructuredResult {
     "sessionId" in val &&
     // Persisted content can carry anything, and the card maps over this and
     // reads name off each entry.
-    isSandboxFileList(v.files)
+    isWorkdirFileList(v.files)
   );
 }
 
@@ -63,7 +64,7 @@ function PythonToolImage({
   // and its revocation live in one place instead of two. A failed or cancelled image stays as its
   // accessible alt text. Keyed by url inside the hook: a re-used element reads idle, not the
   // previous file's blob, and a stale response cannot write state for a url it was not fetched for.
-  const { ref, state } = useSandboxImage(pythonToolImagePath(sessionId, filename));
+  const { ref, state } = useWorkdirImage(pythonToolImagePath(sessionId, filename));
 
   return (
     <img
@@ -91,7 +92,7 @@ const PythonToolUIImpl: ToolCallMessagePartComponent = ({
 
   let output: string;
   let images: string[] = [];
-  let files: SandboxFile[] = [];
+  let files: WorkdirFile[] = [];
   let sessionId = "";
 
   if (isStructuredResult(result)) {
@@ -125,7 +126,7 @@ const PythonToolUIImpl: ToolCallMessagePartComponent = ({
   const scriptCell = code ? (
     <div className="mt-1 pl-5">
       <ToolCodeCell
-        label="script"
+        label={translate("uxComponents.script8y2pi")}
         code={code}
         language="python"
         downloadName="script.py"
@@ -161,10 +162,10 @@ const PythonToolUIImpl: ToolCallMessagePartComponent = ({
                 <Spinner className="size-3.5" />
                 <span>
                   {awaitingApproval
-                    ? "Waiting for approval…"
+                    ? translate("uxComponents.waitingForApprovalu473o")
                     : isWriting
-                      ? "Writing code…"
-                      : "Running…"}
+                      ? translate("uxComponents.writingCode43k1i")
+                      : translate("uxComponents.runningEllipsisw2les")}
                 </span>
               </div>
               {/* Live stdout streamed via tool_output SSE events. */}
@@ -196,7 +197,7 @@ const PythonToolUIImpl: ToolCallMessagePartComponent = ({
           )}
         </div>
       </ToolFallbackContent>
-      <SandboxFiles className="ml-5" sessionId={sessionId} files={files} />
+      <WorkdirFiles className="ml-5" sessionId={sessionId} files={files} />
     </ToolFallbackRoot>
   );
 };

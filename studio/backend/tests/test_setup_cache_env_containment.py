@@ -30,7 +30,7 @@ _STORAGE_ROOTS_PATH = Path(__file__).resolve().parent.parent / "utils/paths/stor
 _ALWAYS_PINNED = (
     "UV_CACHE_DIR",
     "VLLM_CACHE_ROOT",
-    "LAiM_COMPILE_LOCATION",
+    "UNSLOTH_COMPILE_LOCATION",
     "TORCHINDUCTOR_CACHE_DIR",
     "TRITON_CACHE_DIR",
     "TRITON_DUMP_DIR",
@@ -183,7 +183,7 @@ def test_a_spaced_root_leaves_the_compiler_caches_to_their_own_defaults(monkeypa
 
     _assert_no_unparseable_pin(sr, spaced)
     # Non-vacuity, and the point of the guard being narrow: everything else is still contained.
-    for key in ("UV_CACHE_DIR", "NUMBA_CACHE_DIR", "MPLCONFIGDIR", "LAiM_COMPILE_LOCATION"):
+    for key in ("UV_CACHE_DIR", "NUMBA_CACHE_DIR", "MPLCONFIGDIR", "UNSLOTH_COMPILE_LOCATION"):
         assert os.environ[key].startswith(str(spaced.parent)), key
 
 
@@ -231,7 +231,7 @@ def test_a_quoted_root_leaves_the_compiler_caches_to_their_own_defaults(
 
     _assert_no_unparseable_pin(sr, quoted)
     # Non-vacuity: the caches nobody pastes into a command line still move.
-    for key in ("UV_CACHE_DIR", "NUMBA_CACHE_DIR", "LAiM_COMPILE_LOCATION"):
+    for key in ("UV_CACHE_DIR", "NUMBA_CACHE_DIR", "UNSLOTH_COMPILE_LOCATION"):
         assert os.environ[key].startswith(str(quoted.parent)), key
 
 
@@ -1973,7 +1973,7 @@ _DECLINE_SIBLINGS = (
     "NUMBA_CACHE_DIR",
     "CUDA_CACHE_PATH",
     "UV_CACHE_DIR",
-    "LAiM_COMPILE_LOCATION",
+    "UNSLOTH_COMPILE_LOCATION",
 )
 
 

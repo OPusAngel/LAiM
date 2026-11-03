@@ -154,7 +154,7 @@ class TestRunShRocm:
         gids = [argv[i + 1] for i, a in enumerate(argv) if a == "--group-add"]
         assert gids == ["44", "992"], argv
         image, cmd = _image_and_cmd(argv)
-        assert image == "LAiM/LAiM-rocm:latest"
+        assert image == "unsloth/LAiM-rocm:latest"
         assert cmd == ["true"]
 
     def test_a_missing_dri_node_is_left_out_so_docker_still_starts(self, tmp_path):
@@ -173,13 +173,13 @@ class TestRunShRocm:
         argv, _ = _run_sh(tmp_path, ["python", "train.py", "--rocm"], nvidia = True)
         assert "--gpus" in argv, argv
         image, cmd = _image_and_cmd(argv)
-        assert image == "LAiM/LAiM:latest"
+        assert image == "unsloth/LAiM:latest"
         assert cmd == ["python", "train.py", "--rocm"]
 
     def test_the_env_form_selects_rocm_too(self, tmp_path):
         argv, _ = _run_sh(tmp_path, ["true"], extra_env = {"LAiM_ROCM": "1"})
         image, _ = _image_and_cmd(argv)
-        assert image == "LAiM/LAiM-rocm:latest"
+        assert image == "unsloth/LAiM-rocm:latest"
         assert "/dev/kfd" in argv
 
     def test_no_kfd_and_no_dxg_warns_and_starts_without_devices(self, tmp_path):
@@ -428,7 +428,7 @@ class TestBuildShRocm:
         assert "6.2" not in meaningful
         assert "github.ref == 'refs/heads/main' && github.run_id" in body
         assert "-r{0}', github.run_id" in body, "override sha tags need the run id suffix"
-        assert "git ls-remote https://github.com/LAiMai/LAiM-zoo" in body
+        assert "git ls-remote https://github.com/OPusAngel/LAiM-zoo" in body
         assert "needs.prepare.outputs.stable == 'true'" in body
         assert "org.opencontainers.image.licenses=Apache-2.0 AND AGPL-3.0-only" in body
 
@@ -617,7 +617,7 @@ class TestRocmEntrypoint:
         assert "LD_LIBRARY_PATH=/usr/lib/wsl/lib" in err, err
         # The bridge refuses the published image, so the recovery must name the per-arch build.
         assert "LAiM_IMAGE=LAiM-rocm:latest bash docker/run.sh --rocm" in err, err
-        assert "LAiM/LAiM-rocm:latest" not in err, err
+        assert "unsloth/LAiM-rocm:latest" not in err, err
 
     def _dxg_with_torch(
         self,
@@ -914,7 +914,7 @@ class TestRocmEntrypoint:
         prepare = wf["jobs"]["prepare"]
         assert prepare["outputs"]["notebooks_commit"] == "${{ steps.notebooks.outputs.commit }}"
         resolve = next(s for s in prepare["steps"] if s.get("id") == "notebooks")
-        assert "git ls-remote https://github.com/LAiMai/notebooks" in resolve["run"]
+        assert "git ls-remote https://github.com/unslothai/notebooks" in resolve["run"]
 
         def tag_lines(job):
             meta = next(s for s in wf["jobs"][job]["steps"] if s.get("id") == "meta")

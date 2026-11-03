@@ -371,7 +371,7 @@ def test_pinned_tag_default_and_override(monkeypatch):
 def test_repo_default_and_override(monkeypatch):
     monkeypatch.delenv("LAiM_SD_CPP_REPO", raising = False)
     # Default is the LAiM mirror; the env override can point back to leejet upstream.
-    assert _repo() == DEFAULT_REPO == "LAiMai/stable-diffusion.cpp"
+    assert _repo() == DEFAULT_REPO == "unslothai/stable-diffusion.cpp"
     monkeypatch.setenv("LAiM_SD_CPP_REPO", "leejet/stable-diffusion.cpp")
     assert _repo() == "leejet/stable-diffusion.cpp"
 
@@ -1309,7 +1309,7 @@ def test_the_legacy_default_studio_home_keeps_its_install_dir(tmp_path, monkeypa
 # The shipped pin, not a copy of it: a hardcoded tag here silently stops describing what users
 # actually install the moment DEFAULT_TAG moves.
 _TAG = DEFAULT_TAG
-# Exactly what LAiMai/stable-diffusion.cpp's CI publishes. It was CPU and Apple only, on the
+# Exactly what unslothai/stable-diffusion.cpp's CI publishes. It was CPU and Apple only, on the
 # premise that a GPU host runs diffusers instead. MiniMax-H3 falsified that: its diffusers path
 # wants more VRAM than a consumer card has, so those hosts fall back to the native engine, and on
 # Linux there was no accelerated build to fall back to. The CUDA leg is best effort and outside the
@@ -1339,7 +1339,7 @@ def _mresolve(
 
 
 def test_default_repo_is_the_LAiM_mirror():
-    assert sdmod.DEFAULT_REPO == "LAiMai/stable-diffusion.cpp"
+    assert sdmod.DEFAULT_REPO == "unslothai/stable-diffusion.cpp"
     assert sdmod.UPSTREAM_FALLBACK_REPO == "leejet/stable-diffusion.cpp"
 
 
@@ -1536,7 +1536,7 @@ def test_install_uses_mirror_when_available(tmp_path, monkeypatch, capsys):
     )
     sd_cli = install(install_dir = tmp_path)
     assert sd_cli.name == _CLI and sd_cli.is_file()
-    assert "LAiMai/stable-diffusion.cpp" in capsys.readouterr().out
+    assert "unslothai/stable-diffusion.cpp" in capsys.readouterr().out
 
 
 def test_install_falls_back_to_upstream_when_mirror_missing(tmp_path, monkeypatch, capsys):
@@ -3046,11 +3046,11 @@ def _server_load_backend(tmp_path, monkeypatch, root, server, on_fetch):
 
     monkeypatch.setattr(backend, "_fetch_assets", _fetch)
     backend._load_token = 1
-    backend._loading = bk._SdLoading(repo_id = "LAiM/Z-Image-Turbo-GGUF", base_repo = fam.base_repo)
+    backend._loading = bk._SdLoading(repo_id = "unsloth/Z-Image-Turbo-GGUF", base_repo = fam.base_repo)
 
     def _run():
         backend._run_load(
-            repo_id = "LAiM/Z-Image-Turbo-GGUF",
+            repo_id = "unsloth/Z-Image-Turbo-GGUF",
             gguf_filename = "z.gguf",
             base = fam.base_repo,
             fam = fam,

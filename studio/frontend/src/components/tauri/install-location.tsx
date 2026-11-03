@@ -3,6 +3,8 @@
 
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
+import { translate } from "@/i18n";
+
 
 interface StudioInstallLocation {
   path: string;
@@ -52,8 +54,7 @@ export default function InstallLocation({ disabled }: { disabled: boolean }) {
 
   return (
     <div className="flex max-w-[min(560px,90vw)] flex-col items-center gap-1 text-center text-ui-12 text-muted-foreground">
-      <p className="break-all">
-        Install location: <span className="text-foreground">{location.path}</span>
+      <p className="break-all">{translate("uxComponents.installLocationbbbly")}<span className="text-foreground">{location.path}</span>
       </p>
       <div className="flex items-center gap-3">
         <Button
@@ -70,9 +71,7 @@ export default function InstallLocation({ disabled }: { disabled: boolean }) {
             size="xs"
             disabled={disabled || busy}
             onClick={() => void run("reset_studio_install_location")}
-          >
-            Use default
-          </Button>
+          >{translate("uxComponents.useDefaultbv6xz")}</Button>
         )}
       </div>
       {error && <p className="text-xs text-destructive">{error}</p>}

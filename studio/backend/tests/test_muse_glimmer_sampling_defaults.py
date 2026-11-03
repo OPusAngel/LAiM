@@ -33,11 +33,11 @@ EXPECTED = {"temperature": 1.0, "top_p": 0.95, "top_k": 64, "min_p": 0.0}
 # hypothetical: _repo_gguf_load_id publishes a snapshot filesystem path as the
 # load_id for a GGUF repo in a non-active cache root.
 MUSE_GLIMMER_IDS = [
-    "LAiM/Muse-Glimmer-30B-GGUF",
-    "LAiM/Muse-Glimmer-30B",
-    "LAiM/Muse-Glimmer-30B-LAiM-bnb-4bit",
+    "unsloth/Muse-Glimmer-30B-GGUF",
+    "unsloth/Muse-Glimmer-30B",
+    "unsloth/Muse-Glimmer-30B-unsloth-bnb-4bit",
     "meta-models/Muse-Glimmer-30B",
-    "LAiM/Muse-Glimmer-30B-GGUF:UD-Q4_K_XL",
+    "unsloth/Muse-Glimmer-30B-GGUF:UD-Q4_K_XL",
     "/home/u/.cache/huggingface/hub/models--LAiM--Muse-Glimmer-30B-GGUF/snapshots/deadbeef",
     "/data/models/Muse-Glimmer-30B-GGUF/Muse-Glimmer-30B-UD-Q4_K_XL.gguf",
 ]
@@ -69,7 +69,7 @@ def test_family_entry_is_registered_in_patterns():
 def test_family_lookup_is_case_insensitive_and_org_stripped():
     from utils.inference.inference_config import get_family_inference_params
 
-    params = get_family_inference_params("LAiM/MUSE-GLIMMER-30B-GGUF")
+    params = get_family_inference_params("unsloth/MUSE-GLIMMER-30B-GGUF")
     assert params.get("top_k") == 64
     assert params.get("temperature") == 1.0
 
@@ -88,7 +88,7 @@ def test_top_k_is_within_the_api_bound():
 def test_unrelated_families_are_untouched():
     """The pattern is distinctive, but substring matching means a new entry can
     shadow an existing one. Spot-check the neighbours it sits between."""
-    assert _resolve("LAiM/gemma-2-9b-it")["top_k"] == 64
-    assert _resolve("LAiM/Llama-4-Scout-17B-16E-Instruct")["top_k"] == -1
-    assert _resolve("LAiM/Qwen3-8B")["temperature"] == 0.6
-    assert _resolve("LAiM/Kimi-K3-GGUF")["temperature"] == 1.0
+    assert _resolve("unsloth/gemma-2-9b-it")["top_k"] == 64
+    assert _resolve("unsloth/Llama-4-Scout-17B-16E-Instruct")["top_k"] == -1
+    assert _resolve("unsloth/Qwen3-8B")["temperature"] == 0.6
+    assert _resolve("unsloth/Kimi-K3-GGUF")["temperature"] == 1.0

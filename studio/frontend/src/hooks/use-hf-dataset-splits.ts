@@ -18,6 +18,8 @@ import {
   loadHfDatasetSplits,
   normalizeDatasetSplitsError,
 } from "./hf-dataset-split-sources";
+import { translate } from "@/i18n";
+
 
 export type { HfSplitEntry } from "./hf-dataset-split-sources";
 
@@ -100,7 +102,7 @@ async function fetchLocalSplits({
   });
   if (!response.ok) {
     throw new Error(
-      `Failed to read cached dataset metadata (${response.status})`,
+      translate("uxFeatures.failedToReadCachedzhxm3", { p1: response.status }),
     );
   }
   const payload = (await response.json()) as { splits?: unknown };

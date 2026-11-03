@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import type { HfModelResult } from "@/features/hub/hooks/use-hub-model-search";
 import { resolveInventoryResource } from "@/features/hub/inventory/resource-resolver";
 import type {
@@ -41,25 +42,25 @@ export const CAPABILITY_FILTER_OPTIONS: ReadonlyArray<{
   label: string;
 }> = [
   // Models with none of the others, so ticking every box lists every model.
-  { value: "text", label: "Text only" },
-  { value: "reasoning", label: "Reasoning" },
-  { value: "vision", label: "Vision" },
-  { value: "audio", label: "Audio" },
-  { value: "embedding", label: "Embeddings" },
-  { value: "image-gen", label: "Image gen" },
-  { value: "video-gen", label: "Video gen" },
+  { value: "text", get label() { return translate("uxHub.textOnly60rnu"); } },
+  { value: "reasoning", get label() { return translate("uxModelpicker.reasoning13g72"); } },
+  { value: "vision", get label() { return translate("uxModelpicker.visionvap9v"); } },
+  { value: "audio", get label() { return translate("shell.navigation.audio"); } },
+  { value: "embedding", get label() { return translate("uxHub.embeddingsfqh6b"); } },
+  { value: "image-gen", get label() { return translate("uxHub.imageGen1d10o"); } },
+  { value: "video-gen", get label() { return translate("uxHub.videoGenzrwk3"); } },
 ];
 
 export const FORMAT_FILTER_OPTIONS: ReadonlyArray<{
   value: ModelFormatFilter;
   label: string;
 }> = [
-  { value: "all", label: "All formats" },
-  { value: "recommended", label: "Recommended" },
+  { value: "all", get label() { return translate("uxHub.allFormatsw7s3m"); } },
+  { value: "recommended", get label() { return translate("settings.voice.dictation.sttRecommended"); } },
   { value: "gguf", label: "GGUF" },
-  { value: "checkpoint", label: "Safetensors" },
+  { value: "checkpoint", get label() { return translate("uxHub.safetensors1cksa"); } },
   { value: "mlx", label: "MLX" },
-  { value: "LAiM", label: "Exports & Fine-tunes" },
+  { value: "LAiM", get label() { return translate("uxHub.exportsFineTunesb8hfv"); } },
 ];
 
 const BILLION = 1_000_000_000;
@@ -122,7 +123,7 @@ export function buildSummary(result: HfModelResult): string {
     const library = formatLibrary(result.libraryName);
     if (library) parts.push(library);
   }
-  return parts.join(" · ") || "Hugging Face model";
+  return parts.join(" · ") || translate("uxHub.huggingFaceModelkhyqy");
 }
 
 function compactNumber(value: number): string {

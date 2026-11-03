@@ -2074,7 +2074,7 @@ def test_the_delete_guard_lets_a_delete_through_when_nothing_is_loaded():
     before = orch._inference_backend
     try:
         orch._inference_backend = None
-        assert deletion._inference_backend_blocks_delete("LAiM/Qwen3.5-2B") is False
+        assert deletion._inference_backend_blocks_delete("unsloth/Qwen3.5-2B") is False
         assert orch._inference_backend is None, "the delete guard constructed an orchestrator"
     finally:
         orch._inference_backend = before

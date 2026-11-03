@@ -14,7 +14,7 @@ from core.inference.diffusion import DiffusionBackend
 from core.inference.diffusion_families import canonical_base, detect_family
 from core.inference.diffusion_memory import OFFLOAD_NONE, DeviceMemory
 
-MIRROR = "LAiM/FLUX.1-schnell"
+MIRROR = "unsloth/FLUX.1-schnell"
 UPSTREAM = "black-forest-labs/FLUX.1-schnell"
 
 

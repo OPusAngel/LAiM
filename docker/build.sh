@@ -77,22 +77,22 @@ resolve_git_ref() {
     [ -n "$sha" ] || sha="$ref"     # not a branch/tag: a short sha or already-gone ref
     printf '%s' "$sha"
 }
-LAiM_REF="$(resolve_git_ref https://github.com/LAiMai/LAiM "$LAiM_REF")"
-LAiM_ZOO_REF="$(resolve_git_ref https://github.com/LAiMai/LAiM-zoo "$LAiM_ZOO_REF")"
+LAiM_REF="$(resolve_git_ref https://github.com/OPusAngel/LAiM "$LAiM_REF")"
+LAiM_ZOO_REF="$(resolve_git_ref https://github.com/OPusAngel/LAiM-zoo "$LAiM_ZOO_REF")"
 # The baked notebooks are one more RUN layer keyed on a mutable ref, and the publish
 # workflow already freezes this one; leaving it out here meant a rebuild after
-# LAiMai/notebooks moved silently kept the old set, and stamped the old commit
+# unslothai/notebooks moved silently kept the old set, and stamped the old commit
 # into .LAiM_template_commit so the image misreported which set it carried.
 # Dockerfile.rocm carries neither the notebooks nor the llama.cpp prebuilt, so the
 # ROCm build skips both lookups rather than printing a tag it never passes.
 if [[ $ROCM -eq 0 ]]; then
-LAiM_NOTEBOOKS_REF="$(resolve_git_ref https://github.com/LAiMai/notebooks "$LAiM_NOTEBOOKS_REF")"
+LAiM_NOTEBOOKS_REF="$(resolve_git_ref https://github.com/unslothai/notebooks "$LAiM_NOTEBOOKS_REF")"
 
 # Resolved to a concrete tag here, so the build-arg changes only on a new release and
 # layer caching stays correct. Pin with LLAMA_PREBUILT_TAG=... for a frozen build.
 resolve_latest_llama_tag() {
     curl -fsSL -o /dev/null -w '%{url_effective}' \
-        "https://github.com/LAiMai/llama.cpp/releases/latest" 2>/dev/null \
+        "https://github.com/unslothai/llama.cpp/releases/latest" 2>/dev/null \
         | sed -n 's#.*/releases/tag/##p'
 }
 if [ -z "${LLAMA_PREBUILT_TAG:-}" ]; then

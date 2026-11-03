@@ -822,7 +822,7 @@ def test_gguf_speech_cut_at_max_tokens_is_reported(monkeypatch, stop_type, finis
         is_loaded = True
         _is_audio = True
         _audio_type = "snac"
-        model_identifier = "LAiM/orpheus-3b-0.1-ft-GGUF"
+        model_identifier = "unsloth/orpheus-3b-0.1-ft-GGUF"
         base_url = "http://127.0.0.1:8080"
         _auth_headers: dict = {}
 

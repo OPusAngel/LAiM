@@ -35,7 +35,7 @@ def _run(*args):
 @pytest.mark.parametrize(
     "content, expected",
     [
-        (json.dumps({"base_model_name_or_path": "LAiM/Llama-3.2-1B"}), "LAiM/Llama-3.2-1B"),
+        (json.dumps({"base_model_name_or_path": "unsloth/Llama-3.2-1B"}), "unsloth/Llama-3.2-1B"),
         ("not json", None),
         ("[1, 2]", None),
     ],

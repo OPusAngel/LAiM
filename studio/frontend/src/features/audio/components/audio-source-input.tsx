@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { PillTabs } from "@/features/model-picker/components/model-selector/pill-tabs";
@@ -58,9 +59,9 @@ const AUDIO_EXTS = "wav mp3 flac ogg oga opus m4a aac webm mp4".split(" ");
 const AUDIO_ACCEPT = `audio/*,${AUDIO_EXTS.map((ext) => `.${ext}`).join(",")}`;
 
 const SOURCE_LABEL: Record<AudioSourceSelection["kind"], string> = {
-  input: "Upload",
-  clip: "From history",
-  voice: "Saved voice",
+  get input() { return translate("uxAudio.uploadSourcelarza"); },
+  get clip() { return translate("uxAudio.fromHistoryhgu1g"); },
+  get voice() { return translate("uxAudio.savedVoiceSourceq8inq"); },
 };
 
 export interface AudioSourcePreviewView {
@@ -106,7 +107,7 @@ export function AudioSourceInput({
   maxRecordSeconds,
   expiredMessage = REFERENCE_EXPIRED_MESSAGE,
   usesFirstSeconds = REFERENCE_MAX_SECONDS,
-  recordHint = "Read a sentence or two in a quiet room.",
+  recordHint = translate("uxAudio.readASentenceOrjidoj"),
 }: {
   id: string;
   label: string;
@@ -160,22 +161,22 @@ export function AudioSourceInput({
       const extension = path.split(".").pop()?.toLowerCase() ?? "";
       if (!AUDIO_EXTS.includes(extension)) {
         source.fail(
-          "This is not an audio file. Pick a WAV, MP3, FLAC, OGG or M4A file.",
+          translate("uxAudio.thisIsNotAn7yqkz"),
         );
         return;
       }
       void registerNativeAttachmentPath(path)
         .then(nativeAttachmentIntentToFile)
         .then((file) => source.pickFile(file))
-        .catch(() => source.fail("Could not read the dropped file."));
+        .catch(() => source.fail(translate("uxAudio.couldNotReadTheya7ey")));
     },
   });
 
   const tabs = [
-    { value: "upload", label: "Upload" },
-    ...(recordingSupported() ? [{ value: "record", label: "Record" }] : []),
-    ...(allowHistory ? [{ value: "history", label: "From history" }] : []),
-    ...(allowSavedVoice ? [{ value: "voice", label: "Saved voice" }] : []),
+    { value: "upload", label: translate("settings.appearance.custom.importFont.upload") },
+    ...(recordingSupported() ? [{ value: "record", label: translate("uxAudio.record186wx") }] : []),
+    ...(allowHistory ? [{ value: "history", label: translate("uxAudio.fromHistoryhgu1g") }] : []),
+    ...(allowSavedVoice ? [{ value: "voice", label: translate("settings.voice.readAloud.studioVoiceSaved") }] : []),
   ];
 
   const durationS = preview.durationS ?? value?.durationS ?? null;
@@ -231,7 +232,7 @@ export function AudioSourceInput({
             onClick={source.clear}
           >
             <HugeiconsIcon icon={Cancel01Icon} className="size-3" />
-            Remove
+            {translate("browser.pages.remove")}
           </Button>
         ) : null}
       </div>
@@ -262,7 +263,7 @@ export function AudioSourceInput({
               fileRef.current?.click();
             }}
           >
-            Add it again
+            {translate("uxAudio.addItAgain1rlob")}
           </Button>
         </div>
       ) : showSelected && status.phase !== "error" ? (
@@ -306,7 +307,7 @@ export function AudioSourceInput({
                   status.progress === null ? undefined : status.progress * 100
                 }
                 indeterminate={status.progress === null}
-                aria-label="Upload progress"
+                aria-label={translate("uxAudio.uploadProgressydayx")}
                 className="h-1"
               />
               <output
@@ -315,20 +316,18 @@ export function AudioSourceInput({
               >
                 {status.progress === null
                   ? "Uploading…"
-                  : `Uploading ${Math.round(status.progress * 100)} %`}
+                  : translate("uxAudio.uploadingggtlo", { p1: Math.round(status.progress * 100) })}
               </output>
             </div>
           ) : status.phase === "loading" ? (
-            <output className="text-ui-11p5 text-muted-foreground">
-              Loading the clip…
-            </output>
+            <output className="text-ui-11p5 text-muted-foreground">{translate("uxAudio.loadingTheCliptu98e")}</output>
           ) : usesFirstSeconds !== null &&
             durationS !== null &&
             durationS > usesFirstSeconds ? (
             <p className="text-ui-11p5 leading-snug text-muted-foreground">
               {usesFirstSeconds % 60 === 0 && usesFirstSeconds >= 60
-                ? `Uses the first ${usesFirstSeconds / 60} min.`
-                : `Uses the first ${usesFirstSeconds} s.`}
+                ? translate("uxAudio.usesTheFirstMinqqwmc", { p1: usesFirstSeconds / 60 })
+                : translate("uxAudio.usesTheFirstSe92mi", { p1: usesFirstSeconds })}
             </p>
           ) : null}
         </div>
@@ -347,7 +346,7 @@ export function AudioSourceInput({
                     fileRef.current?.click();
                   }}
                 >
-                  {tab === "record" ? "Upload a file" : "Try another file"}
+                  {tab === "record" ? translate("uxAudio.uploadAFile4l103") : translate("uxAudio.tryAnotherFilecxd8c")}
                 </Button>
                 <Button
                   type="button"
@@ -362,7 +361,7 @@ export function AudioSourceInput({
           ) : null}
           {tabs.length > 1 ? (
             <PillTabs
-              ariaLabel={`${label} source`}
+              ariaLabel={translate("uxAudio.sourcevzs9m", { p1: label })}
               value={recording ? "record" : tab}
               onValueChange={(next) => setTab(next as SourceTab)}
               disabled={disabled || recording}
@@ -380,7 +379,7 @@ export function AudioSourceInput({
               className="flex min-h-[calc(88px*var(--ui-space-scale,1))] flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-border px-3 text-ui-12 text-muted-foreground transition-colors hover:border-[color-mix(in_oklab,var(--foreground)_calc(30%*var(--contrast-edge-gain,1)),transparent)] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <HugeiconsIcon icon={Upload04Icon} className="size-5" />
-              <span>Drop an audio file here, or choose one</span>
+              <span>{translate("uxCopy.dropAnAudioFile1tlej")}</span>
               {hint ? <span className="text-ui-11p5">{hint}</span> : null}
             </button>
           ) : null}
@@ -422,7 +421,7 @@ export function AudioSourceInput({
           {tab === "history" && !recording ? (
             history.length === 0 ? (
               <p className="text-ui-12 leading-snug text-muted-foreground">
-                Clips you make in Audio show up here.
+                {translate("uxAudio.clipsYouMakeIn9c71j")}
               </p>
             ) : (
               <ul className="hover-scrollbar grid min-w-0 max-h-[calc(196px*var(--ui-space-scale,1))] grid-cols-[minmax(0,1fr)] gap-0.5 overflow-y-auto">

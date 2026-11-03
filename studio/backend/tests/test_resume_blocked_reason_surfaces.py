@@ -31,7 +31,7 @@ def _row(**overrides):
     row = {
         "id": "run-1",
         "status": "stopped",
-        "model_name": "LAiM/Llama-3.2-1B-Instruct",
+        "model_name": "unsloth/Llama-3.2-1B-Instruct",
         "project_name": None,
         "dataset_name": "yahma/alpaca-cleaned",
         "started_at": "2026-08-05T00:00:00Z",

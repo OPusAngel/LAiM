@@ -16,6 +16,8 @@ import type {
 import { toast } from "sonner";
 import { externalModelLabel } from "./lib/external-model-label";
 import { useChatRuntimeStore } from "./stores/chat-runtime-store";
+import { translate } from "@/i18n";
+
 
 // crypto.randomUUID is undefined in non-secure contexts (HTTP over a LAN IP).
 export function newAttachmentId(): string {
@@ -50,7 +52,7 @@ export class AudioAttachmentAdapter implements AttachmentAdapter {
         activeModel?.name ||
         externalModelLabel(checkpoint) ||
         checkpoint ||
-        "Current model";
+        translate("uxChat.currentModelvyd7k");
       unavailableReason = `${label} cannot accept audio. Load an audio-input model before attaching audio files.`;
     }
     if (unavailableReason) {
@@ -60,7 +62,7 @@ export class AudioAttachmentAdapter implements AttachmentAdapter {
     // A staged store clip would be dropped if sent alongside attachments.
     if (state.pendingAudioBase64) {
       const stagedReason =
-        "Send or remove the staged audio clip before attaching more audio.";
+        translate("uxChat.sendOrRemoveTheclvp2");
       toast.error(stagedReason, { id: AUDIO_ADD_TOAST_ID });
       throw new Error(stagedReason);
     }

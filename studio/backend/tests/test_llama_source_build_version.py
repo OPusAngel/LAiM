@@ -147,14 +147,14 @@ def test_real_build_number_does_not_read_git(tmp_path, monkeypatch):
 def _status(monkeypatch, exe: str) -> dict:
     res = {
         "prebuilt_available": True,
-        "repo": "LAiMai/llama.cpp",
+        "repo": "unslothai/llama.cpp",
         "release_tag": LATEST_MIX,
         "llama_tag": "b11408",
         "asset": "app-b11408-mix-1e24fc5-linux-x64-cuda13.tar.gz",
         "install_kind": "linux-cuda",
     }
     # A pinned server path or llama.cpp dir on the host makes the tree unmanaged.
-    for var in ("LLAMA_SERVER_PATH", "LAiM_LLAMA_CPP_PATH"):
+    for var in ("LLAMA_SERVER_PATH", "UNSLOTH_LLAMA_CPP_PATH"):
         monkeypatch.delenv(var, raising = False)
     monkeypatch.setattr(upd, "_find_binary", lambda: exe)
     monkeypatch.setattr(upd, "_resolve_prebuilt_for_host", lambda **_: dict(res))

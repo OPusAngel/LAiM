@@ -28,15 +28,13 @@ ACCOUNTS = (OWNER, ALICE, BOB)
 def isolated(tmp_path, monkeypatch):
     sweep = tools._start_detached_sweep
     monkeypatch.setenv("LAiM_STUDIO_HOME", str(tmp_path / "studio"))
-    monkeypatch.delenv("LAiM_STUDIO_SANDBOX_HOME", raising = False)
+    monkeypatch.delenv("LAiM_STUDIO_WORKDIR_HOME", raising = False)
     monkeypatch.setattr(policy, "installation_is_multi_user", lambda: True)
     monkeypatch.setattr(tools, "_workdirs", {})
     monkeypatch.setattr(tools, "_active_sessions", {})
     monkeypatch.setattr(tools, "_pending_removals", {})
     monkeypatch.setattr(tools, "_removing_sessions", set())
-    monkeypatch.setattr(tools, "_legacy_sandbox_migrated", True)
     monkeypatch.setattr(tools, "_start_detached_sweep", lambda: None)
-    monkeypatch.setattr(tools, "_legacy_sandbox_root", lambda: str(tmp_path / "legacy"))
     monkeypatch.setattr(mcp_servers_db, "_schema_ready", set())
     if hasattr(mcp_servers_db, "_account_schema_ready"):
         monkeypatch.setattr(mcp_servers_db, "_account_schema_ready", set())
@@ -53,20 +51,22 @@ def test_workdirs_and_memos_are_account_scoped(session, tmp_path):
     paths = [run_as(account, tools._get_workdir, session) for account in ACCOUNTS]
     assert len(set(paths)) == 3
     for account, path in zip(ACCOUNTS, paths):
-        root = tmp_path / "studio"
-        if account != OWNER:
-            root = root / "accounts" / account.account_id
-        assert Path(path).parent == root / "sandbox"
-        assert run_as(account, tools.resolve_sandbox_workdir, session) == path
+        if account == OWNER:
+            # The owner's chats work in his own account home, not in a folder Studio made.
+            assert Path(path) == Path(os.path.realpath(os.path.expanduser("~")))
+            continue
+        root = tmp_path / "studio" / "accounts" / account.account_id
+        assert Path(path).parent == root / "workdir"
+        assert run_as(account, tools.resolve_session_workdir, session) == path
         assert tools._workdirs[(account.account_id, session or tools._ANON_KEY)] == path
 
 
 def test_override_preserves_owner_and_namespaces_managed_accounts(tmp_path, monkeypatch):
-    override = tmp_path / "custom-sandbox"
-    monkeypatch.setenv("LAiM_STUDIO_SANDBOX_HOME", str(override))
-    assert tools.sandbox_root() == str(override)
+    override = tmp_path / "custom-workdir"
+    monkeypatch.setenv("LAiM_STUDIO_WORKDIR_HOME", str(override))
+    assert tools.session_workdir_root() == str(override)
     for account in (ALICE, BOB):
-        assert run_as(account, tools.sandbox_root) == str(
+        assert run_as(account, tools.session_workdir_root) == str(
             override / "accounts" / account.account_id
         )
 
@@ -84,18 +84,6 @@ def test_records_are_account_scoped(resolver, name, tmp_path):
         assert run_as(account, resolver) == str(
             tmp_path / "studio" / "accounts" / account.account_id / name
         )
-
-
-def test_managed_account_never_reads_or_migrates_owner_legacy_sandbox(tmp_path, monkeypatch):
-    legacy = tmp_path / "legacy" / "same-chat"
-    legacy.mkdir(parents = True)
-    (legacy / "secret").write_text("owner", encoding = "utf-8")
-    monkeypatch.setattr(tools, "_legacy_sandbox_migrated", False)
-    assert run_as(ALICE, tools._legacy_session_dir, "same-chat") is None
-    path = Path(run_as(ALICE, tools._get_workdir, "same-chat"))
-    assert not (path / "secret").exists()
-    assert (legacy / "secret").read_text(encoding = "utf-8") == "owner"
-    assert not tools._legacy_sandbox_migrated
 
 
 def test_managed_project_does_not_resolve_host_workspace(monkeypatch):
@@ -118,10 +106,10 @@ def test_session_lifecycle_does_not_block_another_account():
     run_as(ALICE, alice_call)
 
 
-def test_removing_alices_sandbox_keeps_bobs(tmp_path):
+def test_removing_alices_workdir_keeps_bobs(tmp_path):
     alice = Path(run_as(ALICE, tools._get_workdir, "same-chat"))
     bob = Path(run_as(BOB, tools._get_workdir, "same-chat"))
-    assert run_as(ALICE, tools.remove_session_sandbox, "same-chat") is True
+    assert run_as(ALICE, tools.remove_session_workdir, "same-chat") is True
     assert not alice.exists()
     assert bob.is_dir()
     assert (BOB.account_id, "same-chat") in tools._workdirs
@@ -130,7 +118,7 @@ def test_removing_alices_sandbox_keeps_bobs(tmp_path):
 
 @pytest.mark.parametrize("other", [OWNER, BOB])
 @pytest.mark.parametrize("kind", ["absolute", "parent", "symlink"])
-def test_edit_file_cannot_read_or_write_foreign_sandbox(other, kind):
+def test_edit_file_cannot_read_or_write_foreign_workdir(other, kind):
     alice = Path(run_as(ALICE, tools._get_workdir, "same-chat"))
     foreign = Path(run_as(other, tools._get_workdir, "same-chat")) / "secret.txt"
     foreign.write_text("private", encoding = "utf-8")
@@ -157,7 +145,7 @@ def test_edit_file_cannot_read_or_write_foreign_sandbox(other, kind):
 
 @pytest.mark.parametrize("account", ACCOUNTS)
 @pytest.mark.parametrize(
-    "flags", [{"permission_mode": "full"}, {"bypass_permissions": True}, {"disable_sandbox": True}]
+    "flags", [{"permission_mode": "full"}, {"bypass_permissions": True}]
 )
 def test_full_access_admission_follows_the_account_role(account, flags):
     if account.is_owner:
@@ -185,7 +173,7 @@ def test_single_account_permissions_keep_historical_normalization(mode, bypass, 
     assert tool_policy.normalize_tool_permissions(mode, bypass) == want
 
 
-def test_sandboxed_admission_never_queries_installation_policy(monkeypatch):
+def test_unrestricted_admission_never_queries_installation_policy(monkeypatch):
     monkeypatch.setattr(
         policy, "full_access_permitted", lambda: pytest.fail("unexpected policy lookup")
     )
@@ -197,7 +185,7 @@ def test_sandboxed_admission_never_queries_installation_policy(monkeypatch):
 def test_direct_tool_bypass_is_rejected_before_dispatch(monkeypatch):
     monkeypatch.setattr(tools, "_bash_exec", lambda *a, **kw: pytest.fail("tool ran"))
     with pytest.raises(HTTPException) as exc:
-        run_as(ALICE, tools.execute_tool, "terminal", {"command": "pwd"}, disable_sandbox = True)
+        run_as(ALICE, tools.execute_tool, "terminal", {"command": "pwd"})
     assert exc.value.status_code == 400
 
 
@@ -221,9 +209,11 @@ def test_direct_tool_bypass_is_rejected_before_dispatch(monkeypatch):
 def test_safe_environment_excludes_host_credentials(account, name, monkeypatch):
     monkeypatch.setenv(name, "private-value")
     workdir = run_as(account, tools._get_workdir, "env")
-    env = run_as(account, tools._build_safe_env, workdir)
+    env = run_as(account, tools._build_bypass_env, workdir)
     assert name not in env
-    assert env["HOME"] == workdir
+    # HOME is the operator's real profile so ~/Desktop reaches the machine; only the temp
+    # vars stay inside the session workdir.
+    assert env["HOME"] == os.path.expanduser("~")
     assert Path(env["TMPDIR"]).parent == Path(workdir)
 
 
@@ -231,7 +221,7 @@ def test_owner_environment_remains_identical_for_managed_context(monkeypatch):
     workdir = tools._get_workdir("env")
     monkeypatch.setenv("HF_TOKEN", "owner-token")
     monkeypatch.setenv("LANG", "en_US.UTF-8")
-    assert run_as(ALICE, tools._build_safe_env, workdir) == tools._build_safe_env(workdir)
+    assert run_as(ALICE, tools._build_bypass_env, workdir) == tools._build_bypass_env(workdir)
 
 
 def test_tool_stream_carries_account_into_worker_thread():
@@ -675,7 +665,7 @@ def test_retrieval_worker_retains_account():
     assert result == ALICE.account_id
 
 
-def test_managed_sandbox_does_not_fall_back_to_owner_on_root_error(monkeypatch):
+def test_managed_workdir_does_not_fall_back_to_owner_on_root_error(monkeypatch):
     from utils.paths import storage_roots
 
     def unavailable():
@@ -683,8 +673,8 @@ def test_managed_sandbox_does_not_fall_back_to_owner_on_root_error(monkeypatch):
 
     monkeypatch.setattr(storage_roots, "workspace_root", unavailable)
     with pytest.raises(RuntimeError, match = "root unavailable"):
-        run_as(ALICE, tools.sandbox_root)
-    assert tools.sandbox_root() == tools._legacy_sandbox_root()
+        run_as(ALICE, tools.session_workdir_root)
+    assert tools.session_workdir_root() == os.path.join(tools.shared_workdir_root(), "workdir")
 
 
 def test_transport_refuses_managed_stdio_before_constructing_client(monkeypatch):
@@ -697,12 +687,12 @@ def test_transport_refuses_managed_stdio_before_constructing_client(monkeypatch)
     assert exc.value.status_code == 400
 
 
-def test_sandbox_recovery_runs_once_for_each_account(isolated, monkeypatch):
+def test_workdir_recovery_runs_once_for_each_account(isolated, monkeypatch):
     seen = []
     monkeypatch.setattr(tools, "_swept_detached", True)
     monkeypatch.setattr(tools, "_swept_detached_accounts", set(), raising = False)
     monkeypatch.setattr(
-        tools, "sweep_detached_sandboxes", lambda: seen.append(current_account_id())
+        tools, "sweep_detached_workdirs", lambda: seen.append(current_account_id())
     )
     monkeypatch.setattr(tools, "collect_orphaned_project_workspaces", lambda: None)
     for account in (ALICE, BOB):
@@ -715,8 +705,8 @@ def test_sandbox_recovery_runs_once_for_each_account(isolated, monkeypatch):
 
 
 @pytest.mark.parametrize("account", ACCOUNTS)
-def test_only_owner_full_access_can_edit_outside_the_sandbox(account, tmp_path):
-    target = tmp_path / "outside-sandbox.txt"
+def test_only_owner_full_access_can_edit_outside_the_workdir(account, tmp_path):
+    target = tmp_path / "outside-workdir.txt"
     target.write_text("original", encoding = "utf-8")
 
     def edit():
@@ -725,7 +715,6 @@ def test_only_owner_full_access_can_edit_outside_the_sandbox(account, tmp_path):
             tools.execute_tool,
             "edit_file",
             {"path": str(target), "edits": [{"old_string": "original", "new_string": "updated"}]},
-            disable_sandbox = True,
         )
 
     if account.is_owner:

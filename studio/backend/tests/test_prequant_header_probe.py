@@ -234,7 +234,7 @@ class _Lines:
 
 def test_a_stale_hosted_checkpoint_is_refused_before_any_weight_download(hub):
     container = "safetensors"
-    repo = "LAiM/Qwen-Image-2512-FP8"
+    repo = "unsloth/Qwen-Image-2512-FP8"
     name = f"Qwen-Image-2512-INT8.{container}"
     path = _repo_file(hub, repo, name)
     writer = _write_safetensors
@@ -254,7 +254,7 @@ def test_a_stale_hosted_checkpoint_is_refused_before_any_weight_download(hub):
 def test_a_pickle_checkpoint_is_never_read_and_never_refused_early(hub):
     """The probe reads safetensors headers only. A ``.pt`` that comes first in the resolver's order is
     "unknown": no range read of it at all, and the load goes on to download and validate it as before."""
-    repo = "LAiM/Qwen-Image-2512-FP8"
+    repo = "unsloth/Qwen-Image-2512-FP8"
     name = "Qwen-Image-2512-INT8.pt"
     _write_pt(_repo_file(hub, repo, name), _qwen_int8_meta(_STALE_INT8_EXCLUDES))
     assert pq.hosted_prequant_refusal(_source(repo, name), "int8") is None
@@ -266,7 +266,7 @@ def test_a_pickle_checkpoint_is_never_read_and_never_refused_early(hub):
 def test_the_first_existing_name_decides_like_the_resolver(hub):
     """Safetensors ahead of the pickle, as the resolver orders them: a stale .safetensors is refused even
     with a .pt behind it, and a missing .safetensors leaves the .pt to the loader."""
-    repo = "LAiM/Qwen-Image-2512-FP8"
+    repo = "unsloth/Qwen-Image-2512-FP8"
     _write_pt(_repo_file(hub, repo, "q-INT8.pt"), _qwen_int8_meta(_STALE_INT8_EXCLUDES))
     assert (
         pq.hosted_prequant_refusal(_source(repo, "q-INT8.safetensors", "q-INT8.pt"), "int8") is None
@@ -281,7 +281,7 @@ def test_the_first_existing_name_decides_like_the_resolver(hub):
 def test_a_current_hosted_checkpoint_still_goes_to_the_download(hub):
     from core.inference.diffusion_transformer_quant import exclude_tokens_for_scheme
 
-    repo = "LAiM/Qwen-Image-FP8"
+    repo = "unsloth/Qwen-Image-FP8"
     path = _repo_file(hub, repo, "Qwen-Image-INT8.pt")
     _write_pt(path, _qwen_int8_meta(exclude_tokens_for_scheme("int8", "qwen-image")))
     source = _source(repo, "Qwen-Image-INT8.pt")
@@ -315,7 +315,7 @@ def test_an_unreadable_or_foreign_header_is_never_a_refusal(hub):
 
 def test_offline_with_nothing_cached_asks_nothing(hub, monkeypatch):
     monkeypatch.setattr(pq, "hub_offline", lambda: True)
-    repo = "LAiM/Qwen-Image-2512-FP8"
+    repo = "unsloth/Qwen-Image-2512-FP8"
     _write_pt(_repo_file(hub, repo, "x-INT8.pt"), _qwen_int8_meta(_STALE_INT8_EXCLUDES))
     assert pq.hosted_prequant_refusal(_source(repo, "x-INT8.pt"), "int8") is None
     assert (
@@ -331,13 +331,13 @@ def test_a_cached_checkpoint_is_judged_locally_without_the_network(hub, monkeypa
     )
     monkeypatch.setattr(pq, "cached_checkpoint_path", lambda *a, **k: str(cached))
     monkeypatch.setattr(pq, "hub_offline", lambda: True)
-    reason = pq.hosted_prequant_refusal(_source("LAiM/x", "cached-INT8.safetensors"), "int8")
+    reason = pq.hosted_prequant_refusal(_source("unsloth/x", "cached-INT8.safetensors"), "int8")
     assert reason is not None and "txt_in" in reason
     assert hub.server.sent == 0
 
 
 def test_the_kill_switch_turns_the_probe_off(hub, monkeypatch):
-    repo = "LAiM/Qwen-Image-2512-FP8"
+    repo = "unsloth/Qwen-Image-2512-FP8"
     _write_safetensors(
         _repo_file(hub, repo, "y-INT8.safetensors"), _qwen_int8_meta(_STALE_INT8_EXCLUDES)
     )
@@ -597,7 +597,7 @@ def test_the_hub_token_and_cache_root_reach_the_planning_probe(hub, monkeypatch)
     "recorded, usable",
     [
         ("Qwen/Qwen-Image-2512", True),  # the requested base
-        ("LAiM/Qwen-Image-2512", True),  # a mirror of it: same tail, as the loader accepts
+        ("unsloth/Qwen-Image-2512", True),  # a mirror of it: same tail, as the loader accepts
         ("Qwen/Qwen-Image", False),  # a different base
         (None, False),  # no base_model_id at all: the loader refuses it for a requested base
     ],
@@ -724,7 +724,7 @@ def replaced(hub, tmp_path, monkeypatch):
 
     from core.inference.diffusion_transformer_quant import exclude_tokens_for_scheme
 
-    repo, name = "LAiM/Qwen-Image-2512-FP8", "Qwen-Image-2512-INT8.safetensors"
+    repo, name = "unsloth/Qwen-Image-2512-FP8", "Qwen-Image-2512-INT8.safetensors"
     cached = _hf_cache_file(
         tmp_path,
         name,
@@ -793,7 +793,7 @@ def test_a_cached_name_the_hub_no_longer_serves_moves_on_to_the_next_name(
     # The stale cached name 404s on the Hub, so planning must judge the next name.
     from core.inference.diffusion_transformer_quant import exclude_tokens_for_scheme
 
-    repo = "LAiM/Qwen-Image-2512-FP8"
+    repo = "unsloth/Qwen-Image-2512-FP8"
     gone, current = "Qwen-Image-2512-INT8-ComfyUI.safetensors", "Qwen-Image-2512-INT8.safetensors"
     cached = _hf_cache_file(
         tmp_path,
@@ -817,7 +817,7 @@ def test_LAiM_metadata_that_is_not_an_object_is_refused_before_download(hub):
 
     from core.inference.prequant_safetensors import LAiM_FORMAT_KEY, LAiM_METADATA_KEY
 
-    repo, name = "LAiM/Qwen-Image-2512-FP8", "Qwen-Image-2512-INT8.safetensors"
+    repo, name = "unsloth/Qwen-Image-2512-FP8", "Qwen-Image-2512-INT8.safetensors"
     save_file(
         {"blocks.0.weight": torch.zeros(256, 1024, dtype = torch.int8)},
         str(_repo_file(hub, repo, name)),
@@ -867,7 +867,7 @@ def test_many_requested_bases_keep_the_memo_bounded(hub, monkeypatch, tmp_path):
     monkeypatch.setattr(pq, "hub_offline", lambda: True)
     for i in range(pq._HEADER_PROBE_MAX + 50):
         pq.hosted_prequant_refusal(
-            _source("LAiM/x", "c-INT8.safetensors"), "int8", base = f"org/b{i}"
+            _source("unsloth/x", "c-INT8.safetensors"), "int8", base = f"org/b{i}"
         )
     assert len(pq._HEADER_PROBE_MEMO) <= pq._HEADER_PROBE_MAX
 
@@ -889,7 +889,7 @@ def test_an_anonymous_401_does_not_answer_for_a_token_probe(hub, monkeypatch):
         return real(url, token = token, **kwargs)
 
     monkeypatch.setattr(huggingface_hub, "get_hf_file_metadata", gated)
-    repo = "LAiM/Qwen-Image-2512-FP8"
+    repo = "unsloth/Qwen-Image-2512-FP8"
     _write_safetensors(
         _repo_file(hub, repo, "g-INT8.safetensors"), _qwen_int8_meta(_STALE_INT8_EXCLUDES)
     )

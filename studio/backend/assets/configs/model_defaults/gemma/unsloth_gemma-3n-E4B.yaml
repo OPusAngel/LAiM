@@ -1,6 +1,6 @@
-# Model defaults for LAiM/gemma-3n-E4B
+# Model defaults for unsloth/gemma-3n-E4B
 # Based on Gemma3N_(4B)-Vision.ipynb
-# Also applies to: LAiM/gemma-3n-E4B-LAiM-bnb-4bit, google/gemma-3n-E4B
+# Also applies to: unsloth/gemma-3n-E4B-unsloth-bnb-4bit, google/gemma-3n-E4B
 # added inference parameters from LAiM guides
 
 training:
@@ -17,7 +17,7 @@ training:
   random_seed: 3407
   packing: false
   train_on_completions: true
-  gradient_checkpointing: "LAiM"
+  gradient_checkpointing: "unsloth"
   optim: "adamw_torch_fused"
   lr_scheduler_type: "cosine"
 

@@ -25,7 +25,7 @@ _BLOCK_STATUS_CODES = {
     0xC0000602: "the image was refused by a code integrity fail-fast",
 }
 
-# winerror equivalents; CI_BLOCKED is from LAiMai/LAiM#6648.
+# winerror equivalents; CI_BLOCKED is from OPusAngel/LAiM#6648.
 _BLOCK_WINERRORS = {
     577: _REASON_INVALID_HASH_WINERROR,
     1260: _REASON_ADMIN_POLICY,

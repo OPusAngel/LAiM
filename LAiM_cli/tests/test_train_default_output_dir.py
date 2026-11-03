@@ -41,7 +41,7 @@ class _SavingTrainer:
         output_dir = resolve_output_dir(kwargs.get("output_dir"))
         ensure_dir(output_dir)
         (output_dir / "adapter_config.json").write_text(
-            '{"base_model_name_or_path": "LAiM/Qwen3-0.6B", "peft_type": "LORA", "r": 16}',
+            '{"base_model_name_or_path": "unsloth/Qwen3-0.6B", "peft_type": "LORA", "r": 16}',
             encoding = "utf-8",
         )
         (output_dir / "adapter_model.safetensors").write_bytes(b"\0")
@@ -58,7 +58,7 @@ def _train(monkeypatch, trainer, *args):
     app.command()(train_module.train)
     return CliRunner().invoke(
         app,
-        ["--model", "LAiM/Qwen3-0.6B", "--dataset", "yahma/alpaca-cleaned", *args],
+        ["--model", "unsloth/Qwen3-0.6B", "--dataset", "yahma/alpaca-cleaned", *args],
     )
 
 

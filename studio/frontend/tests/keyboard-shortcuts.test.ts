@@ -1788,7 +1788,7 @@ test("a parked tool request is keyed by its own approval, not call_0", async () 
   // Scope first, so two panes differ even before the approval token does.
   assert.match(
     adapter,
-    /const toolConfirmationScopeId = resolvedThreadId\n\s*\? `\$\{sandboxSessionId \|\| "_default"\}:\$\{resolvedThreadId\}`/,
+    /const toolConfirmationScopeId = resolvedThreadId\n\s*\? `\$\{workdirSessionId \|\| "_default"\}:\$\{resolvedThreadId\}`/,
   );
   assert.match(adapter, /\? `\$\{toolConfirmationScopeId\}:\$\{approvalId\}`/);
   // The other branch mints a unique part id rather than reusing the backend's.

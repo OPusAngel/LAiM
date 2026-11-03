@@ -334,7 +334,7 @@ def test_conversion_complete_detects_truncation_and_source_change(tmp_path):
 def test_cache_dir_for(tmp_path, monkeypatch):
     monkeypatch.setenv("LAiM_STUDIO_HOME", str(tmp_path))
     d = conv.cache_dir_for(
-        "LAiM/Z-Image-Turbo-GGUF", "abc123", "z-image-turbo-Q4_0.gguf", dense_bits = 4
+        "unsloth/Z-Image-Turbo-GGUF", "abc123", "z-image-turbo-Q4_0.gguf", dense_bits = 4
     )
     assert d.parent.name == "LAiM--Z-Image-Turbo-GGUF@abc123"
     assert d.name == "z-image-turbo-Q4_0-d4-bf16"

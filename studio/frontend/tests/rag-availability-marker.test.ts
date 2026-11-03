@@ -10,9 +10,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { readSrc, registerBundlerResolver } from "./helpers/kit.ts";
+import { readSrc, readSrcExpanded, registerBundlerResolver } from "./helpers/kit.ts";
 
-const RAG_API = readSrc("features/rag/api/rag-api.ts");
+const RAG_API = readSrcExpanded("features/rag/api/rag-api.ts");
 
 registerBundlerResolver();
 
@@ -260,7 +260,7 @@ test("listKnowledgeBases reads the marker before returning the array", async () 
 });
 
 test("the dialog stops offering a Create button that can only 503", async () => {
-  const src = await readSrc("features/rag/components/knowledge-base-dialog.tsx");
+  const src = await readSrcExpanded("features/rag/components/knowledge-base-dialog.tsx");
   assert.match(
     src,
     /const ragUnavailable = useRagAvailabilityStore\(\(s\) => s\.isUnavailable\(\)\);/,
@@ -309,7 +309,7 @@ test("the dialog stops offering a Create button that can only 503", async () => 
 // RAG host the probe can never succeed, so a queued prompt on a thread using documents
 // was never dispatched at all.
 test("a queued prompt is not held forever by a probe that can never succeed", async () => {
-  const src = await readSrc("components/assistant-ui/thread.tsx");
+  const src = await readSrcExpanded("components/assistant-ui/thread.tsx");
   assert.match(
     src,
     /import \{ useRagAvailabilityStore \} from "@\/features\/rag\/api\/rag-availability";/,
@@ -341,7 +341,7 @@ test("a queued prompt is not held forever by a probe that can never succeed", as
 // useRagToolDisabled is a model-capability gate and is deliberately false when no model is
 // loaded. Folding host availability into it would conflate two different questions.
 test("host availability is kept out of the model-capability gate", async () => {
-  const src = await readSrc("features/chat/hooks/use-rag-tool-disabled.ts");
+  const src = await readSrcExpanded("features/chat/hooks/use-rag-tool-disabled.ts");
   assert.ok(
     !src.includes("rag-availability"),
     "the sqlite-vec verdict was folded into the tool-capability hook",

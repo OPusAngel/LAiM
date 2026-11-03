@@ -95,7 +95,7 @@ def generated_sentinel():
         pytest.skip(
             f"installed LAiM_zoo {installed} still generates the pre-fix sentinel; it is "
             f"fixed from {ZOO_RELEASE_WITH_GENERATED_SENTINEL_FIX} "
-            f"(LAiMai/LAiM-zoo#1259) onwards, which pyproject.toml's floor now "
+            f"(OPusAngel/LAiM-zoo#1259) onwards, which pyproject.toml's floor now "
             f"requires, so upgrade LAiM_zoo here to run these. The canary test in this "
             f"file runs unconditionally and shows these probes have teeth."
         )

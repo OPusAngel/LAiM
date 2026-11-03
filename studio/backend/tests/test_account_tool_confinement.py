@@ -53,18 +53,16 @@ LANDLOCK = (
 def isolated(tmp_path, monkeypatch):
     monkeypatch.setenv("LAiM_STUDIO_HOME", str(tmp_path / "studio"))
     monkeypatch.setenv("LAiM_STUDIO_PROJECTS_HOME", str(tmp_path / "projects"))
-    monkeypatch.delenv("LAiM_STUDIO_SANDBOX_HOME", raising = False)
+    monkeypatch.delenv("LAiM_STUDIO_WORKDIR_HOME", raising = False)
     monkeypatch.delenv("LAiM_STUDIO_ALLOW_UNCONFINED_TOOLS", raising = False)
-    # The sandbox caps the child at 10000 processes per user; a busy CI host is often already above that.
-    monkeypatch.setenv("LAiM_STUDIO_SANDBOX_NPROC", "4000000")
+    # The workdir caps the child at 10000 processes per user; a busy CI host is often already above that.
+    monkeypatch.setenv("LAiM_STUDIO_WORKDIR_NPROC", "4000000")
     monkeypatch.setattr(policy, "installation_is_multi_user", lambda: True)
     monkeypatch.setattr(tools, "_workdirs", {})
     monkeypatch.setattr(tools, "_active_sessions", {})
     monkeypatch.setattr(tools, "_pending_removals", {})
     monkeypatch.setattr(tools, "_removing_sessions", set())
-    monkeypatch.setattr(tools, "_legacy_sandbox_migrated", True)
     monkeypatch.setattr(tools, "_start_detached_sweep", lambda: None)
-    monkeypatch.setattr(tools, "_legacy_sandbox_root", lambda: str(tmp_path / "legacy"))
 
 
 def _seed(tmp_path: Path) -> dict[str, Path]:
@@ -83,10 +81,10 @@ def _seed(tmp_path: Path) -> dict[str, Path]:
 
 def test_owner_spawns_exactly_as_before():
     assert run_as(OWNER, tools._account_confinement) is None
-    kwargs = {"preexec_fn": tools._sandbox_preexec}
+    kwargs = {"preexec_fn": tools._child_preexec}
     argv = ["bash", "-c", "true"]
     assert tools._apply_confinement(None, kwargs, argv) is argv
-    assert kwargs["preexec_fn"] is tools._sandbox_preexec
+    assert kwargs["preexec_fn"] is tools._child_preexec
 
 
 @pytest.mark.skipif(sys.platform == "linux" and LANDLOCK, reason = "host confines with Landlock")
@@ -123,7 +121,7 @@ def test_macos_profile_hides_install_root_then_allows_own_roots(tmp_path, monkey
     assert profile.startswith("(version 1)\n(deny default)")
     deny = profile.index(f'(deny file-read* file-write* (subpath "{studio}"))')
     allow = profile.index(f'(allow file-read* (subpath "{alice_root}"))')
-    writable = profile.index(f'(allow file-read* file-write* (subpath "{alice_root}/sandbox"))')
+    writable = profile.index(f'(allow file-read* file-write* (subpath "{alice_root}/workdir"))')
     assert (
         deny < allow < writable
     ), "the account roots must be allowed after the install root is denied"
@@ -286,7 +284,6 @@ def test_owner_bypass_remains_unconfined(tmp_path):
         tools._bash_exec,
         f"cat {files['alice']}",
         session_id = "chat",
-        disable_sandbox = True,
     )
     assert "ALICE_PRIVATE" in out
 
@@ -295,13 +292,13 @@ def test_landlock_rules_cover_own_roots_only(tmp_path):
     if sys.platform != "linux":
         pytest.skip("Linux rule builder")
     run_as(ALICE, tools._get_workdir, "chat")
-    rules = run_as(ALICE, tool_confinement._landlock_rules, 3, tools._SANDBOX_SITE_DIR)
+    rules = run_as(ALICE, tool_confinement._landlock_rules, 3, tools._TOOL_SITE_DIR)
     handled = tool_confinement._handled_mask(3)
     writable_access = tool_confinement._writable_access(handled)
     writable = [p for p, access in rules if access == writable_access]
     alice_root = str((tmp_path / "studio" / "accounts" / "alice-id").resolve())
     assert alice_root not in writable
-    assert f"{alice_root}/sandbox" in writable
+    assert f"{alice_root}/workdir" in writable
     assert str((tmp_path / "projects" / "Accounts" / "alice-id" / "Projects").resolve()) in writable
     assert alice_root in [p for p, access in rules if access != writable_access]
     assert str((tmp_path / "studio").resolve()) not in [p for p, _ in rules]
@@ -395,7 +392,7 @@ def test_managed_child_cannot_signal_another_accounts_process(tmp_path):
 
 
 @pytest.mark.skipif(not LANDLOCK, reason = "Landlock not available on this kernel")
-def test_managed_child_writes_only_its_sandbox_and_projects(tmp_path):
+def test_managed_child_writes_only_its_workdir_and_projects(tmp_path):
     files = _seed(tmp_path)
     bob_root = Path(run_as(BOB, storage_roots_workspace))
     (bob_root / "studio.db").write_text("BOB-DB")
@@ -407,12 +404,12 @@ def test_managed_child_writes_only_its_sandbox_and_projects(tmp_path):
         f"cat {bob_root}/assets/data.jsonl; echo rc=$?; "
         f"echo TAMPERED > {bob_root}/studio.db; echo write_rc=$?; "
         f"echo x > {bob_root}/assets/new.txt; echo assets_rc=$?; "
-        "echo mine > own.txt; echo sandbox_rc=$?",
+        "echo mine > own.txt; echo workdir_rc=$?",
         session_id = "chat",
     )
     assert "BOB-DATA" in out and "rc=0" in out, out
     assert "write_rc=0" not in out and "assets_rc=0" not in out, out
-    assert "sandbox_rc=0" in out, out
+    assert "workdir_rc=0" in out, out
     assert (bob_root / "studio.db").read_text() == "BOB-DB"
     assert files["LAiM"].read_text() == "LAiM_PRIVATE"
 
@@ -457,28 +454,28 @@ def test_install_under_a_granted_root_stays_hidden(tmp_path, monkeypatch):
             session_id = "chat",
         )
         assert sys.prefix in usable, usable
-        rules = run_as(BOB, tool_confinement._landlock_rules, 3, tools._SANDBOX_SITE_DIR)
+        rules = run_as(BOB, tool_confinement._landlock_rules, 3, tools._TOOL_SITE_DIR)
         assert all(not tool_confinement._contains(p, str(home.resolve())) for p, _ in rules)
     finally:
         import shutil
         shutil.rmtree(home, ignore_errors = True)
 
 
-def test_sandbox_home_override_is_writable(tmp_path, monkeypatch):
-    monkeypatch.setenv("LAiM_STUDIO_SANDBOX_HOME", str(tmp_path / "custom-sandboxes"))
+def test_workdir_home_override_is_writable(tmp_path, monkeypatch):
+    monkeypatch.setenv("LAiM_STUDIO_WORKDIR_HOME", str(tmp_path / "custom-workdirs"))
     roots = run_as(BOB, tool_confinement._writable_roots)
-    assert str((tmp_path / "custom-sandboxes" / "accounts" / "bob-id").resolve()) in roots
+    assert str((tmp_path / "custom-workdirs" / "accounts" / "bob-id").resolve()) in roots
 
 
 def test_landlock_below_abi_3_is_refused(monkeypatch):
     monkeypatch.setattr(tool_confinement, "landlock_abi", lambda: 2)
-    assert tool_confinement._linux_confinement(tools._SANDBOX_SITE_DIR) is None
+    assert tool_confinement._linux_confinement(tools._TOOL_SITE_DIR) is None
 
 
 @pytest.mark.skipif(not LANDLOCK, reason = "Landlock not available on this kernel")
-def test_sandbox_home_under_a_granted_root_hides_other_accounts(tmp_path, monkeypatch):
-    base = Path(sys.prefix) / f"mu-shared-sandboxes-{os.getpid()}"
-    monkeypatch.setenv("LAiM_STUDIO_SANDBOX_HOME", str(base))
+def test_workdir_home_under_a_granted_root_hides_other_accounts(tmp_path, monkeypatch):
+    base = Path(sys.prefix) / f"mu-shared-workdirs-{os.getpid()}"
+    monkeypatch.setenv("LAiM_STUDIO_WORKDIR_HOME", str(base))
     try:
         alice_dir = Path(run_as(ALICE, tools._get_workdir, "chat"))
         (alice_dir / "alice-secret.txt").write_text("ALICE_PRIVATE")
@@ -491,7 +488,7 @@ def test_sandbox_home_under_a_granted_root_hides_other_accounts(tmp_path, monkey
         )
         assert "ALICE_PRIVATE" not in out and "rc=0" not in out.replace("own_rc=0", ""), out
         assert "own_rc=0" in out and "mine" in out, out
-        rules = run_as(BOB, tool_confinement._landlock_rules, 3, tools._SANDBOX_SITE_DIR)
+        rules = run_as(BOB, tool_confinement._landlock_rules, 3, tools._TOOL_SITE_DIR)
         assert all(not tool_confinement._contains(p, str(alice_dir)) for p, _ in rules)
     finally:
         import shutil
@@ -560,13 +557,13 @@ def test_projects_home_under_a_granted_root_hides_other_accounts(tmp_path, monke
         shutil.rmtree(base, ignore_errors = True)
 
 
-def test_macos_profile_hides_shared_sandbox_and_project_bases(tmp_path, monkeypatch):
+def test_macos_profile_hides_shared_workdir_and_project_bases(tmp_path, monkeypatch):
     prefix = tmp_path / "prefix"
-    sandboxes = prefix / "sandboxes"
+    workdirs = prefix / "workdirs"
     projects = prefix / "projects"
-    sandboxes.mkdir(parents = True)
+    workdirs.mkdir(parents = True)
     projects.mkdir(parents = True)
-    monkeypatch.setenv("LAiM_STUDIO_SANDBOX_HOME", str(sandboxes))
+    monkeypatch.setenv("LAiM_STUDIO_WORKDIR_HOME", str(workdirs))
     monkeypatch.setenv("LAiM_STUDIO_PROJECTS_HOME", str(projects))
     monkeypatch.setattr(sys, "platform", "darwin")
     monkeypatch.setattr(tool_confinement.shutil, "which", lambda name: "/usr/bin/sandbox-exec")
@@ -574,17 +571,17 @@ def test_macos_profile_hides_shared_sandbox_and_project_bases(tmp_path, monkeypa
     run_as(ALICE, tools._get_workdir, "chat")
 
     profile = run_as(BOB, tools._account_confinement).wrap(["bash"])[2]
-    bob_sandbox = str(Path(run_as(BOB, tools.sandbox_root)).resolve())
-    alice_sandbox = str(Path(run_as(ALICE, tools.sandbox_root)).resolve())
-    for base in (sandboxes, projects):
+    bob_workdir = str(Path(run_as(BOB, tools.session_workdir_root)).resolve())
+    alice_workdir = str(Path(run_as(ALICE, tools.session_workdir_root)).resolve())
+    for base in (workdirs, projects):
         deny = profile.index(f'(deny file-read* file-write* (subpath "{base.resolve()}"))')
         assert profile.index(f'(allow file-read* (subpath "{prefix.resolve()}"))') < deny
-    allow_own = profile.index(f'(allow file-read* file-write* (subpath "{bob_sandbox}"))')
+    allow_own = profile.index(f'(allow file-read* file-write* (subpath "{bob_workdir}"))')
     assert (
-        profile.rindex(f'(deny file-read* file-write* (subpath "{sandboxes.resolve()}"))')
+        profile.rindex(f'(deny file-read* file-write* (subpath "{workdirs.resolve()}"))')
         < allow_own
     )
-    assert f'(subpath "{alice_sandbox}")' not in profile
+    assert f'(subpath "{alice_workdir}")' not in profile
 
 
 @pytest.mark.skipif(not LANDLOCK, reason = "Landlock not available on this kernel")
@@ -598,7 +595,7 @@ def test_hf_cache_under_a_granted_root_is_hidden(monkeypatch):
     monkeypatch.setattr(hf_cache_settings, "_EXPLICIT_CACHE_ENV", {"HF_HUB_CACHE": str(cache)})
     try:
         run_as(BOB, tools._get_workdir, "chat")
-        rules = run_as(BOB, tool_confinement._landlock_rules, 3, tools._SANDBOX_SITE_DIR)
+        rules = run_as(BOB, tool_confinement._landlock_rules, 3, tools._TOOL_SITE_DIR)
         assert all(not tool_confinement._contains(p, str(secret)) for p, _ in rules)
         out = run_as(BOB, tools._bash_exec, f"cat {secret}; echo rc=$?", session_id = "chat")
         assert "ACME_PRIVATE" not in out and "rc=0" not in out, out
@@ -630,12 +627,12 @@ def test_bases_outside_a_granted_root_leave_the_landlock_rules_unchanged(tmp_pat
 
     _keep_the_interpreter_walk_out_of_the_fixtures(tmp_path, monkeypatch)
     run_as(ALICE, tools._get_workdir, "chat")
-    rules = run_as(ALICE, tool_confinement._landlock_rules, 3, tools._SANDBOX_SITE_DIR)
+    rules = run_as(ALICE, tool_confinement._landlock_rules, 3, tools._TOOL_SITE_DIR)
     install_only = tool_confinement._existing((run_as(ALICE, studio_root),))
     original = tool_confinement._protected_roots
     tool_confinement._protected_roots = lambda: install_only
     try:
-        baseline = run_as(ALICE, tool_confinement._landlock_rules, 3, tools._SANDBOX_SITE_DIR)
+        baseline = run_as(ALICE, tool_confinement._landlock_rules, 3, tools._TOOL_SITE_DIR)
     finally:
         tool_confinement._protected_roots = original
     assert rules == baseline
@@ -693,7 +690,7 @@ def test_link_to_an_ancestor_of_the_install_root_stays_hidden(tmp_path, monkeypa
         )
         assert "OWNER_AUTH_DB" not in out and "rc=0" not in out.replace("own_rc=0", ""), out
         assert "own_rc=0" in out and "mine" in out, out
-        rules = run_as(BOB, tool_confinement._landlock_rules, 3, tools._SANDBOX_SITE_DIR)
+        rules = run_as(BOB, tool_confinement._landlock_rules, 3, tools._TOOL_SITE_DIR)
         assert all(not tool_confinement._contains(p, str(link)) for p, _ in rules), rules
     finally:
         import shutil
@@ -797,22 +794,22 @@ def _make_private_roots(account):
 def test_a_tool_launch_after_deletion_refuses_instead_of_recreating_the_roots(matrix):  # noqa: F811
     """A chat authenticated before the delete must not rematerialize the private roots.
 
-    ``_ensure_dirs`` used to create the workspace, sandbox, temporary and project roots
+    ``_ensure_dirs`` used to create the workspace, workdir, temporary and project roots
     with a raw ``Path.mkdir``, so a tool process launched after ``delete_account`` returned
     rebuilt an orphaned account tree and ran in it.
     """
     _, _, accounts = matrix
     alice = storage.get_account("alice")
     _make_private_roots(alice)
-    Path(run_as(alice, tools.sandbox_root)).mkdir(parents = True, exist_ok = True)
+    Path(run_as(alice, tools.session_workdir_root)).mkdir(parents = True, exist_ok = True)
 
     storage.delete_account(alice.account_id, accounts.retire_account_roots)
 
     workspace = run_as(alice, storage_roots.workspace_root)
     tmp = run_as(alice, storage_roots.tmp_root)
     projects = run_as(alice, storage_roots.project_workspaces_root)
-    sandbox = Path(run_as(alice, tools.sandbox_root))
-    assert not any(root.exists() for root in (workspace, tmp, projects, sandbox))
+    workdir = Path(run_as(alice, tools.session_workdir_root))
+    assert not any(root.exists() for root in (workspace, tmp, projects, workdir))
 
     for helper in (
         tool_confinement._readable_account_roots,
@@ -827,7 +824,7 @@ def test_a_tool_launch_after_deletion_refuses_instead_of_recreating_the_roots(ma
     result = run_as(alice, tools._bash_exec, "echo hi", "chat")
     assert "account has been deleted" in result
 
-    assert not any(root.exists() for root in (workspace, tmp, projects, sandbox))
+    assert not any(root.exists() for root in (workspace, tmp, projects, workdir))
 
 
 def test_runtime_secret_mounts_are_excluded_from_the_system_grant(tmp_path, monkeypatch):
@@ -851,7 +848,7 @@ def test_runtime_secret_mounts_are_excluded_from_the_system_grant(tmp_path, monk
         ),
     )
     run_as(ALICE, tools._get_workdir, "chat")
-    rules = run_as(ALICE, tool_confinement._landlock_rules, 6, tools._SANDBOX_SITE_DIR)
+    rules = run_as(ALICE, tool_confinement._landlock_rules, 6, tools._TOOL_SITE_DIR)
     granted = [p for p, _ in rules]
     resolved = str(run.resolve())
     print(f"granted under {resolved}: {[p for p in granted if p.startswith(resolved)]}")
@@ -893,7 +890,7 @@ def test_privileged_etc_secrets_are_excluded_from_the_system_grant(tmp_path, mon
         ),
     )
     run_as(ALICE, tools._get_workdir, "chat")
-    rules = run_as(ALICE, tool_confinement._landlock_rules, 6, tools._SANDBOX_SITE_DIR)
+    rules = run_as(ALICE, tool_confinement._landlock_rules, 6, tools._TOOL_SITE_DIR)
     granted = [p for p, _ in rules]
     resolved = str(etc.resolve())
     assert resolved not in granted
@@ -917,7 +914,7 @@ def test_landlock_grants_device_nodes_not_the_device_tree(tmp_path):
     if sys.platform != "linux":
         pytest.skip("Linux rule builder")
     run_as(ALICE, tools._get_workdir, "chat")
-    rules = dict(run_as(ALICE, tool_confinement._landlock_rules, 5, tools._SANDBOX_SITE_DIR))
+    rules = dict(run_as(ALICE, tool_confinement._landlock_rules, 5, tools._TOOL_SITE_DIR))
     granted = [p for p in rules if p == "/dev" or p.startswith("/dev/")]
     assert "/dev" not in granted
     assert {"/dev/null", "/dev/urandom"} <= set(granted)

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { useCallback, useEffect, useState } from "react";
 
 import { Cancel01Icon } from "@hugeicons/core-free-icons";
@@ -70,7 +71,7 @@ function ShowcaseTile({
       await deleteDiffusionDatasetImage(dataset, filename);
       onRemove(filename);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to delete image");
+      toast.error(e instanceof Error ? e.message : translate("uxImages.failedToDeleteImageko49i"));
       setDeleting(false);
     }
   }, [dataset, filename, onRemove]);
@@ -97,7 +98,7 @@ function ShowcaseTile({
             )}
           </button>
         </TooltipTrigger>
-        <TooltipContent>Browse and caption these images</TooltipContent>
+        <TooltipContent>{translate("uxCopy.browseAndCaptionTheseiq4jr")}</TooltipContent>
       </Tooltip>
       <Tooltip>
         <TooltipTrigger asChild={true}>
@@ -105,7 +106,7 @@ function ShowcaseTile({
             type="button"
             onClick={remove}
             disabled={deleting}
-            aria-label={`Remove ${filename}`}
+            aria-label={translate("uxImages.removecucki", { p1: filename })}
             className="absolute right-0.5 top-0.5 flex size-5 items-center justify-center rounded-full bg-background/90 text-muted-foreground opacity-0 any-pointer-coarse:opacity-100 shadow-sm ring-1 ring-border backdrop-blur-sm transition-opacity hover:text-destructive focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring group-hover/thumb:opacity-100"
           >
             {deleting ? (
@@ -115,7 +116,7 @@ function ShowcaseTile({
             )}
           </button>
         </TooltipTrigger>
-        <TooltipContent>Remove this image from the dataset</TooltipContent>
+        <TooltipContent>{translate("uxCopy.removeThisImageFrom80imv")}</TooltipContent>
       </Tooltip>
     </div>
   );
@@ -183,8 +184,7 @@ export function DatasetShowcase({
       <div className="flex flex-wrap items-center gap-2.5">
         {names === null ? (
           <div className="flex h-14 items-center gap-2 px-2 text-ui-11 text-muted-foreground">
-            <Spinner className="size-3.5" /> Loading preview...
-          </div>
+            <Spinner className="size-3.5" />{translate("uxImages.loadingPreview4g7b5")}</div>
         ) : (
           <>
             {names.map((n) => (

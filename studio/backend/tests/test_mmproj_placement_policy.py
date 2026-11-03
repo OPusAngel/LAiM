@@ -646,7 +646,7 @@ def test_the_download_interlock_is_not_relaxed_by_the_vision_switch(tmp_path):
             GgufLoadIntent(
                 gguf_path = str(tmp_path / "model.gguf"),
                 model_identifier = "test",
-                hf_repo = "LAiM/some-vl-GGUF",
+                hf_repo = "unsloth/some-vl-GGUF",
                 is_vision = True,
                 **intent_kwargs,
             ),
@@ -744,7 +744,7 @@ def test_a_remote_projector_of_unknown_kind_is_charged_to_the_guard(tmp_path):
         gguf_mtp_file = None,
         gguf_dspark_file = None,
         gguf_dflash_file = None,
-        gguf_hf_repo = "LAiM/some-vl-GGUF",
+        gguf_hf_repo = "unsloth/some-vl-GGUF",
         gguf_variant = "UD-Q4_K_XL",
         is_vision = True,
     )
@@ -787,7 +787,7 @@ def test_the_training_guard_charges_a_hand_added_repo_root_projector(tmp_path):
         gguf_mtp_file = None,
         gguf_dspark_file = None,
         gguf_dflash_file = None,
-        gguf_hf_repo = "LAiM/some-vl-GGUF",
+        gguf_hf_repo = "unsloth/some-vl-GGUF",
         gguf_variant = "UD-Q4_K_XL",
         is_vision = True,
     )
@@ -841,7 +841,7 @@ def test_the_guard_asks_the_local_projector_whether_the_launch_opens_it(
         gguf_mtp_file = None,
         gguf_dspark_file = None,
         gguf_dflash_file = None,
-        gguf_hf_repo = "LAiM/some-vl-GGUF",
+        gguf_hf_repo = "unsloth/some-vl-GGUF",
         gguf_variant = "UD-Q4_K_XL",
         is_vision = True,
     )
@@ -1968,7 +1968,7 @@ def test_only_the_owner_may_name_a_custom_projector(monkeypatch, flag, managed):
         ["--spec-draft-model", "/home/owner/draft.gguf"],
         ["-lcs", "/home/owner/cache.bin"],
         ["--log-prompts-dir", "/home/owner/.config"],
-        ["--video-ffmpeg-dir", "/srv/studio/accounts/m/sandbox"],
+        ["--video-ffmpeg-dir", "/srv/studio/accounts/m/workdir"],
     ],
 )
 @pytest.mark.parametrize("managed", [False, True])
@@ -2054,7 +2054,7 @@ def test_managed_caller_may_resend_the_resident_same_model_paths(monkeypatch):
     monkeypatch.setattr(
         routes, "get_llama_cpp_backend", lambda: SimpleNamespace(last_load_intent = snapshot)
     )
-    routes._refuse_managed_custom_projector(["--lora", "/owner/a.gguf"], "LAiM/B-GGUF")
+    routes._refuse_managed_custom_projector(["--lora", "/owner/a.gguf"], "unsloth/B-GGUF")
     monkeypatch.setattr(
         routes, "get_llama_cpp_backend", lambda: SimpleNamespace(last_load_intent = intent)
     )
@@ -2081,9 +2081,9 @@ def test_resident_paths_need_a_real_cache_snapshot_and_follow_an_omitted_variant
     )
     routes = _managed_with_owner(monkeypatch, intent = intent)
     # The same repo, by id or by its real cache path, with the variant omitted or named.
-    routes._refuse_managed_custom_projector(["--lora", "/owner/a.gguf"], "LAiM/B-GGUF")
+    routes._refuse_managed_custom_projector(["--lora", "/owner/a.gguf"], "unsloth/B-GGUF")
     routes._refuse_managed_custom_projector(
-        ["--lora", "/owner/a.gguf"], "LAiM/B-GGUF", None, "Q4_K_M"
+        ["--lora", "/owner/a.gguf"], "unsloth/B-GGUF", None, "Q4_K_M"
     )
     routes._refuse_managed_custom_projector(["--lora", "/owner/a.gguf"], intent.model_identifier)
     # A look-alike snapshot path in an account workspace is not the resident repo.
@@ -2101,10 +2101,10 @@ def test_resident_paths_need_a_real_cache_snapshot_and_follow_an_omitted_variant
         routes, "get_llama_cpp_backend", lambda: SimpleNamespace(last_load_intent = outside)
     )
     with pytest.raises(HTTPException):
-        routes._refuse_managed_custom_projector(["--lora", "/owner/a.gguf"], "LAiM/B-GGUF")
+        routes._refuse_managed_custom_projector(["--lora", "/owner/a.gguf"], "unsloth/B-GGUF")
     with pytest.raises(HTTPException):
         routes._refuse_managed_custom_projector(
-            ["--lora", "/owner/a.gguf"], "LAiM/B-GGUF", None, "Q8_0"
+            ["--lora", "/owner/a.gguf"], "unsloth/B-GGUF", None, "Q8_0"
         )
 
 
@@ -2132,8 +2132,8 @@ def test_inherited_owner_paths_get_the_same_managed_check(monkeypatch, tmp_path)
     monkeypatch.setattr(routes, "get_llama_cpp_backend", lambda: backend)
     config = SimpleNamespace(is_gguf = True, gguf_variant = "Q4_K_M")
 
-    same = LoadRequest(model_path = "LAiM/B-GGUF")
-    assert routes._resolve_inherited_extra_args(same, config, "LAiM/B-GGUF", None) == [
+    same = LoadRequest(model_path = "unsloth/B-GGUF")
+    assert routes._resolve_inherited_extra_args(same, config, "unsloth/B-GGUF", None) == [
         "--lora",
         "/owner/a.gguf",
     ]

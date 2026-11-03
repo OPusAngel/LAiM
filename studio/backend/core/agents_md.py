@@ -28,7 +28,7 @@ def _owner_home() -> Path:
 
 
 def _read(path: Path, confine: Optional[Path] = None) -> bytes:
-    # The model writes in the sandbox but this read is unsandboxed: no link there may pull in a host file
+    # The model writes in the workdir but this read is unrestricted: no link there may pull in a host file
     # (project and global files may be links, CLAUDE.md -> AGENTS.md). Non-blocking so a FIFO cannot hang.
     flags = os.O_RDONLY | getattr(os, "O_NONBLOCK", 0)
     if confine is not None:
@@ -44,7 +44,7 @@ def _read(path: Path, confine: Optional[Path] = None) -> bytes:
     with os.fdopen(fd, "rb") as handle:
         try:
             status = os.fstat(handle.fileno())
-            # A hard link is the other way to plant a host file in the sandbox.
+            # A hard link is the other way to plant a host file in the workdir.
             if not stat.S_ISREG(status.st_mode) or (confine is not None and status.st_nlink > 1):
                 return b""
             # One byte over the cap is enough to know it was cut.
@@ -92,11 +92,11 @@ def _sources(project: Optional[dict]) -> list[tuple[tuple[Path, ...], Optional[P
         folder = Path(working)
         sources.append(((folder / "AGENTS.md", folder / "CLAUDE.md"), folder))
         return sources
-    sandbox_path = project.get("sandboxPath")
+    session_dir_path = project.get("workdirPath")
     # Same containment tools._get_project_workdir requires before running anything there.
-    if sandbox_path and os.path.realpath(sandbox_path).startswith(os.path.realpath(root) + os.sep):
-        sandbox = Path(sandbox_path)
-        sources.append(((sandbox / "AGENTS.md", sandbox / "CLAUDE.md"), sandbox))
+    if session_dir_path and os.path.realpath(session_dir_path).startswith(os.path.realpath(root) + os.sep):
+        workdir = Path(session_dir_path)
+        sources.append(((workdir / "AGENTS.md", workdir / "CLAUDE.md"), workdir))
     return sources
 
 

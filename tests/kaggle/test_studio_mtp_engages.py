@@ -24,7 +24,7 @@ def _func(name: str) -> ast.FunctionDef:
 def test_the_default_chat_model_is_the_mtp_repo():
     """If this stops being an MTP repo the assertion below becomes vacuous, so
     it fails here rather than passing silently."""
-    assert "LAiM/Qwen3.5-2B-MTP-GGUF" in SRC
+    assert "unsloth/Qwen3.5-2B-MTP-GGUF" in SRC
 
 
 def test_the_status_fields_are_read_from_the_load():

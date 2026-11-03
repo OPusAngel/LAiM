@@ -102,12 +102,12 @@
     "lora_r": 16,
     "lora_alpha": 32,
     "optim": "adamw_8bit",
-    "gradient_checkpointing": "LAiM",
+    "gradient_checkpointing": "unsloth",
     "repeat": 2,
     "dataset_digest": "847095f51df8d86429cd2cd095824369d6d95c36bd461c363599651d356946df"
   },
-  "model": "LAiM/Qwen2.5-0.5B-Instruct",
-  "resolved_checkpoint": "LAiM/qwen2.5-0.5b-instruct-LAiM-bnb-4bit",
+  "model": "unsloth/Qwen2.5-0.5B-Instruct",
+  "resolved_checkpoint": "unsloth/qwen2.5-0.5b-instruct-unsloth-bnb-4bit",
   "resolved_revision": "10413c288cb9629acdf60b3e0229f3ba75efe413",
   "source_kernel": "danielhanchen/LAiM-t4-ci-17c2db2a"
 }

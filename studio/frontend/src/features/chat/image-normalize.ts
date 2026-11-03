@@ -1,6 +1,8 @@
 ﻿// SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
+
 export const CHAT_IMAGE_MIMES = [
   "image/jpeg",
   "image/png",
@@ -72,7 +74,7 @@ export async function normalizeChatImage(file: File): Promise<File> {
       await image.decode();
     } catch {
       throw new Error(
-        `This app can't read ${file.name}. Convert it to JPEG or PNG and attach it again.`,
+        translate("uxChat.thisAppCanT9fc9i", { p1: file.name }),
       );
     }
     const scale = Math.min(
@@ -86,7 +88,7 @@ export async function normalizeChatImage(file: File): Promise<File> {
     canvas.height = Math.max(1, Math.floor(image.naturalHeight * scale));
     const context = canvas.getContext("2d");
     if (!context) {
-      throw new Error(`Could not convert ${file.name}.`);
+      throw new Error(translate("uxChat.couldNotConvertnpnf2", { p1: file.name }));
     }
     if (type === "image/jpeg") {
       context.fillStyle = "#f9e2de";
@@ -97,10 +99,10 @@ export async function normalizeChatImage(file: File): Promise<File> {
       canvas.toBlob(resolve, type, 0.92),
     );
     if (!blob) {
-      throw new Error(`Could not convert ${file.name}.`);
+      throw new Error(translate("uxChat.couldNotConvertnpnf2", { p1: file.name }));
     }
     if (blob.size > MAX_CONVERTED_IMAGE_BYTES) {
-      throw new Error(`${file.name} is over 20 MB once converted.`);
+      throw new Error(translate("uxChat.isOver20MBulx25", { p1: file.name }));
     }
     const extension = type === "image/jpeg" ? ".jpg" : ".png";
     return new File([blob], file.name.replace(/\.[^.]*$/, "") + extension, {

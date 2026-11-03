@@ -31,7 +31,7 @@ from core.inference.diffusion_memory import DeviceMemory, snapshot_device_memory
 MIB = 1024 * 1024
 GIB_MIB = 1024
 
-# LAiM/FLUX.2-dev, 112.9 GB: too large for every pool below, so a machine that keeps
+# unsloth/FLUX.2-dev, 112.9 GB: too large for every pool below, so a machine that keeps
 # loading it is one the guard genuinely never reaches.
 FLUX2_DEV = [
     (f"{name}/model.safetensors", mib * MIB)
@@ -42,7 +42,7 @@ FLUX2_DEV = [
         ("tokenizer", 16),
     )
 ]
-# LAiM/Lumina-Image-2.0, 20 GB stored fp32: the control that must still load.
+# unsloth/Lumina-Image-2.0, 20 GB stored fp32: the control that must still load.
 LUMINA_2 = [
     (f"{name}/model.safetensors", mib * MIB)
     for name, mib in (
@@ -125,7 +125,7 @@ def _guard(
     def verdict(files):
         return backend.declared_footprint_shortfall(
             types.SimpleNamespace(name = "flux.2-dev", base_repo = "black-forest-labs/FLUX.2-dev"),
-            "LAiM/FLUX.2-dev",
+            "unsloth/FLUX.2-dev",
             "black-forest-labs/FLUX.2-dev",
             kind = "pipeline",
             declared_files = files,
@@ -248,7 +248,7 @@ def test_no_offload_request_can_talk_a_shared_pool_into_it(monkeypatch, memory_m
     def verdict(files, base):
         return backend.declared_footprint_shortfall(
             types.SimpleNamespace(name = "flux.2-dev", base_repo = base),
-            "LAiM/FLUX.2-dev",
+            "unsloth/FLUX.2-dev",
             base,
             kind = "pipeline",
             declared_files = files,
@@ -378,7 +378,7 @@ def _plan_probe(monkeypatch, calls):
     """A download_plan whose device-dependent steps announce themselves."""
     backend = DiffusionBackend()
     # The real registry entry: download_plan reads more of it than a stub can carry.
-    fam = detect_family_for_pick("LAiM/FLUX.2-dev", None, None)
+    fam = detect_family_for_pick("unsloth/FLUX.2-dev", None, None)
     assert fam is not None
     monkeypatch.setattr(diffusion_mod, "detect_family_for_pick", lambda *_a, **_k: fam)
     monkeypatch.setattr(diffusion_mod, "prefer_ungated_mirror", lambda base, *_a, **_k: base)
@@ -403,7 +403,7 @@ def _plan_probe(monkeypatch, calls):
     def _estimate(*_a, **kwargs):
         out = kwargs.get("file_sizes_out")
         if out is not None:
-            out["LAiM/FLUX.2-dev"] = {name: size for name, size in FLUX2_DEV}
+            out["unsloth/FLUX.2-dev"] = {name: size for name, size in FLUX2_DEV}
         resident = kwargs.get("resident_file_sizes_out")
         if resident is not None:
             resident.extend(FLUX2_DEV)
@@ -421,7 +421,7 @@ def test_suppressing_the_verdict_leaves_the_file_scope_alone(monkeypatch):
     "fully downloaded" answer goes wrong."""
     calls: list = []
     backend = _plan_probe(monkeypatch, calls)
-    plan = backend.download_plan("LAiM/FLUX.2-dev", model_kind = "pipeline", memory_verdict = False)
+    plan = backend.download_plan("unsloth/FLUX.2-dev", model_kind = "pipeline", memory_verdict = False)
     assert plan["incompatible_reason"] is None
     assert calls == ["te_prequant", "dit_prequant"]
 
@@ -432,7 +432,7 @@ def test_clearing_the_probe_suppresses_the_verdict_too(monkeypatch):
     calls: list = []
     backend = _plan_probe(monkeypatch, calls)
     plan = backend.download_plan(
-        "LAiM/FLUX.2-dev", model_kind = "pipeline", allow_device_probe = False
+        "unsloth/FLUX.2-dev", model_kind = "pipeline", allow_device_probe = False
     )
     assert plan["incompatible_reason"] is None
     assert calls == []
@@ -441,7 +441,7 @@ def test_clearing_the_probe_suppresses_the_verdict_too(monkeypatch):
 def test_the_default_plan_still_refuses_an_oversized_pipeline(monkeypatch):
     calls: list = []
     backend = _plan_probe(monkeypatch, calls)
-    plan = backend.download_plan("LAiM/FLUX.2-dev", model_kind = "pipeline")
+    plan = backend.download_plan("unsloth/FLUX.2-dev", model_kind = "pipeline")
     assert plan["incompatible_reason"] is not None
     assert "unified memory" in plan["incompatible_reason"]
 
@@ -450,7 +450,7 @@ def test_the_default_plan_still_refuses_an_oversized_pipeline(monkeypatch):
 def test_a_mirrored_pre_cast_encoder_is_never_staged_from_the_hub(monkeypatch, tmp_path, mirrored):
     from core.inference import diffusion_te_prequant as te_prequant
 
-    repo, name = "LAiM/FLUX.2-dev-FP8", "te.safetensors"
+    repo, name = "unsloth/FLUX.2-dev-FP8", "te.safetensors"
     backend = _plan_probe(monkeypatch, [])
     monkeypatch.setattr(
         DiffusionBackend,
@@ -465,8 +465,8 @@ def test_a_mirrored_pre_cast_encoder_is_never_staged_from_the_hub(monkeypatch, t
         (tmp_path / repo).mkdir(parents = True)
         (tmp_path / repo / name).write_bytes(b"x" * 7)
         monkeypatch.setenv(te_prequant.TE_PREQUANT_MIRROR_ENV, str(tmp_path))
-    plan = backend.download_plan("LAiM/FLUX.2-dev", model_kind = "pipeline", memory_verdict = False)
+    plan = backend.download_plan("unsloth/FLUX.2-dev", model_kind = "pipeline", memory_verdict = False)
     staged = [e for e in plan["entries"] if e["repo_id"] == repo]
     assert bool(staged) is not mirrored
-    base = [e for e in plan["entries"] if e["repo_id"] == "LAiM/FLUX.2-dev"]
+    base = [e for e in plan["entries"] if e["repo_id"] == "unsloth/FLUX.2-dev"]
     assert all(not f.startswith("text_encoder/") for e in base for f in e["files"])

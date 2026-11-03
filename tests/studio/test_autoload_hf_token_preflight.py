@@ -134,7 +134,7 @@ _SCRIPT = textwrap.dedent(
       isDiffusion = await classify({
         candidate: { kind: "gguf", ggufVariant: "Q4_K_M" },
         config: { selectedGpuIds: [0] },
-        modelPath: "LAiM/some-public-gguf",
+        modelPath: "unsloth/some-public-gguf",
         hfToken: %s,
         prepareHfTokenForUse,
         fetchGgufStagedMetadata,

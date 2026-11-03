@@ -39,11 +39,11 @@ test("curated hidden task ids survive the query-mode recommended filter", () => 
 });
 
 test("an allowed hidden Audio id survives local source matching without allowing siblings", () => {
-  const allowed = new Set(["LAiM/whisper-tiny"]);
+  const allowed = new Set(["unsloth/whisper-tiny"]);
   assert.equal(
     allowedHiddenModelIdMatches(
       allowed,
-      "LAiM/whisper-tiny",
+      "unsloth/whisper-tiny",
       "E:/models/whisper-tiny",
     ),
     true,
@@ -51,7 +51,7 @@ test("an allowed hidden Audio id survives local source matching without allowing
   assert.equal(
     allowedHiddenModelIdMatches(
       allowed,
-      "LAiM/whisper-base",
+      "unsloth/whisper-base",
       "E:/models/whisper-tiny",
     ),
     false,

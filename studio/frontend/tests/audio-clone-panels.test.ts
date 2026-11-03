@@ -5,7 +5,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import type { AudioModelContext } from "../src/features/audio/tools/types.ts";
-import { readSrc, registerBundlerResolver } from "./helpers/kit.ts";
+import { readSrc, readSrcExpanded, registerBundlerResolver } from "./helpers/kit.ts";
 
 registerBundlerResolver();
 const {
@@ -473,7 +473,7 @@ test("Clone's blockers come in rail order", () => {
 });
 
 test("panel labels are plain words, never option names", () => {
-  const panels = readSrc("features/audio/tools/clone-panels.tsx");
+  const panels = readSrcExpanded("features/audio/tools/clone-panels.tsx");
   for (const label of [
     "Timbre only",
     "Emotion",
@@ -492,9 +492,9 @@ test("panel labels are plain words, never option names", () => {
 });
 
 test("deleting the selected saved voice clears Speak's pick", () => {
-  const picker = readSrc("features/audio/components/voice-picker.tsx");
+  const picker = readSrcExpanded("features/audio/components/voice-picker.tsx");
   assert.match(picker, /if \(voice\.id === selectedId\) onDeselect\?\.\(\);/);
-  const speak = readSrc("features/audio/tools/speak-panels.tsx");
+  const speak = readSrcExpanded("features/audio/tools/speak-panels.tsx");
   assert.match(
     speak,
     /onDeselect=\{\(\) => onChange\(\{ \.\.\.value, voiceId: null \}\)\}/,
@@ -502,12 +502,12 @@ test("deleting the selected saved voice clears Speak's pick", () => {
 });
 
 test("reference transcription sends no language hint", () => {
-  const hook = readSrc("features/audio/hooks/use-reference-transcribe.ts");
+  const hook = readSrcExpanded("features/audio/hooks/use-reference-transcribe.ts");
   assert.doesNotMatch(hook, /\blanguage\s*[:,}]/);
 });
 
 test("a run whose clips carry no output role still selects its first clip, except an edit", () => {
-  const clone = readSrc("features/audio/hooks/use-clone-generation.ts");
+  const clone = readSrcExpanded("features/audio/hooks/use-clone-generation.ts");
   const body = clone.slice(clone.indexOf("export async function showRunResult("));
   assert.match(
     body,
@@ -516,14 +516,14 @@ test("a run whose clips carry no output role still selects its first clip, excep
 });
 
 test("a run's inline fallback clip stays on the page that started it", () => {
-  const clone = readSrc("features/audio/hooks/use-clone-generation.ts");
+  const clone = readSrcExpanded("features/audio/hooks/use-clone-generation.ts");
   const body = clone.slice(clone.indexOf("export async function showRunResult("));
   assert.doesNotMatch(body.slice(0, body.indexOf("\n}\n")), /workflow: "clone"/);
-  assert.match(readSrc("features/audio/hooks/use-speech-generation.ts"), /showRunResult\(\{[^}]*workflow: "speak"/);
+  assert.match(readSrcExpanded("features/audio/hooks/use-speech-generation.ts"), /showRunResult\(\{[^}]*workflow: "speak"/);
 });
 
 test("transcribing the reference holds the page busy until it ends", () => {
-  const hook = readSrc("features/audio/hooks/use-clone-generation.ts");
+  const hook = readSrcExpanded("features/audio/hooks/use-clone-generation.ts");
   const body = hook.slice(hook.indexOf("const transcribeReference = useCallback("));
   assert.match(body, /if \(!source \|\| busyRef\.current\) return;\s*busyRef\.current = "transcribing";\s*setBusy\("transcribing"\);/);
   assert.match(body, /finally \{\s*if \(busyRef\.current === "transcribing"\) \{\s*busyRef\.current = null;\s*setBusy\(null\);/);

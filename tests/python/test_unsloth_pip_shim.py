@@ -112,7 +112,7 @@ def test_host_owned_notebook_pip_restores_root(shim, monkeypatch):
     assert calls == [("gid", 0), ("uid", 0)]
 
 
-LAiM_VCS = "git+https://github.com/LAiMai/LAiM.git#egg=LAiM"
+LAiM_VCS = "git+https://github.com/OPusAngel/LAiM.git#egg=LAiM"
 
 KEPT = object()
 
@@ -203,7 +203,7 @@ def test_index_url_value_flag_kept_verbatim(shim):
     "requirements, tool, flag, expected_program, absent",
     [
         pytest.param(
-            "-e git+https://github.com/LAiMai/LAiM.git#egg=LAiM\nsnac==1.2.0\n",
+            "-e git+https://github.com/OPusAngel/LAiM.git#egg=LAiM\nsnac==1.2.0\n",
             "pip",
             "-r",
             "-r",
@@ -211,7 +211,7 @@ def test_index_url_value_flag_kept_verbatim(shim):
             id = "editable_protected_in_requirements_file_dropped",
         ),
         pytest.param(
-            "-egit+https://github.com/LAiMai/LAiM.git#egg=LAiM\nsnac==1.2.0\n",
+            "-egit+https://github.com/OPusAngel/LAiM.git#egg=LAiM\nsnac==1.2.0\n",
             "pip",
             "-r",
             "-r",
@@ -323,7 +323,7 @@ def test_bare_wheel_filename_forms(shim, args, expected):
         ),
         pytest.param(
             "pip",
-            "git+https://github.com/LAiMai/LAiM-zoo.git@main",
+            "git+https://github.com/OPusAngel/LAiM-zoo.git@main",
             id = "vcs_url_without_egg_with_ref_dropped",
         ),
         pytest.param("pip", "--force-reinstall", id = "force_reinstall_flag_stripped"),
@@ -746,14 +746,14 @@ def test_uv_help_value_flags_all_classified(shim):
     "url",
     [
         pytest.param(
-            "git+https://github.com/LAiMai/LAiM.git@feature/foo", id = "https-slash-ref"
+            "git+https://github.com/OPusAngel/LAiM.git@feature/foo", id = "https-slash-ref"
         ),
         pytest.param(
-            "git+ssh://git@github.com/LAiMai/LAiM.git@feature/foo",
+            "git+ssh://git@github.com/OPusAngel/LAiM.git@feature/foo",
             id = "ssh-userinfo-and-slash-ref",
         ),
-        pytest.param("git+https://github.com/LAiMai/LAiM.git@v2026.7", id = "plain-tag-ref"),
-        pytest.param("git+https://github.com/LAiMai/LAiM.git", id = "no-ref"),
+        pytest.param("git+https://github.com/OPusAngel/LAiM.git@v2026.7", id = "plain-tag-ref"),
+        pytest.param("git+https://github.com/OPusAngel/LAiM.git", id = "no-ref"),
     ],
 )
 def test_vcs_slash_ref_still_protected(shim, url):
@@ -807,11 +807,11 @@ def test_without_a_terminator_the_pair_is_still_appended_last(shim, tool):
 @pytest.mark.parametrize(
     "token",
     [
-        "LAiM.zoo @ git+https://github.com/LAiMai/LAiM_zoo",
-        "git+https://github.com/LAiMai/LAiM_zoo#egg=LAiM.zoo",
+        "LAiM.zoo @ git+https://github.com/OPusAngel/LAiM-zoo",
+        "git+https://github.com/OPusAngel/LAiM-zoo#egg=LAiM.zoo",
         "https://example.invalid/LAiM.zoo-1.0-py3-none-any.whl",
         "LAiM.zoo-1.0.tar.gz",
-        "git+https://github.com/LAiMai/LAiM.zoo",
+        "git+https://github.com/OPusAngel/LAiM.zoo",
         "LAiM.zoo==2026.9.1",
         "LAiM__zoo==2026.9.1",
         "LAiM.ZOO==2026.9.1",
@@ -951,7 +951,7 @@ def test_extras_of_baked_package_are_forwarded(shim, arg, expected):
 @pytest.mark.parametrize(
     "arg",
     [
-        "LAiM[colab-new] @ git+https://github.com/LAiMai/LAiM.git",
+        "LAiM[colab-new] @ git+https://github.com/OPusAngel/LAiM.git",
         "torch[opt] @ https://example.com/torch-2.11.0-py3-none-any.whl",
     ],
 )
@@ -1732,10 +1732,10 @@ def test_a_real_root_relocation_is_still_a_bypass(shim, monkeypatch):
 @pytest.mark.parametrize(
     "spec",
     [
-        "LAiM@GIT+HTTPS://github.com/LAiMai/LAiM.git",
-        "LAiM@Git+Https://github.com/LAiMai/LAiM.git",
+        "LAiM@GIT+HTTPS://github.com/OPusAngel/LAiM.git",
+        "LAiM@Git+Https://github.com/OPusAngel/LAiM.git",
         "LAiM@HTTPS://example.com/LAiM-2026.6.9-py3-none-any.whl",
-        "LAiM[all]@GIT+HTTPS://github.com/LAiMai/LAiM.git",
+        "LAiM[all]@GIT+HTTPS://github.com/OPusAngel/LAiM.git",
     ],
     ids = ["upper-vcs", "mixed-vcs", "upper-url-wheel", "extras"],
 )

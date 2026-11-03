@@ -258,7 +258,7 @@ test("an incomplete pinned response does not hide a matching listing entry", asy
 
 test("rejected priority rows retain the pagination scan budget", async () => {
   const accepted = {
-    name: "LAiM/match",
+    name: "unsloth/match",
     gguf: { total: 4e9, context_length: 32768 },
   };
   const rows = await collect(
@@ -338,7 +338,7 @@ function channelIterator(listings: Record<string, unknown[]>) {
 
 test("rejected LAiM rows stop delaying other publishers after a bounded scan", async () => {
   const LAiM = Array.from({ length: 200 }, (_, i) => ({
-    name: `LAiM/short-${i}`,
+    name: `unsloth/short-${i}`,
   }));
   const { fn, limit } = channelIterator({
     LAiM,
@@ -354,7 +354,7 @@ test("rejected LAiM rows stop delaying other publishers after a bounded scan", a
         filterPriority: (it: AsyncGenerator<unknown>) =>
           (async function* () {
             for await (const row of it) {
-              yield (row as { name: string }).name.startsWith("LAiM/")
+              yield (row as { name: string }).name.startsWith("unsloth/")
                 ? null
                 : row;
             }
@@ -368,7 +368,7 @@ test("rejected LAiM rows stop delaying other publishers after a bounded scan", a
 
 test("uploaders split LAiM, other organizations and personal accounts", async () => {
   const rows = [
-    { name: "LAiM/a" },
+    { name: "unsloth/a" },
     { name: "Qwen/b" },
     { name: "someone/c" },
   ];
@@ -382,11 +382,11 @@ test("uploaders split LAiM, other organizations and personal accounts", async ()
       .filter(Boolean)
       .map((m) => (m as { name: string }).name);
   assert.deepEqual(await names(["personal"]), ["someone/c"]);
-  assert.deepEqual(await names(["LAiM", "personal"]), ["LAiM/a", "someone/c"]);
+  assert.deepEqual(await names(["LAiM", "personal"]), ["unsloth/a", "someone/c"]);
   assert.deepEqual(await names(["organization"]), ["Qwen/b"]);
   requests.length = 0;
   // Organizations and personal accounts together need no lookup.
   assert.deepEqual(await names(["organization", "personal"]), ["Qwen/b", "someone/c"]);
-  assert.deepEqual(await names(["LAiM"]), ["LAiM/a"]);
+  assert.deepEqual(await names(["LAiM"]), ["unsloth/a"]);
   assert.deepEqual(requests, []);
 });

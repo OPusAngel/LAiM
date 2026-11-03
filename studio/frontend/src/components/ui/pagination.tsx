@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import type * as React from "react";
 
 import { Button } from "@/components/ui/button";
@@ -17,7 +18,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
   return (
     <nav
-      aria-label="pagination"
+      aria-label={translate("uxComponents.paginationjmpdq")}
       data-slot="pagination"
       className={cn("mx-auto flex w-full justify-center", className)}
       {...props}
@@ -76,7 +77,7 @@ function PaginationPrevious({
 }: React.ComponentProps<typeof PaginationLink>) {
   return (
     <PaginationLink
-      aria-label="Go to previous page"
+      aria-label={translate("uxComponents.goToPreviousPage11cjj")}
       size="default"
       className={cn("pl-2!", className)}
       {...props}
@@ -96,7 +97,7 @@ function PaginationNext({
 }: React.ComponentProps<typeof PaginationLink>) {
   return (
     <PaginationLink
-      aria-label="Go to next page"
+      aria-label={translate("uxComponents.goToNextPage1gb4j")}
       size="default"
       className={cn("pr-2!", className)}
       {...props}
@@ -125,7 +126,7 @@ function PaginationEllipsis({
       {...props}
     >
       <HugeiconsIcon icon={MoreHorizontalCircle01Icon} strokeWidth={2} />
-      <span className="sr-only">More pages</span>
+      <span className="sr-only">{translate("uxComponents.morePages0b96b")}</span>
     </span>
   );
 }

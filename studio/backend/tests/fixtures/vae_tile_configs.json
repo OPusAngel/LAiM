@@ -3,7 +3,7 @@
  "families": {
   "flux.1": {
    "kind": "image",
-   "repo": "LAiM/FLUX.1-schnell",
+   "repo": "unsloth/FLUX.1-schnell",
    "revision": "9df3faa7ae3b6ddf0b2b69bb78616372897cc65c",
    "config": {
     "_class_name": "AutoencoderKL",
@@ -90,7 +90,7 @@
   },
   "flux.2-dev": {
    "kind": "image",
-   "repo": "LAiM/FLUX.2-dev",
+   "repo": "unsloth/FLUX.2-dev",
    "revision": "351bbb0ebab35d4dfec0445f67bcec34b383ddf9",
    "config": {
     "_class_name": "AutoencoderKLFlux2",
@@ -134,7 +134,7 @@
   },
   "flux.1-kontext": {
    "kind": "image",
-   "repo": "LAiM/FLUX.1-Kontext-dev",
+   "repo": "unsloth/FLUX.1-Kontext-dev",
    "revision": "ed585f929575da3142d1cdd7a49ef25db6f12161",
    "config": {
     "_class_name": "AutoencoderKL",
@@ -570,7 +570,7 @@
   },
   "krea-2": {
    "kind": "image",
-   "repo": "LAiM/Krea-2-Turbo",
+   "repo": "unsloth/Krea-2-Turbo",
    "revision": "2489d0f4cb200616c0b5410f96f64d8fdc611b06",
    "config": {
     "_class_name": "AutoencoderKLQwenImage",
@@ -745,7 +745,7 @@
   },
   "ideogram-4": {
    "kind": "image",
-   "repo": "LAiM/ideogram-4-fp8",
+   "repo": "unsloth/ideogram-4-fp8",
    "revision": "518e05e745736960acb56d8726138ffbc174f0a9",
    "config": {
     "_class_name": "AutoencoderKLFlux2",

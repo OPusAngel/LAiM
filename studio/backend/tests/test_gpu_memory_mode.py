@@ -1449,7 +1449,7 @@ def _launch_diffusion(monkeypatch, tmp_path, *, gguf_gib, gpus, gpu_ids, **kwarg
             gguf_path = "/m.gguf",
             hf_repo = None,
             hf_variant = None,
-            model_identifier = "LAiM/diffusiongemma-26B-A4B-it-GGUF",
+            model_identifier = "unsloth/diffusiongemma-26B-A4B-it-GGUF",
             n_ctx = 0,
             extra_args = None,
             gpu_ids = gpu_ids,

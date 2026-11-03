@@ -57,7 +57,7 @@ resume = _load_resume_module()
 def test_resume_request_accepts_sanitized_null_target_modules():
     from models.training import TrainingStartRequest
     request = TrainingStartRequest(
-        model_name = "LAiM/Qwen3-0.6B",
+        model_name = "unsloth/Qwen3-0.6B",
         training_type = "Full Finetuning",
         format_type = "alpaca",
         target_modules = None,
@@ -161,7 +161,7 @@ def test_list_runs_includes_config_json_for_resume_policy(monkeypatch, tmp_path)
 
     studio_db.create_run(
         id = "run-s3",
-        model_name = "LAiM/test-model",
+        model_name = "unsloth/test-model",
         dataset_name = "s3://training-data",
         config_json = config_json,
         started_at = "2026-01-01T00:00:00Z",

@@ -20,7 +20,7 @@ from test_keep_install_backcompat_9979 import MACOS, S12, build_install  # noqa:
 
 ILP = load_studio_module("studio_install_llama_prebuilt_plan_laziness", "install_llama_prebuilt.py")
 
-PUBLISHED_REPO = "LAiMai/llama.cpp"
+PUBLISHED_REPO = "unslothai/llama.cpp"
 RELEASE_TAGS = [f"b{11000 - index}-mix-abcdef0" for index in range(20)]
 
 

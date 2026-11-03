@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -71,14 +72,14 @@ import { FieldLabel } from "../shared/field-label";
 
 const SAMPLING_OPTIONS: Array<{ value: SeedSamplingStrategy; label: string }> =
   [
-    { value: "ordered", label: "Ordered" },
-    { value: "shuffle", label: "Shuffle" },
+    { value: "ordered", get label() { return translate("uxRecipestudio.ordered6krmu"); } },
+    { value: "shuffle", get label() { return translate("uxRecipestudio.shuffle14r76"); } },
   ];
 
 const SELECTION_OPTIONS: Array<{ value: SeedSelectionType; label: string }> = [
-  { value: "none", label: "None" },
-  { value: "index_range", label: "Index range" },
-  { value: "partition_block", label: "Partition block" },
+  { value: "none", get label() { return translate("composer.pill.effortNone"); } },
+  { value: "index_range", get label() { return translate("uxRecipestudio.indexRangeave7z"); } },
+  { value: "partition_block", get label() { return translate("uxRecipestudio.partitionBlock1mhnv"); } },
 ];
 
 const LOCAL_ACCEPT = ".csv,.json,.jsonl,.parquet";
@@ -131,10 +132,10 @@ function splitGithubRepoInput(value: string): string[] {
 function getGithubRepoError(repo: string): string | null {
   const parts = repo.split("/");
   if (parts.length !== 2 || parts.some((part) => !part.trim())) {
-    return "Use owner/name.";
+    return translate("uxRecipestudio.useOwnerNamefxuht");
   }
   if (parts.some((part) => !GITHUB_REPO_PART_RE.test(part))) {
-    return "Use only GitHub repo characters.";
+    return translate("uxRecipestudio.useOnlyGitHubRepodocgi");
   }
   return null;
 }
@@ -240,9 +241,9 @@ export function GithubRepoSeedForm({
     <div className="space-y-4">
       <div className="grid gap-1.5">
         <FieldLabel
-          label="GitHub repositories"
+          label={translate("uxRecipestudio.gitHubRepositories1btyu")}
           htmlFor={repoInputId}
-          hint="Paste owner/name entries or GitHub URLs. Newlines, commas, and spaces are accepted."
+          hint={translate("uxRecipestudio.pasteOwnerNameEntriesng8ea")}
         />
         <div
           className={cn(
@@ -267,7 +268,7 @@ export function GithubRepoSeedForm({
                   type="button"
                   className="rounded-full px-1 text-muted-foreground hover:bg-background hover:text-foreground"
                   onClick={() => removeRepo(index)}
-                  aria-label={`Remove ${repo}`}
+                  aria-label={translate("uxRecipestudio.removecucki", { p1: repo })}
                 >
                   ×
                 </button>
@@ -290,22 +291,19 @@ export function GithubRepoSeedForm({
             }}
             placeholder={
               repos.length === 0
-                ? "LAiMai/LAiM or GitHub URL"
-                : "Add repo…"
+                ? "OPusAngel/LAiM or GitHub URL"
+                : translate("uxRecipestudio.addRepoj7o76")
             }
             aria-invalid={hasRepoErrors}
             aria-describedby={`${repoHelpId}${hasRepoErrors ? ` ${repoErrorId}` : ""}`}
           />
         </div>
         <p id={repoHelpId} className="text-xs text-muted-foreground">
-          Stored as one <code>owner/name</code> repo per line in the recipe.
-        </p>
+          {translate("uxCopy.storedAsOne1tmxl")} <code>owner/name</code>{translate("uxRecipestudio.repoPerLineIn07ukk")}</p>
         {hasRepoErrors && (
           <ul id={repoErrorId} className="space-y-0.5 text-xs text-red-600">
             {repoErrors.map((item) => (
-              <li key={`${item.repo}-${item.index}`}>
-                Row {item.index + 1}: {item.error}
-              </li>
+              <li key={`${item.repo}-${item.index}`}>{translate("uxRecipestudio.rowo0yb7", { p1: item.index + 1, p2: item.error })}</li>
             ))}
           </ul>
         )}
@@ -314,13 +312,13 @@ export function GithubRepoSeedForm({
       <div className="grid gap-1.5">
         <div className="flex items-start justify-between gap-2">
           <FieldLabel
-            label="GitHub token (optional)"
+            label={translate("uxRecipestudio.gitHubTokenOptional1k58o")}
             htmlFor={tokenId}
-            hint="Prefer the server GH_TOKEN / GITHUB_TOKEN env var. Use public_repo for public repos or repo for private repos."
+            hint={translate("uxRecipestudio.preferTheServerGH12coq")}
           />
           {usingEnvToken && (
             <span className="shrink-0 rounded-md border border-emerald-500/40 bg-emerald-500/10 px-1.5 py-0.5 text-ui-10 font-medium text-emerald-700 dark:text-emerald-300">
-              Using server env var
+              {translate("uxRecipestudio.usingServerEnvVar157eb")}
             </span>
           )}
         </div>
@@ -332,8 +330,8 @@ export function GithubRepoSeedForm({
           onChange={(e) => onUpdate({ github_token: e.target.value })}
           placeholder={
             usingEnvToken
-              ? "Using server GH_TOKEN / GITHUB_TOKEN"
-              : "Leave blank to use server GH_TOKEN"
+              ? translate("uxRecipestudio.usingServerGHTOKENvbph5")
+              : translate("uxRecipestudio.leaveBlankToUsejn866")
           }
           aria-describedby={tokenHelpId}
         />
@@ -344,21 +342,20 @@ export function GithubRepoSeedForm({
         </p>
         {hasToken && (
           <p className="rounded-md bg-amber-500/10 px-2 py-1.5 text-xs text-amber-700 dark:text-amber-300">
-            Personal access tokens are sensitive. Prefer server env vars when
-            possible, and avoid sharing recipes that contain a PAT.
+            {translate("uxCopy.personalAccessTokensAre1xvap")}
           </p>
         )}
       </div>
 
       <fieldset className="space-y-3">
         <legend className="text-xs font-semibold uppercase text-muted-foreground">
-          Fetch scope
+          {translate("uxRecipestudio.fetchScopeb7mlx")}
         </legend>
         <div className="grid gap-1.5">
           <FieldLabel
-            label="Items per repo"
+            label={translate("uxRecipestudio.itemsPerRepo1v2jp")}
             htmlFor={limitId}
-            hint="How many issues/PRs/commits to fetch from each repo (1-5000)."
+            hint={translate("uxRecipestudio.howManyIssuesPRs1vrxq")}
           />
           <Input
             id={limitId}
@@ -371,17 +368,12 @@ export function GithubRepoSeedForm({
             placeholder="100"
             aria-describedby={limitHelpId}
           />
-          <p id={limitHelpId} className="text-xs text-muted-foreground">
-            Estimate before comments: up to {estimatedItems.toLocaleString()}{" "}
-            rows ({repos.length || 0} repos × {itemTypes.length} item types ×{" "}
-            {boundedLimit} limit). Commit crawling uses each repo's default
-            branch.
-          </p>
+          <p id={limitHelpId} className="text-xs text-muted-foreground">{translate("uxRecipestudio.estimateBeforeCommentsUph3n8b", { p1: estimatedItems.toLocaleString(), p2: " ", p3: repos.length || 0, p4: itemTypes.length, p5: " ", p6: boundedLimit })}</p>
         </div>
 
         <div className="grid gap-1.5">
           <span className="text-xs font-semibold uppercase text-muted-foreground">
-            Item types
+            {translate("uxRecipestudio.itemTypesba5ow")}
           </span>
           <div className="flex flex-wrap gap-3 text-xs">
             {(["issues", "pulls", "commits"] as const).map((kind) => {
@@ -425,13 +417,13 @@ export function GithubRepoSeedForm({
                 onUpdate({ github_include_comments: v === true })
               }
             />
-            <span>Include issue/PR comments</span>
+            <span>{translate("uxRecipestudio.includeIssuePRComments09sow")}</span>
           </label>
           <div className="grid gap-1.5">
             <FieldLabel
-              label="Max comments / item"
+              label={translate("uxRecipestudio.maxCommentsItem107qc")}
               htmlFor={commentsId}
-              hint="Comments are concatenated into the comments column for issues and PRs."
+              hint={translate("uxRecipestudio.commentsAreConcatenatedIntoe5dt1")}
             />
             <Input
               id={commentsId}
@@ -447,17 +439,13 @@ export function GithubRepoSeedForm({
               aria-describedby={commentsHelpId}
             />
             <p id={commentsHelpId} className="text-xs text-muted-foreground">
-              Comments increase GraphQL cost and can make Check/Run look quiet
-              while GitHub pages and rate-limit waits stream in logs.
+              {translate("uxCopy.commentsIncreaseGraphQLCost1tpdl")}
             </p>
           </div>
         </div>
       </fieldset>
 
-      <p className="text-xs text-muted-foreground">
-        Backed by LAiM's built-in <code>github_repo</code> seed reader. Large
-        repos can take minutes, so start with small limits for previews.
-      </p>
+      <p className="text-xs text-muted-foreground">{translate("uxRecipestudio.backedByLAiMSw359a")}<code>github_repo</code>{translate("uxRecipestudio.seedReaderLargeReposjp1yv")}</p>
     </div>
   );
 }
@@ -498,29 +486,41 @@ function getPreviewEmptyStateCopy(mode: SeedConfig["seed_source_type"]): {
 } {
   if (mode === "local") {
     return {
-      title: "No preview yet",
-      description:
-        "Upload a CSV, JSON, or JSONL file and click Load to see a sample.",
+      get title() {
+        return translate("uxRecipestudio.noPreviewYetmzpx7");
+      },
+      get description() {
+        return translate("uxRecipestudio.uploadACSVJSONl8fe7");
+      },
     };
   }
   if (mode === "unstructured") {
     return {
-      title: "No preview yet",
-      description:
-        "Upload your documents and the preview will appear once processing is done.",
+      get title() {
+        return translate("uxRecipestudio.noPreviewYetmzpx7");
+      },
+      get description() {
+        return translate("uxRecipestudio.uploadYourDocumentsAndehv4v");
+      },
     };
   }
   if (mode === "github_repo") {
     return {
-      title: "GitHub data loads during Check or Run",
-      description:
-        "Configure repos, item types, and limits above. GitHub crawling can take minutes on large repos; watch logs for page and rate-limit updates.",
+      get title() {
+        return translate("uxRecipestudio.gitHubDataLoadsDuring1vnnm");
+      },
+      get description() {
+        return translate("uxRecipestudio.configureReposItemTypese5p32");
+      },
     };
   }
   return {
-    title: "No preview yet",
-    description:
-      "Select a Hugging Face dataset and click Load to see a sample.",
+    get title() {
+      return translate("uxRecipestudio.noPreviewYetmzpx7");
+    },
+    get description() {
+      return translate("uxRecipestudio.selectAHuggingFacenszz0");
+    },
   };
 }
 
@@ -567,7 +567,7 @@ async function fileToBase64Payload(file: File): Promise<string> {
       const parts = value.split(",");
       resolve(parts.length > 1 ? parts[1] : value);
     };
-    reader.onerror = () => reject(new Error("Failed to read file"));
+    reader.onerror = () => reject(new Error(translate("uxRecipestudio.failedToReadFilew7lyq")));
     reader.readAsDataURL(file);
   });
 }
@@ -751,7 +751,7 @@ export function SeedDialog({
         if (mode === "hf") {
           const datasetName = config.hf_repo_id.trim();
           if (!datasetName) {
-            throw new Error("Dataset repo is required.");
+            throw new Error(translate("uxRecipestudio.datasetRepoIsRequiredk8rjm"));
           }
           const response = await inspectSeedDataset({
             dataset_name: datasetName,
@@ -787,11 +787,11 @@ export function SeedDialog({
 
         if (mode === "local") {
           if (!localFile) {
-            throw new Error("Select a local CSV/JSON/JSONL file first.");
+            throw new Error(translate("uxRecipestudio.selectALocalCSVqjreg"));
           }
           if (localFile.size > LOCAL_SEED_UPLOAD_MAX_BYTES) {
             throw new Error(
-              `File too large (max ${LOCAL_SEED_UPLOAD_MAX_LABEL}).`,
+              translate("uxRecipestudio.fileTooLargeMax586no", { p1: LOCAL_SEED_UPLOAD_MAX_LABEL }),
             );
           }
           const payload = await fileToBase64Payload(localFile);
@@ -835,7 +835,7 @@ export function SeedDialog({
             .map((f) => f.name);
 
           if (fileIds.length === 0) {
-            setInspectError("No files uploaded");
+            setInspectError(translate("uxRecipestudio.noFilesUploadedphn10"));
             return false;
           }
 
@@ -870,7 +870,7 @@ export function SeedDialog({
       } catch (error) {
         if (!opts?.silent) {
           setInspectError(
-            getErrorMessage(error, "Failed to load seed metadata."),
+            getErrorMessage(error, translate("uxRecipestudio.failedToLoadSeed4mdyt")),
           );
         }
         setPreviewRows([]);
@@ -960,9 +960,9 @@ export function SeedDialog({
             <>
               <div className="grid gap-1.5">
                 <FieldLabel
-                  label="Dataset"
+                  label={translate("studio.wizard.datasetTitle")}
                   htmlFor={datasetId}
-                  hint="Hugging Face dataset repo id (org/repo)."
+                  hint={translate("uxRecipestudio.huggingFaceDatasetRepo1hmmo")}
                 />
                 <div className="flex items-center gap-2">
                   <HfDatasetCombobox
@@ -970,7 +970,7 @@ export function SeedDialog({
                     className="flex-1"
                     value={config.hf_repo_id}
                     accessToken={config.hf_token?.trim() || undefined}
-                    placeholder="org/repo"
+                    placeholder={translate("uxRecipestudio.orgRepo1y5m0")}
                     onValueChange={(nextValue) =>
                       onUpdate({
                         hf_repo_id: nextValue,
@@ -997,15 +997,15 @@ export function SeedDialog({
 
               <div className="grid gap-1.5">
                 <FieldLabel
-                  label="HF token (optional)"
+                  label={translate("uxRecipestudio.hFTokenOptional1m5y0")}
                   htmlFor={tokenId}
-                  hint="Only needed for private/gated datasets."
+                  hint={translate("uxRecipestudio.onlyNeededForPrivate1l0pl")}
                 />
                 <Input
                   id={tokenId}
                   className="nodrag"
                   data-reload-snapshot-sensitive
-                  placeholder="hf_..."
+                  placeholder={translate("uxRecipestudio.hfdcawb")}
                   value={config.hf_token ?? ""}
                   onChange={(event) =>
                     onUpdate({ hf_token: event.target.value })
@@ -1018,8 +1018,8 @@ export function SeedDialog({
           {mode === "local" && (
             <div className="grid gap-1.5">
               <FieldLabel
-                label="Structured file"
-                hint="Upload CSV, JSON, JSONL, or Parquet seed file."
+                label={translate("uxRecipestudio.structuredFile19ma9")}
+                hint={translate("uxRecipestudio.uploadCSVJSONJSONLdopgj")}
               />
               <div className="flex items-center gap-2">
                 <Input
@@ -1048,13 +1048,9 @@ export function SeedDialog({
                   {isInspecting ? "Loading..." : "Load"}
                 </Button>
               </div>
-              <p className="text-xs text-muted-foreground">
-                Max {LOCAL_SEED_UPLOAD_MAX_LABEL} per file.
-              </p>
+              <p className="text-xs text-muted-foreground">{translate("uxRecipestudio.maxPerFileab914", { p1: LOCAL_SEED_UPLOAD_MAX_LABEL })}</p>
               {(localFile?.name || config.local_file_name?.trim()) && (
-                <p className="text-xs text-muted-foreground">
-                  Selected:{" "}
-                  <span data-reload-snapshot-sensitive>
+                <p className="text-xs text-muted-foreground">{translate("uxRecipestudio.selectedu2cg9", { p1: " " })}<span data-reload-snapshot-sensitive>
                     {localFile?.name ?? config.local_file_name?.trim()}
                   </span>
                 </p>
@@ -1082,12 +1078,12 @@ export function SeedDialog({
           {mode !== "unstructured" && mode !== "github_repo" && (
             <div className="space-y-2 rounded-xl corner-squircle border border-border/60 p-3">
               <FieldLabel
-                label="Drop specific seed columns"
-                hint="Dropped columns stay usable in prompts/expressions but are omitted from final dataset."
+                label={translate("uxRecipestudio.dropSpecificSeedColumns84vzz")}
+                hint={translate("uxRecipestudio.droppedColumnsStayUsablea69oh")}
               />
               {previewColumns.length === 0 ? (
                 <p className="text-xs text-muted-foreground">
-                  Load columns to select which seed fields to drop.
+                  {translate("uxRecipestudio.loadColumnsToSelect1qvf3")}
                 </p>
               ) : (
                 <div className="grid gap-2 sm:grid-cols-2">
@@ -1130,16 +1126,16 @@ export function SeedDialog({
           >
             <CollapsibleTrigger asChild={true}>
               <CollapsibleSectionTriggerButton
-                label="Advanced source options"
+                label={translate("uxRecipestudio.advancedSourceOptionsav858")}
                 open={advancedOpen}
               />
             </CollapsibleTrigger>
             <CollapsibleContent className="mt-2 space-y-3">
               <div className="grid gap-1.5">
                 <FieldLabel
-                  label="Sampling strategy"
+                  label={translate("uxRecipestudio.samplingStrategy11jzn")}
                   htmlFor={samplingId}
-                  hint="Ordered keeps row order. Shuffle randomizes sampled rows."
+                  hint={translate("uxRecipestudio.orderedKeepsRowOrder166it")}
                 />
                 <Select
                   value={config.sampling_strategy}
@@ -1150,7 +1146,7 @@ export function SeedDialog({
                   }
                 >
                   <SelectTrigger className="nodrag w-full" id={samplingId}>
-                    <SelectValue placeholder="Select sampling" />
+                    <SelectValue placeholder={translate("uxRecipestudio.selectSamplinghz8pr")} />
                   </SelectTrigger>
                   <SelectContent>
                     {SAMPLING_OPTIONS.map((option) => (
@@ -1164,9 +1160,9 @@ export function SeedDialog({
 
               <div className="grid gap-1.5">
                 <FieldLabel
-                  label="Selection strategy"
+                  label={translate("uxRecipestudio.selectionStrategybc6ec")}
                   htmlFor={selectionId}
-                  hint="Select all, a row range, or partition block."
+                  hint={translate("uxRecipestudio.selectAllARowl0vq2")}
                 />
                 <Select
                   value={config.selection_type}
@@ -1175,7 +1171,7 @@ export function SeedDialog({
                   }
                 >
                   <SelectTrigger className="nodrag w-full" id={selectionId}>
-                    <SelectValue placeholder="Select selection" />
+                    <SelectValue placeholder={translate("uxRecipestudio.selectSelectionl4a0f")} />
                   </SelectTrigger>
                   <SelectContent>
                     {SELECTION_OPTIONS.map((option) => (
@@ -1191,9 +1187,9 @@ export function SeedDialog({
                 <div className="grid grid-cols-2 gap-3">
                   <div className="grid gap-1.5">
                     <FieldLabel
-                      label="Chunk size"
+                      label={translate("uxRecipestudio.chunkSize1wqbi")}
                       htmlFor={chunkSizeId}
-                      hint="Characters per chunk."
+                      hint={translate("uxRecipestudio.charactersPerChunk1nfmf")}
                     />
                     <Input
                       id={chunkSizeId}
@@ -1212,9 +1208,9 @@ export function SeedDialog({
                   </div>
                   <div className="grid gap-1.5">
                     <FieldLabel
-                      label="Chunk overlap"
+                      label={translate("uxRecipestudio.chunkOverlap1vjnq")}
                       htmlFor={chunkOverlapId}
-                      hint="Shared chars between adjacent chunks."
+                      hint={translate("uxRecipestudio.sharedCharsBetweenAdjacentenxgs")}
                     />
                     <Input
                       id={chunkOverlapId}
@@ -1238,8 +1234,8 @@ export function SeedDialog({
                 <div className="grid grid-cols-2 gap-3">
                   <div className="grid gap-1.5">
                     <FieldLabel
-                      label="Start"
-                      hint="Inclusive start row index for index_range."
+                      label={translate("uxRecipestudio.start30xvg")}
+                      hint={translate("uxRecipestudio.inclusiveStartRowIndexhktkn")}
                     />
                     <Input
                       className="nodrag"
@@ -1252,8 +1248,8 @@ export function SeedDialog({
                   </div>
                   <div className="grid gap-1.5">
                     <FieldLabel
-                      label="End"
-                      hint="Inclusive end row index for index_range."
+                      label={translate("studio.dataset.endPlaceholder")}
+                      hint={translate("uxRecipestudio.inclusiveEndRowIndexhgkgs")}
                     />
                     <Input
                       className="nodrag"
@@ -1270,7 +1266,7 @@ export function SeedDialog({
               {config.selection_type === "partition_block" && (
                 <div className="grid grid-cols-2 gap-3">
                   <div className="grid gap-1.5">
-                    <FieldLabel label="Index" hint="Partition index to load." />
+                    <FieldLabel label={translate("uxRecipestudio.index1chtu")} hint={translate("uxRecipestudio.partitionIndexToLoaddigki")} />
                     <Input
                       className="nodrag"
                       inputMode="numeric"
@@ -1282,8 +1278,8 @@ export function SeedDialog({
                   </div>
                   <div className="grid gap-1.5">
                     <FieldLabel
-                      label="Partitions"
-                      hint="Total number of partitions."
+                      label={translate("uxRecipestudio.partitions14sac")}
+                      hint={translate("uxRecipestudio.totalNumberOfPartitions9cx37")}
                     />
                     <Input
                       className="nodrag"
@@ -1315,15 +1311,13 @@ export function SeedDialog({
                   </EmptyDescription>
                 </EmptyHeader>
                 <EmptyContent className="text-xs text-muted-foreground">
-                  Preview appears here after loading source metadata.
+                  {translate("uxRecipestudio.previewAppearsHereAfter39rq9")}
                 </EmptyContent>
               </Empty>
             </div>
           ) : (
             <div className="space-y-2">
-              <div className="text-xs text-muted-foreground">
-                Loaded columns: {previewColumns.join(", ") || "None"}
-              </div>
+              <div className="text-xs text-muted-foreground">{translate("uxRecipestudio.loadedColumnsnsj86", { p1: previewColumns.join(", ") || "None" })}</div>
               <div className="max-h-[calc(360px*var(--ui-space-scale,1))] overflow-y-auto overflow-x-hidden scroll-rounded rounded-xl corner-squircle border border-border/60">
                 <Table className="corner-squircle min-w-max">
                   <TableHeader>
@@ -1368,14 +1362,14 @@ export function SeedDialog({
                                 return (
                                   <img
                                     src={imagePreview.src}
-                                    alt={`${col} preview`}
+                                    alt={translate("uxRecipestudio.previewcwc67", { p1: col })}
                                     loading="lazy"
                                     className="h-20 w-auto max-w-[calc(220px*var(--ui-space-scale,1))] rounded-md border border-border/60 bg-muted/20 object-contain"
                                   />
                                 );
                               }
                               if (imagePreview?.kind === "too_large") {
-                                return "Image too large to preview";
+                                return translate("uxRecipestudio.imageTooLargeToxqax5");
                               }
                               const value = stringifyCell(row[col]);
                               const rowHasExpandableCell =

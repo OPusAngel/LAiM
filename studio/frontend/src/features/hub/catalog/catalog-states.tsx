@@ -22,7 +22,7 @@ import {
 } from "../lib/network";
 import { useIsAccountOwner } from "@/features/auth";
 import { updateHubSource, useSettingsDialogStore } from "@/features/settings";
-import { useT } from "@/i18n";
+import { translate, useT } from "@/i18n";
 import { useHubName, useHubSource } from "@/lib/hf-endpoint";
 
 // Only a browser reporting itself offline earns "You're offline". Calling a DNS
@@ -42,30 +42,30 @@ function describeFailure(
   switch (failure?.kind) {
     case "browser-offline":
       return {
-        title: "You're offline",
-        body: `Reconnect to the internet to browse ${resourceLabel} from ${hub}.`,
+        title: translate("picker.offlineTitle"),
+        get body() { return translate("uxHub.reconnectToTheInternettvzti", { p1: resourceLabel, p2: hub }); },
         offlineLike: true,
       };
     case "timeout":
       return {
-        title: `${hub} timed out`,
+        get title() { return translate("uxHub.timedOutnnwdv", { p1: hub }); },
         body: failure.message,
         offlineLike: false,
       };
     case "network-opaque":
     case "unknown":
       return {
-        title: `Can't reach ${hub}`,
+        get title() { return translate("uxHub.canTReachw9ar1", { p1: hub }); },
         body:
           failure.kind === "network-opaque" && offersModelScope
-            ? `Unable to reach ${hub}. Check your network connection or try ModelScope instead.`
+            ? translate("uxHub.unableToReachCheckw6w18", { p1: hub })
             : failure.message,
         offlineLike: false,
       };
     // Reached and refused: the fix is the token, not the connection or the hub.
     case "auth-rejected":
       return {
-        title: `${hub} rejected your token`,
+        get title() { return translate("uxHub.rejectedYourTokenw8bdk", { p1: hub }); },
         body: failure.message,
         offlineLike: false,
         tokenRejected: true,
@@ -75,13 +75,13 @@ function describeFailure(
   }
   return online
     ? {
-        title: `Couldn't reach ${hub}`,
-        body: "The discovery feed couldn't load. Check your connection or try again.",
+        get title() { return translate("uxHub.couldnTReachxj74s", { p1: hub }); },
+        get body() { return translate("uxHub.theDiscoveryFeedCouldn91ohl"); },
         offlineLike: false,
       }
     : {
-        title: `Can't reach ${hub}`,
-        body: `LAiM couldn't load ${resourceLabel} from ${hub}.`,
+        get title() { return translate("uxHub.canTReachw9ar1", { p1: hub }); },
+        get body() { return translate("uxHub.lAiMCouldnTLoadcmix1", { p1: resourceLabel, p2: hub }); },
         offlineLike: false,
       };
 }
@@ -190,9 +190,7 @@ export function NetworkErrorState({
             type="button"
             onClick={onSwitchDevice}
             className="inline-flex h-8 items-center gap-1.5 rounded-full bg-[color-mix(in_oklab,var(--foreground)_calc(6%*var(--contrast-wash-gain,1)),transparent)] px-3 text-ui-12 font-medium text-foreground transition-colors hover:bg-[color-mix(in_oklab,var(--foreground)_calc(10%*var(--contrast-wash-gain,1)),transparent)] dark:bg-[rgb(249_226_222_/_calc(0.06*var(--contrast-wash-gain,1)))] dark:hover:bg-[rgb(249_226_222_/_calc(0.1*var(--contrast-wash-gain,1)))]"
-          >
-            On Device
-          </button>
+          >{translate("uxHub.onDevicetz33l")}</button>
         ) : null}
         <button
           type="button"
@@ -204,7 +202,7 @@ export function NetworkErrorState({
             strokeWidth={1.75}
             className="size-3.5"
           />
-          Try again
+          {translate("browser.error.retry")}
         </button>
       </div>
     </div>
@@ -254,7 +252,7 @@ export function HubFailureHint({
             strokeWidth={1.75}
             className="size-3.5"
           />
-          Try again
+          {translate("browser.error.retry")}
         </Button>
       </div>
     </div>
@@ -282,12 +280,9 @@ export function DiscoverFetchMoreState({
       </div>
       <div className="space-y-1">
         <p className="text-ui-14 font-semibold tracking-tight text-foreground">
-          No matches yet
+          {translate("uxHub.noMatchesYet1urr9")}
         </p>
-        <p className="max-w-md text-ui-12p5 leading-5 text-muted-foreground">
-          Scanned {scannedCount.toLocaleString()} results. Load another page to
-          keep searching {hubName}.
-        </p>
+        <p className="max-w-md text-ui-12p5 leading-5 text-muted-foreground">{translate("uxHub.scannedResultsLoadAnother6aeqz", { p1: scannedCount.toLocaleString(), p2: hubName })}</p>
       </div>
       <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
         {hasActiveFilters && (
@@ -295,9 +290,7 @@ export function DiscoverFetchMoreState({
             type="button"
             onClick={onClearFilters}
             className="inline-flex h-8 items-center gap-1.5 rounded-full bg-[color-mix(in_oklab,var(--foreground)_calc(6%*var(--contrast-wash-gain,1)),transparent)] px-3 text-ui-12 font-medium text-foreground transition-colors hover:bg-[color-mix(in_oklab,var(--foreground)_calc(10%*var(--contrast-wash-gain,1)),transparent)] dark:bg-[rgb(249_226_222_/_calc(0.06*var(--contrast-wash-gain,1)))] dark:hover:bg-[rgb(249_226_222_/_calc(0.1*var(--contrast-wash-gain,1)))]"
-          >
-            Clear filters
-          </button>
+          >{translate("uxHub.clearFiltersylqcn")}</button>
         )}
         <button
           type="button"
@@ -310,7 +303,7 @@ export function DiscoverFetchMoreState({
             strokeWidth={1.75}
             className="size-3.5"
           />
-          {isLoadingMore ? "Loading..." : "Load more"}
+          {isLoadingMore ? "Loading..." : translate("uxHub.loadMore979qc")}
         </button>
       </div>
     </div>
@@ -340,7 +333,7 @@ export function DiscoverFetchMoreFooter({
       {/* Only warn about hidden results when a filter is actually narrowing them. */}
       {hasActiveFilters && (
         <p className="text-ui-11p5 leading-4 text-muted-foreground">
-          Some results may be hidden by your filters.
+          {translate("uxHub.someResultsMayBeho04x")}
         </p>
       )}
       {/* Rows stay on screen when the feed fails, so without this the outage is
@@ -349,7 +342,7 @@ export function DiscoverFetchMoreFooter({
           transient, so reducing this to "out of date" threw it away again. */}
       {failed && (
         <p className="max-w-md text-ui-11p5 leading-4 text-muted-foreground">
-          {failureText || "These results may be out of date."}
+          {failureText || translate("uxHub.theseResultsMayBeumvnq")}
         </p>
       )}
       <button
@@ -363,7 +356,7 @@ export function DiscoverFetchMoreFooter({
           strokeWidth={1.75}
           className="size-3.5"
         />
-        {isLoadingMore ? "Loading..." : failed ? "Try again" : "Load more"}
+        {isLoadingMore ? "Loading..." : failed ? translate("uxHub.tryAgainxb90s") : translate("uxHub.loadMore979qc")}
       </button>
     </div>
   );
@@ -383,13 +376,9 @@ export function InventoryErrorState({
       </div>
       <div className="space-y-1">
         <p className="text-ui-14 font-semibold tracking-tight text-foreground">
-          Couldn't load your library
+          {translate("uxHub.couldnTLoadYour1yeh4")}
         </p>
-        <p className="max-w-md text-ui-12p5 leading-5 text-muted-foreground">
-          Something went wrong reading your downloaded{" "}
-          {isDataset ? "datasets" : "models"}. Check that the backend is running
-          and try again.
-        </p>
+        <p className="max-w-md text-ui-12p5 leading-5 text-muted-foreground">{translate("uxHub.somethingWentWrongReadingskf8a", { p1: " ", p2: isDataset ? "datasets" : "models" })}</p>
       </div>
       <button
         type="button"
@@ -397,7 +386,7 @@ export function InventoryErrorState({
         className="inline-flex h-8 items-center gap-1.5 rounded-full bg-transparent px-3 text-ui-12 font-medium text-foreground transition-colors hover:bg-[color-mix(in_oklab,var(--foreground)_calc(4%*var(--contrast-wash-gain,1)),transparent)] dark:hover:bg-[rgb(249_226_222_/_calc(0.05*var(--contrast-wash-gain,1)))]"
       >
         <HugeiconsIcon icon={Refresh01Icon} strokeWidth={1.75} className="size-3.5" />
-        Try again
+        {translate("browser.error.retry")}
       </button>
     </div>
   );

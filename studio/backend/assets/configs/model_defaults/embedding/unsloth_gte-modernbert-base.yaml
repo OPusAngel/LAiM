@@ -1,4 +1,4 @@
-# Model defaults for LAiM/gte-modernbert-base
+# Model defaults for unsloth/gte-modernbert-base
 # Based on ModernBert.py embedding notebook
 
 training:
@@ -15,7 +15,7 @@ training:
   random_seed: 3407
   packing: false
   train_on_completions: false
-  gradient_checkpointing: "LAiM"
+  gradient_checkpointing: "unsloth"
   optim: "adamw_8bit"
   lr_scheduler_type: "constant_with_warmup"
 

@@ -3,6 +3,8 @@
 
 import { authFetch } from "@/features/auth";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { translate } from "@/i18n";
+
 
 export interface LlamaUpdateChangeLink {
   label: string;
@@ -136,7 +138,7 @@ export function useLlamaUpdateChangelog({
             parsed.installedTag !== installedTag ||
             parsed.latestTag !== latestTag
           ) {
-            throw new Error("Changelog response no longer matches this update");
+            throw new Error(translate("uxFeatures.changelogResponseNoLonger5enj5"));
           }
           if (requestIdRef.current !== requestId) {
             return;

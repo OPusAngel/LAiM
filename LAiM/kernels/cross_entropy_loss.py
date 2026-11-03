@@ -493,7 +493,7 @@ def patch_loss_functions(torch_compile = True):
 
     # Redirect LOSS_MAPPING aliases still pointing at stock ForCausalLMLoss (e.g.
     # ForConditionalGeneration for Qwen3.5, Csm). LAiM_zoo also does this; remove once the floor
-    # pin passes LAiMai/LAiM-zoo#656.
+    # pin passes OPusAngel/LAiM-zoo#656.
     try:
         import transformers.loss.loss_utils as _lu
         _LAiM_loss = _lu.LOSS_MAPPING.get("ForCausalLM")

@@ -142,9 +142,9 @@ def test_unset_fields_stay_out_of_the_merge():
 
 
 @pytest.mark.parametrize("level", ["high", "low"])
-def test_sandbox_level_survives_the_payload(level):
-    payload = ChatSettingsPayload.model_validate({"sandboxLevel": level})
-    assert payload.model_dump(exclude_unset = True) == {"sandboxLevel": level}
+def test_workdir_level_survives_the_payload(level):
+    payload = ChatSettingsPayload.model_validate({"workdirLevel": level})
+    assert payload.model_dump(exclude_unset = True) == {"workdirLevel": level}
 
 
 def test_max_tool_calls_off_survives_the_payload():
@@ -155,9 +155,9 @@ def test_max_tool_calls_off_survives_the_payload():
 @pytest.mark.parametrize(
     "payload",
     [
-        # Full access disables the sandbox, so it is re-accepted each session.
+        # Full access disables the workdir, so it is re-accepted each session.
         {"permissionMode": "full"},
-        {"sandboxLevel": "medium"},
+        {"workdirLevel": "medium"},
         {"ragTopK": 0},
         {"ragTopK": 51},
         {"ragAutoInjectMinScore": 2},

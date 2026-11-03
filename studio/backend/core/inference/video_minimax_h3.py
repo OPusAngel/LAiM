@@ -19,12 +19,12 @@ from typing import Any, Callable, Optional
 # tests/test_video_backend.py::test_the_h3_native_repo_matches_the_family_gguf_repo pins the pair. The mirror carries
 # the Qwen3-VL encoder quants as well as the denoisers, so this repo alone satisfies h3_native_hub_files' first two
 # entries.
-H3_GGUF_REPO = "LAiM/MiniMax-H3-GGUF"
+H3_GGUF_REPO = "unsloth/MiniMax-H3-GGUF"
 # The VAEs live beside the denoisers, so the native pick is one repo we control end to end. It was Comfy-Org/MiniMax-H3,
 # which put a community repack in the download path of BOTH H3 paths; an install that already holds those bytes keeps
 # using them through h3_component_source below, because the HF cache is keyed by repo id and repointing alone
 # re-downloads ~6 GB.
-H3_COMPONENT_REPO = "LAiM/MiniMax-H3-GGUF"
+H3_COMPONENT_REPO = "unsloth/MiniMax-H3-GGUF"
 # Where the component files came from originally. Only for reusing an existing cache entry: a fresh install never
 # reads it. The pairing itself lives in diffusion_families' _SD_CPP_LEGACY_SOURCES, which owns this decision for every
 # mirrored asset; this name is what the delete-cached claims read, and a test pins the two together.
@@ -62,7 +62,7 @@ H3_VAE_RESIDENT_GB = 11.1
 H3_TRANSFORMER_STREAMED_GB = 3.0
 
 
-# Resident decimal GB of each hosted pre-quantized denoiser, from the artifact sizes in LAiM/MiniMax-H3-FP8
+# Resident decimal GB of each hosted pre-quantized denoiser, from the artifact sizes in unsloth/MiniMax-H3-FP8
 # (MiniMax-H3-INT8.pt 18.86 GiB, MiniMax-H3-FP8.pt 18.87 GiB). Both are the PRUNED (curve-form adaLN) partition, which
 # is why they are so far under half the 66.3 GB dense denoiser rather than at it.
 H3_TRANSFORMER_PREQUANT_GB: dict[str, float] = {"int8": 20.3, "fp8": 20.3}

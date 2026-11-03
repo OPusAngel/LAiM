@@ -21,8 +21,8 @@ def test_format_installer_failure_prefers_fallback_reason_over_path_noise():
         "[llama-prebuilt] prebuilt install path failed; falling back to source build\n",
         (
             "[llama-prebuilt] prebuilt fallback reason: failed to inspect published "
-            "releases in LAiMai/llama.cpp: GitHub API returned 403 for "
-            "https://api.github.com/repos/LAiMai/llama.cpp/releases/tags/b10679; "
+            "releases in unslothai/llama.cpp: GitHub API returned 403 for "
+            "https://api.github.com/repos/unslothai/llama.cpp/releases/tags/b10679; "
             "set GH_TOKEN or GITHUB_TOKEN to avoid GitHub API rate limits\n"
         ),
         f"windows_runtime_dirs={huge_path}\n",
@@ -38,7 +38,7 @@ def test_format_installer_failure_does_not_name_llama_for_a_whisper_install():
     # 403 text for both, so the message must not name the wrong component.
     lines = [
         "[whisper-prebuilt] prebuilt install failed: GitHub API returned 403 for "
-        "https://api.github.com/repos/LAiMai/whisper.cpp/releases/latest; "
+        "https://api.github.com/repos/unslothai/whisper.cpp/releases/latest; "
         "set GH_TOKEN or GITHUB_TOKEN to avoid GitHub API rate limits\n",
     ]
     message = flow.format_installer_failure_message(1, lines)
@@ -57,7 +57,7 @@ def test_format_installer_failure_prefers_the_verdict_over_an_earlier_rate_limit
     # retry line must never outrank the reason it actually exited on.
     lines = [
         "[llama-prebuilt] fetch failed (1/4) for "
-        "https://api.github.com/repos/LAiMai/llama.cpp/releases/tags/b10679: "
+        "https://api.github.com/repos/unslothai/llama.cpp/releases/tags/b10679: "
         "HTTP Error 403: rate limit exceeded; retrying\n",
         "[llama-prebuilt] prebuilt install refused: unknown backend request 'cuda14'\n",
     ]
@@ -85,7 +85,7 @@ def test_stream_installer_keeps_reason_a_long_system_report_pushes_out_of_the_ta
     exc = _run_fake_installer(
         tmp_path,
         "print('[llama-prebuilt] prebuilt fallback reason: failed to inspect published "
-        "releases in LAiMai/llama.cpp: GitHub API returned 403; set GH_TOKEN or "
+        "releases in unslothai/llama.cpp: GitHub API returned 403; set GH_TOKEN or "
         "GITHUB_TOKEN to avoid GitHub API rate limits')\n"
         "for i in range(300):\n"
         "    print(f'linux_runtime_dirs_{i}=/usr/lib/x86_64-linux-gnu')\n"
@@ -101,7 +101,7 @@ def test_stream_installer_keeps_the_verdict_behind_a_run_of_rate_limit_retries(t
     # cannot share one capped buffer.
     exc = _run_fake_installer(
         tmp_path,
-        "url = 'https://api.github.com/repos/LAiMai/llama.cpp/releases/tags/b10679'\n"
+        "url = 'https://api.github.com/repos/unslothai/llama.cpp/releases/tags/b10679'\n"
         "for i in range(1, 11):\n"
         "    print(f'[llama-prebuilt] fetch failed ({i}/4) for {url}: "
         "HTTP Error 403: rate limit exceeded; retrying')\n"
@@ -145,7 +145,7 @@ def test_stream_installer_reports_a_fatal_error_that_follows_a_survived_retry(tm
     # not replace the error the installer actually exited on.
     exc = _run_fake_installer(
         tmp_path,
-        "url = 'https://api.github.com/repos/LAiMai/llama.cpp/releases/tags/b10679'\n"
+        "url = 'https://api.github.com/repos/unslothai/llama.cpp/releases/tags/b10679'\n"
         "print(f'[llama-prebuilt] fetch failed (1/4) for {url}: "
         "HTTP Error 429: Too Many Requests; retrying')\n"
         "print('[llama-prebuilt] resolved published release b10679-mix-67dfc8b')\n"
@@ -164,7 +164,7 @@ def test_stream_installer_keeps_the_output_when_only_a_rate_limit_hint_is_presen
     # it, so a crash is still readable.
     exc = _run_fake_installer(
         tmp_path,
-        "url = 'https://api.github.com/repos/LAiMai/llama.cpp/releases/tags/b10679'\n"
+        "url = 'https://api.github.com/repos/unslothai/llama.cpp/releases/tags/b10679'\n"
         "print(f'[llama-prebuilt] fetch failed (1/4) for {url}: "
         "HTTP Error 403: rate limit exceeded; retrying')\n"
         "print('Traceback (most recent call last):')\n"
@@ -182,8 +182,8 @@ def test_format_installer_failure_tells_an_authenticated_run_to_wait(monkeypatch
     monkeypatch.setenv("GH_TOKEN", "x")
     lines = [
         "[llama-prebuilt] prebuilt fallback reason: failed to inspect published "
-        "releases in LAiMai/llama.cpp: GitHub API returned 429 for "
-        "https://api.github.com/repos/LAiMai/llama.cpp/releases/tags/b10679\n",
+        "releases in unslothai/llama.cpp: GitHub API returned 429 for "
+        "https://api.github.com/repos/unslothai/llama.cpp/releases/tags/b10679\n",
     ]
     message = flow.format_installer_failure_message(2, lines)
     assert "rate limit" in message.lower()
@@ -198,7 +198,7 @@ def test_stream_installer_reads_the_token_from_the_installer_environment(tmp_pat
     script.write_text(
         "import sys\n"
         "print('[llama-prebuilt] prebuilt fallback reason: GitHub API returned 403 for "
-        "https://api.github.com/repos/LAiMai/llama.cpp/releases/latest')\n"
+        "https://api.github.com/repos/unslothai/llama.cpp/releases/latest')\n"
         "sys.exit(2)\n",
         encoding = "utf-8",
     )

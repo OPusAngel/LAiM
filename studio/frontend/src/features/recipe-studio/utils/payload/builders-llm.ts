@@ -7,6 +7,8 @@ import type {
   LlmToolConfig,
   ToolProfileConfig,
 } from "../../types";
+import { translate } from "@/i18n";
+
 
 function buildImageContext(
   config: LlmConfig,
@@ -18,7 +20,7 @@ function buildImageContext(
   }
   const columnName = imageContext.column_name.trim();
   if (!columnName) {
-    errors.push(`LLM ${config.name}: image context column is required.`);
+    errors.push(translate("uxRecipestudio.lLMImageContextColumnpuee9", { p1: config.name }));
     return undefined;
   }
   return [
@@ -68,7 +70,7 @@ export function buildLlmColumn(
       try {
         outputFormat = JSON.parse(outputFormat);
       } catch {
-        errors.push(`LLM ${config.name}: output_format is not valid JSON.`);
+        errors.push(translate("uxRecipestudio.lLMOutputFormatIspgsdp", { p1: config.name }));
       }
     }
     return {
@@ -102,7 +104,7 @@ export function buildLlmColumn(
           score.name && score.description && Object.keys(score.options).length > 0,
       );
     if (scores.length === 0) {
-      errors.push(`LLM ${config.name}: scores required for LLM Judge.`);
+      errors.push(translate("uxRecipestudio.lLMScoresRequiredForb8azz", { p1: config.name }));
     }
     return {
       // biome-ignore lint/style/useNamingConvention: api schema
@@ -124,13 +126,13 @@ export function buildLlmMcpProvider(
 ): Record<string, unknown> | null {
   const name = provider.name.trim();
   if (!name) {
-    errors.push("MCP provider: name is required.");
+    errors.push(translate("uxRecipestudio.mCPProviderNameIs8o76d"));
     return null;
   }
   if (provider.provider_type === "stdio") {
     const command = provider.command?.trim() ?? "";
     if (!command) {
-      errors.push(`MCP provider ${name}: command is required for stdio.`);
+      errors.push(translate("uxRecipestudio.mCPProviderCommandIsid01y", { p1: name }));
       return null;
     }
     const env: Record<string, string> = {};
@@ -152,7 +154,7 @@ export function buildLlmMcpProvider(
   }
   const endpoint = provider.endpoint?.trim() ?? "";
   if (!endpoint) {
-    errors.push(`MCP provider ${name}: endpoint is required.`);
+    errors.push(translate("uxRecipestudio.mCPProviderEndpointIsfr1w2", { p1: name }));
     return null;
   }
   return {
@@ -173,14 +175,14 @@ export function buildLlmToolConfig(
 ): Record<string, unknown> | null {
   const toolAlias = config.tool_alias.trim();
   if (!toolAlias) {
-    errors.push("Tool config: tool_alias is required.");
+    errors.push(translate("uxRecipestudio.toolConfigToolAliase09i1"));
     return null;
   }
   const providers = config.providers
     .map((value) => value.trim())
     .filter(Boolean);
   if (providers.length === 0) {
-    errors.push(`Tool config ${toolAlias}: at least one provider is required.`);
+    errors.push(translate("uxRecipestudio.toolConfigAtLeastqkoyn", { p1: toolAlias }));
     return null;
   }
   const allowTools = (config.allow_tools ?? [])

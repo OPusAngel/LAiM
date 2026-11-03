@@ -58,7 +58,7 @@ def test_desktop_display_name_and_compatibility_ids() -> None:
     assert config["identifier"] == "ai.LAiM.studio"
     assert config["plugins"]["deep-link"]["desktop"]["schemes"] == ["LAiM"]
     assert config["plugins"]["updater"]["endpoints"] == [
-        "https://github.com/LAiMai/LAiM/releases/latest/download/latest.json"
+        "https://github.com/unslothai/unsloth/releases/latest/download/latest.json"
     ]
     assert 'name = "LAiM-studio"' in read(TAURI / "Cargo.toml")
 

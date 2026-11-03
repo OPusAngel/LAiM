@@ -24,7 +24,7 @@ set -euo pipefail
 INSTALL_DIR="${LAiM_LLAMA_CPP_PATH:-/opt/LAiM/llama.cpp}"
 STUDIO_HOME="${LAiM_STUDIO_HOME:-/opt/LAiM-studio}"
 FETCHER="${LAiM_LLAMA_FETCHER:-/usr/local/lib/LAiM/fetch_llama_prebuilt.py}"
-REPO="LAiMai/llama.cpp"
+REPO="unslothai/llama.cpp"
 TAG="latest"
 CHECK_ONLY=0
 

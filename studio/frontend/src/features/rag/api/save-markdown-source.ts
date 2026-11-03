@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { toast } from "@/lib/toast";
 import { type IndexJob, terminalJobStatus } from "../types/rag";
 import {
@@ -93,7 +94,7 @@ async function watchIngestion(
     if (terminal === "failed") {
       // The panel hides failed documents, so without this the source just never
       // appears after a success toast.
-      toast.error(`Couldn't index ${filename}`, {
+      toast.error(translate("uxRag.couldnTIndexi266f", { p1: filename }), {
         description: job.error ?? "Indexing failed",
       });
     }
@@ -118,11 +119,11 @@ export async function saveMarkdownAsProjectSource(
   invalidateProjectSources(projectId);
   try {
     const result = await uploadProjectDocument(projectId, file);
-    if (!options.quiet) toast.success("Saved to project sources.");
+    if (!options.quiet) toast.success(translate("uxRag.savedToProjectSources1fcrb"));
     void watchIngestion(projectId, result.jobId, result.filename || filename);
     return true;
   } catch (error) {
-    toast.error("Failed to save to project sources.", {
+    toast.error(translate("uxRag.failedToSaveTo1hosz"), {
       description: error instanceof Error ? error.message : undefined,
     });
     return false;

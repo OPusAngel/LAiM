@@ -59,13 +59,19 @@ test("custom titlebar branding centers on the chat header's model picker", async
   );
   assert.match(
     header,
-    /usesCustomTitlebar && "h-\[var\(--studio-chat-control-height,34px\)\]"/,
+    /usesCustomTitlebar && "min-h-\[var\(--studio-chat-control-height,34px\)\]"/,
   );
 });
 
-test("desktop branding keeps an 11px gap above New chat", async () => {
-  const source = APP_SIDEBAR;
-  assert.match(source, /usesDesktopTitlebar \? "pt-\[11px\]" : "pt-\[7px\]"/);
+test("New chat sits the same distance below the logo as Обучить модель sits below its spacer", async () => {
+  // Reading the source at the default UI scale, the train row's spacer is 22px tall.
+  // The web header already leaves 8px under the lockup, so New chat takes the
+  // remaining 14px; the desktop titlebar header carries none, so it takes all 22px.
+  assert.match(
+    APP_SIDEBAR,
+    /usesDesktopTitlebar\s*\?\s*"pt-\[22px\]"\s*:\s*"pt-\[14px\]"/,
+  );
+  assert.match(APP_SIDEBAR, /className="mx-auto h-\[22px\] w-full shrink-0 list-none/);
 });
 
 test("footer profile sits 11px above the sidebar edge", async () => {
@@ -170,13 +176,14 @@ test("the sidebar list measures its scroll rail", async () => {
   // Thumb stays hidden until the list is hovered, as the other lists do.
   assert.match(INDEX, /\.sidebar-scroll-fade:hover::-webkit-scrollbar-thumb,/);
   // A mask covers the scrollbar, so the top fade keeps the rail column opaque.
+  // Any fully opaque colour does that; the shipped one is LAiM's ink.
   assert.match(
     INDEX,
-    /mask-image: linear-gradient\(to bottom, transparent 0, #000 14px\),\s*linear-gradient\(to left, #000 var\(--sidebar-rail, 0px\), transparent 0\);/,
+    /mask-image: linear-gradient\(to bottom, transparent 0, #061d21 14px\),\s*linear-gradient\(to left, #061d21 var\(--sidebar-rail, 0px\), transparent 0\);/,
   );
   assert.match(
     INDEX,
-    /\[dir="rtl"\] \.sidebar-scroll-fade\.is-scrolled \{[\s\S]*linear-gradient\(to right, #000 var\(--sidebar-rail, 0px\), transparent 0\);/,
+    /\[dir="rtl"\] \.sidebar-scroll-fade\.is-scrolled \{[\s\S]*linear-gradient\(to right, #061d21 var\(--sidebar-rail, 0px\), transparent 0\);/,
   );
 });
 

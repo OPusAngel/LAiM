@@ -224,8 +224,8 @@ const OCR_OR_VISION_TEXT_TASKS = new Set([
 
 const CURATED_EMPTY_QUERY_DATASET_IDS: Partial<Record<HubModelType, string[]>> = {
   text: [
-    "LAiM/alpaca-cleaned",
-    "LAiM/OpenMathReasoning-mini",
+    "unsloth/alpaca-cleaned",
+    "unsloth/OpenMathReasoning-mini",
     "mlabonne/FineTome-100k",
     "openai/gsm8k",
     "philschmid/guanaco-sharegpt-style",
@@ -248,9 +248,9 @@ const CURATED_EMPTY_QUERY_DATASET_IDS: Partial<Record<HubModelType, string[]>> =
     "openbmb/UltraInteract_sft",
   ],
   vision: [
-    "LAiM/LaTeX_OCR",
-    "LAiM/llava-instruct-mix-vsft-mini",
-    "LAiM/Radiology_mini",
+    "unsloth/LaTeX_OCR",
+    "unsloth/llava-instruct-mix-vsft-mini",
+    "unsloth/Radiology_mini",
     "AI4Math/MathVista",
     "AI4Math/MathVerse",
     "ChongyanChen/VQAonline",

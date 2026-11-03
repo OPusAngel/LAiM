@@ -50,7 +50,7 @@ def test_the_redirect_chain_is_allowed_and_nothing_else():
     studio = _studio()
     for good in (
         "https://LAiM.ai/install.sh",
-        "https://raw.githubusercontent.com/LAiMai/LAiM/main/install.sh",
+        "https://raw.githubusercontent.com/OPusAngel/LAiM/main/install.sh",
     ):
         assert studio._is_allowed_installer_url(good), good
     for bad in (

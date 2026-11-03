@@ -62,7 +62,7 @@ def _run(
     env = dict(os.environ)
     env["PATH"] = f"{bin_dir}{os.pathsep}" + env["PATH"]
     env.update(
-        REGISTRY_USERNAME = "LAiM", IMAGE_NAME = "LAiM/LAiM", PROBE_TAG = "credential-probe"
+        REGISTRY_USERNAME = "LAiM", IMAGE_NAME = "unsloth/LAiM", PROBE_TAG = "credential-probe"
     )
     # Bind the step's env: too; expand only the expected secret so a wrong name fails.
     for name, value in (step.get("env") or {}).items():

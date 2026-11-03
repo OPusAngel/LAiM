@@ -39,7 +39,7 @@ if not hasattr(ilp, "resolve_simple_install_release_plans"):
 # Captured before the autouse fixture stubs it, so the probe's own tests reach the real one.
 _REAL_AMD_VULKAN_ICD_PRESENT = ilp._amd_vulkan_icd_present
 
-FORK = ilp.DEFAULT_PUBLISHED_REPO  # LAiMai/llama.cpp
+FORK = ilp.DEFAULT_PUBLISHED_REPO  # unslothai/llama.cpp
 UPSTREAM = ilp.UPSTREAM_REPO  # ggml-org/llama.cpp
 
 
@@ -3019,7 +3019,7 @@ def test_forced_cpu_outranks_every_vulkan_trigger(
     # The legacy switch too, so a stale one cannot smuggle Vulkan past --force-cpu.
     monkeypatch.setenv("LAiM_FORCE_VULKAN", "1")
 
-    repo, tag = "LAiMai/llama.cpp-prebuilt", "latest"
+    repo, tag = "unslothai/llama.cpp-prebuilt", "latest"
     _, out_repo, _, persist = ilp._route_to_vulkan_prebuilt(
         _sim_host(platform_name, gpu_name),
         repo,
@@ -3034,7 +3034,7 @@ def test_forced_cpu_outranks_every_vulkan_trigger(
 def test_the_forced_cpu_guard_is_not_vacuous():
     """The same host DOES take Vulkan once the CPU pin is gone, or the check above
     would pass on a resolver that had stopped routing to Vulkan entirely."""
-    repo, tag = "LAiMai/llama.cpp-prebuilt", "latest"
+    repo, tag = "unslothai/llama.cpp-prebuilt", "latest"
     _, out_repo, _, persist = ilp._route_to_vulkan_prebuilt(
         _sim_host("Linux", "amd"),
         repo,

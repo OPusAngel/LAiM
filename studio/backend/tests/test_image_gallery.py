@@ -40,7 +40,7 @@ def _meta(**over):
         "steps": 9,
         "guidance": 0.0,
         "seed": 7,
-        "model": "LAiM/Z-Image-Turbo-GGUF",
+        "model": "unsloth/Z-Image-Turbo-GGUF",
         "created_at": 100.0,
     }
     base.update(over)

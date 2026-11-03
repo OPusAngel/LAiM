@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -53,16 +54,16 @@ export function PersonDialog({
       <div className="grid gap-3">
         <div className="rounded-2xl border border-border/60 px-3 py-2">
           <p className="text-xs font-semibold uppercase text-muted-foreground">
-            Source
+            {translate("uxVideo.sourcer5qyu")}
           </p>
           <p className="text-sm text-foreground">Faker</p>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="grid gap-1.5">
             <FieldLabel
-              label="Locale"
+              label={translate("uxRecipestudio.locale1pfta")}
               htmlFor={localeId}
-              hint="Faker locale e.g. en_US."
+              hint={translate("uxRecipestudio.fakerLocaleEGomemp")}
             />
             <Input
               id={localeId}
@@ -75,9 +76,9 @@ export function PersonDialog({
           </div>
           <div className="grid gap-1.5">
             <FieldLabel
-              label="Sex"
+              label={translate("uxRecipestudio.sexemchh")}
               htmlFor={sexId}
-              hint="Optional demographic filter."
+              hint={translate("uxRecipestudio.optionalDemographicFilter1angq")}
             />
             <Select
               value={config.person_sex?.trim() ? config.person_sex : "any"}
@@ -86,7 +87,7 @@ export function PersonDialog({
               }
             >
               <SelectTrigger className="nodrag w-full" id={sexId}>
-                <SelectValue placeholder="Any" />
+                <SelectValue placeholder={translate("uxRecipestudio.any13li5")} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="any">Any</SelectItem>
@@ -97,9 +98,9 @@ export function PersonDialog({
           </div>
           <div className="grid gap-1.5">
             <FieldLabel
-              label="Age range"
+              label={translate("uxRecipestudio.ageRange1ucmm")}
               htmlFor={ageRangeId}
-              hint="Range format: min-max, e.g. 18-70."
+              hint={translate("uxRecipestudio.rangeFormatMinMax1cpka")}
             />
             <Input
               id={ageRangeId}
@@ -113,9 +114,9 @@ export function PersonDialog({
           </div>
           <div className="grid gap-1.5">
             <FieldLabel
-              label="City"
+              label={translate("uxRecipestudio.city142k4")}
               htmlFor={cityId}
-              hint="Optional city bias for faker generation."
+              hint={translate("uxRecipestudio.optionalCityBiasFor17ah6")}
             />
             <Input
               id={cityId}

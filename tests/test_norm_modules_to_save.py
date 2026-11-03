@@ -80,7 +80,7 @@ def test_fast_path_trains_norm_in_modules_to_save(tmp_path):
         r = 4,
         target_modules = ["q_proj", "v_proj"],
         modules_to_save = ["input_layernorm"],
-        use_gradient_checkpointing = "LAiM",
+        use_gradient_checkpointing = "unsloth",
     )
     copies = {n: p for n, p in model.named_parameters() if "input_layernorm.modules_to_save" in n}
     assert copies and all(p.requires_grad for p in copies.values())

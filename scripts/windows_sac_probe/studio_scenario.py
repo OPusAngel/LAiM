@@ -554,7 +554,7 @@ def chat(
 
 def main() -> int:
     parser = argparse.ArgumentParser(description = __doc__)
-    parser.add_argument("--model", default = "LAiM/Qwen3.5-2B-MTP-GGUF:UD-Q4_K_XL")
+    parser.add_argument("--model", default = "unsloth/Qwen3.5-2B-MTP-GGUF:UD-Q4_K_XL")
     parser.add_argument("--out", default = ".", help = "directory for scenario-results.json")
     parser.add_argument("--port", type = int, default = None)
     parser.add_argument("--password", default = os.environ.get("SAC_PROBE_STUDIO_PASSWORD"))

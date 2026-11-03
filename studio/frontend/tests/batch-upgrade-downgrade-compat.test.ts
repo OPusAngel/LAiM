@@ -26,7 +26,7 @@ const { savePerModelConfig, deletePerModelConfig, resolveInitialConfig } = await
   "../src/features/model-picker/model-config/per-model-config.ts"
 );
 
-const MODEL = "LAiM/Repo-GGUF";
+const MODEL = "unsloth/Repo-GGUF";
 const VARIANT = "Q4_K_M";
 const KEY = "LAiM_model_configs";
 

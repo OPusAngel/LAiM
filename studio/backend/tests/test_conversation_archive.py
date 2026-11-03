@@ -1419,7 +1419,7 @@ def test_an_embedder_download_still_pending_is_logged_once_without_a_traceback(
 
     def pending(*_args, **_kwargs):
         raise embeddings.EmbeddingModelDownloadRequiredError(
-            "Embedding model 'LAiM/Qwen3-Embedding-0.6B' is not downloaded yet."
+            "Embedding model 'unsloth/Qwen3-Embedding-0.6B' is not downloaded yet."
         )
 
     monkeypatch.setattr(embeddings, "token_counter", pending)
@@ -1439,7 +1439,7 @@ def test_an_embedder_download_still_pending_is_logged_once_without_a_traceback(
     assert not [r for r in records if r.levelno >= logging.WARNING or r.exc_info]
     assert [r.getMessage() for r in records if "embedder_pending" in r.getMessage()] == [
         "conversation_archive.embedder_pending: "
-        "Embedding model 'LAiM/Qwen3-Embedding-0.6B' is not downloaded yet."
+        "Embedding model 'unsloth/Qwen3-Embedding-0.6B' is not downloaded yet."
     ]
 
 
@@ -1471,10 +1471,10 @@ def test_a_failed_archive_marks_the_feature_degraded(conn, monkeypatch):
 
 
 def test_the_late_archive_cleanup_spares_a_recreated_thread(conn):
-    """DELETE removes the rows, then awaits the sandbox pass, and only then sweeps here.
+    """DELETE removes the rows, then awaits the workdir pass, and only then sweeps here.
 
     Another tab can POST the same id in that window and its generation can archive turns
-    under it before the sweep runs. The sandbox pass re-checks for exactly that; this had
+    under it before the sweep runs. The workdir pass re-checks for exactly that; this had
     not, so the recreated chat silently lost its memory.
     """
     from routes import chat_history
@@ -3980,7 +3980,7 @@ def test_a_provider_side_builtin_is_replayed_the_way_the_frontend_replays_it():
     assert [m["role"] for m in conversation_archive._as_wire(homonym)] == ["assistant", "tool"]
 
 
-def test_a_sandbox_result_is_replayed_as_the_text_the_model_saw():
+def test_a_workdir_result_is_replayed_as_the_text_the_model_saw():
     """`python` and `terminal` results are wrapped on every call.
 
     The replay adapter sends `result.text` alone rather than feeding the model a session
@@ -3999,7 +3999,7 @@ def test_a_sandbox_result_is_replayed_as_the_text_the_model_saw():
     def _tool_content(rows):
         return [m["content"] for m in conversation_archive._as_wire(rows) if m["role"] == "tool"]
 
-    sandbox = {
+    workdir = {
         "text": "token ZQX-5150",
         "images": [],
         "sessionId": "project-7",
@@ -4010,15 +4010,15 @@ def test_a_sandbox_result_is_replayed_as_the_text_the_model_saw():
         "images": [{"data": "AAAA", "mimeType": "image/png"}],
     }
 
-    assert _tool_content(_row("terminal", sandbox)) == ["token ZQX-5150"]
+    assert _tool_content(_row("terminal", workdir)) == ["token ZQX-5150"]
     # edit_file is wrapped the same way when it created a file.
-    assert _tool_content(_row("edit_file", sandbox)) == ["token ZQX-5150"]
+    assert _tool_content(_row("edit_file", workdir)) == ["token ZQX-5150"]
     assert _tool_content(_row("python", mcp_image)) == ["chart rendered"]
     # An empty wrapper text still takes the sentinel, as the adapter does.
-    assert _tool_content(_row("terminal", {**sandbox, "text": ""})) == ['{"result":""}']
+    assert _tool_content(_row("terminal", {**workdir, "text": ""})) == ['{"result":""}']
     # Someone else's result with text and a session is NOT unwrapped, or its other fields
     # would be dropped. The name gates it, as on the frontend.
-    assert _tool_content(_row("lookup", sandbox)) == [
+    assert _tool_content(_row("lookup", workdir)) == [
         '{"text":"token ZQX-5150","images":[],"sessionId":"project-7",'
         '"files":[{"name":"out.csv","size":12}]}'
     ]
@@ -4150,13 +4150,13 @@ def test_a_result_that_is_two_wrappers_at_once_is_still_stripped():
         "webImages": [_IMAGE_ENTRY],
     }
     assert _wire_tool_content(_image_search_row(both)) == [_SEARCH_TEXT_REPLAYED]
-    sandboxed = {
+    unrestricted = {
         "text": _SEARCH_TEXT,
         "images": [],
         "sessionId": "project-7",
         "webImages": [_IMAGE_ENTRY],
     }
-    assert _wire_tool_content(_image_search_row(sandboxed, "terminal")) == [_SEARCH_TEXT_REPLAYED]
+    assert _wire_tool_content(_image_search_row(unrestricted, "terminal")) == [_SEARCH_TEXT_REPLAYED]
     assert _wire_tool_content(
         _image_search_row({"text": _SEARCH_TEXT, "images": both["images"]})
     ) == [_SEARCH_TEXT]

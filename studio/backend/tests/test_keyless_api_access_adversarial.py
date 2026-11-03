@@ -357,7 +357,7 @@ def test_no_v1_get_route_but_model_retrieval_matches_a_traversal_suffix():
         assert api_matched in ([], ["/v1/models/{model_id:path}"]), f"{path} reached {api_matched}"
 
     # and the benign shape the allowlist exists to serve still resolves
-    assert scope_covers("inference", "GET", "/v1/models/LAiM/Llama-3.2-1B") is True
+    assert scope_covers("inference", "GET", "/v1/models/unsloth/Llama-3.2-1B") is True
 
 
 # ── credential precedence ────────────────────────────────────────────────────

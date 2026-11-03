@@ -34,7 +34,7 @@ const {
   savePerModelConfig,
 } = await import("../src/features/model-picker/model-config/per-model-config.ts");
 
-const MODEL = "LAiM/Model-GGUF";
+const MODEL = "unsloth/Model-GGUF";
 const VARIANT = "q4_k_m";
 
 test("int8 prefill reaches the server row only when on", () => {

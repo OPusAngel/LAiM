@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
+
 export function isSafeNavigableSourceUrl(raw: unknown): string {
   if (typeof raw !== "string") return "";
   const value = raw.trim();
@@ -37,7 +39,7 @@ export function documentCitationToSource(
   const url =
     isSafeNavigableSourceUrl(source) ||
     `#anthropic-doc-${docIndex ?? fallbackIdx}`;
-  const title = docTitle || source || `Document ${fallbackIdx + 1}`;
+  const title = docTitle || source || translate("uxChat.documentg61em", { p1: fallbackIdx + 1 });
   const cited = typeof cit.cited_text === "string" ? cit.cited_text.trim() : "";
   const description = cited.length > 240 ? `${cited.slice(0, 240)}...` : cited;
   // Position in the id, so distinct citations of one document stay separate footnotes.

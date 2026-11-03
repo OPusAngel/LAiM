@@ -3,6 +3,7 @@
 
 "use client";
 
+import { translate } from "@/i18n";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -73,7 +74,7 @@ function MenuGlyph({ icon, className }: { icon: typeof InternetIcon; className?:
 // Its message is shown as is, in place of the generic one.
 class PageOpenError extends Error {}
 
-/** Open in the user's default browser, served sandboxed by the backend. The web tab opens first
+/** Open in the user's default browser, served locked-down by the backend. The web tab opens first
  *  so the popup blocker allows it. */
 async function openInDefaultBrowser(page: string | (() => Promise<string>)): Promise<void> {
   const tab = isTauri ? null : window.open("", "_blank");
@@ -95,7 +96,7 @@ async function openInDefaultBrowser(page: string | (() => Promise<string>)): Pro
     else openExternalLink(url);
   } catch (error) {
     tab?.close();
-    toast.error(error instanceof PageOpenError ? error.message : "Couldn't open the page in your browser.");
+    toast.error(error instanceof PageOpenError ? error.message : translate("uxChat.couldnTOpenThemqo9b"));
   }
 }
 
@@ -106,12 +107,12 @@ function reactPage(code: string, lang: ReactFenceLang, title: string): () => Pro
     noteNodeAvailability(prepared);
     if (prepared.status === "ready") return prepared.html;
     if (prepared.status === "compile-error") {
-      throw new PageOpenError("This component didn't compile. Open it in the LAiM Browser to see why.");
+      throw new PageOpenError(translate("uxChat.thisComponentDidnT8tgvu"));
     }
     if (needsNode(prepared.reason)) {
-      throw new PageOpenError("React previews need Node.js. Install it, then re-run LAiM setup.");
+      throw new PageOpenError(translate("uxChat.reactPreviewsNeedNodevho8b"));
     }
-    throw new PageOpenError("Couldn't prepare this preview.");
+    throw new PageOpenError(translate("uxChat.couldnTPrepareThise4r3l"));
   };
 }
 
@@ -119,13 +120,13 @@ function reactPage(code: string, lang: ReactFenceLang, title: string): () => Pro
 function displayFallbackTitle(title: string): string {
   const generic = /^HTML preview(?: (\d+))?$/.exec(title);
   if (!generic) return title;
-  return generic[1] ? `Untitled page ${generic[1]}` : "Untitled page";
+  return generic[1] ? translate("uxChat.untitledPage0id3p", { p1: generic[1] }) : translate("uxChat.untitledPage6yb6l");
 }
 
 function displayReactFallbackTitle(title: string): string {
   const generic = /^React preview(?: (\d+))?$/.exec(title);
   if (!generic) return title;
-  return generic[1] ? `Untitled component ${generic[1]}` : "Untitled component";
+  return generic[1] ? translate("uxChat.untitledComponentj0ai8", { p1: generic[1] }) : translate("uxChat.untitledComponentkflqe");
 }
 
 export function ArtifactCard({
@@ -233,12 +234,12 @@ export function ArtifactCard({
       isReact ? "text/plain;charset=utf-8" : "text/html;charset=utf-8",
     ).catch((error) => {
       if (!isDownloadCancelled(error)) {
-        toast.error(isReact ? "Couldn't save the code." : "Couldn't save the HTML.");
+        toast.error(isReact ? translate("uxChat.couldnTSaveThe3g5m8") : translate("uxChat.couldnTSaveThecojcx"));
       }
     });
   const copy = () =>
     void copyToClipboard(artifact.code).then(
-      (ok) => ok && toast.success(isReact ? "Code copied" : "HTML copied"),
+      (ok) => ok && toast.success(isReact ? translate("uxChat.codeCopieds3c9a") : translate("uxChat.hTMLCopiedtrkla")),
     );
   const openDefault = () =>
     void openInDefaultBrowser(isReact ? reactPage(artifact.code, lang, pageTitle) : artifact.code);
@@ -264,7 +265,7 @@ export function ArtifactCard({
           onClick={() => toggle("preview")}
           // State rides on aria-expanded, not the name: the startup-bundle harness counts cards by name.
           aria-expanded={shownView === "preview"}
-          aria-label={`Open ${artifact.title} preview`}
+          aria-label={translate("uxChat.openPreviewts3ba", { p1: artifact.title })}
           className="absolute inset-0 z-0 cursor-pointer rounded-2xl focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-default"
         />
         <span
@@ -283,11 +284,11 @@ export function ArtifactCard({
           </span>
           <span className="truncate text-sm leading-tight text-muted-foreground">
             {isStreaming ? (
-              <span className="shimmer motion-reduce:animate-none">Generating…</span>
+              <span className="shimmer motion-reduce:animate-none">{translate("uxChat.generating58b40")}</span>
             ) : isReact ? (
-              reactUnavailable ? "React preview · Needs Node.js" : "React preview"
+              reactUnavailable ? translate("uxChat.reactPreviewNeedsNodeevxu0") : translate("uxChat.reactPreview4c91y")
             ) : (
-              "HTML preview"
+              translate("uxChat.hTMLPreviewab0y3")
             )}
           </span>
         </span>
@@ -303,15 +304,13 @@ export function ArtifactCard({
             onClick={() => open("preview")}
             aria-pressed={showing}
             className="cursor-pointer pl-3.5 pr-2.5 transition-colors hover:bg-muted/60 focus-visible:bg-muted/60 focus-visible:outline-none disabled:cursor-default disabled:hover:bg-transparent dark:bg-[color-mix(in_oklab,var(--foreground)_calc(12%*var(--contrast-wash-gain,1)),transparent)] dark:hover:bg-[color-mix(in_oklab,var(--foreground)_calc(17%*var(--contrast-wash-gain,1)),transparent)] dark:focus-visible:bg-[color-mix(in_oklab,var(--foreground)_calc(17%*var(--contrast-wash-gain,1)),transparent)]"
-          >
-            Open in
-          </button>
+          >{translate("uxChat.openInv581u")}</button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild={true}>
               <button
                 type="button"
                 disabled={isStreaming}
-                aria-label="More ways to open"
+                aria-label={translate("uxChat.moreWaysToOpen2sqok")}
                 className="flex cursor-pointer items-center border-l border-border/80 pl-1.5 pr-2.5 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground focus-visible:bg-muted/60 focus-visible:outline-none aria-expanded:bg-muted/60 disabled:cursor-default dark:border-l-0 dark:bg-[color-mix(in_oklab,var(--foreground)_calc(12%*var(--contrast-wash-gain,1)),transparent)] dark:hover:bg-[color-mix(in_oklab,var(--foreground)_calc(17%*var(--contrast-wash-gain,1)),transparent)] dark:focus-visible:bg-[color-mix(in_oklab,var(--foreground)_calc(17%*var(--contrast-wash-gain,1)),transparent)] dark:aria-expanded:bg-[color-mix(in_oklab,var(--foreground)_calc(17%*var(--contrast-wash-gain,1)),transparent)]"
               >
                 <HugeiconsIcon
@@ -332,21 +331,21 @@ export function ArtifactCard({
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={openDefault}>
                 <MenuGlyph icon={LinkSquare02Icon} />
-                Default browser
+                {translate("browser.linkDestinationDefault")}
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => open("source")}>
                 {/* </> draws small, so one size up. */}
                 <MenuGlyph icon={SourceCodeIcon} className="size-4.5" />
-                Code view
+                {translate("uxChat.codeView11pb4")}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onSelect={copy}>
                 <MenuGlyph icon={Copy01Icon} />
-                {isReact ? "Copy code" : "Copy HTML"}
+                {isReact ? translate("uxChat.copyCodea9piy") : translate("uxChat.copyHTMLwsjr7")}
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={download}>
                 <MenuGlyph icon={Download01Icon} />
-                {isReact ? "Download code" : "Download HTML"}
+                {isReact ? translate("uxChat.downloadCoderph4k") : translate("uxChat.downloadHTMLd5hro")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

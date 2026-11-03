@@ -66,7 +66,7 @@ def _records(tmp_path_factory, monkeypatch):
 def _own(workdir) -> "os.PathLike":
     """The spill directory as LAiM itself would leave it: created, and recorded as ours.
 
-    Tests that pre-create it are standing in for a sandbox this process has already
+    Tests that pre-create it are standing in for a workdir this process has already
     spilled into. A directory made any other way has no record, which is the case
     `_own_spill_root` deliberately refuses.
     """
@@ -361,7 +361,7 @@ class TestPagingTheRest:
     def test_the_same_output_twice_reuses_one_spill(self, tmp_path):
         """Content addressed, so the notice is identical between the streaming and
         non-streaming runs of one call, and printing the same file twice does not fill
-        the sandbox with copies."""
+        the workdir with copies."""
         text = "\n".join(f"line {i}" for i in range(1, 2_000))
 
         first = tools._truncate(text, 200, workdir = str(tmp_path))
@@ -461,7 +461,7 @@ class TestEveryToolIsHeldToTheRoom:
     """`python` and `terminal` truncate themselves; the rest hand their string back whole.
 
     An MCP response is unbounded and an edit receipt or a search result runs to thousands
-    of characters, so a tool that is not the code sandbox can overflow the same nearly full
+    of characters, so a tool that is not the code workdir can overflow the same nearly full
     thread and land in the newest turn, which the next fit protects. Whatever the tool, the
     result has to be held to the room.
     """
@@ -528,7 +528,7 @@ class TestEveryToolIsHeldToTheRoom:
 
 class TestPruningOnlyTouchesStudioSpills:
     def test_files_studio_did_not_write_are_left_alone(self, tmp_path):
-        """The sandbox can be a directory the user already had, including one that already
+        """The workdir can be a directory the user already had, including one that already
         holds a `.LAiM_tool_output`. Pruning by extension deletes their files."""
         target = _own(tmp_path)
         mine = [target / f"{i:012x}.txt" for i in range(tools._SPILL_KEEP + 5)]
@@ -568,7 +568,7 @@ class TestPruningOnlyTouchesStudioSpills:
 
     def test_an_unowned_directory_is_not_pruned_at_all(self, tmp_path):
         """A name proves nothing about who wrote it. Without the marker this directory came
-        with the sandbox, and every file in it is the user's however it is named."""
+        with the workdir, and every file in it is the user's however it is named."""
         target = tmp_path / tools._SPILL_DIR
         target.mkdir()
         theirs = [target / f"{i:012x}.txt" for i in range(tools._SPILL_KEEP + 5)]
@@ -660,14 +660,14 @@ class TestTheFrontendEnvelopeSurvivesTheCap:
         _within_room(out, 120)
 
 
-class TestTheSpillStaysInsideTheSandbox:
+class TestTheSpillStaysInsideTheWorkdir:
     """The workdir is a directory the model runs commands in, and can be a project the
     user opened. Anything there may be a symlink it made or one that came with the
-    project, and following it writes this result outside the sandbox with the backend's
+    project, and following it writes this result outside the workdir with the backend's
     own permissions."""
 
     def test_a_symlinked_spill_directory_is_refused(self, tmp_path):
-        workdir = tmp_path / "sandbox"
+        workdir = tmp_path / "workdir"
         workdir.mkdir()
         outside = tmp_path / "outside"
         outside.mkdir()
@@ -675,13 +675,13 @@ class TestTheSpillStaysInsideTheSandbox:
 
         out = tools._truncate("\n".join(str(i) for i in range(5_000)), 200, workdir = str(workdir))
 
-        assert list(outside.iterdir()) == [], "the spill was written outside the sandbox"
+        assert list(outside.iterdir()) == [], "the spill was written outside the workdir"
         # Refused, not crashed: the notice is still served, just without a paging hint.
         assert "truncated to" in out
         assert "saved to" not in out
 
     def test_a_symlinked_spill_file_is_refused(self, tmp_path):
-        workdir = tmp_path / "sandbox"
+        workdir = tmp_path / "workdir"
         workdir.mkdir()
         victim = tmp_path / "victim.txt"
         victim.write_text("do not overwrite me")
@@ -718,7 +718,7 @@ class TestTheSpillStaysInsideTheSandbox:
 
 class TestSpillsAreBoundedInBytes:
     def test_one_enormous_result_is_capped_on_disk(self, tmp_path, monkeypatch):
-        """The result arrives here whole, and the sandbox file-size limit does not apply to
+        """The result arrives here whole, and the workdir file-size limit does not apply to
         output that came through a pipe. Without a byte cap a single `cat` of a huge file
         is retained in full."""
         monkeypatch.setattr(tools, "_SPILL_MAX_BYTES", 4_096)
@@ -777,8 +777,8 @@ class TestTheSpillCannotBeAimedElsewhere:
     def test_a_hard_link_at_the_spill_path_is_not_written_through(self, tmp_path):
         """The name is a digest of content the model produced, so it can predict it and
         pre-create it. A hard link reports islink() false and shares the inode of a file
-        outside the sandbox, so an O_TRUNC open writes through to it."""
-        workdir = tmp_path / "sandbox"
+        outside the workdir, so an O_TRUNC open writes through to it."""
+        workdir = tmp_path / "workdir"
         workdir.mkdir()
         victim = tmp_path / "victim.txt"
         victim.write_text("do not overwrite me")
@@ -823,7 +823,7 @@ class TestAZeroCapStaysZero:
 
 
 class TestOneChatsOutputStaysItsOwn:
-    """`_get_workdir(None)` is the shared `_default` sandbox, and a project's chats share
+    """`_get_workdir(None)` is the shared `_default` workdir, and a project's chats share
     one session by design (`project_session_id`). A spill in either outlives the call under
     a path the next chat can list and read, and can be pruned out from under the chat that
     was told to page through it. Before this change that output existed only in the
@@ -853,7 +853,7 @@ class TestOneChatsOutputStaysItsOwn:
 
         monkeypatch.setattr(tools, "_truncate", _recording)
         # Builtin printf over a brace expansion: no command substitution, because the
-        # sandbox caps processes and a fork fails the call before it ever truncates.
+        # workdir caps processes and a fork fails the call before it ever truncates.
         tools._bash_exec("printf 'x%.0s' {1..5000}", None, 30, session_id, thread_id = thread_id)
         return seen
 
@@ -869,7 +869,7 @@ class TestOneChatsOutputStaysItsOwn:
 
     def test_a_project_chat_retains_nothing_even_with_a_thread(self, monkeypatch, tmp_path):
         """A sub-directory is not access control, it is a name: every sibling chat in the
-        project has a terminal in that same sandbox and can read and prune whatever is in
+        project has a terminal in that same workdir and can read and prune whatever is in
         it. So a project chat truncates with a notice and no continuation."""
         session = tools.project_session_id("proj-1")
 
@@ -877,7 +877,7 @@ class TestOneChatsOutputStaysItsOwn:
         assert self._spill_args(monkeypatch, tmp_path, session, "chat-b")["scope"] is None
 
     def test_a_private_session_still_spills(self, monkeypatch, tmp_path):
-        """The control: the feature has to keep working where the sandbox is the
+        """The control: the feature has to keep working where the workdir is the
         conversation's own."""
         seen = self._spill_args(monkeypatch, tmp_path, "chat-1")
 
@@ -885,7 +885,7 @@ class TestOneChatsOutputStaysItsOwn:
         assert seen["scope"] == ""
 
     def test_a_scope_puts_the_spill_in_its_own_directory(self, tmp_path):
-        """And the notice names that path, so paging still works from the sandbox cwd."""
+        """And the notice names that path, so paging still works from the workdir cwd."""
         text = "\n".join(str(i) for i in range(5_000))
 
         out = tools._truncate(text, 200, workdir = str(tmp_path), scope = "abc123abc123")
@@ -1072,7 +1072,7 @@ class TestTheSafetensorsLoopPricesItToo:
 
 class TestAProjectIsBoundedAsOneWorkspace:
     def test_the_byte_budget_spans_every_scope(self, tmp_path, monkeypatch):
-        """A project's chats share one sandbox and get one scope each, so a per-directory
+        """A project's chats share one workdir and get one scope each, so a per-directory
         budget is really a per-chat budget multiplied by however many chats there are."""
         monkeypatch.setattr(tools, "_SPILL_MAX_TOTAL_BYTES", 30_000)
         for chat in range(6):
@@ -1087,7 +1087,7 @@ class TestAProjectIsBoundedAsOneWorkspace:
 
     def test_an_emptied_scope_leaves_no_directory_behind(self, tmp_path, monkeypatch):
         """Deleting a chat does not remove its scope, and an empty directory left in the
-        sandbox is what makes the cleanup treat it as holding something."""
+        workdir is what makes the cleanup treat it as holding something."""
         monkeypatch.setattr(tools, "_SPILL_MAX_TOTAL_BYTES", 12_000)
         for chat in range(4):
             tools._truncate(
@@ -1103,9 +1103,9 @@ class TestAProjectIsBoundedAsOneWorkspace:
 
 
 class TestDeletingAChatIsNotBlockedByItsSpills:
-    def test_a_sandbox_holding_only_spills_is_still_removable(self, tmp_path):
+    def test_a_workdir_holding_only_spills_is_still_removable(self, tmp_path):
         """Spills are LAiM's own, written by this process and deliberately kept off the
-        file cards. Counted as the user's content they leave an unreachable sandbox behind,
+        file cards. Counted as the user's content they leave an unreachable workdir behind,
         reported as holding files the user never created."""
         tools._truncate(
             "\n".join(str(i) for i in range(5_000)),
@@ -1117,7 +1117,7 @@ class TestDeletingAChatIsNotBlockedByItsSpills:
         assert tools._holds_no_user_files(str(tmp_path))
 
     def test_a_real_file_beside_them_still_counts(self):
-        """The control: this must not turn into "delete any sandbox"."""
+        """The control: this must not turn into "delete any workdir"."""
         import tempfile
         with tempfile.TemporaryDirectory() as workdir:
             tools._truncate(
@@ -1177,18 +1177,18 @@ class TestTheNativePathIsBoundedWithoutATokenizer:
 
 
 class TestOwnershipIsNotKeptWhereToolCodeCanWriteIt:
-    """The sandbox is a directory the model runs commands in, so nothing kept inside it is
+    """The workdir is a directory the model runs commands in, so nothing kept inside it is
     evidence about it. A marker file there can be replaced with a link, and once it is a
     plain file its contents can be rewritten to name the user's own files as LAiM's,
     which turns the cleanup into a delete. The record lives in LAiM's own storage."""
 
-    def test_nothing_about_ownership_is_written_into_the_sandbox(self, tmp_path):
+    def test_nothing_about_ownership_is_written_into_the_workdir(self, tmp_path):
         out = tools._truncate("\n".join(str(i) for i in range(5_000)), 200, workdir = str(tmp_path))
 
         names = [p.name for p in (tmp_path / tools._SPILL_DIR).iterdir()]
         assert names == [os.path.basename(_spill_path(out))]
 
-    def test_a_directory_that_came_with_the_sandbox_is_never_adopted(self, tmp_path):
+    def test_a_directory_that_came_with_the_workdir_is_never_adopted(self, tmp_path):
         (tmp_path / tools._SPILL_DIR).mkdir()
         (tmp_path / tools._SPILL_DIR / "notes.txt").write_text("mine")
 
@@ -1222,7 +1222,7 @@ class TestOwnershipIsNotKeptWhereToolCodeCanWriteIt:
     def test_a_spill_written_over_stops_being_ours(self, tmp_path):
         """A recorded path is not the file. Tool code can write its own content over a
         spill, in place, and from then on it is the user's: not something to prune, and
-        not something the cleanup may delete the sandbox on top of."""
+        not something the cleanup may delete the workdir on top of."""
         spilled = tools._truncate(
             "\n".join(str(i) for i in range(5_000)), 200, workdir = str(tmp_path)
         )
@@ -1248,7 +1248,7 @@ class TestOwnershipIsNotKeptWhereToolCodeCanWriteIt:
 
 class TestConcurrentSpillsKeepTheirRecords:
     def test_a_spill_recorded_during_a_prune_is_not_dropped(self, tmp_path):
-        """A project's chats share one sandbox. Appending a spill and rewriting the
+        """A project's chats share one workdir. Appending a spill and rewriting the
         manifest after a prune are a read-modify-write over one file, and a pruner that
         read it before another call appended would discard the newer entry, leaving a
         file nothing counts, prunes, or recognises as LAiM's."""
@@ -1298,7 +1298,7 @@ class TestConcurrentSpillsKeepTheirRecords:
         not tools._DIR_FD_WRITES, reason = "no dir_fd support; the path-based write stands"
     )
     def test_the_spill_write_never_follows_a_swapped_directory(self, tmp_path):
-        """A shared project sandbox can lose the race between checking the directory and
+        """A shared project workdir can lose the race between checking the directory and
         writing into it by name: another call can put a symlink there in between, and a
         path-based create and rename both follow it.
 
@@ -1311,7 +1311,7 @@ class TestConcurrentSpillsKeepTheirRecords:
         swapped.symlink_to(outside, target_is_directory = True)
 
         assert tools._write_spill_file(str(swapped), "abcdef123456.txt", "x" * 100) is None
-        assert list(outside.iterdir()) == [], "the spill was written outside the sandbox"
+        assert list(outside.iterdir()) == [], "the spill was written outside the workdir"
 
     def test_the_writer_still_works_on_a_real_directory(self, tmp_path):
         """The control, so the refusal above is not simply "never writes"."""
@@ -1320,60 +1320,60 @@ class TestConcurrentSpillsKeepTheirRecords:
         assert (tmp_path / "abcdef123456.txt").read_text() == "x" * 100
 
 
-class TestARemovedSandboxTakesItsRecordWithIt:
+class TestARemovedWorkdirTakesItsRecordWithIt:
     """Session workdirs are unique, so a record left behind is one small file per deleted
     chat, for the life of the installation."""
 
     @staticmethod
-    def _sandbox(tmp_path, monkeypatch, session):
-        monkeypatch.setenv("LAiM_STUDIO_SANDBOX_HOME", str(tmp_path / "sb"))
+    def _workdir(tmp_path, monkeypatch, session):
+        monkeypatch.setenv("LAiM_STUDIO_WORKDIR_HOME", str(tmp_path / "sb"))
         tools._workdirs.clear()
-        workdir = tools.get_sandbox_workdir(session)
+        workdir = tools.get_session_workdir(session)
         tools._truncate("\n".join(str(i) for i in range(5_000)), 200, workdir = workdir)
         record = tools._spill_record_path(os.path.join(workdir, tools._SPILL_DIR))
         assert os.path.exists(record)
         return workdir, record
 
-    def test_an_empty_sandbox_takes_its_record(self, tmp_path, monkeypatch):
-        """Only spills are left in it, so the sandbox goes without opting into files."""
-        workdir, record = self._sandbox(tmp_path, monkeypatch, "__LOCALID_spill111")
+    def test_an_empty_workdir_takes_its_record(self, tmp_path, monkeypatch):
+        """Only spills are left in it, so the workdir goes without opting into files."""
+        workdir, record = self._workdir(tmp_path, monkeypatch, "__LOCALID_spill111")
 
-        assert tools.remove_session_sandbox("__LOCALID_spill111") is True
+        assert tools.remove_session_workdir("__LOCALID_spill111") is True
 
         assert not os.path.exists(workdir)
         assert not os.path.exists(record)
 
-    def test_a_sandbox_deleted_with_its_files_does_too(self, tmp_path, monkeypatch):
-        workdir, record = self._sandbox(tmp_path, monkeypatch, "__LOCALID_spill222")
+    def test_a_workdir_deleted_with_its_files_does_too(self, tmp_path, monkeypatch):
+        workdir, record = self._workdir(tmp_path, monkeypatch, "__LOCALID_spill222")
         open(os.path.join(workdir, "game.html"), "w").close()
 
-        assert tools.remove_session_sandbox("__LOCALID_spill222", delete_files = True) is True
+        assert tools.remove_session_workdir("__LOCALID_spill222", delete_files = True) is True
 
         assert not os.path.exists(record)
 
     def test_the_fallback_deletion_takes_it_too(self, tmp_path, monkeypatch):
-        """The rename can fail (a cross-device sandbox root, a locked tree on Windows), and
+        """The rename can fail (a cross-device workdir root, a locked tree on Windows), and
         the rmtree that stands in for it deletes just as much, so it has to forget just as
         much."""
-        workdir, record = self._sandbox(tmp_path, monkeypatch, "__LOCALID_spill444")
+        workdir, record = self._workdir(tmp_path, monkeypatch, "__LOCALID_spill444")
 
         def _no_rename(*args, **kwargs):
             raise OSError("rename unavailable")
 
         monkeypatch.setattr(tools.os, "rename", _no_rename)
 
-        assert tools.remove_session_sandbox("__LOCALID_spill444", delete_files = True) is True
+        assert tools.remove_session_workdir("__LOCALID_spill444", delete_files = True) is True
 
         assert not os.path.exists(workdir)
         assert not os.path.exists(record)
 
-    def test_a_sandbox_that_stays_keeps_its_record(self, tmp_path, monkeypatch):
-        """The control: the files are the user's, the sandbox stays, and so does the
+    def test_a_workdir_that_stays_keeps_its_record(self, tmp_path, monkeypatch):
+        """The control: the files are the user's, the workdir stays, and so does the
         record of what in it is LAiM's."""
-        workdir, record = self._sandbox(tmp_path, monkeypatch, "__LOCALID_spill333")
+        workdir, record = self._workdir(tmp_path, monkeypatch, "__LOCALID_spill333")
         open(os.path.join(workdir, "game.html"), "w").close()
 
-        assert tools.remove_session_sandbox("__LOCALID_spill333") is False
+        assert tools.remove_session_workdir("__LOCALID_spill333") is False
 
         assert os.path.exists(record)
 
@@ -1404,7 +1404,7 @@ class TestARemovedSandboxTakesItsRecordWithIt:
         assert len(_spills(tmp_path / tools._SPILL_DIR)) == 1
 
     def test_a_first_spill_is_not_disowned_by_a_racing_one(self, tmp_path):
-        """Two first-time spills in one sandbox can both see the directory absent. The
+        """Two first-time spills in one workdir can both see the directory absent. The
         slower one must not write an empty record over the winner's: that would leave the
         winner's spill owned by nobody, never pruned and counted as the user's content."""
         import threading
@@ -1501,7 +1501,7 @@ class TestInstallingASpillNeverReplacesAnything:
         assert tools._truncate(text, 200, workdir = str(tmp_path)) == first
 
     def test_the_record_names_what_was_installed_not_what_is_there_now(self, tmp_path):
-        """Between the install and the record, another call sharing the sandbox can replace
+        """Between the install and the record, another call sharing the workdir can replace
         the file. Stating the path then records THAT content as LAiM's, and a later prune
         or cleanup deletes the user's data on the strength of it."""
         root = _own(tmp_path)
@@ -1519,7 +1519,7 @@ class TestInstallingASpillNeverReplacesAnything:
 
 
 class TestPruningDeletesOnlyWhatItChecked:
-    """The manifest lock orders LAiM's own threads; the thing racing here is the sandbox.
+    """The manifest lock orders LAiM's own threads; the thing racing here is the workdir.
     A background process can replace a recorded spill between the check and the unlink, and
     a delete by name then takes the replacement."""
 
@@ -1575,7 +1575,7 @@ class TestPruningDeletesOnlyWhatItChecked:
 
 class TestReadingASpillCannotBeRedirected:
     """The stamp is taken a moment before the content is read, and this runs in the
-    sandbox's own directory. A plain open by name would follow a symlink installed in
+    workdir's own directory. A plain open by name would follow a symlink installed in
     between and block forever on a FIFO or a device, with no timeout above it."""
 
     def test_a_symlink_at_the_name_is_not_followed(self, tmp_path):
@@ -1610,10 +1610,10 @@ class TestReadingASpillCannotBeRedirected:
 
 
 class TestPruningNeverMovesSomethingItCannotPutBack:
-    """A rename moves whatever is at the name, and the sandbox can put anything there.
+    """A rename moves whatever is at the name, and the workdir can put anything there.
 
     The prune moves a spill to a private name so the inode it verified is the inode it
-    deletes. If the sandbox replaced that name with a directory first, the rename takes
+    deletes. If the workdir replaced that name with a directory first, the rename takes
     the directory, the stamp check then rejects it, and `os.link` cannot put a directory
     back: the user's data ends up stranded under a hidden temporary name. So nothing but
     the regular file the record remembers is moved in the first place.
@@ -1678,7 +1678,7 @@ class TestPruningNeverMovesSomethingItCannotPutBack:
         moved = self._watch_renames(monkeypatch)
 
         assert tools._unlink_verified_spill(root, spill, owned) is False
-        assert spill not in moved, "a file the sandbox had rewritten was moved"
+        assert spill not in moved, "a file the workdir had rewritten was moved"
         assert open(spill).read() == "the user's own data"
         assert not self._private_names(root)
 

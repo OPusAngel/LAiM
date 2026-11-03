@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # Copyright 2026-present the LAiM AI Inc. team. All rights reserved.
 
-"""Static cache memory fallback for generate (LAiMai/LAiM#2590).
+"""Static cache memory fallback for generate (OPusAngel/LAiM#2590).
 
 FastModel generate forces a static KV cache, sized for prompt + max_new_tokens before the first
 token. On a memory-tight or unified-memory device (Jetson) that allocation alone can OOM where a

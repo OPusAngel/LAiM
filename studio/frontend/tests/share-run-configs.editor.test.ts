@@ -3,6 +3,7 @@
 
 import assert from "node:assert/strict";
 import test from "node:test";
+import { isLAiMProtocol } from "../src/config/deep-link.ts";
 import type { ModelPickTarget } from "../src/features/model-picker/components/model-selector/types.ts";
 import type { PerModelConfig } from "../src/features/model-picker/model-config/per-model-config.ts";
 import type * as Controls from "../src/features/model-picker/sharing/config-controls.tsx";
@@ -10,12 +11,9 @@ import type * as ConfigUi from "../src/features/model-picker/sharing/config-ui.t
 import type * as LinkEditor from "../src/features/model-picker/sharing/link-editor.tsx";
 import type * as LinkHandler from "../src/features/model-picker/sharing/link-handler.tsx";
 import type * as ShareDialog from "../src/features/model-picker/sharing/share-dialog.tsx";
+import { installLocalStorageFake, readSrc, readSrcExpanded, registerBundlerResolver } from "./helpers/kit.ts";
 import {
-  installLocalStorageFake,
-  readSrc,
-  registerBundlerResolver,
-} from "./helpers/kit.ts";
-import {
+  defaultStubs,
   type StubElement,
   loadWithStubs,
   stubJsxRuntime,
@@ -113,6 +111,7 @@ function load<T>(file: string, stubs: Record<string, unknown> = {}) {
     "./extra-args": sharedArgs,
     "./fields": fields,
     "./links": links,
+    ...defaultStubs,
     ...stubs,
   };
   const module = loadWithStubs<T>(
@@ -362,7 +361,11 @@ test("share dialog defaults to Web only on loopback addresses", () => {
   try {
     for (const address of ["http://localhost:8888", "http://192.168.1.20:8888"]) {
       Object.assign(window, { location: new URL(`${address}/chat`) });
-      assert.equal(new URL(shareDialog(D)().link).protocol, "LAiM:", address);
+      assert.equal(
+        isLAiMProtocol(new URL(shareDialog(D)().link).protocol),
+        true,
+        address,
+      );
     }
     for (const [address, destination] of [
       ["http://localhost:8888", "browser"],
@@ -377,7 +380,8 @@ test("share dialog defaults to Web only on loopback addresses", () => {
       assert.equal(select?.props.value, destination, address);
       const { protocol } = new URL(render().link);
       const http = new URL(address).protocol;
-      assert.equal(protocol, destination === "browser" ? http : "LAiM:");
+      if (destination === "browser") assert.equal(protocol, http, address);
+      else assert.equal(isLAiMProtocol(protocol), true, address);
       call(select, "onValueChange", "browser");
       const explicit = new URL(render().link);
       assert.equal(explicit.origin, new URL(address).origin);
@@ -753,7 +757,7 @@ test("startup intake waits for mount effects and survives strict effect replay",
 });
 
 test("Load and Save refuse while a shared GGUF variant is unresolved", () => {
-  const page = readSrc(
+  const page = readSrcExpanded(
     "features/model-picker/components/model-config-page.tsx",
   ).replace(/\s+/g, " ");
   for (const handler of ["handleRun", "handleSave"]) {

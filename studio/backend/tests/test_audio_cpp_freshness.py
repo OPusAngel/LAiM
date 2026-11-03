@@ -15,7 +15,7 @@ import pytest
 from utils import audio_cpp_freshness as fr
 from utils.prebuilt import freshness_flow
 
-_REPO = "LAiMai/audio.cpp"
+_REPO = "unslothai/audio.cpp"
 
 # The same table the installer's release_version_key is held to.
 _VERSIONS = [

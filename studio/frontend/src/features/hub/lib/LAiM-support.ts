@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
+
 const EXCLUDED_TAGS_GPU = new Set([
   "gptq",
   "awq",
@@ -69,14 +71,14 @@ const UNSUPPORTED_LIBRARY_TAGS: ReadonlySet<string> = new Set([
 ]);
 
 const FORMAT_TAG_LABEL: Record<string, string> = {
-  gptq: "GPTQ quantization",
-  awq: "AWQ quantization",
+  get gptq() { return translate("uxHub.gPTQQuantizationf2lok"); },
+  get awq() { return translate("uxHub.aWQQuantization2cbcj"); },
   exl2: "EXL2 quantization",
   mlx: "MLX-format weights",
   onnx: "ONNX-format weights",
   openvino: "OpenVINO-format weights",
-  coreml: "Core ML-format weights",
-  tflite: "TensorFlow Lite-format weights",
+  get coreml() { return translate("uxHub.coreMLFormatWeights9gkcc"); },
+  get tflite() { return translate("uxHub.tensorFlowLiteFormatWeightsegd7d"); },
   ctranslate2: "CTranslate2-format weights",
 };
 
@@ -97,28 +99,28 @@ const FORMAT_NAME_PATTERNS: ReadonlyArray<{ key: string; pattern: RegExp }> = [
 ];
 
 const UNSUPPORTED_QUANT_METHODS: Record<string, string> = {
-  awq: "AWQ quantization",
-  gptq: "GPTQ quantization",
+  get awq() { return translate("uxHub.aWQQuantization2cbcj"); },
+  get gptq() { return translate("uxHub.gPTQQuantizationf2lok"); },
   exl2: "EXL2 quantization",
   "compressed-tensors": "compressed-tensors quantization",
-  aqlm: "AQLM quantization",
-  eetq: "EETQ quantization",
-  hqq: "HQQ quantization",
+  get aqlm() { return translate("uxHub.aQLMQuantizationihwzt"); },
+  get eetq() { return translate("uxHub.eETQQuantizationzqtrk"); },
+  get hqq() { return translate("uxHub.hQQQuantizations2pm3"); },
   fbgemm_fp8: "FBGEMM FP8 quantization",
   finegrained_fp8: "fine-grained FP8 quantization",
-  quark: "Quark quantization",
-  vptq: "VPTQ quantization",
-  spqr: "SpQR quantization",
-  higgs: "HIGGS quantization",
-  sinq: "SINQ quantization",
-  torchao: "torchao quantization",
+  get quark() { return translate("uxHub.quarkQuantizationiia2e"); },
+  get vptq() { return translate("uxHub.vPTQQuantizationkwfi4"); },
+  get spqr() { return translate("uxHub.spQRQuantizationowiw6"); },
+  get higgs() { return translate("uxHub.hIGGSQuantizationgec8t"); },
+  get sinq() { return translate("uxHub.sINQQuantizationl3nfv"); },
+  get torchao() { return translate("uxHub.torchaoQuantization2bsr3"); },
   quanto: "optimum-quanto quantization",
   // transformers writes "auto-round"; the other spellings are older AutoRound exports.
   "auto-round": "AutoRound quantization",
-  auto_round: "AutoRound quantization",
-  autoround: "AutoRound quantization",
+  get auto_round() { return translate("uxHub.autoRoundQuantizationwf7xx"); },
+  get autoround() { return translate("uxHub.autoRoundQuantizationwf7xx"); },
   metal: "Metal-kernel quantization",
-  fouroversix: "Four Over Six quantization",
+  get fouroversix() { return translate("uxHub.fourOverSixQuantizationcja5u"); },
   fp_quant: "FP-Quant quantization",
 };
 
@@ -260,7 +262,7 @@ export function classifyLAiMSupport({
 
   if (normalizedQuant && !isGguf) {
     if (Object.hasOwn(UNSUPPORTED_QUANT_METHODS, normalizedQuant)) {
-      const reason = `Detected ${UNSUPPORTED_QUANT_METHODS[normalizedQuant]}.`;
+      const reason = translate("uxHub.detectedlymgm", { p1: UNSUPPORTED_QUANT_METHODS[normalizedQuant] });
       // vLLM excuses only the quantization; any other rejection keeps the old answer.
       if (
         vllmRuns &&
@@ -300,8 +302,8 @@ export function classifyLAiMSupport({
   }
   const formatKey = detectUnsupportedFormatKey(modelId, lowerTags, formatTags);
   if (formatKey) {
-    const label = FORMAT_TAG_LABEL[formatKey] ?? `${formatKey.toUpperCase()} weights`;
-    const reason = `Detected ${label}.`;
+    const label = FORMAT_TAG_LABEL[formatKey] ?? translate("uxHub.weights5lt6x", { p1: formatKey.toUpperCase() });
+    const reason = translate("uxHub.detectedlymgm", { p1: label });
     // AWQ / GPTQ must be the only format objection, else tag order would decide.
     if (
       vllmRuns &&

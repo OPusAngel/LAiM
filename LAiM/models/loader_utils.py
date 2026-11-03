@@ -54,10 +54,10 @@ WORLD_SIZE_KEYS = ("WORLD_SIZE",)
 LOCAL_RANK_ONLY_KEYS = ("LOCAL_RANK",)
 
 BAD_MAPPINGS = {
-    "unsloth/Qwen3-32B-LAiM-bnb-4bit".lower(): "unsloth/Qwen3-32B-bnb-4bit",  # 32B dynamic quant is way too big
-    "unsloth/Qwen3-30B-A3B-LAiM-bnb-4bit".lower(): "unsloth/Qwen3-30B-A3B",  # HF loads MoEs too slowly
+    "unsloth/Qwen3-32B-unsloth-bnb-4bit".lower(): "unsloth/Qwen3-32B-bnb-4bit",  # 32B dynamic quant is way too big
+    "unsloth/Qwen3-30B-A3B-unsloth-bnb-4bit".lower(): "unsloth/Qwen3-30B-A3B",  # HF loads MoEs too slowly
     "unsloth/Qwen3-30B-A3B-bnb-4bit".lower(): "unsloth/Qwen3-30B-A3B",  # We rather do it on the fly
-    "unsloth/Qwen3-30B-A3B-Base-LAiM-bnb-4bit".lower(): "unsloth/Qwen3-30B-A3B-Base",  # HF loads MoEs too slowly
+    "unsloth/Qwen3-30B-A3B-Base-unsloth-bnb-4bit".lower(): "unsloth/Qwen3-30B-A3B-Base",  # HF loads MoEs too slowly
     "unsloth/Qwen3-30B-A3B-Base-bnb-4bit".lower(): "unsloth/Qwen3-30B-A3B-Base",  # We rather do it on the fly
 }
 
@@ -1055,7 +1055,7 @@ def _get_new_mapper():
         import time
 
         new_mapper = (
-            "https://raw.githubusercontent.com/LAiMai/LAiM/main/LAiM/models/mapper.py"
+            "https://raw.githubusercontent.com/OPusAngel/LAiM/main/LAiM/models/mapper.py"
         )
         # Capped WHILE reading, since requests.get buffers the whole body first, and the deadline is total because timeout is per-read.
         byte_cap = 1_000_000
@@ -1650,7 +1650,7 @@ def get_model_name(
     ):
         new_model_name = BAD_MAPPINGS[new_model_name.lower()]
     elif new_model_name is None and model_name.lower() in BAD_MAPPINGS:
-        # Some bad names (the -LAiM-bnb-4bit dynamic quants) are keys of the mappers, not values, so the resolver returns None and the remap above is skipped; remap the input name directly.
+        # Some bad names (the -unsloth-bnb-4bit dynamic quants) are keys of the mappers, not values, so the resolver returns None and the remap above is skipped; remap the input name directly.
         new_model_name = BAD_MAPPINGS[model_name.lower()]
 
     if (
@@ -1681,8 +1681,8 @@ def get_model_name(
             raise NotImplementedError(
                 f"LAiM: {model_name} is not supported in your current LAiM version! Please update LAiM via:\n\n"
                 "pip uninstall LAiM LAiM_zoo -y\n"
-                'pip install --upgrade --no-cache-dir "LAiM[colab-new] @ git+https://github.com/LAiMai/LAiM.git"\n'
-                'pip install --upgrade --no-cache-dir "git+https://github.com/LAiMai/LAiM-zoo.git"\n'
+                'pip install --upgrade --no-cache-dir "LAiM[colab-new] @ git+https://github.com/OPusAngel/LAiM.git"\n'
+                'pip install --upgrade --no-cache-dir "git+https://github.com/OPusAngel/LAiM-zoo.git"\n'
             )
 
     if new_model_name is None:
@@ -3624,18 +3624,18 @@ def _get_fp8_mode_and_check_settings(
         and torch.cuda.get_device_capability() >= (9, 0)
     ):
         raise ValueError(
-            "LAiM: On the fly `load_in_fp8` requires H100 GPUs or after. Try `LAiM/Qwen3-8B` instead."
+            "LAiM: On the fly `load_in_fp8` requires H100 GPUs or after. Try `unsloth/Qwen3-8B` instead."
         )
 
     if Version(torch.__version__) < Version("2.9.0"):
         raise ValueError(
-            "LAiM: On the fly `load_in_fp8` requires torch 2.9.0+. Try `LAiM/Qwen3-8B` instead."
+            "LAiM: On the fly `load_in_fp8` requires torch 2.9.0+. Try `unsloth/Qwen3-8B` instead."
         )
 
     # Check if torchao has pytorch/ao#3158, released in 0.15.0.
     if importlib.util.find_spec("torchao") is None:
         raise ValueError(
-            "LAiM: Please install torchao for on the fly float8 to work! Try `LAiM/Qwen3-8B` instead."
+            "LAiM: Please install torchao for on the fly float8 to work! Try `unsloth/Qwen3-8B` instead."
         )
     import torchao
 

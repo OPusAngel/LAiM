@@ -15,6 +15,8 @@ import type {
   LocalInventoryRow,
   SelectedModelView,
 } from "../types";
+import { translate } from "@/i18n";
+
 
 type HfResult = ReturnType<typeof toHfModelResult>;
 
@@ -32,7 +34,7 @@ function localFormatLabel(row: LocalInventoryRow): string {
   if (row.modelFormat === "adapter") return "local adapter";
   if (row.modelFormat === "safetensors") return "local safetensors model";
   if (row.modelFormat === "checkpoint") return "local checkpoint";
-  return "local model";
+  return translate("uxHub.localModelkwjf2");
 }
 
 export function useSelectedModelView({
@@ -143,7 +145,7 @@ export function useSelectedModelView({
         sourceLabel: isResolvedOnDevice
           ? "On device"
           : isResolvedPartial
-            ? "Partial on device"
+            ? translate("uxHub.partialOnDevicexv8xj")
             : hubName,
         path: onDevicePath,
         isLocal: false,
@@ -203,10 +205,10 @@ export function useSelectedModelView({
 
     if (selectedCachedRow) {
       const cachedSummary = isDatasetMode
-        ? "Cached dataset, ready to use."
+        ? translate("uxHub.cachedDatasetReadyTomz0e6")
         : selectedCachedRow.isGguf
-          ? "Cached GGUF repository ready for local inference."
-          : "Cached checkpoint repository ready for local inference.";
+          ? translate("uxHub.cachedGGUFRepositoryReadyv047m")
+          : translate("uxHub.cachedCheckpointRepositoryReadyt44zu");
       const mergedTags = selectedHfResult?.tags ?? selectedCachedRow.tags;
       const mergedPipelineTag =
         selectedHfResult?.pipelineTag ??
@@ -232,7 +234,7 @@ export function useSelectedModelView({
         summary: selectedHfResult
           ? buildSummary(selectedHfResult)
           : cachedSummary,
-        sourceLabel: "Hub cache",
+        sourceLabel: translate("uxHub.hubCache72fbw"),
         path: selectedCachedRow.cachePath ?? null,
         isLocal: false,
         isGguf: selectedCachedRow.isGguf,
@@ -316,9 +318,9 @@ export function useSelectedModelView({
           summary: selectedHfResult
             ? buildSummary(selectedHfResult)
             : isCompanionPrefetch
-              ? "Holds only the files a GGUF borrowed. Download the full model from the card below."
-              : "Partial download. Finish it from the card below, or delete it to free space.",
-          sourceLabel: "Hub cache",
+              ? translate("uxHub.holdsOnlyTheFiles5v81e")
+              : translate("uxHub.partialDownloadFinishIt1uawa"),
+          sourceLabel: translate("uxHub.hubCache72fbw"),
           path: selectedLocalRow.path,
           isLocal: false,
           isGguf: selectedLocalRow.isGguf,

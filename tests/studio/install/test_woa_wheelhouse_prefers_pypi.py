@@ -94,7 +94,7 @@ def test_pyarrow_keeps_its_own_pypi_first_path(source):
 
 
 # Only source of the pyarrow gating the native WoA path; a wrong host means a wrong download.
-DEFAULT_WHEELHOUSE = "https://github.com/LAiMai/LAiM/releases/download/Windows-ARM64"
+DEFAULT_WHEELHOUSE = "https://github.com/unslothai/unsloth/releases/download/Windows-ARM64"
 
 PWSH = shutil.which("pwsh")
 requires_pwsh = pytest.mark.skipif(PWSH is None, reason = "pwsh not available")
@@ -113,7 +113,7 @@ def test_the_default_wheelhouse_url_is_exactly_this(source):
 
 def test_the_default_is_a_release_download_url_on_this_repo(source):
     """Default wheelhouse must be a releases/download URL on this repo; releases/tag serves HTML."""
-    assert DEFAULT_WHEELHOUSE.startswith("https://github.com/LAiMai/LAiM/releases/download/")
+    assert DEFAULT_WHEELHOUSE.startswith("https://github.com/unslothai/unsloth/releases/download/")
     assert "/releases/tag/" not in DEFAULT_WHEELHOUSE, "that URL is the HTML page, not the asset"
     assert not DEFAULT_WHEELHOUSE.endswith("/"), "Join-UrlPath adds the slash"
 

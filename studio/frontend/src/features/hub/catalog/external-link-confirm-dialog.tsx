@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -46,11 +47,10 @@ export function ExternalLinkConfirmDialog() {
                 className="size-4.5 text-muted-foreground"
               />
             </span>
-            <AlertDialogTitle>Open external link</AlertDialogTitle>
+            <AlertDialogTitle>{translate("uxCopy.openExternalLink1gdmw")}</AlertDialogTitle>
           </div>
           <AlertDialogDescription>
-            You are about to leave LAiM and open this page in your browser.
-            Only continue if you trust the destination.
+            {translate("uxCopy.youAreAboutToxjtme")}
           </AlertDialogDescription>
         </AlertDialogHeader>
         {pendingUrl && (
@@ -70,9 +70,7 @@ export function ExternalLinkConfirmDialog() {
               if (pendingUrl) openLink(pendingUrl);
               dismiss();
             }}
-          >
-            Open link
-          </AlertDialogAction>
+          >{translate("uxHub.openLinkb423p")}</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

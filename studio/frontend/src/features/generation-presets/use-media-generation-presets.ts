@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { toast } from "@/lib/toast";
 import {
   useCallback,
@@ -196,7 +197,7 @@ export function useMediaGenerationPresets<Params extends object>({
         // Only the read failed. Settle on local defaults so the controls waiting on hydration
         // still work, but never write back over a store this session could not read.
         hydrateLocalSettings("unreadable");
-        toast.error(`Could not load ${kind} presets`);
+        toast.error(translate("uxGenerationpresets.couldNotLoadPresetsyvuo9", { p1: kind }));
       });
     return () => {
       cancelled = true;
@@ -285,7 +286,7 @@ export function useMediaGenerationPresets<Params extends object>({
     const timer = window.setTimeout(() => {
       queueWrite(() =>
         saveMediaGenerationPresetSettings(kind, settings).catch(() => {
-          toast.error(`Could not save ${kind} presets`);
+          toast.error(translate("uxGenerationpresets.couldNotSavePresetsttkfd", { p1: kind }));
         }),
       );
     }, 400);
@@ -339,7 +340,7 @@ export function useMediaGenerationPresets<Params extends object>({
       }
       const trimmed = rawName.trim();
       if (!trimmed) {
-        toast.error("Enter a preset name");
+        toast.error(translate("uxGenerationpresets.enterAPresetName5ddgj"));
         return null;
       }
       const usedNames = new Set([
@@ -352,7 +353,7 @@ export function useMediaGenerationPresets<Params extends object>({
           : trimmed;
       const overwriting = customPresets.some((preset) => preset.name === name);
       if (!overwriting && customPresets.length >= 100) {
-        toast.error("Delete a preset before saving another one");
+        toast.error(translate("uxGenerationpresets.deleteAPresetBeforer7boo"));
         return null;
       }
       const preset: MediaGenerationPreset<Params> = {

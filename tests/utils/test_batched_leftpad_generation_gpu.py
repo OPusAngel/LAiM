@@ -20,7 +20,7 @@ pytestmark = pytest.mark.skipif(
     not (cuda_available or xpu_available), reason = "requires a CUDA or XPU GPU"
 )
 
-MODEL_NAME = "LAiM/Qwen2.5-0.5B-Instruct"
+MODEL_NAME = "unsloth/Qwen2.5-0.5B-Instruct"
 MAX_NEW_TOKENS = 32
 PREFIX_TOKENS = 16
 # Batch-size-dependent kernels move bf16 logits by ~0.3; garbage loses by several logits.

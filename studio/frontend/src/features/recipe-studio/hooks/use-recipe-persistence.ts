@@ -13,6 +13,8 @@ import {
 import { useRecipeStudioStore } from "../stores/recipe-studio";
 import { importRecipePayload, type RecipeSnapshot } from "../utils/import";
 import type { RecipePayloadResult } from "../utils/payload/types";
+import { translate } from "@/i18n";
+
 
 type SaveTone = "success" | "error";
 
@@ -264,7 +266,7 @@ export function useRecipePersistence({
     if (parsed.snapshot) {
       loadRecipe(parsed.snapshot);
     } else {
-      console.error("Failed to load recipe payload.", parsed.errors);
+      console.error(translate("uxRecipestudio.failedToLoadRecipet67ks"), parsed.errors);
     }
 
     const payload = getCurrentPayloadFromStore();
@@ -301,11 +303,11 @@ export function useRecipePersistence({
       setSavedSignature(buildSignature(nextName, currentPayload));
       drainQueuedUploadCleanups(currentPayload);
     } catch (error) {
-      console.error("Save recipe failed:", error);
+      console.error(translate("uxRecipestudio.saveRecipeFailedq1twv"), error);
       setFailedSignature(buildSignature(nextName, currentPayload));
       toastError(
-        "Save failed",
-        error instanceof Error ? error.message : "Could not save recipe.",
+        translate("uxRecipestudio.saveFailed57tvs"),
+        error instanceof Error ? error.message : translate("uxRecipestudio.couldNotSaveRecipeoonpr"),
       );
     } finally {
       setSaveLoading(false);
@@ -342,14 +344,14 @@ export function useRecipePersistence({
       );
       const ok = await copyToClipboard(JSON.stringify(safePayload, null, 2));
       if (!ok) {
-        throw new Error("Clipboard not available.");
+        throw new Error(translate("uxRecipestudio.clipboardNotAvailableawxk4"));
       }
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1500);
-      toastSuccess("👨‍🍳 Recipe copied");
+      toastSuccess(translate("uxRecipestudio.recipeCopied43259"));
     } catch (error) {
-      console.error("Copy failed:", error);
-      toastError("Copy failed", "Could not copy payload.");
+      console.error(translate("uxRecipestudio.copyFaileds4k7g"), error);
+      toastError(translate("uxRecipestudio.copyFaileddms0y"), translate("uxRecipestudio.couldNotCopyPayload0wq8u"));
     }
   }, [payloadResult.payload]);
 
@@ -357,10 +359,10 @@ export function useRecipePersistence({
     (value: string): string | null => {
       const result = importRecipePayload(value);
       if (result.errors.length > 0 || !result.snapshot) {
-        return result.errors[0] ?? "Invalid payload.";
+        return result.errors[0] ?? translate("uxRecipestudio.invalidPayloadnp69g");
       }
       loadRecipe(result.snapshot);
-      toastSuccess("Recipe imported");
+      toastSuccess(translate("uxRecipestudio.recipeImportedcuz2w"));
       return null;
     },
     [loadRecipe],

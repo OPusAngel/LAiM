@@ -11,6 +11,8 @@ import { ggufVariantDownloadSizeBytes } from "../lib/gguf-variant-sort";
 import { fingerprintToken } from "../lib/token-fingerprint";
 import { hfApiToken } from "../stores/hf-token-store";
 import { useInventoryVersion } from "../stores/inventory-events";
+import { translate } from "@/i18n";
+
 
 export type MediaStudioPage = "images" | "video";
 
@@ -75,7 +77,7 @@ export async function resolveCompanionBytes(
       ? await getVideoDownloadPlan(request)
       : await getDiffusionDownloadPlan(request);
   // Rejected, not null, so the per-card cache drops it and a later rerun retries.
-  if (plan.plan_failed) throw new Error("Download plan incomplete");
+  if (plan.plan_failed) throw new Error(translate("uxHub.downloadPlanIncompleteh4ykg"));
   // A backend without the per-entry flag cannot say which bytes are the checkpoint's.
   if (plan.entries.some((entry) => entry.checkpoint === undefined)) return null;
   const checkpointBytes = plan.checkpoint_bytes || sizeBytes;

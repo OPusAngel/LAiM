@@ -33,7 +33,7 @@ def test_no_archive_fixture_is_committed():
     Two of them embed the May-12 IOC literal, which makes them true positives for other vendors:
     on VirusTotal `malicious_sdist.tar.gz` scores 2/60 and `malicious_wheel.whl` 2/65 (Tencent,
     Rising), and their presence in GitHub's repository archive is what makes Panda report
-    `Exploit/CVE-2014-6271` against `LAiM-main.zip`. LAiMai/LAiM#10060 took the test tree
+    `Exploit/CVE-2014-6271` against `LAiM-main.zip`. OPusAngel/LAiM#10060 took the test tree
     out of the PyPI artifacts, but a repository archive contains tests by construction, so the only
     way those detections stop is for the archives not to be in git (discussion #9577).
 

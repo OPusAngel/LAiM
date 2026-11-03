@@ -11,18 +11,18 @@ import {
   promptWasShortened,
 } from "../src/features/chat/utils/context-truncation.ts";
 
-import { readSrc } from "./helpers/kit.ts";
+import { readSrc, readSrcExpanded } from "./helpers/kit.ts";
 
-const COMPACTION_DIVIDER = readSrc("components/assistant-ui/compaction-divider.tsx");
-const THREAD = readSrc("components/assistant-ui/thread.tsx");
-const DERIVED = readSrc("components/assistant-ui/message-derived.ts");
-const CHAT_ADAPTER = readSrc("features/chat/api/chat-adapter.ts");
-const RUNTIME_PROVIDER = readSrc("features/chat/runtime-provider.tsx");
-const CHAT_PAGE = readSrc("features/chat/chat-page.tsx");
-const CONTEXT_USAGE_BAR = readSrc("features/chat/components/context-usage-bar.tsx");
+const COMPACTION_DIVIDER = readSrcExpanded("components/assistant-ui/compaction-divider.tsx");
+const THREAD = readSrcExpanded("components/assistant-ui/thread.tsx");
+const DERIVED = readSrcExpanded("components/assistant-ui/message-derived.ts");
+const CHAT_ADAPTER = readSrcExpanded("features/chat/api/chat-adapter.ts");
+const RUNTIME_PROVIDER = readSrcExpanded("features/chat/runtime-provider.tsx");
+const CHAT_PAGE = readSrcExpanded("features/chat/chat-page.tsx");
+const CONTEXT_USAGE_BAR = readSrcExpanded("features/chat/components/context-usage-bar.tsx");
 
-const adapter = readSrc("features/chat/api/chat-adapter.ts");
-const transport = readSrc("features/chat/api/chat-api.ts");
+const adapter = readSrcExpanded("features/chat/api/chat-adapter.ts");
+const transport = readSrcExpanded("features/chat/api/chat-api.ts");
 
 test("local chat opts into the rolling context policy", () => {
   assert.match(adapter, /isGgufForCompaction/);
@@ -39,7 +39,7 @@ test("the transport preserves standard chunks with context metadata", () => {
 });
 
 test("durable replay persists context-truncation metadata", () => {
-  const runtimeProvider = readSrc("features/chat/runtime-provider.tsx");
+  const runtimeProvider = readSrcExpanded("features/chat/runtime-provider.tsx");
   assert.match(runtimeProvider, /contextTruncation: mergeContextTruncation\(/);
   assert.match(runtimeProvider, /generationChunkCount/);
   assert.match(adapter, /generationFirstChunkAt/);
@@ -298,7 +298,7 @@ const functionBody = (source: string, name: string): string => {
 };
 
 test("the notice is a NOTICE, never part of the conversation", () => {
-  const exporter = readSrc("features/chat/utils/conversation-markdown-export.ts");
+  const exporter = readSrcExpanded("features/chat/utils/conversation-markdown-export.ts");
 
   // 1. Nothing that builds a request may read the key it renders from. Bounded to the
   //    function bodies: slicing to end-of-file also catches the streaming handler,

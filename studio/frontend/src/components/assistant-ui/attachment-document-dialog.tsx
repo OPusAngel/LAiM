@@ -32,7 +32,7 @@ import {
   truncateAttachmentPreviewText,
 } from "@/features/chat";
 import { startLibraryChat } from "@/features/library";
-import { useT } from "@/i18n";
+import { translate, useT } from "@/i18n";
 import { MessageCircleIcon } from "@/lib/hugeicons-derived";
 import { downloadFile } from "@/lib/native-files";
 import { useAuiState } from "@assistant-ui/react";
@@ -110,7 +110,7 @@ export const AttachmentViewer: FC<{
                   onOpenChange(false);
                   startLibraryChat(navigate, { files: [file] });
                 })
-                .catch(() => toast.error(`Could not read ${name}`)),
+                .catch(() => toast.error(translate("uxComponents.couldNotReadax0mb", { p1: name }))),
           }
         : undefined,
     onDownload: load

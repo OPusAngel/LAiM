@@ -186,7 +186,7 @@ def test_drop_invalid_text_rows_streaming_keeps_filter_skips_len():
 def test_dataset_slice_bounds_are_non_negative():
     with pytest.raises(ValidationError):
         TrainingStartRequest(
-            model_name = "LAiM/test",
+            model_name = "unsloth/test",
             training_type = "LoRA/QLoRA",
             format_type = "alpaca",
             dataset_slice_start = -1,
@@ -194,7 +194,7 @@ def test_dataset_slice_bounds_are_non_negative():
 
     with pytest.raises(ValidationError):
         TrainingStartRequest(
-            model_name = "LAiM/test",
+            model_name = "unsloth/test",
             training_type = "LoRA/QLoRA",
             format_type = "alpaca",
             dataset_slice_start = 5,
@@ -216,7 +216,7 @@ def test_dataset_slice_bounds_are_non_negative():
 def test_hf_dataset_rejects_unsafe_values(bad_hf_dataset):
     with pytest.raises(ValidationError):
         TrainingStartRequest(
-            model_name = "LAiM/test",
+            model_name = "unsloth/test",
             training_type = "LoRA/QLoRA",
             format_type = "alpaca",
             hf_dataset = bad_hf_dataset,
@@ -229,7 +229,7 @@ def test_hf_dataset_rejects_unsafe_values(bad_hf_dataset):
 )
 def test_hf_dataset_defers_benign_repo_id_validation_to_hugging_face(dataset_id):
     request = TrainingStartRequest(
-        model_name = "LAiM/test",
+        model_name = "unsloth/test",
         training_type = "LoRA/QLoRA",
         format_type = "alpaca",
         hf_dataset = dataset_id,
@@ -241,7 +241,7 @@ def test_hf_dataset_defers_benign_repo_id_validation_to_hugging_face(dataset_id)
 def test_hf_dataset_accepts_max_length_namespaced_id():
     dataset_id = f"{'a' * 96}/{'b' * 96}"
     request = TrainingStartRequest(
-        model_name = "LAiM/test",
+        model_name = "unsloth/test",
         training_type = "LoRA/QLoRA",
         format_type = "alpaca",
         hf_dataset = dataset_id,
@@ -253,7 +253,7 @@ def test_hf_dataset_accepts_max_length_namespaced_id():
 def test_project_name_rejects_values_over_ui_limit():
     with pytest.raises(ValidationError):
         TrainingStartRequest(
-            model_name = "LAiM/test",
+            model_name = "unsloth/test",
             project_name = "x" * 81,
             training_type = "LoRA/QLoRA",
             format_type = "alpaca",
@@ -269,7 +269,7 @@ def test_streaming_start_rejects_train_on_completions_before_backend_start():
         "routes/training.py",
     )
     request = TrainingStartRequest(
-        model_name = "LAiM/test",
+        model_name = "unsloth/test",
         training_type = "LoRA/QLoRA",
         hf_dataset = "org/dataset",
         format_type = "chatml",
@@ -291,7 +291,7 @@ def test_streaming_start_requires_separate_eval_split(eval_split):
         "routes/training.py",
     )
     request = TrainingStartRequest(
-        model_name = "LAiM/test",
+        model_name = "unsloth/test",
         training_type = "LoRA/QLoRA",
         hf_dataset = "org/dataset",
         format_type = "chatml",
@@ -314,7 +314,7 @@ def test_streaming_start_rejects_missing_max_steps():
         "routes/training.py",
     )
     request = TrainingStartRequest(
-        model_name = "LAiM/test",
+        model_name = "unsloth/test",
         training_type = "LoRA/QLoRA",
         hf_dataset = "org/dataset",
         format_type = "chatml",
@@ -336,7 +336,7 @@ def test_streaming_start_rejects_embedding_models():
         "routes/training.py",
     )
     request = TrainingStartRequest(
-        model_name = "LAiM/test",
+        model_name = "unsloth/test",
         training_type = "LoRA/QLoRA",
         hf_dataset = "org/dataset",
         format_type = "chatml",
@@ -365,7 +365,7 @@ def test_streaming_start_accepts_raw_text_and_cpt(training_type, format_type):
         "routes/training.py",
     )
     request = TrainingStartRequest(
-        model_name = "LAiM/test",
+        model_name = "unsloth/test",
         training_type = training_type,
         hf_dataset = "org/dataset",
         format_type = format_type,
@@ -413,7 +413,7 @@ def test_streaming_start_happy_path_reaches_backend():
         "routes/training.py",
     )
     request = TrainingStartRequest(
-        model_name = "LAiM/test",
+        model_name = "unsloth/test",
         start_request_id = "start-request-123",
         training_type = "LoRA/QLoRA",
         hf_dataset = "org/dataset",
@@ -527,7 +527,7 @@ def test_training_status_exposes_the_current_start_request_id():
 )
 def test_streaming_rejects_split_instructions(field, value):
     kwargs = {
-        "model_name": "LAiM/test",
+        "model_name": "unsloth/test",
         "training_type": "LoRA/QLoRA",
         "hf_dataset": "org/dataset",
         "format_type": "chatml",
@@ -551,7 +551,7 @@ def test_streaming_start_rejects_local_datasets():
         "routes/training.py",
     )
     request = TrainingStartRequest(
-        model_name = "LAiM/test",
+        model_name = "unsloth/test",
         training_type = "LoRA/QLoRA",
         hf_dataset = "org/dataset",
         format_type = "chatml",

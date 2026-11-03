@@ -96,7 +96,7 @@ const LAYA_CONFIG = {
   max_position_embeddings: null,
 };
 
-const LLM = "LAiM/Qwen3-0.6B";
+const LLM = "unsloth/Qwen3-0.6B";
 
 const LLM_CONFIG = {
   id: LLM,
@@ -562,10 +562,10 @@ test("a Mac lists Clef Omni and trains it on rows that carry audio", () => {
   });
   assert.equal(support.status, "supported");
   assert.equal(priorityTrainingModels("cuda").includes(omni), false);
-  assert.deepEqual(applyPriorityOrdering(["LAiM/x", omni, LAYA], "mac"), [
+  assert.deepEqual(applyPriorityOrdering(["unsloth/x", omni, LAYA], "mac"), [
     LAYA,
     omni,
-    "LAiM/x",
+    "unsloth/x",
   ]);
 
   const config = {

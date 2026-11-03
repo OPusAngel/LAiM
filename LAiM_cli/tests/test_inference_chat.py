@@ -347,7 +347,7 @@ def _clear_sampling_pins(monkeypatch):
 def test_chatbackend_resolves_unset_sampling_to_the_model_recommendation(monkeypatch):
     _clear_sampling_pins(monkeypatch)
     fake = _FakeBackend()
-    fake.active_model_name = "LAiM/gemma-3-270m-it"
+    fake.active_model_name = "unsloth/gemma-3-270m-it"
     backend = ChatBackend("LAiM", fake)
 
     list(
@@ -361,7 +361,7 @@ def test_chatbackend_resolves_unset_sampling_to_the_model_recommendation(monkeyp
 def test_chatbackend_gguf_resolves_unset_sampling_but_keeps_explicit_values(monkeypatch):
     _clear_sampling_pins(monkeypatch)
     fake = _FakeGgufBackend()
-    fake.model_identifier = "LAiM/gemma-3-4b-it-GGUF"
+    fake.model_identifier = "unsloth/gemma-3-4b-it-GGUF"
     backend = ChatBackend("gguf", fake)
 
     list(
@@ -534,7 +534,7 @@ def test_catalog_trained_entries_use_run_metadata(monkeypatch, tmp_path):
         lambda: {
             str(named): {
                 "display_name": "support-bot",
-                "model_name": "LAiM/Llama-3.2-1B-Instruct",
+                "model_name": "unsloth/Llama-3.2-1B-Instruct",
                 "dataset_name": "/x/uploads/0123456789abcdef0123456789abcdef_tickets.jsonl",
                 "started_at": "2026-07-31T20:23:09+00:00",
                 "final_step": 30,
@@ -569,7 +569,7 @@ def test_catalog_cached_entries_filter_non_chat_rows(monkeypatch, tmp_path):
         },
         {"repo_id": "org/Flux-GGUF", "cache_path": str(repo), "task": "text-to-image"},
         {
-            "repo_id": "LAiM/Qwen3-ASR-GGUF",
+            "repo_id": "unsloth/Qwen3-ASR-GGUF",
             "cache_path": str(repo),
             "task": "text-generation",
             "capabilities": {"can_chat": False},
@@ -895,7 +895,7 @@ def test_catalog_collapses_a_model_reached_twice_through_a_symlink(monkeypatch, 
 
 
 def test_catalog_still_folds_case_on_bare_repo_ids(monkeypatch):
-    """A repo id is not a path. The Hub resolves ``LAiM/Qwen3`` and ``LAiM/qwen3`` to one
+    """A repo id is not a path. The Hub resolves ``unsloth/Qwen3`` and ``unsloth/qwen3`` to one
     repo and the cache folds them into one directory, so these stay a single row everywhere."""
     from LAiM_cli import _model_catalog as cat
 
@@ -905,8 +905,8 @@ def test_catalog_still_folds_case_on_bare_repo_ids(monkeypatch):
         cat,
         "cached_entries",
         lambda: [
-            cat.ModelEntry("Downloaded", "LAiM/Qwen3-0.6B", "", "LAiM/Qwen3-0.6B"),
-            cat.ModelEntry("Downloaded", "LAiM/qwen3-0.6b", "", "LAiM/qwen3-0.6b"),
+            cat.ModelEntry("Downloaded", "unsloth/Qwen3-0.6B", "", "unsloth/Qwen3-0.6B"),
+            cat.ModelEntry("Downloaded", "unsloth/qwen3-0.6b", "", "unsloth/qwen3-0.6b"),
         ],
     )
     assert len(cat.list_chat_models()) == 1
@@ -952,9 +952,9 @@ def test_catalog_drops_org_prefix_unless_ambiguous(monkeypatch):
     from LAiM_cli import _model_catalog as cat
 
     rows = [
-        cat.ModelEntry("Downloaded", "LAiM/Qwen3-1.7B", "", "LAiM/Qwen3-1.7B"),
+        cat.ModelEntry("Downloaded", "unsloth/Qwen3-1.7B", "", "unsloth/Qwen3-1.7B"),
         cat.ModelEntry("Downloaded", "Qwen/Qwen3-0.6B", "", "Qwen/Qwen3-0.6B"),
-        cat.ModelEntry("Downloaded", "LAiM/qwen3-0.6b", "", "LAiM/qwen3-0.6b"),
+        cat.ModelEntry("Downloaded", "unsloth/qwen3-0.6b", "", "unsloth/qwen3-0.6b"),
     ]
     for name in ("trained_entries", "exported_entries", "local_folder_entries"):
         monkeypatch.setattr(cat, name, lambda: [])
@@ -962,7 +962,7 @@ def test_catalog_drops_org_prefix_unless_ambiguous(monkeypatch):
     assert [e.name for e in cat.list_chat_models()] == [
         "Qwen3-1.7B",
         "Qwen/Qwen3-0.6B",
-        "LAiM/qwen3-0.6b",
+        "unsloth/qwen3-0.6b",
     ]
 
 
@@ -1407,8 +1407,8 @@ class _FakeStatusResponse:
 
 _RESIDENT_Q8 = {
     "is_gguf": True,
-    "active_model": "LAiM/Qwen3-0.6B-GGUF",
-    "model_identifier": "LAiM/Qwen3-0.6B-GGUF",
+    "active_model": "unsloth/Qwen3-0.6B-GGUF",
+    "model_identifier": "unsloth/Qwen3-0.6B-GGUF",
     "gguf_variant": "Q8_0",
 }
 
@@ -1416,9 +1416,9 @@ _RESIDENT_Q8 = {
 @pytest.mark.parametrize(
     ("model", "status", "expected"),
     [
-        ("LAiM/Qwen3-0.6B-GGUF", _RESIDENT_Q8, "Q8_0"),
-        ("LAiM/qwen3-0.6b-gguf", _RESIDENT_Q8, "Q8_0"),
-        ("LAiM/Qwen3-1.7B-GGUF", _RESIDENT_Q8, None),
+        ("unsloth/Qwen3-0.6B-GGUF", _RESIDENT_Q8, "Q8_0"),
+        ("unsloth/qwen3-0.6b-gguf", _RESIDENT_Q8, "Q8_0"),
+        ("unsloth/Qwen3-1.7B-GGUF", _RESIDENT_Q8, None),
         (
             "/models/Qwen3-0.6B-Q4_K_M.gguf",
             {**_RESIDENT_Q8, "model_identifier": "/models/Qwen3-0.6B-Q4_K_M.gguf"},
@@ -1440,9 +1440,9 @@ _RESIDENT_Q8 = {
         ),
         ("Qwen3-0.6B-GGUF", _RESIDENT_Q8, "Q8_0"),
         ("C:\\Models\\Foo", {**_RESIDENT_Q8, "model_identifier": "C:\\Models\\Foo"}, "Q8_0"),
-        ("LAiM/Qwen3-0.6B-GGUF", {**_RESIDENT_Q8, "model_identifier": None}, "Q8_0"),
-        ("LAiM/Qwen3-0.6B-GGUF", {**_RESIDENT_Q8, "is_gguf": False}, None),
-        ("LAiM/Qwen3-0.6B-GGUF", None, None),
+        ("unsloth/Qwen3-0.6B-GGUF", {**_RESIDENT_Q8, "model_identifier": None}, "Q8_0"),
+        ("unsloth/Qwen3-0.6B-GGUF", {**_RESIDENT_Q8, "is_gguf": False}, None),
+        ("unsloth/Qwen3-0.6B-GGUF", None, None),
     ],
 )
 def test_http_backend_load_keeps_the_resident_quant(monkeypatch, model, status, expected):
@@ -2099,7 +2099,7 @@ def test_server_load_sends_load_in_4bit_only_when_typed(monkeypatch, command, fl
     ("model", "display_name", "picked", "resident", "banner"),
     [
         (
-            "LAiM/Qwen3-0.6B-GGUF",
+            "unsloth/Qwen3-0.6B-GGUF",
             "Qwen3-0.6B-GGUF (UD-Q4_K_XL)",
             "UD-Q4_K_XL",
             _RESIDENT_Q8,
@@ -2970,8 +2970,8 @@ def test_catalog_keeps_the_org_prefix_when_a_plain_name_collides(monkeypatch):
 
     trained = [cat.ModelEntry("Fine-tunes", "Qwen3-0.6B", "", "/outputs/run-1")]
     cached = [
-        cat.ModelEntry("Downloaded", "LAiM/Qwen3-0.6B", "", "LAiM/Qwen3-0.6B"),
-        cat.ModelEntry("Downloaded", "LAiM/Llama-3.2-1B", "", "LAiM/Llama-3.2-1B"),
+        cat.ModelEntry("Downloaded", "unsloth/Qwen3-0.6B", "", "unsloth/Qwen3-0.6B"),
+        cat.ModelEntry("Downloaded", "unsloth/Llama-3.2-1B", "", "unsloth/Llama-3.2-1B"),
     ]
     monkeypatch.setattr(cat, "trained_entries", lambda: trained)
     monkeypatch.setattr(cat, "cached_entries", lambda: cached)
@@ -2979,7 +2979,7 @@ def test_catalog_keeps_the_org_prefix_when_a_plain_name_collides(monkeypatch):
         monkeypatch.setattr(cat, name, lambda: [])
 
     names = [e.name for e in cat.list_chat_models()]
-    assert names == ["Qwen3-0.6B", "LAiM/Qwen3-0.6B", "Llama-3.2-1B"]
+    assert names == ["Qwen3-0.6B", "unsloth/Qwen3-0.6B", "Llama-3.2-1B"]
     assert len(names) == len(set(names))
 
 

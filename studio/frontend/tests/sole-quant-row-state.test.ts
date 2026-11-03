@@ -6,8 +6,8 @@ import test from "node:test";
 
 import { soleQuantRowState } from "../src/features/model-picker/components/model-selector/row-identity.ts";
 
-const REPO = "LAiM/Qwen3-8B-GGUF";
-const OTHER_REPO = "LAiM/Llama-3.1-8B-Instruct-GGUF";
+const REPO = "unsloth/Qwen3-8B-GGUF";
+const OTHER_REPO = "unsloth/Llama-3.1-8B-Instruct-GGUF";
 const QUANT = "Q4_K_M";
 
 /** The row shown for a repo holding only Q4_K_M on disk. */

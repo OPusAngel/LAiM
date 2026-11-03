@@ -2,6 +2,8 @@
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { hasDatasetsServer } from "@/lib/hf-endpoint";
+import { translate } from "@/i18n";
+
 
 export interface HfSplitEntry {
   dataset: string;
@@ -111,8 +113,7 @@ export async function loadHfDatasetSplits(
 
   return {
     entries: [],
-    error:
-      "Dataset config and split metadata is unavailable. Enter the values manually.",
+    get error() { return translate("uxFeatures.datasetConfigAndSplit6lz7c"); },
     source: "manual",
   };
 }

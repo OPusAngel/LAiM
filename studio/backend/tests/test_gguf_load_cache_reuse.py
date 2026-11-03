@@ -89,7 +89,7 @@ from core.inference.llama_cpp import (
 from core.inference.openai_auto_download import _DISK_RESERVE_BYTES
 
 
-REPO = "LAiM/gemma-test-GGUF"
+REPO = "unsloth/gemma-test-GGUF"
 VARIANT = "UD-Q4_K_XL"
 MAIN = f"gemma-test-{VARIANT}.gguf"
 

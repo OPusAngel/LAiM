@@ -932,8 +932,8 @@ def fit_rolling_context(
     }
 
 
-# withSandboxAttachmentPaths' note (sandbox-attachments.ts): only these attachments have a copy to point at.
-_SANDBOX_ATTACHMENT_NOTE_RE = re.compile(
+# withWorkdirAttachmentPaths' note (workdir-attachments.ts): only these attachments have a copy to point at.
+_SESSION_ATTACHMENT_NOTE_RE = re.compile(
     r"\[(?P<name>[^\n]*?): its text is below, so answer from it\. For calculations, the python tool has the "
     r'file at path = (?P<path>"(?:[^"\\\n]|\\.)*")(?:;[^\n]*)?\]\n'
 )
@@ -946,8 +946,8 @@ _MAX_CHARS_PER_TOKEN = 16
 
 
 def _attachment_spans(text: str):
-    """(note, open tag, inner text, close tag, trailing text) per sandbox-backed attachment."""
-    notes = list(_SANDBOX_ATTACHMENT_NOTE_RE.finditer(text))
+    """(note, open tag, inner text, close tag, trailing text) per workdir-backed attachment."""
+    notes = list(_SESSION_ATTACHMENT_NOTE_RE.finditer(text))
     for index, note in enumerate(notes):
         end = notes[index + 1].start() if index + 1 < len(notes) else len(text)
         body = text[note.end() : end]
@@ -968,7 +968,7 @@ def _attachment_spans(text: str):
 
 def _cut_attachment_bodies(text: str, keep_chars: int, *, excerpt: bool) -> str:
     """Attachments longer than ``keep_chars`` keep their first whole lines (``excerpt``) or only their path."""
-    first = _SANDBOX_ATTACHMENT_NOTE_RE.search(text)
+    first = _SESSION_ATTACHMENT_NOTE_RE.search(text)
     if not first:
         return text
     out = [text[: first.start()]]
@@ -1034,7 +1034,7 @@ def fit_oversized_attachments(
     max_tokens: Optional[int],
     count_tokens: Callable[[list[dict]], int],
 ) -> list[dict]:
-    """Cut sandbox-backed attachments too big for the window: the newest turn keeps the start, older turns the path.
+    """Cut workdir-backed attachments too big for the window: the newest turn keeps the start, older turns the path.
 
     Decided per message, so a turn renders the same on every later request. Rewrites ``content`` in place:
     eviction matches messages by identity, and a copy of the newest turn was archived as evicted.

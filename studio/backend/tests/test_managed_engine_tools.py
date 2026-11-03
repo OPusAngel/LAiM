@@ -269,7 +269,7 @@ def test_studio_loop_executes_and_replays_native_tool_calls(native, monkeypatch)
     assert api.active_generations.count() == 0
 
 
-def test_run_automatically_streams_arm_the_no_sandbox_gate(native, monkeypatch):
+def test_run_automatically_streams_arm_the_no_workdir_gate(native, monkeypatch):
     # Same rule as the llama.cpp and safetensors loops: a streaming UI chat in "off" arms the confirm
     # gate, and the loop then asks only for a risky Python/Terminal call without OS isolation.
     from core.inference import studio_tool_loop

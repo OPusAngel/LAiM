@@ -23,7 +23,7 @@ def _serve(token: str):
     return asyncio.run(inf_mod.artifact_preview_page(token))
 
 
-def test_a_staged_page_is_served_sandboxed_with_the_strict_policy():
+def test_a_staged_page_is_served_unrestricted_with_the_strict_policy():
     response = _serve(_stage("<!doctype html><html><head><title>Hi</title></head></html>"))
     csp = response.headers["content-security-policy"]
     assert response.status_code == 200

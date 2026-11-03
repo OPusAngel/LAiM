@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { createRoute } from "@tanstack/react-router";
 import { requireAuth } from "../auth-guards";
 import { Route as rootRoute } from "./__root";
@@ -9,7 +10,7 @@ import { Route as rootRoute } from "./__root";
 export const Route = createRoute({
   getParentRoute: () => rootRoute,
   path: "/images",
-  staticData: { title: "Images" },
+  staticData: { title: translate("composer.pill.images") },
   // A chat-picker pick arrives as ?model= (+ ?quant= for an exact filename, ?ggufQuant= for a label the page resolves),
   // which the page loads and then clears.
   validateSearch: (

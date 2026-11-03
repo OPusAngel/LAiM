@@ -6,6 +6,7 @@
 // ejects it in place. It joins the shared bottom-right stack instead of pinning
 // itself, so the update banners and download panel never overlap it.
 
+import { translate } from "@/i18n";
 import { Spinner } from "@/components/ui/spinner";
 import {
   Tooltip,
@@ -97,7 +98,7 @@ function LoadedModelRow({
         <TooltipTrigger asChild={true}>
           <button
             type="button"
-            aria-label={`${label}. Open ${target.label}`}
+            aria-label={translate("uxLoadedmodels.openfmt9r", { p1: label, p2: target.label })}
             onClick={onOpen}
             className="flex min-w-0 flex-1 items-center gap-2 text-left"
           >
@@ -120,29 +121,27 @@ function LoadedModelRow({
         </TooltipTrigger>
         <TooltipContent side="left" sideOffset={6}>
           <span className="block">{entry.name}</span>
-          <span className="block text-muted-foreground">
-            Open {target.label}
-          </span>
+          <span className="block text-muted-foreground">{translate("uxLoadedmodels.opene6ryv", { p1: target.label })}</span>
         </TooltipContent>
       </Tooltip>
       {entry.loading ? (
         // Nothing resident to release yet, so the eject slot holds the spinner
         // the toast is showing at the same moment.
         <span className="flex size-6 shrink-0 items-center justify-center">
-          <Spinner className="size-3.5" label="Loading" />
+          <Spinner className="size-3.5" label={translate("decisions.modelLoading")} />
         </span>
       ) : (
         <Tooltip>
           <TooltipTrigger asChild={true}>
             <button
               type="button"
-              aria-label={`Eject ${label}`}
+              aria-label={translate("uxLoadedmodels.eject44xl2", { p1: label })}
               disabled={ejecting}
               onClick={onEject}
               className="flex size-6 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-[color-mix(in_oklab,var(--foreground)_calc(7%*var(--contrast-wash-gain,1)),transparent)] hover:text-foreground disabled:pointer-events-none disabled:opacity-60"
             >
               {ejecting ? (
-                <Spinner className="size-3.5" label="Ejecting" />
+                <Spinner className="size-3.5" label={translate("uxLoadedmodels.ejectingqqgep")} />
               ) : (
                 // Eject, not dismiss: this releases the weights, which the
                 // header's X does not. Same glyph the model picker's own eject
@@ -156,7 +155,7 @@ function LoadedModelRow({
             </button>
           </TooltipTrigger>
           <TooltipContent side="left" sideOffset={6}>
-            Eject to free memory
+            {translate("uxLoadedmodels.ejectToFreeMemory8xpho")}
           </TooltipContent>
         </Tooltip>
       )}
@@ -270,7 +269,7 @@ export function LoadedModelsIndicator({
           <TooltipTrigger asChild={true}>
             <button
               type="button"
-              aria-label={`${countLabel}. Show details, or drag to move`}
+              aria-label={translate("uxLoadedmodels.showDetailsOrDrag0io4u", { p1: countLabel })}
               onPointerDown={startDrag}
               // The pill is its own drag handle, so a press that moved is a
               // drag and must not also expand the card.
@@ -302,12 +301,12 @@ export function LoadedModelsIndicator({
               className="size-[calc(15px*var(--ui-space-scale,1))] shrink-0 text-muted-foreground"
             />
             <span className="min-w-0 flex-1 truncate text-ui-12p5 font-semibold text-foreground">
-              Loaded models
+              {translate("uxLoadedmodels.loadedModels10nxw")}
             </span>
             <Tooltip>
               <TooltipTrigger asChild={true}>
                 <div
-                  aria-label="Drag to move"
+                  aria-label={translate("uxLoadedmodels.dragToMove1b56c")}
                   // Not a button, so no click follows to consume the drag sentinel: say so, or the
                   // collapsed pill's next click reads this drag as its own and refuses to expand.
                   onPointerDown={startDrag}
@@ -321,14 +320,14 @@ export function LoadedModelsIndicator({
                 </div>
               </TooltipTrigger>
               <TooltipContent side="left" sideOffset={6}>
-                Drag to move
+                {translate("uxLoadedmodels.dragToMove1b56c")}
               </TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild={true}>
                 <button
                   type="button"
-                  aria-label="Collapse loaded models"
+                  aria-label={translate("uxLoadedmodels.collapseLoadedModels1mbam")}
                   onClick={() => setCollapsed(true)}
                   className="flex size-6 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-[color-mix(in_oklab,var(--foreground)_calc(7%*var(--contrast-wash-gain,1)),transparent)] hover:text-foreground"
                 >
@@ -340,14 +339,14 @@ export function LoadedModelsIndicator({
                 </button>
               </TooltipTrigger>
               <TooltipContent side="left" sideOffset={6}>
-                Collapse
+                {translate("uxLoadedmodels.collapse3i51a")}
               </TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild={true}>
                 <button
                   type="button"
-                  aria-label="Close loaded models"
+                  aria-label={translate("uxLoadedmodels.closeLoadedModelsjf4t0")}
                   onClick={() => setLoadedModelsDismissed(true)}
                   className="flex size-6 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-[color-mix(in_oklab,var(--foreground)_calc(7%*var(--contrast-wash-gain,1)),transparent)] hover:text-foreground"
                 >
@@ -361,7 +360,7 @@ export function LoadedModelsIndicator({
               <TooltipContent side="left" sideOffset={6}>
                 <span className="block">Close</span>
                 <span className="block text-muted-foreground">
-                  Back on the next model load
+                  {translate("uxLoadedmodels.backOnTheNext125iv")}
                 </span>
               </TooltipContent>
             </Tooltip>

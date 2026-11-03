@@ -1003,21 +1003,21 @@ test("created files stay outside the collapsible on Python and Terminal cards", 
       (node) =>
         (ts.isJsxSelfClosingElement(node) || ts.isJsxOpeningElement(node)) &&
         ts.isIdentifier(node.tagName) &&
-        node.tagName.text === "SandboxFiles",
+        node.tagName.text === "WorkdirFiles",
     );
     assert.equal(
       files.length,
       1,
-      `${file} must render SandboxFiles once under ToolFallbackRoot`,
+      `${file} must render WorkdirFiles once under ToolFallbackRoot`,
     );
     const insideContent = find(content, (node) => node === files[0]);
     assert.equal(
       insideContent.length,
       0,
-      `${file} hid SandboxFiles inside ToolFallbackContent`,
+      `${file} hid WorkdirFiles inside ToolFallbackContent`,
     );
     // No wrapper element: an empty one would sit in the DOM of every card that created nothing.
-    assert.equal(files[0].parent, root, `${file} wraps SandboxFiles`);
+    assert.equal(files[0].parent, root, `${file} wraps WorkdirFiles`);
     const cls = (files[0] as ts.JsxSelfClosingElement).attributes.properties.find(
       (property): property is ts.JsxAttribute =>
         ts.isJsxAttribute(property) && property.name.getText() === "className",
@@ -1032,7 +1032,7 @@ test("created files stay outside the collapsible on Python and Terminal cards", 
 
 test("a call that created files keeps its group from collapsing", async () => {
   const { hasCreatedFiles } = await import(
-    "../src/components/assistant-ui/sandbox-files.ts"
+    "../src/components/assistant-ui/workdir-files.ts"
   );
   const wrapped = (files: unknown) => ({
     text: "",

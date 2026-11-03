@@ -6,6 +6,8 @@ import { isValidSex, parseAgeRange, parseIntNumber, parseNumber } from "./parse"
 import { VALIDATOR_OXC_CODE_LANGS, VALIDATOR_SQL_CODE_LANGS } from "./validators/code-lang";
 import { isOxcCodeShape } from "./validators/oxc-code-shape";
 import { isOxcValidationMode } from "./validators/oxc-mode";
+import { translate } from "@/i18n";
+
 
 const TRACE_MODES = new Set(["none", "last_message", "all_messages"]);
 const GITHUB_ITEM_TYPES = new Set(["issues", "pulls", "commits"]);
@@ -17,31 +19,31 @@ export function getConfigErrors(config: NodeConfig | null): string[] {
   }
   const errors: string[] = [];
   if (!config.name.trim()) {
-    errors.push("Name is required.");
+    errors.push(translate("uxRecipestudio.nameIsRequiredklnez"));
   }
   if (config.kind === "sampler") {
     if (config.sampler_type === "category") {
       const values = config.values ?? [];
       if (values.length < 2) {
-        errors.push("Category needs at least 2 values.");
+        errors.push(translate("uxRecipestudio.categoryNeedsAtLeastu74ae"));
       }
       const weights = config.weights ?? [];
       const hasWeights = weights.some((weight) => weight !== null);
       if (hasWeights && weights.some((weight) => weight === null)) {
-        errors.push("Weights must be set for all values.");
+        errors.push(translate("uxRecipestudio.weightsMustBeSet94j7s"));
       }
       for (const [condition, params] of Object.entries(
         config.conditional_params ?? {},
       )) {
         if (!condition.trim()) {
-          errors.push("Category conditional rule needs condition text.");
+          errors.push(translate("uxRecipestudio.categoryConditionalRuleNeedsbmn5e"));
           continue;
         }
         const conditionalValues = (params.values ?? [])
           .map((value) => value.trim())
           .filter(Boolean);
         if (conditionalValues.length === 0) {
-          errors.push(`Category conditional '${condition}' needs values.`);
+          errors.push(translate("uxRecipestudio.categoryConditionalNeedsValuesuyio9", { p1: condition }));
           continue;
         }
         const conditionalWeights = params.weights ?? [];
@@ -54,7 +56,7 @@ export function getConfigErrors(config: NodeConfig | null): string[] {
             conditionalWeights.some((weight) => weight === null))
         ) {
           errors.push(
-            `Category conditional '${condition}' weights must be set for all values.`,
+            translate("uxRecipestudio.categoryConditionalWeightsMustm6fvm", { p1: condition }),
           );
         }
       }
@@ -80,14 +82,14 @@ export function getConfigErrors(config: NodeConfig | null): string[] {
     if (config.sampler_type === "bernoulli") {
       const p = parseNumber(config.p);
       if (p === null) {
-        errors.push("Bernoulli p must be a number.");
+        errors.push(translate("uxRecipestudio.bernoulliPMustBetlfi3"));
       } else if (p < 0 || p > 1) {
-        errors.push("Bernoulli p must be between 0 and 1.");
+        errors.push(translate("uxRecipestudio.bernoulliPMustBexpv9a"));
       }
     }
     if (config.sampler_type === "datetime") {
       if (!config.datetime_unit) {
-        errors.push("Datetime unit required.");
+        errors.push(translate("uxRecipestudio.datetimeUnitRequired798r1"));
       }
       if (config.datetime_start && config.datetime_end) {
         const start = new Date(config.datetime_start).getTime();
@@ -95,7 +97,7 @@ export function getConfigErrors(config: NodeConfig | null): string[] {
         if (!(Number.isFinite(start) && Number.isFinite(end))) {
           errors.push("Datetime start/end must be valid.");
         } else if (start >= end) {
-          errors.push("Datetime start must be before end.");
+          errors.push(translate("uxRecipestudio.datetimeStartMustBexd7f0"));
         }
       }
     }
@@ -108,14 +110,14 @@ export function getConfigErrors(config: NodeConfig | null): string[] {
         errors.push("Timedelta dt_min must be < dt_max.");
       }
       if (!config.reference_column_name?.trim()) {
-        errors.push("Timedelta reference datetime column required.");
+        errors.push(translate("uxRecipestudio.timedeltaReferenceDatetimeColumn6xdn3"));
       }
       if (!config.timedelta_unit) {
-        errors.push("Timedelta unit required.");
+        errors.push(translate("uxRecipestudio.timedeltaUnitRequired2p1pn"));
       }
     }
     if (config.sampler_type === "subcategory" && !config.subcategory_parent) {
-      errors.push("Subcategory needs a parent category column.");
+      errors.push(translate("uxRecipestudio.subcategoryNeedsAParent473jy"));
     }
     if (
       config.sampler_type === "person" ||
@@ -124,58 +126,58 @@ export function getConfigErrors(config: NodeConfig | null): string[] {
       if (config.person_sex?.trim()) {
         const normalized = config.person_sex.trim();
         if (!isValidSex(normalized)) {
-          errors.push("Person sex must be Male or Female.");
+          errors.push(translate("uxRecipestudio.personSexMustBelnede"));
         }
       }
       if (config.person_age_range?.trim()) {
         const parsed = parseAgeRange(config.person_age_range);
         if (!parsed) {
-          errors.push("Person age range must be like 18-70.");
+          errors.push(translate("uxRecipestudio.personAgeRangeMust5hp0r"));
         }
       }
     }
   }
   if (config.kind === "llm") {
     if (!config.model_alias.trim()) {
-      errors.push("Choose a saved model.");
+      errors.push(translate("uxRecipestudio.chooseASavedModelmrcxc"));
     }
     if (!config.prompt.trim()) {
-      errors.push("Prompt is required.");
+      errors.push(translate("uxRecipestudio.promptIsRequired1zyy4"));
     }
     if (config.llm_type === "code" && !config.code_lang) {
-      errors.push("Code language is required.");
+      errors.push(translate("uxRecipestudio.codeLanguageIsRequireddewx4"));
     }
     if (config.llm_type === "structured") {
       if (!config.output_format?.trim()) {
-        errors.push("Output format is required.");
+        errors.push(translate("uxRecipestudio.outputFormatIsRequiredfk7js"));
       } else {
         try {
           JSON.parse(config.output_format);
         } catch {
-          errors.push("Output format must be valid JSON.");
+          errors.push(translate("uxRecipestudio.outputFormatMustBe9ce8b"));
         }
       }
     }
     if (config.llm_type === "judge") {
       const scores = config.scores ?? [];
       if (scores.length === 0) {
-        errors.push("Add at least one scoring rule.");
+        errors.push(translate("uxRecipestudio.addAtLeastOne5sohf"));
       }
       for (const score of scores) {
         if (!score.name.trim()) {
-          errors.push("Each scoring rule needs a name.");
+          errors.push(translate("uxRecipestudio.eachScoringRuleNeedsu5yk3"));
         }
         if (!score.description.trim()) {
-          errors.push("Each scoring rule needs a description.");
+          errors.push(translate("uxRecipestudio.eachScoringRuleNeedsjy18j"));
         }
         const options = score.options ?? [];
         if (options.length === 0) {
-          errors.push(`Scoring rule ${score.name || "Untitled"} needs options.`);
+          errors.push(translate("uxRecipestudio.scoringRuleNeedsOptions9ijpw", { p1: score.name || "Untitled" }));
         }
         for (const option of options) {
           if (!option.value.trim() || !option.description.trim()) {
             errors.push(
-              `Scoring rule ${score.name || "Untitled"} needs both a value and a description for each option.`,
+              translate("uxRecipestudio.scoringRuleNeedsBothojqb0", { p1: score.name || "Untitled" }),
             );
             break;
           }
@@ -184,30 +186,30 @@ export function getConfigErrors(config: NodeConfig | null): string[] {
     }
     if (config.image_context?.enabled) {
       if (!config.image_context.column_name.trim()) {
-        errors.push("Image context column is required.");
+        errors.push(translate("uxRecipestudio.imageContextColumnIs1bj1d"));
       }
     }
     if (
       config.with_trace &&
       !TRACE_MODES.has(config.with_trace)
     ) {
-      errors.push("Trace mode must be none, last_message, or all_messages.");
+      errors.push(translate("uxRecipestudio.traceModeMustBe4thq4"));
     }
   }
   if (config.kind === "expression") {
     if (!config.expr.trim()) {
-      errors.push("Expression is required.");
+      errors.push(translate("uxRecipestudio.expressionIsRequirednbul5"));
     }
   }
   if (config.kind === "tool_config") {
     if (config.mcp_providers.length === 0) {
-      errors.push("Add at least one tool server.");
+      errors.push(translate("uxRecipestudio.addAtLeastOne4ctmr"));
     }
     const serverNames = new Set<string>();
     for (const provider of config.mcp_providers) {
       const name = provider.name.trim();
       if (!name) {
-        errors.push("Each tool server needs a name.");
+        errors.push(translate("uxRecipestudio.eachToolServerNeedskprww"));
         continue;
       }
       if (serverNames.has(name)) {
@@ -216,10 +218,10 @@ export function getConfigErrors(config: NodeConfig | null): string[] {
       serverNames.add(name);
       if (provider.provider_type === "stdio") {
         if (!provider.command?.trim()) {
-          errors.push(`Tool server ${name}: add a command.`);
+          errors.push(translate("uxRecipestudio.toolServerAddAen8sw", { p1: name }));
         }
       } else if (!provider.endpoint?.trim()) {
-        errors.push(`Tool server ${name}: add an endpoint.`);
+        errors.push(translate("uxRecipestudio.toolServerAddAnssq1l", { p1: name }));
       }
     }
     const maxTurnsRaw = config.max_tool_call_turns?.trim();
@@ -227,7 +229,7 @@ export function getConfigErrors(config: NodeConfig | null): string[] {
       maxTurnsRaw &&
       (!Number.isFinite(Number(maxTurnsRaw)) || Number(maxTurnsRaw) < 1)
     ) {
-      errors.push("Max tool-use turns must be 1 or more.");
+      errors.push(translate("uxRecipestudio.maxToolUseTurns1v6qh"));
     }
     const timeoutRaw = config.timeout_sec?.trim();
     if (
@@ -242,7 +244,7 @@ export function getConfigErrors(config: NodeConfig | null): string[] {
       .map((value) => value.trim())
       .filter(Boolean);
     if (targets.length === 0) {
-      errors.push("Choose the field to check.");
+      errors.push(translate("uxRecipestudio.chooseTheFieldTojd5m5"));
     }
     const batch = parseIntNumber(config.batch_size);
     if (batch === null || batch < 1) {
@@ -252,22 +254,22 @@ export function getConfigErrors(config: NodeConfig | null): string[] {
       return errors;
     }
     if (!config.code_lang.trim()) {
-      errors.push("Choose a code language for this check.");
+      errors.push(translate("uxRecipestudio.chooseACodeLanguage9uhf5"));
     } else if (config.validator_type === "oxc") {
       if (!VALIDATOR_OXC_CODE_LANGS.includes(config.code_lang)) {
         errors.push("This JS/TS check only supports JavaScript or TypeScript.");
       }
       if (!isOxcValidationMode(config.oxc_validation_mode)) {
-        errors.push("Choose whether to check syntax, lint rules, or both.");
+        errors.push(translate("uxRecipestudio.chooseWhetherToCheckqvl5q"));
       }
       if (!isOxcCodeShape(config.oxc_code_shape)) {
-        errors.push("Choose whether this code is a full file or a snippet.");
+        errors.push(translate("uxRecipestudio.chooseWhetherThisCode9xw19"));
       }
     } else if (
       config.code_lang !== "python" &&
       !VALIDATOR_SQL_CODE_LANGS.includes(config.code_lang)
     ) {
-      errors.push("This check supports Python or SQL.");
+      errors.push(translate("uxRecipestudio.thisCheckSupportsPython0llna"));
     }
   }
   if (config.kind === "seed") {
@@ -278,7 +280,7 @@ export function getConfigErrors(config: NodeConfig | null): string[] {
         .map((repo) => repo.trim())
         .filter(Boolean);
       if (repos.length === 0) {
-        errors.push("Add at least one GitHub repository.");
+        errors.push(translate("uxRecipestudio.addAtLeastOney5zbm"));
       }
       if (
         repos.some((repo) => {
@@ -292,20 +294,20 @@ export function getConfigErrors(config: NodeConfig | null): string[] {
         ? config.github_item_types
         : ["issues", "pulls"];
       if (itemTypes.length === 0) {
-        errors.push("Choose at least one GitHub item type.");
+        errors.push(translate("uxRecipestudio.chooseAtLeastOne6ovs8"));
       } else if (itemTypes.some((itemType) => !GITHUB_ITEM_TYPES.has(itemType))) {
-        errors.push("GitHub item types must be issues, pulls, or commits.");
+        errors.push(translate("uxRecipestudio.gitHubItemTypesMustx7c1r"));
       }
       const limit = parseIntNumber(config.github_limit ?? "100");
       if (limit === null || limit < 1 || limit > 5000) {
-        errors.push("Items per repo must be an integer from 1 to 5000.");
+        errors.push(translate("uxRecipestudio.itemsPerRepoMustcyemv"));
       }
       const maxComments = parseIntNumber(config.github_max_comments_per_item ?? "30");
       if (maxComments === null || maxComments < 0 || maxComments > 200) {
-        errors.push("Max comments per item must be an integer from 0 to 200.");
+        errors.push(translate("uxRecipestudio.maxCommentsPerItemmico3"));
       }
     } else if (seedSourceType === "hf" && !config.hf_repo_id.trim()) {
-      errors.push("Choose a Hugging Face dataset.");
+      errors.push(translate("uxRecipestudio.chooseAHuggingFacebdbff"));
     }
     if (seedSourceType !== "github_repo") {
       const hasPath =
@@ -313,7 +315,7 @@ export function getConfigErrors(config: NodeConfig | null): string[] {
           ? (config.resolved_paths?.length ?? 0) > 0
           : Boolean(config.hf_path.trim());
       if (!hasPath) {
-        errors.push("Load the source-data preview first.");
+        errors.push(translate("uxRecipestudio.loadTheSourceData17g23"));
       }
     }
     if (
@@ -321,11 +323,11 @@ export function getConfigErrors(config: NodeConfig | null): string[] {
       config.hf_endpoint?.trim() &&
       !config.hf_endpoint.trim().startsWith("http")
     ) {
-      errors.push("HF endpoint must start with http.");
+      errors.push(translate("uxRecipestudio.hFEndpointMustStarte5n86"));
     }
     if (seedSourceType === "unstructured") {
       if (config.drop && (config.seed_columns?.length ?? 0) === 0) {
-        errors.push("Load the available fields before hiding any from the final dataset.");
+        errors.push(translate("uxRecipestudio.loadTheAvailableFieldskk4fb"));
       }
       const chunkSizeRaw = Number(config.unstructured_chunk_size);
       const chunkOverlapRaw = Number(config.unstructured_chunk_overlap);
@@ -340,14 +342,14 @@ export function getConfigErrors(config: NodeConfig | null): string[] {
         Number.isFinite(chunkOverlapRaw) &&
         Math.floor(chunkOverlapRaw) >= Math.floor(chunkSizeRaw)
       ) {
-        errors.push("Chunk overlap must be less than chunk size.");
+        errors.push(translate("uxRecipestudio.chunkOverlapMustBee7mch"));
       }
     } else if (seedSourceType !== "github_repo") {
       const selectedDropColumns = (config.seed_drop_columns ?? [])
         .map((value) => value.trim())
         .filter(Boolean);
       if (selectedDropColumns.length > 0 && (config.seed_columns?.length ?? 0) === 0) {
-        errors.push("Load the available fields before hiding any from the final dataset.");
+        errors.push(translate("uxRecipestudio.loadTheAvailableFieldskk4fb"));
       }
     }
 

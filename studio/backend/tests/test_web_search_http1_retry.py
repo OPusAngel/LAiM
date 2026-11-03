@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
-"""ddgs requests replay once over HTTP/1.1 after a connection reset (LAiMai/LAiM#12638)."""
+"""ddgs requests replay once over HTTP/1.1 after a connection reset (OPusAngel/LAiM#12638)."""
 
 from __future__ import annotations
 

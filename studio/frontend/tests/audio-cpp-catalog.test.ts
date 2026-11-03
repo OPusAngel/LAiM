@@ -82,12 +82,7 @@ import {
   withSttVariant,
 } from "../src/features/settings/stores/stt-model-catalog.ts";
 
-import {
-  installLocalStorageFake,
-  readSrc,
-  readText,
-  registerBundlerResolver,
-} from "./helpers/kit.ts";
+import { installLocalStorageFake, readSrc, readSrcExpanded, readText, registerBundlerResolver } from "./helpers/kit.ts";
 import { readAudioWorkspaceSource } from "./helpers/audio-workspace.ts";
 
 registerBundlerResolver();
@@ -140,7 +135,7 @@ test("recommended ids are unique and name their Hub repo or package folder", () 
   assert.equal(audioCppDisplayName(`${ACE_STEP}/turbo`), "ACE-Step1.5-GGUF");
   assert.equal(isAudioCppFolderId(AUDIO_CPP_REPO), false);
   assert.equal(isAudioCppFolderId(`${AUDIO_CPP_REPO}/`), false);
-  assert.equal(isAudioCppFolderId("LAiMai/Qwen3-ASR-0.6B-GGUF"), false);
+  assert.equal(isAudioCppFolderId("unslothai/Qwen3-ASR-0.6B-GGUF"), false);
   assert.equal(
     audioCppHubPath(`${AUDIO_CPP_REPO}/Qwen3-TTS-12Hz-0.6B-Base-GGUF`),
     `${AUDIO_CPP_REPO}/tree/main/Qwen3-TTS-12Hz-0.6B-Base-GGUF`,
@@ -151,7 +146,7 @@ test("recommended ids are unique and name their Hub repo or package folder", () 
   );
   assert.equal(audioCppHubPath(AUDIO_CPP_REPO), null);
   assert.equal(audioCppHubPath(MINIMAX_GGUF), null);
-  assert.equal(audioCppHubPath("LAiM/Qwen3-8B-GGUF"), null);
+  assert.equal(audioCppHubPath("unsloth/Qwen3-8B-GGUF"), null);
   assert.equal(audioCppModelFor("OpenMOSS-Team/MOSS-TTS-Nano-100M"), null);
   assert.equal(audioCppModelFor(""), null);
   assert.equal(audioCppSizeLabel(57.6 * 1024 * 1024), "58 MB");
@@ -203,8 +198,8 @@ test("recommended models are plain GGUF Audio rows named as on the Hub", () => {
   }
   // The folder ids do not steal the owner/name rows they resemble.
   assert.equal(
-    groupForRepoId("LAiMai/Qwen3-ASR-0.6B-GGUF", AUDIO_CATALOG)?.canonicalId,
-    "LAiMai/Qwen3-ASR-0.6B-GGUF",
+    groupForRepoId("unslothai/Qwen3-ASR-0.6B-GGUF", AUDIO_CATALOG)?.canonicalId,
+    "unslothai/Qwen3-ASR-0.6B-GGUF",
   );
   assert.equal(groupForRepoId(AUDIO_CPP_REPO, AUDIO_CATALOG), null);
   for (const host of ["unknown", "gguf-only", "accelerated", "dense-quant"] as const) {
@@ -230,7 +225,7 @@ test("a GGUF suffix is kept only where the name does not already say GGUF", () =
 });
 
 test("a hub GGUF named like a bundled folder does not read as its twin", () => {
-  const hub = curatedRowLabelFor("LAiMai/Qwen3-ASR-0.6B-GGUF", AUDIO_CATALOG);
+  const hub = curatedRowLabelFor("unslothai/Qwen3-ASR-0.6B-GGUF", AUDIO_CATALOG);
   const folder = curatedRowLabelFor(QWEN_ASR, AUDIO_CATALOG);
   assert.equal(hub?.name, folder?.name);
   assert.notDeepEqual(hub, folder);
@@ -238,7 +233,7 @@ test("a hub GGUF named like a bundled folder does not read as its twin", () => {
   assert.deepEqual(folder?.tags, []);
   // A GGUF with no twin keeps a bare row.
   assert.deepEqual(curatedRowLabelFor(KOKORO, AUDIO_CATALOG)?.tags, []);
-  assert.deepEqual(curatedRowLabelFor("LAiM/Z-Image-Turbo-GGUF", IMAGE_CATALOG)?.tags, []);
+  assert.deepEqual(curatedRowLabelFor("unsloth/Z-Image-Turbo-GGUF", IMAGE_CATALOG)?.tags, []);
 });
 
 test("voice conversion models are seeded with the pages they run on", () => {
@@ -412,9 +407,9 @@ test("ASR repos and folders run on the audiocpp engine; saved keys still resolve
   assert.equal(sttEngineForRepoId("audiocpp-moonshine-small"), "audiocpp");
   assert.equal(isKnownSttArtifactRepoId(KOKORO), false);
   // The curated Whisper and Qwen3-ASR GGUFs keep their own engines and keys.
-  assert.equal(sttEngineForRepoId("LAiMai/Qwen3-ASR-0.6B-GGUF"), "mtmd");
-  assert.equal(sttEngineForRepoId("LAiMai/whisper-small-GGUF"), "gguf");
-  assert.equal(sttRepoIdForSidecarKey("qwen3-asr-0.6b", "mtmd"), "LAiMai/Qwen3-ASR-0.6B-GGUF");
+  assert.equal(sttEngineForRepoId("unslothai/Qwen3-ASR-0.6B-GGUF"), "mtmd");
+  assert.equal(sttEngineForRepoId("unslothai/whisper-small-GGUF"), "gguf");
+  assert.equal(sttRepoIdForSidecarKey("qwen3-asr-0.6b", "mtmd"), "unslothai/Qwen3-ASR-0.6B-GGUF");
 });
 
 test("audiocpp status blocks feed downloads and residency, by key or by id", () => {
@@ -458,7 +453,7 @@ test("dictation settings list the saved keys by their Hub name", () => {
   }
   assert.equal(sttModelName("audiocpp-qwen3-asr-0.6b"), "Qwen3-ASR-0.6B-GGUF");
   assert.equal(sttModelName("audiocpp-moonshine-tiny"), "Moonshine-Streaming-GGUF (tiny)");
-  const voiceTab = readSrc("features/settings/tabs/voice-tab.tsx");
+  const voiceTab = readSrcExpanded("features/settings/tabs/voice-tab.tsx");
   assert.match(
     voiceTab,
     /if \(AUDIO_CPP_STT_MODELS\.has\(model\) \|\| isAudioCppFolderId\(model\)\) \{\s*return sttModelName\(model\);/,
@@ -532,7 +527,7 @@ test("Transcribe's other ASR folders are listed by id, after the keyed models", 
     `${AUDIO_CPP_REPO}/VibeVoice-ASR-GGUF`,
     `${AUDIO_CPP_REPO}/Voxtral-Mini-4B-Realtime-2602-GGUF`,
   ]);
-  const voiceTab = readSrc("features/settings/tabs/voice-tab.tsx");
+  const voiceTab = readSrcExpanded("features/settings/tabs/voice-tab.tsx");
   assert.match(
     voiceTab,
     /STT_PICKER_MODELS\.filter\(\(model\) =>\s*isSttModelLanguageCompatible\(model, language\)/,
@@ -548,7 +543,7 @@ test("Transcribe's other ASR folders are listed by id, after the keyed models", 
 });
 
 test("an Audio-page ASR pick sends its quant; other engines and saved keys send none", () => {
-  const adapter = readSrc("features/chat/adapters/studio-model-dictation-adapter.ts");
+  const adapter = readSrcExpanded("features/chat/adapters/studio-model-dictation-adapter.ts");
   assert.match(
     adapter,
     /return engine === "audiocpp" && ggufVariant\s*\?[\s\S]*\{ gguf_variant: ggufVariant \}\s*:\s*\{\};/,
@@ -573,7 +568,7 @@ test("an Audio-page ASR pick sends its quant; other engines and saved keys send 
     /trackSttDownload\(sidecarKey, \{[\s\S]*ggufVariant,[\s\S]*downloadId: download\.download_id,[\s\S]*\}\)/,
   );
   // Settings > Voice sends its saved quant only for package folders.
-  const voiceTab = readSrc("features/settings/tabs/voice-tab.tsx");
+  const voiceTab = readSrcExpanded("features/settings/tabs/voice-tab.tsx");
   assert.match(
     voiceTab,
     /await startSttDownload\(\s*sttModel,\s*hfApiToken\(hfToken\),\s*undefined,\s*sttVariant,\s*\);/,
@@ -600,7 +595,7 @@ test("only a package folder row runs a saved quant; saved keys and other engines
 });
 
 test("the saved quant is cleared with its model and rehydrated only beside it", () => {
-  const store = readSrc("features/settings/stores/voice-settings-store.ts");
+  const store = readSrcExpanded("features/settings/stores/voice-settings-store.ts");
   assert.match(
     store,
     /return sttModel === state\.sttModel\s*\?\s*\{ sttModel \}\s*:\s*\{ sttModel, sttGgufVariant: "" \};/,
@@ -613,7 +608,7 @@ test("the saved quant is cleared with its model and rehydrated only beside it", 
 });
 
 test("every Settings dictation path carries the saved quant", () => {
-  const adapter = readSrc("features/chat/adapters/studio-model-dictation-adapter.ts");
+  const adapter = readSrcExpanded("features/chat/adapters/studio-model-dictation-adapter.ts");
   // a raw transcription folds the quant into the id so a cold sidecar does not load the default.
   assert.match(
     adapter,
@@ -625,7 +620,7 @@ test("every Settings dictation path carries the saved quant", () => {
   assert.match(adapter, /ggufVariant: sessionVariant,/);
   assert.match(adapter, /sessionEngine,\s*undefined,\s*undefined,\s*sessionVariant,/);
 
-  const voiceTab = readSrc("features/settings/tabs/voice-tab.tsx");
+  const voiceTab = readSrcExpanded("features/settings/tabs/voice-tab.tsx");
   assert.match(voiceTab, /await loadSttModel\(sttModel, undefined, undefined, undefined, sttVariant\);/);
   assert.match(voiceTab, /void autoLoadSttModel\(sttModel, sttVariant\);/);
   // ready requires the pinned quant to be resident, not merely its row.
@@ -641,17 +636,17 @@ test("every Settings dictation path carries the saved quant", () => {
   assert.match(voiceTab, /<SelectValue placeholder=\{shownSttLabel\}>/);
 
   // the prompt fetches the requester's pin, not the current Voice setting.
-  const prompt = readSrc("features/settings/components/stt-download-prompt.tsx");
+  const prompt = readSrcExpanded("features/settings/components/stt-download-prompt.tsx");
   assert.match(prompt, /hfApiToken\(hfToken\),\s*undefined,\s*request\.ggufVariant,/);
   assert.match(prompt, /const variant = pending\?\.ggufVariant \?\? null;/);
   assert.doesNotMatch(prompt, /sttGgufVariant/);
   assert.match(prompt, /candidate\.quant === \(variant \?\? listing\.default_variant\)/);
   assert.match(adapter, /requestSttDownload\(sessionModel, \{ ggufVariant: sessionVariant \}\)/);
-  const offer = readSrc("features/chat/adapters/studio-dictation-adapter.tsx");
+  const offer = readSrcExpanded("features/chat/adapters/studio-dictation-adapter.tsx");
   assert.match(offer, /const ggufVariant = sttModelVariant\(sttModel, sttGgufVariant\);/);
   assert.match(offer, /requestSttDownload\(sttModel, \{ selectLocalEngine: true, ggufVariant \}\)/);
 
-  const mirror = readSrc("features/settings/lib/stt-download-mirror.ts");
+  const mirror = readSrcExpanded("features/settings/lib/stt-download-mirror.ts");
   // a stopped second-quant download must not look complete because its row is already listed.
   const cancelledAt = mirror.indexOf("download?.cancelled && (download.cancelled_model ?? model) === model");
   const erroredAt = mirror.indexOf("if (download?.error)");
@@ -680,7 +675,7 @@ test("every Settings dictation path carries the saved quant", () => {
   assert.match(mirror, /sttModelVariant\(model, sttGgufVariant\)/);
   assert.match(mirror, /outcome === "complete" && isAudioCppFolderId\(model\)[\s\S]*invalidateGgufVariantsCache\(model\)/);
 
-  const upload = readSrc("features/chat/hooks/use-chat-audio-upload.ts");
+  const upload = readSrcExpanded("features/chat/hooks/use-chat-audio-upload.ts");
   assert.match(upload, /ggufVariant: sttModelVariant\(model\.trim\(\), ggufVariant\),/);
   assert.match(upload, /ggufVariant: source\.ggufVariant,/);
   for (const holder of ["target", "source", "failed\\.snapshot"]) {
@@ -699,19 +694,19 @@ test("every Settings dictation path carries the saved quant", () => {
     /engine\?\.downloaded_models\.includes\(sttModel\) &&\s*\(await sttQuantDownloaded\(sttModel, ggufVariant\)\)/,
   );
 
-  const reference = readSrc("features/audio/hooks/use-reference-transcribe.ts");
+  const reference = readSrcExpanded("features/audio/hooks/use-reference-transcribe.ts");
   assert.match(reference, /withSttVariant\(model, voice\.sttGgufVariant\)/);
 });
 
 test("the quant Select appears for package folders with more than one quant", () => {
-  const voiceTab = readSrc("features/settings/tabs/voice-tab.tsx");
+  const voiceTab = readSrcExpanded("features/settings/tabs/voice-tab.tsx");
   assert.match(voiceTab, /\{sttVariants\.length > 1 \? \([\s\S]{0,200}?<Select\s/);
   assert.match(voiceTab, /if \(!isLocalEngine \|\| !isAudioCppFolderId\(sttModel\)\) return;/);
   assert.match(voiceTab, /aria-label=\{t\("settings\.voice\.dictation\.sttQuantLabel"\)\}/);
 });
 
 test("sttEngineFor sends saved keys, folders and GGUF repos to the audiocpp engine", () => {
-  const adapter = readSrc("features/chat/adapters/studio-model-dictation-adapter.ts");
+  const adapter = readSrcExpanded("features/chat/adapters/studio-model-dictation-adapter.ts");
   assert.match(adapter, /AUDIO_CPP_STT_MODELS\.has\(id\) \|\|\s*isAudioCppFolderId\(id\)/);
   assert.match(adapter, /if \(engine === "audiocpp"\) return status\.audiocpp;/);
 });
@@ -827,9 +822,9 @@ test("pickers, toasts, downloads and loaded models show no engine name", () => {
   assert.equal(shortModelLabel(KOKORO), "Kokoro-82M-GGUF");
   assert.equal(shortModelLabel("audiocpp-qwen3-asr-0.6b"), "Qwen3-ASR-0.6B-GGUF");
   assert.equal(shortModelLabel(MINIMAX_GGUF), MINIMAX_GGUF);
-  const sources = readSrc("features/loaded-models/loaded-models-sources.ts");
+  const sources = readSrcExpanded("features/loaded-models/loaded-models-sources.ts");
   assert.match(sources, /audiocpp: "GGUF"/);
-  const panel = readSrc("features/hub/download-manager/download-manager-panel.tsx");
+  const panel = readSrcExpanded("features/hub/download-manager/download-manager-panel.tsx");
   assert.match(panel, /isAudioCppFolderId\(repoId\) \? audioCppDisplayName\(repoId\) : repoId/);
   assert.match(panel, /\{job\.presentation\?\.label \?\? repoLabel\(job\.repoId\)\}/);
 });
@@ -837,7 +832,7 @@ test("pickers, toasts, downloads and loaded models show no engine name", () => {
 test("an Audio GGUF pick downloads its quant as the standard variant job", () => {
   const page = readAudioWorkspaceSource();
   assert.match(page, /ggufVariant: meta\.ggufVariant,/);
-  const staged = readSrc("features/hub/download-manager/use-staged-download.ts");
+  const staged = readSrcExpanded("features/hub/download-manager/use-staged-download.ts");
   assert.match(staged, /current\.ggufVariant \?\? scopedVariant\(scopeId\)/);
   assert.match(staged, /variant: current\.ggufVariant,/);
 });
@@ -915,7 +910,7 @@ test("YuE2 generates from a style description alone; other music still needs lyr
 });
 
 test("a custom GGUF dictation repo skips the Whisper-only validator", () => {
-  const tab = readSrc("features/settings/tabs/voice-tab.tsx");
+  const tab = readSrcExpanded("features/settings/tabs/voice-tab.tsx");
   assert.match(tab, /!isCuratedSttModel\(model\) && sttEngineFor\(model\) !== "audiocpp"/);
 });
 
@@ -955,7 +950,7 @@ test("the quant Select shows the quant a dictation would actually run", () => {
   assert.equal(sttShownVariant(null, "Q8_0", moonshine), "small/Q8_0");
   // without a listing, use the resident quant.
   assert.equal(sttShownVariant(null, "Q8_0", null), "Q8_0");
-  const voiceTab = readSrc("features/settings/tabs/voice-tab.tsx");
+  const voiceTab = readSrcExpanded("features/settings/tabs/voice-tab.tsx");
   assert.match(voiceTab, /const shownSttVariant = sttShownVariant\(\s*sttVariant,\s*sttLoadedVariant,/);
 });
 

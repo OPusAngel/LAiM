@@ -10,6 +10,8 @@ import {
   readNumberString,
   readString,
 } from "../helpers";
+import { translate } from "@/i18n";
+
 
 const SAMPLER_TYPES: SamplerType[] = [
   "category",
@@ -92,7 +94,7 @@ export function parseSampler(
   const drop = column.drop === true;
   const samplerType = readString(column.sampler_type);
   if (!samplerType || !SAMPLER_TYPES.includes(samplerType as SamplerType)) {
-    errors.push(`Sampler ${name}: unsupported sampler_type.`);
+    errors.push(translate("uxRecipestudio.samplerUnsupportedSamplerType44nw6", { p1: name }));
     return null;
   }
   const convertTo = readString(column.convert_to);

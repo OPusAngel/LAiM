@@ -185,7 +185,7 @@ def test_a_streamed_upload_is_refused():
     "path",
     [
         "/api/auth/api-keys",
-        "/api/settings/sandbox",
+        "/api/settings/workdir",
         "/api/settings/mcp-access",
         "/api/hub/token",
         "/mcp/",

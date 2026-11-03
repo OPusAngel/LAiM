@@ -1,8 +1,14 @@
 ﻿// SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { useVllmAvailable, useVllmPlatform } from "@/features/model-picker";
 import { useHfEndpoint, useHubName } from "@/lib/hf-endpoint";
+import {
+  HF_SOURCE_OWNER,
+  displayOwnerLabel,
+  isHfFirstPartyOwner,
+} from "@/config/hub-source";
 import {
   Tooltip,
   TooltipContent,
@@ -99,7 +105,7 @@ function ViewRepositoryButton({
             href={url}
             target="_blank"
             rel="noopener noreferrer"
-            aria-label="View repository"
+            aria-label={translate("uxHub.viewRepository5rvpm")}
             className={cn(baseClass, "hover:bg-muted hover:text-foreground")}
             onClick={(event) => {
               event.stopPropagation();
@@ -112,7 +118,7 @@ function ViewRepositoryButton({
           </a>
         ) : (
           <span
-            aria-label="View repository unavailable offline"
+            aria-label={translate("uxHub.viewRepositoryUnavailableOffline1dlhs")}
             aria-disabled="true"
             className={cn(baseClass, "cursor-not-allowed opacity-45")}
           >
@@ -121,7 +127,7 @@ function ViewRepositoryButton({
         )}
       </TooltipTrigger>
       <TooltipContent side="bottom" className="tooltip-compact">
-        {online ? `Open on ${hubName}` : "Unavailable offline"}
+        {online ? translate("uxHub.openOnt4j8p", { p1: hubName }) : translate("uxHub.unavailableOffline5tet5")}
       </TooltipContent>
     </Tooltip>
   );
@@ -141,7 +147,7 @@ function CopyRepoButton({ repoId }: { repoId: string }) {
       <TooltipTrigger asChild={true}>
         <button
           type="button"
-          aria-label="Copy repository ID"
+          aria-label={translate("uxHub.copyRepositoryIDeg5l5")}
           onClick={handleCopy}
           className="inline-flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
@@ -266,7 +272,7 @@ function BaseModelSearchChip({
         )}
       </TooltipTrigger>
       <TooltipContent side="bottom" className="tooltip-compact">
-        Search this base model in Hub
+        {translate("uxHub.searchThisBaseModelrjz08")}
       </TooltipContent>
     </Tooltip>
   );
@@ -308,17 +314,17 @@ function ModelStatusChips({
     : "success";
   const vramLabel = vramInfo
     ? vramInfo.status === "exceeds"
-      ? `Over VRAM budget · ~${vramInfo.est} GB`
+      ? translate("uxHub.overVRAMBudgetGB7onz2", { p1: vramInfo.est })
       : vramInfo.status === "tight"
-        ? `Tight fit · ~${vramInfo.est} GB`
-        : `Likely fits · ~${vramInfo.est} GB`
+        ? translate("uxHub.tightFitGB394wm", { p1: vramInfo.est })
+        : translate("uxHub.likelyFitsGBenmrz", { p1: vramInfo.est })
     : "";
   const vramDetail = vramInfo
     ? vramInfo.status === "exceeds"
-      ? "A 4-bit load is likely to exceed the current GPU budget. Higher-precision loads need even more."
+      ? translate("uxHub.a4BitLoadn7do4")
       : vramInfo.status === "tight"
-        ? "A 4-bit load should fit, with limited headroom for context and activations."
-        : "A 4-bit load should fit comfortably on the current GPU."
+        ? translate("uxHub.a4BitLoadmgaom")
+        : translate("uxHub.a4BitLoadzchyc")
     : "";
 
   return (
@@ -327,7 +333,7 @@ function ModelStatusChips({
         <Tooltip>
           <TooltipTrigger asChild={true}>
             <span tabIndex={0} className="inline-flex outline-none">
-              <StatusChip tone="danger" label="May not be supported" />
+              <StatusChip tone="danger" label={translate("uxHub.mayNotBeSupportedwg104")} />
             </span>
           </TooltipTrigger>
           <TooltipContent
@@ -342,7 +348,7 @@ function ModelStatusChips({
               </span>
             )}
             <span className="mt-1 block text-ui-10p5 font-normal text-[#f9e2de]/75">
-              Still downloadable to your Hugging Face cache.
+              {translate("uxHub.stillDownloadableToYour17tew")}
             </span>
           </TooltipContent>
         </Tooltip>
@@ -351,7 +357,7 @@ function ModelStatusChips({
         <Tooltip>
           <TooltipTrigger asChild={true}>
             <span tabIndex={0} className="inline-flex outline-none">
-              <StatusChip tone="warning" label="Requires vLLM" />
+              <StatusChip tone="warning" label={translate("uxHub.requiresVLLM76l5s")} />
             </span>
           </TooltipTrigger>
           <TooltipContent
@@ -374,7 +380,7 @@ function ModelStatusChips({
         <Tooltip>
           <TooltipTrigger asChild={true}>
             <span tabIndex={0} className="inline-flex outline-none">
-              <StatusChip tone="warning" label="GGUF-only device" />
+              <StatusChip tone="warning" label={translate("uxHub.gGUFOnlyDevice1xcr7")} />
             </span>
           </TooltipTrigger>
           <TooltipContent
@@ -382,10 +388,9 @@ function ModelStatusChips({
             sideOffset={6}
             className="tooltip-compact max-w-xs"
           >
-            This device has no supported GPU or usable MLX, so only GGUF models
-            can run here.
+            {translate("uxCopy.thisDeviceHasNooli20")}
             <span className="mt-1 block text-ui-10p5 font-normal text-[#f9e2de]/75">
-              Still downloadable to your Hugging Face cache.
+              {translate("uxHub.stillDownloadableToYour17tew")}
             </span>
           </TooltipContent>
         </Tooltip>
@@ -401,9 +406,7 @@ function ModelStatusChips({
             side="bottom"
             sideOffset={6}
             className="tooltip-compact max-w-xs"
-          >
-            Estimated 4-bit memory load is around {vramInfo.est} GB.
-            <span className="mt-1 block text-ui-10p5 font-normal text-[#f9e2de]/75">
+          >{translate("uxHub.estimated4BitMemoryylbrt", { p1: vramInfo.est })}<span className="mt-1 block text-ui-10p5 font-normal text-[#f9e2de]/75">
               {vramDetail}
             </span>
           </TooltipContent>
@@ -544,13 +547,11 @@ export const ModelInspector = memo(function ModelInspector({
           <HugeiconsIcon icon={CubeIcon} strokeWidth={1.5} className="size-5" />
         </div>
         <div className="space-y-1">
-          <p className="text-ui-15 font-semibold tracking-tight text-foreground">
-            Select a {isDataset ? "dataset" : "model"}
-          </p>
+          <p className="text-ui-15 font-semibold tracking-tight text-foreground">{translate("uxHub.selectA0soep", { p1: isDataset ? "dataset" : "model" })}</p>
           <p className="max-w-sm text-ui-12p5 leading-5 text-muted-foreground">
             {isDataset
-              ? "Choose a dataset from the catalog to inspect its download state and details."
-              : "Choose an item from the catalog to inspect its hardware fit, download state, and model card."}
+              ? translate("uxHub.chooseADatasetFromd8mrw")
+              : translate("uxHub.chooseAnItemFrom2m6jw")}
           </p>
         </div>
       </div>
@@ -561,7 +562,7 @@ export const ModelInspector = memo(function ModelInspector({
   const updatedRaw = model.updatedAt
     ? formatRelativeShort(model.updatedAt)
     : formatLocalUpdated(model.localUpdatedAt);
-  const updatedLabel = updatedRaw === "Unknown update" ? "N/A" : updatedRaw;
+  const updatedLabel = updatedRaw === translate("uxHub.unknownUpdatem6hpa") ? "N/A" : updatedRaw;
   const createdLabel = model.createdAt
     ? formatShortDate(model.createdAt)
     : null;
@@ -570,10 +571,8 @@ export const ModelInspector = memo(function ModelInspector({
   const downloadsTooltip =
     model.downloadsAllTime != null ? (
       <>
-        Downloads (30 days)
-        <span className="mt-1 block text-ui-10p5 font-normal text-[#f9e2de]/75">
-          {formatCompact(model.downloadsAllTime)} all time
-        </span>
+        {translate("uxHub.downloads30Days1o980")}
+        <span className="mt-1 block text-ui-10p5 font-normal text-[#f9e2de]/75">{translate("uxHub.allTimef8smr", { p1: formatCompact(model.downloadsAllTime) })}</span>
       </>
     ) : (
       "Downloads"
@@ -648,10 +647,10 @@ export const ModelInspector = memo(function ModelInspector({
               )}
             </div>
             <div className="mt-0.5 flex min-w-0 items-center gap-1 text-ui-15 leading-ui-24 text-muted-foreground">
-              <span className="truncate">{model.owner}</span>
-              {model.owner.toLowerCase() === "LAiM" && (
+              <span className="truncate">{displayOwnerLabel(model.owner)}</span>
+              {isHfFirstPartyOwner(model.owner) && (
                 <span
-                  aria-label="Verified LAiM"
+                  aria-label={translate("uxHub.verifiedLAiMqmy0j")}
                   className="hub-verified-badge size-[calc(18px*var(--ui-space-scale,1))] shrink-0 text-verified"
                 />
               )}
@@ -662,7 +661,7 @@ export const ModelInspector = memo(function ModelInspector({
         <div className="mt-4 flex flex-wrap items-center gap-1.5">
           {isDataset && (
             <span className="inline-flex shrink-0 items-center rounded-full border border-violet-500/40 bg-transparent px-2 py-0.5 text-ui-11p5 font-medium text-violet-600 dark:text-violet-400">
-              Dataset
+              {translate("studio.wizard.datasetTitle")}
             </span>
           )}
           {!isDataset && (
@@ -680,8 +679,8 @@ export const ModelInspector = memo(function ModelInspector({
               {taskLabel}
             </span>
           )}
-          {model.private && <AccessChip label="Private" />}
-          {gatedAccess && <AccessChip label="Gated" />}
+          {model.private && <AccessChip label={translate("uxHub.private1lqvc")} />}
+          {gatedAccess && <AccessChip label={translate("uxHub.gatedny2st")} />}
           {model.capabilities.map((capability) => (
             <CapabilityPill key={capability.key} capability={capability} />
           ))}
@@ -748,7 +747,7 @@ export const ModelInspector = memo(function ModelInspector({
               unsupportedReason={
                 LAiMSupport.status === "unsupported" &&
                 !LAiMSupport.supportedIn
-                  ? (LAiMSupport.reason ?? "Unsupported format")
+                  ? (LAiMSupport.reason ?? translate("uxHub.unsupportedFormats7l99"))
                   : null
               }
               onRun={runAction}
@@ -788,26 +787,25 @@ export const ModelInspector = memo(function ModelInspector({
       <div className="pb-5 pt-5">
         {selectionHiddenByFilters && (
           <p className="mb-3 rounded-[8px] border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-ui-11p5 leading-snug text-muted-foreground">
-            Current selection is hidden by the active filters or search.
+            {translate("uxHub.currentSelectionIsHidden16muy")}
           </p>
         )}
         {metadataUnavailable && (
           <p className="mb-3 text-ui-11p5 leading-snug text-muted-foreground">
-            Couldn't load full details from Hugging Face. Some fields may be
-            incomplete.
+            {translate("uxCopy.couldnTLoadFull1exc7")}
           </p>
         )}
         <StatGrid>
-          <StatRow label="Updated" value={updatedLabel} icon={Calendar03Icon} />
+          <StatRow label={translate("settings.data.library.updated")} value={updatedLabel} icon={Calendar03Icon} />
           {createdLabel && (
             <StatRow
-              label="Created"
+              label={translate("settings.accounts.created")}
               value={createdLabel}
               icon={CalendarAdd01Icon}
             />
           )}
           <StatRow
-            label="Downloads"
+            label={translate("browser.agentSettings.downloads")}
             tooltip={downloadsTooltip}
             value={
               model.downloads !== undefined
@@ -817,32 +815,32 @@ export const ModelInspector = memo(function ModelInspector({
             icon={Download01Icon}
           />
           <StatRow
-            label="Likes"
+            label={translate("uxHub.likes1aslz")}
             value={
               model.likes !== undefined ? formatCompact(model.likes) : "N/A"
             }
             icon={FavouriteIcon}
           />
           {!isDataset && (
-            <StatRow label="Parameters" value={paramsLabel} icon={CpuIcon} />
+            <StatRow label={translate("studio.wizard.paramsTitle")} value={paramsLabel} icon={CpuIcon} />
           )}
           {libraryLabel && (
             <StatRow
-              label="Library"
+              label={translate("shell.navigation.library")}
               value={libraryLabel}
               icon={LibrariesIcon}
             />
           )}
           {isDataset && datasetSize?.numRows != null && (
             <StatRow
-              label="Rows"
+              label={translate("studio.dataset.rows")}
               value={formatCompact(datasetSize.numRows)}
               icon={Database02Icon}
             />
           )}
           {isDataset && datasetSizeBytes != null && (
             <StatRow
-              label="Size"
+              label={translate("library.toolbar.sortSize")}
               value={formatBytes(datasetSizeBytes)}
               icon={PackageIcon}
             />
@@ -851,14 +849,14 @@ export const ModelInspector = memo(function ModelInspector({
             datasetSize?.numSplits != null &&
             datasetSize.numSplits > 0 && (
               <StatRow
-                label="Splits"
+                label={translate("uxHub.splits13y12")}
                 value={String(datasetSize.numSplits)}
                 icon={LayersLogoIcon}
               />
             )}
           {languages.length > 0 && (
             <StatRow
-              label="Languages"
+              label={translate("uxHub.languages3fqfy")}
               value={
                 languages.length > 3
                   ? `${languages.slice(0, 3).join(", ")} +${languages.length - 3}`
@@ -867,7 +865,7 @@ export const ModelInspector = memo(function ModelInspector({
               icon={InternetIcon}
             />
           )}
-          <StatRow label="License" value={licenseLabel} icon={LicenseIcon} />
+          <StatRow label={translate("settings.about.license.sectionTitle")} value={licenseLabel} icon={LicenseIcon} />
         </StatGrid>
         <ModelStatusChips
           isDataset={isDataset}

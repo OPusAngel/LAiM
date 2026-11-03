@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -55,7 +56,7 @@ export function ManagedEngineOfferDialog() {
     (engine) => ready.length === 0 || shown.includes(engine.engine),
   );
   const names = (offer?.engines ?? []).map((name) => ENGINE_NAMES[name]);
-  const displayName = modelName?.split("/").pop() || "This model";
+  const displayName = modelName?.split("/").pop() || translate("uxModelpicker.thisModela5zdv");
   const quantization =
     QUANTIZATION_NAMES[offer?.quantization ?? ""] ?? offer?.quantization;
 
@@ -75,23 +76,17 @@ export function ManagedEngineOfferDialog() {
               className="size-5 text-muted-foreground"
             />
           </AlertDialogMedia>
-          <AlertDialogTitle className="min-w-0 break-words">
-            {displayName} needs {names.join(" or ")}
-          </AlertDialogTitle>
-          <AlertDialogDescription>
-            The default engine cannot run {quantization} models.
-          </AlertDialogDescription>
+          <AlertDialogTitle className="min-w-0 break-words">{translate("uxModelpicker.needs1jut9", { p1: displayName, p2: names.join(" or ") })}</AlertDialogTitle>
+          <AlertDialogDescription>{translate("uxModelpicker.theDefaultEngineCannot0ospz", { p1: quantization })}</AlertDialogDescription>
         </AlertDialogHeader>
         {offered.length === 0 ? (
           error ? (
             // The check keeps retrying; say why it is stuck rather than spinning silently.
-            <p role="alert" className="text-center text-ui-12 text-destructive">
-              Could not check installed engines: {error}
-            </p>
+            <p role="alert" className="text-center text-ui-12 text-destructive">{translate("uxModelpicker.couldNotCheckInstalledhoslt", { p1: error })}</p>
           ) : (
             <p className="flex items-center justify-center gap-2 text-ui-12 text-muted-foreground">
               <Spinner className="size-3.5" />
-              Checking installed engines...
+              {translate("uxModelpicker.checkingInstalledEnginesh92g4")}
             </p>
           )
         ) : visible.length === 0 ? null : (
@@ -126,9 +121,7 @@ export function ManagedEngineOfferDialog() {
             <AlertDialogAction
               key={engine.engine}
               onClick={() => resolve(engine.engine)}
-            >
-              Load with {ENGINE_NAMES[engine.engine]}
-            </AlertDialogAction>
+            >{translate("uxModelpicker.loadWithjncdk", { p1: ENGINE_NAMES[engine.engine] })}</AlertDialogAction>
           ))}
         </AlertDialogFooter>
       </AlertDialogContent>

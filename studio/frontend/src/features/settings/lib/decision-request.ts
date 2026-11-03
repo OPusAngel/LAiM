@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
+
 export type DecisionType = "noul" | "choice" | "score";
 
 export const DECISION_TYPES: DecisionType[] = ["noul", "choice", "score"];
@@ -136,20 +138,19 @@ export const PRESETS: DecisionPreset[] = [
       options: [
         {
           name: "billing",
-          description:
-            "Charges, refunds, invoices, plan changes and payment methods",
+          get description() { return translate("uxSettings.chargesRefundsInvoicesPlan79f27"); },
         },
         {
           name: "technical",
-          description: "Bugs, errors, crashes, setup problems",
+          get description() { return translate("uxSettings.bugsErrorsCrashesSetuplosc8"); },
         },
         {
           name: "account",
-          description: "Sign in, password resets, two-factor, email changes",
+          get description() { return translate("uxSettings.signInPasswordResetsfd05i"); },
         },
         {
           name: "sales",
-          description: "Pricing questions, quotes, team and enterprise plans",
+          get description() { return translate("uxSettings.pricingQuestionsQuotesTeamyjw64"); },
         },
       ],
     },
@@ -166,21 +167,19 @@ export const PRESETS: DecisionPreset[] = [
       options: [
         {
           name: "safe",
-          description:
-            "Ordinary conversation, including disagreement and mild language",
+          get description() { return translate("uxSettings.ordinaryConversationIncludingDisnow63"); },
         },
         {
           name: "harassment",
-          description:
-            "Insults or threats aimed at demeaning or scaring someone",
+          get description() { return translate("uxSettings.insultsOrThreatsAimedxpnqh"); },
         },
         {
           name: "spam",
-          description: "Unsolicited ads, scams, repeated links or promotions",
+          get description() { return translate("uxSettings.unsolicitedAdsScamsRepeated54o7m"); },
         },
         {
           name: "self_harm",
-          description: "Talk of hurting oneself or of suicide",
+          get description() { return translate("uxSettings.talkOfHurtingOneself9bra4"); },
         },
       ],
     },
@@ -195,17 +194,17 @@ export const PRESETS: DecisionPreset[] = [
         "hey, can you move my dentist appointment from thursday to next monday morning?",
       instructions: "What does the user want the assistant to do?",
       options: [
-        { name: "book", description: "Make a new appointment" },
+        { name: "book", get description() { return translate("uxSettings.makeANewAppointmentia8zj"); } },
         {
           name: "reschedule",
-          description: "Move an existing appointment to a different time",
+          get description() { return translate("uxSettings.moveAnExistingAppointmentgelxt"); },
         },
-        { name: "cancel", description: "Cancel an existing appointment" },
+        { name: "cancel", get description() { return translate("uxSettings.cancelAnExistingAppointmento2gnm"); } },
         {
           name: "question",
-          description: "Ask about opening hours, prices or the location",
+          get description() { return translate("uxSettings.askAboutOpeningHourshzluu"); },
         },
-        { name: "other", description: "Anything else, including small talk" },
+        { name: "other", get description() { return translate("uxSettings.anythingElseIncludingSmallrwo6e"); } },
       ],
     },
   },

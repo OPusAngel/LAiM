@@ -53,7 +53,7 @@ def test_get_with_nothing_stored(client):
 
 def test_put_then_get_round_trips(client):
     c, store = client
-    payload = {"id": "LAiM/gemma-4-E2B-it-GGUF", "kind": "gguf", "gguf_variant": "UD-Q4_K_XL"}
+    payload = {"id": "unsloth/gemma-4-E2B-it-GGUF", "kind": "gguf", "gguf_variant": "UD-Q4_K_XL"}
     r = c.put("/last-local-model", json = payload)
     assert r.status_code == 200
     body = r.json()
@@ -71,7 +71,7 @@ def test_put_then_get_round_trips(client):
 def test_put_accepts_path_qualified_variant(client):
     c, _ = client
     variant = "quants/" + "a" * 80 + "/model-UD-Q4_K_XL-00001-of-00002.gguf"
-    payload = {"id": "LAiM/gemma-4-E2B-it-GGUF", "kind": "gguf", "gguf_variant": variant}
+    payload = {"id": "unsloth/gemma-4-E2B-it-GGUF", "kind": "gguf", "gguf_variant": variant}
     r = c.put("/last-local-model", json = payload)
     assert r.status_code == 200
     assert r.json()["gguf_variant"] == variant
@@ -79,7 +79,7 @@ def test_put_accepts_path_qualified_variant(client):
 
 def test_put_round_trips_loaded_at(client):
     c, _ = client
-    payload = {"id": "LAiM/Qwen3-4B", "kind": "model", "loaded_at": 1765432100000}
+    payload = {"id": "unsloth/Qwen3-4B", "kind": "model", "loaded_at": 1765432100000}
     r = c.put("/last-local-model", json = payload)
     assert r.status_code == 200
     assert r.json()["loaded_at"] == 1765432100000
@@ -88,12 +88,12 @@ def test_put_round_trips_loaded_at(client):
 
 def test_put_without_variant(client):
     c, _ = client
-    r = c.put("/last-local-model", json = {"id": "LAiM/Qwen3-4B", "kind": "model"})
+    r = c.put("/last-local-model", json = {"id": "unsloth/Qwen3-4B", "kind": "model"})
     assert r.status_code == 200
     body = r.json()
     body.pop("server_now")
     assert body == {
-        "id": "LAiM/Qwen3-4B",
+        "id": "unsloth/Qwen3-4B",
         "kind": "model",
         "gguf_variant": None,
         "loaded_at": None,
@@ -102,9 +102,9 @@ def test_put_without_variant(client):
 
 def test_put_ignores_stale_timestamped_write(client):
     c, _ = client
-    newer = {"id": "LAiM/Qwen3-4B", "kind": "model", "loaded_at": 2000}
+    newer = {"id": "unsloth/Qwen3-4B", "kind": "model", "loaded_at": 2000}
     stale = {
-        "id": "LAiM/gemma-4-E2B-it-GGUF",
+        "id": "unsloth/gemma-4-E2B-it-GGUF",
         "kind": "gguf",
         "gguf_variant": "UD-Q4_K_XL",
         "loaded_at": 1000,
@@ -112,19 +112,19 @@ def test_put_ignores_stale_timestamped_write(client):
     assert c.put("/last-local-model", json = newer).status_code == 200
     r = c.put("/last-local-model", json = stale)
     assert r.status_code == 200
-    assert r.json()["id"] == "LAiM/Qwen3-4B"
+    assert r.json()["id"] == "unsloth/Qwen3-4B"
     assert c.get("/last-local-model").json()["loaded_at"] == 2000
 
 
 def test_put_unstamped_write_keeps_last_write_wins(client):
     c, _ = client
-    stamped = {"id": "LAiM/Qwen3-4B", "kind": "model", "loaded_at": 2000}
+    stamped = {"id": "unsloth/Qwen3-4B", "kind": "model", "loaded_at": 2000}
     assert c.put("/last-local-model", json = stamped).status_code == 200
     assert (
-        c.put("/last-local-model", json = {"id": "LAiM/OLMo-4-13B", "kind": "model"}).status_code
+        c.put("/last-local-model", json = {"id": "unsloth/OLMo-4-13B", "kind": "model"}).status_code
         == 200
     )
-    assert c.get("/last-local-model").json()["id"] == "LAiM/OLMo-4-13B"
+    assert c.get("/last-local-model").json()["id"] == "unsloth/OLMo-4-13B"
 
 
 def test_put_clamps_future_dated_stamps(client):
@@ -133,7 +133,7 @@ def test_put_clamps_future_dated_stamps(client):
 
     r = c.put(
         "/last-local-model",
-        json = {"id": "LAiM/Qwen3-4B", "kind": "model", "loaded_at": 9_999_999_999_999},
+        json = {"id": "unsloth/Qwen3-4B", "kind": "model", "loaded_at": 9_999_999_999_999},
     )
     assert r.status_code == 200
     cap = int(_time.time() * 1000) + settings._LAST_LOCAL_MODEL_CLOCK_SLACK_MS
@@ -148,7 +148,7 @@ def test_put_normalizes_slow_client_clocks(client):
     assert (
         c.put(
             "/last-local-model",
-            json = {"id": "LAiM/Qwen3-4B", "kind": "model", "loaded_at": now, "client_now": now},
+            json = {"id": "unsloth/Qwen3-4B", "kind": "model", "loaded_at": now, "client_now": now},
         ).status_code
         == 200
     )
@@ -157,14 +157,14 @@ def test_put_normalizes_slow_client_clocks(client):
     r = c.put(
         "/last-local-model",
         json = {
-            "id": "LAiM/OLMo-4-13B",
+            "id": "unsloth/OLMo-4-13B",
             "kind": "model",
             "loaded_at": slow_now + 60_000,
             "client_now": slow_now,
         },
     )
     assert r.status_code == 200
-    assert c.get("/last-local-model").json()["id"] == "LAiM/OLMo-4-13B"
+    assert c.get("/last-local-model").json()["id"] == "unsloth/OLMo-4-13B"
     assert "client_now" not in store[settings._last_local_model_key("admin")]
 
 
@@ -233,18 +233,18 @@ def test_an_upgraded_install_still_sees_the_shared_row(multi_subject_client):
     its own inherits it rather than booting with nothing remembered."""
     c, store, subject = multi_subject_client
     store[settings.LAST_LOCAL_MODEL_SETTING_KEY] = {
-        "id": "LAiM/gemma-4-E2B-it-GGUF",
+        "id": "unsloth/gemma-4-E2B-it-GGUF",
         "kind": "gguf",
         "gguf_variant": "UD-Q4_K_XL",
         "loaded_at": 1000,
     }
     subject["value"] = "alice"
-    assert c.get("/last-local-model").json()["id"] == "LAiM/gemma-4-E2B-it-GGUF"
+    assert c.get("/last-local-model").json()["id"] == "unsloth/gemma-4-E2B-it-GGUF"
 
     # Once the subject writes it owns its row and stops following the shared one.
     c.put("/last-local-model", json = {"id": "alice/model", "kind": "model", "loaded_at": 2000})
     assert c.get("/last-local-model").json()["id"] == "alice/model"
-    assert store[settings.LAST_LOCAL_MODEL_SETTING_KEY]["id"] == "LAiM/gemma-4-E2B-it-GGUF"
+    assert store[settings.LAST_LOCAL_MODEL_SETTING_KEY]["id"] == "unsloth/gemma-4-E2B-it-GGUF"
 
 
 def test_subject_keys_do_not_collide(multi_subject_client):

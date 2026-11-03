@@ -182,7 +182,7 @@ def test_a_bundled_template_on_a_snapshot_path_load_is_not_reported_as_the_users
         resolve_effective_chat_template_override,
     )
     bundled = resolve_effective_chat_template_override(
-        model_identifier = "LAiM/gemma-4-12b-it-GGUF", user_override = None
+        model_identifier = "unsloth/gemma-4-12b-it-GGUF", user_override = None
     )
     backend = _StatusBackend("/scan/models--LAiM--gemma-4-12b-it-GGUF/snapshots/abc")
     backend.chat_template_override = bundled

@@ -36,8 +36,8 @@ _REAL_DENIED = _scan_folders.is_denied_system_path
 _REAL_SCRATCH = library._scratch_and_system_folders
 
 _CLIP = bytes(range(100))
-_SANDBOX_ID = "sandbox:t-lib:report.txt"
-_SANDBOX_A = "sandbox:t-lib:a.txt"
+_WORKDIR_ID = "workdir:project-p-lib:report.txt"
+_WORKDIR_A = "workdir:project-p-lib:a.txt"
 
 
 def _app(subject) -> TestClient:
@@ -151,19 +151,23 @@ def _gallery_audio(prompt: str) -> str:
     )["id"]
 
 
-def _sandbox_chat(
+def _workdir_chat(
     name,
     body,
-    thread = "t-lib",
+    thread = "p-lib",
 ):
-    """A file ``name`` in the chat's sandbox: (sandbox directory, its path)."""
-    from core.inference.tools import resolve_sandbox_workdir
+    """A file ``name`` in a chat's folder: (folder, its path).
+
+    ``thread`` is a project id: a chat of the user's own works in his own home, whose files are his
+    rather than the chat's, so the folder the Library may walk is a project's own workspace.
+    """
+    from core.inference.tools import resolve_session_workdir
     from storage import studio_db
 
-    studio_db.upsert_chat_thread(
-        {"id": thread, "title": "T", "modelType": "base", "modelId": "m", "createdAt": 1}
+    studio_db.upsert_chat_project(
+        {"id": thread, "name": f"Project {thread}", "createdAt": 1, "updatedAt": 1}
     )
-    directory = resolve_sandbox_workdir(thread)
+    directory = resolve_session_workdir(f"project-{thread}")
     path = os.path.join(directory, name)
     os.makedirs(os.path.dirname(path), exist_ok = True)
     Path(path).write_bytes(body)
@@ -251,7 +255,7 @@ def test_rename_favorite_and_folders_are_an_overlay(client):
     assert _post(client, "items/opened", id = image).status_code == 200
     item = _items(client)[0][image]
     assert item["createdAt"] <= item["openedAt"] and item["favorite"] is True
-    for missing in ("upload:gone", "sandbox:t-lib:gone.txt"):
+    for missing in ("upload:gone", "workdir:project-p-lib:gone.txt"):
         assert _post(client, "items/opened", id = missing).status_code == 404
     assert "upload:gone" not in library_db.list_entries()
     # The type follows the file's own name, so a binary renamed to .txt never opens as text.
@@ -396,37 +400,37 @@ def test_a_gallery_file_that_cannot_be_deleted_keeps_its_name_star_and_folder(cl
     assert (item["name"], item["favorite"]) == ("Renamed", True)
 
 
-def test_a_sandbox_file_that_is_gone_takes_no_rename_a_later_file_would_inherit(
+def test_a_workdir_file_that_is_gone_takes_no_rename_a_later_file_would_inherit(
     client, signed_in, monkeypatch
 ):
-    monkeypatch.setattr(library, "_SOURCES", (library._sandbox_items,))
-    _directory, path = _sandbox_chat("a.txt", b"first")
+    monkeypatch.setattr(library, "_SOURCES", (library._workdir_items,))
+    _directory, path = _workdir_chat("a.txt", b"first")
     os.unlink(path)
-    response = client.patch("/api/library/items", json = {"id": _SANDBOX_A, "name": "Old"})
+    response = client.patch("/api/library/items", json = {"id": _WORKDIR_A, "name": "Old"})
     assert response.status_code == 404
-    _sandbox_chat("a.txt", b"another file at the same path")
-    assert _items(client)[0][_SANDBOX_A]["name"] == "a.txt"
+    _workdir_chat("a.txt", b"another file at the same path")
+    assert _items(client)[0][_WORKDIR_A]["name"] == "a.txt"
 
 
-def test_a_sandbox_file_the_model_edits_keeps_its_name_star_and_folder(
+def test_a_workdir_file_the_model_edits_keeps_its_name_star_and_folder(
     client, signed_in, monkeypatch
 ):
     from core.inference.tools import execute_tool
 
-    monkeypatch.setattr(library, "_SOURCES", (library._sandbox_items,))
-    _directory, path = _sandbox_chat("report.txt", b"teh report\n")
+    monkeypatch.setattr(library, "_SOURCES", (library._workdir_items,))
+    _directory, path = _workdir_chat("report.txt", b"teh report\n")
     folder = _folder(client, "Reports", None)
-    _patch(client, id = _SANDBOX_ID, name = "Q3 report", favorite = True, folderId = folder)
+    _patch(client, id = _WORKDIR_ID, name = "Q3 report", favorite = True, folderId = folder)
     result = execute_tool(
         "edit_file",
         {"path": "report.txt", "edits": [{"old_string": "teh", "new_string": "the"}]},
-        session_id = "t-lib",
+        session_id = "project-p-lib",
     )
     assert Path(path).read_bytes() == b"the report\n", result
     library.invalidate_listing()
-    item = _items(client)[0][_SANDBOX_ID]
+    item = _items(client)[0][_WORKDIR_ID]
     assert (item["name"], item["favorite"], item["folderId"]) == ("Q3 report", True, folder)
-    assert _favorites(client) == [_SANDBOX_ID]
+    assert _favorites(client) == [_WORKDIR_ID]
 
 
 def test_a_listing_during_an_edit_does_not_drop_the_files_name_star_and_folder(
@@ -437,9 +441,9 @@ def test_a_listing_during_an_edit_does_not_drop_the_files_name_star_and_folder(
 
     from core.inference.tools import execute_tool
 
-    monkeypatch.setattr(library, "_SOURCES", (library._sandbox_items,))
-    _directory, path = _sandbox_chat("report.txt", b"teh report\n")
-    _patch(client, id = _SANDBOX_ID, name = "Q3 report", favorite = True)
+    monkeypatch.setattr(library, "_SOURCES", (library._workdir_items,))
+    _directory, path = _workdir_chat("report.txt", b"teh report\n")
+    _patch(client, id = _WORKDIR_ID, name = "Q3 report", favorite = True)
     carry = library_db.carry_fingerprint
     listings = []
 
@@ -457,13 +461,13 @@ def test_a_listing_during_an_edit_does_not_drop_the_files_name_star_and_folder(
     execute_tool(
         "edit_file",
         {"path": "report.txt", "edits": [{"old_string": "teh", "new_string": "the"}]},
-        session_id = "t-lib",
+        session_id = "project-p-lib",
     )
     for listing in listings:
         listing.join(timeout = 10)
     assert Path(path).read_bytes() == b"the report\n"
     library.invalidate_listing()
-    item = _items(client)[0][_SANDBOX_ID]
+    item = _items(client)[0][_WORKDIR_ID]
     assert (item["name"], item["favorite"]) == ("Q3 report", True)
 
 
@@ -472,16 +476,16 @@ def test_a_folder_move_during_an_edit_keeps_the_files_name_and_star(client, sign
 
     from core.inference.tools import execute_tool
 
-    monkeypatch.setattr(library, "_SOURCES", (library._sandbox_items,))
-    _sandbox_chat("report.txt", b"teh report\n")
-    _patch(client, id = _SANDBOX_ID, name = "Q3 report", favorite = True)
+    monkeypatch.setattr(library, "_SOURCES", (library._workdir_items,))
+    _workdir_chat("report.txt", b"teh report\n")
+    _patch(client, id = _WORKDIR_ID, name = "Q3 report", favorite = True)
     folder = _folder(client, "Reports", None)
     carry = library_db.carry_fingerprint
     moves = []
 
     def move_then_carry(*args):
         move = threading.Thread(
-            target = _patch, args = (client,), kwargs = {"id": _SANDBOX_ID, "folderId": folder}
+            target = _patch, args = (client,), kwargs = {"id": _WORKDIR_ID, "folderId": folder}
         )
         move.start()
         move.join(timeout = 1)
@@ -492,12 +496,12 @@ def test_a_folder_move_during_an_edit_keeps_the_files_name_and_star(client, sign
     execute_tool(
         "edit_file",
         {"path": "report.txt", "edits": [{"old_string": "teh", "new_string": "the"}]},
-        session_id = "t-lib",
+        session_id = "project-p-lib",
     )
     for move in moves:
         move.join(timeout = 10)
     library.invalidate_listing()
-    item = _items(client)[0][_SANDBOX_ID]
+    item = _items(client)[0][_WORKDIR_ID]
     assert (item["name"], item["favorite"], item["folderId"]) == ("Q3 report", True, folder)
 
 
@@ -506,31 +510,31 @@ def test_a_legacy_row_keeps_its_name_and_star_through_an_edit_a_cached_listing_s
 ):
     from core.inference.tools import execute_tool
 
-    monkeypatch.setattr(library, "_SOURCES", (library._remembered("_sandbox_items", 60.0),))
-    _sandbox_chat("report.txt", b"teh report\n")
-    _patch(client, id = _SANDBOX_ID, name = "Q3 report", favorite = True)
+    monkeypatch.setattr(library, "_SOURCES", (library._remembered("_workdir_items", 60.0),))
+    _workdir_chat("report.txt", b"teh report\n")
+    _patch(client, id = _WORKDIR_ID, name = "Q3 report", favorite = True)
     _items(client)
     conn = library_db.get_connection()
-    conn.execute("UPDATE library_entries SET fingerprint = NULL WHERE item_id = ?", (_SANDBOX_ID,))
+    conn.execute("UPDATE library_entries SET fingerprint = NULL WHERE item_id = ?", (_WORKDIR_ID,))
     conn.commit()
     conn.close()
     execute_tool(
         "edit_file",
         {"path": "report.txt", "edits": [{"old_string": "teh", "new_string": "the"}]},
-        session_id = "t-lib",
+        session_id = "project-p-lib",
     )
     _items(client)
     library.invalidate_listing()
-    item = _items(client)[0][_SANDBOX_ID]
+    item = _items(client)[0][_WORKDIR_ID]
     assert (item["name"], item["favorite"]) == ("Q3 report", True)
 
 
 def test_a_path_made_again_right_after_an_edit_starts_fresh(client, signed_in, monkeypatch):
     from core.inference.tools import execute_tool
 
-    monkeypatch.setattr(library, "_SOURCES", (library._sandbox_items,))
-    directory, path = _sandbox_chat("report.txt", b"teh report\n")
-    _patch(client, id = _SANDBOX_ID, name = "Q3 report", favorite = True)
+    monkeypatch.setattr(library, "_SOURCES", (library._workdir_items,))
+    directory, path = _workdir_chat("report.txt", b"teh report\n")
+    _patch(client, id = _WORKDIR_ID, name = "Q3 report", favorite = True)
     # Linux keeps no birth time, so a recreated file reusing a freed inode passes for it: keep both allocated.
     os.link(path, os.path.join(directory, ".held"))
     replace = os.replace
@@ -546,74 +550,74 @@ def test_a_path_made_again_right_after_an_edit_starts_fresh(client, signed_in, m
     execute_tool(
         "edit_file",
         {"path": "report.txt", "edits": [{"old_string": "teh", "new_string": "the"}]},
-        session_id = "t-lib",
+        session_id = "project-p-lib",
     )
     monkeypatch.setattr(os, "replace", replace)
     assert Path(path).read_bytes() == b"someone else\n"
     library.invalidate_listing()
-    item = _items(client)[0][_SANDBOX_ID]
+    item = _items(client)[0][_WORKDIR_ID]
     assert (item["name"], item["favorite"]) == ("report.txt", False)
 
 
-def test_a_sandbox_delete_takes_only_the_file_it_was_listed_as(client, signed_in, monkeypatch):
-    monkeypatch.setattr(library, "_SOURCES", (library._sandbox_items,))
-    _directory, path = _sandbox_chat("a.txt", b"listed")
-    listed = _items(client)[0][_SANDBOX_A]["fingerprint"]
+def test_a_workdir_delete_takes_only_the_file_it_was_listed_as(client, signed_in, monkeypatch):
+    monkeypatch.setattr(library, "_SOURCES", (library._workdir_items,))
+    _directory, path = _workdir_chat("a.txt", b"listed")
+    listed = _items(client)[0][_WORKDIR_A]["fingerprint"]
     # Held open so ext4 cannot hand the new file the same inode; Windows refuses to unlink an
     # open file and never reuses a file id, so nothing is held there.
     with open(path, "rb") if os.name != "nt" else contextlib.nullcontext():
         os.unlink(path)
-        _sandbox_chat("a.txt", b"made since")
-    response = _post(client, "items/delete", id = _SANDBOX_A, fingerprint = listed)
+        _workdir_chat("a.txt", b"made since")
+    response = _post(client, "items/delete", id = _WORKDIR_A, fingerprint = listed)
     assert response.status_code == 409
     assert Path(path).read_bytes() == b"made since"
     library.invalidate_listing()
-    current = _items(client)[0][_SANDBOX_A]["fingerprint"]
+    current = _items(client)[0][_WORKDIR_A]["fingerprint"]
     assert current != listed
-    assert _post(client, "items/delete", id = _SANDBOX_A, fingerprint = current).status_code == 200
+    assert _post(client, "items/delete", id = _WORKDIR_A, fingerprint = current).status_code == 200
     assert not os.path.exists(path)
 
 
-def test_a_sandbox_file_of_a_chat_whose_id_has_a_colon_is_reachable(client, signed_in, monkeypatch):
-    monkeypatch.setattr(library, "_SOURCES", (library._sandbox_items,))
-    _sandbox_chat("a.txt", b"mine", thread = "imported:1")
+def test_a_workdir_file_of_a_chat_whose_id_has_a_colon_is_reachable(client, signed_in, monkeypatch):
+    monkeypatch.setattr(library, "_SOURCES", (library._workdir_items,))
+    _workdir_chat("a.txt", b"mine", thread = "imported:1")
     [item_id] = _items(client)[0]
-    assert item_id == "sandbox:imported%3A1:a.txt"
+    assert item_id == "workdir:project-imported%3A1:a.txt"
     assert _download(client, item_id).content == b"mine"
     assert _delete(client, item_id) == 200
     assert _items(client)[0] == {}
 
 
-def test_a_chats_files_stay_listed_after_it_is_moved_into_a_project(
+def test_a_chats_files_stay_listed_after_its_project_is_renamed(
     client, signed_in, monkeypatch, tmp_path
 ):
     from storage import studio_db
 
     monkeypatch.setenv("LAiM_STUDIO_PROJECTS_HOME", str(tmp_path / "Projects home"))
-    monkeypatch.setattr(library, "_SOURCES", (library._sandbox_items,))
-    _sandbox_chat("a.txt", b"mine")
+    monkeypatch.setattr(library, "_SOURCES", (library._workdir_items,))
+    _workdir_chat("a.txt", b"mine")
     folder = _folder(client, "Charts", None)
-    _patch(client, id = _SANDBOX_A, name = "Chart", favorite = True, folderId = folder)
+    _patch(client, id = _WORKDIR_A, name = "Chart", favorite = True, folderId = folder)
+    # A rename leaves the project's folder where it was, so the card is still the same file.
     studio_db.upsert_chat_project(
-        {"id": "p-lib", "name": "Research", "createdAt": 1, "updatedAt": 1}
+        {"id": "p-lib", "name": "Research", "createdAt": 1, "updatedAt": 2}
     )
-    studio_db.update_chat_thread("t-lib", {"projectId": "p-lib"})
     library.invalidate_listing()
-    item = _items(client)[0][_SANDBOX_A]
+    item = _items(client)[0][_WORKDIR_A]
     assert (item["name"], item["favorite"], item["folderId"]) == ("Chart", True, folder)
-    assert item["threadId"] == "t-lib"
-    assert _download(client, _SANDBOX_A).content == b"mine"
-    assert _delete(client, _SANDBOX_A) == 200
+    assert item["threadTitle"] == "Research"
+    assert _download(client, _WORKDIR_A).content == b"mine"
+    assert _delete(client, _WORKDIR_A) == 200
 
 
-def test_a_sandbox_file_written_twice_in_a_second_is_a_new_version(client, signed_in, monkeypatch):
-    monkeypatch.setattr(library, "_SOURCES", (library._sandbox_items,))
-    _directory, path = _sandbox_chat("frame.png", b"one")
+def test_a_workdir_file_written_twice_in_a_second_is_a_new_version(client, signed_in, monkeypatch):
+    monkeypatch.setattr(library, "_SOURCES", (library._workdir_items,))
+    _directory, path = _workdir_chat("frame.png", b"one")
     versions = []
     for ns in (1_700_000_000_100_000_000, 1_700_000_000_600_000_000):
         os.utime(path, ns = (ns, ns))
         library.invalidate_listing()
-        versions.append(_items(client)[0]["sandbox:t-lib:frame.png"]["updatedAt"])
+        versions.append(_items(client)[0]["workdir:project-p-lib:frame.png"]["updatedAt"])
     assert versions == [1_700_000_000_100, 1_700_000_000_600]
 
 
@@ -845,14 +849,14 @@ def test_the_listing_reports_the_library_disk_and_the_sources_on_it(client, monk
         assert 0 <= disk["freeBytes"] <= disk["totalBytes"] and disk["totalBytes"] > 0
         return set(disk["sources"])
 
-    every = {"upload", "attachment", "image", "video", "audio", "sandbox"}
+    every = {"upload", "attachment", "image", "video", "audio", "workdir"}
     every |= {"model:training", "model:exported"}
     assert sources() == every
     real, exports, uploads = library._device, str(exports_root()), str(library.uploads_dir())
     monkeypatch.setattr(library, "_device", lambda path: -1 if str(path) == exports else real(path))
     assert sources() == every - {"model:exported"}
-    monkeypatch.setitem(library._SOURCE_ROOTS, "sandbox", _fail)
-    assert sources() == every - {"model:exported", "sandbox"}
+    monkeypatch.setitem(library._SOURCE_ROOTS, "workdir", _fail)
+    assert sources() == every - {"model:exported", "workdir"}
     monkeypatch.setattr(library, "_device", lambda path: 1 if str(path) == uploads else -1)
     assert sources() == {"upload"}
 
@@ -910,7 +914,7 @@ def test_fine_tuned_models_are_listed_but_not_deleted_here(client, monkeypatch):
     stamp = library._model_stamp()
     run, gguf = outputs_root() / "library-test-run", exports_root() / "library-test-gguf"
     run.mkdir()
-    (run / "adapter_config.json").write_text('{"base_model_name_or_path": "LAiM/base"}')
+    (run / "adapter_config.json").write_text('{"base_model_name_or_path": "unsloth/base"}')
     (run / "adapter_model.safetensors").write_bytes(b"x" * 10)
     gguf.mkdir(parents = True)
     (gguf / "model.Q4_K_M.gguf").write_bytes(b"x" * 10)
@@ -1056,19 +1060,19 @@ def test_the_slow_sources_are_remembered_briefly_and_forgotten_on_a_write(client
         calls.append(1)
         fields = {"source": "generated", "content_type": "text/plain", "file_url": ""}
         return [
-            library._item("sandbox:t:a.txt", name = "a.txt", size_bytes = 1, created_at = 1, **fields)
+            library._item("workdir:t:a.txt", name = "a.txt", size_bytes = 1, created_at = 1, **fields)
         ]
 
     def broken():
         raise RuntimeError("gallery unreadable")
 
-    monkeypatch.setattr(library, "_sandbox_items", walked)
-    monkeypatch.setattr(library, "_SOURCES", (library._remembered("_sandbox_items", 60), broken))
+    monkeypatch.setattr(library, "_workdir_items", walked)
+    monkeypatch.setattr(library, "_SOURCES", (library._remembered("_workdir_items", 60), broken))
     # Listed only, never written: the star is kept for the file it would find.
     monkeypatch.setattr(library, "fingerprint", lambda _item_id: "1:1")
-    _patch(client, id = "sandbox:t:a.txt", favorite = True)
+    _patch(client, id = "workdir:t:a.txt", favorite = True)
     for _ in range(2):
-        assert _items(client)[0]["sandbox:t:a.txt"]["favorite"] is True
+        assert _items(client)[0]["workdir:t:a.txt"]["favorite"] is True
     assert len(calls) == 1
     # Another account's listing is never this one's.
     monkeypatch.setattr(library, "_account_key", lambda: "other")
@@ -1081,39 +1085,39 @@ def test_the_slow_sources_are_remembered_briefly_and_forgotten_on_a_write(client
 
 
 def test_an_overlay_row_stays_with_the_file_it_was_made_for(client, monkeypatch, tmp_path):
-    monkeypatch.setattr(library, "_SOURCES", (library._sandbox_items,))
-    _directory, path = _sandbox_chat("report.txt", b"v1")
+    monkeypatch.setattr(library, "_SOURCES", (library._workdir_items,))
+    _directory, path = _workdir_chat("report.txt", b"v1")
 
     def make_again():
         os.replace(path, tmp_path / f"old-{len(os.listdir(tmp_path))}")
         Path(path).write_bytes(b"new")
         library.invalidate_listing()
 
-    library_db.update_entry(_SANDBOX_ID, favorite = True)
-    assert library_db.list_entries()[_SANDBOX_ID]["fingerprint"] is None
-    item = _items(client)[0][_SANDBOX_ID]
+    library_db.update_entry(_WORKDIR_ID, favorite = True)
+    assert library_db.list_entries()[_WORKDIR_ID]["fingerprint"] is None
+    item = _items(client)[0][_WORKDIR_ID]
     assert item["favorite"] is True and "_fingerprint" not in item
-    assert library_db.list_entries()[_SANDBOX_ID]["fingerprint"] == library.fingerprint(_SANDBOX_ID)
+    assert library_db.list_entries()[_WORKDIR_ID]["fingerprint"] == library.fingerprint(_WORKDIR_ID)
 
-    _patch(client, id = _SANDBOX_ID, name = "Q3")
+    _patch(client, id = _WORKDIR_ID, name = "Q3")
     with open(path, "ab") as handle:
         handle.write(b" and v2")
     library.invalidate_listing()
-    item = _items(client)[0][_SANDBOX_ID]
+    item = _items(client)[0][_WORKDIR_ID]
     assert (item["favorite"], item["name"]) == (True, "Q3")
-    assert _favorites(client) == [_SANDBOX_ID]
+    assert _favorites(client) == [_WORKDIR_ID]
 
     make_again()
     assert _favorites(client) == []
-    _patch(client, id = _SANDBOX_ID, folderId = None)
-    entry = library_db.list_entries()[_SANDBOX_ID]
+    _patch(client, id = _WORKDIR_ID, folderId = None)
+    entry = library_db.list_entries()[_WORKDIR_ID]
     assert (entry["name"], entry["favorite"]) == (None, False)
 
-    _patch(client, id = _SANDBOX_ID, favorite = True, name = "Old")
+    _patch(client, id = _WORKDIR_ID, favorite = True, name = "Old")
     make_again()
-    item = _items(client)[0][_SANDBOX_ID]
+    item = _items(client)[0][_WORKDIR_ID]
     assert (item["favorite"], item["name"]) == (False, "report.txt")
-    assert _SANDBOX_ID not in library_db.list_entries()
+    assert _WORKDIR_ID not in library_db.list_entries()
 
 
 def test_an_older_database_is_upgraded_and_checked_once(client, monkeypatch, tmp_path):
@@ -1329,12 +1333,12 @@ def project(tmp_path, monkeypatch):
     import storage.studio_db as studio_db
 
     root = tmp_path / "Projects" / "demo"
-    (root / "sandbox").mkdir(parents = True)
-    record = {"id": "p1", "rootPath": str(root), "sandboxPath": str(root / "sandbox")}
+    (root / "workdir").mkdir(parents = True)
+    record = {"id": "p1", "rootPath": str(root), "workdirPath": str(root / "workdir")}
     monkeypatch.setattr(
         studio_db, "ensure_chat_project_workspace", lambda pid: record if pid == "p1" else None
     )
-    return root / "sandbox"
+    return root / "workdir"
 
 
 def test_an_upload_is_copied_into_a_project_under_its_own_name(client, project, tmp_path):
@@ -1462,46 +1466,46 @@ def test_generated_media_download_under_their_prompt(client, signed_in, project)
     assert gallery_projects.copy_into_project(path, "p1", "images")["already"] is True
 
 
-def test_a_sandbox_file_is_reachable_by_id_only_as_the_listing_walks_it(
+def test_a_workdir_file_is_reachable_by_id_only_as_the_listing_walks_it(
     client, signed_in, monkeypatch
 ):
     import routes.inference as inference
 
-    monkeypatch.setattr(library, "_SOURCES", (library._sandbox_items,))
+    monkeypatch.setattr(library, "_SOURCES", (library._workdir_items,))
     monkeypatch.setattr(inference, "_MAX_SNAPSHOT_FILES", 3)
-    directory, _path = _sandbox_chat("a.txt", b"mine")
+    directory, _path = _workdir_chat("a.txt", b"mine")
     for name in ("b.txt", "c.txt", ".env", "d1/d2/d3/d4/deep.txt"):
-        _sandbox_chat(name, b"x")
+        _workdir_chat(name, b"x")
     walks = []
-    real = inference._sandbox_listing_names
+    real = inference._session_listing_names
     monkeypatch.setattr(
-        inference, "_sandbox_listing_names", lambda path: walks.append(path) or real(path)
+        inference, "_session_listing_names", lambda path: walks.append(path) or real(path)
     )
-    status = lambda name: _download(client, f"sandbox:t-lib:{name}").status_code  # noqa: E731
+    status = lambda name: _download(client, f"workdir:project-p-lib:{name}").status_code  # noqa: E731
 
     def listed(*_args):
-        raise AssertionError("a per-item route listed the sandboxes")
+        raise AssertionError("a per-item route listed the workdirs")
 
     with monkeypatch.context() as patched:
-        # A card's file never lists every chat, and its sandbox is walked once for every card.
-        patched.setattr(library, "_sandbox_sessions", listed)
-        response = _download(client, "sandbox:t-lib:a.txt")
+        # A card's file never lists every chat, and its workdir is walked once for every card.
+        patched.setattr(library, "_workdir_sessions", listed)
+        response = _download(client, "workdir:project-p-lib:a.txt")
         assert response.content == b"mine"
         assert 'filename="a.txt"' in response.headers["content-disposition"]
         assert status("b.txt") == 200 and len(walks) == 1
         for name in ("c.txt", ".env", "d1/d2/d3/d4/deep.txt", "../x", ".hidden"):
             assert status(name) == 404, name
-        assert _download(client, "sandbox:nope:a.txt").status_code == 404
-    assert set(_items(client)[0]) == {"sandbox:t-lib:a.txt", "sandbox:t-lib:b.txt"}
+        assert _download(client, "workdir:nope:a.txt").status_code == 404
+    assert set(_items(client)[0]) == {"workdir:project-p-lib:a.txt", "workdir:project-p-lib:b.txt"}
     library.invalidate_listing()
     _items(client)
     walks.clear()
     assert (status("a.txt"), status("c.txt"), walks) == (200, 404, [])
-    for item_id in ("sandbox:t-lib:.env", "sandbox:t-lib:c.txt", "sandbox:not-a-chat:a.txt"):
+    for item_id in ("workdir:project-p-lib:.env", "workdir:project-p-lib:c.txt", "workdir:not-a-chat:a.txt"):
         assert _delete(client, item_id) == 404, item_id
     assert os.path.exists(os.path.join(directory, ".env"))
     assert os.path.exists(os.path.join(directory, "c.txt"))
-    assert _delete(client, "sandbox:t-lib:a.txt") == 200
+    assert _delete(client, "workdir:project-p-lib:a.txt") == 200
     assert not os.path.exists(os.path.join(directory, "a.txt"))
 
 
@@ -1530,16 +1534,16 @@ def test_a_file_swapped_for_a_fifo_is_refused_without_waiting_for_a_writer(tmp_p
 
 
 @pytest.mark.parametrize("route", ["download", "stream"])
-def test_a_sandbox_file_swapped_for_a_link_after_the_check_is_not_read(
+def test_a_workdir_file_swapped_for_a_link_after_the_check_is_not_read(
     client, signed_in, monkeypatch, tmp_path, route
 ):
     secret = _file(tmp_path / "secret.mp3", "secret")
-    _directory, path = _sandbox_chat("song.mp3", b"mine")
-    item_id = "sandbox:t-lib:song.mp3"
+    _directory, path = _workdir_chat("song.mp3", b"mine")
+    item_id = "workdir:project-p-lib:song.mp3"
     if route == "stream":
         url = _stream_url(client, item_id)
         assert _app(None).get(url).content == b"mine"
-    real = library._sandbox_path
+    real = library._workdir_file_path
     swapped = []
 
     def swap_after_check(ref):
@@ -1550,27 +1554,27 @@ def test_a_sandbox_file_swapped_for_a_link_after_the_check_is_not_read(
             swapped.append(ref)
         return checked
 
-    monkeypatch.setattr(library, "_sandbox_path", swap_after_check)
+    monkeypatch.setattr(library, "_workdir_file_path", swap_after_check)
     response = _app(None).get(url) if route == "stream" else _download(client, item_id)
     assert response.status_code == 404
     assert b"secret" not in response.content
 
 
 def test_a_projects_own_files_are_listed(client, monkeypatch, tmp_path):
-    from core.inference.tools import resolve_sandbox_workdir
+    from core.inference.tools import resolve_session_workdir
     from storage import studio_db
 
     monkeypatch.setenv("LAiM_STUDIO_PROJECTS_HOME", str(tmp_path / "Projects home"))
-    monkeypatch.setattr(library, "_SOURCES", (library._sandbox_items,))
+    monkeypatch.setattr(library, "_SOURCES", (library._workdir_items,))
     project = studio_db.upsert_chat_project(
         {"id": "p-lib", "name": "Research", "createdAt": 1, "updatedAt": 1}
     )
     # Studio gives every project a folder of its own, so the column is never empty.
     assert project["rootPath"]
-    directory = resolve_sandbox_workdir("project-p-lib")
+    directory = resolve_session_workdir("project-p-lib")
     os.makedirs(os.path.join(directory, "files"), exist_ok = True)
     Path(directory, "files", "notes.txt").write_text("x")
-    item = _items(client)[0]["sandbox:project-p-lib:files/notes.txt"]
+    item = _items(client)[0]["workdir:project-p-lib:files/notes.txt"]
     assert item["threadTitle"] == "Research"
 
     own = tmp_path / "My code"
@@ -1579,18 +1583,22 @@ def test_a_projects_own_files_are_listed(client, monkeypatch, tmp_path):
     conn.commit()
     conn.close()
     assert not library._studio_project_root(str(own))
-    assert "sandbox:project-p-lib:files/notes.txt" not in _items(client)[0]
+    assert "workdir:project-p-lib:files/notes.txt" not in _items(client)[0]
 
 
 @pytest.fixture(autouse = True)
 def _temp_folders_are_ordinary(monkeypatch):
     # macOS keeps pytest's temp folders under /private/var, which the real checks refuse, and they
-    # are temporary folders, which Library moves refuse too.
-    monkeypatch.setattr(
-        _scan_folders,
-        "is_denied_system_path",
-        lambda path: path.startswith(("/etc", "/private/etc", "/usr")),
-    )
+    # are temporary folders, which Library moves refuse too. The system folders of the host this
+    # runs on stay refused: a test that aims at one must read as the refusal it is aiming at.
+    system_root = os.path.join(os.environ.get("SystemRoot", r"C:\Windows"), "")
+
+    def _denied(path):
+        return path.startswith(("/etc", "/private/etc", "/usr")) or (
+            os.name == "nt" and os.path.normcase(path).startswith(os.path.normcase(system_root))
+        )
+
+    monkeypatch.setattr(_scan_folders, "is_denied_system_path", _denied)
     monkeypatch.setattr(
         library,
         "_scratch_and_system_folders",
@@ -1710,9 +1718,9 @@ def _named_folder(tmp_path, link_to = None):
     return data
 
 
-def _sandbox():
-    from core.inference.tools import sandbox_root
-    return Path(sandbox_root())
+def _workdir():
+    from core.inference.tools import session_workdir_root
+    return Path(session_workdir_root())
 
 
 def _read_only(tmp_path):
@@ -1746,8 +1754,8 @@ def _studio(sub = ""):
             "holds files",
         ),
         ("images", lambda _: _videos() / "images", "inside another LAiM folder"),
-        ("uploads", lambda _: _made(_sandbox() / "chat-1") / "uploads", "inside another LAiM"),
-        ("images", lambda _: _sandbox(), "inside another LAiM folder"),
+        ("uploads", lambda _: _made(_workdir() / "chat-1") / "uploads", "inside another LAiM"),
+        ("images", lambda _: _workdir(), "inside another LAiM folder"),
         ("images", lambda _: _images() / "sub", "inside another LAiM folder"),
         ("images", lambda _: _images() / "new", "inside another LAiM folder"),
         ("images", lambda _: _studio(), "LAiM's own folder"),
@@ -2111,6 +2119,9 @@ def test_temporary_and_cache_folders_cannot_hold_library_files(monkeypatch):
     assert not _REAL_DENIED("/scratch-for-test/images")
     with pytest.raises(ValueError, match = "Temporary"):
         library._refuse_denied(Path("/scratch-for-test/images"))
+    # A folder of the user's own is allowed. The test home sits in the temp tree this guard reads,
+    # so the check is made against a folder that is outside it.
+    monkeypatch.setattr(library, "_scratch_and_system_folders", lambda: ["/scratch-for-test"])
     library._refuse_denied(Path.home() / "Pictures" / "LAiM")
 
 
@@ -2750,9 +2761,9 @@ def test_only_audio_and_video_items_get_a_stream_link(client):
         # A declared type the extension map does not know is stored, but never streamed.
         ("clip.xyz", b"x", "video/x-custom"),
     )
-    _sandbox_chat("notes.txt", b"text")
+    _workdir_chat("notes.txt", b"text")
     mint = lambda item_id: _mint(client, item_id).status_code  # noqa: E731
-    for item_id in (note, image, unknown, "sandbox:t-lib:notes.txt", "attachment:m:a"):
+    for item_id in (note, image, unknown, "workdir:project-p-lib:notes.txt", "attachment:m:a"):
         assert mint(item_id) == 400, item_id
     for item_id in ("model:training:/x", "elsewhere:x"):
         assert mint(item_id) == 400, item_id
@@ -2859,21 +2870,30 @@ def test_a_stream_link_reads_only_its_own_accounts_item(client, two_accounts):
 
 
 @pytest.mark.parametrize("in_project", [False, True])
-def test_a_chat_named_like_its_project_session_is_listed_once(
+def test_a_chat_named_like_its_project_session_owns_that_id_once(
     client, signed_in, monkeypatch, tmp_path, in_project
 ):
+    """A chat that took a project's session id for itself is a chat: its tools run in the user's own
+    home, whose files are his rather than cards, and the id is not walked a second time as the
+    project's folder. The one file it names is the chat's own."""
+    from core.inference.tools import resolve_session_workdir
     from storage import studio_db
 
     monkeypatch.setenv("LAiM_STUDIO_PROJECTS_HOME", str(tmp_path / "Projects home"))
-    monkeypatch.setattr(library, "_SOURCES", (library._sandbox_items,))
+    monkeypatch.setattr(library, "_SOURCES", (library._workdir_items,))
     studio_db.upsert_chat_project(
         {"id": "p-lib", "name": "Research", "createdAt": 1, "updatedAt": 1}
     )
-    _sandbox_chat("a.txt", b"mine", thread = "project-p-lib")
+    workspace = resolve_session_workdir("project-p-lib")
+    Path(workspace, "a.txt").write_bytes(b"the project's")
+    studio_db.upsert_chat_thread(
+        {"id": "project-p-lib", "title": "T", "modelType": "base", "modelId": "m", "createdAt": 1}
+    )
     if in_project:
         studio_db.update_chat_thread("project-p-lib", {"projectId": "p-lib"})
+    home = resolve_session_workdir("project-p-lib")
+    Path(home, "a.txt").write_bytes(b"mine")
     library.invalidate_listing()
     body = client.get("/api/library").json()["items"]
-    ids = [item["id"] for item in body]
-    assert ids.count("sandbox:project-p-lib:a.txt") == 1
-    assert body[ids.index("sandbox:project-p-lib:a.txt")]["threadId"] == "project-p-lib"
+    assert [item["id"] for item in body] == []
+    assert _download(client, "workdir:project-p-lib:a.txt").content == b"mine"

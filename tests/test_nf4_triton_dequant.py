@@ -255,7 +255,7 @@ def test_compile_cache_key_covers_the_kernel_source():
     for mod in (nf4_mod, nf4_gemv_mod):
         with open(mod.__file__, "rb") as file:
             digest = hashlib.sha256(file.read()).hexdigest()[:16]
-        assert f"LAiM/{os.path.basename(mod.__file__)}:{digest}" in tags
+        assert f"unsloth/{os.path.basename(mod.__file__)}:{digest}" in tags
 
 
 def _utils_with_kernels():

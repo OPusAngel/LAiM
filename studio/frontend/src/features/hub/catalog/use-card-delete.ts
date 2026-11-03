@@ -2,6 +2,8 @@
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { useDeleteConfirmAction } from "./use-delete-confirm-action";
+import { translate } from "@/i18n";
+
 
 type DeleteSuccessMessage = string | (() => string);
 
@@ -22,7 +24,7 @@ export function useCardDelete({
     action,
     successMessage,
     errorToast: (err) => ({
-      title: `Failed to delete ${resourceName}`,
+      get title() { return translate("uxHub.failedToDeletetq1gu", { p1: resourceName }); },
       description: err instanceof Error ? err.message : undefined,
     }),
     onSuccess,

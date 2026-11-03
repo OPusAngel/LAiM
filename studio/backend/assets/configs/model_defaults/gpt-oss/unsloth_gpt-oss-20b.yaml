@@ -1,6 +1,6 @@
-# Model defaults for LAiM/gpt-oss-20b
+# Model defaults for unsloth/gpt-oss-20b
 # Based on gpt-oss-(20B)-Fine-tuning.ipynb
-# Also applies to: openai/gpt-oss-20b, LAiM/gpt-oss-20b-LAiM-bnb-4bit, LAiM/gpt-oss-20b-BF16
+# Also applies to: openai/gpt-oss-20b, unsloth/gpt-oss-20b-unsloth-bnb-4bit, unsloth/gpt-oss-20b-BF16
 # added inference parameters from LAiM guides
 
 training:
@@ -17,7 +17,7 @@ training:
   random_seed: 3407
   packing: false
   train_on_completions: true
-  gradient_checkpointing: "LAiM"
+  gradient_checkpointing: "unsloth"
   optim: "adamw_8bit"
   lr_scheduler_type: "linear"
 

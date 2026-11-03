@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -67,7 +68,7 @@ export function LyricsEditor({
               className="-me-2 h-auto px-2 py-1 text-ui-11p5"
             >
               <HugeiconsIcon icon={Add01Icon} className="size-3" />
-              Add section
+              {translate("uxAudio.addSection1xbvi")}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent

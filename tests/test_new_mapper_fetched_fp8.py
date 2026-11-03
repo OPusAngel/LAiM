@@ -18,11 +18,11 @@ _WANTED = {
     "get_model_name",
 }
 
-_NEW_KEY = "LAiM/Zeta-9B-Only-On-Main"
+_NEW_KEY = "unsloth/Zeta-9B-Only-On-Main"
 _NEW_OFFICIAL = "zeta-org/Zeta-9B-Only-On-Main-FP8"
-_NEW_BLOCK = "LAiM/Zeta-9B-Only-On-Main-FP8-Block"
-_NEW_ROW = "LAiM/Zeta-9B-Only-On-Main-FP8-Row"
-_ANCHOR = '    "LAiM/Kimi-K2-Instruct-BF16" : ('
+_NEW_BLOCK = "unsloth/Zeta-9B-Only-On-Main-FP8-Block"
+_NEW_ROW = "unsloth/Zeta-9B-Only-On-Main-FP8-Row"
+_ANCHOR = '    "unsloth/Kimi-K2-Instruct-BF16" : ('
 # Row table only, so the block branch cannot mask a row-path regression.
 _ROW_ONLY = "zeta-org/Zeta-9B-Row-Only-FP8"
 

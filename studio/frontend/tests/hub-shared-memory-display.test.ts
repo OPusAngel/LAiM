@@ -10,8 +10,8 @@ const hubPage = readSrc("features/hub/hub-page.tsx");
 const modelsHeader = readSrc("features/hub/catalog/models-header.tsx");
 
 test("Model Hub separates dedicated VRAM from shared GPU memory", () => {
-  assert.match(hubPage, /gpu\.dedicatedMemoryTotalGb/);
-  assert.match(hubPage, /gpu\.memorySharedGb/);
+  assert.match(hubPage, /vramSource\.dedicatedMemoryTotalGb/);
+  assert.match(hubPage, /vramSource\.memorySharedGb/);
   assert.match(hubPage, /gpuSharedLabel=\{gpuSharedLabel\}/);
   assert.match(modelsHeader, /`\$\{gpuLabel\} VRAM \+ \$\{gpuSharedLabel\}`/);
   assert.match(modelsHeader, /label=\{gpuSharedLabel \? "shared" : "VRAM"\}/);

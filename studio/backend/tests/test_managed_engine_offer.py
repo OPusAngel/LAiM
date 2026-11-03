@@ -255,7 +255,7 @@ def test_audio_checkpoints_get_no_offer(tmp_path):
 
 def test_a_cached_hub_config_is_read_without_a_hub_round_trip(tmp_path):
     (tmp_path / "config.json").write_text(json.dumps(NVFP4), encoding = "utf-8")
-    remote = SimpleNamespace(is_local = False, path = None, identifier = "LAiM/Qwen3.8-27B-NVFP4")
+    remote = SimpleNamespace(is_local = False, path = None, identifier = "unsloth/Qwen3.8-27B-NVFP4")
     with (
         patch("core.inference.engine_install.support_reason", return_value = None),
         _gpus("10.0"),

@@ -122,11 +122,11 @@ def LAiM_public_mirror(model_name: Optional[str], load_in_4bit: bool = True) -> 
         return None
     int_to_float, float_to_int, map_to_LAiM_16bit = tables
     lower = model_name.strip().lower()
-    # An LAiM/ id is NOT a fixed point. A 16-bit load of an explicit -LAiM-bnb-4bit id
-    # resolves through INT_TO_FLOAT_MAPPER (LAiM/gemma-3-270m-it-LAiM-bnb-4bit ->
-    # LAiM/gemma-3-270m-it), and BAD_MAPPINGS is applied to the INPUT name when the tables
+    # An unsloth/ id is NOT a fixed point. A 16-bit load of an explicit -unsloth-bnb-4bit id
+    # resolves through INT_TO_FLOAT_MAPPER (unsloth/gemma-3-270m-it-unsloth-bnb-4bit ->
+    # unsloth/gemma-3-270m-it), and BAD_MAPPINGS is applied to the INPUT name when the tables
     # resolve nothing (loader_utils.py:1014-1016), which is how a 4-bit
-    # LAiM/Qwen3-30B-A3B-LAiM-bnb-4bit becomes LAiM/Qwen3-30B-A3B. Both were verified
+    # unsloth/Qwen3-30B-A3B-unsloth-bnb-4bit becomes unsloth/Qwen3-30B-A3B. Both were verified
     # against get_model_name. Returning None for these let the security scan check a repo the
     # loader never fetches while the one it does fetch, and any custom code in it, went
     # unscanned. Identity results are still dropped at the end.
@@ -138,7 +138,7 @@ def LAiM_public_mirror(model_name: Optional[str], load_in_4bit: bool = True) -> 
         mirror = int_to_float.get(lower) or map_to_LAiM_16bit.get(lower)
     # get_model_name corrects the resolved name, and corrects the INPUT name when the tables
     # resolved nothing. Without this, a 4-bit Qwen/Qwen3-30B-A3B resolves to
-    # LAiM/Qwen3-30B-A3B-LAiM-bnb-4bit, which does not exist: the loader never fetches it.
+    # unsloth/Qwen3-30B-A3B-unsloth-bnb-4bit, which does not exist: the loader never fetches it.
     corrections = _bad_mappings()
     if corrections is None:
         return None

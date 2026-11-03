@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   getDiffusionDownloadPlan,
@@ -53,7 +54,7 @@ export function useRequiredAssetsDownload({
     const resultPlan: DiffusionDownloadPlan = result;
     if (resultPlan.plan_failed)
       throw new Error(
-        "Required file information is incomplete. Please try again.",
+        translate("uxHub.requiredFileInformationIs9lpun"),
       );
     if (resultPlan.incompatible_reason)
       throw new Error(resultPlan.incompatible_reason);
@@ -129,8 +130,8 @@ export function useRequiredAssetsDownload({
       else fallback();
     } catch (e) {
       if (sequence.current !== id) return;
-      toast.error("Could not check required files", {
-        description: e instanceof Error ? e.message : "Please try again.",
+      toast.error(translate("uxHub.couldNotCheckRequiredxzn7y"), {
+        description: e instanceof Error ? e.message : translate("uxHub.pleaseTryAgain53jxh"),
       });
     } finally {
       if (sequence.current === id) {

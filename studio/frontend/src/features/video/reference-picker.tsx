@@ -22,6 +22,8 @@ import {
   readReferenceFile,
 } from "./reference-budget";
 import { classifiedAttachmentFile } from "@/lib/video-utils";
+import { translate } from "@/i18n";
+
 
 /** One staged reference file: the data URL the request carries, plus its name for the chip. */
 export interface ReferenceMedia {
@@ -152,7 +154,7 @@ export function ReferenceMediaPicker({
               type="button"
               variant="ghost"
               size="icon"
-              aria-label={`Remove ${label}`}
+              aria-label={translate("uxVideo.removecucki", { p1: label })}
               className="size-6 shrink-0"
               onClick={() => {
                 onChange(null);

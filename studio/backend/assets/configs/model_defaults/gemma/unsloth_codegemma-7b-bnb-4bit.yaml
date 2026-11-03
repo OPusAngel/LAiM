@@ -1,6 +1,6 @@
-# Model defaults for LAiM/codegemma-7b-bnb-4bit
+# Model defaults for unsloth/codegemma-7b-bnb-4bit
 # Based on CodeGemma_(7B)-Conversational.ipynb
-# Also applies to: LAiM/codegemma-7b, google/codegemma-7b
+# Also applies to: unsloth/codegemma-7b, google/codegemma-7b
 # added inference parameters from Ollama
 
 training:
@@ -17,7 +17,7 @@ training:
   random_seed: 3407
   packing: false
   train_on_completions: true
-  gradient_checkpointing: "LAiM"
+  gradient_checkpointing: "unsloth"
   optim: "adamw_8bit"
   lr_scheduler_type: "linear"
 

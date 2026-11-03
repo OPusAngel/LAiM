@@ -95,11 +95,11 @@ def test_flux_dev_and_krea_do_not_inherit_the_schnell_nvfp4_checkpoint():
     assert fam is not None and fam.name == "flux.1"
     assert (
         family_prequant_repo(fam, "nvfp4", base_repo = "black-forest-labs/FLUX.1-schnell")
-        == "LAiM/FLUX.1-schnell-NVFP4"
+        == "unsloth/FLUX.1-schnell-NVFP4"
     )
     for base, fp8_repo in (
-        ("black-forest-labs/FLUX.1-dev", "LAiM/FLUX.1-dev-FP8"),
-        ("black-forest-labs/FLUX.1-Krea-dev", "LAiM/FLUX.1-Krea-dev-FP8"),
+        ("black-forest-labs/FLUX.1-dev", "unsloth/FLUX.1-dev-FP8"),
+        ("black-forest-labs/FLUX.1-Krea-dev", "unsloth/FLUX.1-Krea-dev-FP8"),
     ):
         assert family_prequant_repo(fam, "nvfp4", base_repo = base) is None
         assert family_prequant_repo(fam, "fp8", base_repo = base) == fp8_repo
@@ -108,13 +108,13 @@ def test_flux_dev_and_krea_do_not_inherit_the_schnell_nvfp4_checkpoint():
 
 def test_flux2_klein_generation_defaults_distinguish_base_from_distilled():
     for size in ("4B", "9B"):
-        assert default_generation_params(f"LAiM/FLUX.2-klein-base-{size}") == (20, 5.0)
-        assert default_generation_params(f"LAiM/FLUX.2-klein-{size}") == (4, 1.0)
+        assert default_generation_params(f"unsloth/FLUX.2-klein-base-{size}") == (20, 5.0)
+        assert default_generation_params(f"unsloth/FLUX.2-klein-{size}") == (4, 1.0)
 
 
 # ── z-image: the undistilled base ────────────────────────────────────────────
 def test_zimage_base_is_trusted_so_the_gguf_keeps_its_companion_base():
-    # LAiM/Z-Image-GGUF carries base_model: Tongyi-MAI/Z-Image, and _resolve_base_repo drops a
+    # unsloth/Z-Image-GGUF carries base_model: Tongyi-MAI/Z-Image, and _resolve_base_repo drops a
     # tag that fails this gate. While it did, that pick fell back to the Turbo companions and
     # denoised on their shift 3.0 scheduler instead of the base's 6.0.
     assert _is_trusted_diffusion_repo("Tongyi-MAI/Z-Image")
@@ -132,10 +132,10 @@ def test_zimage_base_has_no_hosted_prequant_to_inherit():
     fam = detect_family("Tongyi-MAI/Z-Image-Turbo")
     assert fam is not None and fam.name == "z-image"
     for scheme in ("int8", "fp8"):
-        assert family_prequant_repo(fam, scheme) == "LAiM/Z-Image-Turbo-FP8"
+        assert family_prequant_repo(fam, scheme) == "unsloth/Z-Image-Turbo-FP8"
         assert (
             family_prequant_repo(fam, scheme, base_repo = "Tongyi-MAI/Z-Image-Turbo")
-            == "LAiM/Z-Image-Turbo-FP8"
+            == "unsloth/Z-Image-Turbo-FP8"
         )
         assert family_prequant_repo(fam, scheme, base_repo = "Tongyi-MAI/Z-Image") is None
         # However the id was typed, and through the mirror the loader actually fetches.
@@ -158,19 +158,19 @@ def test_prequant_exclusion_does_not_break_a_family_type_that_lacks_the_field():
         # The base_repo argument is the trigger: an empty base short-circuits before the read.
         assert (
             family_prequant_repo(h3, scheme, base_repo = "MiniMaxAI/MiniMax-H3")
-            == "LAiM/MiniMax-H3-FP8"
+            == "unsloth/MiniMax-H3-FP8"
         )
         source = resolve_prequant_source(h3, scheme, base_repo = "MiniMaxAI/MiniMax-H3")
-        assert source is not None and source.location == "LAiM/MiniMax-H3-FP8"
+        assert source is not None and source.location == "unsloth/MiniMax-H3-FP8"
 
 
 def test_zimage_base_generation_defaults_are_not_the_distilled_recipe():
     # The base is undistilled: 20 steps at guidance 4. The more specific "z-image-turbo" key sits
     # ahead of "z-image", so the 9-step CFG-free Turbo recipe must not swallow it.
     assert default_generation_params("Tongyi-MAI/Z-Image") == (25, 3.0)
-    assert default_generation_params("LAiM/Z-Image-GGUF") == (25, 3.0)
+    assert default_generation_params("unsloth/Z-Image-GGUF") == (25, 3.0)
     assert default_generation_params("Tongyi-MAI/Z-Image-Turbo") == (8, 0.0)
-    assert default_generation_params("LAiM/Z-Image-Turbo-GGUF") == (8, 0.0)
+    assert default_generation_params("unsloth/Z-Image-Turbo-GGUF") == (8, 0.0)
 
 
 # ── lumina-2 family ──────────────────────────────────────────────────────────
@@ -215,7 +215,7 @@ def test_lumina2_prequant_wiring():
     from core.inference.diffusion_families import family_prequant_repo
     fam = detect_family("Alpha-VLLM/Lumina-Image-2.0")
     for scheme in ("int8", "fp8"):
-        assert family_prequant_repo(fam, scheme) == "LAiM/Lumina-Image-2.0-FP8"
+        assert family_prequant_repo(fam, scheme) == "unsloth/Lumina-Image-2.0-FP8"
 
 
 def test_lumina2_bf16_component_table_present():
@@ -279,7 +279,7 @@ def test_hunyuanimage21_prequant_wiring():
     from core.inference.diffusion_families import family_prequant_repo
     fam = detect_family("hunyuanvideo-community/HunyuanImage-2.1-Diffusers")
     for scheme in ("int8", "fp8"):
-        assert family_prequant_repo(fam, scheme) == "LAiM/HunyuanImage-2.1-FP8"
+        assert family_prequant_repo(fam, scheme) == "unsloth/HunyuanImage-2.1-FP8"
 
 
 def test_hunyuanimage21_bf16_component_table_present():
@@ -324,7 +324,7 @@ def test_hidream_override_and_trust():
     ):
         assert _is_trusted_diffusion_repo(rid)
     assert not _is_trusted_diffusion_repo("HiDream-ai/some-future-repo")
-    assert _is_trusted_diffusion_repo("LAiM/Meta-Llama-3.1-8B-Instruct")
+    assert _is_trusted_diffusion_repo("unsloth/Meta-Llama-3.1-8B-Instruct")
 
 
 def test_hidream_generation_defaults():
@@ -374,7 +374,7 @@ def test_hidream_prequant_wiring():
     from core.inference.diffusion_families import family_prequant_repo
     fam = detect_family("HiDream-ai/HiDream-I1-Full")
     for scheme in ("int8", "fp8"):
-        assert family_prequant_repo(fam, scheme) == "LAiM/HiDream-I1-Full-FP8"
+        assert family_prequant_repo(fam, scheme) == "unsloth/HiDream-I1-Full-FP8"
 
 
 def test_hidream_distilled_variants_have_no_hosted_prequant_to_inherit():
@@ -404,19 +404,19 @@ def test_qwen_image_2512_routes_to_its_own_hosted_prequant():
     fam = detect_family("Qwen/Qwen-Image-2512")
     assert fam is not None and fam.name == "qwen-image"
     for scheme in ("int8", "fp8"):
-        assert family_prequant_repo(fam, scheme) == "LAiM/Qwen-Image-FP8"
+        assert family_prequant_repo(fam, scheme) == "unsloth/Qwen-Image-FP8"
         assert (
             family_prequant_repo(fam, scheme, base_repo = "Qwen/Qwen-Image")
-            == "LAiM/Qwen-Image-FP8"
+            == "unsloth/Qwen-Image-FP8"
         )
         for base_repo in (
             "Qwen/Qwen-Image-2512",
-            "LAiM/Qwen-Image-2512",
+            "unsloth/Qwen-Image-2512",
             " QWEN/QWEN-IMAGE-2512 ",
         ):
             assert (
                 family_prequant_repo(fam, scheme, base_repo = base_repo)
-                == "LAiM/Qwen-Image-2512-FP8"
+                == "unsloth/Qwen-Image-2512-FP8"
             )
 
 
@@ -433,7 +433,7 @@ def test_qwen_image_2512_prequant_filenames_match_its_repo():
     ):
         source = resolve_prequant_source(fam, scheme, base_repo = "Qwen/Qwen-Image-2512")
         assert source is not None
-        assert source.location == "LAiM/Qwen-Image-2512-FP8"
+        assert source.location == "unsloth/Qwen-Image-2512-FP8"
         names = list(candidate_filenames_of(source))
         # the int8 ComfyUI twin (Studio's int8 codes bit for bit) leads; Studio's own containers follow unchanged
         own = [n for n in names if not n.endswith("-ComfyUI.safetensors")]
@@ -471,7 +471,7 @@ def test_hunyuanimage_is_excluded_with_reason():
 
 
 def test_excluded_model_reason_none_for_supported_and_unknown():
-    assert excluded_model_reason("LAiM/Z-Image-Turbo-GGUF") is None
+    assert excluded_model_reason("unsloth/Z-Image-Turbo-GGUF") is None
     assert excluded_model_reason("someorg/some-model") is None
 
 
@@ -625,10 +625,10 @@ def test_flux2_klein_9b_resolves_its_own_base_and_text_encoder():
         assert _is_trusted_diffusion_repo(repo), repo
 
     for repo_id, want_te in (
-        ("LAiM/FLUX.2-klein-9B-GGUF", "qwen_3_8b"),
-        ("LAiM/FLUX.2-klein-base-9B-GGUF", "qwen_3_8b"),
-        ("LAiM/FLUX.2-klein-4B-GGUF", "qwen_3_4b"),
-        ("LAiM/FLUX.2-klein-base-4B-GGUF", "qwen_3_4b"),
+        ("unsloth/FLUX.2-klein-9B-GGUF", "qwen_3_8b"),
+        ("unsloth/FLUX.2-klein-base-9B-GGUF", "qwen_3_8b"),
+        ("unsloth/FLUX.2-klein-4B-GGUF", "qwen_3_4b"),
+        ("unsloth/FLUX.2-klein-base-4B-GGUF", "qwen_3_4b"),
     ):
         encoders = sd_cpp_text_encoders_for(detect_family(repo_id), repo_id, None)
         assert want_te in encoders[0][1], (repo_id, encoders)
@@ -636,15 +636,15 @@ def test_flux2_klein_9b_resolves_its_own_base_and_text_encoder():
 
 def test_flux2_gguf_base_mismatch_check_fails_open(tmp_path):
     """The size check never turns a working load into a failing one."""
-    fam = detect_family("LAiM/FLUX.2-klein-9B-GGUF")
+    fam = detect_family("unsloth/FLUX.2-klein-9B-GGUF")
     empty = tmp_path / "not-a-gguf.gguf"
     empty.write_bytes(b"")
     # No path, an unreadable file, an unmapped base, and a non-FLUX.2 family are all pass-through.
     assert_flux2_gguf_matches_base(fam, "black-forest-labs/FLUX.2-klein-4B", None)
     assert_flux2_gguf_matches_base(fam, "black-forest-labs/FLUX.2-klein-4B", empty)
-    assert_flux2_gguf_matches_base(fam, "LAiM/Something-FP8", empty)
+    assert_flux2_gguf_matches_base(fam, "unsloth/Something-FP8", empty)
     assert_flux2_gguf_matches_base(
-        detect_family("LAiM/FLUX.1-dev-GGUF"), "black-forest-labs/FLUX.2-klein-4B", empty
+        detect_family("unsloth/FLUX.1-dev-GGUF"), "black-forest-labs/FLUX.2-klein-4B", empty
     )
 
 
@@ -714,11 +714,11 @@ def test_qwen_image_21_turbo_loads_as_its_own_checkpoint_of_the_family():
     # Turbo's own int8 / fp8 denoisers, never 2.1's; nvfp4 (not hosted for Turbo) quantizes at load.
     for scheme in ("int8", "fp8"):
         assert (
-            family_prequant_repo(fam, scheme, base_repo = turbo) == "LAiM/Qwen-Image-2.1-Turbo-FP8"
+            family_prequant_repo(fam, scheme, base_repo = turbo) == "unsloth/Qwen-Image-2.1-Turbo-FP8"
         )
         assert (
             family_prequant_repo(fam, scheme, base_repo = "Qwen/Qwen-Image-2.1")
-            == "LAiM/Qwen-Image-2.1-FP8"
+            == "unsloth/Qwen-Image-2.1-FP8"
         )
     assert family_prequant_repo(fam, "nvfp4", base_repo = turbo) is None
     # Its Qwen3-VL encoder is byte-identical to 2.1's, so the hosted int8 ConvRot encoder serves both.
@@ -737,22 +737,22 @@ def test_qwen_image_21_turbo_resolves_its_own_artifact_names(monkeypatch):
     fam = detect_family("Qwen/Qwen-Image-2.1")
     expected = {
         ("Qwen/Qwen-Image-2.1", "int8"): (
-            "LAiM/Qwen-Image-2.1-FP8",
+            "unsloth/Qwen-Image-2.1-FP8",
             ("Qwen-Image-2.1-INT8-ConvRot.safetensors", "Qwen-Image-2.1-INT8.safetensors"),
         ),
         ("Qwen/Qwen-Image-2.1", "fp8"): (
-            "LAiM/Qwen-Image-2.1-FP8",
+            "unsloth/Qwen-Image-2.1-FP8",
             ("Qwen-Image-2.1-FP8.safetensors",),
         ),
         ("Qwen/Qwen-Image-2.1-Turbo", "int8"): (
-            "LAiM/Qwen-Image-2.1-Turbo-FP8",
+            "unsloth/Qwen-Image-2.1-Turbo-FP8",
             (
                 "Qwen-Image-2.1-Turbo-INT8-ConvRot.safetensors",
                 "Qwen-Image-2.1-Turbo-INT8.safetensors",
             ),
         ),
         ("Qwen/Qwen-Image-2.1-Turbo", "fp8"): (
-            "LAiM/Qwen-Image-2.1-Turbo-FP8",
+            "unsloth/Qwen-Image-2.1-Turbo-FP8",
             ("Qwen-Image-2.1-Turbo-FP8.safetensors",),
         ),
     }
@@ -794,24 +794,24 @@ def test_qwen_image_21_gguf_reaches_sd_cpp_with_its_own_vae_and_a_qwen3vl_encode
     decodes 2.1 latents to noise instead of erroring, and a fixed flow shift overrides the
     resolution-dependent schedule upstream picks for this architecture.
     """
-    fam = detect_family("LAiM/Qwen-Image-2.1-GGUF")
+    fam = detect_family("unsloth/Qwen-Image-2.1-GGUF")
     assert fam is not None and fam.name == "qwen-image-2.1"
     assert family_sd_cpp_supported(fam)
 
     assert fam.sd_cpp_vae == (
-        "LAiM/Qwen-Image-2.1-FP8",
+        "unsloth/Qwen-Image-2.1-FP8",
         "vae/qwen_image_2.1_vae_bf16.safetensors",
     )
     # Not the qwen-image VAE: a different class for a different latent space, which decodes to
     # noise rather than raising if it is ever substituted here.
     assert "2.1" in fam.sd_cpp_vae[1]
 
-    encoders = sd_cpp_text_encoders_for(fam, "LAiM/Qwen-Image-2.1-GGUF", None)
+    encoders = sd_cpp_text_encoders_for(fam, "unsloth/Qwen-Image-2.1-GGUF", None)
     # The encoder, then the vision projector native editing reads through --llm_vision.
     assert len(encoders) == 2
-    assert encoders[1] == ("LAiM/Qwen3-VL-8B-Instruct-GGUF", "mmproj-F16.gguf", "llm_vision")
+    assert encoders[1] == ("unsloth/Qwen3-VL-8B-Instruct-GGUF", "mmproj-F16.gguf", "llm_vision")
     repo, filename, kind = encoders[0]
-    assert repo == "LAiM/Qwen3-VL-8B-Instruct-GGUF"
+    assert repo == "unsloth/Qwen3-VL-8B-Instruct-GGUF"
     # Which rung is the family's call, pinned by exact name in
     # test_diffusion_compat_preflight.py::test_qwen_image_2_1_takes_the_dynamic_4bit_text_encoder.
     # Restating it here broke when #11542 moved it to UD-Q4_K_XL. What this route needs is that
@@ -828,11 +828,11 @@ def test_qwen_image_21_gguf_reaches_sd_cpp_with_its_own_vae_and_a_qwen3vl_encode
     # The encoder repo is fetch-only and must not be offered as a loadable model. The VAE repo is
     # the base itself, so it must NOT be classified that way.
     companions = sd_cpp_companion_only_repo_ids()
-    assert "LAiM/qwen3-vl-8b-instruct-gguf" in companions
+    assert "unsloth/qwen3-vl-8b-instruct-gguf" in companions
     # The VAE ships inside a repo that is itself loadable, so it must NOT be classified fetch-only.
     # Putting it in the GGUF repo instead WOULD be: that repo appears in no family field, so
     # companions-minus-loadable would mark the home of every denoiser as a companion and hide it.
-    assert "LAiM/qwen-image-2.1-fp8" not in companions
+    assert "unsloth/qwen-image-2.1-fp8" not in companions
     assert "qwen/qwen-image-2.1" not in companions
 
 
@@ -1025,12 +1025,12 @@ def test_the_selected_file_decides_the_named_variant(repo, gguf, expected):
 @pytest.mark.parametrize(
     "base, expected",
     [
-        ("Qwen/Qwen-Image-2.1-Turbo", "LAiM/Qwen-Image-2.1-Turbo-FP8"),
+        ("Qwen/Qwen-Image-2.1-Turbo", "unsloth/Qwen-Image-2.1-Turbo-FP8"),
         # A local Turbo pipeline: the Turbo artifact when the loader's tail compare accepts it, else none at all.
-        ("/models/Qwen-Image-2.1-Turbo", "LAiM/Qwen-Image-2.1-Turbo-FP8"),
+        ("/models/Qwen-Image-2.1-Turbo", "unsloth/Qwen-Image-2.1-Turbo-FP8"),
         ("/models/qwen_image_21_turbo", None),
-        ("/models/Qwen-Image-2.1", "LAiM/Qwen-Image-2.1-FP8"),
-        ("Qwen/Qwen-Image-2.1", "LAiM/Qwen-Image-2.1-FP8"),
+        ("/models/Qwen-Image-2.1", "unsloth/Qwen-Image-2.1-FP8"),
+        ("Qwen/Qwen-Image-2.1", "unsloth/Qwen-Image-2.1-FP8"),
     ],
 )
 def test_a_local_turbo_pipeline_never_plans_the_2_1_artifact(base, expected):

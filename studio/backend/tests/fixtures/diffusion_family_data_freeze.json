@@ -1834,7 +1834,7 @@
      []
     ],
     "convrot_variant_repos": [
-     "LAiM/LTX-2.5-FP8"
+     "unsloth/LTX-2.5-FP8"
     ],
     "exclude": [
      "norm",
@@ -2195,7 +2195,7 @@
    },
    "int8": {
     "convrot_filename": "Qwen-Image-2.1-INT8-ConvRot.safetensors",
-    "convrot_repo": "LAiM/Qwen-Image-2.1-FP8",
+    "convrot_repo": "unsloth/Qwen-Image-2.1-FP8",
     "convrot_spec": [
      256,
      [
@@ -2209,8 +2209,8 @@
      ]
     ],
     "convrot_variant_repos": [
-     "LAiM/Qwen-Image-2.1-Turbo-FP8",
-     "LAiM/qwen-image-2.1-turbo-fp8"
+     "unsloth/Qwen-Image-2.1-Turbo-FP8",
+     "unsloth/qwen-image-2.1-turbo-fp8"
     ],
     "exclude": [
      "norm",
@@ -3011,7 +3011,7 @@
    },
    "int8": {
     "convrot_filename": "Z-Image-Turbo-INT8-ConvRot.safetensors",
-    "convrot_repo": "LAiM/Z-Image-Turbo-FP8",
+    "convrot_repo": "unsloth/Z-Image-Turbo-FP8",
     "convrot_spec": [
      256,
      [
@@ -3277,15 +3277,15 @@
    "z-image": "Z-Image-Turbo-INT8-ConvRot.safetensors"
   },
   "int8_family_convrot_repo": {
-   "qwen-image-2.1": "LAiM/Qwen-Image-2.1-FP8",
-   "z-image": "LAiM/Z-Image-Turbo-FP8"
+   "qwen-image-2.1": "unsloth/Qwen-Image-2.1-FP8",
+   "z-image": "unsloth/Z-Image-Turbo-FP8"
   },
   "int8_family_convrot_variant_repos": {
    "ltx-2.5": [
-    "LAiM/LTX-2.5-FP8"
+    "unsloth/LTX-2.5-FP8"
    ],
    "qwen-image-2.1": [
-    "LAiM/Qwen-Image-2.1-Turbo-FP8"
+    "unsloth/Qwen-Image-2.1-Turbo-FP8"
    ]
   },
   "int8_family_exclude": {

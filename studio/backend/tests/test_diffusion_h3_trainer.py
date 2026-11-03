@@ -1525,7 +1525,7 @@ def test_the_h3_conditioner_load_carries_the_hub_token(monkeypatch):
     monkeypatch.setattr(h3, "_assert_component_grid", lambda pipe: None)
     monkeypatch.setattr("core.inference.diffusion.hub_cache_dir", lambda: "/live/hub")
 
-    cfg = types.SimpleNamespace(base_model = "LAiM/private-h3", hf_token = "hf_secret")
+    cfg = types.SimpleNamespace(base_model = "unsloth/private-h3", hf_token = "hf_secret")
     h3._load_conditioners(cfg, "cpu")
 
     assert seen[0] == {"index_token": "hf_secret", "cache_dir": "/live/hub"}

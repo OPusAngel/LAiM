@@ -121,9 +121,9 @@ def layered(fake_runtime, tmp_path):
 @pytest.mark.parametrize(
     "repo_id",
     [
-        "LAiM/Qwen-Image-Layered-GGUF",
+        "unsloth/Qwen-Image-Layered-GGUF",
         "Qwen/Qwen-Image-Layered",
-        "LAiM/qwen_image_layered",
+        "unsloth/qwen_image_layered",
         "/models/qwen-image-layered-UD-Q4_K_XL.gguf",
     ],
 )
@@ -141,34 +141,34 @@ def test_layered_filename_in_a_neutral_folder_resolves():
 
 
 def test_neighbouring_families_keep_their_detection():
-    assert detect_family("LAiM/Qwen-Image-GGUF").name == "qwen-image"
-    assert detect_family("LAiM/Qwen-Image-2512-GGUF").name == "qwen-image"
-    assert detect_family("LAiM/Qwen-Image-Edit-2511-GGUF").name == "qwen-image-edit"
-    assert detect_family("LAiM/Qwen-Image-2.1-GGUF").name == "qwen-image-2.1"
+    assert detect_family("unsloth/Qwen-Image-GGUF").name == "qwen-image"
+    assert detect_family("unsloth/Qwen-Image-2512-GGUF").name == "qwen-image"
+    assert detect_family("unsloth/Qwen-Image-Edit-2511-GGUF").name == "qwen-image-edit"
+    assert detect_family("unsloth/Qwen-Image-2.1-GGUF").name == "qwen-image-2.1"
     # A layered or inpaint variant of a family with no entry of its own is still refused.
-    assert detect_family("LAiM/FLUX.1-dev-Layered-GGUF") is None
-    assert detect_family("LAiM/Qwen-Image-2512-Inpaint") is None
+    assert detect_family("unsloth/FLUX.1-dev-Layered-GGUF") is None
+    assert detect_family("unsloth/Qwen-Image-2512-Inpaint") is None
     assert detect_family_for_pick("/models/misc", "z-image-layered-Q4.gguf") is None
 
 
 def test_layered_family_contract():
-    fam = detect_family("LAiM/Qwen-Image-Layered-GGUF")
+    fam = detect_family("unsloth/Qwen-Image-Layered-GGUF")
     # Image in, layers out: no text-to-image tab.
     assert fam.edit is True and _family_workflows(fam) == ["edit"]
     assert fam.condition_image_mode == "RGBA"
     assert fam.cfg_kwarg == "true_cfg_scale"
     # ComfyUI's Image to Layers template: 20 steps, cfg 2.5, ModelSamplingAuraFlow 1, 2 layers at 640.
     assert (fam.layer_count, fam.layer_resolution) == (2, 640)
-    assert comfy_flow_shift_for(fam, "LAiM/Qwen-Image-Layered-GGUF") == 1.0
+    assert comfy_flow_shift_for(fam, "unsloth/Qwen-Image-Layered-GGUF") == 1.0
     for name in (
-        "LAiM/Qwen-Image-Layered-GGUF",
+        "unsloth/Qwen-Image-Layered-GGUF",
         "Qwen/Qwen-Image-Layered",
         "local/qwen_image_layered",
         "local/qwenimagelayered-q4",
     ):
         assert default_generation_params(name) == (20, 2.5)
     # Families without a layered pipeline stay at 0.
-    assert detect_family("LAiM/Qwen-Image-Edit-2511-GGUF").layer_count == 0
+    assert detect_family("unsloth/Qwen-Image-Edit-2511-GGUF").layer_count == 0
     # The full repo is an allowed non-GGUF base (and the GGUF's base_model tag).
     assert _is_trusted_diffusion_repo("Qwen/Qwen-Image-Layered")
 
@@ -230,7 +230,7 @@ def test_layered_needs_an_input_image(layered):
     [((96, 64), (768, 512)), ((1000, 500), (896, 448)), ((640, 640), (640, 640))],
 )
 def test_registered_shape_is_the_decomposition_canvas(size, expected):
-    fam = detect_family("LAiM/Qwen-Image-Layered-GGUF")
+    fam = detect_family("unsloth/Qwen-Image-Layered-GGUF")
     src = Image.new("RGBA", size)
     # 640 x 640 area at the input's aspect ratio on the 32 px grid, as the pipeline sizes it.
     assert _compile_shape_dims("edit", src, 1024, 1024, fam) == expected
@@ -295,12 +295,12 @@ def test_load_planning_reserves_what_the_decomposition_guard_charges():
     # default render on a card that had to offload to fit (no calibrated placement to release groups from).
     from core.inference import diffusion_memory as dm
 
-    fam = detect_family("LAiM/Qwen-Image-Layered-GGUF")
+    fam = detect_family("unsloth/Qwen-Image-Layered-GGUF")
     assert (dm._QWEN_LAYERED_LAYERS, dm._QWEN_LAYERED_CANVAS) == (
         fam.layer_count,
         fam.layer_resolution,
     )
-    hint = "qwen-image-layered qwen-image-layered-Q4_K_M.gguf LAiM/Qwen-Image-Layered-GGUF"
+    hint = "qwen-image-layered qwen-image-layered-Q4_K_M.gguf unsloth/Qwen-Image-Layered-GGUF"
     side = fam.layer_resolution
     extra = (fam.layer_count + 1) * side * side
     planned = dm.estimate_image_runtime_mib(width = None, height = None, family = hint)

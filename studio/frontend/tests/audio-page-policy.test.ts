@@ -292,19 +292,19 @@ test("STT activation adopts resident sidecars and preserves only pending selecti
 
   assert.equal(
     reconcileSttSelection({
-      selectedRepo: "LAiM/whisper-small",
+      selectedRepo: "unsloth/whisper-small",
       loadedModel: "small",
       loadedEngine: "gguf",
       preservePending: false,
       sidecarKeyFor: () => "small",
       repoIdForSidecarKey: (_key, engine) =>
         engine === "gguf"
-          ? "LAiMai/whisper-small-GGUF"
-          : "LAiM/whisper-small",
+          ? "unslothai/whisper-small-GGUF"
+          : "unsloth/whisper-small",
       engineForRepo: (repo) =>
         repo.endsWith("-GGUF") ? "gguf" : "transformers",
     }),
-    "LAiMai/whisper-small-GGUF",
+    "unslothai/whisper-small-GGUF",
   );
 });
 
@@ -783,9 +783,9 @@ test("a direct .gguf pick is a GGUF target even without a variant filename", () 
     isGgufTtsTarget({ repoId: "Orpheus TTS", loadId: "/m/x.GGUF" }),
     true,
   );
-  assert.equal(isGgufTtsTarget({ repoId: "LAiM/orpheus-3b-0.1-ft-GGUF" }), true);
+  assert.equal(isGgufTtsTarget({ repoId: "unsloth/orpheus-3b-0.1-ft-GGUF" }), true);
   assert.equal(
-    isGgufTtsTarget({ repoId: "LAiM/orpheus", ggufFilename: "x-Q4.gguf" }),
+    isGgufTtsTarget({ repoId: "unsloth/orpheus", ggufFilename: "x-Q4.gguf" }),
     true,
   );
 });
@@ -807,7 +807,7 @@ test("the catalog's own answer outranks the name heuristics", () => {
 });
 
 test("a safetensors pick is not a GGUF target", () => {
-  assert.equal(isGgufTtsTarget({ repoId: "LAiM/orpheus-3b-0.1-ft" }), false);
+  assert.equal(isGgufTtsTarget({ repoId: "unsloth/orpheus-3b-0.1-ft" }), false);
   assert.equal(isGgufTtsTarget({ repoId: "bosonai/higgs-tts-2-3b-base" }), false);
   // "gguf" only as a bare path segment, so a name merely containing it does not match.
   assert.equal(isGgufTtsTarget({ repoId: "acme/ggufology" }), false);
@@ -881,12 +881,12 @@ test("the audio picker marks the main slot's loaded model and quant, not the cha
   // A Hub model loaded from a cache snapshot keeps the repo id its row uses.
   assert.deepEqual(
     audioLoadedSelection({
-      active_model: "LAiM/orpheus-3b-0.1-ft-GGUF",
+      active_model: "unsloth/orpheus-3b-0.1-ft-GGUF",
       model_identifier:
         "/data/hf/hub/models--LAiM--orpheus-3b-0.1-ft-GGUF/snapshots/abc123",
       gguf_variant: "Q4_K_M",
     }),
-    { id: "LAiM/orpheus-3b-0.1-ft-GGUF", variant: "Q4_K_M" },
+    { id: "unsloth/orpheus-3b-0.1-ft-GGUF", variant: "Q4_K_M" },
   );
   assert.deepEqual(audioLoadedSelection({ active_model: null, gguf_variant: "Q8_0" }), {
     id: null,
@@ -906,13 +906,13 @@ test("a deleted model is forgotten only once the settled inventory lacks it", ()
   const available = new Set(["hexgrad/kokoro-82m", "audio-cpp/audio.cpp-gguf"]);
   const settled = { settled: true, error: false, available };
   assert.equal(rememberedModelIsGone("hexgrad/Kokoro-82M", settled), false);
-  assert.equal(rememberedModelIsGone("LAiM/orpheus-3b-0.1-ft", settled), true);
+  assert.equal(rememberedModelIsGone("unsloth/orpheus-3b-0.1-ft", settled), true);
   assert.equal(
-    rememberedModelIsGone("LAiM/orpheus-3b-0.1-ft", { ...settled, settled: false }),
+    rememberedModelIsGone("unsloth/orpheus-3b-0.1-ft", { ...settled, settled: false }),
     false,
   );
   assert.equal(
-    rememberedModelIsGone("LAiM/orpheus-3b-0.1-ft", { ...settled, error: true }),
+    rememberedModelIsGone("unsloth/orpheus-3b-0.1-ft", { ...settled, error: true }),
     false,
   );
   // An inventory without folder rows cannot tell an audio.cpp folder is gone.
@@ -1009,7 +1009,7 @@ function deleteForgetReplay(remembered: Record<string, string>, available: Set<s
 }
 
 test("the local listing landing first keeps a delete marker until the Hub cache fetch lands", () => {
-  const gguf = "LAiM/orpheus-3b-0.1-ft-GGUF";
+  const gguf = "unsloth/orpheus-3b-0.1-ft-GGUF";
   const local = "/models/other";
   const replay = deleteForgetReplay({ speak: gguf }, new Set([gguf.toLowerCase(), local]));
   replay.deleteModel(gguf);
@@ -1059,9 +1059,9 @@ test("a remembered Hub repo the inventory no longer lists is not offered, but ke
   const settled = { settled: true, error: false, available: new Set(["hexgrad/kokoro-82m"]) };
   assert.equal(rememberedModelUnavailable("hexgrad/Kokoro-82M", settled), false);
   // Deleted from the Hub while the Audio page was closed.
-  assert.equal(rememberedModelUnavailable("LAiM/orpheus-3b-0.1-ft", settled), true);
+  assert.equal(rememberedModelUnavailable("unsloth/orpheus-3b-0.1-ft", settled), true);
   assert.equal(
-    rememberedModelUnavailable("LAiM/orpheus-3b-0.1-ft", { ...settled, settled: false }),
+    rememberedModelUnavailable("unsloth/orpheus-3b-0.1-ft", { ...settled, settled: false }),
     false,
   );
   // Trained checkpoints and local folders are not listed by repo id.
@@ -1082,7 +1082,7 @@ test("deleting the audio.cpp package forgets the folders remembered from it", ()
   assert.equal(deleteCoversRememberedModel(qwenTts, qwenTts.toUpperCase()), true);
   assert.equal(deleteCoversRememberedModel("hexgrad/Kokoro-82M", "hexgrad/Kokoro-82M"), true);
   assert.equal(deleteCoversRememberedModel("hexgrad/Kokoro", "hexgrad/Kokoro-82M"), false);
-  assert.equal(deleteCoversRememberedModel("audio-cpp/audio.cpp-gguf", "LAiM/orpheus"), false);
+  assert.equal(deleteCoversRememberedModel("audio-cpp/audio.cpp-gguf", "unsloth/orpheus"), false);
   const settled = { settled: true, error: false };
   // The package repo is gone, so is every folder in it.
   assert.equal(

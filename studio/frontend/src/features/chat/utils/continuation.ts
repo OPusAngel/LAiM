@@ -11,6 +11,8 @@ import {
 } from "../gemini-thought-replay.ts";
 import type { ProviderCompactionContentPart } from "../types/api";
 import { providerCompactionPart } from "./provider-compaction.ts";
+import { translate } from "@/i18n";
+
 
 /** Resuming a response that stopped early (`length`, `cancelled`, `interrupted`): the conversation is re-sent
  *  with the partial as the final assistant turn plus `continue_final_message`, so the prompt ends mid-sentence
@@ -139,12 +141,12 @@ export function restoredAssistantStatus(
 }
 
 const INCOMPLETE_LABELS: Record<IncompleteReason, string> = {
-  length: "Response hit the Max Tokens limit",
-  cancelled: "Response stopped",
-  interrupted: "Response interrupted",
-  context_window: "Response filled the model's context window",
-  empty: "The model returned an empty response",
-  quote_cut: "This response may have ended early",
+  get length() { return translate("uxChat.responseHitTheMaxiot6e"); },
+  get cancelled() { return translate("uxChat.responseStoppedudsmz"); },
+  get interrupted() { return translate("uxChat.responseInterruptedfnka1"); },
+  get context_window() { return translate("uxChat.responseFilledTheModelejsv8"); },
+  get empty() { return translate("uxChat.theModelReturnedAn02gl1"); },
+  get quote_cut() { return translate("uxChat.thisResponseMayHavek89lz"); },
 };
 
 /** The user-facing explanation of why a turn stopped. */
@@ -155,12 +157,11 @@ export function incompleteLabel(reason: IncompleteReason): string {
 /** A hosted window is fixed and the partial has nothing left to replay into, so the only
  *  levers are a shorter conversation or a new one. */
 const INCOMPLETE_REMEDIES: Partial<Record<IncompleteReason, string>> = {
-  context_window: "Start a new chat, or shorten this one, to keep going",
+  get context_window() { return translate("uxChat.startANewChat0h4vf"); },
   // There is no partial to resume from, so the way out is another attempt.
-  empty: "Try again, or pick a different model",
+  get empty() { return translate("uxChat.tryAgainOrPick8ps9k"); },
   // Detection is heuristic, and continuation may repeat the cut.
-  quote_cut:
-    "The model may have emitted a special token while quoting it. Write special tokens with a space inside, like < |im_end|> or < end_of_turn>, ask the model to do the same, and try again",
+  get quote_cut() { return translate("uxChat.theModelMayHave3mzo4"); },
 };
 
 /** What to do about a turn that stopped early, or `null` when resuming is the answer. */

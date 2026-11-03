@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -326,9 +327,7 @@ export function GuidedTour({
                       <div className="min-w-0">
                         <div className="inline-flex items-center gap-2 rounded-full bg-[rgb(6_29_33_/_calc(0.04*var(--contrast-wash-gain,1)))] px-2.5 py-1 text-ui-10 font-mono text-foreground/60 ring-1 ring-[rgb(6_29_33_/_calc(0.1*var(--contrast-edge-gain,1)))] dark:bg-[rgb(249_226_222_/_calc(0.04*var(--contrast-wash-gain,1)))] dark:text-zinc-200/75 dark:ring-[rgb(249_226_222_/_calc(0.14*var(--contrast-edge-gain,1)))]">
                           {idx + 1}/{total}
-                          <span className="size-1 rounded-full bg-control-accent/70" />
-                          guided tour
-                        </div>
+                          <span className="size-1 rounded-full bg-control-accent/70" />{translate("uxTour.guidedToururrfu")}</div>
                         <DialogPrimitive.Title
                           className="mt-2 text-ui-18 leading-tight"
                           style={{ fontFamily: "var(--font-serif)" }}
@@ -345,7 +344,7 @@ export function GuidedTour({
                         size="icon-sm"
                         className="text-foreground/60 hover:text-foreground hover:bg-[rgb(6_29_33_/_calc(0.05*var(--contrast-wash-gain,1)))] dark:text-zinc-300/70 dark:hover:text-zinc-100 dark:hover:bg-[rgb(249_226_222_/_calc(0.1*var(--contrast-wash-gain,1)))]"
                         onClick={() => requestClose("skip")}
-                        aria-label="Skip tour"
+                        aria-label={translate("uxFeatures.skipTourgoc2e")}
                       >
                         <HugeiconsIcon icon={Cancel01Icon} className="size-4" />
                       </Button>
@@ -368,7 +367,7 @@ export function GuidedTour({
                           onClick={() => setIdx((i) => Math.max(0, i - 1))}
                         >
                           <ChevronLeftIcon className="size-4" />
-                          Back
+                          {translate("browser.back")}
                         </Button>
                         {isLast ? (
                           <Button
@@ -377,7 +376,7 @@ export function GuidedTour({
                             onClick={() => requestClose("complete")}
                           >
                             <HugeiconsIcon icon={CheckmarkCircle01Icon} className="size-4" />
-                            Done
+                            {translate("common.done")}
                           </Button>
                         ) : (
                           <Button
@@ -394,9 +393,7 @@ export function GuidedTour({
                   </div>
 
                   <div className="h-px bg-gradient-to-r from-transparent via-black/10 to-transparent dark:via-white/14" />
-                  <div className="px-5 py-3 text-ui-11 text-foreground/55 dark:text-zinc-300/65">
-                    Tip: `Esc` skips. Tour blocks clicks so you can read.
-                  </div>
+                  <div className="px-5 py-3 text-ui-11 text-foreground/55 dark:text-zinc-300/65">{translate("uxTour.tipEscSkipsTourkzsjt")}</div>
                 </motion.div>
               </DialogPrimitive.Content>
             </>

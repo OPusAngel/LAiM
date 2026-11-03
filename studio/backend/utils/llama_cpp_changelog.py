@@ -30,7 +30,7 @@ logger = structlog.get_logger(__name__)
 
 MAX_CHANGES = 50
 # The only repo whose notes this module can read: generated, cumulative, one bullet per carried PR. --published-repo can point elsewhere, and a per-release body says nothing about what is still carried.
-CUMULATIVE_NOTES_REPO = "LAiMai/llama.cpp"
+CUMULATIVE_NOTES_REPO = "unslothai/llama.cpp"
 # A release body is a few KB; the cap only bounds a far side that misbehaves.
 MAX_RELEASE_BYTES = 4 * 1024 * 1024
 # Without a floor, a held-down Retry is two uncached GitHub calls per click.

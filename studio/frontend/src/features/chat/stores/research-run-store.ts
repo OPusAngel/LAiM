@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import { translate } from "@/i18n";
 import { create } from "zustand";
 // eslint-disable-next-line no-restricted-imports -- Avoid the auth barrel's React login page.
 import { AUTH_SESSION_CLEARED_EVENT } from "@/features/auth/session";
@@ -109,7 +110,7 @@ function statusActivity(event: ResearchEvent): ResearchActivity | null {
   };
   switch (event.event) {
     case "run.created":
-      return { ...base, title: "Research requested", state: "complete" };
+      return { ...base, title: translate("uxChat.researchRequested1yftg"), state: "complete" };
     case "run.started":
       return event.data.status === "planning"
         ? null
@@ -117,36 +118,36 @@ function statusActivity(event: ResearchEvent): ResearchActivity | null {
             ...base,
             title:
               event.data.resumed || attempt > 0
-                ? "Research resumed"
-                : "Research started",
+                ? translate("uxChat.researchResumednp6db")
+                : translate("uxChat.researchStartedkzq0s"),
             state: "complete",
           };
     case "run.approved":
-      return { ...base, title: "Plan approved", state: "complete" };
+      return { ...base, title: translate("uxChat.planApprovedlv8mc"), state: "complete" };
     case "run.cancelRequested":
-      return { ...base, title: "Stopping research safely", state: "running" };
+      return { ...base, title: translate("uxChat.stoppingResearchSafelyegk6u"), state: "running" };
     case "run.cancelled":
-      return { ...base, title: "Research cancelled", state: "cancelled" };
+      return { ...base, title: translate("uxChat.researchCancelled1l6zf"), state: "cancelled" };
     case "run.retried":
       return {
         ...base,
-        title: `Started attempt ${attempt + 1}`,
-        detail: "Previous activity is preserved below.",
+        get title() { return translate("uxChat.startedAttemptec0b6", { p1: attempt + 1 }); },
+        get detail() { return translate("uxChat.previousActivityIsPreserved3hco3"); },
         state: "complete",
       };
     case "run.rebound":
       return {
         ...base,
-        title: "Moved to a new question",
-        detail: "Activity from the stopped question is preserved below.",
+        title: translate("uxChat.movedToANew16zja"),
+        get detail() { return translate("uxChat.activityFromTheStoppedhjtxg"); },
         state: "complete",
       };
     case "run.completed":
-      return { ...base, title: "Research completed", state: "complete" };
+      return { ...base, title: translate("uxChat.researchCompletedqfmwx"), state: "complete" };
     case "run.failed":
       return {
         ...base,
-        title: "Research failed",
+        title: translate("uxChat.researchFailed5ap5f"),
         detail: event.data.error ?? undefined,
         state: "failed",
       };
@@ -168,14 +169,14 @@ function findLastActivityIndex(
 export function researchPhaseTitle(phase: ResearchPhase | undefined): string {
   switch (phase) {
     case "planning":
-      return "Planning an approach";
+      return translate("uxChat.planningAnApproachcch4k");
     case "synthesis_audit":
-      return "Checking the evidence";
+      return translate("uxChat.checkingTheEvidenceo5c0m");
     case "synthesis":
     case "synthesis_recovery":
-      return "Writing the report";
+      return translate("uxChat.writingTheReportzwhxp");
     case "decision":
-      return "Choosing the next step";
+      return translate("uxChat.choosingTheNextStepgpiaj");
     default:
       return "Working";
   }
@@ -209,7 +210,7 @@ export function stepResultDetail(sourceCount: number, action?: string): string {
   }
   // A fetch records an excerpt of one page and never collects sources, so a count would read as a
   // failure. A search that returns nothing is a real outcome, not a styled success.
-  return action === "fetch" ? "Page read" : "No usable results";
+  return action === "fetch" ? translate("uxChat.pageRead3z0ii") : translate("uxChat.noUsableResults9dvq3");
 }
 
 /** Header summary. Counts are omitted until they exist, so a run that has not searched yet reads
@@ -393,7 +394,7 @@ function reduceActivity(
       attempt,
       kind: "plan",
       createdAt: event.createdAt,
-      title: "Research plan ready",
+      title: translate("uxChat.researchPlanReadyvrzvq"),
       plan: event.data.plan ?? event.run.plan ?? undefined,
       state: "action",
     });
@@ -427,8 +428,8 @@ function reduceActivity(
       createdAt: event.createdAt,
       title:
         event.data.title ??
-        (action === "fetch" ? "Reading a page" : "Searching the web"),
-      detail: action === "fetch" ? "Reading page" : "Web search",
+        (action === "fetch" ? translate("uxChat.readingAPagemxnhp") : translate("uxChat.searchingTheWebbdqwe")),
+      detail: action === "fetch" ? translate("uxChat.readingPagekbun1") : translate("uxChat.webSearcht53qk"),
       state: "running",
       stepPosition: event.data.stepPosition ?? event.data.position,
       action,
@@ -488,7 +489,7 @@ function reduceActivity(
         state: event.event === "step.failed" ? "failed" : "complete",
         detail:
           event.event === "step.failed"
-            ? (event.data.error ?? "The tool could not complete this action.")
+            ? (event.data.error ?? translate("uxChat.theToolCouldNoto23fa"))
             : stepResultDetail(
                 event.data.sourceCount ?? activity.sources?.length ?? 0,
                 event.data.action ?? activity.action,
@@ -530,7 +531,7 @@ function reduceActivity(
         attempt,
         kind: "report",
         createdAt: event.createdAt,
-        title: "Writing the report",
+        title: translate("uxChat.writingTheReport1dq38"),
         state: "running",
       });
     }
@@ -1095,7 +1096,7 @@ export function ensureResearchRunFollowed(
             runId,
             error instanceof Error
               ? error.message
-              : "Research activity disconnected",
+              : translate("uxChat.researchActivityDisconnectednx3ew"),
           );
       }
     } finally {

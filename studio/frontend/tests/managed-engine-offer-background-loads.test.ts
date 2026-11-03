@@ -6,6 +6,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { readSrc } from "./helpers/kit.ts";
+
+import { enTranslate } from "./helpers/module-stubs.ts";
+
+// A slice of src run through new Function has no module table, so the catalog stand-in goes in as a global.
+Object.assign(globalThis, { translate: enTranslate });
 import { DEFAULT_ENGINE_LAUNCH_FIELDS } from "../src/features/chat/lib/engine-launch-fields.ts";
 
 const OFFER = {
@@ -76,7 +81,7 @@ const paneDecisionBody = new AsyncFunction(
    ${composer.slice(paneStart, paneEnd)}
    return paneEngineFields;`,
 );
-const sel = { id: "LAiM/Qwen3.8-27B-NVFP4" };
+const sel = { id: "unsloth/Qwen3.8-27B-NVFP4" };
 
 /** Runs the pane's offer step; `choice` is what the dialog answers. */
 async function paneDecision(

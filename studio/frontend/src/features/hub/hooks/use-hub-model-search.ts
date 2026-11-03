@@ -2,6 +2,7 @@
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { usePlatformStore } from "@/config/env";
+import { HF_SOURCE_OWNER } from "@/config/hub-source";
 import { getHfEndpoint, useHfEndpoint } from "@/lib/hf-endpoint";
 import type { PipelineType } from "@huggingface/hub";
 import { listModels, modelInfo } from "@huggingface/hub";
@@ -41,6 +42,8 @@ import {
   type ModelSearchFilters,
 } from "../lib/model-search-filters";
 import { pullBatch, useHubPaginatedSearch } from "./use-hub-paginated-search";
+import { translate } from "@/i18n";
+
 
 // "gguf" is not in the @huggingface/hub expandable-key type, but the listing supports
 // expand=gguf and listModels' pick() copies any requested field through at runtime. Request it
@@ -330,7 +333,7 @@ async function* mergedModelIterator(
     (task, taskSignal) =>
       listModels({
         hubUrl: getHfEndpoint(),
-        search: { query, owner: "LAiM", ...(task ? { task } : {}) },
+        search: { query, owner: HF_SOURCE_OWNER, ...(task ? { task } : {}) },
         fetch: makeSortFetch(sortBy, direction, taskSignal, parameterFilter),
         ...common,
       }) as AsyncGenerator<unknown>,
@@ -455,7 +458,7 @@ async function* priorityThenListingIterator(
     (task, taskSignal) =>
       listModels({
         hubUrl: getHfEndpoint(),
-        search: { owner: "LAiM", ...(task ? { task } : {}) },
+        search: { owner: HF_SOURCE_OWNER, ...(task ? { task } : {}) },
         fetch: makeSortFetch(sortBy, direction, taskSignal, parameterFilter),
         ...common,
       }) as AsyncGenerator<unknown>,
@@ -553,9 +556,9 @@ async function* providerLAiMFirstIterator(
   };
   const nameOf = (model: unknown) => (model as { name?: string } | null)?.name;
   const isProviders = (name: string) =>
-    resolveOwnerProviderLogo("LAiM", name.split("/")[1])?.id === provider.id;
+    resolveOwnerProviderLogo(HF_SOURCE_OWNER, name.split("/")[1])?.id === provider.id;
   const LAiMIters = providerSearchTerms(provider).map((term) =>
-    listing({ query: term, owner: "LAiM" }),
+    listing({ query: term, owner: HF_SOURCE_OWNER }),
   );
   const orgIters = opts.includeOrgs
     ? providerHubOrgs(provider).map((owner) => listing({ owner }))
@@ -732,7 +735,7 @@ async function* channelLAiMFirstIterator(
     hubUrl: getHfEndpoint(),
     search: {
       ...(queryString ? { query: queryString } : {}),
-      owner: "LAiM",
+      owner: HF_SOURCE_OWNER,
       ...(channel.tags ? { tags: channel.tags } : {}),
     },
     additionalFields: ALL_FIELDS,
@@ -893,7 +896,7 @@ export function useHubModelSearch(
   const { isPublisherQuery, searchQuery, pinnedId, trimmed } = useMemo(() => {
     const t = query.trim();
     const m = PUBLISHER_RE.exec(t);
-    const is = !!m && m[1].toLowerCase() !== "LAiM";
+    const is = !!m && m[1].toLowerCase() !== HF_SOURCE_OWNER;
     return {
       isPublisherQuery: is,
       searchQuery: is ? m![2] : t,
@@ -921,7 +924,7 @@ export function useHubModelSearch(
         if (LAiMOnly && !channelOwner) {
           return createChannelIterator(
             {
-              owner: "LAiM",
+              owner: HF_SOURCE_OWNER,
               tags: channelTags,
               query: channelQuery || undefined,
             },
@@ -970,7 +973,7 @@ export function useHubModelSearch(
       // Browsing only: a typed search keeps the search paths below (LAiM floated, tasks checked client-side).
       if (sortBy === "fresh" && !trimmed) {
         return freshChannelIterator(
-          { owner: LAiMOnly ? "LAiM" : undefined },
+          { owner: LAiMOnly ? HF_SOURCE_OWNER : undefined },
           {
             sortDirection,
             accessToken,
@@ -1013,7 +1016,7 @@ export function useHubModelSearch(
               hubUrl: getHfEndpoint(),
               // LAiM-only scope restricts the plain sort browse to the org.
               search: {
-                ...(LAiMOnly ? { owner: "LAiM" } : {}),
+                ...(LAiMOnly ? { owner: HF_SOURCE_OWNER } : {}),
                 ...(task ? { task } : {}),
               },
               additionalFields: ALL_FIELDS,
@@ -1040,7 +1043,7 @@ export function useHubModelSearch(
       if (LAiMOnly) {
         const orgSearch = listModels({
           hubUrl: getHfEndpoint(),
-          search: { query: searchQuery, owner: "LAiM" },
+          search: { query: searchQuery, owner: HF_SOURCE_OWNER },
           additionalFields: ALL_FIELDS,
           fetch: makeSortFetch(sortBy, sortDirection, signal, filterRange),
           sort: hubListingSort(sortBy),
@@ -1117,7 +1120,7 @@ export function useHubModelSearch(
         if ([401, 403, 404].includes(response.status)) return null;
         if (!response.ok) {
           throw new Error(
-            `Model filter metadata request failed (HTTP ${response.status})`,
+            translate("uxHub.modelFilterMetadataRequestea1a2", { p1: response.status }),
           );
         }
         // One repo's malformed config.json must not abort the whole search.
@@ -1234,8 +1237,8 @@ export function useHubModelSearch(
         stableCache.source !== incoming)
     ) {
       const sorted = [...incoming].sort((a, b) => {
-        const aFirst = a.id.startsWith("LAiM/") ? 0 : 1;
-        const bFirst = b.id.startsWith("LAiM/") ? 0 : 1;
+        const aFirst = a.id.startsWith("unsloth/") ? 0 : 1;
+        const bFirst = b.id.startsWith("unsloth/") ? 0 : 1;
         return aFirst - bFirst;
       });
       results = sorted;

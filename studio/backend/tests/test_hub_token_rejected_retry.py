@@ -28,7 +28,7 @@ from utils.models.model_config import (
 )
 from utils.utils import is_hf_authentication_error
 
-REPO = "LAiM/Qwen3-0.6B-GGUF"
+REPO = "unsloth/Qwen3-0.6B-GGUF"
 GGUF = "Qwen3-0.6B-UD-Q4_K_XL.gguf"
 OAUTH = "hf_oauth_" + "a" * 40
 
@@ -483,7 +483,7 @@ def test_admission_sizing_counts_companions_when_the_token_is_refused(monkeypatc
 
     monkeypatch.setattr(huggingface_hub, "model_info", model_info)
     sized = inference_routes._remote_gguf_companion_bytes(
-        "LAiM/Qwen3-VL-2B-Instruct-GGUF", hf_token = OAUTH, include_mmproj = True
+        "unsloth/Qwen3-VL-2B-Instruct-GGUF", hf_token = OAUTH, include_mmproj = True
     )
     assert sized == 800_000_000
 

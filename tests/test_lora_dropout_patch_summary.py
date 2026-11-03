@@ -137,7 +137,7 @@ def test_summary_reason_is_logged_for_a_real_model():
             records.append(record.getMessage())
 
     model, _tokenizer = FastLanguageModel.from_pretrained(
-        "LAiM/Llama-3.2-1B-Instruct",
+        "unsloth/Llama-3.2-1B-Instruct",
         max_seq_length = 512,
         load_in_4bit = True,
     )

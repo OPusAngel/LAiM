@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,28 +32,14 @@ export function TransportConflictDialog({
   const previousLabel = conflict?.previous.toUpperCase() ?? "";
   const nextLabel = conflict?.next.toUpperCase() ?? "";
   const description = conflict?.resumable ? (
-    <>
-      You started this download with{" "}
-      <span className="font-medium text-foreground">{previousLabel}</span>, but
-      your current setting is{" "}
-      <span className="font-medium text-foreground">{nextLabel}</span>. Resume
-      with {previousLabel} to keep the progress you already have, or restart
-      with {nextLabel} to begin from scratch.
-    </>
+    <>{translate("uxHub.youStartedThisDownload672yx", { p1: " " })}<span className="font-medium text-foreground">{previousLabel}</span>{translate("uxHub.butYourCurrentSettingumrxt", { p1: " " })}<span className="font-medium text-foreground">{nextLabel}</span>{translate("uxHub.resumeWithToKeepkwm0t", { p1: previousLabel, p2: nextLabel })}</>
   ) : (
-    <>
-      Your previous download used{" "}
-      <span className="font-medium text-foreground">{previousLabel}</span>,
-      which can't resume its partial files, so the existing partial will be
-      discarded and this download will start from the beginning either way.
-      Restart with {previousLabel} to keep it usually faster, or restart with{" "}
-      {nextLabel} so future cancels can resume.
-    </>
+    <>{translate("uxHub.yourPreviousDownloadUsedgww9i", { p1: " " })}<span className="font-medium text-foreground">{previousLabel}</span>{translate("uxHub.whichCanTResumez81dd", { p1: previousLabel, p2: " ", p3: nextLabel })}</>
   );
   const primaryLabel = conflict?.resumable
-    ? `Resume with ${previousLabel}`
-    : `Restart with ${previousLabel}`;
-  const secondaryLabel = `Restart with ${nextLabel}`;
+    ? translate("uxHub.resumeWithqbc6v", { p1: previousLabel })
+    : translate("uxHub.restartWithh10pt", { p1: previousLabel });
+  const secondaryLabel = translate("uxHub.restartWithh10pt", { p1: nextLabel });
   return (
     <AlertDialog
       open={conflict !== null}
@@ -62,7 +49,7 @@ export function TransportConflictDialog({
     >
       <AlertDialogContent className="sm:!max-w-[calc(22rem*var(--ui-space-scale,1))]">
         <AlertDialogHeader>
-          <AlertDialogTitle>Different transport mode</AlertDialogTitle>
+          <AlertDialogTitle>{translate("uxCopy.differentTransportModekbgct")}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="!flex !flex-col gap-2 sm:!flex-col sm:!justify-stretch">
@@ -86,7 +73,7 @@ export function TransportConflictDialog({
             {secondaryLabel}
           </AlertDialogAction>
           <AlertDialogCancel className="w-full !bg-transparent hover:!bg-transparent">
-            Cancel
+            {translate("browser.agentSettings.cancel")}
           </AlertDialogCancel>
         </AlertDialogFooter>
       </AlertDialogContent>

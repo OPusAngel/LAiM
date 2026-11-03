@@ -21,9 +21,9 @@ store.set(
   JSON.stringify({
     state: {
       agentsAgent: "codex",
-      agentsModel: "LAiM/Foo-GGUF",
+      agentsModel: "unsloth/Foo-GGUF",
       agentsVariant: "UD-Q4_K_XL",
-      agentsVariantModel: "LAiM/Foo-GGUF",
+      agentsVariantModel: "unsloth/Foo-GGUF",
       apiExampleLang: "pythonTools",
       apiExampleOs: "windows",
       apiExampleAgent: "codex",
@@ -44,7 +44,7 @@ const { useSettingsPanelPrefsStore, SETTINGS_PANEL_PREFS_STORAGE_KEY } =
 test("a version 0 record hydrates every field", () => {
   const s = useSettingsPanelPrefsStore.getState();
   assert.equal(s.agentsAgent, "codex");
-  assert.equal(s.agentsModel, "LAiM/Foo-GGUF");
+  assert.equal(s.agentsModel, "unsloth/Foo-GGUF");
   assert.equal(s.agentsOs, null);
   assert.equal(s.agentsVariant, "UD-Q4_K_XL");
   assert.equal(s.apiExampleOs, "windows");
@@ -56,10 +56,10 @@ test("a version 0 record hydrates every field", () => {
 
 test("picking a model carries its quant, and clearing it clears the quant", () => {
   const s = useSettingsPanelPrefsStore.getState();
-  s.setAgentsModel("LAiM/Bar-GGUF", "Q4_K_M");
+  s.setAgentsModel("unsloth/Bar-GGUF", "Q4_K_M");
   let next = useSettingsPanelPrefsStore.getState();
-  assert.equal(next.agentsModel, "LAiM/Bar-GGUF");
-  assert.equal(next.agentsVariantModel, "LAiM/Bar-GGUF");
+  assert.equal(next.agentsModel, "unsloth/Bar-GGUF");
+  assert.equal(next.agentsVariantModel, "unsloth/Bar-GGUF");
   next.setAgentsModel(null, null);
   next = useSettingsPanelPrefsStore.getState();
   assert.equal(next.agentsModel, null);
@@ -69,10 +69,10 @@ test("picking a model carries its quant, and clearing it clears the quant", () =
 
 test("a quant remembered for one model does not follow onto another", () => {
   const s = useSettingsPanelPrefsStore.getState();
-  s.setAgentsVariant("LAiM/Baz-GGUF", "Q4_K_M");
+  s.setAgentsVariant("unsloth/Baz-GGUF", "Q4_K_M");
   const next = useSettingsPanelPrefsStore.getState();
   assert.equal(next.agentsVariant, "Q4_K_M");
-  assert.equal(next.agentsVariantModel, "LAiM/Baz-GGUF");
+  assert.equal(next.agentsVariantModel, "unsloth/Baz-GGUF");
   assert.equal(next.agentsModel, null, "a quant pick must not pin the model");
 });
 
@@ -142,11 +142,11 @@ test("a persisted blob cannot replace the store actions", () => {
 test("a quant picked while following the resident model does not pin a model", () => {
   const s = useSettingsPanelPrefsStore.getState();
   s.setAgentsModel(null, null);
-  s.setAgentsVariant("LAiM/Qux-GGUF", "Q6_K");
+  s.setAgentsVariant("unsloth/Qux-GGUF", "Q6_K");
   const next = useSettingsPanelPrefsStore.getState();
   assert.equal(next.agentsModel, null);
   assert.equal(next.agentsVariant, "Q6_K");
-  assert.equal(next.agentsVariantModel, "LAiM/Qux-GGUF");
+  assert.equal(next.agentsVariantModel, "unsloth/Qux-GGUF");
 });
 
 // Half a pair is unusable: a quant with no model can never be scoped to one.
@@ -167,9 +167,9 @@ test("a record from a newer build falls back to defaults", () => {
   const { migrate, version } = useSettingsPanelPrefsStore.persist.getOptions();
   assert.ok(migrate);
   assert.equal(version, 1);
-  assert.deepEqual(migrate({ agentsModel: "LAiM/Foo-GGUF" }, 2), {});
-  assert.deepEqual(migrate({ agentsModel: "LAiM/Foo-GGUF" }, 0), {
-    agentsModel: "LAiM/Foo-GGUF",
+  assert.deepEqual(migrate({ agentsModel: "unsloth/Foo-GGUF" }, 2), {});
+  assert.deepEqual(migrate({ agentsModel: "unsloth/Foo-GGUF" }, 0), {
+    agentsModel: "unsloth/Foo-GGUF",
   });
 });
 

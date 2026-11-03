@@ -12,7 +12,7 @@ from torch import nn
 
 
 pytest.importorskip("sentence_transformers")
-SOURCE = Path(__file__).resolve().parents[2] / "LAiM/models/sentence_transformer_loss.py"
+SOURCE = Path(__file__).resolve().parents[2] / "unsloth/models/sentence_transformer_loss.py"
 SPEC = importlib.util.spec_from_file_location("st_merged_loss_under_test", SOURCE)
 MODULE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(MODULE)

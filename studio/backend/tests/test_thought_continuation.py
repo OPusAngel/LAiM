@@ -420,7 +420,7 @@ def _route_backend(monkeypatch, streams: list[list[str]], payloads: list[dict], 
     backend._supports_reasoning = True
     backend._reasoning_style = "enable_thinking"
     backend._supports_tools = tools
-    backend._model_identifier = "LAiM/Qwen3.5-4B-GGUF"
+    backend._model_identifier = "unsloth/Qwen3.5-4B-GGUF"
 
     @contextlib.contextmanager
     def fake_stream_with_retry(

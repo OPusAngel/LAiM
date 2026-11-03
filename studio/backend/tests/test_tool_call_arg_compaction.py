@@ -404,7 +404,7 @@ def test_the_refusal_does_not_read_as_a_contradiction():
 def test_a_receipt_cannot_be_mistaken_for_the_tools_output():
     """The first wording was quoted back by the model as "the tool result says ...".
 
-    It then decided the sandbox had mangled its file and abandoned a working approach. The
+    It then decided the workdir had mangled its file and abandoned a working approach. The
     receipt has to name whose text it replaced, and say what it is not.
     """
     body = "y" * 8000

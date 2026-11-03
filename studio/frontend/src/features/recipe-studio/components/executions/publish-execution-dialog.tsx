@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { useEffect, useMemo, useState, type ReactElement } from "react";
 import {
   CheckmarkCircle02Icon,
@@ -60,11 +61,11 @@ function buildDefaultDescription(execution: RecipeExecutionRecord | null): strin
   if (!execution) {
     return "";
   }
-  const runName = execution.run_name?.trim() || "This dataset";
+  const runName = execution.run_name?.trim() || translate("uxRecipestudio.thisDatasetdqr1y");
   const records = getExecutionRecordCount(execution);
   const recordPart =
     typeof records === "number" && records > 0
-      ? ` It contains ${records.toLocaleString()} generated records.`
+      ? translate("uxRecipestudio.itContainsGeneratedRecordslhuoh", { p1: records.toLocaleString() })
       : "";
   return `${runName} was generated with LAiM Recipe Studio.${recordPart}`;
 }
@@ -87,7 +88,7 @@ export function PublishExecutionDialog({
     () => buildDefaultDescription(execution),
     [execution],
   );
-  const runLabel = execution?.run_name?.trim() || "Completed run";
+  const runLabel = execution?.run_name?.trim() || translate("uxRecipestudio.completedRunuulm3");
   const recordCount = getExecutionRecordCount(execution);
   const recordLabel =
     typeof recordCount === "number" ? recordCount.toLocaleString() : "--";
@@ -121,15 +122,15 @@ export function PublishExecutionDialog({
     }
     const ok = await copyToClipboard(publishedUrl);
     if (ok) {
-      toastSuccess("Dataset link copied");
+      toastSuccess(translate("uxRecipestudio.datasetLinkCopiedg7rwq"));
       return;
     }
-    toastError("Copy failed", "Could not copy the dataset link.");
+    toastError(translate("uxRecipestudio.copyFaileddms0y"), translate("uxRecipestudio.couldNotCopyThe6ywgv"));
   };
 
   const handlePublish = async (): Promise<void> => {
     if (!execution?.jobId) {
-      setPublishError("This run is missing a job id, so it cannot be published.");
+      setPublishError(translate("uxRecipestudio.thisRunIsMissinglgser"));
       return;
     }
     setPublishing(true);
@@ -143,12 +144,12 @@ export function PublishExecutionDialog({
         artifact_path: execution.artifact_path,
       });
       setPublishedUrl(result.url);
-      toastSuccess("Dataset published");
+      toastSuccess(translate("uxRecipestudio.datasetPublishedh2ncd"));
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Could not publish this dataset.";
+        error instanceof Error ? error.message : translate("uxRecipestudio.couldNotPublishThiszsemg");
       setPublishError(message);
-      toastError("Publish failed", message);
+      toastError(translate("uxRecipestudio.publishFailed33pp5"), message);
     } finally {
       setPublishing(false);
     }
@@ -185,75 +186,70 @@ export function PublishExecutionDialog({
               <div className="space-y-1 text-center">
                 <DialogTitle>Published</DialogTitle>
                 <DialogDescription>
-                  Your dataset is live on Hugging Face.
+                  {translate("uxRecipestudio.yourDatasetIsLivexrz1n")}
                 </DialogDescription>
               </div>
             </div>
             <div className="rounded-2xl border border-border/60 bg-card/55 p-3 text-xs">
-              <p className="mb-1 text-muted-foreground">Dataset URL</p>
+              <p className="mb-1 text-muted-foreground">{translate("uxRecipestudio.datasetURLo8v0w")}</p>
               <p className="break-all font-medium text-foreground">{publishedUrl}</p>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={handleCopyUrl}>
                 <HugeiconsIcon icon={Copy01Icon} className="mr-2 size-4" />
-                Copy link
+                {translate("linkMenu.copyLink")}
               </Button>
               <Button asChild={true}>
                 <a href={publishedUrl} target="_blank" rel="noreferrer">
-                  Open repo
+                  {translate("uxRecipestudio.openRepovokyr")}
                   <ChevronRightIcon className="ml-2 size-4" />
                 </a>
               </Button>
               <Button variant="ghost" onClick={() => onOpenChange(false)}>
-                Done
+                {translate("common.done")}
               </Button>
             </DialogFooter>
           </>
         ) : (
           <>
             <DialogHeader>
-              <DialogTitle>Publish to Hugging Face</DialogTitle>
+              <DialogTitle>{translate("uxRecipestudio.publishToHuggingFacew4gvt")}</DialogTitle>
               <DialogDescription>
-                Create or update a dataset repo from this completed run.
+                {translate("uxRecipestudio.createOrUpdateAl2hh3")}
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4">
               <div className="rounded-2xl border border-border/60 bg-card/55 p-3 text-xs">
-                <p className="font-medium text-foreground">From this run</p>
+                <p className="font-medium text-foreground">{translate("uxRecipestudio.fromThisRunwdcon")}</p>
                 <div className="mt-2 grid gap-1.5 text-muted-foreground sm:grid-cols-2">
-                  <p>
-                    Run: <span className="text-foreground">{runLabel}</span>
+                  <p>{translate("uxRecipestudio.run44t0h")}<span className="text-foreground">{runLabel}</span>
                   </p>
-                  <p>
-                    Records: <span className="text-foreground">{recordLabel}</span>
+                  <p>{translate("uxRecipestudio.recordswaeia")}<span className="text-foreground">{recordLabel}</span>
                   </p>
                 </div>
-                <p className="mt-2 text-muted-foreground">
-                  We’ll upload the generated dataset, dataset card, images, and any processor
-                  outputs from this execution.
-                </p>
+                <p className="mt-2 text-muted-foreground">{translate("uxRecipestudio.weLlUploadThearadi")}</p>
               </div>
 
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-foreground" htmlFor="publish-repo-id">
-                  Repository
+                  {translate("uxRecipestudio.repository1s7ad")}
                 </label>
                 <Input
                   id="publish-repo-id"
-                  placeholder="your-name/customer-support-synth"
+                  placeholder={translate("uxRecipestudio.yourNameCustomerSupport19v5a")}
                   value={repoId}
                   onChange={(event) => setRepoId(event.target.value)}
                   disabled={publishing}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Use the format <span className="font-mono">username-or-org/dataset-name</span>.
+                  {translate("uxCopy.useTheFormatgbklu")} <span className="font-mono">username-or-org/dataset-name</span>.
                 </p>
               </div>
 
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-foreground" htmlFor="publish-description">
-                  About this dataset
+                  {translate("uxRecipestudio.aboutThisDataset16hhl")}
                 </label>
                 <Textarea
                   id="publish-description"
@@ -262,26 +258,24 @@ export function PublishExecutionDialog({
                   onChange={(event) => setDescription(event.target.value)}
                   disabled={publishing}
                   rows={4}
-                  placeholder={defaultDescription || "What is this dataset for?"}
+                  placeholder={defaultDescription || translate("uxRecipestudio.whatIsThisDatasetphear")}
                 />
                 <p className="text-xs text-muted-foreground">
-                  This short summary is used in the dataset card on Hugging Face.
+                  {translate("uxRecipestudio.thisShortSummaryIst2hdl")}
                 </p>
               </div>
 
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between gap-3">
                   <label className="text-sm font-medium text-foreground" htmlFor="publish-hf-token">
-                    HF write token
+                    {translate("uxRecipestudio.hFWriteToken1sbvi")}
                   </label>
                   <a
                     href="https://huggingface.co/settings/tokens"
                     target="_blank"
                     rel="noreferrer"
                     className="text-xs text-muted-foreground underline underline-offset-3 hover:text-foreground"
-                  >
-                    Manage tokens
-                  </a>
+                  >{translate("uxRecipestudio.manageTokensopmx4")}</a>
                 </div>
                 <div className="relative">
                   <HugeiconsIcon
@@ -293,14 +287,14 @@ export function PublishExecutionDialog({
                     type="password"
                     autoComplete="new-password"
                     className="pl-9"
-                    placeholder="hf_..."
+                    placeholder={translate("uxRecipestudio.hfdcawb")}
                     value={hfToken}
                     onChange={(event) => setHfToken(event.target.value)}
                     disabled={publishing}
                   />
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Leave empty if you're already logged in via CLI.
+                  {translate("uxRecipestudio.leaveEmptyIfYouoe33d")}
                 </p>
               </div>
 
@@ -316,11 +310,9 @@ export function PublishExecutionDialog({
                   <label
                     htmlFor="publish-private"
                     className="text-sm font-medium text-foreground"
-                  >
-                    Private dataset
-                  </label>
+                  >{translate("uxRecipestudio.privateDatasetzxd4u")}</label>
                   <p className="text-xs text-muted-foreground">
-                    Only people with access can view or download the repo.
+                    {translate("uxRecipestudio.onlyPeopleWithAccess1ur3e")}
                   </p>
                 </div>
               </div>
@@ -341,7 +333,7 @@ export function PublishExecutionDialog({
                 Cancel
               </Button>
               <Button onClick={() => void handlePublish()} disabled={!canSubmit}>
-                {publishing ? "Publishing..." : "Publish to Hugging Face"}
+                {publishing ? "Publishing..." : translate("uxRecipestudio.publishToHuggingFacey6c7y")}
               </Button>
             </DialogFooter>
           </>

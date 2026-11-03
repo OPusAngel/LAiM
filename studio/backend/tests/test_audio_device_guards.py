@@ -203,7 +203,7 @@ def test_an_auto_load_on_a_cpu_only_runtime_reaches_the_worker_as_cpu(monkeypatc
     orch = orch_mod.InferenceOrchestrator.__new__(orch_mod.InferenceOrchestrator)
     orch.loading_models = set()
     config = types.SimpleNamespace(
-        identifier = "LAiM/Kokoro-82M-GGUF",
+        identifier = "unsloth/Kokoro-82M-GGUF",
         audio_type = "audiocpp_tts",
         audio_cpp = object(),
         gguf_variant = None,

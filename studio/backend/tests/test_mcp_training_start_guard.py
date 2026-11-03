@@ -37,7 +37,7 @@ def _load_training_route(name: str):
 
 def _config(**overrides):
     payload = {
-        "model_name": "LAiM/test",
+        "model_name": "unsloth/test",
         "training_type": "LoRA/QLoRA",
         "format_type": "alpaca",
     }

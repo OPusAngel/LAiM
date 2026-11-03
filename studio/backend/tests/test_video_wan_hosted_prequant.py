@@ -28,7 +28,7 @@ def _names(source) -> tuple[str, ...]:
 def test_ti2v_5b_resolves_its_hosted_artifact(scheme):
     fam = detect_video_family(TI2V_5B)
     assert fam is not None and fam.name == "wan2.2-ti2v-5b"
-    assert video_family_prequant_repo(fam, scheme, TI2V_5B) == "LAiM/Wan2.2-TI2V-5B-FP8"
+    assert video_family_prequant_repo(fam, scheme, TI2V_5B) == "unsloth/Wan2.2-TI2V-5B-FP8"
     assert scheme in video_family_prequant_schemes(fam)
     sources = denoiser_prequant_sources(fam, scheme, TI2V_5B)
     assert sources is not None and set(sources) == {"transformer"}
@@ -48,7 +48,7 @@ def test_t2v_a14b_seeds_both_experts_from_their_own_files(scheme):
     assert f"Wan2.2-T2V-A14B-{tag}.pt" in _names(sources["transformer"])
     # Expert 2 is served by its own row only: falling back to expert 1's name would load the wrong weights.
     assert _names(sources["transformer_2"]) == (f"Wan2.2-T2V-A14B-{tag}-2.pt",)
-    assert sources["transformer_2"].location == "LAiM/Wan2.2-T2V-A14B-FP8"
+    assert sources["transformer_2"].location == "unsloth/Wan2.2-T2V-A14B-FP8"
 
 
 @pytest.mark.parametrize(
@@ -66,9 +66,9 @@ def test_resident_sizes_price_the_artifact(repo, scheme, gb):
 
 def test_nvfp4_rows_are_unchanged():
     # Raw rows: the NVFP4 switch hides the scheme from the resolver, not from the table.
-    assert ("nvfp4", "LAiM/Wan2.2-TI2V-5B-NVFP4") in detect_video_family(TI2V_5B).prequant_repos
+    assert ("nvfp4", "unsloth/Wan2.2-TI2V-5B-NVFP4") in detect_video_family(TI2V_5B).prequant_repos
     a14b = detect_video_family(T2V_A14B)
-    assert ("nvfp4", "LAiM/Wan2.2-T2V-A14B-NVFP4") in a14b.prequant_repos
+    assert ("nvfp4", "unsloth/Wan2.2-T2V-A14B-NVFP4") in a14b.prequant_repos
     assert (
         "nvfp4",
         "transformer_2",

@@ -1,8 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { isLAiMProtocol } from "@/config/deep-link";
 import { isValidRepoId as isShareableModelId } from "@/features/deep-links";
 import type { PerModelConfig } from "../model-config/per-model-config";
+import { translate } from "@/i18n";
+
 import {
   SHARED_CONFIG_FIELDS,
   SHARED_CONFIG_KEYS,
@@ -49,28 +52,28 @@ function validVariant(value: string): boolean {
 
 function fieldError(key: SharedConfigKey): Error {
   const field = SHARED_CONFIG_FIELDS[key];
-  return new Error(field.error ?? `The setting “${field.label}” is invalid.`);
+  return new Error(field.error ?? translate("uxModelpicker.theSettingIsInvalid33y2l", { p1: field.label }));
 }
 
 function linkQuery(raw: string, url: URL, native: boolean): string {
   if (invalidUrlCharacters(raw)) {
-    throw new Error("This link contains invalid URL characters.");
+    throw new Error(translate("uxModelpicker.thisLinkContainsInvalidre93p"));
   }
   if (
     url.username ||
     url.password ||
     (native && (url.port || url.hash || !nativeRunAddress.test(raw)))
   ) {
-    throw new Error("This run configuration link has an invalid address.");
+    throw new Error(translate("uxModelpicker.thisRunConfigurationLink1862s"));
   }
   const query = native ? url.search.slice(1) : url.hash.slice(5);
   if (malformedEscape.test(query)) {
-    throw new Error("This run configuration link has invalid URL encoding.");
+    throw new Error(translate("uxModelpicker.thisRunConfigurationLinkec89k"));
   }
   try {
     decodeURIComponent(query);
   } catch {
-    throw new Error("This run configuration link has invalid text encoding.");
+    throw new Error(translate("uxModelpicker.thisRunConfigurationLinknc8za"));
   }
   return query;
 }
@@ -83,17 +86,17 @@ function readParameter(
   if (key === "v") {
     if (value !== "1") {
       throw new Error(
-        "This run configuration link uses an unsupported version.",
+        translate("uxModelpicker.thisRunConfigurationLinkirs86"),
       );
     }
   } else if (key === "model") {
     if (!isShareableModelId(value)) {
-      throw new Error("Use a Hugging Face model ID such as owner/model.");
+      throw new Error(translate("uxModelpicker.useAHuggingFacepuse2"));
     }
     result.model = value;
   } else if (key === "ggufVariant") {
     if (!validVariant(value)) {
-      throw new Error("The GGUF variant is invalid.");
+      throw new Error(translate("uxModelpicker.theGGUFVariantIs5vgx3"));
     }
     result.ggufVariant = value;
   } else if (isSharedConfigKey(key)) {
@@ -110,7 +113,7 @@ function readParameter(
     Object.assign(result.config, { [key]: decoded });
   } else {
     throw new Error(
-      "This run configuration link contains an unsupported setting.",
+      translate("uxModelpicker.thisRunConfigurationLinketn3o"),
     );
   }
 }
@@ -121,14 +124,14 @@ function parseParameters(query: string): SharedRunConfig {
   for (const [key, value] of new URLSearchParams(query)) {
     if (seen.has(key)) {
       throw new Error(
-        "This run configuration link contains a repeated setting.",
+        translate("uxModelpicker.thisRunConfigurationLink6ogab"),
       );
     }
     seen.add(key);
     readParameter(result, key, value);
   }
   if (!seen.has("v")) {
-    throw new Error("This run configuration link is missing its version.");
+    throw new Error(translate("uxModelpicker.thisRunConfigurationLink263bb"));
   }
   return result;
 }
@@ -154,12 +157,12 @@ export function parseRunConfigLink(raw: string): RunConfigLinkResult {
   if (raw.length > MAX_RUN_CONFIG_URL_LENGTH) {
     return {
       kind: "invalid",
-      error: "This run configuration link is too long.",
+      get error() { return translate("uxModelpicker.thisRunConfigurationLinkib3jg"); },
     };
   }
   const url = new URL(raw);
   try {
-    const query = linkQuery(raw, url, url.protocol === "LAiM:");
+    const query = linkQuery(raw, url, isLAiMProtocol(url.protocol));
     return { kind: "valid", value: parseParameters(query) };
   } catch (error) {
     return {
@@ -167,7 +170,7 @@ export function parseRunConfigLink(raw: string): RunConfigLinkResult {
       error:
         error instanceof Error
           ? error.message
-          : "Invalid run configuration link.",
+          : translate("uxModelpicker.invalidRunConfigurationLink15vy4"),
     };
   }
 }
@@ -202,7 +205,7 @@ function browserLink(params: URLSearchParams, address: string): string {
     url.username ||
     url.password
   ) {
-    throw new Error("Use an HTTP or HTTPS LAiM Web address.");
+    throw new Error(translate("uxModelpicker.useAnHTTPOr033lq"));
   }
   url.pathname = "/chat";
   // Force document navigation from /chat: link intake ignores same-document hash changes.

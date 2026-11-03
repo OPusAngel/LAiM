@@ -31,13 +31,13 @@ from core.inference.sd_cpp_backend import SdCppDiffusionBackend
 
 from .test_sd_cpp_backend import _FakeEngine, _FakeServer
 
-QWEN_EDIT = detect_family("LAiM/Qwen-Image-Edit-2511-GGUF")
-KONTEXT = detect_family("LAiM/FLUX.1-Kontext-dev-GGUF")
+QWEN_EDIT = detect_family("unsloth/Qwen-Image-Edit-2511-GGUF")
+KONTEXT = detect_family("unsloth/FLUX.1-Kontext-dev-GGUF")
 
 QWEN_PICKS = (
-    ("LAiM/Qwen-Image-Edit-GGUF", "qwen-image-edit-Q4_K_M.gguf"),
-    ("LAiM/Qwen-Image-Edit-2509-GGUF", "qwen-image-edit-2509-Q4_K_M.gguf"),
-    ("LAiM/Qwen-Image-Edit-2511-GGUF", "qwen-image-edit-2511-Q4_K_M.gguf"),
+    ("unsloth/Qwen-Image-Edit-GGUF", "qwen-image-edit-Q4_K_M.gguf"),
+    ("unsloth/Qwen-Image-Edit-2509-GGUF", "qwen-image-edit-2509-Q4_K_M.gguf"),
+    ("unsloth/Qwen-Image-Edit-2511-GGUF", "qwen-image-edit-2511-Q4_K_M.gguf"),
 )
 
 QWEN_FILES = SdCppModelFiles(
@@ -68,7 +68,7 @@ def _state(
     server = None,
 ):
     return bk._SdState(
-        repo_id = "LAiM/x-GGUF",
+        repo_id = "unsloth/x-GGUF",
         base_repo = fam.base_repo,
         family = fam,
         device = "cpu",
@@ -95,26 +95,26 @@ def test_every_qwen_edit_checkpoint_maps_to_vae_encoder_and_projector(repo, file
     specs = SdCppDiffusionBackend(engine = _FakeEngine())._asset_specs(repo, filename, fam)
     assert specs == [
         (repo, filename, "diffusion_model"),
-        ("LAiM/Qwen-Image-ComfyUI", "split_files/vae/qwen_image_vae.safetensors", "vae"),
+        ("unsloth/Qwen-Image-ComfyUI", "split_files/vae/qwen_image_vae.safetensors", "vae"),
         (
-            "LAiM/Qwen2.5-VL-7B-Instruct-GGUF",
+            "unsloth/Qwen2.5-VL-7B-Instruct-GGUF",
             "Qwen2.5-VL-7B-Instruct-Q4_K_M.gguf",
             "qwen2vl",
         ),
-        ("LAiM/Qwen2.5-VL-7B-Instruct-GGUF", "mmproj-F16.gguf", "llm_vision"),
+        ("unsloth/Qwen2.5-VL-7B-Instruct-GGUF", "mmproj-F16.gguf", "llm_vision"),
     ]
     assert (fam.sd_cpp_sampling_method, fam.sd_cpp_flow_shift) == ("euler", 3.0)
     assert text_encoder_flags_for_family(fam.name) == ("--qwen2vl",)
 
 
 def test_kontext_maps_to_the_flux1_assets():
-    fam = detect_family_for_pick("LAiM/FLUX.1-Kontext-dev-GGUF", "flux1-kontext-dev-Q4_K_M.gguf")
+    fam = detect_family_for_pick("unsloth/FLUX.1-Kontext-dev-GGUF", "flux1-kontext-dev-Q4_K_M.gguf")
     assert fam is KONTEXT and family_sd_cpp_supported(fam)
-    flux1 = detect_family("LAiM/FLUX.1-dev-GGUF")
+    flux1 = detect_family("unsloth/FLUX.1-dev-GGUF")
     assert fam.sd_cpp_vae == flux1.sd_cpp_vae
     assert fam.sd_cpp_text_encoders == flux1.sd_cpp_text_encoders
     specs = SdCppDiffusionBackend(engine = _FakeEngine())._asset_specs(
-        "LAiM/FLUX.1-Kontext-dev-GGUF", "flux1-kontext-dev-Q4_K_M.gguf", fam
+        "unsloth/FLUX.1-Kontext-dev-GGUF", "flux1-kontext-dev-Q4_K_M.gguf", fam
     )
     assert [k for _r, _f, k in specs] == ["diffusion_model", "vae", "clip_l", "t5xxl"]
     assert text_encoder_flags_for_family(fam.name) == ("--clip_l", "--t5xxl")
@@ -122,15 +122,15 @@ def test_kontext_maps_to_the_flux1_assets():
 
 def test_the_new_companions_stay_fetch_only_and_bases_stay_loadable():
     companions = sd_cpp_companion_only_repo_ids()
-    assert "LAiM/qwen-image-comfyui" in companions
-    assert "LAiM/qwen2.5-vl-7b-instruct-gguf" in companions
+    assert "unsloth/qwen-image-comfyui" in companions
+    assert "unsloth/qwen2.5-vl-7b-instruct-gguf" in companions
     # The FLUX.1 VAE lives in a real base; mapping Kontext onto it must not hide that base.
     assert "black-forest-labs/flux.1-schnell" not in companions
 
 
 def test_inpaint_and_other_layered_variants_are_still_refused():
     # Qwen-Image-Layered has a family of its own; a layered or inpaint variant of any other family does not.
-    assert detect_family("LAiM/Qwen-Image-Layered-GGUF").name == "qwen-image-layered"
+    assert detect_family("unsloth/Qwen-Image-Layered-GGUF").name == "qwen-image-layered"
     assert detect_family("someone/FLUX.1-dev-layered-GGUF") is None
     assert detect_family("someone/FLUX.1-dev-inpaint-GGUF") is None
 
@@ -295,7 +295,7 @@ def test_edit_only_families_refuse_what_the_diffusers_engine_refuses(fam, files)
 
 def test_a_text_to_image_family_keeps_refusing_an_input_image():
     b = SdCppDiffusionBackend(engine = _FakeEngine())
-    flux1 = detect_family("LAiM/FLUX.1-dev-GGUF")
+    flux1 = detect_family("unsloth/FLUX.1-dev-GGUF")
     b._state = _state(flux1, KONTEXT_FILES)
     with pytest.raises(ValueError, match = "not yet supported on the native"):
         b.generate(prompt = "p", steps = 2, init_image = _png())
@@ -303,7 +303,7 @@ def test_a_text_to_image_family_keeps_refusing_an_input_image():
 
 
 def test_unified_edit_readiness_is_unchanged(tmp_path):
-    q21 = detect_family("LAiM/Qwen-Image-2.1-GGUF")
+    q21 = detect_family("unsloth/Qwen-Image-2.1-GGUF")
     files = SdCppModelFiles(diffusion_model = "/m/q.gguf", llm = "/m/llm.gguf", llm_vision = "/m/v.gguf")
     binary = tmp_path / "sd-server"
     binary.write_bytes(b"no marker here")
@@ -387,7 +387,7 @@ def test_an_uncached_projector_fails_an_offline_edit_only_load(monkeypatch, tmp_
         return str(cached)
 
     monkeypatch.setattr(xet, "hf_hub_download_with_xet_fallback", _download)
-    repo = "LAiM/Qwen2.5-VL-7B-Instruct-GGUF"
+    repo = "unsloth/Qwen2.5-VL-7B-Instruct-GGUF"
     assets = [(repo, cached.name, "qwen2vl"), (repo, "mmproj-F16.gguf", "llm_vision")]
     with pytest.raises(RuntimeError, match = "mmproj-F16.gguf"):
         SdCppDiffusionBackend(engine = None)._fetch_assets(

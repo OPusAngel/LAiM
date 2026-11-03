@@ -162,7 +162,7 @@ def _contained_link_path(link_dir: Path, link_name: str) -> Optional[Path]:
 
 
 def _ollama_links_roots(ollama_dir: Path) -> tuple[Path, ...]:
-    """Where *ollama_dir*'s ``.gguf`` links can live, best first: beside the blobs, then LAiM's cache (read-only installs), then the temp dir (sandboxed installs)."""
+    """Where *ollama_dir*'s ``.gguf`` links can live, best first: beside the blobs, then LAiM's cache (read-only installs), then the temp dir (locked down installs)."""
     # Hashed so two Ollama roots cannot collide. A cache path, not a security boundary.
     try:
         digest = hashlib.sha256(str(ollama_dir.resolve()).encode()).hexdigest()[:12]

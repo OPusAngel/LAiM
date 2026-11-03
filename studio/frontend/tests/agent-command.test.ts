@@ -27,12 +27,12 @@ test("the Unix override emits a Bash-compatible remote command", () => {
 
 test("safe model IDs do not get unnecessary quotes", () => {
   assert.equal(
-    quoteShellArg("LAiM/Qwen3.8:UD-Q4_K_XL", "unix"),
-    "LAiM/Qwen3.8:UD-Q4_K_XL",
+    quoteShellArg("unsloth/Qwen3.8:UD-Q4_K_XL", "unix"),
+    "unsloth/Qwen3.8:UD-Q4_K_XL",
   );
   assert.equal(
-    quoteShellArg("LAiM/Qwen3.8:UD-Q4_K_XL", "windows"),
-    "LAiM/Qwen3.8:UD-Q4_K_XL",
+    quoteShellArg("unsloth/Qwen3.8:UD-Q4_K_XL", "windows"),
+    "unsloth/Qwen3.8:UD-Q4_K_XL",
   );
 });
 
@@ -79,9 +79,9 @@ test("VS Code takes the model flags like the other agents", () => {
       "http://127.0.0.1:8888",
       "unix",
       "vscode",
-      "--model LAiM/Qwen3-4B-GGUF --gguf-variant Q4_K_M",
+      "--model unsloth/Qwen3-4B-GGUF --gguf-variant Q4_K_M",
     ).primary,
-    "LAiM start vscode --model LAiM/Qwen3-4B-GGUF --gguf-variant Q4_K_M",
+    "LAiM start vscode --model unsloth/Qwen3-4B-GGUF --gguf-variant Q4_K_M",
   );
 });
 

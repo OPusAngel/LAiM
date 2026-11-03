@@ -37,6 +37,8 @@ import type { AudioGallery } from "./use-audio-gallery";
 import type { AudioModelSlot } from "./use-audio-model-slot";
 import { showRunResult } from "./use-clone-generation";
 import { useReferenceTranscribe } from "./use-reference-transcribe";
+import { translate } from "@/i18n";
+
 
 export const EDIT_TRANSCRIPT_FIELD_ID = "edit-transcript";
 export const EDIT_CHANGES_FIELD_ID = "edit-changes";
@@ -348,7 +350,7 @@ export function useEditGeneration({
           ? REFERENCE_EXPIRED_MESSAGE
           : error instanceof Error
             ? error.message
-            : "Editing the recording failed.";
+            : translate("uxAudio.editingTheRecordingFaileda32o2");
         setGenerationError(message);
         if (!expired) toast.error(message);
         await refreshStatus();

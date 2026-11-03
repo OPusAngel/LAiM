@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -71,9 +72,9 @@ function isExpandableGguf(model: LocalModelInfo): boolean {
 function sourceLabel(model: LocalModelInfo): string {
   switch (model.source) {
     case "models_dir":
-      return "Models";
+      return translate("uxRecipestudio.modelsTitlel1pjt");
     case "hf_cache":
-      return "HF cache";
+      return translate("uxRecipestudio.hfCacheSource569k7");
     case "lmstudio":
       return "LM Studio";
     case "omlx":
@@ -83,7 +84,7 @@ function sourceLabel(model: LocalModelInfo): string {
     case "hermes":
       return "Hermes";
     case "custom":
-      return "Custom folder";
+      return translate("uxRecipestudio.customFolderkoi43");
     default:
       return "Local";
   }
@@ -103,7 +104,7 @@ function getSelectedModelSummary(
   if (!selectedModel) {
     return {
       label: value,
-      source: "Local model",
+      get source() { return translate("uxRecipestudio.localModelo5m3b"); },
       isGguf: Boolean(ggufVariant),
     };
   }
@@ -144,7 +145,7 @@ function LocalGgufVariantList({
           return;
         }
         setError(
-          err instanceof Error ? err.message : "Failed to load variants.",
+          err instanceof Error ? err.message : translate("uxRecipestudio.failedToLoadVariantsaf6mt"),
         );
       })
       .finally(() => {
@@ -179,7 +180,7 @@ function LocalGgufVariantList({
     return (
       <div className="flex items-center gap-2 px-4 py-2 text-xs text-muted-foreground">
         <Spinner className="size-3" />
-        Loading quantizations...
+        {translate("settings.agents.loadingQuantizations")}
       </div>
     );
   }
@@ -191,7 +192,7 @@ function LocalGgufVariantList({
   if (!sortedVariants || sortedVariants.length === 0) {
     return (
       <div className="px-4 py-2 text-xs text-muted-foreground">
-        No GGUF quantizations found for this model.
+        {translate("uxRecipestudio.noGGUFQuantizationsFound1x9jz")}
       </div>
     );
   }
@@ -199,7 +200,7 @@ function LocalGgufVariantList({
   return (
     <div className="ml-6 mt-1 rounded-lg bg-muted/25 p-1.5">
       <div className="mb-1 px-2 text-ui-10 font-medium uppercase tracking-wide text-muted-foreground">
-        Quantization
+        {translate("settings.voice.dictation.sttQuantLabel")}
       </div>
       <div className="space-y-0.5">
         {sortedVariants.map((variant) => {
@@ -284,14 +285,14 @@ const SelectorTrigger = forwardRef<HTMLButtonElement, SelectorTriggerProps>(
               !selected.label && "text-muted-foreground",
             )}
           >
-            {selected.label || "Choose a local model"}
+            {selected.label || translate("uxRecipestudio.chooseALocalModely4jv8")}
           </span>
           {compact ? null : (
             <span className="mt-0.5 flex min-w-0 items-center gap-1.5 text-ui-11 text-muted-foreground">
               <span className="truncate">
                 {selected.label
                   ? selected.source
-                  : "Select from local and cached models"}
+                  : translate("uxRecipestudio.selectFromLocalAndbc97b")}
               </span>
               {selected.isGguf ? <span>GGUF</span> : null}
               {ggufVariant ? (
@@ -414,7 +415,7 @@ function LocalModelResults({
     return (
       <div className="flex items-center gap-2 px-3 py-3 text-xs text-muted-foreground">
         <Spinner className="size-3" />
-        Scanning local models...
+        {translate("uxExport.scanningLocalModelsbaxuf")}
       </div>
     );
   }
@@ -424,7 +425,7 @@ function LocalModelResults({
       <div className="space-y-2 px-3 py-3 text-xs">
         <p className="text-destructive">{error}</p>
         <Button type="button" variant="outline" size="xs" onClick={onRefresh}>
-          Try again
+          {translate("browser.error.retry")}
         </Button>
       </div>
     );
@@ -433,16 +434,14 @@ function LocalModelResults({
   if (models.length === 0) {
     return (
       <div className="space-y-2 px-3 py-3 text-xs text-muted-foreground">
-        <p className="font-medium text-foreground">No local models found.</p>
+        <p className="font-medium text-foreground">{translate("studio.modelPicker.noLocalModels")}</p>
         <p>
-          Download a model or add a scan folder from Chat, then refresh this
-          list.
-        </p>
+          {translate("uxRecipestudio.downloadAModelOr1g65u")}</p>
         <Link
           to="/chat"
           className="inline-flex font-medium text-primary underline-offset-4 hover:underline"
         >
-          Open Chat model picker
+          {translate("uxCopy.openChatModelPickeroxncr")}
         </Link>
       </div>
     );
@@ -519,7 +518,7 @@ export function LocalRecipeModelSelector({
           return;
         }
         setError(
-          err instanceof Error ? err.message : "Failed to list local models.",
+          err instanceof Error ? err.message : translate("uxRecipestudio.failedToListLocala4e10"),
         );
       })
       .finally(() => {
@@ -616,7 +615,7 @@ export function LocalRecipeModelSelector({
               <Input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Filter local models"
+                placeholder={translate("uxRecipestudio.filterLocalModelsvzmim")}
                 className="h-8 flex-1"
                 autoFocus={true}
               />
@@ -625,7 +624,7 @@ export function LocalRecipeModelSelector({
                 variant="ghost"
                 size="icon-sm"
                 onClick={requestModelRefresh}
-                aria-label="Refresh local models"
+                aria-label={translate("uxRecipestudio.refreshLocalModels1gf5y")}
               >
                 <RefreshGlyph className="size-3.5" />
               </Button>

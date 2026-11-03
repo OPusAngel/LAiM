@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { useHubDownloadPlan } from "../download-manager/use-hub-download-queue";
 import { HubPlanProgress } from "../download-manager/hub-plan-progress";
 import { useRequiredAssetsDownload } from "./use-required-assets-download";
@@ -122,37 +123,49 @@ interface FitBadgeMeta {
 
 const FIT_BADGE: Record<GgufFitClass, FitBadgeMeta> = {
   fits: {
-    label: "Full GPU offload",
-    tooltip: "Full offload likely possible on your system.",
+    get label() {
+      return translate("uxHub.fullGPUOffloadsqqht");
+    },
+    get tooltip() {
+      return translate("uxHub.fullOffloadLikelyPossiblek2a8x");
+    },
     iconClassName: "text-emerald-600 dark:text-emerald-400",
   },
   marginal: {
-    label: "Over budget",
+    get label() {
+      return translate("uxHub.overBudgetsel34");
+    },
     // Not conditional on other apps: _vram_usable_mib gives free - reserve, which on an idle card
     // is exactly the budget this tier has already passed, so the load takes --fit every time.
     // Same words the chat picker uses.
-    tooltip:
-      "Larger than your VRAM Budget allows, so part of it offloads even on an idle GPU. It is still smaller than the card, so raising the budget can keep it resident.",
+    get tooltip() { return translate("uxHub.largerThanYourVRAMlwq76"); },
     iconClassName: "text-amber-600 dark:text-amber-400",
   },
   partial: {
-    label: "Partial offload",
-    tooltip:
-      "Model may not fit but still works with offloading. Expect slower inference.",
+    get label() {
+      return translate("uxHub.partialOffloadbm6me");
+    },
+    get tooltip() {
+      return translate("uxHub.modelMayNotFit1jood");
+    },
     iconClassName: "text-sky-600 dark:text-sky-400",
   },
   ram: {
-    label: "RAM fallback",
-    tooltip:
-      "No GPU VRAM detected. This GGUF may run with system RAM and CPU offload. Inference will be slower.",
+    get label() { return translate("uxHub.rAMFallbackzkwxb"); },
+    get tooltip() {
+      return translate("uxHub.noGPUVRAMDetectedtegod");
+    },
     iconClassName: "text-sky-600 dark:text-sky-400",
   },
   oom: {
-    label: "Does not fit",
+    get label() {
+      return translate("uxHub.doesNotFitwrsym");
+    },
     // Not "won't fit": llama-server never refuses a GGUF on size, it hands it to --fit. Same words
     // the chat picker uses, where this class and `partial` share one mark.
-    tooltip:
-      "Model may not fit but still works with offloading. Expect slower inference.",
+    get tooltip() {
+      return translate("uxHub.modelMayNotFit1jood");
+    },
     iconClassName: "text-rose-600 dark:text-rose-400",
   },
 };
@@ -298,10 +311,7 @@ function GgufVariantSizeLabel({
         </span>
       </TooltipTrigger>
       <TooltipContent side="top" className="tooltip-compact">
-        <span className="font-medium">
-          {formatFootprintBytes(footprint.checkpointBytes)} model
-          {downloaded ? " on device" : ""} + {companion} required assets
-        </span>
+        <span className="font-medium">{translate("uxHub.modelRequiredAssets7lm58", { p1: formatFootprintBytes(footprint.checkpointBytes), p2: downloaded ? " on device" : "", p3: companion })}</span>
         <span className="ml-1 text-muted-foreground">
           {downloaded
             ? "· assets download on Run, once, shared across compatible variants"
@@ -325,16 +335,13 @@ function CompanionsPendingTag({
         <span className="inline-flex">
           <DotTag
             tone="warning"
-            label="Partial"
+            label={translate("uxHub.partialxcezp")}
             className={compact ? "max-sm:border-0 max-sm:px-0" : undefined}
             labelClassName={compact ? "max-sm:sr-only" : undefined}
           />
         </span>
       </TooltipTrigger>
-      <TooltipContent side="top" sideOffset={4}>
-        Model on device. {formatFootprintBytes(companionBytes)} of required
-        assets download on Run.
-      </TooltipContent>
+      <TooltipContent side="top" sideOffset={4}>{translate("uxHub.modelOnDeviceOfzes41", { p1: formatFootprintBytes(companionBytes) })}</TooltipContent>
     </Tooltip>
   );
 }
@@ -393,27 +400,27 @@ export function QuantOptionsMenu({
   const pinned = pinnedKeys.includes(pinKey(repoId, quant));
   const deviceType = usePlatformStore((s) => s.deviceType);
   const revealLabel =
-    deviceType === "mac" ? "Reveal in Finder" : "Reveal in Folder";
+    deviceType === "mac" ? translate("uxHub.revealInFinderlk9z0") : translate("uxHub.revealInFolderq7998");
   const handleCopyPath = useCallback(async () => {
     try {
       const { path } = await getCachedModelPath(repoId, quant);
       if (await copyToClipboard(path)) {
-        toast.success("Copied path");
+        toast.success(translate("uxHub.copiedPathzae8j"));
       } else {
-        toast.error("Failed to copy");
+        toast.error(translate("uxHub.failedToCopyx3hul"));
       }
     } catch (err) {
       toast.error(
-        err instanceof Error ? err.message : "Failed to resolve model path",
+        err instanceof Error ? err.message : translate("uxHub.failedToResolveModel77gz6"),
       );
     }
   }, [repoId, quant]);
   const handleCopyId = useCallback(async () => {
     const id = quant ? `${repoId}:${quant}` : repoId;
     if (await copyToClipboard(id)) {
-      toast.success("Copied identifier");
+      toast.success(translate("uxHub.copiedIdentifier8ze6r"));
     } else {
-      toast.error("Failed to copy");
+      toast.error(translate("uxHub.failedToCopyx3hul"));
     }
   }, [repoId, quant]);
 
@@ -423,7 +430,7 @@ export function QuantOptionsMenu({
         <button
           type="button"
           onClick={(e) => e.stopPropagation()}
-          aria-label={`More options for ${label}`}
+          aria-label={translate("uxHub.moreOptionsForh2e4h", { p1: label })}
           className={cn(
             "inline-flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-full",
             "text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
@@ -467,7 +474,7 @@ export function QuantOptionsMenu({
                 toast.error(
                   err instanceof Error
                     ? err.message
-                    : "Failed to open file manager",
+                    : translate("uxHub.failedToOpenFilev8yun"),
                 );
               });
             }}
@@ -491,7 +498,7 @@ export function QuantOptionsMenu({
             strokeWidth={1.75}
             className="size-icon"
           />
-          <span>Copy identifier</span>
+          <span>{translate("uxHub.copyIdentifierzamxl")}</span>
         </DropdownMenuItem>
         {downloaded && (
           <DropdownMenuItem
@@ -505,7 +512,7 @@ export function QuantOptionsMenu({
               strokeWidth={1.75}
               className="size-icon"
             />
-            <span>Copy path</span>
+            <span>{translate("uxHub.copyPath2dlds")}</span>
           </DropdownMenuItem>
         )}
         {canDelete && (
@@ -605,7 +612,7 @@ const GgufVariantMenuRow = memo(function GgufVariantMenuRow({
             companionBytes={item.footprint?.companionBytes ?? 0}
           />
         ) : (
-          item.downloaded && <DotTag tone="success" label="On device" />
+          item.downloaded && <DotTag tone="success" label={translate("settings.general.rag.onDevice")} />
         )}
         {!item.downloaded && item.partial && (
           <Tooltip>
@@ -621,8 +628,8 @@ const GgufVariantMenuRow = memo(function GgufVariantMenuRow({
               {/* Selecting a row only selects it; the card's button starts the
                   transfer, so do not promise otherwise. */}
               {liveActive
-                ? "Download is running. Select it to view progress."
-                : "Partial download. Select it, then use the button on the card to finish it."}
+                ? translate("uxHub.downloadIsRunningSelectjfe1s")
+                : translate("uxHub.partialDownloadSelectIt9a2om")}
             </TooltipContent>
           </Tooltip>
         )}
@@ -1000,9 +1007,9 @@ export function GgufDownloadCard({
       );
     },
     successMessage: () =>
-      `Deleted ${repoId} ${deleteTargetLabel ?? deleteTarget}`,
+      translate("uxHub.deletedsjjtx", { p1: repoId, p2: deleteTargetLabel ?? deleteTarget }),
     errorToast: (err) => ({
-      title: err instanceof Error ? err.message : "Failed to delete",
+      title: err instanceof Error ? err.message : translate("uxHub.failedToDeleterkpcb"),
     }),
     onSuccess: () => {
       onChange?.();
@@ -1085,7 +1092,7 @@ export function GgufDownloadCard({
       <GgufDownloadStatusCard
         job={job}
         loading={true}
-        message="Loading available quantizations…"
+        message={translate("uxHub.loadingAvailableQuantizationsnoeyc")}
       />
     );
   }
@@ -1097,8 +1104,8 @@ export function GgufDownloadCard({
           job={job}
           tone="muted"
           partial={true}
-          message="Partial download present. Couldn't load quantizations."
-          actionLabel="Reload"
+          message={translate("uxHub.partialDownloadPresentCouldn10dh0")}
+          actionLabel={translate("browser.reload")}
           onAction={() => void refresh()}
         />
       );
@@ -1107,7 +1114,7 @@ export function GgufDownloadCard({
       <GgufDownloadStatusCard
         job={job}
         tone="danger"
-        message={error ?? "No GGUF quantizations found in this repository."}
+        message={error ?? translate("uxHub.noGGUFQuantizationsFoundrcoj6")}
       />
     );
   }
@@ -1125,18 +1132,14 @@ export function GgufDownloadCard({
               onOpenChange={(o) => {
                 if (!o && !deleting) setDeleteTarget(null);
               }}
-              title="Delete quantization?"
+              title={translate("uxHub.deleteQuantization1dc1p")}
               deleting={deleting}
               blocked={(deleteImpact?.blocked_by.length ?? 0) > 0}
               onConfirm={() => void runDelete()}
               description={
-                <>
-                  This will remove{" "}
-                  <span className="font-medium text-foreground">
+                <>{translate("uxHub.thisWillRemovebmxmc", { p1: " " })}<span className="font-medium text-foreground">
                     {repoId} ({deleteTargetLabel})
-                  </span>{" "}
-                  from disk. You can re-download it later.
-                  <DeleteImpactSummary impact={deleteImpact} />
+                  </span>{translate("uxHub.fromDiskYouCan8ww0x", { p1: " " })}<DeleteImpactSummary impact={deleteImpact} />
                 </>
               }
             />
@@ -1145,17 +1148,13 @@ export function GgufDownloadCard({
               onOpenChange={(o) => {
                 if (!o) setUpdateTarget(null);
               }}
-              title="Update quantization?"
+              title={translate("uxHub.updateQuantizationmygkn")}
               updating={false}
               onConfirm={handleConfirmUpdate}
               description={
-                <>
-                  This will re-download the latest version of{" "}
-                  <span className="font-medium text-foreground">
+                <>{translate("uxHub.thisWillReDownload27y89", { p1: " " })}<span className="font-medium text-foreground">
                     {repoId} ({updateTargetLabel})
-                  </span>{" "}
-                  from Hugging Face.
-                </>
+                  </span>{translate("uxHub.fromHuggingFace49kts", { p1: " " })}</>
               }
             />
           </>
@@ -1191,7 +1190,7 @@ export function GgufDownloadCard({
                   />
                 ) : (
                   <span className="text-ui-12p5 text-muted-foreground">
-                    Select quantization
+                    {translate("uxHub.selectQuantization17tke")}
                   </span>
                 )}
                 {selectedAwaitsCompanions ? (
@@ -1204,7 +1203,7 @@ export function GgufDownloadCard({
                     // Dot only on phones.
                     <DotTag
                       tone="success"
-                      label="On device"
+                      label={translate("settings.general.rag.onDevice")}
                       className="max-sm:border-0 max-sm:px-0"
                       labelClassName="max-sm:sr-only"
                     />
@@ -1224,9 +1223,9 @@ export function GgufDownloadCard({
                       {/* The badge rides inside the quant trigger, so clicking
                           it opens the menu. Name the button that acts. */}
                       {selectedScopedLive
-                        ? "Download is running. Progress is in the downloads panel."
+                        ? translate("uxHub.downloadIsRunningProgress16ic0")
                         : selectedLiveActive
-                          ? "Download is running. Use the button on the right to stop it."
+                          ? translate("uxHub.downloadIsRunningUseguecr")
                           : downloadAction.partialHint}
                     </TooltipContent>
                   </Tooltip>
@@ -1319,14 +1318,14 @@ export function GgufDownloadCard({
           <button
             type="button"
             onClick={() => selected && setUpdateTarget(selected.quant)}
-            aria-label={`Update ${repoId}`}
+            aria-label={translate("uxHub.update04kez", { p1: repoId })}
             className="hub-action-btn ml-1 text-amber-700 dark:text-amber-300"
           >
             <HugeiconsIcon
               icon={Refresh01Icon}
               strokeWidth={1.75}
             />
-            Update
+            {translate("settings.about.updates")}
           </button>
         )}
 
@@ -1352,9 +1351,7 @@ export function GgufDownloadCard({
           >
             {cancelling ? (
               <span className="inline-flex items-center gap-2 text-muted-foreground">
-                <Spinner />
-                Cancelling…
-              </span>
+                <Spinner />{translate("uxHub.cancellingmpxju")}</span>
             ) : downloadingThisVariant ? (
               <span className="inline-flex items-center gap-2">
                 <DownloadStopIndicator mode={downloadAction.stopMode} />
@@ -1364,9 +1361,7 @@ export function GgufDownloadCard({
               </span>
             ) : downloadAction.starting ? (
               <span className="inline-flex items-center gap-2">
-                <Spinner />
-                Starting…
-              </span>
+                <Spinner />{translate("uxHub.startingd3ta0")}</span>
             ) : selectedScopedLive ? (
               <span className="inline-flex items-center gap-2 text-muted-foreground">
                 <Spinner />
@@ -1380,10 +1375,10 @@ export function GgufDownloadCard({
           </button>
         )}
 
-        {hubPlan && <span className="px-3 text-ui-12 text-muted-foreground">Downloading…</span>}
+        {hubPlan && <span className="px-3 text-ui-12 text-muted-foreground">{translate("uxHub.downloadinguamyq")}</span>}
         {showRunAction && onRun && selected && (
           <ModelRunActionButton
-            label={`Configure and run ${repoId} ${selectedLabel ?? selected.quant}`}
+            label={translate("uxHub.configureAndRuniw83n", { p1: repoId, p2: selectedLabel ?? selected.quant })}
             loading={runPending}
             onClick={() =>
               onRun({
@@ -1417,9 +1412,7 @@ export function GgufDownloadCard({
           type="button"
           onClick={() => void refresh()}
           className="self-start px-1 text-ui-11 text-status-warning underline-offset-2 transition-colors hover:underline"
-        >
-          Couldn't refresh quantizations. Retry
-        </button>
+        >{translate("uxHub.couldnTRefreshQuantizations149xx")}</button>
       )}
     </div>
   );

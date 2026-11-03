@@ -39,6 +39,8 @@ import {
   useRef,
   useState,
 } from "react";
+import { translate } from "@/i18n";
+
 
 /** A caller-supplied entry. Rendered under the pin and above cache/update, so delete stays last. */
 export interface ModelRowMenuItem {
@@ -154,7 +156,7 @@ export function ModelRowMenu({
       setDeleteOpen(false);
     } catch (err) {
       toast.error(
-        err instanceof Error ? err.message : "Failed to delete model",
+        err instanceof Error ? err.message : translate("uxModelpicker.failedToDeleteModelis1ob"),
       );
     } finally {
       setDeleting(false);
@@ -169,7 +171,7 @@ export function ModelRowMenu({
       .then(onUpdateConfirm)
       .catch((err) => {
         toast.error(
-          err instanceof Error ? err.message : "Failed to start update",
+          err instanceof Error ? err.message : translate("uxModelpicker.failedToStartUpdategdrhm"),
         );
       });
     setUpdateOpen(false);
@@ -185,7 +187,7 @@ export function ModelRowMenu({
         : null;
     reveal?.catch((err) => {
       toast.error(
-        err instanceof Error ? err.message : "Failed to open file manager",
+        err instanceof Error ? err.message : translate("uxModelpicker.failedToOpenFilev8yun"),
       );
     });
   }, [onReveal, cachePathRepoId, cachePathVariant]);

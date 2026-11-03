@@ -17,7 +17,7 @@ const { loadStampId, loadedAt, recordModelLoaded } = await import(
 const KEY = "LAiM.model-load-times.v1";
 
 test("an unloaded selection is not stamped", () => {
-  assert.equal(loadStampId("LAiM/Kokoro-82M-GGUF", false), undefined);
+  assert.equal(loadStampId("unsloth/Kokoro-82M-GGUF", false), undefined);
   assert.equal(loadStampId(undefined, true), undefined);
   assert.equal(loadStampId(null), undefined);
   assert.equal(loadStampId("", true), undefined);
@@ -25,11 +25,11 @@ test("an unloaded selection is not stamped", () => {
 });
 
 test("a loaded selection, or one with no loaded signal, still stamps", () => {
-  assert.equal(loadStampId("LAiM/Kokoro-82M-GGUF", true), "LAiM/Kokoro-82M-GGUF");
-  assert.equal(loadStampId("LAiM/Qwen3-8B"), "LAiM/Qwen3-8B");
-  const id = loadStampId("LAiM/Qwen3-8B", true);
+  assert.equal(loadStampId("unsloth/Kokoro-82M-GGUF", true), "unsloth/Kokoro-82M-GGUF");
+  assert.equal(loadStampId("unsloth/Qwen3-8B"), "unsloth/Qwen3-8B");
+  const id = loadStampId("unsloth/Qwen3-8B", true);
   assert.ok(id);
   const times = recordModelLoaded(id);
-  assert.ok(loadedAt(times, "LAiM/qwen3-8b") > 0);
-  assert.ok(store.get(KEY)?.includes("LAiM/qwen3-8b"));
+  assert.ok(loadedAt(times, "unsloth/qwen3-8b") > 0);
+  assert.ok(store.get(KEY)?.includes("unsloth/qwen3-8b"));
 });

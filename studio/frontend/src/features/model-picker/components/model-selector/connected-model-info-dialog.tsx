@@ -11,6 +11,7 @@
 // What the model is, not what it is set to: the gear beside this opens the three settings it
 // keeps of its own and shows what each holds, so printing them here was that dialog again.
 
+import { translate } from "@/i18n";
 import {
   Dialog,
   DialogContent,
@@ -117,7 +118,7 @@ export function ConnectedModelInfoDialog({
         .map((modality) => MODALITY_LABELS[modality] ?? modality)
         .join(" · ")
     : marks.vision
-      ? "Text · Images"
+      ? translate("uxModelpicker.textImages1jwmr")
       : "Text";
   const generates = [
     marks.capabilities.imageGen ? "Images" : null,
@@ -132,37 +133,37 @@ export function ConnectedModelInfoDialog({
         </DialogHeader>
 
         <div className="-mt-2 divide-y divide-border/50">
-          <Field label="Model ID">
+          <Field label={translate("uxModelpicker.modelID14cxu")}>
             {/* break-all, not break-words: an id has no spaces to break at. */}
             <span className="break-all font-mono">{modelId}</span>
           </Field>
-          <Field label="Connection">{providerName}</Field>
+          <Field label={translate("settings.voice.dictation.connectionLabel")}>{providerName}</Field>
           {baseUrl ? (
-            <Field label="Endpoint">
+            <Field label={translate("uxModelpicker.endpointb2lti")}>
               <span className="break-all font-mono">{baseUrl}</span>
             </Field>
           ) : null}
-          <Field label="Accepts">{inputs}</Field>
+          <Field label={translate("uxModelpicker.acceptsijc1n")}>{inputs}</Field>
           {generates.length > 0 ? (
-            <Field label="Generates">{generates.join(" · ")}</Field>
+            <Field label={translate("uxModelpicker.generates12ykp")}>{generates.join(" · ")}</Field>
           ) : null}
-          <Field label="Context window">
+          <Field label={translate("uxModelpicker.contextWindowiqrsd")}>
             {entry?.contextLength ? (
               <span className="tabular-nums">
                 {tokens(entry.contextLength)}
               </span>
             ) : (
-              <Unset>Not published</Unset>
+              <Unset>{translate("uxModelpicker.notPublished420wb")}</Unset>
             )}
           </Field>
-          <Field label="Max output">
+          <Field label={translate("uxModelpicker.maxOutputkkpmt")}>
             {publishedMaxOutput ? (
               <span className="tabular-nums">{tokens(publishedMaxOutput)}</span>
             ) : (
-              <Unset>Follows the connection</Unset>
+              <Unset>{translate("uxCopy.followsTheConnectionihlf1")}</Unset>
             )}
           </Field>
-          <Field label="Reasoning">
+          <Field label={translate("uxModelpicker.reasoning13g72")}>
             {reasoning.supportsReasoning ? (
               <>
                 {effortLevels.length > 0

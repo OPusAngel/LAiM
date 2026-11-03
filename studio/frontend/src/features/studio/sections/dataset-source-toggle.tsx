@@ -3,7 +3,7 @@
 
 import { SegmentedControl } from "@/components/segmented-control";
 import { useTrainingConfigStore } from "@/features/training";
-import { useT } from "@/i18n";
+import { translate, useT } from "@/i18n";
 import type { DatasetSource } from "@/types/training";
 import { useShallow } from "zustand/react/shallow";
 
@@ -29,7 +29,7 @@ export function DatasetSourceToggle({
   const value: DatasetSourceMode = datasetSource === "s3" ? "s3" : "browse";
   const options = [
     { value: "browse", label: t("studio.wizard.sourceBrowse") },
-    { value: "s3", label: "Amazon S3" },
+    { value: "s3", label: translate("uxStudio.amazonS31b8rv") },
   ] as const;
 
   return (

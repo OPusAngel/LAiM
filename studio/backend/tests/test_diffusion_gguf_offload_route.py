@@ -163,12 +163,12 @@ def test_auto_keeps_a_q8_pick_explicit_int8_still_swaps():
 def test_swap_reason_names_what_ran_and_how_to_keep_the_gguf():
     text = route.gguf_offload_swap_reason(
         "int8",
-        "prequant:LAiM/Qwen-Image-2.1-FP8/Qwen-Image-2.1-INT8.safetensors",
+        "prequant:unsloth/Qwen-Image-2.1-FP8/Qwen-Image-2.1-INT8.safetensors",
         types.SimpleNamespace(offload_policy = OFFLOAD_STREAMING),
         "qwen-image-2.1-Q4_K_M.gguf",
     )
     assert (
-        "Q4_K_M GGUF pick was replaced by LAiM/Qwen-Image-2.1-FP8/Qwen-Image-2.1-INT8.safetensors"
+        "Q4_K_M GGUF pick was replaced by unsloth/Qwen-Image-2.1-FP8/Qwen-Image-2.1-INT8.safetensors"
         in text
     )
     assert "'streaming'" in text and "Precision to Off" in text

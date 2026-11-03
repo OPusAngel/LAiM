@@ -97,13 +97,13 @@ def _with_auto_map(files):
 
 class TestConsentGate:
     def test_disabled_is_a_noop(self):
-        d = evaluate_remote_code_consent("LAiM/X", trust_remote_code = False)
+        d = evaluate_remote_code_consent("unsloth/X", trust_remote_code = False)
         assert isinstance(d, RemoteCodeDecision)
         assert d.has_remote_code is False and d.blocked is False
 
     def test_no_auto_map_is_noop(self):
         with patch.object(consent, "_config_has_auto_map", return_value = False):
-            d = evaluate_remote_code_consent("LAiM/Plain", trust_remote_code = True)
+            d = evaluate_remote_code_consent("unsloth/Plain", trust_remote_code = True)
         assert d.has_remote_code is False
         assert d.blocked is False
         assert "no-op" in d.reason
@@ -189,7 +189,7 @@ class TestConsentGate:
     def test_benign_remote_code_allowed(self):
         a, b = _with_auto_map(_BENIGN)
         with a, b:
-            d = evaluate_remote_code_consent("LAiM/Good", trust_remote_code = True)
+            d = evaluate_remote_code_consent("unsloth/Good", trust_remote_code = True)
         assert d.has_remote_code is True
         assert d.blocked is False
         assert d.fingerprint  # still fingerprinted for pinning
@@ -221,7 +221,7 @@ class TestConsentGate:
         a, b = _with_auto_map(_HIGH)
         with a, b:
             d = evaluate_remote_code_consent(
-                "LAiM/DeepSeek-OCR", trust_remote_code = True, trusted_org = True
+                "unsloth/DeepSeek-OCR", trust_remote_code = True, trusted_org = True
             )
         assert d.has_remote_code is True
         assert d.blocked is True
@@ -254,7 +254,7 @@ class TestConsentGate:
         a, b = _with_auto_map(_CRITICAL)
         with a, b:
             d = evaluate_remote_code_consent(
-                "LAiM/Compromised", trust_remote_code = True, trusted_org = True
+                "unsloth/Compromised", trust_remote_code = True, trusted_org = True
             )
         assert d.blocked is True
         assert d.approvable is False
@@ -511,7 +511,7 @@ class TestConsentGate:
                 side_effect = RemoteCodeUnscannable("gated"),
             ),
         ):
-            d = evaluate_remote_code_consent("LAiM/Gated", trust_remote_code = True)
+            d = evaluate_remote_code_consent("unsloth/Gated", trust_remote_code = True)
         assert d.has_remote_code is True
         assert d.blocked is True
         assert d.approvable is False
@@ -525,7 +525,7 @@ class TestConsentGate:
             patch.object(consent, "repo_remote_code_files", return_value = {}),
         ):
             d = evaluate_remote_code_consent(
-                "LAiM/Llama-3_1-Nemotron-Ultra-253B-v1-GGUF", trust_remote_code = True
+                "unsloth/Llama-3_1-Nemotron-Ultra-253B-v1-GGUF", trust_remote_code = True
             )
         assert d.blocked is False
         assert d.has_remote_code is False
@@ -1115,8 +1115,8 @@ class TestIsTrustedOrgRepo:
     """Only a genuine LAiM/ or nvidia/ repo is trusted (Hub-verified); everything spoofed/malformed/unreachable fails closed."""
 
     def test_accepts_genuine_LAiM_repo(self):
-        with patch("huggingface_hub.HfApi", _fake_hfapi("LAiM/DeepSeek-OCR")):
-            assert is_trusted_org_repo("LAiM/DeepSeek-OCR") is True
+        with patch("huggingface_hub.HfApi", _fake_hfapi("unsloth/DeepSeek-OCR")):
+            assert is_trusted_org_repo("unsloth/DeepSeek-OCR") is True
 
     def test_accepts_genuine_nvidia_repo(self):
         with patch("huggingface_hub.HfApi", _fake_hfapi("nvidia/Nemotron-H-8B", author = "nvidia")):
@@ -1128,17 +1128,17 @@ class TestIsTrustedOrgRepo:
             assert is_trusted_org_repo(n, verify_remote = False) is False, n
 
     def test_rejects_local_path_even_if_is_local_path_says_so(self):
-        # Defensive: a bare "LAiM/x" that resolves as a local dir must fail.
+        # Defensive: a bare "unsloth/x" that resolves as a local dir must fail.
         with patch("utils.security.trusted_org.is_local_path", return_value = True):
-            assert is_trusted_org_repo("LAiM/x") is False
+            assert is_trusted_org_repo("unsloth/x") is False
 
     def test_local_dir_shadowing_trusted_name_rejected(self, tmp_path, monkeypatch):
-        # A local dir literally named "LAiM/evil" must be rejected before any Hub call, even with remote verify on.
+        # A local dir literally named "unsloth/evil" must be rejected before any Hub call, even with remote verify on.
         monkeypatch.chdir(tmp_path)
         (tmp_path / "LAiM" / "evil").mkdir(parents = True)
         clear_cache()
         with patch("huggingface_hub.HfApi") as Api:
-            assert is_trusted_org_repo("LAiM/evil") is False
+            assert is_trusted_org_repo("unsloth/evil") is False
             Api.assert_not_called()
 
     def test_untrusted_namespaces_rejected(self):
@@ -1146,13 +1146,13 @@ class TestIsTrustedOrgRepo:
             assert is_trusted_org_repo(n, verify_remote = False) is False, n
 
     def test_malformed_names_rejected(self):
-        for n in ["", "gpt2", "LAiM", "a/b/c", "/x", "LAiM/", "/LAiM", None]:
+        for n in ["", "gpt2", "LAiM", "a/b/c", "/x", "unsloth/", "/LAiM", None]:
             assert is_trusted_org_repo(n, verify_remote = False) is False, repr(n)
 
     def test_rejects_when_resolved_owner_is_not_trusted(self):
         # Name says LAiM/ but the Hub resolves it elsewhere -> fail closed.
         with patch("huggingface_hub.HfApi", _fake_hfapi("someoneelse/x", author = "someoneelse")):
-            assert is_trusted_org_repo("LAiM/x") is False
+            assert is_trusted_org_repo("unsloth/x") is False
 
     def test_fails_closed_when_hub_raises(self):
         for exc in (ConnectionError("net"), Exception("404"), TimeoutError("t")):
@@ -1160,14 +1160,14 @@ class TestIsTrustedOrgRepo:
             api = MagicMock()
             api.return_value.model_info.side_effect = exc
             with patch("huggingface_hub.HfApi", api):
-                assert is_trusted_org_repo("LAiM/maybe-real") is False
+                assert is_trusted_org_repo("unsloth/maybe-real") is False
 
     def test_offline_trusts_shape_without_hub(self, monkeypatch):
         # Offline: trust the namespace shape without ever touching the Hub.
         monkeypatch.setenv("HF_HUB_OFFLINE", "1")
         clear_cache()
         with patch("huggingface_hub.HfApi") as Api:
-            assert is_trusted_org_repo("LAiM/Local-Cached") is True
+            assert is_trusted_org_repo("unsloth/Local-Cached") is True
             assert is_trusted_org_repo("nvidia/Nemotron-H-x") is True
             assert is_trusted_org_repo("evil/x") is False
             Api.assert_not_called()
@@ -1178,11 +1178,11 @@ class TestIsTrustedOrgRepo:
         api = MagicMock()
         api.return_value.model_info.side_effect = [
             Exception("401 gated"),  # no token -> fails closed
-            SimpleNamespace(id = "LAiM/Private", author = "LAiM"),  # token -> resolves
+            SimpleNamespace(id = "unsloth/Private", author = "LAiM"),  # token -> resolves
         ]
         with patch("huggingface_hub.HfApi", api):
-            assert is_trusted_org_repo("LAiM/Private") is False
-            assert is_trusted_org_repo("LAiM/Private", hf_token = "hf_xyz") is True
+            assert is_trusted_org_repo("unsloth/Private") is False
+            assert is_trusted_org_repo("unsloth/Private", hf_token = "hf_xyz") is True
 
 
 class TestNemotronGateUsesTrustCheck:
@@ -1209,16 +1209,16 @@ class TestNemotronGateUsesTrustCheck:
             low = name.lower()
             return (
                 any(s in low for s in subs)
-                and (low.startswith("LAiM/") or low.startswith("nvidia/"))
+                and (low.startswith("unsloth/") or low.startswith("nvidia/"))
                 and is_trusted_org_repo(name, verify_remote = False)
             )
 
         with patch.dict(os.environ, {"HF_HUB_OFFLINE": "1"}):
             clear_cache()
-            assert gate("LAiM/Nemotron-H-8B") is True
+            assert gate("unsloth/Nemotron-H-8B") is True
         clear_cache()
         assert gate("evil/nemotron_h-backdoor") is False  # spoofed namespace
-        assert gate("LAiM/llama-3-8b") is False  # not nemotron
+        assert gate("unsloth/llama-3-8b") is False  # not nemotron
 
 
 # Raw scanner behaviour + coverage: scan_remote_code_files flags dangerous patterns and
@@ -1454,7 +1454,7 @@ class TestScannerCoversAllExecutableCode:
                 return_value = ["config.json", "tokenizer_config.json", "processing_paddleocr_vl.py"],
             ),
         ):
-            files = repo_remote_code_files("LAiM/PaddleOCR-VL")
+            files = repo_remote_code_files("unsloth/PaddleOCR-VL")
         assert files != {}, "must not fail closed: present .py are scannable"
         assert "processing_paddleocr_vl.py" in files  # present file scanned
         assert "processing_ppocrvl.py" not in files  # stale ref ignored, never fetched
@@ -1658,7 +1658,7 @@ class TestScannerCoversAllExecutableCode:
                 return_value = ["config.json", "model-00001-of-00097.gguf"],
             ),
         ):
-            files = repo_remote_code_files("LAiM/Some-Model-GGUF")
+            files = repo_remote_code_files("unsloth/Some-Model-GGUF")
         assert files == {}  # no executable code -> empty (no raise)
 
     def test_tokenizer_only_auto_map_is_gated(self, tmp_path):
@@ -1739,7 +1739,7 @@ class TestScannerCoversAllExecutableCode:
                 return_value = ["config.json", "model-00001-of-00097.gguf"],
             ),
         ):
-            assert consent._config_has_auto_map("LAiM/Some-Model-GGUF") is True
+            assert consent._config_has_auto_map("unsloth/Some-Model-GGUF") is True
 
     def test_gguf_only_repo_with_python_is_scanned_and_blocked(self, tmp_path):
         # Regression: the GGUF-only short-circuit must not skip auto_map Python for export loaders.

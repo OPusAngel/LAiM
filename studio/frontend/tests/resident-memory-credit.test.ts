@@ -11,6 +11,8 @@ import {
   resolveReclaimableMemoryCredit,
 } from "../src/features/model-picker/model-config/memory-fit.ts";
 
+import { englishView } from "./helpers/kit.ts";
+
 const GiB = 1024 ** 3;
 const pool = { ids: null, indexKind: null };
 const estimate = (total: number, gpu = total, files = 0) => ({
@@ -32,7 +34,10 @@ const capacity: MemoryFitCapacity = {
 };
 
 test("reload credit preserves pressure thresholds and physical limits", () => {
-  assert.equal(resolveMemoryFit(estimate(25), capacity).freeGpuFit, "exceeds");
+  assert.equal(
+    resolveMemoryFit(estimate(25), capacity, englishView).freeGpuFit,
+    "exceeds",
+  );
   for (const singleMemoryPool of [false, true]) {
     const available = {
       ...capacity,
@@ -49,11 +54,11 @@ test("reload credit preserves pressure thresholds and physical limits", () => {
       const footprint = singleMemoryPool
         ? estimate(wanted, wanted / 2)
         : estimate(wanted * 2, wanted);
-      const fit = resolveMemoryFit(footprint, available);
+      const fit = resolveMemoryFit(footprint, available, englishView);
       assert.equal(fit.freeGpuFit, verdict);
       assert.equal(fit.usableHostFit, verdict);
     }
-    const oversized = resolveMemoryFit(estimate(120, 70), available);
+    const oversized = resolveMemoryFit(estimate(120, 70), available, englishView);
     assert.equal(oversized.rawGpuFit, "exceeds");
     assert.equal(oversized.totalFit, "exceeds");
   }
@@ -69,7 +74,7 @@ test("resident credit cannot turn an unknown probe into a known one", () => {
       freeGpuCapacityKnown: known,
       usableSystemRamKnown: known,
       reclaimableTotalBytes: 10 * GiB,
-    });
+    }, englishView);
     assert.equal(fit.freeGpuFit, known ? "tight" : "unknown");
     assert.equal(fit.usableHostFit, known ? "tight" : "unknown");
   }
@@ -91,7 +96,7 @@ test("credit fills unmet reserves without consuming already usable memory", () =
     systemRamReserveDeficitGb: 2,
     reclaimableTotalBytes: 40 * GiB,
     reclaimableGpuBytes: 20 * GiB,
-  });
+  }, englishView);
   assert.equal(fit.freeGpuFit, "tight");
   assert.equal(fit.usableHostFit, "tight");
   assert.equal(
@@ -101,7 +106,7 @@ test("credit fills unmet reserves without consuming already usable memory", () =
       freeGpuReserveDeficitGb: deficit,
       reclaimableTotalBytes: GiB,
       reclaimableGpuBytes: GiB,
-    }).freeGpuFit,
+    }, englishView).freeGpuFit,
     "fits",
   );
 });

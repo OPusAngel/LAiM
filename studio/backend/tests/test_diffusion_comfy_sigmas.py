@@ -132,8 +132,8 @@ def test_qwen_image_21_uses_comfy_fixed_mu_at_every_size(monkeypatch):
 def test_qwen_image_21_gguf_and_prequant_ids_resolve_the_same_shift():
     fam = detect_family("Qwen/Qwen-Image-2.1")
     for ids in (
-        ("qwen-image-2.1-Q4_K_M.gguf", "LAiM/Qwen-Image-2.1-GGUF", "Qwen/Qwen-Image-2.1"),
-        (None, "LAiM/Qwen-Image-2.1-FP8", "Qwen/Qwen-Image-2.1"),
+        ("qwen-image-2.1-Q4_K_M.gguf", "unsloth/Qwen-Image-2.1-GGUF", "Qwen/Qwen-Image-2.1"),
+        (None, "unsloth/Qwen-Image-2.1-FP8", "Qwen/Qwen-Image-2.1"),
     ):
         assert comfy_flow_shift_for(fam, *ids) == pytest.approx(math.exp(0.69))
 
@@ -142,14 +142,14 @@ def test_qwen_image_21_gguf_and_prequant_ids_resolve_the_same_shift():
     "ids",
     [
         (None, "black-forest-labs/FLUX.1-dev", "black-forest-labs/FLUX.1-dev"),
-        (None, "LAiM/FLUX.1-dev", "LAiM/FLUX.1-dev"),
+        (None, "unsloth/FLUX.1-dev", "unsloth/FLUX.1-dev"),
         (None, "black-forest-labs/FLUX.1-Krea-dev", "black-forest-labs/FLUX.1-Krea-dev"),
-        (None, "LAiM/FLUX.1-Krea-dev-FP8", "black-forest-labs/FLUX.1-Krea-dev"),
+        (None, "unsloth/FLUX.1-Krea-dev-FP8", "black-forest-labs/FLUX.1-Krea-dev"),
         # A dev GGUF whose base fell back to the family's schnell repo: the file name decides.
-        ("flux1-dev-Q4_K_M.gguf", "LAiM/FLUX.1-dev-GGUF", "black-forest-labs/FLUX.1-schnell"),
+        ("flux1-dev-Q4_K_M.gguf", "unsloth/FLUX.1-dev-GGUF", "black-forest-labs/FLUX.1-schnell"),
         (
             "flux1-krea-dev-Q8_0.gguf",
-            "LAiM/FLUX.1-Krea-dev-GGUF",
+            "unsloth/FLUX.1-Krea-dev-GGUF",
             "black-forest-labs/FLUX.1-schnell",
         ),
         # The family's flux-1 alias, also as flux_1 (normalised to -).
@@ -211,10 +211,10 @@ def test_local_path_containing_schnell_still_resolves_its_dev_base():
         (None, "black-forest-labs/FLUX.1-schnell", "black-forest-labs/FLUX.1-schnell"),
         (
             "flux1-schnell-Q4_K_M.gguf",
-            "LAiM/FLUX.1-schnell-GGUF",
+            "unsloth/FLUX.1-schnell-GGUF",
             "black-forest-labs/FLUX.1-schnell",
         ),
-        (None, "LAiM/FLUX.1-schnell-NVFP4", "black-forest-labs/FLUX.1-schnell"),
+        (None, "unsloth/FLUX.1-schnell-NVFP4", "black-forest-labs/FLUX.1-schnell"),
     ],
 )
 def test_flux1_schnell_keeps_its_shipped_static_schedule(ids):

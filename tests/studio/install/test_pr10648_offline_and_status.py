@@ -444,7 +444,7 @@ def test_macos_incompatible_newest_plus_unreachable_listing_keeps_a_runnable_ins
 
     # This is the call whose failure discards first_error.
     assert [url for _kind, url in net.install_calls] == [
-        "https://api.github.com/repos/LAiMai/whisper.cpp/releases?per_page=100"
+        "https://api.github.com/repos/unslothai/whisper.cpp/releases?per_page=100"
     ], net.install_calls
     assert code == M.EXIT_SUCCESS, f"exit {code}\n{log}"
     assert KEEP_TOKEN in log, log

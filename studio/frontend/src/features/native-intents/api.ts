@@ -4,6 +4,8 @@ import type {
   NativePathLeaseResponse,
   NativePathOperation,
 } from "./types";
+import { translate } from "@/i18n";
+
 
 async function invokeNative<T>(
   command: string,
@@ -11,7 +13,7 @@ async function invokeNative<T>(
 ): Promise<T> {
   if (!isTauri) {
     throw new Error(
-      "Native desktop features are only available in the Tauri app.",
+      translate("uxNativeintents.nativeDesktopFeaturesArez8nd2"),
     );
   }
   const { invoke } = await import("@tauri-apps/api/core");
@@ -29,7 +31,7 @@ export interface NativeDocumentFolderSelection {
 export async function pickNativeDocumentFolder(): Promise<NativeDocumentFolderSelection | null> {
   if (!isTauri) {
     throw new Error(
-      "Persistent local folder sync is only available in the desktop app.",
+      translate("uxNativeintents.persistentLocalFolderSyncue5am"),
     );
   }
   return invokeNative<NativeDocumentFolderSelection | null>(

@@ -267,7 +267,7 @@ def _family_bases(repo_id: str, gguf_filename: Optional[str] = None) -> set[str]
 
 
 def _curated_variant_bases(fam, repo_id: str, gguf_filename: Optional[str]) -> set[str]:
-    """Curated bases of *fam* that the checkpoint's own identity names, beyond the family default. One family entry serves several sizes, and which one a pick uses comes from the Hub card's ``base_model`` tag. Offline that tag is gone, so ``resolve_base_repo(fam, None)`` answers the family DEFAULT: an installed ``LAiM/FLUX.2-klein-9B-GGUF`` derived as needing the 4B base, while its cached ``black-forest-labs/FLUX.2-klein-9B`` had no dependent at all, and since that base is in the curated offerable set, Free up space would list it before the checkpoint's first recorded load and delete the companions of a model that is still installed. Conservative on both ends: candidates come only from the curated tables, only from entries belonging to THIS family, and only when the checkpoint id or its GGUF file name names the base, so a wrong guess can add a dependent, never invent a repo, and naming one base too many costs a delete that is refused while naming one too few costs an installed model. Matched with punctuation folded away, the way family detection accepts its own aliases: ``flux1-dev-Q4_K_M.gguf`` resolves to the flux.1 family, and a literal comparison against the curated name ``FLUX.1-dev`` missed it over one dot, leaving the dev base offerable while the dev checkpoint was installed."""
+    """Curated bases of *fam* that the checkpoint's own identity names, beyond the family default. One family entry serves several sizes, and which one a pick uses comes from the Hub card's ``base_model`` tag. Offline that tag is gone, so ``resolve_base_repo(fam, None)`` answers the family DEFAULT: an installed ``unsloth/FLUX.2-klein-9B-GGUF`` derived as needing the 4B base, while its cached ``black-forest-labs/FLUX.2-klein-9B`` had no dependent at all, and since that base is in the curated offerable set, Free up space would list it before the checkpoint's first recorded load and delete the companions of a model that is still installed. Conservative on both ends: candidates come only from the curated tables, only from entries belonging to THIS family, and only when the checkpoint id or its GGUF file name names the base, so a wrong guess can add a dependent, never invent a repo, and naming one base too many costs a delete that is refused while naming one too few costs an installed model. Matched with punctuation folded away, the way family detection accepts its own aliases: ``flux1-dev-Q4_K_M.gguf`` resolves to the flux.1 family, and a literal comparison against the curated name ``FLUX.1-dev`` missed it over one dot, leaving the dev base offerable while the dev checkpoint was installed."""
     family = _fold(getattr(fam, "name", "") or "")
     if not family:
         return set()
@@ -432,7 +432,7 @@ def required_companion_bases(
     ignored = {_normalise(r) for r in ignore_repo_ids}
     links = read_companion_links()
     pick_names = _cached_checkpoint_pick_names(cache_scans)
-    # Denoiser-gated, not id-gated: a VAE-only fetch from a prequant repo (LAiM/Qwen-Image-2.1-FP8) cannot load, so it pins nothing (#11825).
+    # Denoiser-gated, not id-gated: a VAE-only fetch from a prequant repo (unsloth/Qwen-Image-2.1-FP8) cannot load, so it pins nothing (#11825).
     checkpoints = _denoiser_holding_repo_ids(cache_scans)
     required: dict[str, set[str]] = {}
     for repo_id in _cached_model_repo_ids(cache_scans):

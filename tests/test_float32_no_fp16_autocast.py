@@ -207,7 +207,7 @@ def test_upcast_float32_on_a_v100_still_gets_fp16_autocast():
 def test_loaders_record_the_explicit_request():
     """Every public entry point, since only the outermost one sees the
     argument as the caller wrote it."""
-    for rel in ("LAiM/models/loader.py", "LAiM/models/vision.py"):
+    for rel in ("unsloth/models/loader.py", "unsloth/models/vision.py"):
         src = (REPO_ROOT / rel).read_text(encoding = "utf-8")
         assert "_requested_float32(dtype)" in src, rel
         assert "_mark_requested_float32(" in src, rel

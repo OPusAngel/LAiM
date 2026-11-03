@@ -3,6 +3,8 @@
 
 // Containers the backend can reach wav/mp3 from: wav and mp3 pass through, the
 // rest decode via libsndfile, PyAV's bundled FFmpeg, or finally librosa.
+import { translate } from "@/i18n";
+
 export const AUDIO_ACCEPT =
   "audio/wav,audio/mpeg,audio/webm,audio/ogg,audio/opus,audio/flac,audio/mp4,audio/aac,audio/aiff,audio/x-aiff,audio/x-caf,audio/x-ms-wma,audio/amr,audio/3gpp,audio/x-matroska";
 // Browsers report an empty or wrong type for several of these containers, so
@@ -80,7 +82,7 @@ export function fileToBase64(file: File): Promise<string> {
       const commaIndex = result.indexOf(",");
       resolve(commaIndex >= 0 ? result.slice(commaIndex + 1) : result);
     };
-    reader.onerror = () => reject(new Error("Failed to read file"));
+    reader.onerror = () => reject(new Error(translate("uxFeatures.failedToReadFile0st9b")));
     reader.readAsDataURL(file);
   });
 }

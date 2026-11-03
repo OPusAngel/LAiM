@@ -18,29 +18,29 @@ DEFAULTS = {"engine": "auto", "engine_precision": "auto", "engine_parallelism": 
 
 def test_an_all_default_save_leaves_no_row(monkeypatch):
     _mock_override_store(monkeypatch)
-    _put("LAiM/Qwen2.5-0.5B-Instruct", **DEFAULTS)
-    assert "LAiM/Qwen2.5-0.5B-Instruct" not in settings.get_model_overrides()
+    _put("unsloth/Qwen2.5-0.5B-Instruct", **DEFAULTS)
+    assert "unsloth/Qwen2.5-0.5B-Instruct" not in settings.get_model_overrides()
 
 
 def test_a_default_only_variant_no_longer_shadows_the_repository(monkeypatch):
     _mock_override_store(monkeypatch)
-    _put("LAiM/Q-GGUF", max_seq_length = 8192, **DEFAULTS)
-    _put("LAiM/Q-GGUF:Q4_K_M", **DEFAULTS)
-    key, override = settings.resolve_override_for_load("LAiM/Q-GGUF", None, "Q4_K_M")
-    assert key == "LAiM/Q-GGUF"
+    _put("unsloth/Q-GGUF", max_seq_length = 8192, **DEFAULTS)
+    _put("unsloth/Q-GGUF:Q4_K_M", **DEFAULTS)
+    key, override = settings.resolve_override_for_load("unsloth/Q-GGUF", None, "Q4_K_M")
+    assert key == "unsloth/Q-GGUF"
     assert override["max_seq_length"] == 8192
 
 
 def test_rows_saved_before_the_fix_read_as_unset(monkeypatch):
     store = _mock_override_store(monkeypatch)
     store[settings.MODEL_OVERRIDES_SETTING_KEY] = {
-        "LAiM/Q-GGUF": {"max_seq_length": 8192, "engine_precision": "auto"},
-        "LAiM/Q-GGUF:Q4_K_M": {"engine_precision": "auto", "engine_parallelism": "tensor"},
+        "unsloth/Q-GGUF": {"max_seq_length": 8192, "engine_precision": "auto"},
+        "unsloth/Q-GGUF:Q4_K_M": {"engine_precision": "auto", "engine_parallelism": "tensor"},
     }
     settings._cache.clear()
-    assert settings.get_model_overrides() == {"LAiM/Q-GGUF": {"max_seq_length": 8192}}
-    key, _ = settings.resolve_override_for_load("LAiM/Q-GGUF", None, "Q4_K_M")
-    assert key == "LAiM/Q-GGUF"
+    assert settings.get_model_overrides() == {"unsloth/Q-GGUF": {"max_seq_length": 8192}}
+    key, _ = settings.resolve_override_for_load("unsloth/Q-GGUF", None, "Q4_K_M")
+    assert key == "unsloth/Q-GGUF"
 
 
 def test_a_real_engine_choice_persists_and_resetting_it_clears_it(monkeypatch):

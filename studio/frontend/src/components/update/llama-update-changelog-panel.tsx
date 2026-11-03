@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   UPDATE_NOTES_BULLET_CLASS,
   UPDATE_NOTES_EXPANDED_SCROLL_CLASS,
@@ -62,9 +63,7 @@ export function LlamaUpdateChangelogPanel({
       onClick={handleExternalClick}
       className={UPDATE_NOTES_LINK_CLASS}
       data-testid="llama-update-release-link"
-    >
-      Open release
-    </a>
+    >{translate("uxComponents.openReleasephydl")}</a>
   ) : null;
 
   return (
@@ -75,7 +74,7 @@ export function LlamaUpdateChangelogPanel({
     >
       <div className={UPDATE_NOTES_SURFACE_CLASS}>
         {state === "loading" || state === "idle" ? (
-          <Message>Loading new changes...</Message>
+          <Message>{translate("uxComponents.loadingNewChanges8lt8z")}</Message>
         ) : state === "unavailable" ? (
           // Definitive, so no Retry: re-asking GitHub cannot change the answer.
           <Message>
@@ -96,13 +95,13 @@ export function LlamaUpdateChangelogPanel({
               </button>
             }
           >
-            Could not compare these releases.
+            {translate("uxCopy.couldNotCompareTheseie24q")}
           </Message>
         ) : changelog && changelog.changes.length > 0 ? (
           <ul
             // biome-ignore lint/a11y/noNoninteractiveTabindex: keyboard-scrollable region
             tabIndex={0}
-            aria-label={`New llama.cpp changes from ${installedTag} to ${latestTag}`}
+            aria-label={translate("uxComponents.newLlamaCppChanges9h4wd", { p1: installedTag, p2: latestTag })}
             className={`${UPDATE_NOTES_EXPANDED_SCROLL_CLASS} space-y-1`}
             data-testid="llama-update-changelog-list"
           >
@@ -143,14 +142,11 @@ export function LlamaUpdateChangelogPanel({
               </li>
             ))}
             {changelog.truncated ? (
-              <li className="pl-3 text-ui-10 text-muted-foreground/70">
-                Showing {changelog.changes.length} of {changelog.totalChanges}{" "}
-                changes
-              </li>
+              <li className="pl-3 text-ui-10 text-muted-foreground/70">{translate("uxComponents.showingOfChanges4twro", { p1: changelog.changes.length, p2: changelog.totalChanges, p3: " " })}</li>
             ) : null}
           </ul>
         ) : (
-          <Message>No new carried changes are listed for this build.</Message>
+          <Message>{translate("uxCopy.noNewCarriedChanges8uv79")}</Message>
         )}
       </div>
       {/* Also shown when the comparison failed: the release page is usually

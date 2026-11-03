@@ -813,11 +813,11 @@ class TestConfigJsonHfCacheFallback:
 
     def test_offline_reads_from_cache(self, tmp_path: Path, monkeypatch):
         cfg = {"model_type": "nemotron_h", "hybrid_override_pattern": "M-M*-"}
-        self._seed_cache(tmp_path, "LAiM/NVIDIA-Nemotron-3-Nano-4B", cfg)
+        self._seed_cache(tmp_path, "unsloth/NVIDIA-Nemotron-3-Nano-4B", cfg)
         monkeypatch.setenv("HF_HUB_CACHE", str(tmp_path))
         monkeypatch.setenv("HF_HUB_OFFLINE", "1")
         with patch("utils.utils.auth_safe_open") as mock_url:
-            assert _load_config_json("LAiM/NVIDIA-Nemotron-3-Nano-4B") == cfg
+            assert _load_config_json("unsloth/NVIDIA-Nemotron-3-Nano-4B") == cfg
             mock_url.assert_not_called()
 
     def test_online_prefers_network_over_cache(self, tmp_path: Path, monkeypatch):
@@ -993,13 +993,13 @@ class TestGetTransformersTier:
         "model_name, expected",
         [
             pytest.param("google/gemma-4-E2B-it", "550", id = "gemma4_substring_returns_550"),
-            pytest.param("LAiM/gemma-4-12b-it", "510", id = "gemma4_12b_substring_returns_510"),
+            pytest.param("unsloth/gemma-4-12b-it", "510", id = "gemma4_12b_substring_returns_510"),
             pytest.param(
                 "google/gemma-4-E2B-it-assistant",
                 "510",
                 id = "gemma4_assistant_substring_returns_510",
             ),
-            pytest.param("LAiM/gemma4-E4B-it", "550", id = "gemma4_alt_substring_returns_550"),
+            pytest.param("unsloth/gemma4-E4B-it", "550", id = "gemma4_alt_substring_returns_550"),
             # 5.5.0 is checked before 5.3.0 - a model matching both gets 550.
             pytest.param("gemma-4-model", "550", id = "550_checked_before_530"),
         ],
@@ -1084,7 +1084,7 @@ class TestGetTransformersTier:
                 ).encode()
 
         with patch("utils.utils.auth_safe_open", return_value = _Response()):
-            assert get_transformers_tier("LAiM/NVIDIA-Nemotron-3-Nano-4B") == "510"
+            assert get_transformers_tier("unsloth/NVIDIA-Nemotron-3-Nano-4B") == "510"
 
     def test_local_config_json_short_circuits_path_substrings(self, tmp_path: Path):
         """Local config.json should prevent false matches from parent directory names."""
@@ -1222,7 +1222,7 @@ class TestGetTransformersTier:
 
     def test_needs_transformers_5_compat(self):
         """needs_transformers_5 should return True for 510, 530, and 550 models."""
-        assert needs_transformers_5("LAiM/gemma-4-12b-it") is True
+        assert needs_transformers_5("unsloth/gemma-4-12b-it") is True
         assert needs_transformers_5("google/gemma-4-E2B-it") is True
         with (
             patch(
@@ -2424,7 +2424,7 @@ class TestTierFromName:
                 "assistant",
                 id = "gemma4_assistant_returns_510",
             ),
-            pytest.param("LAiM/gemma-4-12b-it", "510", None, id = "gemma4_12b_returns_510"),
+            pytest.param("unsloth/gemma-4-12b-it", "510", None, id = "gemma4_12b_returns_510"),
             pytest.param("Qwen/Qwen3.5-7B", "530", "qwen3.5", id = "qwen35_returns_530"),
             # The existing substring "ministral-3-" matches the 2512 naming style.
             pytest.param(
@@ -2445,7 +2445,7 @@ class TestTierFromName:
             pytest.param("org/Qwen3_Next-14B", "530", None, id = "qwen3_next_underscore_returns_530"),
             pytest.param("google/gemma_4_E2B_it", "550", None, id = "gemma_4_underscore_returns_550"),
             pytest.param(
-                "LAiM/gemma_4_12b_it", "510", None, id = "gemma_4_12b_underscore_returns_510"
+                "unsloth/gemma_4_12b_it", "510", None, id = "gemma_4_12b_underscore_returns_510"
             ),
             pytest.param(
                 "meta_llama/Llama_3_8B", None, None, id = "unrelated_underscores_not_promoted"
@@ -2757,13 +2757,13 @@ class TestResolveBaseModelNameOrPathFallback:
         (d / "config.json").write_text(
             json.dumps(
                 {
-                    "model_name": "LAiM/Qwen3.5-7B-bnb-4bit",
+                    "model_name": "unsloth/Qwen3.5-7B-bnb-4bit",
                     "_name_or_path": "Qwen/Qwen3.5-7B",
                 }
             )
         )
         # model_name is not the local path, so it wins
-        assert _resolve_base_model(str(d)) == "LAiM/Qwen3.5-7B-bnb-4bit"
+        assert _resolve_base_model(str(d)) == "unsloth/Qwen3.5-7B-bnb-4bit"
 
     def test_tier_resolved_via_name_or_path_when_model_name_self_refs(self, tmp_path: Path):
         """End-to-end: get_transformers_tier picks up the sidecar tier from
@@ -2851,7 +2851,7 @@ class TestAdapterModelOnlyLoRA:
         d = tmp_path / "LAiM_Qwen3.5-7B_20260620"
         d.mkdir()
         (d / "adapter_model.safetensors").write_text("")
-        assert _resolve_base_model(str(d)) == "LAiM/Qwen3.5-7B"
+        assert _resolve_base_model(str(d)) == "unsloth/Qwen3.5-7B"
 
     def test_activation_pre_resolves_adapter_only_lora(self, tmp_path: Path):
         """Regression: activate_transformers_for_subprocess must pre-resolve an

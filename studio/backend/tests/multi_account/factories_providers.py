@@ -369,7 +369,7 @@ FACTORIES = {
     ),
     "routes.accounts:PUT:/{account_id}/model-access": Factory(
         "prov-account",
-        {"model_allowlist": ["LAiM/*"]},
+        {"model_allowlist": ["unsloth/*"]},
         owner = (200,),
         right = (403,),
         wrong = (403,),

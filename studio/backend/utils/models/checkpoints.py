@@ -320,7 +320,7 @@ def scan_checkpoints(
                 pass
 
             # Fallback: extract base model name from the folder name, e.g.
-            # "LAiM_Llama-3.2-3B-Instruct_1771227800" → "LAiM/Llama-3.2-3B-Instruct"
+            # "LAiM_Llama-3.2-3B-Instruct_1771227800" → "unsloth/Llama-3.2-3B-Instruct"
             if not metadata.get("base_model"):
                 metadata["base_model"] = _infer_base_model_from_history(item)
 

@@ -145,7 +145,6 @@ def test_full_access_follows_the_account_role(auth_db, active):
     for flags in (
         {"permission_mode": "full"},
         {"bypass_permissions": True},
-        {"disable_sandbox": True},
     ):
         run_as(OWNER, require_tool_access, **flags)
         with pytest.raises(HTTPException, match = "installation owner"):

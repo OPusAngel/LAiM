@@ -95,7 +95,7 @@ def test_native_lease_keeps_the_path_shaped_id_agents_tab_filters_on(monkeypatch
 
 def test_plain_repo_ids_are_unchanged(monkeypatch):
     class _Backend(_FakeLAiM):
-        default_models = ["LAiM/Qwen3-4B-Instruct-2507", "Qwen3-4B"]
+        default_models = ["unsloth/Qwen3-4B-Instruct-2507", "Qwen3-4B"]
 
     monkeypatch.setattr(models_route, "get_inference_backend", lambda: _Backend())
     monkeypatch.setattr(inf, "get_llama_cpp_backend", lambda: _FakeLlama(None))
@@ -103,7 +103,7 @@ def test_plain_repo_ids_are_unchanged(monkeypatch):
     entries = asyncio.run(models_route.list_models(current_subject = "LAiM")).models
 
     assert [(e.id, e.name) for e in entries] == [
-        ("LAiM/Qwen3-4B-Instruct-2507", "Qwen3-4B-Instruct-2507"),
+        ("unsloth/Qwen3-4B-Instruct-2507", "Qwen3-4B-Instruct-2507"),
         ("Qwen3-4B", "Qwen3-4B"),
     ]
 

@@ -18,24 +18,24 @@ export function isAudioSttEngine(value: unknown): value is AudioSttEngine {
 }
 
 const TRANSFORMERS_REPO_BY_KEY: Record<string, string> = {
-  tiny: "LAiM/whisper-tiny",
-  base: "LAiM/whisper-base",
-  small: "LAiM/whisper-small",
-  "large-v3-turbo": "LAiM/whisper-large-v3-turbo",
-  "large-v3": "LAiM/whisper-large-v3",
+  tiny: "unsloth/whisper-tiny",
+  base: "unsloth/whisper-base",
+  small: "unsloth/whisper-small",
+  "large-v3-turbo": "unsloth/whisper-large-v3-turbo",
+  "large-v3": "unsloth/whisper-large-v3",
 };
 
 const MTMD_REPO_BY_KEY: Record<string, string> = {
-  "qwen3-asr-0.6b": "LAiMai/Qwen3-ASR-0.6B-GGUF",
-  "qwen3-asr-1.7b": "LAiMai/Qwen3-ASR-1.7B-GGUF",
+  "qwen3-asr-0.6b": "unslothai/Qwen3-ASR-0.6B-GGUF",
+  "qwen3-asr-1.7b": "unslothai/Qwen3-ASR-1.7B-GGUF",
 };
 
 const GGUF_REPO_BY_KEY: Record<string, string> = {
-  tiny: "LAiMai/whisper-tiny-GGUF",
-  base: "LAiMai/whisper-base-GGUF",
-  small: "LAiMai/whisper-small-GGUF",
-  "large-v3-turbo": "LAiMai/whisper-large-v3-turbo-GGUF",
-  "large-v3": "LAiMai/whisper-large-v3-GGUF",
+  tiny: "unslothai/whisper-tiny-GGUF",
+  base: "unslothai/whisper-base-GGUF",
+  small: "unslothai/whisper-small-GGUF",
+  "large-v3-turbo": "unslothai/whisper-large-v3-turbo-GGUF",
+  "large-v3": "unslothai/whisper-large-v3-GGUF",
 };
 
 // The audiocpp engine takes any GGUF ASR repo or package folder id as its key. Dictation keys

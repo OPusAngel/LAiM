@@ -13,8 +13,6 @@ REPO = Path(__file__).resolve().parents[2]
 DRIVERS = sorted((REPO / "tests" / "studio").glob("playwright_*.py"))
 
 NOT_IN_CI = {
-    # Needs the Tauri desktop shell, which no Linux runner here builds.
-    "playwright_tauri_python_tool_images.py",
     # Needs dataset/model resolution via huggingface_hub; UI workflows boot API-only.
     "playwright_train_pickers.py",
     # A measurement harness with no budget; its verdict logic is covered by

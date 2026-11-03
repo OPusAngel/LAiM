@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -67,7 +68,7 @@ export function ChatTemplateEditorDialog({
       return;
     }
     if (overLimit) {
-      setError("Template exceeds the size limit.");
+      setError(translate("uxModelpicker.templateExceedsTheSizepjv7a"));
       return;
     }
     setValidating(true);
@@ -79,14 +80,14 @@ export function ChatTemplateEditorDialog({
         return;
       }
       if (!result.valid) {
-        setError(result.error ?? "Invalid Jinja template.");
+        setError(result.error ?? translate("uxModelpicker.invalidJinjaTemplate2ike1"));
         return;
       }
       onSave(renderedDraft);
       handleClose();
     } catch {
       if (token === validationToken.current) {
-        setError("Could not validate the template.");
+        setError(translate("uxModelpicker.couldNotValidateThewgxs3"));
       }
     } finally {
       if (token === validationToken.current) {
@@ -109,12 +110,12 @@ export function ChatTemplateEditorDialog({
       <DialogContent className="corner-squircle dialog-soft-surface sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>
-            {readOnly ? "Chat Template" : "Edit Chat Template"}
+            {readOnly ? translate("uxModelpicker.chatTemplate7wzfl") : translate("uxModelpicker.editChatTemplatewxvz8")}
           </DialogTitle>
           <DialogDescription>
             {readOnly
-              ? "This is the model's chat template. This model's backend cannot take a custom one, so it is view only."
-              : "Override the model's chat template with custom Jinja. The change applies when the model loads. Saving an empty template or one that matches the default clears the override."}
+              ? translate("uxModelpicker.thisIsTheModelutsb8")
+              : translate("uxModelpicker.overrideTheModelSpicvo")}
           </DialogDescription>
         </DialogHeader>
         {/* Chrome does not clip a scroll area to a squircle, which squared off
@@ -131,17 +132,14 @@ export function ChatTemplateEditorDialog({
             className="min-h-[min(calc(20rem*var(--ui-space-scale,1)),50dvh)] max-h-[50dvh] overflow-y-auto rounded-none border-0 font-mono text-xs leading-5 focus-visible:ring-0"
             rows={14}
             spellCheck={false}
-            placeholder={defaultLoading ? "Loading model default..." : ""}
+            placeholder={defaultLoading ? translate("uxModelpicker.loadingModelDefaultj6voq") : ""}
           />
         </div>
         {readOnly ? null : (
           <div className="flex items-center justify-between gap-3 px-0.5 text-ui-11">
             <span
               className={overLimit ? "text-amber-500" : "text-muted-foreground"}
-            >
-              {byteLength.toLocaleString()} /{" "}
-              {MAX_CHAT_TEMPLATE_BYTES.toLocaleString()} bytes
-            </span>
+            >{translate("uxModelpicker.bytesjg44d", { p1: byteLength.toLocaleString(), p2: " ", p3: MAX_CHAT_TEMPLATE_BYTES.toLocaleString() })}</span>
             {error ? (
               <span className="truncate text-red-500" title={error}>
                 {error}
@@ -153,7 +151,7 @@ export function ChatTemplateEditorDialog({
           {readOnly ? (
             <div className="flex w-full justify-end">
               <Button type="button" onClick={handleClose}>
-                Close
+                {translate("imageViewer.close")}
               </Button>
             </div>
           ) : (
@@ -170,12 +168,12 @@ export function ChatTemplateEditorDialog({
                 {defaultLoading ? (
                   <Spinner className="size-3.5" />
                 ) : (
-                  "Reset to default"
+                  translate("uxModelpicker.resetToDefaultuh6o1")
                 )}
               </Button>
               <div className="flex gap-2">
                 <Button type="button" variant="ghost" onClick={handleClose}>
-                  Cancel
+                  {translate("browser.agentSettings.cancel")}
                 </Button>
                 <Button
                   type="button"

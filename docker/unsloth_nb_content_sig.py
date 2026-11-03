@@ -166,7 +166,7 @@ def _normalize_install(text):
     re-records its old hash.
 
     Only the install COMMANDS are flattened. Three quarters of the install cells in
-    LAiMai/notebooks carry ordinary Python or shell around the install, and
+    unslothai/notebooks carry ordinary Python or shell around the install, and
     flattening that as well made a `#` or a run of spaces inside a string literal
     cosmetic. A non-install line therefore keeps its bytes, unless it is blank or a
     whole-line comment, or it contains no quote and no `#` at all and so has nowhere

@@ -1,4 +1,7 @@
+import { translate, type TranslationKey } from "@/i18n";
+
 export const INITIAL_STARTUP_MESSAGE = "Starting LAiM...";
+
 export const MODELS_STARTUP_MESSAGE = "Loading models...";
 export const SERVER_STARTUP_MESSAGE = "Nearly done...";
 export const UPDATE_STARTUP_MESSAGE = "Finishing update...";
@@ -11,20 +14,20 @@ export interface InstallProgressMessage {
 
 const INSTALL_PHASE_MESSAGES: readonly InstallProgressMessage[] = [
   {
-    title: "Preparing your workspace...",
-    subtitle: "Checking what this computer needs.",
+    get title() { return translate("uxComponents.preparingYourWorkspacees1kf"); },
+    get subtitle() { return translate("uxComponents.checkingWhatThisComputer31zs6"); },
   },
   {
-    title: "Downloading required components...",
-    subtitle: "Creating your local environment.",
+    get title() { return translate("uxComponents.downloadingRequiredComponents931kb"); },
+    get subtitle() { return translate("uxComponents.creatingYourLocalEnvironment071u2"); },
   },
   {
-    title: "Installing LAiM...",
-    subtitle: "Setting up local AI tools...",
+    get title() { return translate("uxComponents.installingLAiM27f7r"); },
+    get subtitle() { return translate("uxComponents.settingUpLocalAI6j8l6"); },
   },
   {
-    title: "Finishing setup...",
-    subtitle: "Getting everything ready.",
+    get title() { return translate("uxComponents.finishingSetup3vue0"); },
+    get subtitle() { return translate("uxComponents.gettingEverythingReadylp2ii"); },
   },
 ];
 
@@ -50,10 +53,11 @@ export function installProgressMessage(
 
   return {
     title: phaseMessage.title,
-    subtitle:
+    subtitle: startupMessageText(
       INSTALL_WAITING_SUBTITLES[
         normalizedRotationIndex(rotationIndex - 1, INSTALL_WAITING_SUBTITLES.length)
       ],
+    ),
   };
 }
 
@@ -93,4 +97,22 @@ export function startupMessageFromLog(
     return MODELS_STARTUP_MESSAGE;
   }
   return current;
+}
+
+// The sentinels above are compared by identity, so they stay English; only the copy shown
+// to the user is looked up here.
+const STARTUP_MESSAGE_KEYS: Record<string, TranslationKey> = {
+  [INITIAL_STARTUP_MESSAGE]: "uxComponents.startingLAiMMsg7kq2",
+  [MODELS_STARTUP_MESSAGE]: "uxComponents.loadingModelsMsg3vt8",
+  [SERVER_STARTUP_MESSAGE]: "uxComponents.nearlyDoneMsg9wz4",
+  [UPDATE_STARTUP_MESSAGE]: "uxComponents.finishingUpdateMsg2hb6",
+  "Loading projects...": "uxComponents.loadingProjectsMsg5rc1",
+  "Setup will continue automatically.": "uxComponents.setupContinuesAutoMsg8yd3",
+  "This can take a few minutes.": "uxComponents.thisTakesFewMinMsg4ke9",
+  "Some components take longer to configure.": "uxComponents.someComponentsLongerMsg6tn5",
+};
+
+export function startupMessageText(message: string): string {
+  const key = STARTUP_MESSAGE_KEYS[message];
+  return key === undefined ? message : translate(key);
 }

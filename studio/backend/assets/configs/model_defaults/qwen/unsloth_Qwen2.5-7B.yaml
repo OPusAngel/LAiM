@@ -1,6 +1,6 @@
-# Model defaults for LAiM/Qwen2.5-7B
+# Model defaults for unsloth/Qwen2.5-7B
 # Based on Qwen2.5_(7B)-Alpaca.ipynb
-# Also applies to: LAiM/Qwen2.5-7B-LAiM-bnb-4bit, Qwen/Qwen2.5-7B, LAiM/Qwen2.5-7B-bnb-4bit
+# Also applies to: unsloth/Qwen2.5-7B-unsloth-bnb-4bit, Qwen/Qwen2.5-7B, unsloth/Qwen2.5-7B-bnb-4bit
 
 training:
   max_seq_length: 2048
@@ -16,7 +16,7 @@ training:
   random_seed: 3407
   packing: false
   train_on_completions: true
-  gradient_checkpointing: "LAiM"
+  gradient_checkpointing: "unsloth"
   optim: "adamw_8bit"
   lr_scheduler_type: "linear"
 

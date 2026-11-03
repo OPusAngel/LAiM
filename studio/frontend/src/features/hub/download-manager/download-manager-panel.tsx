@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { useHubDownloadQueue, useQueuedHubEntries } from "./use-hub-download-queue";
 import {
   Tooltip,
@@ -119,9 +120,9 @@ function variantSuffix(job: RowSubject): string {
       isRequiredAssetJob(job)
         ? assetLabel(
             { repoId: job.repoId, files: job.scopedFiles, bytes: 0 },
-            "Required assets",
+            translate("uxHub.requiredAssetsif7qx"),
           )
-        : "Model file"
+        : translate("uxHub.modelFilellkr9")
     }`;
   }
   return job.variant ? ` · ${job.variant}` : "";
@@ -151,7 +152,7 @@ function RowDetail({ job }: { job: RowSubject }) {
 }
 
 function StartingLine() {
-  return <div className="text-ui-11 text-muted-foreground">Starting…</div>;
+  return <div className="text-ui-11 text-muted-foreground">{translate("uxHub.startingd3ta0")}</div>;
 }
 
 function PendingStartRow({ start }: { start: PendingStart }) {
@@ -171,15 +172,15 @@ function StatusLine({ job }: { job: ManagedDownload }) {
     return <span className="text-status-success">Downloaded</span>;
   }
   if (job.state === "cancelled") {
-    return <span>Cancelled. Partial files kept.</span>;
+    return <span>{translate("uxHub.cancelledPartialFilesKept4pjhu")}</span>;
   }
   if (job.state === "error") {
     return (
-      <span className="text-destructive">{job.error ?? "Download failed"}</span>
+      <span className="text-destructive">{job.error ?? translate("uxHub.downloadFailedmihpj")}</span>
     );
   }
   if (job.state === "cancelling") {
-    return <span>Cancelling…</span>;
+    return <span>{translate("uxHub.cancellingmpxju")}</span>;
   }
   if (job.error) {
     return <span className="text-status-warning">{job.error}</span>;
@@ -226,7 +227,7 @@ function DownloadRow({
           <TooltipTrigger asChild={true}>
             <button
               type="button"
-              aria-label={active ? "Cancel download" : "Dismiss"}
+              aria-label={active ? translate("uxHub.cancelDownloadnlui2") : "Dismiss"}
               disabled={job.state === "cancelling" || starting}
               onClick={() =>
                 active
@@ -246,7 +247,7 @@ function DownloadRow({
             </button>
           </TooltipTrigger>
           <TooltipContent side="top" sideOffset={4}>
-            {active ? "Cancel download" : "Dismiss"}
+            {active ? translate("uxHub.cancelDownload4qfjn") : "Dismiss"}
           </TooltipContent>
         </Tooltip>
       </div>
@@ -262,7 +263,7 @@ function DownloadRow({
       ) : null}
       {!starting && job.details?.length ? (
         <details className="text-ui-11">
-          <summary>Installation details</summary>
+          <summary>{translate("uxHub.installationDetails1ib01")}</summary>
           <pre className="max-h-40 overflow-auto whitespace-pre-wrap break-all">
             {job.details.join("\n")}
           </pre>
@@ -319,7 +320,7 @@ export function DownloadManagerPanel({
 
   const headerLabel =
     activeCount > 0
-      ? `Downloading ${activeCount} ${activeCount === 1 ? "item" : "items"}`
+      ? translate("uxHub.downloadingz26sy", { p1: activeCount, p2: activeCount === 1 ? "item" : "items" })
       : "Downloads";
 
   return (
@@ -364,7 +365,7 @@ export function DownloadManagerPanel({
             </span>
             <button
               type="button"
-              aria-label="Collapse downloads"
+              aria-label={translate("uxHub.collapseDownloads59e3a")}
               onClick={() => setCollapsed(true)}
               className="inline-flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-[color-mix(in_oklab,var(--foreground)_calc(6%*var(--contrast-wash-gain,1)),transparent)] hover:text-foreground dark:hover:bg-[rgb(249_226_222_/_calc(0.06*var(--contrast-wash-gain,1)))]"
             >
@@ -384,8 +385,8 @@ export function DownloadManagerPanel({
               />
             ))}
             {queued.map((entry, i) => <li key={`${entry.planId}:${i}`} className="flex flex-col gap-1.5 py-2.5 pl-4 pr-3">
-              <span className="truncate text-ui-12p5 font-medium">{entry.repoId}<span className="text-muted-foreground"> · {entry.checkpoint !== false ? "Model file" : assetLabel(entry, "Required assets")}</span></span>
-              <span className="text-ui-11 text-muted-foreground">{entry.checkpoint !== false ? "Queued" : `Queued · ${REQUIRED_ASSET_NOTE}`}</span>
+              <span className="truncate text-ui-12p5 font-medium">{entry.repoId}<span className="text-muted-foreground"> · {entry.checkpoint !== false ? translate("uxHub.modelFilellkr9") : assetLabel(entry, translate("uxHub.requiredAssetsif7qx"))}</span></span>
+              <span className="text-ui-11 text-muted-foreground">{entry.checkpoint !== false ? "Queued" : translate("uxHub.queuedudwvx", { p1: REQUIRED_ASSET_NOTE })}</span>
             </li>)}
             {unlistedStarts.map((start) => (
               <PendingStartRow key={start.key} start={start} />

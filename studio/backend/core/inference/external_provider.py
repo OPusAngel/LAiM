@@ -5349,7 +5349,7 @@ class ExternalProviderClient:
                                         yield f"data: {_json.dumps(tool_chunk)}"
                                     # executableCode + codeExecutionResult parts surface as the standard
                                     # code_execution tool_start/tool_end envelope (the same shape OpenAI and Anthropic
-                                    # emit) so the chat adapter renders Gemini sandbox output through
+                                    # emit) so the chat adapter renders Gemini code-execution output through
                                     # CodeExecutionToolUI.
                                     exec_code = part.get("executableCode")
                                     if isinstance(exec_code, dict):
@@ -5459,7 +5459,7 @@ class ExternalProviderClient:
                                         last_code_exec_tool_id = pair_id
                                         last_code_exec_result_text = result_text
                                         gemini_code_exec_pending_id = None
-                                    # inlineData: either a Nano Banana generation (own card) or a sandbox plot
+                                    # inlineData: either a Nano Banana generation (own card) or a code-execution plot
                                     # attached to the code_execution card via the __IMAGES__: marker.
                                     inline = part.get("inlineData")
                                     if isinstance(inline, dict):

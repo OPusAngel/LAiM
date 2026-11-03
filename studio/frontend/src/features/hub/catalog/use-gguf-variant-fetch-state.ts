@@ -8,6 +8,8 @@ import {
   useGgufVariantsCacheVersion,
 } from "../inventory";
 import { fingerprintToken } from "../lib/token-fingerprint";
+import { translate } from "@/i18n";
+
 
 interface GgufVariantFetchState {
   key: string;
@@ -30,7 +32,7 @@ export function useGgufVariantFetchState({
   includeCacheLocations = false,
   localPath = null,
   enabled = true,
-  errorFallback = "Failed to load variants",
+  errorFallback = translate("uxHub.failedToLoadVariantsqo0ie"),
 }: {
   repoId: string;
   hfToken?: string | null;

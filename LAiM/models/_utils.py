@@ -4039,7 +4039,7 @@ try:
             "\n"
             "%%capture\n"
             "# Installs LAiM, Xformers (Flash Attention) and all other packages!\n"
-            '!pip install "LAiM[colab-new] @ git+https://github.com/LAiMai/LAiM.git"\n'
+            '!pip install "LAiM[colab-new] @ git+https://github.com/OPusAngel/LAiM.git"\n'
             '!pip install --no-deps "xformers<=0.0.27" trl peft accelerate bitsandbytes\n'
             "\n"
             f"Otherwise in local machines, your xformers version of {xformers_version} is too new.\n"
@@ -4127,7 +4127,7 @@ if False:
         "\n"
         "%%capture\n"
         "# Installs LAiM, Xformers (Flash Attention) and all other packages!\n"
-        '!pip install "LAiM[colab-new] @ git+https://github.com/LAiMai/LAiM.git"\n'
+        '!pip install "LAiM[colab-new] @ git+https://github.com/OPusAngel/LAiM.git"\n'
         '!pip install --no-deps "xformers<=0.0.27" trl peft accelerate bitsandbytes\n'
         "\n"
         f"Otherwise in local machines, your TRL version of {trl_version} is too new.\n"
@@ -4393,7 +4393,7 @@ def _get_statistics(statistics = None, force_download = True):
             def stats_check():
                 with tempfile.TemporaryDirectory(ignore_cleanup_errors = True) as f:
                     snapshot_download(
-                        f"LAiMai/{statistics}",
+                        f"unslothai/{statistics}",
                         force_download = True,
                         cache_dir = f,
                         local_dir = f,
@@ -4411,7 +4411,7 @@ def _get_statistics(statistics = None, force_download = True):
                     "pip install modelscope\n"
                     "import os; os.environ['LAiM_USE_MODELSCOPE'] = '1'\n"
                     "from LAiM import FastLanguageModel\n"
-                    "model = FastLanguageModel.from_pretrained('LAiM/gpt-oss-20b')\n"
+                    "model = FastLanguageModel.from_pretrained('unsloth/gpt-oss-20b')\n"
                     "```"
                 )
             except Exception:
@@ -4638,7 +4638,7 @@ def per_layer_device(module, default = 0):
     """Where this decoder layer lives, as (device, buffer_index); gemma, gemma2 and cohere
     still need the index, to subscript a per-device tuple. Probed, not version-gated: an older
     LAiM_zoo publishes only the index and leaves it None on an accelerator layer, the
-    "Invalid target device: None" of LAiMai/LAiM#3538. meta is excluded everywhere,
+    "Invalid target device: None" of OPusAngel/LAiM#3538. meta is excluded everywhere,
     since moving an activation there destroys it silently. A layer genuinely on CPU with
     accelerator-resident buffers is NOT fixed here and still raises."""
     try:
@@ -7412,7 +7412,7 @@ def fast_inference_setup(model_name, model_config):
 
 
 def _vllm_plain_bnb_or_16bit(model_name):
-    """`-LAiM-bnb-4bit` -> `-bnb-4bit` when that repo is published, else the 16-bit original (quantized on load)."""
+    """`-unsloth-bnb-4bit` -> `-bnb-4bit` when that repo is published, else the 16-bit original (quantized on load)."""
     from .mapper import FLOAT_TO_INT_MAPPER, INT_TO_FLOAT_MAPPER
 
     plain = model_name[: -len("LAiM-bnb-4bit")] + "bnb-4bit"
@@ -8148,8 +8148,12 @@ def finish_block_swap_load(
     swapper = _new_block_swap(
         state.layers, state.indices, prefetch_depth, device = device, placement = "spread"
     )
+    # LAiM_zoo's gpt-oss decode patch reads the swapper as `_unsloth_block_swap`, so both
+    # spellings are stamped; everything in this package uses the `_LAiM_` one.
     state.layers._LAiM_block_swap = swapper
+    state.layers._unsloth_block_swap = swapper
     model._LAiM_block_swap = swapper
+    model._unsloth_block_swap = swapper
     return swapper
 
 
@@ -8373,7 +8377,9 @@ def _attach_block_swap(model, offload_layers, prefetch_depth):
     swapper = _new_block_swap(layers, offload_layers, prefetch_depth, placement = "spread")
     # On the layer list too: the fast decode loop only sees the inner model.
     layers._LAiM_block_swap = swapper
+    layers._unsloth_block_swap = swapper
     model._LAiM_block_swap = swapper
+    model._unsloth_block_swap = swapper
     return swapper
 
 
@@ -8854,7 +8860,9 @@ def attach_offload_layers(
         layers.append(layer)
     swapper = _new_block_swap(layers, count, prefetch_depth, device = device, placement = "tail")
     layers._LAiM_block_swap = swapper
+    layers._unsloth_block_swap = swapper
     model._LAiM_block_swap = swapper
+    model._unsloth_block_swap = swapper
     return swapper
 
 

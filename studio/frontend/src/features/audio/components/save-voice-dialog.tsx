@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -99,7 +100,7 @@ function SaveVoiceForm({
       await onSubmit({ name: clean, transcript: transcript.trim(), language });
     } catch (reason) {
       setError(
-        reason instanceof Error ? reason.message : "Could not save the voice.",
+        reason instanceof Error ? reason.message : translate("uxAudio.couldNotSaveTheaiip3"),
       );
       setSaving(false);
     }
@@ -115,15 +116,15 @@ function SaveVoiceForm({
     >
       <DialogHeader>
         <DialogTitle className="text-ui-21">
-          {mode === "create" ? "Save voice" : "Edit voice"}
+          {mode === "create" ? translate("uxAudio.saveVoice582s8") : translate("uxAudio.editVoiceft2q7")}
         </DialogTitle>
         <DialogDescription>
           {mode === "create"
-            ? "Keep this reference to use again on Clone and Speak. Its first 30 seconds are saved."
-            : "Change how this voice is listed and what its clip says."}
+            ? translate("uxAudio.keepThisReferenceTob2uey")
+            : translate("uxAudio.changeHowThisVoicet4n8l")}
         </DialogDescription>
       </DialogHeader>
-      <Field label="Name" htmlFor="save-voice-name">
+      <Field label={translate("browser.bookmarks.name")} htmlFor="save-voice-name">
         <Input
           id="save-voice-name"
           value={name}
@@ -132,13 +133,13 @@ function SaveVoiceForm({
           autoFocus={true}
           onFocus={(event) => event.currentTarget.select()}
           onChange={(event) => setName(event.target.value)}
-          placeholder="Narrator"
+          placeholder={translate("uxAudio.narratorzx5pg")}
         />
       </Field>
       <Field
-        label="What's said in the clip"
+        label={translate("uxAudio.whatSSaidInin5xk")}
         htmlFor="save-voice-transcript"
-        hint="Optional. Saves transcribing the clip again next time."
+        hint={translate("uxAudio.optionalSavesTranscribingThe1ayca")}
       >
         <Textarea
           id="save-voice-transcript"
@@ -150,15 +151,13 @@ function SaveVoiceForm({
       </Field>
       <LanguageSelect
         id="save-voice-language"
-        label="Language"
+        label={translate("settings.appearance.language.title")}
         value={language}
         onChange={setLanguage}
-        emptyLabel="Not set"
+        emptyLabel={translate("uxAudio.notSetxf1f9")}
       />
       {taken ? (
-        <p className="text-ui-11p5 leading-snug text-muted-foreground">
-          You already have a voice named {clean}. Pick another name.
-        </p>
+        <p className="text-ui-11p5 leading-snug text-muted-foreground">{translate("uxAudio.youAlreadyHaveA3v8c7", { p1: clean })}</p>
       ) : null}
       {error ? (
         <p role="alert" className="text-ui-11p5 leading-snug text-destructive">
@@ -167,10 +166,10 @@ function SaveVoiceForm({
       ) : null}
       <DialogFooter className="flex-wrap gap-2 sm:justify-end">
         <Button type="button" variant="ghost" onClick={onCancel}>
-          Cancel
+          {translate("browser.agentSettings.cancel")}
         </Button>
         <Button type="submit" disabled={!clean || taken || saving}>
-          {saving ? "Saving…" : mode === "create" ? "Save voice" : "Save"}
+          {saving ? translate("uxAudio.savingEllipsisub64n") : mode === "create" ? translate("uxAudio.saveVoice582s8") : translate("uxAudio.saveActionjzjb8")}
         </Button>
       </DialogFooter>
     </form>

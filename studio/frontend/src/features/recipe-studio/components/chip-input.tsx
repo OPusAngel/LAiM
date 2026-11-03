@@ -14,6 +14,8 @@ import {
   useRef,
   useState,
 } from "react";
+import { translate } from "@/i18n";
+
 
 type ChipInputProps = {
   values: string[];
@@ -27,7 +29,7 @@ export function ChipInput({
   values,
   onAdd,
   onRemove,
-  placeholder = "Type and press Enter",
+  placeholder = translate("uxRecipestudio.typeAndPressEntertydjf"),
   suggestions,
 }: ChipInputProps): ReactElement {
   const [draft, setDraft] = useState("");

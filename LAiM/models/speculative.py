@@ -152,6 +152,9 @@ def get_mtp_head(
             "is still written into merged / GGUF exports."
         )
     head._LAiM_mtp_info = info
+    # LAiM_zoo's speculative trainer saves the head with the metadata read back under this
+    # spelling, so without the alias an exported MTP head carries an empty info dict.
+    head._unsloth_mtp_info = info
     # Not a submodule: keeps the head out of model.state_dict(), PEFT and the target's optimizer.
     object.__setattr__(model, "_LAiM_mtp_head", head)
     _wrap_save_pretrained(model)

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -66,55 +67,30 @@ export function TransformersUpgradeDialog() {
             </div>
             <div className="min-w-0 flex-1 space-y-3">
               <div className="space-y-1">
-                <AlertDialogTitle>New model architecture</AlertDialogTitle>
+                <AlertDialogTitle>{translate("uxCopy.newModelArchitecture1rrcd")}</AlertDialogTitle>
                 <AlertDialogDescription>
                   <span className="font-medium text-foreground">
                     {displayName}
-                  </span>{" "}
-                  uses the{" "}
-                  <span className="font-mono text-foreground">{modelType}</span>{" "}
+                  </span>{translate("uxFeatures.usesThe88rog", { p1: " ", p2: " " })}<span className="font-mono text-foreground">{modelType}</span>{" "}
                   architecture, which your installed transformers does not
                   support yet.{" "}
                   {installable && fromMain ? (
-                    <>
-                      No transformers release supports it yet, but the
-                      development branch (main) does. Install transformers{" "}
-                      <span className="font-medium text-foreground">
+                    <>{translate("uxFeatures.noTransformersReleaseSupportsr8mhi", { p1: " " })}<span className="font-medium text-foreground">
                         {version}
-                      </span>{" "}
-                      from main to load it. Development builds are not releases
-                      and can change; the install runs once and loading
-                      continues automatically afterwards.
-                    </>
+                      </span>{translate("uxFeatures.fromMainToLoadht1vo", { p1: " " })}</>
                   ) : installable ? (
-                    <>
-                      Install transformers{" "}
-                      <span className="font-medium text-foreground">
+                    <>{translate("uxFeatures.installTransformerscw7rd", { p1: " " })}<span className="font-medium text-foreground">
                         {version}
-                      </span>{" "}
-                      from PyPI to load it. The install runs once and can take a
-                      minute; loading continues automatically afterwards.
-                    </>
+                      </span>{translate("uxFeatures.fromPyPIToLoadf9tax", { p1: " " })}</>
                   ) : devOnly ? (
                     <>
-                      Even the latest transformers release on PyPI does not
-                      support it yet: the architecture is only available on the
-                      transformers development branch (main), whose version
-                      could not be checked right now. Try again later.
-                    </>
+                      {translate("uxFeatures.evenTheLatestTransformers183pa")}</>
                   ) : (
                     <>
-                      No released transformers version supports it yet, so it
-                      cannot be loaded.
-                    </>
+                      {translate("uxFeatures.noReleasedTransformersVersion1udww")}</>
                   )}
                   {customCode ? (
-                    <>
-                      {" "}
-                      This model also ships its own modeling code; you can
-                      continue and review enabling that custom code instead,
-                      which loads it on the transformers you already have.
-                    </>
+                    <>{translate("uxFeatures.thisModelAlsoShipse9gie", { p1: " " })}</>
                   ) : null}
                 </AlertDialogDescription>
               </div>
@@ -127,9 +103,7 @@ export function TransformersUpgradeDialog() {
 
               {installing ? (
                 <p className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <Spinner className="size-3.5" />
-                  Installing transformers {version}... This can take a minute.
-                </p>
+                  <Spinner className="size-3.5" />{translate("uxFeatures.installingTransformersThisCaneu3pe", { p1: version })}</p>
               ) : null}
             </div>
           </div>
@@ -148,7 +122,7 @@ export function TransformersUpgradeDialog() {
                   className="bg-transparent text-foreground hover:bg-accent"
                   onClick={() => resolve(true)}
                 >
-                  Continue with custom code
+                  {translate("uxFeatures.continueWithCustomCode16y8y")}
                 </AlertDialogAction>
               ) : null}
               <AlertDialogAction
@@ -163,7 +137,7 @@ export function TransformersUpgradeDialog() {
                 {installing ? (
                   <>
                     <Spinner className="size-4" />
-                    Installing...
+                    {translate("settings.resources.llamaBackend.applying")}
                   </>
                 ) : phase === "error" ? (
                   "Retry install"
@@ -176,7 +150,7 @@ export function TransformersUpgradeDialog() {
             // No installable release but the model ships custom code: continue
             // into the caller's trust_remote_code gate as the last resort.
             <AlertDialogAction onClick={() => resolve(true)}>
-              Continue with custom code
+              {translate("uxFeatures.continueWithCustomCode16y8y")}
             </AlertDialogAction>
           ) : null}
         </AlertDialogFooter>

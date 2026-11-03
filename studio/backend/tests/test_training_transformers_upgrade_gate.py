@@ -20,7 +20,7 @@ _BACKEND_DIR = str(Path(__file__).resolve().parent.parent)
 if _BACKEND_DIR not in sys.path:
     sys.path.insert(0, _BACKEND_DIR)
 
-MODEL = "LAiM/Muse-Glimmer-30B-LAiM-bnb-4bit"
+MODEL = "unsloth/Muse-Glimmer-30B-unsloth-bnb-4bit"
 UPGRADE = {
     "model_type": "muse_glimmer",
     "pypi_version": "5.15.0",

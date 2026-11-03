@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSettingsDialogStore } from "@/features/settings";
 import { useStripReorder } from "@/hooks/use-strip-reorder";
@@ -119,7 +120,7 @@ export function useAudioGallery({
           });
         }
       } catch {
-        toast.error("Could not load this audio clip. Try selecting it again.");
+        toast.error(translate("uxAudio.couldNotLoadThis1tli1"));
       }
     })();
     clipSrcLoads.current.set(clip.id, load);
@@ -287,7 +288,7 @@ export function useAudioGallery({
         await refreshGallery(id);
       } catch (error) {
         toast.error(
-          error instanceof Error ? error.message : "Could not delete the clip.",
+          error instanceof Error ? error.message : translate("uxAudio.couldNotDeleteThe4vbju"),
         );
       }
     },
@@ -301,7 +302,7 @@ export function useAudioGallery({
         for (const id of ids) dropClip(id);
       } catch (error) {
         toast.error(
-          error instanceof Error ? error.message : "Could not delete the stems.",
+          error instanceof Error ? error.message : translate("uxAudio.couldNotDeleteThe0rozl"),
         );
       }
       // Either way, so a run the server only partly removed shows what is left.
@@ -316,7 +317,7 @@ export function useAudioGallery({
         await setAudioClipFlags(id, { archived: true });
       } catch (error) {
         toast.error(
-          error instanceof Error ? error.message : "Could not archive the clip.",
+          error instanceof Error ? error.message : translate("uxAudio.couldNotArchiveTheph0xv"),
         );
         return;
       }
@@ -331,7 +332,7 @@ export function useAudioGallery({
           }}
           className="w-full cursor-pointer text-left"
         >
-          You can view archived audio in Settings
+          {translate("uxCopy.youCanViewArchived1ntuy")}
         </button>,
         { closeButton: true },
       );
@@ -371,7 +372,7 @@ export function useAudioGallery({
       if (!pinned && galleryCache.hasMore) orderWrites.current.deferred = true;
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Could not pin the clip.",
+        error instanceof Error ? error.message : translate("uxAudio.couldNotPinThelmoz4"),
       );
       if (pinAttempt.current.get(id) === attempt) {
         galleryCache.clips = pinned
@@ -423,7 +424,7 @@ export function useAudioGallery({
         setClips(galleryCache.clips);
       } catch (error) {
         toast.error(
-          error instanceof Error ? error.message : "Could not move the clip.",
+          error instanceof Error ? error.message : translate("uxAudio.couldNotMoveTheyk6du"),
         );
         if (pinAttempt.current.get(id) === attempt) pinAttempt.current.delete(id);
         orderWrites.current.deferred = true;
@@ -479,7 +480,7 @@ export function useAudioGallery({
       await refreshGallery();
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Could not clear the gallery.",
+        error instanceof Error ? error.message : translate("uxAudio.couldNotClearTheigjsc"),
       );
     }
   }, [refreshGallery]);
@@ -515,9 +516,9 @@ export function useAudioGallery({
 
   const handleCopyPrompt = useCallback(async (text: string) => {
     if (await copyToClipboard(text)) {
-      toast.success("Text copied");
+      toast.success(translate("uxAudio.textCopied19k54"));
     } else {
-      toast.error("Could not copy the text.");
+      toast.error(translate("uxAudio.couldNotCopyThe5nmt7"));
     }
   }, []);
 

@@ -145,7 +145,7 @@ def test_a_cached_safetensors_artifact_is_evidence_enough(monkeypatch):
 def test_the_derived_chain_puts_safetensors_first_and_keeps_the_pickles(monkeypatch):
     """The preference itself, and the promise that nothing is dropped behind it: an existing
     .pt-only repo still resolves both of the names it resolves today."""
-    fam = _family(prequant_repos = (("fp8", "LAiM/Model-FP8"),))
+    fam = _family(prequant_repos = (("fp8", "unsloth/Model-FP8"),))
     src = pq.resolve_prequant_source(fam, "fp8")
     assert src.candidate_filenames == (
         "Model-FP8.safetensors",

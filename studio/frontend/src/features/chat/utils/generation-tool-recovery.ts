@@ -2,10 +2,10 @@
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import {
-  SANDBOX_FILE_TOOLS,
-  SANDBOX_RUN_TOOLS,
+  WORKDIR_FILE_TOOLS,
+  WORKDIR_RUN_TOOLS,
   extractCreatedFiles,
-} from "@/components/assistant-ui/sandbox-files";
+} from "@/components/assistant-ui/workdir-files";
 import {
   SEARCH_IMAGE_TOOL,
   extractSearchImages,
@@ -78,9 +78,9 @@ function recoveredToolResult(
   if (typeof event.result !== "string") {
     return event.result ?? "";
   }
-  const sandbox =
-    typeof toolName === "string" && SANDBOX_FILE_TOOLS.has(toolName);
-  const { text: withUi, files } = sandbox
+  const workdir =
+    typeof toolName === "string" && WORKDIR_FILE_TOOLS.has(toolName);
+  const { text: withUi, files } = workdir
     ? extractCreatedFiles(event.result)
     : { text: event.result, files: [] };
   // As the live adapter does: the UI line comes off first, then the image envelope.
@@ -113,7 +113,7 @@ function recoveredToolResult(
       // Keep malformed envelopes as text.
     }
   }
-  if (sandbox && (SANDBOX_RUN_TOOLS.has(toolName as string) || files.length > 0)) {
+  if (workdir && (WORKDIR_RUN_TOOLS.has(toolName as string) || files.length > 0)) {
     return { text, images: [], sessionId, files };
   }
   if (toolName === SEARCH_IMAGE_TOOL) {
@@ -137,7 +137,7 @@ function recoveredToolResult(
  *  calls must be idempotent -- a card can be re-raised from the seed AND re-folded from its frame. */
 export type RecoveredToolConfirmations = {
   /** This card is waiting on a decision. `partId` is the card's own `toolCallId`, which is what the
-   *  controls look themselves up by, whichever path minted it. `sessionId` is the run's sandbox
+   *  controls look themselves up by, whichever path minted it. `sessionId` is the run's workdir
    *  session, which the decision is resolved against and which scopes "Always allow". */
   register: (partId: string, approvalId: string, sessionId: string) => void;
   /** It is no longer waiting: answered, denied, timed out, or finished. */

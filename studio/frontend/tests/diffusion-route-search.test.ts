@@ -11,7 +11,7 @@ import {
   routedGgufLabel,
 } from "../src/lib/diffusion-route-search.ts";
 
-const REPO = "LAiM/Z-Image-Turbo-GGUF";
+const REPO = "unsloth/Z-Image-Turbo-GGUF";
 
 test("an expander pick routes its exact filename as the quant", () => {
   assert.deepEqual(
@@ -44,8 +44,8 @@ test("a non-catalog repo keeps its label too", () => {
 });
 
 test("a curated non-GGUF pick routes the model alone", () => {
-  assert.deepEqual(diffusionRouteSearch("LAiM/FLUX.1-schnell", {}), {
-    model: "LAiM/FLUX.1-schnell",
+  assert.deepEqual(diffusionRouteSearch("unsloth/FLUX.1-schnell", {}), {
+    model: "unsloth/FLUX.1-schnell",
   });
 });
 

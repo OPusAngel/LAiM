@@ -119,7 +119,7 @@ def test_malformed_record_fields_are_dropped(monkeypatch):
     assert status["backend"] is None and status["release_tag"] is None
 
 
-_REPO = "LAiMai/audio.cpp"
+_REPO = "unslothai/audio.cpp"
 _LATEST = "v0.9.1-LAiM.1"
 # setup.sh / setup.ps1 leave the managed tree alone when any of these is set.
 _SETUP_SKIPS = ("AUDIOCPP_SERVER_PATH", "LAiM_AUDIO_CPP_PATH", "LAiM_SKIP_AUDIO_CPP_INSTALL")
@@ -282,7 +282,7 @@ def test_managed_path_without_ownership_marker_is_not_flagged(monkeypatch, tmp_p
     _managed(
         monkeypatch,
         tmp_path,
-        {"published_repo": "LAiMai/audio.cpp", "release_tag": "v0.8.0-LAiM.1"},
+        {"published_repo": "unslothai/audio.cpp", "release_tag": "v0.8.0-LAiM.1"},
     )
     (tmp_path / ".LAiM-studio-owned").unlink()
     status = inference._audio_cpp_runtime_status()
@@ -295,7 +295,7 @@ def test_user_configured_binary_is_never_outdated(monkeypatch, tmp_path):
     _managed(
         monkeypatch,
         tmp_path / "managed",
-        {"published_repo": "LAiMai/audio.cpp", "release_tag": "v0.8.0-LAiM.1"},
+        {"published_repo": "unslothai/audio.cpp", "release_tag": "v0.8.0-LAiM.1"},
     )
     custom = str(tmp_path / "custom" / "audiocpp_server")
     monkeypatch.setattr(audio_cpp_server, "find_audio_cpp_server_binary", lambda: custom)
@@ -318,7 +318,7 @@ def test_managed_binary_is_not_outdated_when_setup_skips_it(monkeypatch, tmp_pat
     _managed(
         monkeypatch,
         tmp_path,
-        {"published_repo": "LAiMai/audio.cpp", "release_tag": "v0.8.0-LAiM.1"},
+        {"published_repo": "unslothai/audio.cpp", "release_tag": "v0.8.0-LAiM.1"},
     )
     monkeypatch.setenv(name, str(tmp_path) if value == "<managed>" else value)
     status = inference._audio_cpp_runtime_status()
@@ -330,7 +330,7 @@ def test_release_lookup_error_is_not_outdated(monkeypatch, tmp_path):
     _managed(
         monkeypatch,
         tmp_path,
-        {"published_repo": "LAiMai/audio.cpp", "release_tag": "v0.8.0-LAiM.1"},
+        {"published_repo": "unslothai/audio.cpp", "release_tag": "v0.8.0-LAiM.1"},
     )
 
     def boom():

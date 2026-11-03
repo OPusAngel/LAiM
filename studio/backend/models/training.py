@@ -140,7 +140,7 @@ class TrainingStartRequest(BaseModel):
     """Request schema for starting training"""
 
     model_name: str = Field(
-        ..., description = "Model identifier (e.g., 'LAiM/llama-3-8b-bnb-4bit')"
+        ..., description = "Model identifier (e.g., 'unsloth/llama-3-8b-bnb-4bit')"
     )
     # The same identity the picker was shown; see `resolve_inventory_handle`.
     _resolve_the_handle = field_validator("model_name")(_resolve_inventory_handle)
@@ -730,7 +730,7 @@ class TrainingStartRequest(BaseModel):
         ):
             raise ValueError(
                 "offload_layers needs gradient checkpointing: set gradient_checkpointing to "
-                "'LAiM' or 'true', or offload_layers to 0."
+                "'unsloth' or 'true', or offload_layers to 0."
             )
         return self
 

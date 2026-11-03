@@ -3448,11 +3448,17 @@ extra_eos_tokens = None,
     tokenizer._ollama_modelfile = modelfile
     tokenizer._LAiM_input_part  = input_part
     tokenizer._LAiM_output_part = output_part
+    # LAiM_zoo's train_on_responses_only looks these up under the upstream spelling, so a
+    # renamed-only marker makes it report the dataset has no instruction/response part.
+    tokenizer._unsloth_input_part  = input_part
+    tokenizer._unsloth_output_part = output_part
     if hasattr(tokenizer, "tokenizer"):
         tokenizer.tokenizer.chat_template = jinja_template
         tokenizer.tokenizer._ollama_modelfile = modelfile
         tokenizer.tokenizer._LAiM_input_part  = input_part
         tokenizer.tokenizer._LAiM_output_part = output_part
+        tokenizer.tokenizer._unsloth_input_part  = input_part
+        tokenizer.tokenizer._unsloth_output_part = output_part
 
     return dataset.map(formatting_prompts_func, batched = True,)
 

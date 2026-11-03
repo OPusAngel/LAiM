@@ -53,7 +53,7 @@ const GRADIENT_CHECKPOINTING_ALIASES = new Map<
   ["no", "none"],
   ["none", "none"],
   ["off", "none"],
-  ["LAiM", "LAiM"],
+  ["unsloth", "unsloth"],
   ["mlx", "mlx"],
 ]);
 
@@ -70,7 +70,7 @@ function toGradientCheckpointing(
   if (resolved === undefined) return undefined;
   // On Mac, map "LAiM" → "mlx" since LAiM GC is GPU-only
   if (
-    resolved === "LAiM" &&
+    resolved === "unsloth" &&
     usePlatformStore.getState().deviceType === "mac"
   ) {
     return "mlx";

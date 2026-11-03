@@ -31,7 +31,7 @@ def _clear_offline_environment(monkeypatch):
 @pytest.fixture(autouse = True)
 def _cuda_host_with_triton(monkeypatch):
     # A CUDA torch with Triton, where zoo's Triton conv runs; the platform tests below override it.
-    monkeypatch.delenv("LAiM_DISABLE_TRITON_CAUSAL_CONV1D", raising = False)
+    monkeypatch.delenv("UNSLOTH_DISABLE_TRITON_CAUSAL_CONV1D", raising = False)
     monkeypatch.setattr(ssm_runtime, "_zoo_triton_platform_usable", lambda: True)
 
 
@@ -51,8 +51,8 @@ class _Result:
 @pytest.mark.parametrize(
     "name",
     [
-        "LAiM/NVIDIA-Nemotron-3-Nano-4B",
-        "LAiM/Nemotron-3-Nano-30B-A3B",
+        "unsloth/NVIDIA-Nemotron-3-Nano-4B",
+        "unsloth/Nemotron-3-Nano-30B-A3B",
         "nvidia/Nemotron-H-8B",
         "tiiuae/Falcon-H1-0.5B-Instruct",
         "ibm-granite/granite-4.0-h-micro",
@@ -83,9 +83,9 @@ def test_causal_conv1d_only_models(name):
 @pytest.mark.parametrize(
     "name",
     [
-        "LAiM/Llama-3.2-1B-Instruct",
-        "LAiM/Qwen2.5-7B",
-        "LAiM/gemma-3-4b-it",
+        "unsloth/Llama-3.2-1B-Instruct",
+        "unsloth/Qwen2.5-7B",
+        "unsloth/gemma-3-4b-it",
         "",
         None,
     ],
@@ -135,7 +135,7 @@ def test_probe_local_ssm_checkpoint_basename_detected(tmp_path):
 def test_noop_for_non_ssm_model(monkeypatch):
     calls = []
     monkeypatch.setattr(ssm_runtime, "_install_kernel", lambda **k: calls.append(k) or True)
-    ssm_runtime.ensure_ssm_runtime("LAiM/Llama-3.2-1B-Instruct", run = lambda *a, **k: _Result())
+    ssm_runtime.ensure_ssm_runtime("unsloth/Llama-3.2-1B-Instruct", run = lambda *a, **k: _Result())
     assert calls == []  # nothing installed for a plain transformer
 
 
@@ -148,7 +148,7 @@ def test_ssm_model_installs_causal_then_mamba(monkeypatch):
 
     monkeypatch.setattr(ssm_runtime, "_install_kernel", fake_install)
     monkeypatch.setattr(ssm_runtime.sys, "platform", "linux")
-    ssm_runtime.ensure_ssm_runtime("LAiM/NVIDIA-Nemotron-3-Nano-4B")
+    ssm_runtime.ensure_ssm_runtime("unsloth/NVIDIA-Nemotron-3-Nano-4B")
     assert order == ["causal_conv1d", "mamba_ssm"]
 
 
@@ -168,7 +168,7 @@ def test_failure_raises_runtime_error(monkeypatch):
     # otherwise). "Nemotron-3-Nano-30B-A3B" matches the SSM substrings.
     monkeypatch.setattr(ssm_runtime, "_install_kernel", lambda **k: False)
     with pytest.raises(RuntimeError):
-        ssm_runtime.ensure_ssm_runtime("LAiM/Nemotron-3-Nano-30B-A3B")
+        ssm_runtime.ensure_ssm_runtime("unsloth/Nemotron-3-Nano-30B-A3B")
 
 
 def test_causal_only_install_failure_is_not_fatal(monkeypatch):
@@ -183,7 +183,7 @@ def test_ssm_causal_failure_nonfatal_when_mamba_ok(monkeypatch):
     monkeypatch.setattr(
         ssm_runtime, "_install_kernel", lambda *, import_name, **_: import_name == "mamba_ssm"
     )
-    ssm_runtime.ensure_ssm_runtime("LAiM/NVIDIA-Nemotron-3-Nano-4B")  # no raise
+    ssm_runtime.ensure_ssm_runtime("unsloth/NVIDIA-Nemotron-3-Nano-4B")  # no raise
 
 
 def test_install_kernel_idempotent_when_present(monkeypatch):
@@ -484,7 +484,7 @@ def test_ssm_model_on_windows_installs_causal_then_mamba_with_triton(monkeypatch
         "_install_kernel",
         lambda *, import_name, **_: installed.append(import_name) or True,
     )
-    ssm_runtime.ensure_ssm_runtime("LAiM/NVIDIA-Nemotron-3-Nano-4B")
+    ssm_runtime.ensure_ssm_runtime("unsloth/NVIDIA-Nemotron-3-Nano-4B")
     assert installed == ["causal_conv1d", "mamba_ssm"]
 
 
@@ -498,7 +498,7 @@ def test_ssm_model_on_windows_without_triton_fails_clearly(monkeypatch):
         lambda *, import_name, **_: installed.append(import_name) or True,
     )
     with pytest.raises(RuntimeError, match = "triton-windows"):
-        ssm_runtime.ensure_ssm_runtime("LAiM/NVIDIA-Nemotron-3-Nano-4B")
+        ssm_runtime.ensure_ssm_runtime("unsloth/NVIDIA-Nemotron-3-Nano-4B")
     assert "mamba_ssm" not in installed
 
 
@@ -813,19 +813,19 @@ def test_constants_shared_with_training_worker():
 
     # detection must agree with the training worker across SSM + non-SSM names
     for name in (
-        "LAiM/NVIDIA-Nemotron-3-Nano-4B",
+        "unsloth/NVIDIA-Nemotron-3-Nano-4B",
         "nvidia/Nemotron-H-8B",
         "tiiuae/Falcon-H1-0.5B",
         "ibm-granite/granite-4.0-h-micro",
         "Qwen/Qwen3-Next-80B",
-        "LAiM/Qwen3.5-2B",
+        "unsloth/Qwen3.5-2B",
         "LiquidAI/LFM2-1.2B",
         "state-spaces/mamba-2.8b-hf",
         "ai21labs/Jamba-v0.1",
         "Zyphra/Zamba2-7B",
         "ibm/Bamba-9B",
-        "LAiM/Llama-3.2-1B-Instruct",
-        "LAiM/Qwen2.5-7B",
+        "unsloth/Llama-3.2-1B-Instruct",
+        "unsloth/Qwen2.5-7B",
     ):
         assert ssm_runtime.model_wants_causal_conv1d(name) == tw._model_wants_causal_conv1d(
             name
@@ -889,9 +889,9 @@ def test_nested_text_config_resolves_causal_conv1d(tmp_path):
 _ZOO_GDN_NAMES = [
     "Qwen/Qwen3-Next-80B-A3B",
     "Qwen/Qwen3-Next-80B-A3B-Instruct",
-    "LAiM/Qwen3.5-2B",
-    "LAiM/Qwen3.5-35B-A3B-GGUF",
-    "LAiM/Qwen3.6-27B",
+    "unsloth/Qwen3.5-2B",
+    "unsloth/Qwen3.5-35B-A3B-GGUF",
+    "unsloth/Qwen3.6-27B",
     "my-org/qwen3_5-finetune",
 ]
 
@@ -1033,7 +1033,7 @@ def test_a_known_non_ssm_config_overrides_an_ssm_looking_name(tmp_path):
 def test_no_config_falls_back_to_the_name(tmp_path):
     missing = str(tmp_path / "no-config")
     assert ssm_runtime.resolved_model_is_ssm("tiiuae/Falcon-H1-0.5B", missing, None) is True
-    assert ssm_runtime.resolved_model_is_ssm("LAiM/Llama-3.2-1B", missing, None) is False
+    assert ssm_runtime.resolved_model_is_ssm("unsloth/Llama-3.2-1B", missing, None) is False
 
 
 def test_resolved_answers_override_the_name(monkeypatch):
@@ -1121,7 +1121,7 @@ def test_zoo_triton_conv_platform_check_reads_an_imported_torch(monkeypatch):
     assert _REAL_PLATFORM_USABLE() is True
 
 
-@pytest.mark.parametrize("name", ["LAiM/Qwen3.5-2B", "Qwen/Qwen3-Next-80B-A3B"])
+@pytest.mark.parametrize("name", ["unsloth/Qwen3.5-2B", "Qwen/Qwen3-Next-80B-A3B"])
 def test_qwen_keeps_causal_conv1d_where_zoo_triton_conv_cannot_run(monkeypatch, tmp_path, name):
     monkeypatch.setattr(ssm_runtime, "_zoo_triton_platform_usable", lambda: False)
     assert ssm_runtime.model_wants_causal_conv1d(name) is True
@@ -1134,7 +1134,7 @@ def test_the_platform_check_is_not_run_for_unrelated_models(monkeypatch):
         raise AssertionError("the platform check must not run for a non-Qwen model")
 
     monkeypatch.setattr(ssm_runtime, "_zoo_triton_platform_usable", _boom)
-    assert ssm_runtime.model_wants_causal_conv1d("LAiM/Llama-3.2-1B") is False
+    assert ssm_runtime.model_wants_causal_conv1d("unsloth/Llama-3.2-1B") is False
     assert ssm_runtime.model_wants_causal_conv1d("LiquidAI/LFM2-1.2B") is True
 
 

@@ -179,7 +179,7 @@ def host_normalize_path(path: str) -> str:
 
 
 def is_local_path(path: str) -> bool:
-    """Whether path is a local filesystem path rather than a HuggingFace model identifier: local for /home/user/model, ./model or ~/model, not local for LAiM/llama-3.1-8b or microsoft/phi-2."""
+    """Whether path is a local filesystem path rather than a HuggingFace model identifier: local for /home/user/model, ./model or ~/model, not local for unsloth/llama-3.1-8b or microsoft/phi-2."""
     if not path:
         return False
 
@@ -373,7 +373,7 @@ def _wsl_reveal_in_explorer(path: Path, is_file: bool) -> bool:
 def reveal_in_file_manager(path: Path, expect_dir: bool = False) -> None:
     """Open the OS file manager with *path* selected (best effort per platform).
 
-    Raises ``FileNotFoundError`` when the target is gone: the Linux branch falls back to the parent, which for a sandbox is the root holding every other chat's.
+    Raises ``FileNotFoundError`` when the target is gone: the Linux branch falls back to the parent, which for a workdir is the root holding every other chat's.
 
     ``expect_dir`` refuses anything that is not a real directory, symlinks included, since both would take the file branch and name that same parent. One ``lstat`` answers type and link-ness together, leaving no window between the checks (``is_dir()`` follows links; ``follow_symlinks = False`` is 3.13+ only, and this runs on 3.10). Off by default: the cached-model reveal points at a file, and a symlinked one, as an HF cache snapshot is a link farm.
     """
@@ -492,7 +492,7 @@ def _opened_path(handle: int) -> Optional[str]:
 def _stage_for_open(path: Path, root: Optional[Path] = None) -> Path:
     """A name for *path*'s current file in a private directory, for the OS opener.
 
-    Tool code runs in the sandbox and can swap *path* for a symlink (to an app or a script outside
+    Tool code runs in the workdir and can swap *path* for a symlink (to an app or a script outside
     it) between any check and the opener resolving the name. So the file is opened once without
     following links, and the inode that open returned is hard-linked (or, across filesystems,
     copied) into a fresh directory only Studio writes to. That name is what the OS opens.

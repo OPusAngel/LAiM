@@ -78,7 +78,7 @@ model_comparison_results = {}
 
 
 model, tokenizer = FastVisionModel.from_pretrained(
-    model_name = "LAiM/Qwen2.5-VL-32B-Instruct-bnb-4bit",
+    model_name = "unsloth/Qwen2.5-VL-32B-Instruct-bnb-4bit",
     max_seq_length = 2048,
     load_in_4bit = True,
     load_in_8bit = False,
@@ -102,7 +102,7 @@ model = FastVisionModel.get_peft_model(
     lora_alpha = 32,
     lora_dropout = 0,
     bias = "none",
-    use_gradient_checkpointing = "LAiM",
+    use_gradient_checkpointing = "unsloth",
     random_state = 3407,
     use_rslora = False,
     loftq_config = None,

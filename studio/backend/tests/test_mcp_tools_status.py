@@ -7,10 +7,10 @@ from .mcp_harness import run_tool
 
 CHAT = {
     "active_model": "Llama 3.2 1B",
-    "model_identifier": "LAiM/Llama-3.2-1B-Instruct-GGUF",
+    "model_identifier": "unsloth/Llama-3.2-1B-Instruct-GGUF",
     "is_gguf": True,
-    "loaded": ["LAiM/Llama-3.2-1B-Instruct-GGUF", "LAiM/Qwen3-0.6B"],
-    "loading": ["LAiM/gemma-3-1b-it"],
+    "loaded": ["unsloth/Llama-3.2-1B-Instruct-GGUF", "unsloth/Qwen3-0.6B"],
+    "loading": ["unsloth/gemma-3-1b-it"],
     "serving_checkpoints": ["/srv/models/llama"],
 }
 STT = {
@@ -108,19 +108,19 @@ def test_every_slot_is_reported(monkeypatch):
     assert status["chat"] == {
         "loaded": [
             {
-                "id": "LAiM/Llama-3.2-1B-Instruct-GGUF",
+                "id": "unsloth/Llama-3.2-1B-Instruct-GGUF",
                 "display_name": "Llama 3.2 1B",
                 "is_gguf": True,
                 "audio_options": None,
             },
             {
-                "id": "LAiM/Qwen3-0.6B",
+                "id": "unsloth/Qwen3-0.6B",
                 "display_name": None,
                 "is_gguf": None,
                 "audio_options": None,
             },
         ],
-        "loading": ["LAiM/gemma-3-1b-it"],
+        "loading": ["unsloth/gemma-3-1b-it"],
     }
     assert status["image"] == {
         "loaded": True,
@@ -210,7 +210,7 @@ def test_failing_and_owner_only_slots_do_not_fail_the_tool(monkeypatch):
 
 
 def test_the_active_audio_model_lists_its_options(monkeypatch):
-    tts = "LAiM/Qwen3-TTS-12Hz-1.7B-CustomVoice-GGUF"
+    tts = "unsloth/Qwen3-TTS-12Hz-1.7B-CustomVoice-GGUF"
     voice = {
         "name": "voice",
         "type": "enum",

@@ -1,6 +1,6 @@
-# Model defaults for LAiM/Magistral-Small-2509
+# Model defaults for unsloth/Magistral-Small-2509
 # Based on Magistral_(24B)-Reasoning-Conversational.ipynb
-# Also applies to: mistralai/Magistral-Small-2509, LAiM/Magistral-Small-2509-bnb-4bit
+# Also applies to: mistralai/Magistral-Small-2509, unsloth/Magistral-Small-2509-bnb-4bit
 # added inference parameters from LAiM guides
 
 training:
@@ -17,7 +17,7 @@ training:
   random_seed: 3407
   packing: false
   train_on_completions: true
-  gradient_checkpointing: "LAiM"
+  gradient_checkpointing: "unsloth"
   optim: "adamw_8bit"
   lr_scheduler_type: "linear"
 

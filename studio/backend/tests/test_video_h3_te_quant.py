@@ -89,7 +89,7 @@ def test_the_hosted_filename_comes_from_an_LAiM_repo():
     # that the conditioner sits with the other prequantized checkpoints rather than alone.
     from core.inference.video_families import _FAMILIES
 
-    assert H3_TE_QUANT_REPO.startswith("LAiM/")
+    assert H3_TE_QUANT_REPO.startswith("unsloth/")
     h3 = next(fam for fam in _FAMILIES if fam.name == "minimax-h3")
     assert H3_TE_QUANT_REPO in {repo for _, repo in (h3.prequant_repos or ())}
     assert (

@@ -611,15 +611,15 @@ def test_causal_conv1d_fast_path_skips_qwen3_6_variants_on_zoo_triton_conv(monke
     install_mock = mock.Mock(return_value = True)
     monkeypatch.setattr(worker, "_install_package_wheel_first", install_mock)
     monkeypatch.setattr(ssm_runtime, "_zoo_triton_platform_usable", lambda: True)
-    monkeypatch.delenv("LAiM_DISABLE_TRITON_CAUSAL_CONV1D", raising = False)
+    monkeypatch.delenv("UNSLOTH_DISABLE_TRITON_CAUSAL_CONV1D", raising = False)
 
-    for model_name in ("LAiM/Qwen3.6-4B", "LAiM/Qwen3_6-4B"):
+    for model_name in ("unsloth/Qwen3.6-4B", "unsloth/Qwen3_6-4B"):
         worker._ensure_causal_conv1d_fast_path(event_queue = [], model_name = model_name)
     assert install_mock.call_count == 0
 
     # zoo's kill switch puts them back on the prebuilt causal-conv1d.
-    monkeypatch.setenv("LAiM_DISABLE_TRITON_CAUSAL_CONV1D", "1")
-    for model_name in ("LAiM/Qwen3.6-4B", "LAiM/Qwen3_6-4B"):
+    monkeypatch.setenv("UNSLOTH_DISABLE_TRITON_CAUSAL_CONV1D", "1")
+    for model_name in ("unsloth/Qwen3.6-4B", "unsloth/Qwen3_6-4B"):
         worker._ensure_causal_conv1d_fast_path(event_queue = [], model_name = model_name)
     assert install_mock.call_count == 2
 
@@ -706,7 +706,7 @@ def test_hook_leaves_causal_gate_unchanged_for_unrelated_model(monkeypatch):
 
     worker._install_fast_path_hooks(
         event_queue = _FakeQueue(),
-        model_name = "LAiM/Llama-3.2-1B-Instruct",
+        model_name = "unsloth/Llama-3.2-1B-Instruct",
     )
 
     from transformers.utils import import_utils as _iu
@@ -1015,7 +1015,7 @@ def test_no_install_path_pips_flash_linear_attention_or_tilelang(monkeypatch, uv
 
     worker._ensure_causal_conv1d_fast_path(
         event_queue = [],
-        model_name = "LAiM/Qwen3.5-2B",
+        model_name = "unsloth/Qwen3.5-2B",
         required = True,
     )
     worker._ensure_mamba_ssm(
@@ -1029,7 +1029,7 @@ def test_no_install_path_pips_flash_linear_attention_or_tilelang(monkeypatch, uv
     _patch_iu_gate(monkeypatch, conv_gate)
     worker._install_fast_path_hooks(
         event_queue = _FakeQueue(),
-        model_name = "LAiM/Qwen3.5-2B",
+        model_name = "unsloth/Qwen3.5-2B",
         install_causal_conv1d = True,
     )
     from transformers.utils import import_utils as _iu
@@ -1131,7 +1131,7 @@ def test_install_fast_path_hooks_sets_fla_tilelang_zero_on_hip(monkeypatch):
     _patch_iu_gate(monkeypatch, _make_fake_gate(initial_return = True))
     monkeypatch.setattr(worker, "_install_package_wheel_first", lambda **kw: True)
 
-    worker._install_fast_path_hooks(event_queue = _FakeQueue(), model_name = "LAiM/Qwen3.5-2B")
+    worker._install_fast_path_hooks(event_queue = _FakeQueue(), model_name = "unsloth/Qwen3.5-2B")
 
     assert os.environ.get("FLA_TILELANG") == "0"
 
@@ -1144,7 +1144,7 @@ def test_install_fast_path_hooks_guards_tilelang_even_when_hooks_are_skipped(mon
     gate = _make_fake_gate(initial_return = True)
     _patch_iu_gate(monkeypatch, gate)
 
-    worker._install_fast_path_hooks(event_queue = _FakeQueue(), model_name = "LAiM/Qwen3.5-2B")
+    worker._install_fast_path_hooks(event_queue = _FakeQueue(), model_name = "unsloth/Qwen3.5-2B")
 
     assert os.environ.get("FLA_TILELANG") == "0"
 
@@ -1160,7 +1160,7 @@ def test_install_fast_path_hooks_sets_fla_tilelang_zero_on_rocm_tagged_torch(mon
     _patch_iu_gate(monkeypatch, _make_fake_gate(initial_return = True))
     monkeypatch.setattr(worker, "_install_package_wheel_first", lambda **kw: True)
 
-    worker._install_fast_path_hooks(event_queue = _FakeQueue(), model_name = "LAiM/Qwen3.5-2B")
+    worker._install_fast_path_hooks(event_queue = _FakeQueue(), model_name = "unsloth/Qwen3.5-2B")
 
     assert os.environ.get("FLA_TILELANG") == "0"
 
@@ -1244,7 +1244,7 @@ def test_install_fast_path_hooks_respects_user_fla_tilelang_override(monkeypatch
     _patch_iu_gate(monkeypatch, _make_fake_gate(initial_return = True))
     monkeypatch.setattr(worker, "_install_package_wheel_first", lambda **kw: True)
 
-    worker._install_fast_path_hooks(event_queue = _FakeQueue(), model_name = "LAiM/Qwen3.5-2B")
+    worker._install_fast_path_hooks(event_queue = _FakeQueue(), model_name = "unsloth/Qwen3.5-2B")
 
     assert os.environ["FLA_TILELANG"] == "1"
 
@@ -1259,7 +1259,7 @@ def test_install_fast_path_hooks_does_not_set_fla_tilelang_on_cuda(monkeypatch):
     _patch_iu_gate(monkeypatch, _make_fake_gate(initial_return = True))
     monkeypatch.setattr(worker, "_install_package_wheel_first", lambda **kw: True)
 
-    worker._install_fast_path_hooks(event_queue = _FakeQueue(), model_name = "LAiM/Qwen3.5-2B")
+    worker._install_fast_path_hooks(event_queue = _FakeQueue(), model_name = "unsloth/Qwen3.5-2B")
 
     assert os.environ.get("FLA_TILELANG") is None
 

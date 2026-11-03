@@ -2,6 +2,7 @@
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { SegmentedPill } from "@/components/segmented-control";
+import { HF_SOURCE_OWNER } from "@/config/hub-source";
 import { getClientPlatform } from "@/components/tauri/window-titlebar";
 import {
   Command,
@@ -44,7 +45,7 @@ import {
   useOnlineStatus,
 } from "@/features/hub";
 import type { TranslationKey } from "@/i18n";
-import { useT } from "@/i18n";
+import { translate, useT } from "@/i18n";
 import { getApiBase, isTauri } from "@/lib/api-base";
 import { ChevronDownStandardIcon } from "@/lib/chevron-icons";
 import { Tick02Icon } from "@/lib/tick-icon";
@@ -91,7 +92,7 @@ import {
 
 const DOCS_URL = LAiM_START_DOCS_URL;
 const FLAGS_DOCS_URL = `${DOCS_URL}#flags--options`;
-const EXAMPLE_MODEL_REPO = "LAiM/Qwen3.8-27B-GGUF";
+const EXAMPLE_MODEL_REPO = "unsloth/Qwen3.8-27B-GGUF";
 const EXAMPLE_MODEL_VARIANT = "UD-Q4_K_XL";
 const EXAMPLE_MODEL_FLAGS = "--reasoning-effort medium";
 const MODEL_RESULT_LIMIT = 7;
@@ -468,7 +469,7 @@ export function AgentsTab() {
   const online = useOnlineStatus();
   const deviceType = usePlatformStore((s) => s.deviceType);
   const { results: trendingGgufs } = useHubModelSearch("", {
-    channel: { owner: "LAiM", tags: ["gguf"] },
+    channel: { owner: HF_SOURCE_OWNER, tags: ["gguf"] },
     sortBy: "trendingScore",
     sortDirection: "desc",
     accessToken: hfAccessToken,
@@ -1138,9 +1139,7 @@ export function AgentsTab() {
           rel="noopener noreferrer"
           title={t("settings.agents.readDocs")}
           className="rounded bg-muted px-1 py-0.5 font-mono text-[0.85em] text-foreground underline decoration-border decoration-dotted underline-offset-2 transition-colors hover:decoration-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:bg-[rgb(249_226_222_/_calc(0.08*var(--contrast-wash-gain,1)))]"
-        >
-          LAiM start
-        </a>{" "}
+        >{translate("uxSettings.lAiMStartc7l24")}</a>{" "}
         {t("settings.agents.intro")}
       </p>
 

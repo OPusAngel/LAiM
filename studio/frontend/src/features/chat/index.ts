@@ -104,19 +104,7 @@ export { useToolAwaitingApproval } from "./tool-approval";
 export {
   PermissionModeDropdown,
   useActivePermissionMode,
-  useSandboxCapability,
 } from "./permission-mode-select";
-export { sandboxSwitchState } from "./sandbox-level";
-export { pickSandboxLevel } from "./sandbox-pick";
-export { SandboxSetupDialog } from "./sandbox-setup-dialog";
-export {
-  type SandboxSetupAction,
-  type SandboxSetupJob,
-  type SandboxSetupOperation,
-  forgetSandboxCapability,
-  loadSandboxSetup,
-  startSandboxSetup,
-} from "./api/sandbox-capability";
 export { useChatSearchStore } from "./stores/chat-search-store";
 export type { ChatNavigationState } from "./stores/chat-navigation-store";
 export {
@@ -389,10 +377,10 @@ export {
   exportConversationByFormat,
   forkChatRow,
   getSidebarItemThreadIds,
-  recordedSandboxSessionIds,
+  recordedWorkdirSessionIds,
   regenerateChatTitle,
   regenerateChatTitleWithToast,
-  sandboxSessionIdsHolding,
+  workdirSessionIdsHolding,
   type ConversationExportFormat,
 } from "./components/chat-row-menu";
 export {
@@ -407,7 +395,7 @@ export { useForkInFlight } from "./utils/fork-in-flight";
 export { showForkCreatedToast } from "./utils/fork-toast";
 export { clearAllChats, countAllChats } from "./utils/clear-all-chats";
 export { stopRecoveredRun } from "./utils/chat-generation-recovery";
-export { offerToDeleteKeptSandboxes } from "./utils/offer-kept-sandbox-files";
+export { offerToDeleteKeptWorkdirs } from "./utils/offer-kept-workdir-files";
 export { pasteClipboardFiles } from "./utils/clipboard-files";
 export {
   extractYoutubeVideoId,
@@ -462,7 +450,7 @@ export {
   markThreadIncognito,
   readBackendChatThread,
 } from "./utils/chat-history-storage";
-export { allRecordedSandboxSessionIds } from "./utils/recorded-sandbox-session";
+export { allRecordedWorkdirSessionIds } from "./utils/recorded-workdir-session";
 export {
   markChatThreadDeleted,
   onChatThreadsDeleted,

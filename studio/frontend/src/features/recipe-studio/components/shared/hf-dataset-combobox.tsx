@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   Combobox,
   ComboboxContent,
@@ -28,7 +29,7 @@ export function HfDatasetCombobox({
   onValueChange,
   accessToken,
   inputId,
-  placeholder = "Search datasets...",
+  placeholder = translate("uxRecipestudio.searchDatasetsfe9m5"),
   className,
 }: HfDatasetComboboxProps): ReactElement {
   const [inputValue, setInputValue] = useState(value);
@@ -96,10 +97,10 @@ export function HfDatasetCombobox({
           {isLoading ? (
             <div className="flex items-center gap-2 px-2 py-3 text-xs text-muted-foreground">
               <Spinner className="size-3.5" />
-              Searching...
+              {translate("uxRecipestudio.searching1arh7")}
             </div>
           ) : (
-            <ComboboxEmpty>No datasets found</ComboboxEmpty>
+            <ComboboxEmpty>{translate("uxRecipestudio.noDatasetsFoundcyj2n")}</ComboboxEmpty>
           )}
           <ComboboxList>
             {(id: string) => (

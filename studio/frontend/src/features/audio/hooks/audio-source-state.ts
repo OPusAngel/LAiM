@@ -4,6 +4,8 @@
 // Free of app imports so the node test runner can load it directly.
 
 import { AUDIO_INPUT_MAX_BYTES } from "../audio-run-request";
+import { translate } from "@/i18n";
+
 
 export type AudioSourceStatus =
   | { phase: "idle" }
@@ -62,8 +64,8 @@ export const INITIAL_AUDIO_SOURCE_STATE: AudioSourceState = {
 
 /** Mirrors `CONVERT_EXPIRED_DETAIL` on the server: which Convert side's upload expired. */
 export const CONVERT_EXPIRED_MESSAGE = {
-  source: "This recording expired. Add it again.",
-  target: "This target voice expired. Add it again.",
+  get source() { return translate("uxAudio.thisRecordingExpiredAddfvgyi"); },
+  get target() { return translate("uxAudio.thisTargetVoiceExpired63bcg"); },
 } as const;
 export const REFERENCE_EXPIRED_MESSAGE =
   "This reference expired. Add it again.";
@@ -150,9 +152,9 @@ export function audioFileProblem(file: {
   type?: string;
   name?: string;
 }): string | null {
-  if (file.size <= 0) return "This file is empty.";
+  if (file.size <= 0) return translate("uxAudio.thisFileIsEmptywq2ww");
   if (file.size > AUDIO_INPUT_MAX_BYTES)
-    return "Audio is too large. Keep it under 200 MB.";
+    return translate("uxAudio.audioIsTooLarge6rn5v");
   const type = file.type ?? "";
   const name = (file.name ?? "").toLowerCase();
   if (
@@ -162,7 +164,7 @@ export function audioFileProblem(file: {
     type !== "application/octet-stream" &&
     !/\.(wav|mp3|flac|ogg|oga|opus|m4a|aac|webm|mp4)$/.test(name)
   ) {
-    return "This is not an audio file. Pick a WAV, MP3, FLAC, OGG or M4A file.";
+    return translate("uxAudio.thisIsNotAn5b008");
   }
   return null;
 }
@@ -186,13 +188,13 @@ export function micErrorMessage(error: unknown, desktop: boolean): string {
     // The desktop WebView has no site-permission UI, so Settings is the only way back.
     return desktop
       ? "Microphone access is blocked. Open Settings > Voice and click Allow microphone, or upload a file instead."
-      : "Microphone access is blocked. Allow it for this page, or upload a file instead.";
+      : translate("uxAudio.microphoneAccessIsBlockeddl9rf");
   }
   if (name === "NotFoundError" || name === "OverconstrainedError") {
-    return "No microphone was found. Connect one, or upload a file instead.";
+    return translate("uxAudio.noMicrophoneWasFound3s6r3");
   }
   if (name === "NotReadableError" || name === "AbortError") {
-    return "The microphone is in use or unavailable. Try again, or upload a file instead.";
+    return translate("uxAudio.theMicrophoneIsInuzpuw");
   }
-  return "Could not use the microphone. Allow access, or upload a file instead.";
+  return translate("uxAudio.couldNotUseThe7shc7");
 }

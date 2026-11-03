@@ -20,7 +20,7 @@ from utils import llama_cpp_path_settings as path_settings
 def settings_store(monkeypatch):
     store = {}
     monkeypatch.delenv("LLAMA_SERVER_PATH", raising = False)
-    monkeypatch.delenv("LAiM_LLAMA_CPP_PATH", raising = False)
+    monkeypatch.delenv("UNSLOTH_LLAMA_CPP_PATH", raising = False)
     monkeypatch.delenv(path_settings.MANAGED_LLAMA_CPP_PATH_MARKER, raising = False)
     monkeypatch.setattr(
         "storage.studio_db.get_app_setting",
@@ -115,15 +115,15 @@ def test_environment_path_is_displayed_and_locks_the_setting(settings_store, mon
 
     env_root = tmp_path / "environment"
     env_binary = _binary(env_root)
-    monkeypatch.setenv("LAiM_LLAMA_CPP_PATH", str(env_root))
+    monkeypatch.setenv("UNSLOTH_LLAMA_CPP_PATH", str(env_root))
 
     status = path_settings.custom_llama_cpp_path_status()
     assert status["source"] == "environment"
     assert status["editable"] is False
     assert status["path"] == str(env_root)
     assert status["resolved_binary"] == str(env_binary)
-    assert status["environment_variable"] == "LAiM_LLAMA_CPP_PATH"
-    with pytest.raises(RuntimeError, match = "LAiM_LLAMA_CPP_PATH"):
+    assert status["environment_variable"] == "UNSLOTH_LLAMA_CPP_PATH"
+    with pytest.raises(RuntimeError, match = "UNSLOTH_LLAMA_CPP_PATH"):
         path_settings.set_custom_llama_cpp_path(str(stored))
 
 
@@ -131,7 +131,7 @@ def test_direct_environment_binary_has_highest_priority(settings_store, monkeypa
     env_dir = tmp_path / "directory-env"
     _binary(env_dir)
     direct = _binary(tmp_path / "direct")
-    monkeypatch.setenv("LAiM_LLAMA_CPP_PATH", str(env_dir))
+    monkeypatch.setenv("UNSLOTH_LLAMA_CPP_PATH", str(env_dir))
     monkeypatch.setenv("LLAMA_SERVER_PATH", str(direct))
 
     status = path_settings.custom_llama_cpp_path_status()
@@ -150,7 +150,7 @@ def test_studio_managed_environment_path_does_not_lock_out_the_ui(
     _binary(managed)
     selected = tmp_path / "selected"
     selected_binary = _binary(selected)
-    monkeypatch.setenv("LAiM_LLAMA_CPP_PATH", str(managed))
+    monkeypatch.setenv("UNSLOTH_LLAMA_CPP_PATH", str(managed))
     monkeypatch.setenv(path_settings.MANAGED_LLAMA_CPP_PATH_MARKER, "1")
 
     path_settings.set_custom_llama_cpp_path(str(selected))
@@ -166,14 +166,14 @@ def test_inherited_managed_path_is_marked_even_when_launcher_exported_it(
     settings_store, monkeypatch, tmp_path
 ):
     managed = tmp_path / "not-installed-yet" / "llama.cpp"
-    monkeypatch.setenv("LAiM_LLAMA_CPP_PATH", str(managed))
+    monkeypatch.setenv("UNSLOTH_LLAMA_CPP_PATH", str(managed))
 
     assert path_settings.mark_managed_llama_cpp_path(managed) is True
     assert os.environ[path_settings.MANAGED_LLAMA_CPP_PATH_MARKER] == "1"
     assert path_settings.custom_llama_cpp_path_status()["editable"] is True
 
     explicit = tmp_path / "user-owned-llama.cpp"
-    monkeypatch.setenv("LAiM_LLAMA_CPP_PATH", str(explicit))
+    monkeypatch.setenv("UNSLOTH_LLAMA_CPP_PATH", str(explicit))
     assert path_settings.mark_managed_llama_cpp_path(managed) is False
     assert path_settings.MANAGED_LLAMA_CPP_PATH_MARKER not in os.environ
     assert path_settings.custom_llama_cpp_path_status()["editable"] is False
@@ -376,7 +376,7 @@ def test_an_unresolvable_named_user_does_not_raise_out_of_the_expansion():
         Path("~no-such-account-anywhere/llama.cpp").expanduser()
         RuntimeError: Could not determine home directory.
 
-    Every reader of LAiM_LLAMA_CPP_PATH used the raising form, so a stale pin made
+    Every reader of UNSLOTH_LLAMA_CPP_PATH used the raising form, so a stale pin made
     runtime discovery itself throw rather than treating the override as unusable and
     continuing down the documented search order.
     """
@@ -399,7 +399,7 @@ def test_the_resolvable_forms_still_expand(monkeypatch, tmp_path):
 def test_the_status_payload_survives_an_unresolvable_override(settings_store, monkeypatch):
     """The UI reads this, and a raise here is a broken settings page rather than a
     message saying the pin is unusable."""
-    monkeypatch.setenv("LAiM_LLAMA_CPP_PATH", _UNKNOWN_USER)
+    monkeypatch.setenv("UNSLOTH_LLAMA_CPP_PATH", _UNKNOWN_USER)
     status = path_settings.custom_llama_cpp_path_status()
     assert status["source"] == "environment"
     assert status["path"] == _UNKNOWN_USER
@@ -412,7 +412,7 @@ def test_discovery_continues_past_an_unresolvable_override(monkeypatch, tmp_path
     of falling through, and several callers have no exception boundary, so a model
     operation reported the expansion error rather than using another runtime."""
     llama_cpp = pytest.importorskip("core.inference.llama_cpp")
-    monkeypatch.setenv("LAiM_LLAMA_CPP_PATH", _UNKNOWN_USER)
+    monkeypatch.setenv("UNSLOTH_LLAMA_CPP_PATH", _UNKNOWN_USER)
     monkeypatch.delenv("LAiM_STUDIO_MANAGED_LLAMA_CPP_PATH", raising = False)
     # Not asserting which runtime is found: the machine decides that. The claim under
     # test is only that the search reaches its own answer instead of raising.

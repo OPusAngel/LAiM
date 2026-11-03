@@ -18,7 +18,7 @@ class DownloadModelRequest(BaseModel):
 
     repo_id: str = Field(
         ...,
-        description = "HuggingFace repo ID, e.g. 'LAiM/Qwen3-4B-GGUF'",
+        description = "HuggingFace repo ID, e.g. 'unsloth/Qwen3-4B-GGUF'",
     )
     gguf_variant: Optional[str] = Field(
         None,

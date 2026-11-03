@@ -532,7 +532,7 @@ def test_masking_miss_reaches_the_warning_channel():
     "model_name,detect",
     [
         ("org/unmapped", lambda _p: ("<|user|>", "<|assistant|>")),
-        ("LAiM/llama-3-8b-instruct", _detect_fails),
+        ("unsloth/llama-3-8b-instruct", _detect_fails),
     ],
     ids = ["auto-detected", "recovered-by-template-table"],
 )

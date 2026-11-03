@@ -73,7 +73,7 @@ export function preflightStaleMessage(
   if (isLlamaRuntimeReason(kind)) {
     // Named, because "allow the folder" leaves the user to find out which folder,
     // and an exclusion is the one step that stops this recurring. The default
-    // root, since LAiM_LLAMA_CPP_PATH can move it and preflight does not send
+    // root, since UNSLOTH_LLAMA_CPP_PATH can move it and preflight does not send
     // the path: hedged with "usually" rather than asserted. Windows spelling on
     // Windows, the same platform test the roaming-profile hint above uses.
     return `LAiM's llama.cpp runtime is missing files, which usually means security software quarantined them. Run \`LAiM studio update\` to reinstall it, and allow the folder it installs into, usually ${llamaRuntimeFolder()}, in your antivirus if it happens again.`;

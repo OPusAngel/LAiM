@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""16bit loads and merges take a row's first name, so it must not be an unpublished ``LAiM/`` repo."""
+"""16bit loads and merges take a row's first name, so it must not be an unpublished ``unsloth/`` repo."""
 
 import os
 
@@ -24,24 +24,24 @@ MAPPER_PATH = os.path.join(os.path.dirname(__file__), os.pardir, "LAiM", "models
 
 # key -> (unpublished name, upstream)
 ROWS = {
-    "LAiM/mistral-7b-instruct-v0.1-bnb-4bit": (
-        "LAiM/mistral-7b-instruct-v0.1",
+    "unsloth/mistral-7b-instruct-v0.1-bnb-4bit": (
+        "unsloth/mistral-7b-instruct-v0.1",
         "mistralai/Mistral-7B-Instruct-v0.1",
     ),
-    "LAiM/Hermes-3-Llama-3.1-70B-bnb-4bit": (
-        "LAiM/Hermes-3-Llama-3.1-70B",
+    "unsloth/Hermes-3-Llama-3.1-70B-bnb-4bit": (
+        "unsloth/Hermes-3-Llama-3.1-70B",
         "NousResearch/Hermes-3-Llama-3.1-70B",
     ),
-    "LAiM/Qwen2-VL-72B-bnb-4bit": (
-        "LAiM/Qwen2-VL-72B",
+    "unsloth/Qwen2-VL-72B-bnb-4bit": (
+        "unsloth/Qwen2-VL-72B",
         "Qwen/Qwen2-VL-72B",
     ),
-    "LAiM/Llama-3.1-Tulu-3-70B-bnb-4bit": (
-        "LAiM/Llama-3.1-Tulu-3-70B",
+    "unsloth/Llama-3.1-Tulu-3-70B-bnb-4bit": (
+        "unsloth/Llama-3.1-Tulu-3-70B",
         "allenai/Llama-3.1-Tulu-3-70B",
     ),
-    "LAiM/OpenThinker-7B-LAiM-bnb-4bit": (
-        "LAiM/OpenThinker-7B",
+    "unsloth/OpenThinker-7B-unsloth-bnb-4bit": (
+        "unsloth/OpenThinker-7B",
         "open-thoughts/OpenThinker-7B",
     ),
 }

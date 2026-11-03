@@ -18,9 +18,9 @@ function payloadFor(patch: Partial<TrainingConfigState>) {
   const config: TrainingConfigState = {
     ...initialTrainingConfigState,
     modelType: "text",
-    selectedModel: "LAiM/gemma-3-270m-it",
+    selectedModel: "unsloth/gemma-3-270m-it",
     datasetSource: "huggingface",
-    dataset: "LAiM/test",
+    dataset: "unsloth/test",
     ...patch,
   };
   return buildTrainingStartPayload(config, null);

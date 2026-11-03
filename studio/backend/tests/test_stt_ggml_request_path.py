@@ -116,7 +116,7 @@ def test_managed_install_skips_the_help_probe(tmp_path, monkeypatch):
     monkeypatch.setattr(
         ggml_module,
         "_whisper_install_marker",
-        lambda binary: {"component": "whisper.cpp", "published_repo": "LAiMai/whisper.cpp"},
+        lambda binary: {"component": "whisper.cpp", "published_repo": "unslothai/whisper.cpp"},
     )
     assert ggml_module._supports_request_path(old) is True
     assert not (tmp_path / "managed-server.runs").exists()

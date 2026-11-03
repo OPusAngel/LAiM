@@ -3,6 +3,7 @@
 
 "use client";
 
+import { translate } from "@/i18n";
 import {
   Sheet,
   SheetCloseButton,
@@ -283,7 +284,7 @@ function useResponseModelDisplay() {
     parsedExternal?.modelId ??
     modelSummary?.name ??
     recordedModelId ??
-    "Not recorded";
+    null;
   const providerLabel =
     responseDetails?.providerName ??
     provider?.name ??
@@ -292,7 +293,7 @@ function useResponseModelDisplay() {
       : parsedExternal
         ? customProviderDisplayName(provider?.providerType)
         : recordedModelId
-          ? "Local model"
+          ? translate("uxChat.localModelt5w5z")
           : null);
 
   return {
@@ -314,7 +315,7 @@ export const MessageResponseModelBadge: FC<{ className?: string }> = ({
   );
   const { modelLabel, providerLabel } = useResponseModelDisplay();
 
-  if (!showResponseModel || modelLabel === "Not recorded") {
+  if (!showResponseModel || modelLabel === null) {
     return null;
   }
 
@@ -389,7 +390,9 @@ const MessageResponseDetailsSheetContent: FC<{
   const totalTime =
     responseDetails?.durationMs ?? timing?.totalStreamTime ?? undefined;
   const summaryLabel =
-    modelLabel === "Not recorded" ? "Model not recorded" : `Used ${modelLabel}`;
+    modelLabel === null
+      ? translate("uxComponents.modelNotRecordedki4pf")
+      : translate("uxComponents.usedModelo1dxh", { p1: modelLabel });
   const messageToolCalls = toolCallsFromContent(message.content);
   const mcpProvenance = mcpProvenanceFromContent(message.content);
   const toolCalls =
@@ -412,12 +415,12 @@ const MessageResponseDetailsSheetContent: FC<{
                 strokeWidth={1.75}
                 className="size-icon text-chat-icon-fg"
               />
-              Response details
+              {translate("uxComponents.responseDetails1gi70")}
             </SheetTitle>
             <SheetCloseButton className="absolute top-1/2 right-0 -translate-y-1/2" />
           </div>
           <SheetDescription className="sr-only">
-            Timing, model, token, and tool details for this response.
+            {translate("uxComponents.timingModelTokenAndihzgc")}
           </SheetDescription>
         </SheetHeader>
 
@@ -433,10 +436,10 @@ const MessageResponseDetailsSheetContent: FC<{
             ) : null}
           </div>
 
-          <DetailSection title="Response">
-            <DetailRow label="Model" value={modelLabel} />
+          <DetailSection title={translate("decisions.responseTitle")}>
+            <DetailRow label={translate("settings.voice.dictation.customModelLabel")} value={modelLabel ?? translate("uxComponents.notRecordedtqq64")} />
             <DetailRow
-              label="Requested"
+              label={translate("uxComponents.requestedx9t3z")}
               value={
                 responseDetails?.modelId &&
                 responseDetails.modelId !== responseDetails.responseModelId
@@ -444,65 +447,65 @@ const MessageResponseDetailsSheetContent: FC<{
                   : null
               }
             />
-            <DetailRow label="Provider" value={providerLabel} />
-            <DetailRow label="Message ID" value={message.id} mono={true} />
-            <DetailRow label="Created" value={formatDate(message.createdAt)} />
+            <DetailRow label={translate("uxComponents.providerevz7q")} value={providerLabel} />
+            <DetailRow label={translate("uxComponents.messageID1mxu0")} value={message.id} mono={true} />
+            <DetailRow label={translate("settings.accounts.created")} value={formatDate(message.createdAt)} />
             <DetailRow
-              label="Started"
+              label={translate("uxComponents.started163dn")}
               value={formatDate(responseDetails?.startedAt)}
             />
             <DetailRow
-              label="Finished"
+              label={translate("uxComponents.finished1aj3c")}
               value={formatDate(responseDetails?.finishedAt)}
             />
           </DetailSection>
 
-          <DetailSection title="Tokens">
-            <DetailRow label="Prompt" value={formatNumber(promptTokens)} mono />
+          <DetailSection title={translate("uxComponents.tokensil7qe")}>
+            <DetailRow label={translate("uxVideo.prompt1lmzx")} value={formatNumber(promptTokens)} mono />
             <DetailRow
-              label="Output"
+              label={translate("uxAudio.output1u5xh")}
               value={formatNumber(completionTokens)}
               mono
             />
-            <DetailRow label="Total" value={formatNumber(totalTokens)} mono />
+            <DetailRow label={translate("uxModelpicker.total1c0as")} value={formatNumber(totalTokens)} mono />
             <DetailRow
-              label="Cache hits"
+              label={translate("uxComponents.cacheHits18w38")}
               value={formatNumber(
                 usage?.cachedTokens ?? asNumber(serverTimings?.cache_n),
               )}
               mono
             />
             <DetailRow
-              label="Cache writes"
+              label={translate("uxComponents.cacheWritesxvnld")}
               value={formatNumber(usage?.cacheWriteTokens)}
               mono
             />
           </DetailSection>
 
-          <DetailSection title="Timing">
-            <DetailRow label="Total" value={formatMs(totalTime)} mono />
+          <DetailSection title={translate("uxComponents.timing3xwjf")}>
+            <DetailRow label={translate("uxModelpicker.total1c0as")} value={formatMs(totalTime)} mono />
             <DetailRow
-              label="First token"
+              label={translate("uxComponents.firstTokenbuzem")}
               value={formatMs(timing?.firstTokenTime)}
               mono
             />
             <DetailRow
-              label="Prompt eval"
+              label={translate("uxComponents.promptEval1cjb8")}
               value={formatMs(asNumber(serverTimings?.prompt_ms))}
               mono
             />
             <DetailRow
-              label="Prompt speed"
+              label={translate("uxComponents.promptSpeedixafj")}
               value={formatRate(promptSpeed)}
               mono
             />
             <DetailRow
-              label="Generation"
+              label={translate("uxComponents.generationp8xfx")}
               value={formatMs(asNumber(serverTimings?.predicted_ms))}
               mono
             />
             <DetailRow
-              label="Speed"
+              label={translate("settings.voice.readAloud.speedLabel")}
               value={formatRate(
                 asNumber(serverTimings?.predicted_per_second) ??
                   timing?.tokensPerSecond,
@@ -510,25 +513,25 @@ const MessageResponseDetailsSheetContent: FC<{
               mono
             />
             <DetailRow
-              label="Chunks"
+              label={translate("uxComponents.chunks12ir0")}
               value={formatNumber(timing?.totalChunks)}
               mono
             />
             <DetailRow
-              label="Tool calls"
+              label={translate("settings.profile.stats.toolCalls")}
               value={formatNumber(timing?.toolCallCount)}
               mono
             />
           </DetailSection>
 
-          <DetailSection title="Tools">
+          <DetailSection title={translate("composer.pill.tools")}>
             <DetailRow
-              label="Enabled"
+              label={translate("settings.accounts.active")}
               value={enabledTools(responseDetails?.tools, toolCalls)}
             />
-            <DetailRow label="Called" value={calledTools(toolCalls, mcpProvenance)} />
+            <DetailRow label={translate("uxComponents.called170f5")} value={calledTools(toolCalls, mcpProvenance)} />
             <DetailRow
-              label="Confirmation"
+              label={translate("uxComponents.confirmationp3snl")}
               value={
                 responseDetails?.tools?.confirmToolCalls === true
                   ? "On"
@@ -538,7 +541,7 @@ const MessageResponseDetailsSheetContent: FC<{
               }
             />
             <DetailRow
-              label="Bypass"
+              label={translate("uxComponents.bypasseioyb")}
               value={
                 responseDetails?.tools?.bypassPermissions === true
                   ? "On"
@@ -547,8 +550,8 @@ const MessageResponseDetailsSheetContent: FC<{
                     : null
               }
             />
-            <DetailRow label="Session" value={responseDetails?.sessionId} mono />
-            <DetailRow label="Run ID" value={responseDetails?.cancelId} mono />
+            <DetailRow label={translate("uxComponents.session8yh9j")} value={responseDetails?.sessionId} mono />
+            <DetailRow label={translate("uxComponents.runIDrcm68")} value={responseDetails?.cancelId} mono />
           </DetailSection>
         </div>
       </SheetContent>

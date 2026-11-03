@@ -1998,7 +1998,7 @@ def test_a_cached_spark_snapshot_root_still_gets_the_llm_subfolder(tmp_path):
     (snapshot / "LLM").mkdir(parents = True)
 
     assert _spark_tts_tokenizer_kwargs("bicodec", str(snapshot)) == {"subfolder": "LLM"}
-    assert _spark_tts_tokenizer_kwargs("bicodec", "LAiM/Spark-TTS-0.5B") == {"subfolder": "LLM"}
+    assert _spark_tts_tokenizer_kwargs("bicodec", "unsloth/Spark-TTS-0.5B") == {"subfolder": "LLM"}
     # Already pointed at the tokenizer directory.
     assert _spark_tts_tokenizer_kwargs("bicodec", str(snapshot / "LLM")) == {}
     # A local checkpoint holding its own tokenizer.

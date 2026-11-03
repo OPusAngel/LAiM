@@ -35,14 +35,14 @@ def _record(**over):
 
 def test_an_unlisted_model_still_fails_on_disagreement():
     """The rule this whole check exists for is unchanged for everything else."""
-    broken = batched_generation_failures(_record(), "LAiM/Qwen3-0.6B")
+    broken = batched_generation_failures(_record(), "unsloth/Qwen3-0.6B")
     assert len(broken) == 3
     assert all("did not reproduce" in f for f in broken)
 
 
 def test_a_listed_model_does_not_fail_on_the_known_disagreement():
-    assert "LAiM/gemma-4-E2B-it" in KNOWN_BATCHED_GENERATION_BREAKAGE
-    assert batched_generation_failures(_record(), "LAiM/gemma-4-E2B-it") == []
+    assert "unsloth/gemma-4-E2B-it" in KNOWN_BATCHED_GENERATION_BREAKAGE
+    assert batched_generation_failures(_record(), "unsloth/gemma-4-E2B-it") == []
 
 
 def test_a_listed_model_that_starts_AGREEING_fails():
@@ -50,7 +50,7 @@ def test_a_listed_model_that_starts_AGREEING_fails():
     means a kernel or the stack changed, and CI says so instead of carrying a
     stale expectation."""
     agreeing = _record(agrees = {"2": True, "4": True, "8": True})
-    broken = batched_generation_failures(agreeing, "LAiM/Qwen3.5-2B")
+    broken = batched_generation_failures(agreeing, "unsloth/Qwen3.5-2B")
     assert broken, "a fixed upstream bug must turn the leg red"
     assert "delete the entry" in broken[0]
 
@@ -66,7 +66,7 @@ def test_a_listed_model_still_fails_every_other_rule():
         ({"empty_batched_outputs": {"8": [2]}}, "inside the batch"),
         ({"singles": ["x"] * 2}, "largest batch was never actually formed"),
     ):
-        broken = batched_generation_failures(_record(**over), "LAiM/Qwen3.5-2B")
+        broken = batched_generation_failures(_record(**over), "unsloth/Qwen3.5-2B")
         assert any(
             expect in f for f in broken
         ), f"{over} was excused along with the known disagreement"

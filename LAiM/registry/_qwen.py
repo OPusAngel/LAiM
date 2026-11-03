@@ -94,7 +94,7 @@ Qwen_2_5_CoderMeta = ModelMeta(
     model_sizes = ["0.5", "1.5", "3", "7", "14", "32"],
     model_info_cls = Qwen2_5CoderModelInfo,
     is_multimodal = False,
-    quant_types = [QuantType.NONE, QuantType.BNB],  # no *-LAiM-bnb-4bit Coder uploads exist
+    quant_types = [QuantType.NONE, QuantType.BNB],  # no *-unsloth-bnb-4bit Coder uploads exist
 )
 
 

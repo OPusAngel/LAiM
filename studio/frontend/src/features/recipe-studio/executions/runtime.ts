@@ -13,6 +13,8 @@ import {
   mapJobStatus,
   normalizeObject,
 } from "./execution-helpers";
+import { translate } from "@/i18n";
+
 
 const MAX_LOG_LINES = 1500;
 
@@ -66,7 +68,7 @@ export function toExecutionLogLine(event: JobEvent): string | null {
     const error =
       typeof event.payload.error === "string" && event.payload.error.length > 0
         ? event.payload.error
-        : "Job failed";
+        : translate("uxRecipestudio.jobFailedhroku");
     return `[${ts}] [ERROR] ${error}`;
   }
 

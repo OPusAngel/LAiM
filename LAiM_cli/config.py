@@ -41,7 +41,7 @@ class TrainingConfig(BaseModel):
     random_seed: int = 3407
     packing: bool = False
     train_on_completions: bool = False
-    gradient_checkpointing: Literal["LAiM", "true", "none"] = "LAiM"
+    gradient_checkpointing: Literal["unsloth", "true", "none"] = "unsloth"
 
     _normalize_training_type = field_validator("training_type", mode = "before")(_lower_str)
 
@@ -53,7 +53,7 @@ class TrainingConfig(BaseModel):
             return "true" if value else "none"
         text = _lower_str(value)
         if text == "":
-            return "LAiM"
+            return "unsloth"
         if text in ("1", "yes"):
             return "true"
         if text in ("false", "0", "no", "off"):

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { isTauri } from "@/lib/api-base";
 import { MAX_FOLDER_FILES, filesFromDrop } from "@/lib/dropped-folders";
 import { toast } from "@/lib/toast";
@@ -45,7 +46,7 @@ function toastNothingAccepted(
   // A folder is one extension-less name, and the native side takes files only.
   const looksLikeFolder = names.some((name) => !name.includes("."));
   if (looksLikeFolder) {
-    toast.error("Folders can't be dropped here", {
+    toast.error(translate("uxNativeintents.foldersCanTBe12316"), {
       description:
         folderHint ?? "Drop the files inside it, or use the picker button.",
     });
@@ -55,7 +56,7 @@ function toastNothingAccepted(
     names.length === 1
       ? "That file type can't be dropped here"
       : "Those file types can't be dropped here",
-    accept ? { description: `Accepts ${accept}.` } : undefined,
+    accept ? { get description() { return translate("uxNativeintents.accepts4a96o", { p1: accept }); } } : undefined,
   );
 }
 
@@ -290,14 +291,14 @@ export function useNativeFileDrop(
       ).then(
         ({ files, truncated, hadFolder }) => {
           if (hadFolder && files.length === 0) {
-            toast.error("That folder has no files to add");
+            toast.error(translate("uxNativeintents.thatFolderHasNo10b59"));
             return;
           }
           take(files);
           if (truncated > 0) {
-            toast.info(`Added the first ${MAX_FOLDER_FILES} files`, {
+            toast.info(translate("uxNativeintents.addedTheFirstFilesuwwy1", { p1: MAX_FOLDER_FILES }), {
               description:
-                "The rest were left out. Drop a smaller folder for them.",
+                translate("uxNativeintents.theRestWereLeftgo3dz"),
             });
           }
         },

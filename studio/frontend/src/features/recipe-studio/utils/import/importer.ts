@@ -20,6 +20,8 @@ import { parseColumn, parseModelConfig, parseModelProvider } from "./parsers";
 import { parseSeedConfig } from "./parsers/seed-config-parser";
 import { buildNodes, parseUi } from "./ui";
 import type { ImportResult } from "./types";
+import { translate } from "@/i18n";
+
 
 type RecipeInput = {
   columns?: unknown;
@@ -377,7 +379,7 @@ export function importRecipePayload(
   const parsed = parseJson(input);
   if (!parsed.data || !isRecord(parsed.data)) {
     return {
-      errors: [parsed.error ?? "Invalid JSON payload."],
+      errors: [parsed.error ?? translate("uxRecipestudio.invalidJSONPayloadqml82")],
       snapshot: null,
     };
   }
@@ -388,7 +390,7 @@ export function importRecipePayload(
   const ui = isRecord(parsed.data.ui) ? (parsed.data.ui as UiInput) : null;
 
   if (!Array.isArray(recipe.columns)) {
-    return { errors: ["Recipe must include columns."], snapshot: null };
+    return { errors: [translate("uxRecipestudio.recipeMustIncludeColumnsjuzme")], snapshot: null };
   }
 
   const errors: string[] = [];
@@ -523,12 +525,12 @@ export function importRecipePayload(
   if (Array.isArray(recipe.model_providers)) {
     recipe.model_providers.forEach((provider, index) => {
       if (!isRecord(provider)) {
-        errors.push(`Model provider ${index + 1}: invalid object.`);
+        errors.push(translate("uxRecipestudio.modelProviderInvalidObjectncjaj", { p1: index + 1 }));
         return;
       }
       const name = readString(provider.name);
       if (!name) {
-        errors.push(`Model provider ${index + 1}: missing name.`);
+        errors.push(translate("uxRecipestudio.modelProviderMissingName0cn5p", { p1: index + 1 }));
         return;
       }
       const id = `n${nextId}`;
@@ -546,12 +548,12 @@ export function importRecipePayload(
   if (Array.isArray(recipe.model_configs)) {
     recipe.model_configs.forEach((model, index) => {
       if (!isRecord(model)) {
-        errors.push(`Model config ${index + 1}: invalid object.`);
+        errors.push(translate("uxRecipestudio.modelConfigInvalidObjectbfa09", { p1: index + 1 }));
         return;
       }
       const name = readString(model.alias) ?? readString(model.name);
       if (!name) {
-        errors.push(`Model config ${index + 1}: missing alias.`);
+        errors.push(translate("uxRecipestudio.modelConfigMissingAliasazenp", { p1: index + 1 }));
         return;
       }
       const id = `n${nextId}`;
@@ -586,7 +588,7 @@ export function importRecipePayload(
 
   recipe.columns.forEach((column, index) => {
     if (!isRecord(column)) {
-      errors.push(`Column ${index + 1}: invalid object.`);
+      errors.push(translate("uxRecipestudio.columnInvalidObject5otw8", { p1: index + 1 }));
       return;
     }
     const id = `n${nextId}`;

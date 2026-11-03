@@ -81,8 +81,8 @@ type Props = React.ComponentProps<typeof ExportRunPanel>;
 const props: Props = {
   exportMethod: "gguf",
   quantLevels: ["q4_k_m"],
-  checkpoint: "LAiM/Qwen3-0.6B",
-  baseModelName: "LAiM/Qwen3-0.6B",
+  checkpoint: "unsloth/Qwen3-0.6B",
+  baseModelName: "unsloth/Qwen3-0.6B",
   isAdapter: false,
   destination: "hub",
   onDestinationChange: () => {},

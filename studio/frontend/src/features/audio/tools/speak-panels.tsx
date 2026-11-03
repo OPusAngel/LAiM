@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { PillTabs } from "@/features/model-picker/components/model-selector/pill-tabs";
 import { formatVibeVoiceScript } from "../clone-policy";
 import { VoicePicker } from "../components/voice-picker";
@@ -30,8 +31,8 @@ const speakVoicePanel: AudioToolPanel<SpeakVoiceValue> = {
         compact={true}
         className="[&>button]:px-3"
         tabs={[
-          { value: "builtin", label: "Built-in" },
-          { value: "saved", label: "Saved" },
+          { value: "builtin", label: translate("settings.appearance.custom.fontBundledGroup") },
+          { value: "saved", label: translate("picker.hfToken.saved") },
         ]}
       />
       {value.source === "saved" ? (
@@ -43,8 +44,7 @@ const speakVoicePanel: AudioToolPanel<SpeakVoiceValue> = {
         />
       ) : (
         <p className="text-ui-11p5 leading-snug text-muted-foreground">
-          The model's own voice, shaped by a voice description when you give
-          one.
+          {translate("uxCopy.theModelSOwn11bf3")}
         </p>
       )}
     </div>
@@ -59,10 +59,7 @@ const vibeVoiceDialoguePanel: AudioToolPanel<null> = {
     return (
       <div className="grid gap-1.5">
         <span className="text-ui-13 font-medium text-foreground">Dialogue</span>
-        <p className="text-ui-11p5 leading-snug text-muted-foreground">
-          This model reads a script with one line per speaker, such as “Speaker
-          1: Hello.” Plain text is read by Speaker 1.
-        </p>
+        <p className="text-ui-11p5 leading-snug text-muted-foreground">{translate("uxAudio.thisModelReadsAgae5w")}</p>
         {text && script !== text ? (
           <pre className="max-h-24 overflow-auto whitespace-pre-wrap rounded-xl bg-muted px-3 py-2 font-mono text-ui-11p5 text-muted-foreground">
             {script}

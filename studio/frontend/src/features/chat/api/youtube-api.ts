@@ -3,6 +3,8 @@
 
 import { authFetch } from "@/features/auth";
 import { formatFastApiDetail } from "@/lib/format-fastapi-error";
+import { translate } from "@/i18n";
+
 
 export interface YoutubeTranscript {
   videoId: string;
@@ -36,7 +38,7 @@ export async function fetchYoutubeTranscript(
         ? formatFastApiDetail((body as { detail?: unknown }).detail)
         : null;
     throw new Error(
-      detail ?? `Could not fetch the transcript (${response.status})`,
+      detail ?? translate("uxChat.couldNotFetchTheu7acb", { p1: response.status }),
     );
   }
   return body as YoutubeTranscript;

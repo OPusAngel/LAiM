@@ -310,7 +310,7 @@ class TestGgufVariantFileResolution:
         # Keep coverage for offline reuse; online reuse is tested separately.
         monkeypatch.setenv("HF_HUB_OFFLINE", "1")
         backend = LlamaCppBackend()
-        repo = "LAiM/vision-GGUF"
+        repo = "unsloth/vision-GGUF"
         old = _build_cache(
             hf_cache,
             repo,
@@ -353,8 +353,8 @@ class TestGgufVariantFileResolution:
         # Keep coverage for case-insensitive offline cache lookup.
         monkeypatch.setenv("HF_HUB_OFFLINE", "1")
         backend = LlamaCppBackend()
-        canonical_repo = "LAiM/gemma-4-E2B-it-GGUF"
-        requested_repo = "LAiM/gemma-4-e2b-it-gguf"
+        canonical_repo = "unsloth/gemma-4-E2B-it-GGUF"
+        requested_repo = "unsloth/gemma-4-e2b-it-gguf"
         gguf_file = "gemma-4-E2B-it-UD-Q4_K_XL.gguf"
         snap = _build_cache(
             hf_cache,
@@ -406,7 +406,7 @@ class TestGgufVariantFileResolution:
         # Loads reuse complete cached models across repo revisions.
         monkeypatch.delenv("HF_HUB_OFFLINE", raising = False)
         backend = LlamaCppBackend()
-        repo = "LAiM/vision-GGUF"
+        repo = "unsloth/vision-GGUF"
         snap = _build_cache(hf_cache, repo, {"model-UD-Q4_K_XL.gguf": 4}, snapshot_sha = "a" * 40)
 
         def fail_download(*_args, **_kwargs):
@@ -430,7 +430,7 @@ class TestGgufVariantFileResolution:
         # cannot load.
         monkeypatch.setenv("HF_HUB_OFFLINE", "true")
         backend = LlamaCppBackend()
-        repo = "LAiM/vision-GGUF"
+        repo = "unsloth/vision-GGUF"
         old = _build_cache(hf_cache, repo, {"model-UD-Q4_K_XL.gguf": 4}, snapshot_sha = "a" * 40)
 
         def fake_get_paths_info(
@@ -459,8 +459,8 @@ class TestGgufVariantFileResolution:
         # wrong casing.
         monkeypatch.setenv("HF_HUB_OFFLINE", "1")
         backend = LlamaCppBackend()
-        canonical_repo = "LAiM/gemma-4-E2B-it-GGUF"
-        requested_repo = "LAiM/gemma-4-e2b-it-gguf"
+        canonical_repo = "unsloth/gemma-4-E2B-it-GGUF"
+        requested_repo = "unsloth/gemma-4-e2b-it-gguf"
         snap = _build_cache(hf_cache, canonical_repo, {"mmproj-F16.gguf": 4}, snapshot_sha = "a" * 40)
         # A partial lower-case dir exists so casing resolution keeps the requested spelling.
         _build_cache(hf_cache, requested_repo, {"config.json": 1}, snapshot_sha = "b" * 40)
@@ -492,7 +492,7 @@ class TestGgufVariantFileResolution:
             "utils.hf_cache_settings.get_hf_cache_paths",
             lambda: _types.SimpleNamespace(hub_cache = selected_cache),
         )
-        repo = "LAiM/vision-GGUF"
+        repo = "unsloth/vision-GGUF"
         snap = _build_cache(selected_cache, repo, {"mmproj-F16.gguf": 4})
         backend = LlamaCppBackend()
 
@@ -619,27 +619,27 @@ def _siblings(items: dict[str, int]):
 class TestIterHfCacheSnapshots:
     def test_returns_empty_when_cache_dir_missing(self, monkeypatch):
         monkeypatch.setattr(hf_constants, "HF_HUB_CACHE", "/no/such/dir")
-        assert list(_iter_hf_cache_snapshots("LAiM/foo")) == []
+        assert list(_iter_hf_cache_snapshots("unsloth/foo")) == []
 
     def test_returns_empty_when_repo_not_cached(self, hf_cache):
-        assert list(_iter_hf_cache_snapshots("LAiM/not-here")) == []
+        assert list(_iter_hf_cache_snapshots("unsloth/not-here")) == []
 
     def test_returns_empty_when_snapshots_dir_missing(self, hf_cache):
         # Repo dir exists but no snapshots/ inside.
         (hf_cache / "models--LAiM--bare").mkdir()
-        assert list(_iter_hf_cache_snapshots("LAiM/bare")) == []
+        assert list(_iter_hf_cache_snapshots("unsloth/bare")) == []
 
     def test_yields_newest_first(self, hf_cache):
-        old = _build_cache(hf_cache, "LAiM/multi", {"x.gguf": 1}, snapshot_sha = "a" * 40)
-        new = _build_cache(hf_cache, "LAiM/multi", {"y.gguf": 1}, snapshot_sha = "b" * 40)
+        old = _build_cache(hf_cache, "unsloth/multi", {"x.gguf": 1}, snapshot_sha = "a" * 40)
+        new = _build_cache(hf_cache, "unsloth/multi", {"y.gguf": 1}, snapshot_sha = "b" * 40)
         os.utime(old, (1000, 1000))
         os.utime(new, (2000, 2000))
-        out = list(_iter_hf_cache_snapshots("LAiM/multi"))
+        out = list(_iter_hf_cache_snapshots("unsloth/multi"))
         assert [p.name for p in out] == ["b" * 40, "a" * 40]
 
     def test_skips_snapshot_when_mtime_is_unavailable(self, hf_cache, monkeypatch):
-        stale = _build_cache(hf_cache, "LAiM/multi", {"x.gguf": 1}, snapshot_sha = "a" * 40)
-        good = _build_cache(hf_cache, "LAiM/multi", {"y.gguf": 1}, snapshot_sha = "b" * 40)
+        stale = _build_cache(hf_cache, "unsloth/multi", {"x.gguf": 1}, snapshot_sha = "a" * 40)
+        good = _build_cache(hf_cache, "unsloth/multi", {"y.gguf": 1}, snapshot_sha = "b" * 40)
         original_stat = Path.stat
 
         def flaky_stat(self, *args, **kwargs):
@@ -649,13 +649,13 @@ class TestIterHfCacheSnapshots:
 
         monkeypatch.setattr(Path, "stat", flaky_stat)
 
-        out = list(_iter_hf_cache_snapshots("LAiM/multi"))
+        out = list(_iter_hf_cache_snapshots("unsloth/multi"))
         assert out == [good]
 
     def test_repo_id_match_is_case_insensitive(self, hf_cache):
-        _build_cache(hf_cache, "LAiM/Foo-GGUF", {"Foo-Q4_K_M.gguf": 1})
+        _build_cache(hf_cache, "unsloth/Foo-GGUF", {"Foo-Q4_K_M.gguf": 1})
         # Lookup with different org/name casing still resolves
-        out = list(_iter_hf_cache_snapshots("LAiM/foo-gguf"))
+        out = list(_iter_hf_cache_snapshots("unsloth/foo-gguf"))
         assert len(out) == 1
 
 
@@ -668,20 +668,20 @@ class TestListGgufVariantsFromCache:
     def test_returns_variants_when_cached(self, hf_cache):
         _build_cache(
             hf_cache,
-            "LAiM/Qwen3.5-4B-GGUF",
+            "unsloth/Qwen3.5-4B-GGUF",
             {
                 "Qwen3.5-4B-UD-Q4_K_XL.gguf": 100,
                 "Qwen3.5-4B-Q2_K.gguf": 50,
             },
         )
-        out = _list_gguf_variants_from_hf_cache("LAiM/Qwen3.5-4B-GGUF")
+        out = _list_gguf_variants_from_hf_cache("unsloth/Qwen3.5-4B-GGUF")
         assert out is not None
         variants, has_vision = out
         assert sorted(v.quant for v in variants) == ["Q2_K", "UD-Q4_K_XL"]
         assert has_vision is False
 
     def test_returns_none_when_not_cached(self, hf_cache):
-        assert _list_gguf_variants_from_hf_cache("LAiM/absent") is None
+        assert _list_gguf_variants_from_hf_cache("unsloth/absent") is None
 
 
 class TestCachedColocatedSplitMain:
@@ -691,43 +691,43 @@ class TestCachedColocatedSplitMain:
         shard1 = "m-00001-of-00002.gguf"
         shard2 = "m-00002-of-00002.gguf"
         old = _build_cache(
-            hf_cache, "LAiM/split-GGUF", {shard1: 100, shard2: 100}, snapshot_sha = "a" * 40
+            hf_cache, "unsloth/split-GGUF", {shard1: 100, shard2: 100}, snapshot_sha = "a" * 40
         )
-        new = _build_cache(hf_cache, "LAiM/split-GGUF", {shard1: 100}, snapshot_sha = "b" * 40)
+        new = _build_cache(hf_cache, "unsloth/split-GGUF", {shard1: 100}, snapshot_sha = "b" * 40)
         os.utime(old, (1000, 1000))
         os.utime(new, (2000, 2000))
 
-        main = _cached_colocated_split_main("LAiM/split-GGUF", shard1, [shard2], {})
+        main = _cached_colocated_split_main("unsloth/split-GGUF", shard1, [shard2], {})
         assert main is not None
         assert main.startswith(str(old))
 
     def test_returns_none_when_shards_span_snapshots(self, hf_cache):
         shard1 = "m-00001-of-00002.gguf"
         shard2 = "m-00002-of-00002.gguf"
-        a = _build_cache(hf_cache, "LAiM/split-GGUF", {shard1: 100}, snapshot_sha = "a" * 40)
-        b = _build_cache(hf_cache, "LAiM/split-GGUF", {shard2: 100}, snapshot_sha = "b" * 40)
+        a = _build_cache(hf_cache, "unsloth/split-GGUF", {shard1: 100}, snapshot_sha = "a" * 40)
+        b = _build_cache(hf_cache, "unsloth/split-GGUF", {shard2: 100}, snapshot_sha = "b" * 40)
         os.utime(a, (1000, 1000))
         os.utime(b, (2000, 2000))
 
-        assert _cached_colocated_split_main("LAiM/split-GGUF", shard1, [shard2], {}) is None
+        assert _cached_colocated_split_main("unsloth/split-GGUF", shard1, [shard2], {}) is None
 
 
 class TestResolveRepoIdCasing:
     def test_maps_to_canonical_casing(self, monkeypatch):
         monkeypatch.setattr(
             "utils.paths.resolve_cached_repo_id_case",
-            lambda repo: "LAiM/Gemma-4-GGUF" if repo.lower() == "LAiM/gemma-4-gguf" else repo,
+            lambda repo: "unsloth/Gemma-4-GGUF" if repo.lower() == "unsloth/gemma-4-gguf" else repo,
         )
         # A companion download passed the resolved id reads the same cache entry
         # as the main GGUF instead of missing it under the requested casing.
-        assert _resolve_repo_id_casing("LAiM/gemma-4-gguf") == "LAiM/Gemma-4-GGUF"
+        assert _resolve_repo_id_casing("unsloth/gemma-4-gguf") == "unsloth/Gemma-4-GGUF"
 
     def test_passthrough_on_resolver_error(self, monkeypatch):
         def boom(_repo):
             raise RuntimeError("resolver unavailable")
 
         monkeypatch.setattr("utils.paths.resolve_cached_repo_id_case", boom)
-        assert _resolve_repo_id_casing("LAiM/gemma-4-gguf") == "LAiM/gemma-4-gguf"
+        assert _resolve_repo_id_casing("unsloth/gemma-4-gguf") == "unsloth/gemma-4-gguf"
 
     def test_companion_only_newer_snapshot_does_not_shadow_real_variants(self, hf_cache):
         # A newer snapshot holds only a vision projector fetched on demand,
@@ -735,20 +735,20 @@ class TestResolveRepoIdCasing:
         # must not shadow the real variants; the vision flag carries over.
         old = _build_cache(
             hf_cache,
-            "LAiM/vision-GGUF",
+            "unsloth/vision-GGUF",
             {"vision-Q4_K_M.gguf": 100},
             snapshot_sha = "a" * 40,
         )
         new = _build_cache(
             hf_cache,
-            "LAiM/vision-GGUF",
+            "unsloth/vision-GGUF",
             {"mmproj-vision-F16.gguf": 10},
             snapshot_sha = "b" * 40,
         )
         os.utime(old, (1000, 1000))
         os.utime(new, (2000, 2000))
 
-        out = _list_gguf_variants_from_hf_cache("LAiM/vision-GGUF")
+        out = _list_gguf_variants_from_hf_cache("unsloth/vision-GGUF")
         assert out is not None
         variants, has_vision = out
         assert [v.quant for v in variants] == ["Q4_K_M"]
@@ -757,8 +757,8 @@ class TestResolveRepoIdCasing:
     def test_companion_only_cache_returns_empty_variants_with_vision(self, hf_cache):
         # Only a vision projector is cached anywhere: report the vision flag
         # with an empty variant list rather than None.
-        _build_cache(hf_cache, "LAiM/vision-GGUF", {"mmproj-vision-F16.gguf": 10})
-        out = _list_gguf_variants_from_hf_cache("LAiM/vision-GGUF")
+        _build_cache(hf_cache, "unsloth/vision-GGUF", {"mmproj-vision-F16.gguf": 10})
+        out = _list_gguf_variants_from_hf_cache("unsloth/vision-GGUF")
         assert out is not None
         variants, has_vision = out
         assert variants == []
@@ -769,14 +769,14 @@ class TestListGgufVariantsOffline:
     def test_offline_env_short_circuits_api(self, hf_cache, clean_offline_env, monkeypatch):
         from utils.models.model_config import list_gguf_variants
 
-        _build_cache(hf_cache, "LAiM/a", {"a-UD-Q4_K_XL.gguf": 1})
+        _build_cache(hf_cache, "unsloth/a", {"a-UD-Q4_K_XL.gguf": 1})
         monkeypatch.setenv("HF_HUB_OFFLINE", "1")
 
         def boom(*a, **k):
             raise AssertionError("API must not be called when offline env set")
 
         with patch("huggingface_hub.model_info", boom):
-            variants, _has = list_gguf_variants("LAiM/a")
+            variants, _has = list_gguf_variants("unsloth/a")
         assert len(variants) == 1
         assert variants[0].quant == "UD-Q4_K_XL"
 
@@ -792,7 +792,7 @@ class TestListGgufVariantsOffline:
             raise AssertionError("API must not be called on an offline cache miss")
 
         with patch("huggingface_hub.model_info", boom):
-            variants, has_vision = list_gguf_variants("LAiM/not-cached")
+            variants, has_vision = list_gguf_variants("unsloth/not-cached")
 
         assert variants == []
         assert has_vision is False
@@ -800,10 +800,10 @@ class TestListGgufVariantsOffline:
     def test_api_exception_falls_back_to_cache(self, hf_cache, clean_offline_env):
         from utils.models.model_config import list_gguf_variants
 
-        _build_cache(hf_cache, "LAiM/a", {"a-Q4_K_M.gguf": 1})
+        _build_cache(hf_cache, "unsloth/a", {"a-Q4_K_M.gguf": 1})
 
         with patch("huggingface_hub.model_info", boom):
-            variants, _has = list_gguf_variants("LAiM/a")
+            variants, _has = list_gguf_variants("unsloth/a")
         assert len(variants) == 1
         assert variants[0].quant == "Q4_K_M"
 
@@ -811,7 +811,7 @@ class TestListGgufVariantsOffline:
         from utils.models.model_config import list_gguf_variants
         with patch("huggingface_hub.model_info", boom):
             with pytest.raises(OSError, match = "network down"):
-                list_gguf_variants("LAiM/never-cached")
+                list_gguf_variants("unsloth/never-cached")
 
     def test_online_path_unaffected(self, hf_cache, clean_offline_env):
         # When the API succeeds, cache is not consulted.
@@ -823,7 +823,7 @@ class TestListGgufVariantsOffline:
             return api_payload
 
         with patch("huggingface_hub.model_info", hf_info):
-            variants, _has = list_gguf_variants("LAiM/a")
+            variants, _has = list_gguf_variants("unsloth/a")
         assert sorted(v.quant for v in variants) == ["Q2_K", "UD-Q4_K_XL"]
 
 
@@ -836,20 +836,20 @@ class TestDetectGgufFromCache:
     def test_picks_best_quant(self, hf_cache):
         _build_cache(
             hf_cache,
-            "LAiM/a",
+            "unsloth/a",
             {"a-Q2_K.gguf": 1, "a-UD-Q4_K_XL.gguf": 1},
         )
-        assert _detect_gguf_from_hf_cache("LAiM/a") == "a-UD-Q4_K_XL.gguf"
+        assert _detect_gguf_from_hf_cache("unsloth/a") == "a-UD-Q4_K_XL.gguf"
 
     def test_subdir_only_quant_resolves(self, hf_cache):
         """Regression: ``BF16/foo.gguf`` (quant only in directory). The pre-fix
         cache scan matched on basename and missed this layout."""
         _build_cache(
             hf_cache,
-            "LAiM/gpt-oss-20b-BF16",
+            "unsloth/gpt-oss-20b-BF16",
             {"BF16/foo.gguf": 1},
         )
-        out = _detect_gguf_from_hf_cache("LAiM/gpt-oss-20b-BF16")
+        out = _detect_gguf_from_hf_cache("unsloth/gpt-oss-20b-BF16")
         assert (
             out == "BF16/foo.gguf"
         ), f"subdir-only layout must resolve to relative path, got {out}"
@@ -857,34 +857,34 @@ class TestDetectGgufFromCache:
     def test_subdir_quant_keeps_be_model_name_token(self, hf_cache):
         _build_cache(
             hf_cache,
-            "LAiM/a",
+            "unsloth/a",
             {"Q4_K_M/foo-be.gguf": 1},
         )
-        assert _detect_gguf_from_hf_cache("LAiM/a") == "Q4_K_M/foo-be.gguf"
+        assert _detect_gguf_from_hf_cache("unsloth/a") == "Q4_K_M/foo-be.gguf"
 
     def test_big_endian_only_cache_is_not_detected(self, hf_cache):
         _build_cache(
             hf_cache,
-            "LAiM/a",
+            "unsloth/a",
             {"model-Q4_K_M-be.gguf": 1},
         )
-        assert _detect_gguf_from_hf_cache("LAiM/a") is None
+        assert _detect_gguf_from_hf_cache("unsloth/a") is None
 
     def test_returns_none_when_no_gguf(self, hf_cache):
-        _build_cache(hf_cache, "LAiM/a", {"README.md": 10})
-        assert _detect_gguf_from_hf_cache("LAiM/a") is None
+        _build_cache(hf_cache, "unsloth/a", {"README.md": 10})
+        assert _detect_gguf_from_hf_cache("unsloth/a") is None
 
 
 class TestDetectGgufModelRemoteOffline:
     def test_offline_env_short_circuits_retries(self, hf_cache, clean_offline_env, monkeypatch):
-        _build_cache(hf_cache, "LAiM/a", {"a-Q4_K_M.gguf": 1})
+        _build_cache(hf_cache, "unsloth/a", {"a-Q4_K_M.gguf": 1})
         monkeypatch.setenv("HF_HUB_OFFLINE", "1")
 
         def boom(*a, **k):
             raise AssertionError("API must not be called when offline env set")
 
         with patch("huggingface_hub.model_info", boom):
-            assert detect_gguf_model_remote("LAiM/a") == "a-Q4_K_M.gguf"
+            assert detect_gguf_model_remote("unsloth/a") == "a-Q4_K_M.gguf"
 
     @pytest.mark.parametrize("offline_variable", ["HF_HUB_OFFLINE", "TRANSFORMERS_OFFLINE"])
     def test_offline_cache_miss_does_not_call_api(
@@ -896,10 +896,10 @@ class TestDetectGgufModelRemoteOffline:
             raise AssertionError("API must not be called on an offline cache miss")
 
         with patch("huggingface_hub.model_info", boom):
-            assert detect_gguf_model_remote("LAiM/not-cached") is None
+            assert detect_gguf_model_remote("unsloth/not-cached") is None
 
     def test_api_3x_failure_then_cache(self, hf_cache, clean_offline_env):
-        _build_cache(hf_cache, "LAiM/a", {"a-Q4_K_M.gguf": 1})
+        _build_cache(hf_cache, "unsloth/a", {"a-Q4_K_M.gguf": 1})
 
         def boom(*a, **k):
             raise OSError("hub down")
@@ -909,7 +909,7 @@ class TestDetectGgufModelRemoteOffline:
             patch("huggingface_hub.model_info", boom),
             patch("time.sleep", lambda *_: None),
         ):
-            out = detect_gguf_model_remote("LAiM/a")
+            out = detect_gguf_model_remote("unsloth/a")
         assert out == "a-Q4_K_M.gguf"
 
     def test_remote_big_endian_only_repo_is_not_detected(self, clean_offline_env, monkeypatch):
@@ -921,11 +921,11 @@ class TestDetectGgufModelRemoteOffline:
             lambda *_args, **_kwargs: _types.SimpleNamespace(siblings = siblings),
         )
 
-        assert detect_gguf_model_remote("LAiM/a") is None
+        assert detect_gguf_model_remote("unsloth/a") is None
 
     def test_repository_not_found_does_not_consult_cache(self, hf_cache, clean_offline_env):
         # Cache has a file but the API says the repo is gone.
-        _build_cache(hf_cache, "LAiM/a", {"a-Q4_K_M.gguf": 1})
+        _build_cache(hf_cache, "unsloth/a", {"a-Q4_K_M.gguf": 1})
 
         class RepositoryNotFoundError(Exception):
             pass
@@ -934,7 +934,7 @@ class TestDetectGgufModelRemoteOffline:
             raise RepositoryNotFoundError("404")
 
         with patch("huggingface_hub.model_info", gone):
-            out = detect_gguf_model_remote("LAiM/a")
+            out = detect_gguf_model_remote("unsloth/a")
         # Early-return semantics preserved: 404 wins over a stale cache.
         assert out is None
 
@@ -2074,7 +2074,7 @@ class TestGuardSkipsLocalPaths:
     def test_remote_id_still_guarded(self, monkeypatch, clean_offline_env):
         import core.inference.llama_cpp as lc
         monkeypatch.setattr(lc, "_hf_unreachable", lambda: True)
-        with lc._hf_offline_if_unreachable_for("LAiM/Qwen3.5-4B-GGUF") as engaged:
+        with lc._hf_offline_if_unreachable_for("unsloth/Qwen3.5-4B-GGUF") as engaged:
             assert engaged is True
             assert os.environ.get("HF_HUB_OFFLINE") == "1"
 
@@ -2252,7 +2252,7 @@ class TestDownloadMmprojOfflineCacheFallback:
     def test_cache_lookup_returns_cached_mmproj_when_list_repo_files_fails(self, hf_cache):
         _build_cache(
             hf_cache,
-            "LAiM/vision-GGUF",
+            "unsloth/vision-GGUF",
             {
                 "vision-Q4_K_M.gguf": 1,
                 "mmproj-vision-F16.gguf": 1,
@@ -2277,7 +2277,7 @@ class TestDownloadMmprojOfflineCacheFallback:
             ),
         ):
             out = backend._download_mmproj(
-                hf_repo = "LAiM/vision-GGUF",
+                hf_repo = "unsloth/vision-GGUF",
                 hf_token = None,
             )
         assert out is not None, "mmproj must resolve from cache when offline"
@@ -2286,7 +2286,7 @@ class TestDownloadMmprojOfflineCacheFallback:
     def test_prefers_f16_variant_when_multiple_mmproj_in_cache(self, hf_cache):
         _build_cache(
             hf_cache,
-            "LAiM/vision-GGUF",
+            "unsloth/vision-GGUF",
             {
                 "mmproj-vision-BF16.gguf": 1,
                 "mmproj-vision-F16.gguf": 1,
@@ -2313,7 +2313,7 @@ class TestDownloadMmprojOfflineCacheFallback:
             ),
         ):
             backend._download_mmproj(
-                hf_repo = "LAiM/vision-GGUF",
+                hf_repo = "unsloth/vision-GGUF",
                 hf_token = None,
             )
         assert captured.get("filename") == "mmproj-vision-F16.gguf"
@@ -2321,14 +2321,14 @@ class TestDownloadMmprojOfflineCacheFallback:
     def test_no_mmproj_in_cache_returns_none(self, hf_cache):
         _build_cache(
             hf_cache,
-            "LAiM/text-only-GGUF",
+            "unsloth/text-only-GGUF",
             {"text-Q4_K_M.gguf": 1},
         )
         backend = LlamaCppBackend()
 
         with patch("huggingface_hub.list_repo_files", boom_list):
             out = backend._download_mmproj(
-                hf_repo = "LAiM/text-only-GGUF",
+                hf_repo = "unsloth/text-only-GGUF",
                 hf_token = None,
             )
         assert out is None

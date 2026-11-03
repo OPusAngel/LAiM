@@ -118,7 +118,7 @@ def test_tiny_nemotron_h_trains_with_a_user_bnb_config():
         r = 8,
         lora_alpha = 8,
         target_modules = ["q_proj", "k_proj", "v_proj", "o_proj"],
-        use_gradient_checkpointing = "LAiM",
+        use_gradient_checkpointing = "unsloth",
         random_state = 0,
     )
     model.train()

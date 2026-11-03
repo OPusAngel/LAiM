@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import type { RecipeNodeData, LayoutDirection, NodeConfig } from "../types";
 import {
   labelForExpression,
@@ -14,7 +15,7 @@ export function nodeDataFromConfig(
 ): RecipeNodeData {
   if (config.kind === "sampler") {
     return {
-      title: "Generated field",
+      title: translate("uxRecipestudio.generatedFieldj4m2e"),
       kind: "sampler",
       subtype: labelForSampler(config.sampler_type),
       blockType: config.sampler_type,
@@ -24,7 +25,7 @@ export function nodeDataFromConfig(
   }
   if (config.kind === "expression") {
     return {
-      title: "Formula",
+      title: translate("uxRecipestudio.formula1b8ag"),
       kind: "expression",
       subtype: labelForExpression(config.dtype),
       blockType: "expression",
@@ -53,7 +54,7 @@ export function nodeDataFromConfig(
       blockType = "validator_sql";
     }
     return {
-      title: "Check",
+      title: translate("uxRecipestudio.checkoqqg2"),
       kind: "validator",
       subtype,
       blockType,
@@ -63,7 +64,7 @@ export function nodeDataFromConfig(
   }
   if (config.kind === "markdown_note") {
     return {
-      title: "Note",
+      title: translate("library.create.note"),
       kind: "note",
       subtype: "Markdown",
       blockType: "markdown_note",
@@ -75,14 +76,14 @@ export function nodeDataFromConfig(
     const seedSourceType = config.seed_source_type ?? "hf";
     const sourceLabel =
       seedSourceType === "hf"
-        ? "Hugging Face dataset"
+        ? translate("uxRecipestudio.huggingFaceDatasetq06ps")
         : seedSourceType === "local"
-          ? "CSV or JSON file"
+          ? translate("uxRecipestudio.cSVOrJSONFileotgnm")
           : seedSourceType === "github_repo"
-            ? "GitHub repositories"
-            : "Document file";
+            ? translate("uxRecipestudio.gitHubRepositoriesywji6")
+            : translate("uxRecipestudio.documentFilejp1qz");
     return {
-      title: "Source data",
+      title: translate("uxRecipestudio.sourceDatabj3o5"),
       kind: "seed",
       subtype: sourceLabel,
       blockType: "seed",
@@ -92,7 +93,7 @@ export function nodeDataFromConfig(
   }
   if (config.kind === "model_provider") {
     return {
-      title: "Provider connection",
+      title: translate("uxRecipestudio.providerConnection1307t"),
       kind: "model_provider",
       subtype: config.provider_type || "Connection",
       blockType: "model_provider",
@@ -102,7 +103,7 @@ export function nodeDataFromConfig(
   }
   if (config.kind === "model_config") {
     return {
-      title: "Model preset",
+      title: translate("uxRecipestudio.modelPresetrgozj"),
       kind: "model_config",
       subtype: config.model || "Model",
       blockType: "model_config",
@@ -113,7 +114,7 @@ export function nodeDataFromConfig(
   if (config.kind === "tool_config") {
     const providerCount = config.mcp_providers.length;
     return {
-      title: "Tool access",
+      title: translate("uxRecipestudio.toolAccess1ahyl"),
       kind: "tool_config",
       subtype: providerCount === 1 ? "1 server" : `${providerCount} servers`,
       blockType: "tool_config",
@@ -122,7 +123,7 @@ export function nodeDataFromConfig(
     };
   }
   return {
-    title: "AI step",
+    title: translate("uxRecipestudio.aIStep13v0r"),
     kind: "llm",
     subtype: labelForLlm(config.llm_type),
     blockType: config.llm_type,

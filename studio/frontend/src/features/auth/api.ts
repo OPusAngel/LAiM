@@ -11,6 +11,8 @@ import {
   setMustChangePassword,
   storeAuthTokens,
 } from "./session";
+import { translate } from "@/i18n";
+
 
 type RefreshResponse = {
   access_token: string;
@@ -251,7 +253,7 @@ async function asTransportFailure(err: unknown): Promise<unknown> {
   ) {
     return Object.assign(
       new Error(
-        "You appear to be offline. Check your network connection and try again.",
+        translate("uxFeatures.youAppearToBem5fbn"),
       ),
       { LAiMTransportFailure: true },
     );
@@ -359,7 +361,7 @@ export async function authFetch(
   // Another tab is mid-switch: its new tokens are published before this tab reloads, so a
   // request now would carry this tab's account content under the next account's credentials.
   if (accountTransitionPending())
-    throw new Error("Another tab is switching accounts; this tab will reload.");
+    throw new Error(translate("uxFeatures.anotherTabIsSwitchingcfkw4"));
   const resolvedInput = typeof input === "string" ? apiUrl(input) : input;
   const headers = new Headers(init?.headers);
   addBrowserTimezoneHeaders(headers);

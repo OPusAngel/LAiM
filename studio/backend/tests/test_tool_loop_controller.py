@@ -129,7 +129,7 @@ def test_status_and_provenance_match_local_event_conventions():
         ("www.google.com/x", "Reading: google.com"),
         ("//google.com", "Reading: google.com"),
         ("example.com:8443/path", "Reading: example.com"),
-        ("github.com/LAiMai/LAiM", "Reading: github.com"),
+        ("github.com/OPusAngel/LAiM", "Reading: github.com"),
         # still generic for what the fetch layer refuses
         ("/login", "Reading page..."),
         ("javascript:alert(1)", "Reading page..."),
@@ -910,12 +910,12 @@ def test_the_cap_keeps_the_card_envelope_whole_and_off_the_model():
 
 
 @pytest.fixture
-def _sandbox(tmp_path, monkeypatch):
+def _workdir(tmp_path, monkeypatch):
     import core.inference.tools as tools
 
     records = tmp_path / "records"
     records.mkdir()
-    workdir = tmp_path / "sandbox"
+    workdir = tmp_path / "workdir"
     workdir.mkdir()
     monkeypatch.setattr(tools, "_spill_records_dir", lambda: str(records))
     monkeypatch.setattr(tools, "_get_workdir", lambda session_id = None: str(workdir))
@@ -935,26 +935,26 @@ def _spilled(
     )
 
 
-def test_an_oversized_result_is_spilled_and_the_model_is_told_how_to_search_it(_sandbox):
+def test_an_oversized_result_is_spilled_and_the_model_is_told_how_to_search_it(_workdir):
     huge = "".join(f"row {i}\n" for i in range(60_000))
     content = _spilled(["mcp__docs__dump", "terminal"], huge).tool_message()["content"]
 
     notice = content[content.index(_tool_text_notice_head()) :]
     path = notice.split("saved to ")[1].split(" ")[0]
-    assert (_sandbox / path).read_text() == huge
+    assert (_workdir / path).read_text() == huge
     assert f"grep -n 'pattern' {path}" in notice
     assert f"sed -n '1,200p' {path}" in notice
     assert "open(" not in notice
 
 
-def test_the_hint_names_only_the_reader_the_model_has(_sandbox):
+def test_the_hint_names_only_the_reader_the_model_has(_workdir):
     huge = "q" * (MAX_TOOL_TEXT_CHARS + 1)
     content = _spilled(["mcp__docs__dump", "python"], huge).tool_message()["content"]
     assert "open('.LAiM_tool_output/" in content
     assert "grep" not in content
 
 
-def test_a_cmd_only_windows_host_gets_findstr_with_a_backslash_path(_sandbox, monkeypatch):
+def test_a_cmd_only_windows_host_gets_findstr_with_a_backslash_path(_workdir, monkeypatch):
     import core.inference.tools as tools
 
     monkeypatch.setattr(tools, "_posix_tools_available", lambda: False)
@@ -964,7 +964,7 @@ def test_a_cmd_only_windows_host_gets_findstr_with_a_backslash_path(_sandbox, mo
     assert "grep" not in content
 
 
-def test_no_reader_tool_or_a_shared_sandbox_gets_the_plain_notice(_sandbox):
+def test_no_reader_tool_or_a_shared_workdir_gets_the_plain_notice(_workdir):
     huge = "q" * (MAX_TOOL_TEXT_CHARS + 1)
     plain = "q" * MAX_TOOL_TEXT_CHARS + _NOTICE
     assert _spilled(["mcp__docs__dump"], huge).tool_message()["content"] == plain
@@ -972,7 +972,7 @@ def test_no_reader_tool_or_a_shared_sandbox_gets_the_plain_notice(_sandbox):
         _spilled(["mcp__docs__dump", "terminal"], huge, session_id = None).tool_message()["content"]
         == plain
     )
-    assert not (_sandbox / ".LAiM_tool_output").exists()
+    assert not (_workdir / ".LAiM_tool_output").exists()
 
 
 def test_model_message_leaves_an_already_capped_result_alone():
@@ -1011,13 +1011,13 @@ def test_the_hard_cap_is_tunable(monkeypatch):
     assert "truncated to 50,000 chars" in content
 
 
-def test_the_spill_masks_studio_credentials_like_the_model_copy(_sandbox):
+def test_the_spill_masks_studio_credentials_like_the_model_copy(_workdir):
     key = "sk-LAiM-" + "ab12" * 8
     huge = f"token {key}\n" + "r\n" * (MAX_TOOL_TEXT_CHARS // 2 + 10)
     content = _spilled(["mcp__docs__dump", "terminal"], huge).tool_message()["content"]
 
     path = content.split("saved to ")[1].split(" ")[0]
-    spilled = (_sandbox / path).read_text()
+    spilled = (_workdir / path).read_text()
     assert key not in spilled and key not in content
     assert spilled.startswith("token [redacted]")
 

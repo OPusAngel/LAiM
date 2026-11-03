@@ -199,7 +199,7 @@ def _save_clip(
     prompt: str,
     created_at: str,
     video_id: str | None = None,
-    model: str = "LAiM/LTX-2.3-GGUF",
+    model: str = "unsloth/LTX-2.3-GGUF",
 ) -> dict:
     return gallery_module.save(
         b"OLD-MP4",
@@ -236,7 +236,7 @@ def test_create_like_the_sdk_poll_download_list_delete(client, backend):
     assert job["prompt"] == "a red fox in snow"
     assert job["size"] == "768x512"
     assert job["seconds"] == "4.04"
-    assert job["model"] == "LAiM/LTX-2.3-GGUF"
+    assert job["model"] == "unsloth/LTX-2.3-GGUF"
 
     done = _wait_terminal(client, job["id"])
     assert done["status"] == "completed" and done["progress"] == 100
@@ -574,7 +574,7 @@ def test_clips_made_before_this_process_list_and_retrieve_as_completed(client, b
     assert video["status"] == "completed" and video["progress"] == 100
     assert video["created_at"] == video["completed_at"] == 1767225600
     assert video["size"] == "768x512" and video["seconds"] == "5" and video["prompt"] == "older"
-    assert video["model"] == "LAiM/LTX-2.3-GGUF"
+    assert video["model"] == "unsloth/LTX-2.3-GGUF"
 
     page = client.get("/v1/videos", params = {"limit": 1}).json()
     assert [v["id"] for v in page["data"]] == [newer["id"]]
@@ -770,11 +770,11 @@ def test_create_hands_the_model_to_auto_switch(client, backend, monkeypatch):
     monkeypatch.setattr(mas, "maybe_auto_switch_media_model", _record)
     resp = client.post(
         "/v1/videos",
-        json = {"prompt": "x", "model": "LAiM/LTX-2.3-GGUF"},
+        json = {"prompt": "x", "model": "unsloth/LTX-2.3-GGUF"},
         headers = {"X-LAiM-HF-Token": "hf_abc"},
     )
     assert resp.status_code == 200, resp.json()
-    assert calls == [("LAiM/LTX-2.3-GGUF", gpu_arbiter.VIDEO, True, "hf_abc", True)]
+    assert calls == [("unsloth/LTX-2.3-GGUF", gpu_arbiter.VIDEO, True, "hf_abc", True)]
 
 
 @pytest.mark.parametrize(
@@ -1257,12 +1257,12 @@ def test_the_job_describes_the_run_the_backend_reserved(client, backend, monkeyp
             "height": 1216,
             "num_frames": 121,
             "fps": 24,
-            "model": "LAiM/Some-Other-Video-Model",
+            "model": "unsloth/Some-Other-Video-Model",
         }
 
     monkeypatch.setattr(backend, "begin_generate", _begin)
     job = _create(client, {"prompt": "swapped underneath", "seconds": "4"}).json()
-    assert job["model"] == "LAiM/Some-Other-Video-Model"
+    assert job["model"] == "unsloth/Some-Other-Video-Model"
     assert job["size"] == "704x1216"
     assert job["seconds"] == _format_seconds(121 / 24)
 
@@ -1280,7 +1280,7 @@ def test_requested_model_cannot_change_before_the_generation_reservation(
             backend._state = types.SimpleNamespace(
                 **{
                     **vars(backend._state),
-                    "repo_id": "LAiM/Replacement-Video-Model",
+                    "repo_id": "unsloth/Replacement-Video-Model",
                 }
             )
 

@@ -161,7 +161,7 @@ def test_the_memory_table_covers_every_parent_visible_gpu(smi, monkeypatch):
         hw, "estimate_fp16_model_size_bytes", lambda *a, **k: (8 * (1024**3), "config")
     )
     monkeypatch.setattr(
-        hw, "_resolve_model_identifier_for_gpu_estimate", lambda *a, **k: "LAiM/test"
+        hw, "_resolve_model_identifier_for_gpu_estimate", lambda *a, **k: "unsloth/test"
     )
     monkeypatch.setattr(
         hw,
@@ -177,7 +177,7 @@ def test_the_memory_table_covers_every_parent_visible_gpu(smi, monkeypatch):
         ),
     )
     _, metadata = hw.estimate_required_model_memory_gb(
-        "LAiM/test", training_type = "LoRA/QLoRA", load_in_4bit = True
+        "unsloth/test", training_type = "LoRA/QLoRA", load_in_4bit = True
     )
     assert metadata["estimation_mode"] == "detailed"
     assert "min_per_gpu_2" in metadata["vram_breakdown"]

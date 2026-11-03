@@ -257,9 +257,9 @@ def _pre_ampere_skip_reason(
     """Why a kernel stays off a pre-sm80 GPU, or None when LAiM_zoo uses it there."""
     if name != "mamba_ssm":
         return "needs sm80 or newer"
-    forced = os.environ.get("LAiM_MAMBA_PRE_AMPERE_FAST", "").strip()
+    forced = os.environ.get("UNSLOTH_MAMBA_PRE_AMPERE_FAST", "").strip()
     if forced in ("0", "1"):
-        return None if forced == "1" else "LAiM_MAMBA_PRE_AMPERE_FAST=0 turns off"
+        return None if forced == "1" else "UNSLOTH_MAMBA_PRE_AMPERE_FAST=0 turns off"
     if capability < (7, 5):
         return "needs sm80, or sm75 with Triton 3.4+"
     triton = _triton_version(run)

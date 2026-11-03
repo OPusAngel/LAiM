@@ -88,7 +88,7 @@ def test_a_fast_failure_keeps_its_status_code(route):
 def test_a_slow_call_pads_then_sends_valid_json(route):
     async def slow():
         await asyncio.sleep(0.2)
-        return {"status": "loaded", "model": "LAiM/Kimi-K3-GGUF"}
+        return {"status": "loaded", "model": "unsloth/Kimi-K3-GGUF"}
 
     async def run():
         response = await route._tunnel_safe_json(slow(), label = "t")
@@ -102,7 +102,7 @@ def test_a_slow_call_pads_then_sends_valid_json(route):
     assert all(c == b" " for c in chunks[:-1])
     body = b"".join(chunks)
     # Leading whitespace is legal JSON, which is why no client had to change.
-    assert json.loads(body) == {"status": "loaded", "model": "LAiM/Kimi-K3-GGUF"}
+    assert json.loads(body) == {"status": "loaded", "model": "unsloth/Kimi-K3-GGUF"}
 
 
 def test_a_slow_failure_travels_in_the_body(route):
@@ -169,7 +169,7 @@ def slow_load(route, monkeypatch):
     return finished
 
 
-def _load_request(model_path = "LAiM/Kimi-K3-GGUF"):
+def _load_request(model_path = "unsloth/Kimi-K3-GGUF"):
     from models.inference import LoadRequest
     return LoadRequest(model_path = model_path)
 
@@ -180,9 +180,9 @@ def test_an_in_process_caller_gets_the_real_result(route, slow_load):
     result = asyncio.run(route.load_model_gated(_load_request(), None, "admin"))
 
     assert not isinstance(result, StreamingResponse)
-    assert result == {"status": "loaded", "model": "LAiM/Kimi-K3-GGUF"}
+    assert result == {"status": "loaded", "model": "unsloth/Kimi-K3-GGUF"}
     # Returned only after the load finished, not at the 15s mark.
-    assert slow_load == ["LAiM/Kimi-K3-GGUF"]
+    assert slow_load == ["unsloth/Kimi-K3-GGUF"]
 
 
 def test_an_in_process_caller_sees_a_late_failure(route, monkeypatch):
@@ -211,7 +211,7 @@ def test_the_route_still_pads_the_same_slow_load(route, slow_load):
     response, body = asyncio.run(run())
     assert isinstance(response, StreamingResponse)
     assert body.startswith(b" ")
-    assert json.loads(body) == {"status": "loaded", "model": "LAiM/Kimi-K3-GGUF"}
+    assert json.loads(body) == {"status": "loaded", "model": "unsloth/Kimi-K3-GGUF"}
 
 
 def test_only_the_route_pads(route):

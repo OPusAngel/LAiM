@@ -22,7 +22,7 @@ def _studio():
     return _studio_mod
 
 
-_BASE = ["--model", "LAiM/Qwen3-1.7B-GGUF"]
+_BASE = ["--model", "unsloth/Qwen3-1.7B-GGUF"]
 
 
 def test_run_exposes_cloudflare_option_default_off():
@@ -358,7 +358,7 @@ def test_run_silent_pins_internal_requests_to_the_bound_address(monkeypatch, tmp
         "_load_model_via_http",
         lambda **kwargs: (
             calls.append(("load", kwargs))
-            or {"model": "LAiM/Qwen3-1.7B-GGUF", "context_length": 4096}
+            or {"model": "unsloth/Qwen3-1.7B-GGUF", "context_length": 4096}
         ),
     )
 

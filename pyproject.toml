@@ -174,6 +174,7 @@ studio = [
     "urllib3>=2.3.0 ; python_version < '3.10'",
     "jinja2>=3.1.0",
     "structlog>=24.1.0",
+    "psutil==7.2.2",
     "diceware==1.0.1",
     "ddgs==9.14.4 ; python_version >= '3.10'",
     "ddgs==9.8.0 ; python_version < '3.10'",
@@ -219,7 +220,7 @@ huggingfacenotorch = [
     # generates for the compiled trainers, so fixing _utils.py here never reached the compiled
     # path while an older zoo stayed resolvable: 2026.9.4 hands FSDP2 mixed precision a
     # sentinel that answers `__dataclass_fields__` and then dies in `dataclasses.replace`.
-    # 2026.9.5 carries the matching fix (LAiMai/LAiM-zoo#1259), so the floor moves to it
+    # 2026.9.5 carries the matching fix (OPusAngel/LAiM-zoo#1259), so the floor moves to it
     # and the compiled path is covered for the first time rather than resting on the eager
     # fix alone. The compiled-path probes in tests/test_empty_logits_compiled_path_probes.py
     # gate on the INSTALLED zoo rather than on this pin, so they start running by themselves
@@ -1770,7 +1771,7 @@ extend-exclude = [
     "*mapper.py",
     # Vendored upstream source: reformatting it would break the digest test.
     "studio/backend/vendor/",
-    "LAiM/_vendor/",
+    "unsloth/_vendor/",
 ]
 
 [tool.ruff.lint]
@@ -1812,7 +1813,6 @@ markers = [
     "gpu: needs a real accelerator, and usually downloads a checkpoint to use it",
     "slow: minutes rather than seconds, and covered again more cheaply elsewhere",
     "reads_real_pip_config: opts out of the hermetic pip config stub, for the few tests that drive that read themselves",
-    "native_mxc: needs native Windows, the pinned Microsoft WXC executable, and a working MXC ProcessContainer backend",
 ]
 
 # Deselected by default, not deleted: CI runs them in their own leg with
@@ -1820,4 +1820,4 @@ markers = [
 # A run that names one of these files directly will report "no tests ran"
 # until you pass `-m gpu` -- that is the cost of the default being fast.
 # Live Studio tests are opt-in: `pytest -m server`.
-addopts = "-m 'not gpu and not slow and not server and not native_mxc'"
+addopts = "-m 'not gpu and not slow and not server'"

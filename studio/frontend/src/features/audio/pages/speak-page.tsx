@@ -6,6 +6,8 @@ import type { ModelOption } from "@/features/model-picker/components/model-selec
 import { audioCppModelSpeaks } from "../audio-cpp-catalog";
 import { isMusicGenerationModel, macTtsCatalogChoiceIsRunnable } from "../catalog";
 import { TtsOutput, TtsRailFields } from "./tts-workspace";
+import { translate } from "@/i18n";
+
 
 export function speakPageModels(
   models: ModelOption[],
@@ -38,8 +40,8 @@ export function SpeakOutput(
       {...props}
       emptyText={
         modelReady
-          ? "Generated speech lands here. Type a sentence and press Generate."
-          : "Generated speech lands here. Load a TTS model, type a sentence, and press Generate."
+          ? translate("uxAudio.generatedSpeechLandsHereagla2")
+          : translate("uxAudio.generatedSpeechLandsHeremxz41")
       }
     />
   );

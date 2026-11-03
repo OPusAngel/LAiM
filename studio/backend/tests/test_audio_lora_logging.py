@@ -61,7 +61,7 @@ def test_audio_lora_setup_accepts_real_structlog(monkeypatch, audio_type):
         is_vlm = False,
         should_stop = False,
         _update_progress = progress,
-        _use_gradient_checkpointing = "LAiM",
+        _use_gradient_checkpointing = "unsloth",
         _offload_peft_kwargs = lambda: {},
     )
 

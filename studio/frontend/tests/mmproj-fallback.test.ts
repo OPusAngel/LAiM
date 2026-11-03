@@ -14,7 +14,7 @@ const {
   mmprojFallbackMessage,
   mmprojLoadNotice,
   loadFallbackNotice,
-  CPU_FALLBACK_MESSAGE,
+  cpuFallbackMessage,
 } = await import("../src/features/chat/utils/mmproj-fallback.ts");
 
 const IMAGE_INPUT_AVAILABLE = /Image input remains available/;
@@ -173,7 +173,7 @@ test("a CPU-offloaded projector under a CPU fallback does not claim vision is ac
 test("each fallback alone still reads exactly as it did before", () => {
   const cpuOnly = loadFallbackNotice("X loaded", "vulkan_startup_crash", null);
   assert.equal(cpuOnly.title, "X loaded on CPU");
-  assert.equal(cpuOnly.description, CPU_FALLBACK_MESSAGE);
+  assert.equal(cpuOnly.description, cpuFallbackMessage());
 
   const offload = loadFallbackNotice("X loaded", null, "cpu_offload");
   assert.equal(offload.title, "X loaded with vision on CPU");

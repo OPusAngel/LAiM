@@ -373,19 +373,19 @@ const labelOf = (labels: Record<string, string>, id: string) =>
   Object.hasOwn(labels, id) ? labels[id] : id;
 
 const CONDITIONED_WORKFLOW_INPUTS: Record<string, string> = {
-  img2img: "the source image",
-  inpaint: "the source image and mask",
-  outpaint: "the source image",
-  upscale: "the source image",
-  edit: "the source image",
-  reference: "the source and reference images",
-  controlnet: "the control image",
+  get img2img() { return translate("uxImages.theSourceImageisykk"); },
+  get inpaint() { return translate("uxImages.theSourceImageAnd0nscf"); },
+  get outpaint() { return translate("uxImages.theSourceImageisykk"); },
+  get upscale() { return translate("uxImages.theSourceImageisykk"); },
+  get edit() { return translate("uxImages.theSourceImageisykk"); },
+  get reference() { return translate("uxImages.theSourceAndReferencekywri"); },
+  get controlnet() { return translate("uxImages.theControlImageclarm"); },
 };
 
 // Friendly labels for ControlNet control types; unknown types fall back to a capitalized "(map)" label.
 const CONTROL_TYPE_LABELS: Record<string, string> = {
   passthrough: "Passthrough (already a map)",
-  canny: "Canny (trace edges)",
+  get canny() { return translate("uxImages.cannyTraceEdgesqzisz"); },
   depth: "Depth (map)",
   pose: "Pose (map)",
 };
@@ -476,7 +476,7 @@ async function encodeExport(
   canvas.height = el.naturalHeight;
   const ctx = canvas.getContext("2d");
   if (!ctx) {
-    throw new Error("canvas 2d context unavailable");
+    throw new Error(translate("uxImages.canvas2dContextUnavailablekv0kj"));
   }
   if (format === "jpeg") {
     ctx.fillStyle = "#f9e2de";
@@ -490,12 +490,12 @@ async function encodeExport(
     canvas.toBlob(resolve, `image/${format}`, 0.95),
   );
   if (!blob) {
-    throw new Error(`could not encode ${format}`);
+    throw new Error(translate("uxImages.couldNotEncodefkd5n", { p1: format }));
   }
   if (blob.type !== `image/${format}`) {
     // WebKit can silently return PNG bytes when an encoder is unavailable, so treat that as a
     // failed conversion and use a matching .png name.
-    throw new Error(`${format} encoding is unavailable`);
+    throw new Error(translate("uxImages.encodingIsUnavailable01bb5", { p1: format }));
   }
   const bytes = new Uint8Array(await blob.arrayBuffer());
   const recipe = pngRecipe(original);
@@ -546,13 +546,13 @@ async function downloadImage(
     const filename = exportFilename(image, outputFormat);
     await downloadFile(output, filename, output.type || "image/png");
     if (isTauri) {
-      toast.success("Image saved", { description: filename });
+      toast.success(translate("uxImages.imageSavedicpy7"), { description: filename });
     }
   } catch (error) {
     if (isDownloadCancelled(error)) {
       return;
     }
-    toast.error("Could not save image", {
+    toast.error(translate("uxImages.couldNotSaveImagedb86m"), {
       description: error instanceof Error ? error.message : undefined,
     });
   } finally {
@@ -596,7 +596,7 @@ async function settleLostGeneration(
       else idle = true;
     } catch {
       fails += 1;
-      if (fails >= SETTLE_MAX_FAILS) throw new Error("Lost connection to the image server.");
+      if (fails >= SETTLE_MAX_FAILS) throw new Error(translate("uxImages.lostConnectionToThetowqg"));
     }
     if (!idle) continue;
     if (sawActive) return;
@@ -614,14 +614,14 @@ async function settleLostGeneration(
       if (sawNew) return;
     } catch {
       fails += 1;
-      if (fails >= SETTLE_MAX_FAILS) throw new Error("Lost connection to the image server.");
+      if (fails >= SETTLE_MAX_FAILS) throw new Error(translate("uxImages.lostConnectionToThetowqg"));
       continue;
     }
-    throw new Error("The image generation request did not reach the server.");
+    throw new Error(translate("uxImages.theImageGenerationRequest1p6bi"));
   }
   // Out of budget with the run still active: returning would report success and start the next
   // run against a busy backend.
-  throw new Error("Timed out waiting for the image generation to finish.");
+  throw new Error(translate("uxImages.timedOutWaitingForanohx"));
 }
 
 // The chat tab model-load toast styling, reused verbatim so the diffusion load toast is identical.
@@ -638,18 +638,18 @@ function loadToastDescription(p: DiffusionLoadProgress) {
   // "Downloading" only when bytes actually remain: a cached model must not claim a download.
   const downloading = p.bytes_total > 0 && p.bytes_downloaded < p.bytes_total * 0.999;
   const title = downloading
-    ? "Downloading model requirements…"
+    ? translate("uxImages.downloadingModelRequirementssrh0e")
     : p.phase === "finalizing"
-      ? "Loading to GPU…"
-      : "Starting model…";
+      ? translate("uxImages.loadingToGPUyzhdt")
+      : translate("uxImages.startingModel4qzzc");
   const hasTotal = p.bytes_total > 0;
   return (
     <ModelLoadDescription
       title={title}
       message={
         downloading
-          ? "Downloading the files required to load this model."
-          : "Loading the model."
+          ? translate("uxImages.downloadingTheFilesRequired0scno")
+          : translate("uxImages.loadingTheModelwmlff")
       }
       progressPercent={hasTotal ? p.fraction * 100 : null}
       progressLabel={
@@ -676,7 +676,7 @@ function loadToastArgs(
     description: loadToastDescription(p),
     duration: Infinity,
     closeButton: true,
-    ...(onCancel ? { cancel: { label: "Cancel", onClick: onCancel } } : {}),
+    ...(onCancel ? { cancel: { label: translate("browser.agentSettings.cancel"), onClick: onCancel } } : {}),
     classNames: LOAD_TOAST_CLASSNAMES,
   };
 }
@@ -782,8 +782,8 @@ function ResolvedBadge({
   );
 }
 
-const COMPONENT_FILES_HINT =
-  "Optional. Use separate ComfyUI text encoder / VAE .safetensors files instead of downloading the base model's. Absolute path, or relative to the model folder (e.g. ../text_encoders/clip_l.safetensors). Only for single-file or GGUF transformers.";
+const componentFilesHint = () =>
+  translate("uxImages.optionalUseSeparatep61mj");
 
 function AdvancedTextField({
   label,
@@ -994,7 +994,7 @@ function MaskCanvas({
     <div className="relative overflow-hidden rounded-[10px] border border-border bg-muted/30">
       <img
         src={image}
-        alt="Inpaint source"
+        alt={translate("uxImages.inpaintSourcepjsuf")}
         className="block w-full select-none"
         draggable={false}
       />
@@ -1030,7 +1030,7 @@ function scaleToCanvas(source: CanvasImageSource, w: number, h: number): HTMLCan
   dst.width = w;
   dst.height = h;
   const dctx = dst.getContext("2d");
-  if (!dctx) throw new Error("Could not scale the extended canvas");
+  if (!dctx) throw new Error(translate("uxImages.couldNotScaleThehouuk"));
   dctx.drawImage(source, 0, 0, w, h);
   return dst;
 }
@@ -1071,7 +1071,7 @@ async function buildOutpaint(
   ic.width = nw;
   ic.height = nh;
   const ictx = ic.getContext("2d");
-  if (!ictx) throw new Error("Could not build the extended canvas");
+  if (!ictx) throw new Error(translate("uxImages.couldNotBuildThe7nki8"));
   ictx.drawImage(img, l, t, w, h); // original, centred by the chosen offsets
   // Edge-bleed: stretch the 1px border strips into each new band (and corners).
   if (l) ictx.drawImage(img, 0, 0, 1, h, 0, t, l, h);
@@ -1092,7 +1092,7 @@ async function buildOutpaint(
   mc.width = nw;
   mc.height = nh;
   const mctx = mc.getContext("2d");
-  if (!mctx) throw new Error("Could not build the extend mask");
+  if (!mctx) throw new Error(translate("uxImages.couldNotBuildTheblfka"));
   mctx.fillStyle = "#f9e2de"; // repaint everything...
   mctx.fillRect(0, 0, nw, nh);
   mctx.fillStyle = "#061d21"; // ...except the kept original (inset by the seam overlap).
@@ -1161,7 +1161,7 @@ function RecipePopover({
       <PopoverTrigger asChild>
         <Button size="sm" variant="ghost" className="gap-1.5">
           <HugeiconsIcon icon={InformationCircleIcon} className="size-4" />
-          Recipe
+          {translate("studio.datasetPicker.sourceRecipe")}
         </Button>
       </PopoverTrigger>
       {/* Fits the viewport: only the settings scroll, and overflow-hidden keeps the corners round. */}
@@ -1172,25 +1172,25 @@ function RecipePopover({
         className="flex max-h-[var(--radix-popover-content-available-height)] w-80 flex-col gap-0 overflow-hidden p-0"
       >
         <div className="shrink-0 border-b border-border/60 px-4 py-2.5">
-          <p className="text-sm font-semibold">Generation settings</p>
+          <p className="text-sm font-semibold">{translate("uxImages.generationSettingsw26ni")}</p>
           <p className="text-ui-11 text-muted-foreground">{formatTimestamp(image.created_at)}</p>
         </div>
         <div className="flex min-h-0 flex-col gap-2 overflow-y-auto overscroll-contain px-4 py-3 text-xs">
-          <RecipeRow label="Prompt" value={image.prompt} wrap />
+          <RecipeRow label={translate("uxVideo.prompt1lmzx")} value={image.prompt} wrap />
           {image.negative_prompt ? (
-            <RecipeRow label="Negative" value={image.negative_prompt} wrap />
+            <RecipeRow label={translate("uxVideo.negative35c9q")} value={image.negative_prompt} wrap />
           ) : null}
-          {image.model ? <RecipeRow label="Model" value={image.model} /> : null}
+          {image.model ? <RecipeRow label={translate("settings.voice.dictation.customModelLabel")} value={image.model} /> : null}
           {/* The load-time build, so the recipe still names the pipeline once the model is unloaded: the
               repo id alone does not say which quant ran. */}
-          {image.gguf_filename ? <RecipeRow label="File" value={image.gguf_filename} mono /> : null}
+          {image.gguf_filename ? <RecipeRow label={translate("uxVideo.filebygjt")} value={image.gguf_filename} mono /> : null}
           {image.transformer_quant ? (
-            <RecipeRow label="Transformer" value={image.transformer_quant} />
+            <RecipeRow label={translate("uxVideo.transformerklhnk")} value={image.transformer_quant} />
           ) : null}
           {/* The ENGAGED text-encoder precision and memory placement: the encoder is often the largest
               resident component, and the memory mode decides whether torchao modes could run at all. */}
           {image.text_encoder_quant ? (
-            <RecipeRow label="TE quant" value={image.text_encoder_quant} />
+            <RecipeRow label={translate("uxVideo.tEQuant19dnq")} value={image.text_encoder_quant} />
           ) : null}
           {/* Either field is placement information. The native engine reports no memory_mode while still
               recording an active offload, so gating on it hid the offload on exactly the configuration
@@ -1198,74 +1198,74 @@ function RecipePopover({
           {image.memory_mode ||
           (image.offload_policy && image.offload_policy !== "none") ? (
             <RecipeRow
-              label="Memory"
+              label={translate("studio.params.memory")}
               value={memoryRecipeValue(image.memory_mode, image.offload_policy)}
             />
           ) : null}
           {image.speed_mode ? (
             <RecipeRow
-              label="Speed"
+              label={translate("settings.voice.readAloud.speedLabel")}
               value={formatResolvedValue("speed_mode", image.speed_mode)}
             />
           ) : null}
           {image.attention_backend ? (
             <RecipeRow
-              label="Attention"
+              label={translate("uxVideo.attention2fg7y")}
               value={formatResolvedValue("attention_backend", image.attention_backend)}
             />
           ) : null}
           {image.transformer_cache ? (
             <RecipeRow
-              label="Step cache"
+              label={translate("uxVideo.stepCachexk1do")}
               value={formatResolvedValue("transformer_cache", image.transformer_cache)}
             />
           ) : null}
           {image.cpu_offload ? (
-            <RecipeRow label="CPU offload" value={formatResolvedValue("cpu_offload", true)} />
+            <RecipeRow label={translate("uxImages.cPUOffloadstfxl")} value={formatResolvedValue("cpu_offload", true)} />
           ) : null}
           {image.baked_loras?.length ? (
-            <RecipeRow label="Baked" value={image.baked_loras.join(", ")} wrap />
+            <RecipeRow label={translate("uxImages.baked12srx")} value={image.baked_loras.join(", ")} wrap />
           ) : null}
           {image.loras?.length ? (
-            <RecipeRow label="LoRAs" value={image.loras.join(", ")} wrap />
+            <RecipeRow label={translate("uxImages.loRAs1mo9f")} value={image.loras.join(", ")} wrap />
           ) : null}
-          {image.controlnet ? <RecipeRow label="ControlNet" value={image.controlnet} wrap /> : null}
-          <RecipeRow label="Workflow" value={recipeWorkflowLabel(image.workflow)} />
+          {image.controlnet ? <RecipeRow label={translate("uxImages.controlNett770c")} value={image.controlnet} wrap /> : null}
+          <RecipeRow label={translate("uxImages.workflow1yj1s")} value={recipeWorkflowLabel(image.workflow)} />
           {image.strength != null &&
           (image.workflow === "img2img" ||
             image.workflow === "edit" ||
             image.workflow === "inpaint" ||
             image.workflow === "upscale") ? (
-            <RecipeRow label="Strength" value={String(image.strength)} />
+            <RecipeRow label={translate("uxImages.strength1okjn")} value={String(image.strength)} />
           ) : null}
           {image.upscale != null && image.workflow === "upscale" ? (
-            <RecipeRow label="Upscale" value={`${image.upscale}×`} />
+            <RecipeRow label={translate("uxImages.upscale71k05")} value={`${image.upscale}×`} />
           ) : null}
           {image.reference_image_count != null &&
           (image.workflow === "reference" || image.workflow === "edit") ? (
-            <RecipeRow label="References" value={String(image.reference_image_count)} />
+            <RecipeRow label={translate("uxVideo.references1p1yp")} value={String(image.reference_image_count)} />
           ) : null}
           {image.localized_edit ? (
             <RecipeRow
-              label="Edit mode"
+              label={translate("uxImages.editMode37xk5")}
               value={image.localized_edit.charAt(0).toUpperCase() + image.localized_edit.slice(1)}
             />
           ) : null}
-          <RecipeRow label="Size" value={`${image.width} × ${image.height}`} />
-          {!viaConnection && <RecipeRow label="Steps" value={String(image.steps)} />}
-          {!viaConnection && <RecipeRow label="Guidance" value={String(image.guidance)} />}
+          <RecipeRow label={translate("library.toolbar.sortSize")} value={`${image.width} × ${image.height}`} />
+          {!viaConnection && <RecipeRow label={translate("settings.profile.stats.trainingSteps")} value={String(image.steps)} />}
+          {!viaConnection && <RecipeRow label={translate("uxVideo.guidancew7efa")} value={String(image.guidance)} />}
           {samplerRecipeLabel(image.sampler, image.schedule_type) ? (
             <RecipeRow
-              label="Sampler"
+              label={translate("uxImages.sampler1419s")}
               value={samplerRecipeLabel(image.sampler, image.schedule_type) ?? ""}
             />
           ) : null}
-          {!viaConnection && <RecipeRow label="Seed" value={String(image.seed)} mono />}
+          {!viaConnection && <RecipeRow label={translate("uxVideo.seed1lu3q")} value={String(image.seed)} mono />}
         </div>
         <div className="shrink-0 border-t border-border/60 px-3 py-2.5">
           <Button size="sm" className="w-full gap-1.5" onClick={() => onRestore(image)}>
             <HugeiconsIcon icon={Refresh01Icon} className="size-4" />
-            Restore these settings
+            {translate("uxVideo.restoreTheseSettings68bd8")}
           </Button>
         </div>
       </PopoverContent>
@@ -1294,14 +1294,13 @@ function LoadedBuildSummary({ status }: { status: DiffusionStatus | null }) {
   return (
     <div className="flex flex-col gap-1 rounded-md border border-border/60 px-2.5 py-2 text-ui-11">
       <div className="flex items-center gap-1 pb-0.5 text-xs font-medium text-muted-foreground">
-        Loaded build
+        {translate("uxVideo.loadedBuild1q31k")}
         <InfoHint>
-          What the loaded model is actually running, reported by the backend. A control whose
-          requested value could not be used shows it next to that control, with the reason.
+          {translate("uxCopy.whatTheLoadedModel1glal")}
         </InfoHint>
       </div>
       <BuildRow
-        label="Transformer"
+        label={translate("uxVideo.transformerklhnk")}
         value={
           status.transformer_quant
             ? formatResolvedValue("transformer_quant", status.transformer_quant)
@@ -1311,7 +1310,7 @@ function LoadedBuildSummary({ status }: { status: DiffusionStatus | null }) {
         badge={<ResolvedBadge status={status} controlKey="transformer_quant" />}
       />
       <BuildRow
-        label="Text encoder"
+        label={translate("uxVideo.textEncoder1eci4")}
         value={
           status.text_encoder_quant
             ? formatResolvedValue("text_encoder_quant", status.text_encoder_quant)
@@ -1322,14 +1321,14 @@ function LoadedBuildSummary({ status }: { status: DiffusionStatus | null }) {
       />
       {status.component_files && Object.keys(status.component_files).length > 0 ? (
         <BuildRow
-          label="Text encoder / VAE files"
+          label={translate("uxImages.textEncoderVAEFileswqtf6")}
           value={Object.entries(status.component_files)
             .map(([component, file]) => `${component}: ${file}`)
             .join(", ")}
         />
       ) : null}
       <BuildRow
-        label="Memory"
+        label={translate("studio.params.memory")}
         value={
           offload === "none"
             ? `${status.memory_mode ?? "auto"} · resident`
@@ -1337,7 +1336,7 @@ function LoadedBuildSummary({ status }: { status: DiffusionStatus | null }) {
         }
       />
       <BuildRow
-        label="Attention"
+        label={translate("uxVideo.attention2fg7y")}
         value={
           status.attention_backend
             ? formatResolvedValue("attention_backend", status.attention_backend)
@@ -1346,7 +1345,7 @@ function LoadedBuildSummary({ status }: { status: DiffusionStatus | null }) {
             :
               isNativeEngineStatus(status)
               ? "sd.cpp built-in"
-              : "Native SDPA"
+              : translate("uxImages.nativeSDPA1i5dt")
         }
       />
     </div>
@@ -1912,8 +1911,7 @@ export function ImagesPage({
         setLoras([{ id: deploy.loraId, weight: 1 }]);
       } else {
         toast.error(
-          `The trained adapter is for ${deploy.family}, but the loaded model is ` +
-            `${fam ?? "a different family"}, so it was not applied.`,
+          translate("uxImages.theTrainedAdapterIsjn9ko", { p1: deploy.family, p2: fam ?? "a different family" }),
         );
       }
     }
@@ -1945,9 +1943,9 @@ export function ImagesPage({
     if (engaged !== "int8" && engaged !== "fp8") return;
     if (bakedLorasOnLoad.current || loras.length === 0) return;
     setLoras([]);
-    toast.info("LoRA selection cleared", {
+    toast.info(translate("uxImages.loRASelectionCleared1u3bk"), {
       description:
-        "This quantized load bakes adapters in at load time. Pick them, then load again.",
+        translate("uxImages.thisQuantizedLoadBakes14soe"),
     });
   }, [loraCapable, residentBuildKey, status?.resolved, loras]);
 
@@ -2257,7 +2255,7 @@ export function ImagesPage({
         await deleteGalleryImage(id);
       } catch (err) {
         pendingShelfMutations.current -= 1;
-        toast.error(err instanceof Error ? err.message : "Failed to delete image");
+        toast.error(err instanceof Error ? err.message : translate("uxImages.failedToDeleteImageko49i"));
         return;
       }
       dropFromStrip(id, true);
@@ -2357,7 +2355,7 @@ export function ImagesPage({
         // two requests in flight can be stamped in either order. One at a time follows the clicks.
         await serializeById("image-pin", () => setGalleryImageFlags(id, { pinned }));
       } catch (err) {
-        toast.error(err instanceof Error ? err.message : "Failed to pin image");
+        toast.error(err instanceof Error ? err.message : translate("uxImages.failedToPinImageotx90"));
         // Put the old order back rather than leave the strip lying about server state, but only while
         // this is still what the user last asked for.
         if (pinAttempt.current.get(id) === attempt) {
@@ -2418,7 +2416,7 @@ export function ImagesPage({
           return out;
         });
       } catch (err) {
-        toast.error(err instanceof Error ? err.message : "Failed to move image");
+        toast.error(err instanceof Error ? err.message : translate("uxImages.failedToMoveImageovw9g"));
         // Restore the server's order.
         stripEpoch.current += 1;
         const epoch = stripEpoch.current;
@@ -2447,7 +2445,7 @@ export function ImagesPage({
         await setGalleryImageFlags(id, { archived: true });
       } catch (err) {
         pendingShelfMutations.current -= 1;
-        toast.error(err instanceof Error ? err.message : "Failed to archive image");
+        toast.error(err instanceof Error ? err.message : translate("uxImages.failedToArchiveImageenk0p"));
         return;
       }
       dropFromStrip(id, false);
@@ -2461,7 +2459,7 @@ export function ImagesPage({
           }}
           className="w-full cursor-pointer text-left"
         >
-          You can view archived images in Settings
+          {translate("uxCopy.youCanViewArchivedwcfoj")}
         </button>,
         { closeButton: true },
       );
@@ -2539,15 +2537,15 @@ export function ImagesPage({
     // so rather than leaving the two silently disagreeing.
     const rescaled =
       restored.width !== image.width || restored.height !== image.height
-        ? { description: `Size scaled to ${restored.width} × ${restored.height} to fit the ${MIN_DIM}-${sizeLimits.maxSide} range.` }
+        ? { get description() { return translate("uxImages.sizeScaledToTo2ahys", { p1: restored.width, p2: restored.height, p3: MIN_DIM, p4: sizeLimits.maxSide }); } }
         : undefined;
     // Say so, rather than letting a conditioned image restore as a plain Create that generates something unrelated.
     const conditioned =
       restoreInputsNote(image) ?? CONDITIONED_WORKFLOW_INPUTS[image.workflow ?? ""];
     if (conditioned) {
-      toast.success(`Settings restored. Add ${conditioned} again to reproduce this image.`, rescaled);
+      toast.success(translate("uxImages.settingsRestoredAddAgaine5vjb", { p1: conditioned }), rescaled);
     } else {
-      toast.success("Settings restored to inputs", rescaled);
+      toast.success(translate("uxVideo.settingsRestoredToInputs10whk"), rescaled);
     }
   }, [changeSamplerChoice, samplerOptions.length, setPromptFor, setWorkflow, sizeLimits]);
 
@@ -2563,8 +2561,8 @@ export function ImagesPage({
         recipe = null;
       }
       if (!recipe) {
-        toast.error("No generation settings found in this image", {
-          description: "Images saved by LAiM, ComfyUI, or tools that write a parameters block can be loaded.",
+        toast.error(translate("uxImages.noGenerationSettingsFoundyd6zq"), {
+          description: translate("uxImages.imagesSavedByLAiMtyyug"),
         });
         return;
       }
@@ -2584,9 +2582,9 @@ export function ImagesPage({
       const loaded = status?.display_repo_id ?? status?.repo_id ?? null;
       const quant = typeof recipe.gguf_filename === "string" ? recipe.gguf_filename : null;
       if (settings.model && settings.model !== loaded) {
-        toast(`Made with ${settings.model}${quant ? ` (${quant})` : ""}`, {
+        toast(translate("uxImages.madeWithdvjef", { p1: settings.model, p2: quant ? ` (${quant})` : "" }), {
           // Loading a model applies its own default steps and guidance.
-          description: "Load that model, then load settings from this image again to reproduce it.",
+          description: translate("uxImages.loadThatModelThenn4vao"),
         });
       } else if (settings.model && status?.loaded) {
         // Same model, another build: null on either side means dense / no quant.
@@ -2599,7 +2597,7 @@ export function ImagesPage({
         if (differs.length > 0) {
           toast(
             `Made with ${differs.map((key) => (key === "gguf_filename" ? String(recipe[key] ?? "the dense model") : `${key.replace(/_/g, " ")} ${String(recipe[key] ?? "off")}`)).join(", ")}`,
-            { description: "Reload the model with that build to reproduce this image exactly." },
+            { description: translate("uxImages.reloadTheModelWith1fem8") },
           );
         }
       }
@@ -2636,12 +2634,12 @@ export function ImagesPage({
         }
       }
       if (notApplied.length > 0 || newerRecipeSchema(recipe)) {
-        toast.warning("Some settings in this image were not applied", {
+        toast.warning(translate("uxImages.someSettingsInThis1o9ky"), {
           description:
             (notApplied.length > 0 ? `Not applied: ${notApplied.join(", ")}. ` : "") +
             (newerRecipeSchema(recipe)
-              ? "It was made with a newer LAiM; update to use every setting."
-              : "This model or build does not support them."),
+              ? translate("uxImages.itWasMadeWithlwxv0")
+              : translate("uxImages.thisModelOrBuild0kl43")),
         });
       }
     },
@@ -2652,7 +2650,7 @@ export function ImagesPage({
     async (path: string | undefined) => {
       if (!path) return;
       if (!["png", "jpg", "jpeg", "webp"].includes(path.split(".").pop()?.toLowerCase() ?? "")) {
-        toast.error("Drop a PNG, JPEG or WebP image to load its settings");
+        toast.error(translate("uxImages.dropAPNGJPEG1gdy3"));
         return;
       }
       try {
@@ -2660,7 +2658,7 @@ export function ImagesPage({
         const file = await readNativeAttachmentFile(intent.path.token);
         await importSettingsFromFile(Uint8Array.from(atob(file.base64), (c) => c.charCodeAt(0)));
       } catch (error) {
-        toast.error("Could not read the image", {
+        toast.error(translate("uxImages.couldNotReadThe1o7qk"), {
           description: error instanceof Error ? error.message : String(error),
         });
       }
@@ -2683,7 +2681,7 @@ export function ImagesPage({
       if (file) {
         void importSettingsFromFile(file);
       } else {
-        toast.error("Drop a PNG, JPEG or WebP image to load its settings");
+        toast.error(translate("uxImages.dropAPNGJPEG1gdy3"));
       }
     },
     [importSettingsFromFile],
@@ -2821,7 +2819,7 @@ export function ImagesPage({
           return;
         }
         setStatusIfNewest(ticket, loaded);
-        toast.success("Model loaded");
+        toast.success(translate("uxVideo.modelLoaded4vnur"));
         if (lastLoad.current && matchesRememberedModel(lastLoad.current, loaded)) {
           const remembered = withEngagedFamily(lastLoad.current, loaded);
           rememberImageModel(remembered);
@@ -2851,7 +2849,7 @@ export function ImagesPage({
       if (p.phase === "error") {
         pendingRecalledGeneration.current = null;
         dismissLoadToast();
-        reportLoadFailure(p.error, "Failed to load model");
+        reportLoadFailure(p.error, translate("uxImages.failedToLoadModelakxbp"));
         setBusy(null);
         // A load that failed AFTER starting leaves the previous pipeline loaded, so roll the
         // optimistic quant label back.
@@ -3235,7 +3233,7 @@ export function ImagesPage({
         setCanReapply(prevLastLoad != null);
         lastLoadRevert.current = null;
         dismissLoadToast();
-        reportLoadFailure(err instanceof Error ? err.message : "", "Failed to start load");
+        reportLoadFailure(err instanceof Error ? err.message : "", translate("uxImages.failedToStartLoadp6xh5"));
         setBusy(null);
         void refreshStatus();
         return settle(false);
@@ -3273,7 +3271,7 @@ export function ImagesPage({
   const { openCrop: openInpaintCrop, cropDialog: inpaintCropDialog } = useImageCrop(
     initImage,
     handleInitChange,
-    "Source image",
+    translate("uxImages.sourceImagerbfya"),
   );
 
   // Downloads go through the Hub download manager like every other model, so the load finds a
@@ -3513,7 +3511,7 @@ export function ImagesPage({
           return true;
         }
         if (downloadOnly && plan.plan_failed) {
-          throw new Error("Required asset metadata is incomplete. Retry when it is available.");
+          throw new Error(translate("uxImages.requiredAssetMetadataIsgpzxm"));
         }
         incompatible = plan.incompatible_reason ?? null;
         if (!incompatible && plan.entries.length > 0) {
@@ -3558,8 +3556,8 @@ export function ImagesPage({
         }
       } catch (error) {
         if (downloadOnly) {
-          toast.error("Could not plan the download", {
-            description: error instanceof Error ? error.message : "Try selecting the model again.",
+          toast.error(translate("uxImages.couldNotPlanThe1g9yp"), {
+            description: error instanceof Error ? error.message : translate("uxImages.trySelectingTheModelmdy44"),
           });
           return true;
         }
@@ -3576,7 +3574,7 @@ export function ImagesPage({
         return downloadOnly;
       }
       if (downloadOnly) {
-        toast.info("No downloads were planned for this selection");
+        toast.info(translate("uxImages.noDownloadsWerePlanned17bm3"));
         return true;
       }
       return handleLoadRef.current(repoId, opts, advanced, pickToastId);
@@ -3644,8 +3642,8 @@ export function ImagesPage({
         // Still ambiguous (several quants, or the listing failed): only the expander can say which.
         onAmbiguous: () =>
           toast.error(downloadOnly
-            ? "Pick a quantization for this model to download it"
-            : "Pick a quantization for this model to load it"),
+            ? translate("uxImages.pickAQuantizationForn2scu")
+            : translate("uxImages.pickAQuantizationForrxt0l")),
         // Optimistic label, reverted if the load never starts, like the curated GGUF branch below.
         onResolved: (filename) => {
           if (downloadOnly) return;
@@ -3983,10 +3981,10 @@ export function ImagesPage({
         return;
       }
       // Otherwise treat it as a full diffusers repo. The backend gates loads to LAiM/* repos or on-device paths.
-      if (!pipelineTarget.onDevice && !id.toLowerCase().startsWith("LAiM/")) {
+      if (!pipelineTarget.onDevice && !id.toLowerCase().startsWith("unsloth/")) {
         // A refused Download only pick retires nothing: it never claimed the page, and the rollback
         // slot it would clear belongs to whatever load is still staging.
-        toast.error("Only LAiM or on-device image models can be loaded here");
+        toast.error(translate("uxImages.onlyLAiMOrOnwfxr7"));
         if (!downloadOnlyPick) abandonPick();
         return;
       }
@@ -4031,14 +4029,14 @@ export function ImagesPage({
   const handleDeployAdapter = useCallback(
     (args: { baseRepo: string; family: string; catalogPath: string; trigger: string }) => {
       if (busy !== null) {
-        toast.error("Finish the current model load before deploying the adapter.");
+        toast.error(translate("uxImages.finishTheCurrentModeltcggf"));
         return;
       }
       // The picker keys a local adapter by its filename stem (see diffusion_lora scan).
       const base = args.catalogPath.replace(/\\/g, "/").split("/").pop() ?? "";
       const stem = base.replace(/\.(safetensors|gguf)$/i, "");
       if (!stem) {
-        toast.error("Could not resolve the trained adapter's name.");
+        toast.error(translate("uxImages.couldNotResolveThe1ibla"));
         return;
       }
       // The deploy owns the page now: a resolving pick or a staged download would load over the base it is about to.
@@ -4093,7 +4091,7 @@ export function ImagesPage({
       // so the load is still running and this eject stopped nothing.
       return !loadTrackingRestored.current;
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to unload model");
+      toast.error(err instanceof Error ? err.message : translate("uxImages.failedToUnloadModeless5n"));
       void refreshStatus();
       return false;
     } finally {
@@ -4111,8 +4109,8 @@ export function ImagesPage({
     if (await handleUnload()) {
       // handleUnload holds the page for the whole pending-start path, so by here the window for the
       // backend's "a load is already in progress" refusal is shut.
-      toast.info("Stopped loading the model", {
-        description: "Anything already downloaded stays cached, so loading it again resumes.",
+      toast.info(translate("uxVideo.stoppedLoadingTheModel1dbp9"), {
+        description: translate("uxVideo.anythingAlreadyDownloadedStaysolt27"),
       });
       return;
     }
@@ -4199,7 +4197,7 @@ export function ImagesPage({
   const renderAdditionalImages = (numberOf: (i: number) => number, hint: string) => (
     <>
       {referenceImages.map((img, i) => (
-        <Field key={i} label={`Image ${numberOf(i)}`} hint={hint}>
+        <Field key={i} label={translate("uxImages.image3ogqa", { p1: numberOf(i) })} hint={hint}>
           <div className="space-y-1.5">
             <ImageDropzone
               value={img}
@@ -4208,8 +4206,8 @@ export function ImagesPage({
                 // empty slots are dropped at send time.
                 setReferenceImages((prev) => prev.map((p, j) => (j === i ? (v ?? "") : p)))
               }
-              removeLabel={`Remove image ${numberOf(i)}`}
-              cropSubject={`Image ${numberOf(i)}`}
+              removeLabel={translate("uxImages.removeImagedv9fp", { p1: numberOf(i) })}
+              cropSubject={translate("uxImages.imagez4rbb", { p1: numberOf(i) })}
             />
             <Button
               type="button"
@@ -4218,17 +4216,12 @@ export function ImagesPage({
               className="w-full"
               onClick={() => setReferenceImages((prev) => prev.filter((_, j) => j !== i))}
             >
-              <HugeiconsIcon icon={Delete02Icon} className="size-3.5" />
-              Remove image {numberOf(i)}
-            </Button>
+              <HugeiconsIcon icon={Delete02Icon} className="size-3.5" />{translate("uxImages.removeImageavuyc", { p1: numberOf(i) })}</Button>
           </div>
         </Field>
       ))}
       {referenceImages.length > maxExtras && (
-        <p className="text-xs text-destructive">
-          This model takes {maxExtras} additional image{maxExtras === 1 ? "" : "s"} here. Remove{" "}
-          {referenceImages.length - maxExtras} to generate.
-        </p>
+        <p className="text-xs text-destructive">{translate("uxImages.thisModelTakesAdditionalk6w2l", { p1: maxExtras, p2: maxExtras === 1 ? "" : "s", p3: " ", p4: referenceImages.length - maxExtras })}</p>
       )}
       {referenceImages.length < maxExtras && (
         <Button
@@ -4239,9 +4232,7 @@ export function ImagesPage({
           disabled={!initImage}
           onClick={() => setReferenceImages((prev) => [...prev, ""])}
         >
-          <HugeiconsIcon icon={ImageAdd02Icon} className="size-3.5" />
-          Add image {numberOf(referenceImages.length)}
-        </Button>
+          <HugeiconsIcon icon={ImageAdd02Icon} className="size-3.5" />{translate("uxImages.addImagevoafl", { p1: numberOf(referenceImages.length) })}</Button>
       )}
     </>
   );
@@ -4257,14 +4248,14 @@ export function ImagesPage({
   const referenceDetailControl =
     referenceResolutions.length > 0 && referenceResolution != null ? (
       <Field
-        label="Reference detail"
-        hint="The resolution every input image is resized to (by area) before the model reads it. Separate from the output size: higher keeps more detail from the inputs and costs more memory and time for every image. High (2048) with many images needs a large GPU."
+        label={translate("uxVideo.referenceDetail10psv")}
+        hint={translate("uxImages.theResolutionEveryInput23f9v")}
       >
         <Select
           value={String(referenceResolution)}
           onValueChange={(v) => setReferenceResolution(Number(v))}
         >
-          <SelectTrigger aria-label="Reference detail">
+          <SelectTrigger aria-label={translate("uxVideo.referenceDetail10psv")}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -4283,8 +4274,8 @@ export function ImagesPage({
   const sizeControls = (
     <>
       <Field
-        label="Aspect ratio"
-        hint="Pick a ratio to lock the proportions, then set the size below. Flip swaps width and height."
+        label={translate("uxVideo.aspectRatiodgimx")}
+        hint={translate("uxImages.pickARatioTouwa6g")}
       >
         <AspectRatioSelect
           value={aspect}
@@ -4296,24 +4287,24 @@ export function ImagesPage({
         />
       </Field>
       <Field
-        label="Resolution"
+        label={translate("uxVideo.resolution1cj3d")}
         hint={
           // Image-conditioned workflows size from the source, so "this is the output size" is wrong
           // there: Transform caps the source by this box, the rest ignore it.
           workflow === "transform"
-            ? "Caps the output size. The source image is scaled down to fit inside this box, keeping its aspect ratio, so the result may be smaller than the values shown."
+            ? translate("uxImages.capsTheOutputSizeduti3")
             : workflow === "inpaint" ||
                 workflow === "extend" ||
                 workflow === "upscale" ||
                 (workflow === "edit" && !unifiedEdit)
-              ? "Not used by this workflow: the output size comes from the source image. Upload a smaller image to generate at a smaller size."
-              : `Width and height in pixels. Sizes run from ${MIN_DIM} to ${sizeLimits.maxSide} in steps of ${sizeLimits.multiple}${sizeLimits.maxPixels < sizeLimits.maxSide * sizeLimits.maxSide ? `, up to ${(sizeLimits.maxPixels / 1e6).toFixed(1)} megapixels` : ""}. Most models are trained around 1 megapixel, so much larger sizes can look worse.`
+              ? translate("uxImages.notUsedByThisakzqa")
+              : `Width and height in pixels. Sizes run from ${MIN_DIM} to ${sizeLimits.maxSide} in steps of ${sizeLimits.multiple}${sizeLimits.maxPixels < sizeLimits.maxSide * sizeLimits.maxSide ? translate("uxImages.upToMegapixelsh2g8v", { p1: (sizeLimits.maxPixels / 1e6).toFixed(1) }) : ""}. Most models are trained around 1 megapixel, so much larger sizes can look worse.`
         }
       >
         <div className="flex items-center gap-2">
           <DimensionSelect
             icon={ArrowLeftRightIcon}
-            label="Width"
+            label={translate("uxVideo.widthgfxz9")}
             value={width}
             open={active && widthOpen}
             onOpenChange={(o) => setWidthOpen(active && o)}
@@ -4323,7 +4314,7 @@ export function ImagesPage({
           />
           <DimensionSelect
             icon={ArrowUpDownIcon}
-            label="Height"
+            label={translate("uxVideo.height7puwk")}
             value={height}
             open={active && heightOpen}
             onOpenChange={(o) => setHeightOpen(active && o)}
@@ -4335,8 +4326,8 @@ export function ImagesPage({
       </Field>
       {showOfficialPresets && (
         <Field
-          label="2K presets"
-          hint="The model's native 2K sizes. They take several times the memory and time of a 1 megapixel image."
+          label={translate("uxImages.2KPresets6mjdl")}
+          hint={translate("uxImages.theModelSNative15g84")}
         >
           <Select
             value=""
@@ -4350,8 +4341,8 @@ export function ImagesPage({
               setPortrait(m.portrait);
             }}
           >
-            <SelectTrigger aria-label="2K presets">
-              <SelectValue placeholder="Choose a 2K size" />
+            <SelectTrigger aria-label={translate("uxImages.2KPresets6mjdl")}>
+              <SelectValue placeholder={translate("uxImages.chooseA2KSize1bvcc")} />
             </SelectTrigger>
             <SelectContent>
               {officialPresets.map((p) => (
@@ -4371,7 +4362,7 @@ export function ImagesPage({
     const allowOversizedSent = allowOversizedField(allowOversized, oversizedOnce.current) === true;
     oversizedOnce.current = false;
     if (!prompt.trim()) {
-      toast.error("Prompt is empty");
+      toast.error(translate("uxVideo.promptIsEmpty1ogeh"));
       return;
     }
     if (restoredSampler && samplerOptions.length > 0) {
@@ -4397,26 +4388,26 @@ export function ImagesPage({
               ? "Edit"
               : "Transform";
     if (usesInit && !initImage) {
-      toast.error(`Upload a source image for ${tabLabel}`);
+      toast.error(translate("uxImages.uploadASourceImagesvcn5", { p1: tabLabel }));
       return;
     }
     if (isInpaint && !maskImage) {
-      toast.error("Paint a mask over the region to regenerate");
+      toast.error(translate("uxImages.paintAMaskOver1o234"));
       return;
     }
     const unifiedEditRun = isEdit && unifiedEdit;
     if (unifiedEditRun && localizedMode && !localizedLayer) {
       toast.error(
         localizedMode === "annotate"
-          ? "Draw the annotations on the source image, or turn Localize off"
-          : "Paint the region on the source image, or turn Localize off",
+          ? translate("uxImages.drawTheAnnotationsOnukpp0")
+          : translate("uxImages.paintTheRegionOnse84a"),
       );
       return;
     }
     const emptySlot = (isReference || unifiedEditRun) ? referenceImages.findIndex((img) => !img) : -1;
     if (emptySlot >= 0) {
       const n = isReference ? emptySlot + 2 : additionalImageNumber(emptySlot, localizedMode);
-      toast.error(`Image ${n} is empty. Add it, or remove that slot.`);
+      toast.error(translate("uxImages.imageIsEmptyAddll7sf", { p1: n }));
       return;
     }
     if ((isReference || unifiedEditRun) && referenceImages.filter(Boolean).length > maxExtras) {
@@ -4426,7 +4417,7 @@ export function ImagesPage({
       return;
     }
     if (isExtend && !(extendSides.left || extendSides.right || extendSides.top || extendSides.bottom)) {
-      toast.error("Pick at least one side to extend");
+      toast.error(translate("uxImages.pickAtLeastOne1szsm"));
       return;
     }
 
@@ -4475,7 +4466,7 @@ export function ImagesPage({
         condFields = { workflow: "edit", init_image: initImage ?? undefined };
       }
     } catch {
-      toast.error("Could not prepare the source image");
+      toast.error(translate("uxImages.couldNotPrepareThe1f650"));
       return;
     }
     // Resolve a base seed up front, so each sequential image gets a distinct, reproducible seed (base + i).
@@ -4483,7 +4474,7 @@ export function ImagesPage({
     if (seed.trim() && !external) {
       const n = Number(seed);
       if (!Number.isInteger(n) || n < 0 || n > Number.MAX_SAFE_INTEGER) {
-        toast.error("Seed must be a non-negative integer");
+        toast.error(translate("uxVideo.seedMustBeAtrxu8"));
         return;
       }
       baseSeed = n;
@@ -4507,7 +4498,7 @@ export function ImagesPage({
     // An explicit seed near the 2**53-1 backend cap can overflow once the per-run and in-batch
     // offsets are added, 422ing a later run after earlier images generated. Fail before GPU work.
     if (baseSeed > Number.MAX_SAFE_INTEGER - (runs * batchSize - 1)) {
-      toast.error("Seed too large for this run count and batch size; use a smaller seed");
+      toast.error(translate("uxImages.seedTooLargeFor1rrsi"));
       return;
     }
 
@@ -4651,7 +4642,7 @@ export function ImagesPage({
         setGenDone(i + 1);
       }
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Image generation failed";
+      const msg = err instanceof Error ? err.message : translate("uxImages.imageGenerationFailedb4e8z");
       // The user's own Stop comes back as the backend's cancelled sentinel (409), so it is not
       // toasted. Only a Stop the backend confirmed explains an error away: a POST that never
       // landed, or {cancelled: false}, means whatever it raised is a real failure.
@@ -4714,7 +4705,7 @@ export function ImagesPage({
       if (!abort.signal.aborted) {
         cancelAcked.current = false;
         setStopping(false);
-        toast.error("Could not reach the server to stop this generation; it is still running");
+        toast.error(translate("uxImages.couldNotReachThe1rykn"));
       }
     } finally {
       // Only if they are still ours: a slow cancel from an earlier run must not release the guard a later run set.
@@ -4757,8 +4748,8 @@ export function ImagesPage({
     if (!rememberedModel || !prompt.trim()) {
       toast.info(
         rememberedModel
-          ? "Enter a prompt first."
-          : "Pick an image model first.",
+          ? translate("uxImages.enterAPromptFirstqa2ku")
+          : translate("uxImages.pickAnImageModelgu5yb"),
       );
       return;
     }
@@ -4821,7 +4812,7 @@ export function ImagesPage({
       !(status.workflows ?? []).includes(tab.requires ?? "txt2img")
     ) {
       toast.info(
-        "Choose a workflow supported by the loaded model before generating.",
+        translate("uxImages.chooseAWorkflowSupported11eld"),
       );
       return;
     }
@@ -4867,18 +4858,18 @@ export function ImagesPage({
     <>
       <AdvancedSelect {...familySelect} badge={<ResolvedBadge status={status} controlKey="family_override" />} />
       <AdvancedSelect
-        label="On model selection"
-        hint="Choose Download only to prepare the selected model and its required assets without loading it. Applies to the next model you select; progress and cancellation appear in Downloads."
+        label={translate("uxImages.onModelSelectionm4xzk")}
+        hint={translate("uxImages.chooseDownloadOnlyTomk7r7")}
         value={modelSelectionAction}
         onValueChange={(v) => setModelSelectionAction(v as typeof modelSelectionAction)}
         options={[
-          ["load", "Download and load"],
-          ["download", "Download only"],
+          ["load", translate("uxImages.downloadAndLoad5b0r0")],
+          ["download", translate("uxImages.downloadOnlythl81")],
         ]}
       />
       <AdvancedSelect
-        label="Speed"
-        hint="Auto picks per model: GGUF compiles at load; a dense model keeps the first two images exact and eager, then compiles from the 3rd (~2x from there). eager = fused kernels, no compile. default/max add torch.compile (max also TF32 + fused QKV, plus the step cache on 20+ step models)."
+        label={translate("settings.voice.readAloud.speedLabel")}
+        hint={translate("uxImages.autoPicksPerModelcj51v")}
         badge={<ResolvedBadge status={status} controlKey="speed_mode" />}
         value={speedMode}
         onValueChange={(v) => setSpeedMode(v as typeof speedMode)}
@@ -4886,7 +4877,7 @@ export function ImagesPage({
           ["auto", "Auto"],
           ["off", "Off (bit-exact)"],
           ["eager", "Eager"],
-          ["default", "Default (compile)"],
+          ["default", translate("uxImages.defaultCompilebrihp")],
           ["max", "Max"],
         ]}
       />
@@ -4897,14 +4888,14 @@ export function ImagesPage({
       || (sendsTransformerQuant(status.model_kind, status.repo_id ?? "")
           && !isNativeEngineStatus(status)) ? (
         <AdvancedSelect
-          label="Precision"
-          hint="How the model computes. Auto picks the fastest precision the hardware supports (INT8 on every capable GPU, then FP8 where the card has it) and quantises the transformer onto low-precision tensor cores. A GGUF pick reaches it by loading the FULL base model instead of the GGUF, and falls back to the GGUF as-is when the device, VRAM or disk can't take it; an official pipeline is already dense and is quantised in place, falling back to plain BF16. Off runs the checkpoint as-is."
+          label={translate("uxVideo.precisionjks6g")}
+          hint={translate("uxImages.howTheModelComputesmvpsc")}
           badge={<ResolvedBadge status={status} controlKey="transformer_quant" />}
           value={transformerQuant}
           onValueChange={(v) => setTransformerQuant(v as typeof transformerQuant)}
           options={[
-            ["auto", "Auto (fastest for GPU)"],
-            ["none", "Off (run the checkpoint as-is)"],
+            ["auto", translate("uxImages.autoFastestForGPU2nluu")],
+            ["none", translate("uxImages.offRunTheCheckpointmoard")],
             // The explicit low-precision schemes need the dense tensor-core path, which a Mac or
             // CPU-only host cannot run, so the picker does not list what the loader would refuse.
             ...(hostOffersDensePrecision(hostClass)
@@ -4923,16 +4914,16 @@ export function ImagesPage({
       ) : (
         <div className="flex items-center justify-between gap-2">
           <span className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
-            Precision
+            {translate("uxVideo.precisionjks6g")}
           </span>
           <span className="text-xs text-muted-foreground/60">
-            Runs this checkpoint's own precision
+            {translate("uxImages.runsThisCheckpointSm563k")}
           </span>
         </div>
       )}
       <AdvancedSelect
-        label="Text encoder precision"
-        hint={`Shrinks the text encoder to save memory, at some cost to image quality. Default lets the model choose, which on Qwen-Image 2.1 means its hosted FP8 encoder (8.75 GB rather than 16.3); pick Dense (bf16) to pin the released encoder. FP8 (storage) is the safe pick and the only one that works with CPU offload. FP8 (compute) needs an RTX 40 series or newer.${nvfp4Diffusion ? " NVFP4 is the smallest." : ""} The loaded build below reports what was applied.`}
+        label={translate("uxImages.textEncoderPrecision4vfdw")}
+        hint={translate("uxImages.shrinksTheTextEncoder4a0g2", { p1: nvfp4Diffusion ? translate("uxImages.nvfp4IsTheSmallestW73bq") : "" })}
         badge={<ResolvedBadge status={status} controlKey="text_encoder_quant" />}
         value={textEncoderQuant}
         onValueChange={(v) => setTextEncoderQuant(v as typeof textEncoderQuant)}
@@ -4950,51 +4941,51 @@ export function ImagesPage({
         )}
       />
       <AdvancedTextField
-        label="Text encoder file(s)"
-        hint={COMPONENT_FILES_HINT}
+        label={translate("uxImages.textEncoderFileS1mxzj")}
+        hint={componentFilesHint()}
         multiline
         placeholder="../text_encoders/clip_l.safetensors"
         value={textEncoderFiles}
         onValueChange={setTextEncoderFiles}
       />
       <AdvancedTextField
-        label="VAE file"
-        hint={COMPONENT_FILES_HINT}
+        label={translate("uxImages.vAEFile17cve")}
+        hint={componentFilesHint()}
         placeholder="../vae/ae.safetensors"
         value={vaeFile}
         onValueChange={setVaeFile}
       />
       <AdvancedSelect
-        label="Attention"
-        hint="Attention kernel. Auto upgrades to cuDNN fused attention on NVIDIA when a speed profile is active. sage is INT8 attention (SageAttention 2; without a local install Studio fetches the Hugging Face kernels-hub build, which runs on Ampere, Ada and Hopper GPUs, and any other GPU keeps the default): fast (10-40%) but can black-frame some families (Qwen, Wan), so it never engages automatically."
+        label={translate("uxVideo.attention2fg7y")}
+        hint={translate("uxImages.attentionKernelAutoUpgradescor8d")}
         badge={<ResolvedBadge status={status} controlKey="attention_backend" />}
         value={attentionBackend}
         onValueChange={(v) => setAttentionBackend(v as typeof attentionBackend)}
         options={[
           ["auto", "Auto"],
-          ["native", "Native SDPA"],
+          ["native", translate("uxImages.nativeSDPAa93ez")],
           ["cudnn", "cuDNN"],
           ["flash3", "FlashAttention 3"],
-          ["sage", "SageAttention (INT8)"],
+          ["sage", translate("uxImages.sageAttentionINT893l93")],
         ]}
       />
       <AdvancedSelect
-        label="Memory"
-        hint="auto measures free VRAM. fast keeps everything resident. balanced streams the transformer. low_vram offloads every component (lowest VRAM, slower)."
+        label={translate("studio.params.memory")}
+        hint={translate("uxImages.autoMeasuresFreeVRAMxr0mg")}
         badge={<ResolvedBadge status={status} controlKey="memory_mode" />}
         value={memoryMode}
         onValueChange={(v) => setMemoryMode(v as typeof memoryMode)}
         options={[
           ["auto", "Auto"],
-          ["fast", "Fast (resident)"],
+          ["fast", translate("uxImages.fastResidentp4yof")],
           ["balanced", "Balanced"],
-          ["low_vram", "Low VRAM"],
+          ["low_vram", translate("uxImages.lowVRAM9z47j")],
         ]}
       />
       {gpuChoices.length > 0 && (
         <AdvancedSelect
           label="GPU"
-          hint="Which card this model loads on. Auto uses whichever device torch is pointing at, which on a mixed box is not necessarily the largest. An image model is never split across cards, so this is one choice, not a pool."
+          hint={translate("uxImages.whichCardThisModelv0m39")}
           value={selectedGpu}
           onValueChange={setSelectedGpu}
           options={[
@@ -5010,8 +5001,8 @@ export function ImagesPage({
         />
       )}
       <AdvancedSelect
-        label="Step cache"
-        hint="Static skip extrapolates middle steps on a fixed schedule (12+ steps) and keeps the compile and CUDA graph. Auto uses it for text-to-image, at or above the step count it was measured at, on the models where it stayed close to the full render: Qwen-Image, Qwen-Image-2.1, FLUX.1 Krea dev, FLUX.2 klein base 4B on every speed tier but Off/Eager, and FLUX.1 dev and HunyuanImage 2.1 on Max only. First-Block-Cache reuses the transformer tail across steps (~1.4x, larger quality cost); Auto turns it on for other many-step models on Max only. LAiM_DIFFUSION_AUTO_STEP_SKIP=0 stops Auto from picking Static skip."
+        label={translate("uxVideo.stepCachexk1do")}
+        hint={translate("uxImages.staticSkipExtrapolatesMiddlegbdcv")}
         badge={<ResolvedBadge status={status} controlKey="transformer_cache" />}
         value={transformerCache}
         onValueChange={(v) => setTransformerCache(v as typeof transformerCache)}
@@ -5019,13 +5010,11 @@ export function ImagesPage({
           ["auto", "Auto"],
           ["off", "Off"],
           ["fbcache", "First-Block-Cache"],
-          ["static", "Static skip"],
+          ["static", translate("uxImages.staticSkipyzt74")],
         ]}
       />
       <div className="flex items-center justify-between">
-        <span className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
-          CPU offload
-          <InfoHint>Offload to CPU to fit low-VRAM cards (slower). Overridden by Memory mode when that is not Auto.</InfoHint>
+        <span className="flex items-center gap-1 text-xs font-medium text-muted-foreground">{translate("uxImages.cPUOffloadstfxl")}<InfoHint>{translate("uxCopy.offloadToCPUTo1rzbr")}</InfoHint>
           <ResolvedBadge status={status} controlKey="cpu_offload" />
         </span>
         <Switch checked={cpuOffload} onCheckedChange={setCpuOffload} />
@@ -5043,13 +5032,13 @@ export function ImagesPage({
       </div>
       <div className="flex items-center justify-between">
         <span className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
-          Live preview
-          <InfoHint>Show a rough preview of the image while it denoises. Costs no measurable speed and never changes the final image.</InfoHint>
+          {translate("uxVideo.livePreviewz16ij")}
+          <InfoHint>{translate("uxCopy.showARoughPreview68jp9")}</InfoHint>
         </span>
         <Switch
           checked={livePreview}
           onCheckedChange={(on) => setLivePreviewOff(!on)}
-          aria-label="Live preview"
+          aria-label={translate("uxVideo.livePreviewz16ij")}
         />
       </div>
       <LoadedBuildSummary status={status} />
@@ -5109,7 +5098,7 @@ export function ImagesPage({
                 catalog={IMAGE_CATALOG}
                 opaqueKind={opaqueKind}
                 hubCapability="image-gen"
-                placeholder="Select image model"
+                placeholder={translate("uxImages.selectImageModel1f8de")}
                 open={active && selectorOpen}
                 onOpenChange={(o) => setSelectorOpen(active && o)}
               />
@@ -5121,14 +5110,12 @@ export function ImagesPage({
                     type="button"
                     variant="outline"
                     size="sm"
-                    aria-label="Cancel load"
+                    aria-label={translate("uxVideo.cancelLoad145nv")}
                     className="!h-[calc(34px*var(--ui-space-scale,1))] shrink-0 rounded-full text-xs"
                     onClick={() => void handleCancelLoad()}
-                  >
-                    Cancel load
-                  </Button>
+                  >{translate("uxImages.cancelLoadnxvsd")}</Button>
                 </TooltipTrigger>
-                <TooltipContent>Stop loading this model</TooltipContent>
+                <TooltipContent>{translate("uxCopy.stopLoadingThisModel2r2e4")}</TooltipContent>
               </Tooltip>
             )}
           </div>
@@ -5137,14 +5124,14 @@ export function ImagesPage({
           <div className="pointer-events-auto col-start-2 justify-self-center pt-[var(--studio-chat-header-padding-top,11px)]">
             <PillTabs
               dataTour="images-mode"
-              ariaLabel="Page mode"
+              ariaLabel={translate("uxImages.pageModeuds7i")}
               value={pageMode}
               onValueChange={(v) => setPageMode(v as "create" | "train")}
               fit={true}
               className="h-[calc(34px*var(--ui-space-scale,1))] [&>button]:h-[calc(34px*var(--ui-space-scale,1))] [&>button]:px-3 @[68rem]:[&>button]:px-11 @max-[30rem]:[&>button]:px-2.5 @max-[30rem]:[&>button>[data-pill-tab-label]]:sr-only"
               tabs={[
-                { value: "create", label: "Create", icon: <HugeiconsIcon icon={SparklesIcon} className="size-3.5" /> },
-                { value: "train", label: "Train", icon: <HugeiconsIcon icon={TestTubeOutlineIcon} className="size-3.5" /> },
+                { value: "create", label: translate("library.dialog.create"), icon: <HugeiconsIcon icon={SparklesIcon} className="size-3.5" /> },
+                { value: "train", label: translate("studio.routeTitle"), icon: <HugeiconsIcon icon={TestTubeOutlineIcon} className="size-3.5" /> },
               ]}
             />
           </div>
@@ -5229,14 +5216,14 @@ export function ImagesPage({
             {workflow === "transform" && (
               <>
                 <Field
-                  label="Source image"
-                  hint="The image to transform. Generation redraws it guided by your prompt; the Strength below controls how far."
+                  label={translate("uxImages.sourceImage1xz6a")}
+                  hint={translate("uxImages.theImageToTransformvebkn")}
                 >
-                  <ImageDropzone value={initImage} onChange={handleInitChange} cropSubject="Source image" />
+                  <ImageDropzone value={initImage} onChange={handleInitChange} cropSubject={translate("uxImages.sourceImagerbfya")} />
                 </Field>
                 <SliderField
-                  label="Strength"
-                  hint="How much to redraw the source. Low keeps the original composition; high reimagines it from the prompt."
+                  label={translate("uxImages.strength1okjn")}
+                  hint={translate("uxImages.howMuchToRedrawf34ha")}
                   value={strength}
                   min={0.1}
                   max={1}
@@ -5250,16 +5237,16 @@ export function ImagesPage({
               <>
                 {!initImage ? (
                   <Field
-                    label="Source image"
-                    hint="The image to edit. After uploading, paint over the area you want to regenerate; the rest is kept."
+                    label={translate("uxImages.sourceImage1xz6a")}
+                    hint={translate("uxImages.theImageToEditby1ol")}
                   >
                     <ImageDropzone value={null} onChange={handleInitChange} />
                   </Field>
                 ) : (
                   <>
                     <Field
-                      label="Mask"
-                      hint="Brush over the region to regenerate (shown in red). Those pixels are repainted from your prompt; everything else is preserved."
+                      label={translate("uxImages.masklqkju")}
+                      hint={translate("uxImages.brushOverTheRegion2bhoh")}
                     >
                       <MaskCanvas
                         image={initImage}
@@ -5269,8 +5256,8 @@ export function ImagesPage({
                       />
                     </Field>
                     <SliderField
-                      label="Brush size"
-                      hint="Brush radius as a percent of the image's shorter side."
+                      label={translate("uxImages.brushSize4bcd1")}
+                      hint={translate("uxImages.brushRadiusAsAlmefz")}
                       value={brushPct}
                       min={2}
                       max={25}
@@ -5289,7 +5276,7 @@ export function ImagesPage({
                         }}
                       >
                         <HugeiconsIcon icon={Delete02Icon} className="size-3.5" />
-                        Clear mask
+                        {translate("uxImages.clearMask1g7n4")}
                       </Button>
                       <Button
                         type="button"
@@ -5299,7 +5286,7 @@ export function ImagesPage({
                         onClick={openInpaintCrop}
                       >
                         <HugeiconsIcon icon={ImageCropIcon} className="size-3.5" />
-                        Crop
+                        {translate("uxImages.crop6y3km")}
                       </Button>
                       {inpaintCropDialog}
                       <Button
@@ -5310,12 +5297,12 @@ export function ImagesPage({
                         onClick={() => handleInitChange(null)}
                       >
                         <HugeiconsIcon icon={ImageAdd02Icon} className="size-3.5" />
-                        Replace image
+                        {translate("uxImages.replaceImageyf4og")}
                       </Button>
                     </div>
                     <SliderField
-                      label="Strength"
-                      hint="How much to redraw the masked region. Low blends with the source; high fully reimagines it from the prompt."
+                      label={translate("uxImages.strength1okjn")}
+                      hint={translate("uxImages.howMuchToRedrawp2hrk")}
                       value={strength}
                       min={0.1}
                       max={1}
@@ -5330,21 +5317,21 @@ export function ImagesPage({
             {workflow === "extend" && (
               <>
                 <Field
-                  label="Source image"
-                  hint="The image to outpaint. The canvas grows on the selected sides and the new area is filled from your prompt; the original is kept."
+                  label={translate("uxImages.sourceImage1xz6a")}
+                  hint={translate("uxImages.theImageToOutpaint1kqfn")}
                 >
-                  <ImageDropzone value={initImage} onChange={handleInitChange} cropSubject="Source image" />
+                  <ImageDropzone value={initImage} onChange={handleInitChange} cropSubject={translate("uxImages.sourceImagerbfya")} />
                 </Field>
                 <SliderField
-                  label="Expand by"
-                  hint="How far to grow each selected side, as a percent of the image's size."
+                  label={translate("uxImages.expandByxn7ps")}
+                  hint={translate("uxImages.howFarToGrowae7l9")}
                   value={extendPct}
                   min={10}
                   max={100}
                   step={5}
                   onChange={setExtendPct}
                 />
-                <Field label="Sides" hint="Which edges to extend.">
+                <Field label={translate("uxImages.sides5hxug")} hint={translate("uxImages.whichEdgesToExtend10jsy")}>
                   <div className="grid grid-cols-2 gap-1.5">
                     {(
                       [
@@ -5382,14 +5369,14 @@ export function ImagesPage({
             {workflow === "upscale" && (
               <>
                 <Field
-                  label="Source image"
-                  hint="The image to upscale. It is enlarged by the factor below, then re-detailed at higher resolution guided by your prompt; keep the prompt describing the same content."
+                  label={translate("uxImages.sourceImage1xz6a")}
+                  hint={translate("uxImages.theImageToUpscalewnnv1")}
                 >
-                  <ImageDropzone value={initImage} onChange={handleInitChange} cropSubject="Source image" />
+                  <ImageDropzone value={initImage} onChange={handleInitChange} cropSubject={translate("uxImages.sourceImagerbfya")} />
                 </Field>
                 <SliderField
-                  label="Scale"
-                  hint="How much larger to make the image. The output size is the source size times this factor (capped and rounded to a multiple of 16)."
+                  label={translate("library.viewer.scale")}
+                  hint={translate("uxImages.howMuchLargerTok10qm")}
                   value={upscaleFactor}
                   min={1.5}
                   max={4}
@@ -5397,8 +5384,8 @@ export function ImagesPage({
                   onChange={setUpscaleFactor}
                 />
                 <SliderField
-                  label="Detail strength"
-                  hint="How much new detail to add while upscaling. Low keeps the image faithful to the source; high adds more (and may drift). 0.35 is a good hires-fix default."
+                  label={translate("uxImages.detailStrength1ioib")}
+                  hint={translate("uxImages.howMuchNewDetailqic8r")}
                   value={upscaleStrength}
                   min={0.1}
                   max={0.6}
@@ -5411,14 +5398,14 @@ export function ImagesPage({
             {workflow === "reference" && (
               <>
                 <Field
-                  label={unifiedEdit ? "Image 1" : "Reference image"}
-                  hint="A reference the model draws on (subject, style, or composition) while generating a NEW image from your prompt at the size below. Unlike Transform, it is not a redraw of this image, so there is no strength."
+                  label={unifiedEdit ? "Image 1" : translate("uxImages.referenceImagef8aco")}
+                  hint={translate("uxImages.aReferenceTheModelwkl6g")}
                 >
-                  <ImageDropzone value={initImage} onChange={handleInitChange} cropSubject={unifiedEdit ? "Image 1" : "Reference image"} />
+                  <ImageDropzone value={initImage} onChange={handleInitChange} cropSubject={unifiedEdit ? "Image 1" : translate("uxImages.referenceImagezhvxl")} />
                 </Field>
                 {renderAdditionalImages(
                   (i) => i + 2,
-                  "An extra reference combined with the others (e.g. one for the subject, one for the style). Refer to it in the prompt by its number.",
+                  translate("uxImages.anExtraReferenceCombinedalrzw"),
                 )}
                 {referenceDetailControl}
                 {engineNotes}
@@ -5427,10 +5414,10 @@ export function ImagesPage({
 
             {workflow === "edit" && !unifiedEdit && (
               <Field
-                label="Source image"
-                hint="The image to edit. Describe the change in the prompt below (e.g. 'make it night', 'add a red hat', 'change the background to a beach')."
+                label={translate("uxImages.sourceImage1xz6a")}
+                hint={translate("uxImages.theImageToEdit1kiw0")}
               >
-                <ImageDropzone value={initImage} onChange={handleInitChange} cropSubject="Source image" />
+                <ImageDropzone value={initImage} onChange={handleInitChange} cropSubject={translate("uxImages.sourceImagerbfya")} />
               </Field>
             )}
 
@@ -5438,13 +5425,13 @@ export function ImagesPage({
               <>
                 {initImage && localizedMode ? (
                   <Field
-                    label="Image 1 (source)"
+                    label={translate("uxImages.image1Sourcel6ji0")}
                     hint={
                       localizedMode === "annotate"
-                        ? "Draw outlines or marks around what to change, in the colours your instruction names."
+                        ? translate("uxImages.drawOutlinesOrMarksclq5v")
                         : localizedMode === "paint"
-                          ? "Paint the area to change in white. The model sees the white paint on the source."
-                          : "Paint the area to change. It is sent as a white-on-black mask, Image 2, right after the source."
+                          ? translate("uxImages.paintTheAreaTo5u9kp")
+                          : translate("uxImages.paintTheAreaTo3qrmq")
                     }
                   >
                     <div className="space-y-1.5">
@@ -5465,22 +5452,22 @@ export function ImagesPage({
                         onClick={() => handleInitChange(null)}
                       >
                         <HugeiconsIcon icon={Delete02Icon} className="size-3.5" />
-                        Remove source image
+                        {translate("uxImages.removeSourceImage1p1l0")}
                       </Button>
                     </div>
                   </Field>
                 ) : (
                   <Field
-                    label="Image 1 (source)"
-                    hint="The image to edit. Describe the change in the instruction below; add more images to combine them, and refer to them as Image 2, Image 3 and so on."
+                    label={translate("uxImages.image1Sourcel6ji0")}
+                    hint={translate("uxImages.theImageToEditbzcnu")}
                   >
                     <ImageDropzone value={initImage} onChange={handleInitChange} cropSubject="Image 1" />
                   </Field>
                 )}
                 {conditioning?.localized_edit_modes?.length ? (
                   <Field
-                    label="Localize"
-                    hint="Point the edit at a region. It guides a generative edit: the model redraws the whole image and is asked to change the marked area, so pixels outside it are not guaranteed to stay identical."
+                    label={translate("uxImages.localizezaedr")}
+                    hint={translate("uxImages.pointTheEditAtvskh0")}
                   >
                     <Select
                       value={localizedMode ?? "off"}
@@ -5490,19 +5477,19 @@ export function ImagesPage({
                         setLocalizedColors([]);
                       }}
                     >
-                      <SelectTrigger aria-label="Localize">
+                      <SelectTrigger aria-label={translate("uxImages.localizezaedr")}>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="off">Off (whole image)</SelectItem>
+                        <SelectItem value="off">{translate("uxImages.offWholeImaget4r9s")}</SelectItem>
                         {conditioning.localized_edit_modes.includes("annotate") && (
-                          <SelectItem value="annotate">Colour annotations</SelectItem>
+                          <SelectItem value="annotate">{translate("uxImages.colourAnnotationsx001m")}</SelectItem>
                         )}
                         {conditioning.localized_edit_modes.includes("paint") && (
-                          <SelectItem value="paint">White paint on the source</SelectItem>
+                          <SelectItem value="paint">{translate("uxCopy.whitePaintOnThe1dx2d")}</SelectItem>
                         )}
                         {conditioning.localized_edit_modes.includes("mask") && (
-                          <SelectItem value="mask">Separate mask (Image 2)</SelectItem>
+                          <SelectItem value="mask">{translate("uxImages.separateMaskImage2x8pdp")}</SelectItem>
                         )}
                       </SelectContent>
                     </Select>
@@ -5511,7 +5498,7 @@ export function ImagesPage({
                 {localizedMode && (
                   <>
                     {localizedMode === "annotate" && (
-                      <Field label="Annotation colour">
+                      <Field label={translate("uxImages.annotationColourjjvyg")}>
                         <div className="flex gap-2">
                           {ANNOTATION_COLORS.map((c) => (
                             <button
@@ -5531,7 +5518,7 @@ export function ImagesPage({
                       </Field>
                     )}
                     <SliderField
-                      label="Brush size"
+                      label={translate("uxImages.brushSize4bcd1")}
                       value={brushPct}
                       min={1}
                       max={25}
@@ -5558,29 +5545,29 @@ export function ImagesPage({
                           setPrompt((p) => withLocalizedHint(p, localizedMode, localizedColors))
                         }
                       >
-                        Add region wording
+                        {translate("uxCopy.addRegionWording1hyl5")}
                       </Button>
                     </div>
                   </>
                 )}
                 {renderAdditionalImages(
                   (i) => additionalImageNumber(i, localizedMode),
-                  "Another input the instruction can refer to by its number, such as a person, product or style to bring into the source.",
+                  translate("uxImages.anotherInputTheInstructionl2hpy"),
                 )}
                 <Field
-                  label="Output size"
-                  hint="Match Image 1 keeps the source's proportions at the chosen size. Custom uses the aspect ratio and resolution below. The size shown is the size generated."
+                  label={translate("uxImages.outputSizewyhu5")}
+                  hint={translate("uxImages.matchImage1Keeps787y5")}
                 >
                   <div className="flex items-center gap-2">
                     <Select
                       value={editSizing}
                       onValueChange={(v) => setEditSizing(v as EditSizing)}
                     >
-                      <SelectTrigger aria-label="Output size" className="flex-1">
+                      <SelectTrigger aria-label={translate("uxImages.outputSizewyhu5")} className="flex-1">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="source">Match Image 1</SelectItem>
+                        <SelectItem value="source">{translate("uxImages.matchImage15d3k7")}</SelectItem>
                         <SelectItem value="custom">Custom</SelectItem>
                       </SelectContent>
                     </Select>
@@ -5589,7 +5576,7 @@ export function ImagesPage({
                         value={String(matchResolution)}
                         onValueChange={(v) => setMatchResolution(Number(v))}
                       >
-                        <SelectTrigger aria-label="Match size" className="w-[calc(120px*var(--ui-space-scale,1))]">
+                        <SelectTrigger aria-label={translate("uxImages.matchSizexivie")} className="w-[calc(120px*var(--ui-space-scale,1))]">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -5606,7 +5593,7 @@ export function ImagesPage({
                   </div>
                   <p className="text-ui-11 tabular-nums text-muted-foreground">
                     {editSizing === "source" && !sourceDims
-                      ? "Add Image 1 to size the output from it."
+                      ? translate("uxImages.addImage1Tohfq0i")
                       : `${editSize.width} × ${editSize.height}`}
                   </p>
                 </Field>
@@ -5621,7 +5608,7 @@ export function ImagesPage({
                     className="w-full"
                     onClick={() => setPrompt((p) => withTransparencyPrompt(p))}
                   >
-                    Ask for a transparent background
+                    {translate("uxCopy.askForATransparent14k6n")}
                   </Button>
                 )}
               </>
@@ -5650,14 +5637,14 @@ export function ImagesPage({
                 onChange={setNegativePrompt}
                 open={negativeOpen}
                 onOpenChange={setNegativeOpen}
-                hint="What to steer the image away from. Only used when guidance is above 0."
+                hint={translate("uxImages.whatToSteerThe1rm5m")}
               />
             )}
             {/* LoRA adapters: shown whenever the loaded model + quant can apply them. Each carries a 0-2 weight. */}
             {loraCapable && (
               <Field
-                label="LoRAs"
-                hint="Style or character adapters applied on top of the model. Enter a Hugging Face repo id (or pick a suggestion) and set the strength (1.0 = full effect, 0 disables). Stack several."
+                label={translate("uxImages.loRAs1mo9f")}
+                hint={translate("uxImages.styleOrCharacterAdapterspo5z2")}
               >
                 <div className="space-y-2">
                   {availableLoras.length > 0 && (
@@ -5698,14 +5685,14 @@ export function ImagesPage({
                           variant="ghost"
                           size="icon"
                           className="size-8 shrink-0"
-                          aria-label={`Remove LoRA ${i + 1}`}
+                          aria-label={translate("uxImages.removeLoRAjt4gi", { p1: i + 1 })}
                           onClick={() => setLoras((prev) => prev.filter((_, j) => j !== i))}
                         >
                           <HugeiconsIcon icon={Delete02Icon} className="size-3.5" />
                         </Button>
                       </div>
                       <SliderField
-                        label="Weight"
+                        label={translate("uxImages.weight16i5e")}
                         value={sel.weight}
                         min={0}
                         max={2}
@@ -5734,18 +5721,18 @@ export function ImagesPage({
                         }}
                       >
                         <HugeiconsIcon icon={ImageAdd02Icon} className="size-3.5" />
-                        Add LoRA
+                        {translate("uxImages.addLoRA1otcw")}
                       </Button>
                     )}
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
-                      title="Add a custom models folder. Image LoRAs exported from LAiM in it show up here."
+                      title={translate("uxImages.addACustomModels1g3uk")}
                       onClick={() => setLoraFoldersOpen(true)}
                     >
                       <HugeiconsIcon icon={FolderAddIcon} className="size-3.5" />
-                      Folders
+                      {translate("library.tabs.folders")}
                     </Button>
                   </div>
                 </div>
@@ -5759,13 +5746,13 @@ export function ImagesPage({
             {/* ControlNet: shown when the model supports it, one is discoverable, and txt2img is active. */}
             {controlnetCapable && availableControlNets.length > 0 && workflow === "create" && (
               <Field
-                label="ControlNet"
-                hint="Condition the image on a control map (edges / depth / pose). Union models cover many types. Use 'Canny' to trace edges from your image, or 'Passthrough' if it is already a control map."
+                label={translate("uxImages.controlNett770c")}
+                hint={translate("uxImages.conditionTheImageOnzu552")}
               >
                 <div className="space-y-2 rounded-lg border border-border bg-muted/30 p-2">
                   <Select value={controlnetId || undefined} onValueChange={setControlnetId}>
                     <SelectTrigger className="h-8 w-full text-xs">
-                      <SelectValue placeholder="Select a ControlNet" />
+                      <SelectValue placeholder={translate("uxImages.selectAControlNet12s34")} />
                     </SelectTrigger>
                     <SelectContent>
                       {availableControlNets.map((c) => (
@@ -5777,9 +5764,9 @@ export function ImagesPage({
                   </Select>
                   {controlnetId && (
                     <>
-                      <ImageDropzone value={controlImage} onChange={setControlImage} cropSubject="Control image" />
+                      <ImageDropzone value={controlImage} onChange={setControlImage} cropSubject={translate("uxImages.controlImagemh9p2")} />
                       <div className="flex items-center gap-2">
-                        <span className="shrink-0 text-xs text-muted-foreground">Control type</span>
+                        <span className="shrink-0 text-xs text-muted-foreground">{translate("uxImages.controlType6wu6w")}</span>
                         <Select value={controlType} onValueChange={setControlType}>
                           <SelectTrigger className="h-8 flex-1 text-xs">
                             <SelectValue />
@@ -5795,7 +5782,7 @@ export function ImagesPage({
                         </Select>
                       </div>
                       <SliderField
-                        label="Strength"
+                        label={translate("uxImages.strength1okjn")}
                         value={controlStrength}
                         min={0}
                         max={2}
@@ -5814,8 +5801,8 @@ export function ImagesPage({
               <>
                 <div className="pt-2">
                   <SliderField
-                    label="Steps"
-                    hint="Number of denoising steps. Start with the selected model's default; more steps take longer and may not improve quality."
+                    label={translate("settings.profile.stats.trainingSteps")}
+                    hint={translate("uxImages.numberOfDenoisingSteps1wwzs")}
                     value={steps}
                     min={1}
                     max={50}
@@ -5824,8 +5811,8 @@ export function ImagesPage({
                   />
                 </div>
                 <SliderField
-                  label="Guidance"
-                  hint="Controls how strongly the model follows the prompt. Start with the selected model's default; distilled models may require low or zero guidance."
+                  label={translate("uxVideo.guidancew7efa")}
+                  hint={translate("uxImages.controlsHowStronglyThef6ms0")}
                   value={guidance}
                   min={0}
                   max={15}
@@ -5835,8 +5822,8 @@ export function ImagesPage({
               </>
             )}
             <SliderField
-              label="Batch size"
-              hint="How many images to make at once. Faster than running them one by one, but uses more VRAM. They share a seed but each one is different."
+              label={translate("studio.progress.batchSize")}
+              hint={translate("uxImages.howManyImagesTo1xv59")}
               value={batchSize}
               min={1}
               max={32}
@@ -5844,8 +5831,8 @@ export function ImagesPage({
               onChange={setBatchSize}
             />
             <SliderField
-              label="Runs"
-              hint="How many times to repeat the generation, one after another. Each run uses the next seed, so the images differ and can be reproduced."
+              label={translate("settings.profile.stats.trainingRuns")}
+              hint={translate("uxImages.howManyTimesTo1ndcn")}
               value={count}
               min={1}
               max={RUNS_SLIDER_MAX}
@@ -5855,8 +5842,8 @@ export function ImagesPage({
             {/* A slider row ends flush with its track, so the label below needs room. */}
             {samplerOptions.length > 1 && (
               <Field
-                label="Sampler"
-                hint="How each denoising step is taken. Model default keeps the scheduler the model ships with. Community checkpoints often name one, such as DPM++ 2M with Karras."
+                label={translate("uxImages.sampler1419s")}
+                hint={translate("uxImages.howEachDenoisingSteprq8zj")}
                 className="pt-2"
               >
                 <div className="flex items-center gap-2">
@@ -5864,7 +5851,7 @@ export function ImagesPage({
                     value={samplerChoice.sampler}
                     onValueChange={(v) => changeSamplerChoice({ sampler: v })}
                   >
-                    <SelectTrigger className="h-8 flex-1 text-xs" aria-label="Sampler">
+                    <SelectTrigger className="h-8 flex-1 text-xs" aria-label={translate("uxImages.sampler1419s")}>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -5879,7 +5866,7 @@ export function ImagesPage({
                     value={samplerChoice.scheduleType}
                     onValueChange={(v) => changeSamplerChoice({ scheduleType: v })}
                   >
-                    <SelectTrigger className="h-8 w-32 text-xs" aria-label="Schedule type">
+                    <SelectTrigger className="h-8 w-32 text-xs" aria-label={translate("uxImages.scheduleTypekcqnu")}>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -5899,12 +5886,12 @@ export function ImagesPage({
             {!external && (
               <>
                 <Field
-                  label="Seed"
-                  hint="Leave empty for a fresh random seed each run."
+                  label={translate("uxVideo.seed1lu3q")}
+                  hint={translate("uxVideo.leaveEmptyForAxewf0")}
                   className="pt-2"
                 >
                   <Input
-                    placeholder="Random if empty"
+                    placeholder={translate("uxVideo.randomIfEmptyokdsy")}
                     value={seed}
                     onChange={(e) => setSeed(e.target.value)}
                   />
@@ -5949,10 +5936,10 @@ export function ImagesPage({
                         onClick={handleReapply}
                       >
                         <HugeiconsIcon icon={Refresh01Icon} className="mr-2 size-4" />
-                        Reapply
+                        {translate("uxVideo.reapply4ytff")}
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent>Reload the current model with the advanced options</TooltipContent>
+                    <TooltipContent>{translate("uxCopy.reloadTheCurrentModel1cf3i")}</TooltipContent>
                   </Tooltip>
                 )}
               </>
@@ -5984,7 +5971,7 @@ export function ImagesPage({
               open={true}
               onOpenChange={(open) => !open && setViewerId(null)}
               title={viewerImage.prompt || t("library.viewer.untitledImage")}
-              meta={`Generated · ${viewerImage.width} × ${viewerImage.height}`}
+              meta={translate("uxImages.generatedia0hq", { p1: viewerImage.width, p2: viewerImage.height })}
               media={true}
               noun="image"
               actions={{
@@ -6022,7 +6009,7 @@ export function ImagesPage({
               // requested size (the aspect comes from the preview itself). The finished image replaces it.
               <img
                 src={livePreviewSrc}
-                alt="Live preview of the image being generated"
+                alt={translate("uxImages.livePreviewOfThe5c2ii")}
                 data-testid="images-live-preview"
                 style={{ maxWidth: width, maxHeight: height }}
                 className="size-full object-contain shadow-sm"
@@ -6067,20 +6054,16 @@ export function ImagesPage({
                     <DropdownMenuTrigger asChild={true}>
                       <Button size="sm" variant="ghost" className="gap-1.5">
                         <HugeiconsIcon icon={Download01Icon} className="size-4" />
-                        Download
+                        {translate("imageViewer.download")}
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem
                         onClick={() => void downloadImage(selected, "png", selectedSrc)}
-                      >
-                        PNG (lossless)
-                      </DropdownMenuItem>
+                      >{translate("uxImages.pNGLosslessaj0et")}</DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => void downloadImage(selected, "jpeg", selectedSrc)}
-                      >
-                        JPEG (smaller)
-                      </DropdownMenuItem>
+                      >{translate("uxImages.jPEGSmallervivje")}</DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => void downloadImage(selected, "webp", selectedSrc)}
                       >
@@ -6090,9 +6073,7 @@ export function ImagesPage({
                       <DropdownMenuItem
                         onClick={() => useSettingsDialogStore.getState().openDialog("library")}
                         className="justify-between gap-4 text-muted-foreground"
-                      >
-                        Info stamp
-                        <span className="text-xs">{imageInfoStamp ? "On" : "Off"}</span>
+                      >{translate("uxImages.infoStamp5fmuy")}<span className="text-xs">{imageInfoStamp ? "On" : "Off"}</span>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -6126,16 +6107,16 @@ export function ImagesPage({
                 <div className="absolute bottom-4 right-4 flex items-center gap-0.5 rounded-xl bg-background/80 p-1 shadow-lg ring-1 ring-border backdrop-blur [&_[data-slot=button]]:border-0 [&_[data-slot=button]:focus-visible]:bg-muted">
                   {srcErrors[selected.id] ? (
                     <>
-                      <span role="alert" className="sr-only">Full-resolution download failed.</span>
+                      <span role="alert" className="sr-only">{translate("uxImages.fullResolutionDownloadFailed5lchi")}</span>
                       <Button
                         variant="ghost"
                         size="sm"
                         className="gap-1.5"
-                        title="Full-resolution download failed. Retry downloading."
+                        title={translate("uxImages.fullResolutionDownloadFailed1gzex")}
                         onClick={() => void ensureSrc(selected)}
                       >
                         <HugeiconsIcon icon={Refresh01Icon} className="size-4" />
-                        Retry download
+                        {translate("uxImages.retryDownloadm32zv")}
                       </Button>
                     </>
                   ) : (
@@ -6144,11 +6125,9 @@ export function ImagesPage({
                       variant="ghost"
                       className="gap-1.5"
                       disabled
-                      title="Loading full-resolution image…"
+                      title={translate("uxImages.loadingFullResolutionImage7dxcr")}
                     >
-                      <Spinner className="size-4" label="Loading full-resolution image" />
-                      Loading image…
-                    </Button>
+                      <Spinner className="size-4" label={translate("uxImages.loadingFullResolutionImageeg0oh")} />{translate("uxImages.loadingImagem0mfj")}</Button>
                   )}
                 </div>
               </>
@@ -6158,8 +6137,8 @@ export function ImagesPage({
                 <HugeiconsIcon icon={Image03Icon} className="size-12" strokeWidth={1.5} />
                 <p className="text-sm">
                   {status?.loaded || external
-                    ? "Enter a prompt and hit Generate."
-                    : "Select a diffusion model to load"}
+                    ? translate("uxImages.enterAPromptAndq24o6")
+                    : translate("uxImages.selectADiffusionModel4n2r7")}
                 </p>
               </div>
             )}
@@ -6181,7 +6160,7 @@ export function ImagesPage({
                         ? `Run ${genDone + 1}/${count}`
                         : null
                     }
-                    message="Starting…"
+                    message={translate("uxImages.startingd3ta0")}
                     progressPercent={genStep ? genStep.fraction * 100 : null}
                     progressLabel={genStep ? genStepLabel(genStep) : null}
                   />

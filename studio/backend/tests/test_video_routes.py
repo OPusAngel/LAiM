@@ -35,7 +35,7 @@ from routes.video import router as video_router
 def _shared_setup_1(client):
     client.post(
         "/api/inference/video/load",
-        json = {"model_path": "LAiM/LTX-2.3-GGUF", "gguf_filename": "q.gguf"},
+        json = {"model_path": "unsloth/LTX-2.3-GGUF", "gguf_filename": "q.gguf"},
     )
 
 
@@ -170,7 +170,7 @@ class _FakeBackend(video_module.VideoBackend):
             raise ValueError("A gguf/single_file load needs the checkpoint filename.")
         # Non-GGUF loads are gated to LAiM/* repos, the official bases, and existing local paths.
         # minimaxai/: the real gate trusts MiniMaxAI/MiniMax-H3 as an official family base repo.
-        trusted = model_path.lower().startswith(("LAiM/", "lightricks/", "minimaxai/")) or (
+        trusted = model_path.lower().startswith(("unsloth/", "lightricks/", "minimaxai/")) or (
             Path(model_path).expanduser().exists()
         )
         if kind != "gguf" and not trusted:
@@ -224,7 +224,7 @@ class _FakeBackend(video_module.VideoBackend):
         return {
             "mp4_bytes": b"MP4-FAKE-BYTES",
             "seed": seed if seed is not None else 4242,
-            "repo_id": "LAiM/LTX-2.3-GGUF",
+            "repo_id": "unsloth/LTX-2.3-GGUF",
             "width": kwargs.get("width") or 768,
             "height": kwargs.get("height") or 512,
             "num_frames": kwargs.get("num_frames") or 121,
@@ -249,7 +249,7 @@ class _FakeBackend(video_module.VideoBackend):
         return {
             **_unloaded_status(),
             "loaded": True,
-            "repo_id": "LAiM/LTX-2.3-GGUF",
+            "repo_id": "unsloth/LTX-2.3-GGUF",
             "family": "ltx-2",
             "has_audio": True,
             "defaults": _defaults(),
@@ -340,7 +340,7 @@ def test_load_happy_path_and_arbiter_acquired(client, monkeypatch):
     resp = client.post(
         "/api/inference/video/load",
         json = {
-            "model_path": "LAiM/LTX-2.3-GGUF",
+            "model_path": "unsloth/LTX-2.3-GGUF",
             "gguf_filename": "ltx-2.3-distilled-Q4_K_M.gguf",
         },
     )
@@ -367,7 +367,7 @@ def test_load_forwards_the_gpu_selection(client, monkeypatch):
     resp = client.post(
         "/api/inference/video/load",
         json = {
-            "model_path": "LAiM/LTX-2.3-GGUF",
+            "model_path": "unsloth/LTX-2.3-GGUF",
             "gguf_filename": "ltx-2.3-distilled-Q4_K_M.gguf",
             "gpu_ids": [1],
         },
@@ -387,7 +387,7 @@ def test_load_refuses_a_gpu_index_this_host_does_not_have(client, monkeypatch):
     resp = client.post(
         "/api/inference/video/load",
         json = {
-            "model_path": "LAiM/LTX-2.3-GGUF",
+            "model_path": "unsloth/LTX-2.3-GGUF",
             "gguf_filename": "ltx-2.3-distilled-Q4_K_M.gguf",
             "gpu_ids": [7],
         },
@@ -413,7 +413,7 @@ def test_load_threads_options_through_to_backend(client):
     resp = client.post(
         "/api/inference/video/load",
         json = {
-            "model_path": "LAiM/LTX-2.3-GGUF",
+            "model_path": "unsloth/LTX-2.3-GGUF",
             "gguf_filename": "q.gguf",
             "memory_mode": "low_vram",
             "attention_backend": "cudnn",
@@ -437,7 +437,7 @@ def test_load_threads_transformer_quant_and_guidance_2(client, monkeypatch):
     resp = client.post(
         "/api/inference/video/load",
         json = {
-            "model_path": "LAiM/LTX-2.3-GGUF",
+            "model_path": "unsloth/LTX-2.3-GGUF",
             "gguf_filename": "q.gguf",
             "transformer_quant": "fp8",
         },
@@ -455,7 +455,7 @@ def test_load_rejects_bad_transformer_quant_422(client):
     resp = client.post(
         "/api/inference/video/load",
         json = {
-            "model_path": "LAiM/LTX-2.3-GGUF",
+            "model_path": "unsloth/LTX-2.3-GGUF",
             "gguf_filename": "q.gguf",
             "transformer_quant": "bogus",
         },
@@ -473,7 +473,7 @@ def test_load_threads_text_encoder_quant(client, monkeypatch):
     resp = client.post(
         "/api/inference/video/load",
         json = {
-            "model_path": "LAiM/LTX-2.3-GGUF",
+            "model_path": "unsloth/LTX-2.3-GGUF",
             "gguf_filename": "q.gguf",
             "text_encoder_quant": "fp8",
         },
@@ -488,7 +488,7 @@ def test_load_rejects_bad_text_encoder_quant_422(client):
     resp = client.post(
         "/api/inference/video/load",
         json = {
-            "model_path": "LAiM/LTX-2.3-GGUF",
+            "model_path": "unsloth/LTX-2.3-GGUF",
             "gguf_filename": "q.gguf",
             "text_encoder_quant": "bogus",
         },
@@ -568,7 +568,7 @@ def test_generate_happy_path_persists_and_reports_record(client, monkeypatch):
     assert resets == ["video"]
     assert video["seed"] == 7 and video["prompt"] == "a sloth surfing" and video["id"]
     assert video["has_audio"] is True
-    assert video["model"] == "LAiM/LTX-2.3-GGUF"
+    assert video["model"] == "unsloth/LTX-2.3-GGUF"
     assert video["url"].endswith(f"/gallery/{video['id']}/file")
     assert video["created_at"]  # ISO timestamp string
 
@@ -915,7 +915,7 @@ def test_status_resolved_defaults_to_null(client):
 def _load_fake_video(client):
     resp = client.post(
         "/api/inference/video/load",
-        json = {"model_path": "LAiM/LTX-2.3-GGUF", "gguf_filename": "q.gguf"},
+        json = {"model_path": "unsloth/LTX-2.3-GGUF", "gguf_filename": "q.gguf"},
     )
     assert resp.status_code == 200
 
@@ -1034,7 +1034,7 @@ def test_unload_keeps_ownership_when_a_load_is_in_flight(client, monkeypatch):
     monkeypatch.setattr(gpu_arbiter, "_owner", gpu_arbiter.VIDEO)
 
     backend.loaded = False
-    backend.loading = ("LAiM/ltx-video-2b",)
+    backend.loading = ("unsloth/ltx-video-2b",)
     resp = client.post("/api/inference/video/unload")
     assert resp.status_code == 200 and resp.json()["loaded"] is False
     assert gpu_arbiter.current_owner() == gpu_arbiter.VIDEO  # ownership retained for the load
@@ -1058,7 +1058,7 @@ def test_load_refused_during_training(client, monkeypatch):
 
     resp = client.post(
         "/api/inference/video/load",
-        json = {"model_path": "LAiM/LTX-2.3-GGUF", "gguf_filename": "q.gguf"},
+        json = {"model_path": "unsloth/LTX-2.3-GGUF", "gguf_filename": "q.gguf"},
     )
     assert resp.status_code == 409
     assert "training" in resp.json()["detail"].lower()
@@ -1107,17 +1107,17 @@ def test_delete_guard_protects_the_loaded_video_companion_base(monkeypatch):
         def status(self):
             return {
                 "loaded": True,
-                "repo_id": "LAiM/LTX-2.3-GGUF",
-                "base_repo": "LAiM/LTX-2.3",
+                "repo_id": "unsloth/LTX-2.3-GGUF",
+                "base_repo": "unsloth/LTX-2.3",
             }
 
         def loading_repo_ids(self):
             return ()
 
     monkeypatch.setattr(video_module, "get_video_backend", lambda: _Backend())
-    assert deletion._video_blocks_delete("LAiM/LTX-2.3-GGUF") is not None
-    assert deletion._video_blocks_delete("LAiM/LTX-2.3") is not None
-    assert deletion._video_blocks_delete("LAiM/something-else") is None
+    assert deletion._video_blocks_delete("unsloth/LTX-2.3-GGUF") is not None
+    assert deletion._video_blocks_delete("unsloth/LTX-2.3") is not None
+    assert deletion._video_blocks_delete("unsloth/something-else") is None
 
 
 def test_delete_guard_protects_the_native_video_companion_repos(monkeypatch):
@@ -1129,19 +1129,19 @@ def test_delete_guard_protects_the_native_video_companion_repos(monkeypatch):
         def status(self):
             return {
                 "loaded": True,
-                "repo_id": "LAiM/MiniMax-H3-GGUF",
+                "repo_id": "unsloth/MiniMax-H3-GGUF",
                 "base_repo": "MiniMaxAI/MiniMax-H3",
             }
 
         def loaded_repo_ids(self):
-            return ("LAiM/MiniMax-H3-GGUF", "Comfy-Org/MiniMax-H3")
+            return ("unsloth/MiniMax-H3-GGUF", "Comfy-Org/MiniMax-H3")
 
         def loading_repo_ids(self):
             return ()
 
     monkeypatch.setattr(video_module, "get_video_backend", lambda: _Backend())
     assert deletion._video_blocks_delete("Comfy-Org/MiniMax-H3") is not None
-    assert deletion._video_blocks_delete("LAiM/something-else") is None
+    assert deletion._video_blocks_delete("unsloth/something-else") is None
 
 
 def test_delete_guard_protects_the_native_video_companion_repos_mid_load(monkeypatch):
@@ -1161,15 +1161,15 @@ def test_delete_guard_protects_the_native_video_companion_repos_mid_load(monkeyp
             return (
                 "leejet/MiniMax-H3-GGUF",
                 "MiniMaxAI/MiniMax-H3",
-                "LAiM/MiniMax-H3-GGUF",
+                "unsloth/MiniMax-H3-GGUF",
                 "Comfy-Org/MiniMax-H3",
             )
 
     monkeypatch.setattr(video_module, "get_video_backend", lambda: _Backend())
     assert deletion._video_blocks_delete("Comfy-Org/MiniMax-H3") is not None
     # Loading from the leejet mirror still pulls the Qwen encoder from the LAiM GGUF companion.
-    assert deletion._video_blocks_delete("LAiM/MiniMax-H3-GGUF") is not None
-    assert deletion._video_blocks_delete("LAiM/something-else") is None
+    assert deletion._video_blocks_delete("unsloth/MiniMax-H3-GGUF") is not None
+    assert deletion._video_blocks_delete("unsloth/something-else") is None
 
 
 def test_video_download_plan_forwards_the_encoder_policy(client, monkeypatch):
@@ -1190,7 +1190,7 @@ def test_video_download_plan_forwards_the_encoder_policy(client, monkeypatch):
     resp = client.post(
         "/api/inference/video/download-plan",
         json = {
-            "model_path": "LAiM/LTX-2.3-GGUF",
+            "model_path": "unsloth/LTX-2.3-GGUF",
             "gguf_filename": "distilled/ltx-2.3-22b-distilled-Q4_K_M.gguf",
             "model_kind": "gguf",
             "hf_token": "hf_secret",
@@ -1228,7 +1228,7 @@ def test_the_video_plan_refuses_an_impossible_precision_before_anything_is_stage
     resp = client.post(
         "/api/inference/video/download-plan",
         json = {
-            "model_path": "LAiM/LTX-2.3-GGUF",
+            "model_path": "unsloth/LTX-2.3-GGUF",
             "gguf_filename": "distilled/ltx-2.3-22b-distilled-Q4_K_M.gguf",
             "model_kind": "gguf",
             "text_encoder_quant": "fp8",
@@ -1261,7 +1261,7 @@ def test_video_load_guard_still_checks_diffusion_when_the_llm_probe_raises(clien
 
     resp = client.post(
         "/api/inference/video/load",
-        json = {"model_path": "LAiM/LTX-2.3-GGUF", "gguf_filename": "q.gguf"},
+        json = {"model_path": "unsloth/LTX-2.3-GGUF", "gguf_filename": "q.gguf"},
     )
     assert resp.status_code == 409
     assert "training" in resp.json()["detail"].lower()
@@ -1378,7 +1378,7 @@ def test_video_download_plan_forwards_the_denoiser_policy(client, monkeypatch):
     resp = client.post(
         "/api/inference/video/download-plan",
         json = {
-            "model_path": "LAiM/LTX-2.3-GGUF",
+            "model_path": "unsloth/LTX-2.3-GGUF",
             "gguf_filename": "distilled/ltx-2.3-22b-distilled-Q4_K_M.gguf",
             "model_kind": "gguf",
             "transformer_quant": "int8",
@@ -1408,8 +1408,8 @@ def test_video_download_plan_does_not_stage_the_hosted_fp8_dit_for_an_offloaded_
             _Sibling("ltx-2.3-22b-distilled.safetensors", 46_000_000_000),
             _Sibling("ltx-2.3-22b-dev.safetensors", 46_000_000_000),
         ],
-        "LAiM/LTX-2.3-FP8": [_Sibling("LTX-2.3-FP8.pt", 19_057_628_489)],
-        "LAiM/LTX-2.3-GGUF": [
+        "unsloth/LTX-2.3-FP8": [_Sibling("LTX-2.3-FP8.pt", 19_057_628_489)],
+        "unsloth/LTX-2.3-GGUF": [
             _Sibling("vae/ltx-2.3-22b-distilled_video_vae.safetensors", 2_400_000_000),
             _Sibling("vae/ltx-2.3-22b-distilled_audio_vae.safetensors", 200_000_000),
             _Sibling(
@@ -1468,10 +1468,10 @@ def test_video_download_plan_does_not_stage_the_hosted_fp8_dit_for_an_offloaded_
         assert resp.status_code == 200, resp.text
         return {e["repo_id"] for e in resp.json()["entries"]}
 
-    assert "LAiM/LTX-2.3-FP8" in _staged(None)
-    assert "LAiM/LTX-2.3-FP8" in _staged("fast")
+    assert "unsloth/LTX-2.3-FP8" in _staged(None)
+    assert "unsloth/LTX-2.3-FP8" in _staged("fast")
     for memory_mode in ("balanced", "low_vram"):
-        assert "LAiM/LTX-2.3-FP8" not in _staged(memory_mode), memory_mode
+        assert "unsloth/LTX-2.3-FP8" not in _staged(memory_mode), memory_mode
 
 
 def test_video_download_plan_does_not_probe_fp8_while_training(client, monkeypatch):
@@ -1489,8 +1489,8 @@ def test_video_download_plan_does_not_probe_fp8_while_training(client, monkeypat
 
     repos = {
         "Lightricks/LTX-2.3": [_Sibling("ltx-2.3-22b-distilled.safetensors", 46_000_000_000)],
-        "LAiM/LTX-2.3-FP8": [_Sibling("LTX-2.3-FP8.pt", 19_057_628_489)],
-        "LAiM/LTX-2.3-GGUF": [],
+        "unsloth/LTX-2.3-FP8": [_Sibling("LTX-2.3-FP8.pt", 19_057_628_489)],
+        "unsloth/LTX-2.3-GGUF": [],
         "Lightricks/LTX-2": [_Sibling("model_index.json", 1000)],
     }
 
@@ -1543,9 +1543,9 @@ def test_video_download_plan_does_not_probe_fp8_while_training(client, monkeypat
         assert resp.status_code == 200, resp.text
         return {e["repo_id"] for e in resp.json()["entries"]}
 
-    assert "LAiM/LTX-2.3-FP8" in _staged()
+    assert "unsloth/LTX-2.3-FP8" in _staged()
     tq._SMOKE_CACHE[("fp8", "cuda:0")] = False
-    assert "LAiM/LTX-2.3-FP8" not in _staged()
+    assert "unsloth/LTX-2.3-FP8" not in _staged()
 
 
 def test_video_download_plan_forwards_the_h3_partition(client, monkeypatch):
@@ -1568,7 +1568,7 @@ def test_video_download_plan_forwards_the_h3_partition(client, monkeypatch):
     resp = client.post(
         "/api/inference/video/download-plan",
         json = {
-            "model_path": "LAiM/MiniMax-H3",
+            "model_path": "unsloth/MiniMax-H3",
             "model_kind": "pipeline",
             "family_override": "minimax-h3",
             "h3_task": "ref2va",
@@ -1660,7 +1660,7 @@ def test_video_download_plan_refuses_an_unsupported_combination_before_staging(c
     detail = resp.json()["detail"]
     # A refusal that does not name the alternative just moves the dead end earlier.
     assert "MiniMaxAI/MiniMax-H3" in detail
-    assert "LAiM/MiniMax-H3-GGUF" in detail
+    assert "unsloth/MiniMax-H3-GGUF" in detail
 
 
 def test_video_download_plan_refuses_an_unavailable_transformer_quant(client, monkeypatch):
@@ -1859,7 +1859,7 @@ def test_video_download_plan_sizes_its_file_set_for_the_selected_card(client, mo
     resp = client.post(
         "/api/inference/video/download-plan",
         json = {
-            "model_path": "LAiM/LTX-2.3-GGUF",
+            "model_path": "unsloth/LTX-2.3-GGUF",
             "gguf_filename": "distilled/ltx-2.3-22b-distilled-Q4_K_M.gguf",
             "model_kind": "gguf",
             "gpu_ids": [0, 1],
@@ -1888,7 +1888,7 @@ def test_video_download_plan_refuses_a_gpu_index_this_host_does_not_have(client,
     resp = client.post(
         "/api/inference/video/download-plan",
         json = {
-            "model_path": "LAiM/LTX-2.3-GGUF",
+            "model_path": "unsloth/LTX-2.3-GGUF",
             "gguf_filename": "distilled/ltx-2.3-22b-distilled-Q4_K_M.gguf",
             "model_kind": "gguf",
             "gpu_ids": [7],
@@ -1929,7 +1929,7 @@ def test_video_download_plan_still_refuses_a_bad_gpu_while_training_holds_the_ca
     resp = client.post(
         "/api/inference/video/download-plan",
         json = {
-            "model_path": "LAiM/LTX-2.3-GGUF",
+            "model_path": "unsloth/LTX-2.3-GGUF",
             "gguf_filename": "distilled/ltx-2.3-22b-distilled-Q4_K_M.gguf",
             "model_kind": "gguf",
             "gpu_ids": [7],

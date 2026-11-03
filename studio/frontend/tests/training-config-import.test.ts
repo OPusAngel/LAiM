@@ -17,7 +17,7 @@ test("browser training config imports enforce the native size limit", async () =
     size: MAX_TRAINING_CONFIG_BYTES + 1,
     text: () => {
       read = true;
-      return Promise.resolve("model_name: LAiM/test");
+      return Promise.resolve("model_name: unsloth/test");
     },
   };
 
@@ -32,8 +32,8 @@ test("browser training config imports enforce the native size limit", async () =
   assert.equal(
     await readBrowserTrainingConfig({
       size: MAX_TRAINING_CONFIG_BYTES,
-      text: () => Promise.resolve("model_name: LAiM/test"),
+      text: () => Promise.resolve("model_name: unsloth/test"),
     }),
-    "model_name: LAiM/test",
+    "model_name: unsloth/test",
   );
 });

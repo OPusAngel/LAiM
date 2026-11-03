@@ -3,6 +3,7 @@
 
 "use client";
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { downloadUrl, isDownloadCancelled } from "@/lib/native-files";
 import { toast } from "@/lib/toast";
@@ -69,7 +70,7 @@ export const AudioPlayer: FC<AudioPlayerProps> = ({
   const handleDownload = () => {
     void downloadUrl(src, filename).catch((error) => {
       if (!isDownloadCancelled(error)) {
-        toast.error("Could not save audio.");
+        toast.error(translate("uxComponents.couldNotSaveAudio1547h"));
       }
     });
   };
@@ -123,7 +124,7 @@ export const AudioPlayer: FC<AudioPlayerProps> = ({
         size="icon"
         className="size-7 shrink-0 text-muted-foreground"
         onClick={handleDownload}
-        title="Download audio"
+        title={translate("uxComponents.downloadAudio1mp9m")}
       >
         <HugeiconsIcon icon={Download01Icon} className="size-3.5" />
       </Button>

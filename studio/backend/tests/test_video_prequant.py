@@ -115,7 +115,7 @@ def test_minimax_h3_declares_hosted_denoiser_checkpoints():
         repo = video_family_prequant_repo(fam, scheme)
         # Curated hosted artifacts only: a third-party repo here would be served as this family's
         # own weights, for a load that may never have asked for a scheme at all.
-        assert repo and repo.startswith("LAiM/")
+        assert repo and repo.startswith("unsloth/")
 
 
 def test_both_h3_schemes_resolve_to_one_repo():
@@ -192,7 +192,7 @@ def test_the_h3_primary_name_is_what_memory_planning_credits():
 def test_the_names_are_built_from_the_repo_and_the_scheme():
     # One repo serves both schemes, so the -FP8 suffix on the repo must be stripped and REPLACED by
     # the requested scheme rather than carried through.
-    fam = _fam(prequant_repos = (("int8", "LAiM/Test-FP8"), ("fp8", "LAiM/Test-FP8")))
+    fam = _fam(prequant_repos = (("int8", "unsloth/Test-FP8"), ("fp8", "unsloth/Test-FP8")))
     assert resolve_prequant_source(fam, "int8").filename == "Test-INT8.safetensors"
     assert resolve_prequant_source(fam, "fp8").filename == "Test-FP8.safetensors"
     # The pickle spellings stay available for repos that host no safetensors artifact.
@@ -212,7 +212,7 @@ def test_the_names_are_built_from_the_repo_and_the_scheme():
 
 def test_a_task_specific_row_beats_the_task_agnostic_one():
     fam = _fam(
-        prequant_repos = (("int8", "LAiM/Test-FP8"),),
+        prequant_repos = (("int8", "unsloth/Test-FP8"),),
         prequant_filenames = (
             ("int8", "Test-INT8-ConvRot.pt"),
             ("int8", "ref2va", "Test-Ref2VA-INT8-ConvRot.pt"),
@@ -234,7 +234,7 @@ def test_a_task_specific_artifact_gets_no_filename_fallback():
     # ANOTHER PARTITION's denoiser -- it would pass every check and generate the wrong thing. No
     # artifact is the correct outcome: the load keeps the released bfloat16 denoiser.
     fam = _fam(
-        prequant_repos = (("int8", "LAiM/Test-FP8"),),
+        prequant_repos = (("int8", "unsloth/Test-FP8"),),
         prequant_filenames = (
             ("int8", "Test-INT8-ConvRot.pt"),
             ("int8", "ref2va", "Test-Ref2VA-INT8-ConvRot.pt"),
@@ -255,7 +255,7 @@ def test_a_scheme_without_a_task_row_resolves_exactly_what_it_did_before():
     # Back-compat, stated as an equality rather than a literal: whatever the task-agnostic lookup
     # gives, a task the table says nothing about must give the same thing.
     fam = _fam(
-        prequant_repos = (("int8", "LAiM/Test-FP8"), ("fp8", "LAiM/Test-FP8")),
+        prequant_repos = (("int8", "unsloth/Test-FP8"), ("fp8", "unsloth/Test-FP8")),
         prequant_filenames = (("int8", "Test-INT8-ConvRot.pt"),),
     )
     for scheme in ("int8", "fp8"):
@@ -269,7 +269,7 @@ def test_a_family_predating_the_task_shape_is_unaffected_by_a_task():
     # change its answer -- the field is free to ignore for every family with one denoiser.
     import types
 
-    fam = _fam(prequant_repos = (("fp8", "LAiM/Test-FP8"),))
+    fam = _fam(prequant_repos = (("fp8", "unsloth/Test-FP8"),))
     assert resolve_prequant_source(fam, "fp8", task = "ref2va") == resolve_prequant_source(fam, "fp8")
     assert resolve_prequant_source(types.SimpleNamespace(), "fp8", task = "ref2va") is None
 
@@ -279,11 +279,11 @@ def test_a_partition_task_with_no_artifact_of_its_own_is_unavailable():
     # answers yes; the pair (scheme, task) has nothing, and serving the keyframe file instead is
     # the failure mode this replaced.
     fam = _fam(
-        prequant_repos = (("int8", "LAiM/Test-FP8"), ("fp8", "LAiM/Test-FP8")),
+        prequant_repos = (("int8", "unsloth/Test-FP8"), ("fp8", "unsloth/Test-FP8")),
         prequant_filenames = (("fp8", "ref2va", "Test-Ref2VA-FP8.pt"),),
         prequant_partition_tasks = ("ref2va",),
     )
-    assert video_family_prequant_repo(fam, "int8") == "LAiM/Test-FP8"
+    assert video_family_prequant_repo(fam, "int8") == "unsloth/Test-FP8"
     assert video_family_prequant_available(fam, "int8", task = "ref2va") is False
     assert video_family_prequant_available(fam, "fp8", task = "ref2va") is True
     # Not a partition task, so the artifact-per-task rule does not apply.
@@ -332,7 +332,7 @@ def test_a_reference_load_is_refused_when_its_scheme_has_no_reference_artifact(m
     fam = _fam(
         name = "partitioned",
         modular_workflow = "fl2va",
-        prequant_repos = (("int8", "LAiM/Test-FP8"), ("fp8", "LAiM/Test-FP8")),
+        prequant_repos = (("int8", "unsloth/Test-FP8"), ("fp8", "unsloth/Test-FP8")),
         prequant_filenames = (("fp8", "ref2va", "Test-Ref2VA-FP8.pt"),),
         prequant_partition_tasks = ("ref2va",),
     )
@@ -383,7 +383,7 @@ def test_a_modular_family_refuses_a_single_file_load_before_anything_downloads()
     message = str(excinfo.value)
     # The refusal is only useful if it says what to pick instead.
     assert "MiniMaxAI/MiniMax-H3" in message
-    assert "LAiM/MiniMax-H3-GGUF" in message
+    assert "unsloth/MiniMax-H3-GGUF" in message
 
 
 def test_an_unavailable_transformer_quant_is_refused_with_the_workable_schemes():
@@ -457,7 +457,7 @@ def test_the_metal_refusal_names_the_artifact_that_does_run_there(monkeypatch):
         "core.inference.video.resolve_diffusion_device_target", _forced_target("mps")
     )
     backend = VideoBackend()
-    with pytest.raises(ValueError, match = "LAiM/MiniMax-H3-GGUF"):
+    with pytest.raises(ValueError, match = "unsloth/MiniMax-H3-GGUF"):
         backend.validate_load_request("MiniMaxAI/MiniMax-H3")
 
 
@@ -1687,7 +1687,7 @@ def test_the_seeded_denoiser_repo_is_claimed_against_a_concurrent_delete(monkeyp
         _load_token = 1,
         transformer_quant = "nvfp4",
     )
-    assert "LAiM/Wan2.2-TI2V-5B-NVFP4" in claimed
+    assert "unsloth/Wan2.2-TI2V-5B-NVFP4" in claimed
 
 
 def test_both_experts_of_an_moe_resolve_to_one_claimed_repo():
@@ -1697,10 +1697,10 @@ def test_both_experts_of_an_moe_resolve_to_one_claimed_repo():
     a14b = detect_video_family("Wan-AI/Wan2.2-T2V-A14B-Diffusers")
     assert a14b is not None and a14b.is_moe
     assert VideoBackend._denoiser_prequant_repo_ids(a14b, "nvfp4", a14b.base_repo) == (
-        "LAiM/Wan2.2-T2V-A14B-NVFP4",
+        "unsloth/Wan2.2-T2V-A14B-NVFP4",
     )
     assert VideoBackend._denoiser_prequant_repo_ids(a14b, "int8", a14b.base_repo) == (
-        "LAiM/Wan2.2-T2V-A14B-FP8",
+        "unsloth/Wan2.2-T2V-A14B-FP8",
     )
     assert VideoBackend._denoiser_prequant_repo_ids(a14b, "auto", a14b.base_repo) == ()
 
@@ -1744,7 +1744,7 @@ def test_the_seeded_denoiser_artifact_is_fetched_under_the_load_cancel_event(mon
     )
 
     assert [(r, f) for r, f, _ in fetched] == [
-        ("LAiM/Wan2.2-TI2V-5B-NVFP4", "Wan2.2-TI2V-5B-NVFP4.pt")
+        ("unsloth/Wan2.2-TI2V-5B-NVFP4", "Wan2.2-TI2V-5B-NVFP4.pt")
     ]
     assert fetched[0][2] is cancel
 

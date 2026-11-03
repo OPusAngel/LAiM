@@ -45,7 +45,7 @@ DEFERRED = [
     {"status_code": 500, "detail": "RuntimeError: CUDA out of memory"},
 ]
 CONFIG = {
-    "model_name": "LAiM/Qwen3-0.6B",
+    "model_name": "unsloth/Qwen3-0.6B",
     "training_type": "LoRA/QLoRA",
     "format_type": "auto",
     "hf_dataset": "mlabonne/FineTome-100k",
@@ -75,7 +75,7 @@ RUN_CHECKPOINTS = {
                 _checkpoint("qwen-lora", "qwen-lora", 0.9),
                 _checkpoint("qwen-lora", "checkpoint-30", 1.1),
             ],
-            "base_model": "LAiM/Qwen3-0.6B",
+            "base_model": "unsloth/Qwen3-0.6B",
             "peft_type": "LORA",
             "lora_rank": 16,
             "is_quantized": True,
@@ -83,7 +83,7 @@ RUN_CHECKPOINTS = {
         {
             "name": "qwen-lora-2",
             "checkpoints": [_checkpoint("qwen-lora-2", "checkpoint-30", 1.0)],
-            "base_model": "LAiM/Qwen3-0.6B",
+            "base_model": "unsloth/Qwen3-0.6B",
         },
     ],
 }

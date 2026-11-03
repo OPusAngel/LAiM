@@ -2,6 +2,8 @@
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { authFetch } from "@/features/auth";
+import { translate } from "@/i18n";
+
 
 export interface PromptEntry {
   id: string;
@@ -23,7 +25,7 @@ async function parseJsonOrThrow<T>(res: Response): Promise<T> {
   const body = await res.json().catch(() => null);
   if (!res.ok) {
     const detail = (body as { detail?: string } | null)?.detail;
-    throw new Error(detail ?? `Request failed (${res.status})`);
+    throw new Error(detail ?? translate("uxChat.requestFailedb9a7f", { p1: res.status }));
   }
   return body as T;
 }
@@ -45,7 +47,7 @@ export async function savePromptEntry(entry: PromptEntry): Promise<PromptEntry> 
 
 export async function deletePromptEntry(id: string): Promise<void> {
   const res = await authFetch(`/api/prompts/entries/${id}`, { method: "DELETE" });
-  if (!res.ok) throw new Error(`Delete failed (${res.status})`);
+  if (!res.ok) throw new Error(translate("uxChat.deleteFailed1sk67", { p1: res.status }));
 }
 
 export async function bulkSavePromptEntries(entries: PromptEntry[]): Promise<number> {
@@ -76,7 +78,7 @@ export async function savePromptList(list: PromptListEntry): Promise<PromptListE
 
 export async function deletePromptList(id: string): Promise<void> {
   const res = await authFetch(`/api/prompts/lists/${id}`, { method: "DELETE" });
-  if (!res.ok) throw new Error(`Delete failed (${res.status})`);
+  if (!res.ok) throw new Error(translate("uxChat.deleteFailed1sk67", { p1: res.status }));
 }
 
 export async function bulkSavePromptLists(lists: PromptListEntry[]): Promise<number> {

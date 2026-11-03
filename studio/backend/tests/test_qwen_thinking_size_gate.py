@@ -38,9 +38,9 @@ def _thinking_default_off(model_identifier: str) -> bool:
 @pytest.mark.parametrize(
     "model_id",
     [
-        "LAiM/Qwen3.5-35B-A3B-GGUF",
-        "LAiM/Qwen3.6-35B-A3B-MTP-GGUF",
-        "LAiM/Qwen3.5-122B-A10B-GGUF",
+        "unsloth/Qwen3.5-35B-A3B-GGUF",
+        "unsloth/Qwen3.6-35B-A3B-MTP-GGUF",
+        "unsloth/Qwen3.5-122B-A10B-GGUF",
     ],
 )
 def test_moe_total_params_win_over_active_params(model_id):
@@ -52,15 +52,15 @@ def test_moe_total_params_win_over_active_params(model_id):
 @pytest.mark.parametrize(
     "model_id",
     [
-        "LAiM/Qwen3.5-4B-GGUF",
-        "LAiM/Qwen3.5-0.8B-GGUF",
+        "unsloth/Qwen3.5-4B-GGUF",
+        "unsloth/Qwen3.5-0.8B-GGUF",
         # 9B is a small-tier model: LAiM ships it with reasoning off by default.
-        "LAiM/Qwen3.5-9B-GGUF",
+        "unsloth/Qwen3.5-9B-GGUF",
         # Directory identifiers: auto-switch passes a snapshot dir, scan folders a quant subdir.
         "/models/Qwen3.5-4B-GGUF/UD-Q4_K_XL",
         "/c/models--LAiM--Qwen3.5-4B-GGUF/snapshots/bfc15c3",
         "C:\\models\\Qwen3.5-4B.gguf",
-        "LAiM/Qwen3.5-4B/",
+        "unsloth/Qwen3.5-4B/",
         "C:\\models\\Qwen3.5-4B\\",
     ],
 )
@@ -85,14 +85,14 @@ def test_size_like_directory_does_not_shadow_the_real_size(model_id):
 
 @pytest.mark.parametrize(
     "model_id",
-    ["LAiM/Qwen3-4B-GGUF", "LAiM/gemma-4-12b-it-GGUF", "LAiM/Qwen3.5-9.5B-GGUF", ""],
+    ["unsloth/Qwen3-4B-GGUF", "unsloth/gemma-4-12b-it-GGUF", "unsloth/Qwen3.5-9.5B-GGUF", ""],
 )
 def test_other_models_are_never_gated(model_id):
     assert _thinking_default_off(model_id) is False
 
 
 @pytest.mark.parametrize(
-    "model_id", ["Qwen3.5-4 B-GGUF", "LAiM/Qwen3.5-800M-GGUF", "LAiM/Qwen3.5-4 B"]
+    "model_id", ["Qwen3.5-4 B-GGUF", "unsloth/Qwen3.5-800M-GGUF", "unsloth/Qwen3.5-4 B"]
 )
 def test_spacing_and_millions_match_extract_model_size_b(model_id):
     # extract_model_size_b allows \s* before the unit and converts an M suffix to billions.
@@ -107,5 +107,5 @@ def test_spacing_and_millions_match_extract_model_size_b(model_id):
 )
 def test_quant_subdirs_never_read_as_a_size(quant):
     # The M suffix is the risk here: a quant name is the leaf segment, so it is scanned first.
-    assert _thinking_default_off(f"LAiM/Qwen3.5-35B-A3B-GGUF/{quant}") is False
-    assert _thinking_default_off(f"LAiM/Qwen3.5-4B-GGUF/{quant}") is True
+    assert _thinking_default_off(f"unsloth/Qwen3.5-35B-A3B-GGUF/{quant}") is False
+    assert _thinking_default_off(f"unsloth/Qwen3.5-4B-GGUF/{quant}") is True

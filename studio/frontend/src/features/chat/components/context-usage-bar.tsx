@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { useLocale, useT, type TranslationKey } from "@/i18n";
 import {
   Tooltip,
   TooltipContent,
@@ -8,6 +9,7 @@ import {
 import { cn } from "@/lib/utils";
 import type { CSSProperties, FC } from "react";
 import {
+  type ContextLimitAdvice,
   type ContextUsageBarInput,
   deriveContextUsageBar,
   formatTokenCountFull,
@@ -100,10 +102,21 @@ const Face: FC<{ face: string }> = ({ face }) => {
   );
 };
 
+// Each advice names the setting it wants changed, so the wording follows the UI language.
+const ADVICE_KEYS = {
+  "stops-at-limit": "uxContext.adviceStopsAtLimit",
+  "mlx-near-limit": "uxContext.adviceMlxNearLimit",
+  "mlx-past-limit": "uxContext.adviceMlxPastLimit",
+  "mlx-refuses-past-limit": "uxContext.adviceMlxRefuses",
+  "unenforced-limit": "uxContext.adviceUnenforcedLimit",
+} as const satisfies Record<Exclude<ContextLimitAdvice, "none">, TranslationKey>;
+
 export const ContextUsageBar: FC<
   ContextUsageBarInput & { className?: string; compactUnknownAsIcon?: boolean }
 > = ({ className, compactUnknownAsIcon = false, ...input }) => {
-  const state = deriveContextUsageBar(input);
+  const t = useT();
+  const locale = useLocale();
+  const state = deriveContextUsageBar(input, { t, locale });
   if (!state) return null;
 
   const { cached, cacheWrites, promptTokens, completionTokens } = input.estimated
@@ -188,7 +201,11 @@ export const ContextUsageBar: FC<
           {percent !== null ? (
             <div className="flex items-center justify-between gap-4">
               <span className="text-muted-foreground">
-                {input.estimated ? "Estimated context usage" : "Context usage"}
+                {t(
+                  input.estimated
+                    ? "uxContext.rowEstimatedUsage"
+                    : "uxContext.rowContextUsage",
+                )}
               </span>
               <span className={cn("font-mono tabular-nums font-medium", severity.text)}>
                 {input.estimated ? "~" : ""}
@@ -198,23 +215,23 @@ export const ContextUsageBar: FC<
           ) : null}
           {promptTokens !== undefined && (
             <div className="flex items-center justify-between gap-4">
-              <span className="text-muted-foreground">Prompt tokens</span>
+              <span className="text-muted-foreground">{t("uxContext.rowPromptTokens")}</span>
               <span className="font-mono tabular-nums">
-                {formatTokenCountFull(promptTokens)}
+                {formatTokenCountFull(promptTokens, locale)}
               </span>
             </div>
           )}
           {completionTokens !== undefined && (
             <div className="flex items-center justify-between gap-4">
-              <span className="text-muted-foreground">Completion</span>
+              <span className="text-muted-foreground">{t("uxContext.rowCompletion")}</span>
               <span className="font-mono tabular-nums">
-                {formatTokenCountFull(completionTokens)}
+                {formatTokenCountFull(completionTokens, locale)}
               </span>
             </div>
           )}
           {(input.compactionCount ?? 0) > 0 && (
             <div className="flex items-center justify-between gap-4">
-              <span className="text-muted-foreground">Compactions</span>
+              <span className="text-muted-foreground">{t("uxContext.rowCompactions")}</span>
               <span className="font-mono tabular-nums">
                 {input.compactionCount}
               </span>
@@ -222,17 +239,17 @@ export const ContextUsageBar: FC<
           )}
           {cached !== undefined && cached > 0 && (
             <div className="flex items-center justify-between gap-4">
-              <span className="text-muted-foreground">Cache hits</span>
+              <span className="text-muted-foreground">{t("uxContext.rowCacheHits")}</span>
               <span className="font-mono tabular-nums">
-                {formatTokenCountFull(cached)}
+                {formatTokenCountFull(cached, locale)}
               </span>
             </div>
           )}
           {cacheWrites !== undefined && cacheWrites > 0 && (
             <div className="flex items-center justify-between gap-4">
-              <span className="text-muted-foreground">Cache writes</span>
+              <span className="text-muted-foreground">{t("uxContext.rowCacheWrites")}</span>
               <span className="font-mono tabular-nums">
-                {formatTokenCountFull(cacheWrites)}
+                {formatTokenCountFull(cacheWrites, locale)}
               </span>
             </div>
           )}
@@ -245,51 +262,12 @@ export const ContextUsageBar: FC<
           </div>
           {input.estimated ? (
             <div className="mt-1 max-w-64 text-ui-11 leading-snug text-muted-foreground/90">
-              Estimated from the chat&apos;s text, without attachments. A
-              loaded model replaces it with an exact count.
+              {t("uxContext.estimatedNote")}
             </div>
           ) : null}
           {advice !== "none" ? (
             <div className="mt-1 max-w-64 text-ui-11 leading-snug text-muted-foreground/90">
-              {advice === "mlx-past-limit" ? (
-                <>
-                  Past the context limit. The chat keeps going rather than
-                  stopping here, but the model can no longer hold the whole
-                  conversation: answers get slower and less accurate, and a
-                  long enough chat can still run out of memory. Increase{" "}
-                  <span className="font-medium">Context Length</span> in the
-                  chat Settings panel to fit it all.
-                </>
-              ) : advice === "mlx-near-limit" ? (
-                <>
-                  Close to the context limit. Past it the chat keeps going, but
-                  answers get slower and less accurate. Increase{" "}
-                  <span className="font-medium">Context Length</span> in the
-                  chat Settings panel to fit the whole conversation.
-                </>
-              ) : advice === "mlx-refuses-past-limit" ? (
-                <>
-                  Close to the context limit. This model quantizes its cache
-                  instead of capping it, so{" "}
-                  <span className="font-medium">Context Length</span> is applied
-                  to each request rather than to the cache: past it the request
-                  is refused instead of the chat slowing down. Increase it in
-                  the chat Settings panel, or shorten the conversation.
-                </>
-              ) : advice === "unenforced-limit" ? (
-                <>
-                  This model builds its own cache, so{" "}
-                  <span className="font-medium">Context Length</span> is the
-                  window it was sized for, not a limit on it: the cache keeps
-                  growing and lowering the setting will not save memory.
-                </>
-              ) : (
-                <>
-                  Close to the context limit. Generation will stop at 100%.
-                  Increase <span className="font-medium">Context Length</span> in
-                  the chat Settings panel to keep going.
-                </>
-              )}
+              {t(ADVICE_KEYS[advice], { setting: t("uxContext.settingContextLength") })}
             </div>
           ) : null}
         </div>

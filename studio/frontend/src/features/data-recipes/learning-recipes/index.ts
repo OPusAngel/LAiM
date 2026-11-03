@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import type { RecipePayload } from "@/features/recipe-studio";
 
 const structuredOutputsJinjaUrl = new URL(
@@ -39,12 +40,12 @@ function toRecordArray(value: unknown): Record<string, unknown>[] {
 
 function coerceRecipePayload(value: unknown): RecipePayload {
   if (!isRecord(value)) {
-    throw new Error("Template payload is invalid JSON object.");
+    throw new Error(translate("uxDatarecipes.templatePayloadIsInvalidhmhei"));
   }
 
   const recipeSource = isRecord(value.recipe) ? value.recipe : value;
   if (!Array.isArray(recipeSource.columns)) {
-    throw new Error("Template payload must include recipe.columns.");
+    throw new Error(translate("uxDatarecipes.templatePayloadMustInclude217eu"));
   }
 
   if (isRecord(value.recipe) && isRecord(value.run) && isRecord(value.ui)) {
@@ -86,7 +87,7 @@ function coerceRecipePayload(value: unknown): RecipePayload {
 async function loadPayloadFromUrl(url: string): Promise<RecipePayload> {
   const response = await fetch(url);
   if (!response.ok) {
-    throw new Error(`Failed to fetch template payload (${response.status})`);
+    throw new Error(translate("uxDatarecipes.failedToFetchTemplateihmpi", { p1: response.status }));
   }
   const json = (await response.json()) as unknown;
   return coerceRecipePayload(json);
@@ -102,48 +103,69 @@ export type LearningRecipeDef = {
 export const LEARNING_RECIPES: LearningRecipeDef[] = [
   {
     id: "structured-outputs-jinja",
-    title: "Structured Outputs + Jinja Expressions",
-    description:
-      "Support ticket triage with structured JSON outputs and Jinja conditionals.",
+    get title() {
+      return translate("uxDatarecipes.structuredOutputsJinjaExpressions1ufow");
+    },
+    get description() {
+      return translate("uxDatarecipes.supportTicketTriageWithxwkfv");
+    },
     loadPayload: () => loadPayloadFromUrl(structuredOutputsJinjaUrl),
   },
   {
     id: "pdf-grounded-qa",
-    title: "PDF Document QA",
-    description: "Build grounded question-answer examples from PDF chunks.",
+    get title() {
+      return translate("uxDatarecipes.pDFDocumentQA9izwn");
+    },
+    get description() {
+      return translate("uxDatarecipes.buildGroundedQuestionAnswer12082");
+    },
     loadPayload: () => loadPayloadFromUrl(pdfGroundedQaUrl),
   },
   {
     id: "instruction-from-answer",
-    title: "Instruction from Answer",
-    description:
-      "Use seed answer columns to generate high-quality instruction targets.",
+    get title() {
+      return translate("uxDatarecipes.instructionFromAnswerj87cy");
+    },
+    get description() {
+      return translate("uxDatarecipes.useSeedAnswerColumns9jbqc");
+    },
     loadPayload: () => loadPayloadFromUrl(instructionFromAnswerUrl),
   },
   {
     id: "text-to-python",
-    title: "Text to Python",
-    description:
-      "Generate instruction-to-code data with category sampling and LLM judging.",
+    get title() {
+      return translate("uxDatarecipes.textToPythonxop2l");
+    },
+    get description() {
+      return translate("uxDatarecipes.generateInstructionToCodel39su");
+    },
     loadPayload: () => loadPayloadFromUrl(textToPythonUrl),
   },
   {
     id: "text-to-sql",
-    title: "Text to SQL",
-    description:
-      "Generate SQL tasks and runnable SQL outputs with prompt-driven generation.",
+    get title() {
+      return translate("uxDatarecipes.textToSQL17sot");
+    },
+    get description() {
+      return translate("uxDatarecipes.generateSQLTasksAnd1v4yq");
+    },
     loadPayload: () => loadPayloadFromUrl(textToSqlUrl),
   },
   {
     id: "ocr-document-extraction",
-    title: "OCR Document Extraction",
-    description:
-      "Use image context to generate OCR-style document extraction output.",
+    get title() {
+      return translate("uxDatarecipes.oCRDocumentExtractionlje21");
+    },
+    get description() {
+      return translate("uxDatarecipes.useImageContextToks6mx");
+    },
     loadPayload: () => loadPayloadFromUrl(ocrDocumentExtractionUrl),
   },
   {
     id: "github-support-bot",
-    title: "GitHub Crawler",
+    get title() {
+      return translate("uxDatarecipes.gitHubCrawler1xwz9");
+    },
     description:
       "Crawl real GitHub issues and PRs and turn each thread into a {User, Assistant} training pair.",
     loadPayload: () => loadPayloadFromUrl(githubSupportBotUrl),

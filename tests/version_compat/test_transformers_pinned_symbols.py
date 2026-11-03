@@ -365,21 +365,21 @@ MODELING_CONTRACTS: tuple[ModelingContract, ...] = (
         path = "src/transformers/models/llama/modeling_llama.py",
         classes = ("LlamaAttention", "LlamaDecoderLayer", "LlamaModel", "LlamaForCausalLM"),
         rope_name = "LlamaRotaryEmbedding",
-        patch_site = "LAiM/models/llama.py:FastLlamaModel.pre_patch",
+        patch_site = "unsloth/models/llama.py:FastLlamaModel.pre_patch",
     ),
     ModelingContract(
         name = "qwen2",
         path = "src/transformers/models/qwen2/modeling_qwen2.py",
         classes = ("Qwen2Attention", "Qwen2DecoderLayer", "Qwen2Model", "Qwen2ForCausalLM"),
         rope_name = "Qwen2RotaryEmbedding",
-        patch_site = "LAiM/models/qwen2.py:FastQwen2Model.pre_patch",
+        patch_site = "unsloth/models/qwen2.py:FastQwen2Model.pre_patch",
     ),
     ModelingContract(
         name = "qwen3",
         path = "src/transformers/models/qwen3/modeling_qwen3.py",
         classes = ("Qwen3Attention", "Qwen3DecoderLayer", "Qwen3Model", "Qwen3ForCausalLM"),
         rope_name = "Qwen3RotaryEmbedding",
-        patch_site = "LAiM/models/qwen3.py:FastQwen3Model.pre_patch",
+        patch_site = "unsloth/models/qwen3.py:FastQwen3Model.pre_patch",
     ),
     ModelingContract(
         name = "qwen3_moe",
@@ -393,21 +393,21 @@ MODELING_CONTRACTS: tuple[ModelingContract, ...] = (
             "Qwen3MoeForCausalLM",
         ),
         rope_name = "Qwen3MoeRotaryEmbedding",
-        patch_site = "LAiM/models/qwen3_moe.py:FastQwen3MoeModel.pre_patch",
+        patch_site = "unsloth/models/qwen3_moe.py:FastQwen3MoeModel.pre_patch",
     ),
     ModelingContract(
         name = "gemma",
         path = "src/transformers/models/gemma/modeling_gemma.py",
         classes = ("GemmaAttention", "GemmaDecoderLayer", "GemmaModel", "GemmaForCausalLM"),
         rope_name = "GemmaRotaryEmbedding",
-        patch_site = "LAiM/models/gemma.py:FastGemmaModel.pre_patch",
+        patch_site = "unsloth/models/gemma.py:FastGemmaModel.pre_patch",
     ),
     ModelingContract(
         name = "gemma2",
         path = "src/transformers/models/gemma2/modeling_gemma2.py",
         classes = ("Gemma2Attention", "Gemma2DecoderLayer", "Gemma2Model", "Gemma2ForCausalLM"),
         rope_name = "Gemma2RotaryEmbedding",
-        patch_site = "LAiM/models/gemma2.py:FastGemma2Model.pre_patch",
+        patch_site = "unsloth/models/gemma2.py:FastGemma2Model.pre_patch",
     ),
     ModelingContract(
         name = "gemma3",
@@ -431,14 +431,14 @@ MODELING_CONTRACTS: tuple[ModelingContract, ...] = (
             "MistralForCausalLM",
         ),
         rope_name = "MistralRotaryEmbedding",
-        patch_site = "LAiM/models/mistral.py:FastMistralModel.pre_patch",
+        patch_site = "unsloth/models/mistral.py:FastMistralModel.pre_patch",
     ),
     ModelingContract(
         name = "cohere",
         path = "src/transformers/models/cohere/modeling_cohere.py",
         classes = ("CohereAttention", "CohereDecoderLayer", "CohereModel", "CohereForCausalLM"),
         rope_name = "CohereRotaryEmbedding",
-        patch_site = "LAiM/models/cohere.py:FastCohereModel.pre_patch",
+        patch_site = "unsloth/models/cohere.py:FastCohereModel.pre_patch",
     ),
     ModelingContract(
         name = "granite",
@@ -450,7 +450,7 @@ MODELING_CONTRACTS: tuple[ModelingContract, ...] = (
             "GraniteForCausalLM",
         ),
         rope_name = "GraniteRotaryEmbedding",
-        patch_site = "LAiM/models/granite.py:FastGraniteModel.pre_patch",
+        patch_site = "unsloth/models/granite.py:FastGraniteModel.pre_patch",
     ),
     ModelingContract(
         name = "falcon_h1",
@@ -463,7 +463,7 @@ MODELING_CONTRACTS: tuple[ModelingContract, ...] = (
         ),
         rope_name = "FalconH1RotaryEmbedding",
         extra_bindings = ("FalconH1RMSNorm",),
-        patch_site = "LAiM/models/falcon_h1.py:FastFalconH1Model.pre_patch",
+        patch_site = "unsloth/models/falcon_h1.py:FastFalconH1Model.pre_patch",
     ),
     # glm4_moe omitted: upstream renamed Glm4MoeLiteNaiveMoe -> Glm4MoeLiteExperts.
 )
@@ -505,7 +505,7 @@ def test_auto_factory_lazy_mapping_private_api(tag: str):
     missing = [n for n in needed if n not in src]
     assert not missing, (
         f"{tag}: _LazyAutoMapping private API missing {missing}; "
-        f"LAiM/models/_utils.py:resolve_model_class breaks (LAiM#5155)"
+        f"unsloth/models/_utils.py:resolve_model_class breaks (LAiM#5155)"
     )
 
 
@@ -604,5 +604,5 @@ def test_trainer_training_step_model_train_call_is_standalone(tag: str):
         pytest.skip(f"{tag}: Trainer.training_step no longer calls model.train()")
     assert body[max(0, idx - 11) : idx] != "self.model.", (
         f"{tag}: the first `model.train()` in Trainer.training_step is `self.model.train()`; "
-        f"LAiM/models/_utils.py would rewrite it into `self._LAiM_train_if_needed(model)`"
+        f"unsloth/models/_utils.py would rewrite it into `self._LAiM_train_if_needed(model)`"
     )

@@ -24,6 +24,8 @@ import type {
   TrainingMetricsResponse,
   TrainingStatusResponse,
 } from "../types/runtime";
+import { translate } from "@/i18n";
+
 
 function isAbortError(error: unknown): boolean {
   return (
@@ -412,7 +414,7 @@ export async function streamTrainingProgress(options: {
   }
 
   if (!response.body) {
-    throw new Error("Progress stream unavailable");
+    throw new Error(translate("uxFeatures.progressStreamUnavailableokusr"));
   }
 
   if (options.signal.aborted) {

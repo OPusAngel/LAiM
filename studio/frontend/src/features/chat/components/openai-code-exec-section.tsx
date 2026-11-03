@@ -10,6 +10,7 @@
 
 "use client";
 
+import { translate } from "@/i18n";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -282,7 +283,7 @@ export function OpenAICodeExecSection({
         openaiCodeExecContainerId: value,
       });
       if (!updated) {
-        toast.error("Could not update thread.");
+        toast.error(translate("uxChat.couldNotUpdateThread11rni"));
       }
     } catch (err) {
       toast.error(
@@ -295,7 +296,7 @@ export function OpenAICodeExecSection({
     if (!hasCredential) return;
     const name = createName.trim();
     if (!name) {
-      toast.error("Container name is required");
+      toast.error(translate("uxChat.containerNameIsRequireddmn1p"));
       return;
     }
     // TTL inherits from the section-level "Idle timeout" control. Read at submit time so a
@@ -308,7 +309,7 @@ export function OpenAICodeExecSection({
         { providerId: provider.id, apiKey, baseUrl: provider.baseUrl || null },
         { name, ttlMinutes },
       );
-      toast.success(`Created container ${name}`);
+      toast.success(translate("uxChat.createdContaineram6tx", { p1: name }));
       setCreateName("");
       setCreateOpen(false);
       // Optimistic insert plus "Creating" pill. The list is eventually consistent and can omit the
@@ -383,7 +384,7 @@ export function OpenAICodeExecSection({
           updateStoredChatThread(t.id, { openaiCodeExecContainerId: null }),
         ),
       );
-      toast.success(`Deleted container ${name || id}`);
+      toast.success(translate("uxChat.deletedContainerkzqw0", { p1: name || id }));
     } catch (err) {
       toast.error(
         `Delete failed: ${err instanceof Error ? err.message : "Unknown"}`,
@@ -407,12 +408,9 @@ export function OpenAICodeExecSection({
           <label
             htmlFor="openai-container-ttl"
             className="min-w-0 text-ui-13 font-medium leading-[1.25] tracking-nav text-nav-fg"
-          >
-            Idle timeout
-          </label>
+          >{translate("uxChat.idleTimeoutu8f6f")}</label>
           <InfoHint>
-            Minutes a newly-created container stays alive between calls.
-            OpenAI caps this at 20.
+            {translate("uxCopy.minutesANewlyCreated1ppqa")}
           </InfoHint>
         </div>
         <Input
@@ -431,7 +429,7 @@ export function OpenAICodeExecSection({
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center justify-between gap-2">
           <span className="text-ui-11 uppercase tracking-wider text-muted-foreground">
-            Containers
+            {translate("uxChat.containersenckx")}
           </span>
           <Button
             size="sm"
@@ -439,7 +437,7 @@ export function OpenAICodeExecSection({
             className="-mr-1 h-6 w-6 p-0 text-muted-foreground"
             onClick={() => void refresh()}
             disabled={isLoading || !hasCredential}
-            aria-label="Refresh container list"
+            aria-label={translate("uxChat.refreshContainerList82v1r")}
           >
             <RefreshGlyph
               className={`size-3.5 ${isLoading ? "animate-spin" : ""}`}
@@ -450,7 +448,7 @@ export function OpenAICodeExecSection({
           // Quiet placeholder with the same muted border as row cards so an empty section does not look
           // like an active control. The first container is lazy-created on first send.
           <div className="flex h-9 w-full items-center rounded-md border border-dashed border-border/60 bg-muted/20 px-2 text-xs text-muted-foreground">
-            None yet - one will be created on first send.
+            {translate("uxChat.noneYetOneWill1dvoc")}
           </div>
         ) : (
           <ul className="flex max-h-52 flex-col gap-1 overflow-auto">
@@ -487,9 +485,9 @@ export function OpenAICodeExecSection({
                   aria-pressed={isActive}
                   title={
                     canActivate
-                      ? "Use this container for the active thread"
+                      ? translate("uxChat.useThisContainerFor97r7u")
                       : !running
-                        ? `Container is ${statusLabel}`
+                        ? translate("uxChat.containerIso2v17", { p1: statusLabel })
                         : undefined
                   }
                 >
@@ -502,11 +500,11 @@ export function OpenAICodeExecSection({
                       </span>
                       {isPending ? (
                         <span className="shrink-0 rounded-sm bg-muted px-1 py-px text-ui-9 font-medium uppercase tracking-wider text-muted-foreground">
-                          Creating
+                          {translate("uxChat.creating176tw")}
                         </span>
                       ) : isActive ? (
                         <span className="shrink-0 rounded-sm bg-primary/15 px-1 py-px text-ui-9 font-medium uppercase tracking-wider text-primary">
-                          Active
+                          {translate("uxChat.active8qzyh")}
                         </span>
                       ) : statusLabel ? (
                         <span className="shrink-0 rounded-sm bg-muted px-1 py-px text-ui-9 font-medium uppercase tracking-wider text-muted-foreground">
@@ -534,7 +532,7 @@ export function OpenAICodeExecSection({
                       e.stopPropagation();
                       setPendingDelete(c);
                     }}
-                    aria-label={`Delete container ${c.name ?? c.id}`}
+                    aria-label={translate("uxChat.deleteContainerv6ra2", { p1: c.name ?? c.id })}
                   >
                     <TrashIcon className="size-3.5" />
                   </Button>
@@ -552,7 +550,7 @@ export function OpenAICodeExecSection({
         <div className="flex items-center gap-1 rounded-md border border-border/60 bg-muted/20 px-1.5 py-1">
           <Input
             autoFocus
-            placeholder="Name"
+            placeholder={translate("browser.bookmarks.name")}
             value={createName}
             onChange={(e) => setCreateName(e.target.value)}
             onKeyDown={(e) => {
@@ -599,7 +597,7 @@ export function OpenAICodeExecSection({
           disabled={!hasCredential}
         >
           <PlusIcon className="size-3.5 mr-1" />
-          New container
+          {translate("uxChat.newContainer1htgb")}
         </Button>
       )}
 
@@ -620,8 +618,7 @@ export function OpenAICodeExecSection({
               ?
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Threads using this container will fall back to auto-create on
-              their next turn. This cannot be undone.
+              {translate("uxCopy.threadsUsingThisContainer1fnlt")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

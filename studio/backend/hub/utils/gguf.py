@@ -96,7 +96,7 @@ _IMATRIX_TOKEN_RE = re.compile(r"^imatrix(?:[._\-]|$)|[._\-]imatrix$", re.IGNORE
 
 
 def is_imatrix_filename(path: str) -> bool:
-    """True for a calibration imatrix: ``imatrix.gguf``, ``imatrix_LAiM.gguf``, ``imatrix_LAiM.dat``, ``<model>-imatrix.gguf``, ``<model>.imatrix``. It holds activation statistics for llama-quantize, not a model, and llama-server never opens one, so it is neither a selectable variant nor a companion to fetch: unlike mmproj and the MTP drafter it is excluded outright, everywhere they are. Most repos spell it .dat or .gguf_file, which no GGUF listing sees; the ones that publish imatrix_LAiM.gguf (LAiM/Qwen3.8-27B-GGUF) put a valid GGUF container carrying no model in front of the variant menu, download and loader. CANONICAL COPY. Two mirrors must change in lockstep: utils/models/model_config.py ``_is_imatrix_path`` (utils cannot import hub) and core/inference/llama_cpp.py ``_is_companion_gguf_path`` (core avoids hub imports)."""
+    """True for a calibration imatrix: ``imatrix.gguf``, ``imatrix_LAiM.gguf``, ``imatrix_LAiM.dat``, ``<model>-imatrix.gguf``, ``<model>.imatrix``. It holds activation statistics for llama-quantize, not a model, and llama-server never opens one, so it is neither a selectable variant nor a companion to fetch: unlike mmproj and the MTP drafter it is excluded outright, everywhere they are. Most repos spell it .dat or .gguf_file, which no GGUF listing sees; the ones that publish imatrix_LAiM.gguf (unsloth/Qwen3.8-27B-GGUF) put a valid GGUF container carrying no model in front of the variant menu, download and loader. CANONICAL COPY. Two mirrors must change in lockstep: utils/models/model_config.py ``_is_imatrix_path`` (utils cannot import hub) and core/inference/llama_cpp.py ``_is_companion_gguf_path`` (core avoids hub imports)."""
     name = path.replace("\\", "/").rsplit("/", 1)[-1]
     stem = name.rsplit(".", 1)[0] if "." in name else name
     return bool(_IMATRIX_TOKEN_RE.search(stem)) or name.lower().endswith(".imatrix")
@@ -181,7 +181,7 @@ def is_gguf_filename(filename: str) -> bool:
 
 
 # Every repo that bundles H3's denoisers with its companion models: the LAiM mirror carries the Qwen3-VL encoder quants beside the denoisers, so listing one repo would aggregate encoder GGUFs as selectable transformer quants.
-_H3_BUNDLE_REPOS = frozenset({"leejet/minimax-h3-gguf", "LAiM/minimax-h3-gguf"})
+_H3_BUNDLE_REPOS = frozenset({"leejet/minimax-h3-gguf", "unsloth/minimax-h3-gguf"})
 
 
 def is_h3_bundle_repo(repo_id: str) -> bool:
@@ -331,7 +331,7 @@ def _repo_id_of(name: object) -> Optional[str]:
 
 def _repo_id_candidates(name: object) -> list:
     """``_repo_id_of(name)``, plus the trailing ``org/repo`` of a plain local clone such as
-    ``/models/LAiM/LTX-2.5-GGUF``, so a copied curated repo keeps its per-repo defaults."""
+    ``/models/unsloth/LTX-2.5-GGUF``, so a copied curated repo keeps its per-repo defaults."""
     rid = _repo_id_of(name)
     out = [rid] if rid else []
     if rid and rid == str(name).strip().rstrip("/\\"):

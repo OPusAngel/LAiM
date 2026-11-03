@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { toast } from "@/lib/toast";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -271,7 +272,7 @@ export function useCloneGeneration({
   });
   const focusField = (id: string) => () => document.getElementById(id)?.focus();
   const addReference = {
-    label: "Add reference audio",
+    label: translate("uxAudio.addReferenceAudio162xr"),
     onClick: () => referenceHandle.current?.focus(),
   };
   // Model blockers (none loaded, cannot clone) are the host's and come first.
@@ -280,7 +281,7 @@ export function useCloneGeneration({
     "reference-error": [addReference],
     "reference-expired": [
       {
-        label: "Add it again",
+        label: translate("uxAudio.addItAgain1rlob"),
         onClick: () => {
           // Like Remove: the expired clip's transcript goes with it.
           useAudioCloneStore.getState().adoptReference(null);
@@ -290,12 +291,12 @@ export function useCloneGeneration({
     ],
     "reference-text": [
       {
-        label: "Transcribe it",
+        label: translate("uxAudio.transcribeItk36kg"),
         onClick: () => void transcriber.transcribe(reference),
       },
-      { label: "type it", onClick: focusField(CLONE_REFERENCE_TEXT_FIELD_ID) },
+      { get label() { return translate("uxAudio.typeItuah3c"); }, onClick: focusField(CLONE_REFERENCE_TEXT_FIELD_ID) },
     ],
-    text: [{ label: "Write it", onClick: focusField(CLONE_TEXT_FIELD_ID) }],
+    text: [{ label: translate("uxAudio.writeIttw4wl"), onClick: focusField(CLONE_TEXT_FIELD_ID) }],
   };
   const blocker: GenerateBlocker | null = inputBlocker
     ? {
@@ -389,7 +390,7 @@ export function useCloneGeneration({
           ? REFERENCE_EXPIRED_MESSAGE
           : error instanceof Error
             ? error.message
-            : "Voice cloning failed.";
+            : translate("uxAudio.voiceCloningFailed6cqko");
         // Kept under Generate so the reason outlives the toast; expiry is already on the card.
         setGenerationError(message);
         if (!expired) toast.error(message);

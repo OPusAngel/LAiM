@@ -8,6 +8,8 @@ import { fileURLToPath } from "node:url";
 
 import ts from "@typescript/typescript6";
 
+import { enTranslate } from "./helpers/module-stubs.ts";
+
 const adapterPath = fileURLToPath(
   new URL("../src/features/chat/api/chat-adapter.ts", import.meta.url),
 );
@@ -18,10 +20,11 @@ const declaration = source.slice(start, source.indexOf("\n}", start) + 2);
 
 type Candidate = { kind: string; ggufVariant: string | null };
 const resolve = new Function(
+  "translate",
   `${ts.transpileModule(declaration, {
     compilerOptions: { target: ts.ScriptTarget.ES2020 },
   }).outputText}; return resolveAutoLoadCandidate;`,
-)() as (
+)(enTranslate) as (
   source: object,
   remembered: string | null,
   isSkipped: (candidate: Candidate) => boolean,

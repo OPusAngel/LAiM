@@ -28,7 +28,7 @@ def _load_storage_roots():
 
 def test_repo_id_keeps_namespace():
     sr = _load_storage_roots()
-    assert sr.default_run_dir_name("LAiM/gemma-3-4b") == "LAiM_gemma-3-4b"
+    assert sr.default_run_dir_name("unsloth/gemma-3-4b") == "LAiM_gemma-3-4b"
     assert sr.default_run_dir_name("gemma-3-4b") == "gemma-3-4b"
 
 

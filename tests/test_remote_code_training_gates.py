@@ -75,7 +75,7 @@ def test_peft_wrapper_is_looked_through():
 
 def test_unknown_shapes_leave_the_decision_alone():
     assert _forward_accepts_packing_kwargs(None) is True
-    assert _forward_accepts_packing_kwargs("LAiM/Qwen3-0.6B") is True
+    assert _forward_accepts_packing_kwargs("unsloth/Qwen3-0.6B") is True
     assert _forward_accepts_packing_kwargs(object()) is True
 
 
@@ -344,7 +344,7 @@ def test_peft_dispatches_the_4bit_lora_layer_on_the_core():
     import peft.tuners.lora.bnb as lora_bnb
 
     inner = AutoModelForCausalLM.from_pretrained(
-        "LAiM/Llama-3.2-1B-Instruct-bnb-4bit",
+        "unsloth/Llama-3.2-1B-Instruct-bnb-4bit",
         device_map = {"": 0},
         quantization_config = BitsAndBytesConfig(
             load_in_4bit = True, bnb_4bit_compute_dtype = torch.bfloat16

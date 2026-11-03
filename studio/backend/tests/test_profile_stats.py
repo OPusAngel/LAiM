@@ -62,7 +62,7 @@ def _api_receipt(
     prompt: int = 40,
     completion: int = 10,
     total: int = 50,
-    model: str = "LAiM/api-model",
+    model: str = "unsloth/api-model",
     status: str = "completed",
     via_api_key: bool = True,
     subject: str = "external-client",
@@ -131,7 +131,7 @@ def _metadata(
             "completionTokens": completion,
             "totalTokens": prompt + completion,
             "cachedTokens": 5,
-            "modelId": "LAiM/gpt-oss-20b",
+            "modelId": "unsloth/gpt-oss-20b",
         },
         "timing": {
             # The adapter writes streamStartTime as an epoch stamp and
@@ -174,7 +174,7 @@ def test_mixed_chat_and_api_usage_combines_only_activity_metrics(stats_db):
     finally:
         conn.close()
 
-    assert record_api_usage(_api_receipt("api-mixed", today, model = "LAiM/gpt-oss-20b"))
+    assert record_api_usage(_api_receipt("api-mixed", today, model = "unsloth/gpt-oss-20b"))
     stats = compute_profile_stats(days = 7, tz_name = "UTC", subject = "external-client")
     totals = stats["totals"]
 
@@ -198,7 +198,7 @@ def test_mixed_chat_and_api_usage_combines_only_activity_metrics(stats_db):
         "chats": 1,
     }
     assert stats["peakDay"] == {"date": today.date().isoformat(), "tokens": 175}
-    assert stats["models"][0]["id"] == "LAiM/gpt-oss-20b"
+    assert stats["models"][0]["id"] == "unsloth/gpt-oss-20b"
     assert stats["models"][0]["messages"] == 2
     assert stats["models"][0]["tokens"] == 175
 
@@ -245,7 +245,7 @@ def test_api_only_usage_is_durable_idempotent_and_invalidates_cache(stats_db):
     assert after_insert["totals"]["messages"] == 0
     assert after_insert["totals"]["apiTokens"] == 50
     assert after_insert["totals"]["totalTokens"] == 50
-    assert after_insert["models"][0]["id"] == "LAiM/api-model"
+    assert after_insert["models"][0]["id"] == "unsloth/api-model"
     assert after_insert["streak"]["current"] == 1
 
     # A fresh process/schema initialization still reads the same receipt.
@@ -687,7 +687,7 @@ def test_tokens_streaks_and_models_are_aggregated(stats_db):
         _seed_thread(
             conn,
             "t1",
-            "LAiM/gpt-oss-20b",
+            "unsloth/gpt-oss-20b",
             [
                 (today - timedelta(days = 2), _metadata(100, 50, speed = 30.0, tools = 2)),
                 (today - timedelta(days = 1), _metadata(200, 80, speed = 55.0)),
@@ -718,7 +718,7 @@ def test_tokens_streaks_and_models_are_aggregated(stats_db):
         "lastActiveDay": today.date().isoformat(),
     }
     assert stats["peakDay"] == {"date": today.date().isoformat(), "tokens": 420}
-    assert stats["models"][0]["id"] == "LAiM/gpt-oss-20b"
+    assert stats["models"][0]["id"] == "unsloth/gpt-oss-20b"
     assert stats["models"][0]["label"] == "gpt-oss-20b"
     assert stats["models"][0]["messages"] == 3
     assert stats["speed"]["bestTokensPerSecond"] == 120.0
@@ -811,13 +811,13 @@ def test_training_totals(stats_db):
         conn.execute(
             "INSERT INTO training_runs (id, status, model_name, dataset_name, config_json, "
             "started_at, ended_at, total_steps, final_step, final_loss, duration_seconds) "
-            "VALUES ('r1', 'completed', 'LAiM/llama-3-8b', 'tatsu-lab/alpaca', '{}', "
+            "VALUES ('r1', 'completed', 'unsloth/llama-3-8b', 'tatsu-lab/alpaca', '{}', "
             "'2026-01-01T10:00:00', '2026-01-01T11:00:00', 100, 100, 0.42, 3600)",
         )
         conn.execute(
             "INSERT INTO training_runs (id, status, model_name, dataset_name, config_json, "
             "started_at, total_steps, final_step, final_loss, duration_seconds) "
-            "VALUES ('r2', 'error', 'LAiM/qwen3-4b', 'my/dataset', '{}', "
+            "VALUES ('r2', 'error', 'unsloth/qwen3-4b', 'my/dataset', '{}', "
             "'2026-01-02T10:00:00', 100, 20, 1.8, 600)",
         )
         # num_tokens is a running total, so the last row is the run's figure.
@@ -1031,12 +1031,12 @@ def test_recent_run_name_prefers_the_users_rename(stats_db):
     try:
         conn.execute(
             "INSERT INTO training_runs (id, status, model_name, dataset_name, config_json, "
-            "started_at, display_name) VALUES ('named', 'completed', 'LAiM/llama-3-8b', "
+            "started_at, display_name) VALUES ('named', 'completed', 'unsloth/llama-3-8b', "
             "'tatsu-lab/alpaca', '{}', '2026-01-02T10:00:00', 'Support triage v3')",
         )
         conn.execute(
             "INSERT INTO training_runs (id, status, model_name, dataset_name, config_json, "
-            "started_at) VALUES ('plain', 'completed', 'LAiM/qwen3-4b', 'my/dataset', '{}', "
+            "started_at) VALUES ('plain', 'completed', 'unsloth/qwen3-4b', 'my/dataset', '{}', "
             "'2026-01-01T10:00:00')",
         )
         conn.commit()

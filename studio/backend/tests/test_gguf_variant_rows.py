@@ -4,7 +4,7 @@
 """GGUF picker rows describe one checkpoint each.
 
 A repo can publish several checkpoints under one set of quant labels
-(``LAiM/LTX-2.3-GGUF`` ships 63 GGUFs as ``ltx-2.3-22b-dev-*`` at the root,
+(``unsloth/LTX-2.3-GGUF`` ships 63 GGUFs as ``ltx-2.3-22b-dev-*`` at the root,
 ``distilled/ltx-2.3-22b-distilled-*`` and ``distilled-1.1/...``). Keying a row on
 the quant token alone folded those into one row per quant, hid two of the three
 checkpoints and advertised the sum of all three as the row's size.
@@ -177,7 +177,7 @@ def test_shards_stay_one_row_summing_to_the_whole_file():
 
 
 def test_one_quant_shipped_twice_is_not_advertised_twice():
-    """``LAiM/QwQ-32B-GGUF`` carries the same BF16 as ``-BF16`` and ``.BF16``."""
+    """``unsloth/QwQ-32B-GGUF`` carries the same BF16 as ``-BF16`` and ``.BF16``."""
     duplicated = [
         ("BF16/QwQ-32B-BF16-00001-of-00002.gguf", 50),
         ("BF16/QwQ-32B-BF16-00002-of-00002.gguf", 15),
@@ -636,7 +636,7 @@ def test_h3_auto_download_excludes_the_bundled_text_encoders():
             "qwen3vl_32b_minimax_h3-Q4_K_M.gguf",
         ]
     ]
-    variants = _gguf_variants(siblings, "LAiM/MiniMax-H3-GGUF")
+    variants = _gguf_variants(siblings, "unsloth/MiniMax-H3-GGUF")
     assert set(variants) == {gguf_variant_key(name) for name in H3_FILES}
     assert "Q2_K_M" not in variants
     assert "Q4_K_M" not in variants
@@ -891,7 +891,7 @@ def test_deleting_an_h3_variant_requires_the_full_stem(tmp_path):
     from fastapi import HTTPException
     from hub.services.models.deletion import _delete_gguf_variant_from_repos
 
-    repo, snap = _cache_repo(tmp_path, "LAiM/MiniMax-H3-GGUF", H3_FILES)
+    repo, snap = _cache_repo(tmp_path, "unsloth/MiniMax-H3-GGUF", H3_FILES)
     _delete_gguf_variant_from_repos(
         repo.repo_id,
         H3_FILES[0][:-5],

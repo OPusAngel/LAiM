@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   type PointerEvent,
   useCallback,
@@ -179,7 +180,7 @@ export function LocalizedEditCanvas({
     >
       <img
         src={image}
-        alt="Edit source"
+        alt={translate("uxImages.editSource1v7eb")}
         className="block w-full select-none"
         draggable={false}
       />

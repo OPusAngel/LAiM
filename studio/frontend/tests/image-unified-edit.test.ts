@@ -203,8 +203,8 @@ test("prompt helpers edit the visible instruction idempotently", () => {
 test("Qwen-Image-2.1 samples at 25 steps without guidance under every artifact name", () => {
   for (const id of [
     "Qwen/Qwen-Image-2.1",
-    "LAiM/Qwen-Image-2.1-GGUF",
-    "LAiM/Qwen-Image-2.1-FP8",
+    "unsloth/Qwen-Image-2.1-GGUF",
+    "unsloth/Qwen-Image-2.1-FP8",
   ]) {
     assert.deepEqual(defaultsFor(id), { steps: 25, guidance: 1 }, id);
   }

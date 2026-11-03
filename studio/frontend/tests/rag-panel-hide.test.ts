@@ -43,7 +43,7 @@ test("header controls use the app's tooltip, not the browser's title", () => {
 
 test("the RAG tag's menu offers Show files, with the count, while the panel is hidden", () => {
   const menu = readSrc("features/rag/components/knowledge-base-composer-button.tsx");
-  assert.match(menu, /\{ragPanelHidden && hasFilesPanel \? \([\s\S]*?onSelect=\{\(\) => setRagPanelHidden\(false\)\}[\s\S]*?Show files[\s\S]*?\{ragPanelFileCount\}/);
+  assert.match(menu, /\{ragPanelHidden && hasFilesPanel \? \([\s\S]*?onSelect=\{\(\) => setRagPanelHidden\(false\)\}[\s\S]*?translate\("uxRag\.showFilesbmi4o"\)[\s\S]*?\{ragPanelFileCount\}/);
   assert.match(bar, /setRagPanelFileCount\(fileCount\);\n\s*\}, \[fileCount\]\);/);
 });
 

@@ -6,8 +6,8 @@ import test from "node:test";
 
 import { readSrc } from "./helpers/kit.ts";
 
-const { IMAGE_SENTINEL_TOOLS, SANDBOX_FILE_TOOLS, SANDBOX_RUN_TOOLS, hasCreatedFiles } =
-  await import("../src/components/assistant-ui/sandbox-files.ts");
+const { IMAGE_SENTINEL_TOOLS, WORKDIR_FILE_TOOLS, WORKDIR_RUN_TOOLS, hasCreatedFiles } =
+  await import("../src/components/assistant-ui/workdir-files.ts");
 
 test("only the tools that emit the image envelope are in the set", () => {
   for (const emitter of ["python", "terminal", "code_execution"]) {
@@ -16,16 +16,16 @@ test("only the tools that emit the image envelope are in the set", () => {
   for (const reader of ["mcp__fs__read_file", "web_search", "search_knowledge_base", ""]) {
     assert.ok(!IMAGE_SENTINEL_TOOLS.has(reader), reader);
   }
-  for (const sandbox of SANDBOX_RUN_TOOLS) {
-    assert.ok(IMAGE_SENTINEL_TOOLS.has(sandbox), `${sandbox} emits both envelopes`);
+  for (const workdir of WORKDIR_RUN_TOOLS) {
+    assert.ok(IMAGE_SENTINEL_TOOLS.has(workdir), `${workdir} emits both envelopes`);
   }
   // edit_file emits the file envelope only.
   assert.ok(!IMAGE_SENTINEL_TOOLS.has("edit_file"));
 });
 
 test("a file edit_file created gets the files row", () => {
-  assert.ok(SANDBOX_FILE_TOOLS.has("edit_file"));
-  assert.ok(!SANDBOX_RUN_TOOLS.has("edit_file"));
+  assert.ok(WORKDIR_FILE_TOOLS.has("edit_file"));
+  assert.ok(!WORKDIR_RUN_TOOLS.has("edit_file"));
   const wrapped = {
     text: "Created index.html (2 lines)",
     images: [],
@@ -40,7 +40,7 @@ test("a file edit_file created gets the files row", () => {
 // Asserted against the source like the other chat-adapter tests: importing the adapter
 // drags in the whole app. The backend keeps a well-formed `__IMAGES__` line from a tool
 // that does not emit the envelope as content the model reads, so the card must not slice
-// it off and fetch a sandbox file that was never written.
+// it off and fetch a workdir file that was never written.
 test("the adapter slices the image envelope only for the tools that emit it", () => {
   const source = readSrc("features/chat/api/chat-adapter.ts");
   const gate = source.indexOf(

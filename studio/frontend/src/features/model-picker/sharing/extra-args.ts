@@ -14,6 +14,8 @@ import {
   N_BATCH_MAX,
   N_BATCH_MIN,
 } from "../model-config/per-model-config";
+import { translate } from "@/i18n";
+
 
 type ValueRule = (value: string) => boolean;
 const decimal = /^-?(?:0|[1-9]\d*)(?:\.\d+)?$/;
@@ -130,10 +132,10 @@ function sharedValueError(
   if (token.includes("=")) {
     return permits === null
       ? `${flag} does not take a value.`
-      : `Write ${flag} and its value as two arguments.`;
+      : translate("uxModelpicker.writeAndItsValuegggpx", { p1: flag });
   }
   if (!flagName.test(token)) {
-    return "Extra arguments contain an unexpected token.";
+    return translate("uxModelpicker.extraArgumentsContainAnfqcnp");
   }
   if (permits === null) {
     return null;
@@ -156,7 +158,7 @@ function sharePolicyError(value: string[]): string | null {
     if (!policy) {
       return flag !== null && flag === flag.trim() && flagName.test(flag)
         ? `${flag} is not supported in shared links.`
-        : "Extra arguments contain an unexpected token.";
+        : translate("uxModelpicker.extraArgumentsContainAnfqcnp");
     }
     if (seen.has(policy.canonical)) {
       return `${policy.canonical} is specified more than once.`;
@@ -177,7 +179,7 @@ function sharePolicyError(value: string[]): string | null {
 
 export function sharedExtraArgsError(value: unknown): string | null {
   if (!boundedTokens(value)) {
-    return `Extra arguments must be a list of at most ${EXTRA_ARGS_MAX_TOKENS} text tokens, each at most ${EXTRA_ARGS_MAX_BYTES} characters.`;
+    return translate("uxModelpicker.extraArgumentsMustBenpydp", { p1: EXTRA_ARGS_MAX_TOKENS, p2: EXTRA_ARGS_MAX_BYTES });
   }
   return sharePolicyError(value) ?? upstreamError(value);
 }

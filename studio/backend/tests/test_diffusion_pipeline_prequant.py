@@ -26,7 +26,7 @@ from core.inference.diffusion_memory import DeviceMemory
 MIB = 1024 * 1024
 
 Z_IMAGE_REPO = "Tongyi-MAI/Z-Image-Turbo"
-PREQUANT_REPO = "LAiM/Z-Image-Turbo-FP8"
+PREQUANT_REPO = "unsloth/Z-Image-Turbo-FP8"
 PREQUANT_FILE = "Z-Image-Turbo-FP8.safetensors"
 PREQUANT_BYTES = 6000 * MIB
 
@@ -454,7 +454,7 @@ def _settle_backend_walking(monkeypatch, *, artifacts: tuple, candidates: tuple)
         dmod,
         "denoiser_prequant_source",
         lambda fam, scheme, **_k: (
-            ("LAiM/Qwen-Image-FP8", f"{scheme}.pt") if scheme in artifacts else None
+            ("unsloth/Qwen-Image-FP8", f"{scheme}.pt") if scheme in artifacts else None
         ),
     )
     monkeypatch.setattr(
@@ -540,7 +540,7 @@ def test_auto_planning_passes_the_base_and_prequant_probe(monkeypatch):
     monkeypatch.setattr(
         dmod,
         "denoiser_prequant_source",
-        lambda fam, scheme, **_k: ("LAiM/Z-Image-Turbo-NVFP4", "z.safetensors")
+        lambda fam, scheme, **_k: ("unsloth/Z-Image-Turbo-NVFP4", "z.safetensors")
         if scheme == "nvfp4"
         else None,
     )
@@ -971,14 +971,14 @@ def test_the_artifact_label_names_the_file_that_really_loaded():
     from core.inference.diffusion_denoiser_prequant import prequant_artifact_label
 
     source = types.SimpleNamespace(
-        kind = "repo", location = "LAiM/Z-Image-Turbo-FP8", filename = "Z-Image-Turbo-FP8.pt"
+        kind = "repo", location = "unsloth/Z-Image-Turbo-FP8", filename = "Z-Image-Turbo-FP8.pt"
     )
     assert prequant_artifact_label(source) == (
-        "prequant:LAiM/Z-Image-Turbo-FP8/Z-Image-Turbo-FP8.pt"
+        "prequant:unsloth/Z-Image-Turbo-FP8/Z-Image-Turbo-FP8.pt"
     )
     loaded = types.SimpleNamespace(_LAiM_prequant_path = "/cache/blobs/Z-Image-Turbo-fp8.pt")
     assert prequant_artifact_label(source, loaded) == (
-        "prequant:LAiM/Z-Image-Turbo-FP8/Z-Image-Turbo-fp8.pt"
+        "prequant:unsloth/Z-Image-Turbo-FP8/Z-Image-Turbo-fp8.pt"
     )
     local = types.SimpleNamespace(kind = "path", location = "/models/mine.pt", filename = None)
     assert prequant_artifact_label(local, loaded) == "prequant:/models/mine.pt"
@@ -1060,9 +1060,9 @@ def test_an_explicit_scheme_with_no_artifact_falls_to_the_in_memory_path(fake_ru
 @pytest.mark.parametrize(
     "family, repo",
     [
-        ("z-image", "LAiM/Z-Image-Turbo-FP8"),
-        ("flux.1-schnell", "LAiM/FLUX.1-schnell-FP8"),
-        ("qwen-image", "LAiM/Qwen-Image-FP8"),
+        ("z-image", "unsloth/Z-Image-Turbo-FP8"),
+        ("flux.1-schnell", "unsloth/FLUX.1-schnell-FP8"),
+        ("qwen-image", "unsloth/Qwen-Image-FP8"),
     ],
 )
 def test_the_rebuilt_fp8_artifacts_are_listed_for_both_schemes(family, repo):
@@ -1649,11 +1649,11 @@ def test_an_offline_pick_finds_released_shards_under_the_mirror(monkeypatch):
     backend = _settle_backend(monkeypatch)
     _offload_when_bf16_sized(monkeypatch, "none")
     _uncompilable(monkeypatch)
-    monkeypatch.setattr(dmod, "prefer_ungated_mirror", lambda base, *_a, **_k: "LAiM/mirror")
+    monkeypatch.setattr(dmod, "prefer_ungated_mirror", lambda base, *_a, **_k: "unsloth/mirror")
     monkeypatch.setattr(
         DiffusionBackend,
         "_released_transformer_cached",
-        staticmethod(lambda base: base == "LAiM/mirror"),
+        staticmethod(lambda base: base == "unsloth/mirror"),
     )
     assert _settle(backend, local_files_only = True) is None
 
@@ -1743,7 +1743,7 @@ def test_an_offline_pick_checks_only_the_repo_the_load_reads(monkeypatch):
     monkeypatch.setattr(
         DiffusionBackend,
         "_released_transformer_cached",
-        staticmethod(lambda base: base == "LAiM/mirror"),
+        staticmethod(lambda base: base == "unsloth/mirror"),
     )
     assert _settle(backend, local_files_only = True) == "fp8"
 

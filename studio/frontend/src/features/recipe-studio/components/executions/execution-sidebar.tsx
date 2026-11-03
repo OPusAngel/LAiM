@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import type { ReactElement } from "react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -32,13 +33,13 @@ export function ExecutionSidebar({
     <aside className="w-72 shrink-0 overflow-y-auto border-r border-border/60 bg-card/20 max-md:max-h-48 max-md:w-full max-md:border-r-0 max-md:border-b">
       <div className="flex items-center justify-between  border-border/60 px-3 py-2">
         <p className="text-xs font-semibold uppercase text-muted-foreground">
-          Runs
+          {translate("settings.profile.stats.trainingRuns")}
         </p>
       </div>
       <div className="h-[calc(100%-45px)] space-y-2 overflow-auto p-2">
         {executions.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border/60 p-3 text-xs text-muted-foreground">
-            No runs yet.
+            {translate("uxRecipestudio.noRunsYetiruib")}
           </div>
         ) : (
           executions.map((execution) => {
@@ -71,13 +72,11 @@ export function ExecutionSidebar({
                     {formatStatus(execution.status)}
                   </Badge>
                 </div>
-                <p className="text-xs text-muted-foreground">{execution.rows} rows</p>
+                <p className="text-xs text-muted-foreground">{translate("uxRecipestudio.rows7646q", { p1: execution.rows })}</p>
                 {isExecutionInProgress(execution.status) &&
                   typeof execution.batch?.total === "number" &&
                   execution.batch.total > 1 && (
-                    <p className="text-xs text-muted-foreground">
-                      Batch {execution.batch.idx ?? "--"}/{execution.batch.total}
-                    </p>
+                    <p className="text-xs text-muted-foreground">{translate("uxRecipestudio.batch5dfo5", { p1: execution.batch.idx ?? "--", p2: execution.batch.total })}</p>
                   )}
                 <p className="text-xs text-muted-foreground">
                   {formatTimestamp(execution.createdAt)}

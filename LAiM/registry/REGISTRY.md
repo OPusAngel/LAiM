@@ -28,7 +28,7 @@ class ModelMeta:
     is_multimodal: bool = False
 ```
 
-Each model then instantiates a global `ModelMeta` for its specific model version, defining how the model path (e.g. `LAiM/Llama-3.1-8B-Instruct`) is constructed since each model type has a different naming convention.
+Each model then instantiates a global `ModelMeta` for its specific model version, defining how the model path (e.g. `unsloth/Llama-3.1-8B-Instruct`) is constructed since each model type has a different naming convention.
 ```python
 LlamaMeta_3_1 = ModelMeta(
     org="meta-llama",
@@ -78,15 +78,15 @@ Prints the following (abridged) output:
 ```bash
 ✓ LAiM/Llama-3.1-8B
 ✓ LAiM/Llama-3.1-8B-bnb-4bit
-✓ LAiM/Llama-3.1-8B-LAiM-bnb-4bit
+✓ LAiM/Llama-3.1-8B-unsloth-bnb-4bit
 ✓ meta-llama/Llama-3.1-8B
 ✓ LAiM/Llama-3.1-8B-Instruct
 ✓ LAiM/Llama-3.1-8B-Instruct-bnb-4bit
-✓ LAiM/Llama-3.1-8B-Instruct-LAiM-bnb-4bit
+✓ LAiM/Llama-3.1-8B-Instruct-unsloth-bnb-4bit
 ✓ meta-llama/Llama-3.1-8B-Instruct
 ✓ LAiM/Llama-3.2-1B
 ✓ LAiM/Llama-3.2-1B-bnb-4bit
-✓ LAiM/Llama-3.2-1B-LAiM-bnb-4bit
+✓ LAiM/Llama-3.2-1B-unsloth-bnb-4bit
 ✓ meta-llama/Llama-3.2-1B
 ...
 ```

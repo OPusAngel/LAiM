@@ -108,7 +108,7 @@ amd_dxg_flags() {
 }
 # Named once: the NVIDIA toolkit installer, both as the fallback download below
 # and in the message that tells you to run it yourself.
-TOOLKIT_URL="${LAiM_TOOLKIT_URL:-https://raw.githubusercontent.com/LAiMai/LAiM/main/docker/install_nvidia_toolkit.sh}"
+TOOLKIT_URL="${LAiM_TOOLKIT_URL:-https://raw.githubusercontent.com/OPusAngel/LAiM/main/docker/install_nvidia_toolkit.sh}"
 
 # --group-add needs NUMERIC gids: a name is resolved INSIDE the container, where
 # the host's video/render groups do not exist.

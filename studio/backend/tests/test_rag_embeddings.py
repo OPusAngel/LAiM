@@ -275,38 +275,38 @@ def test_picker_plans_embeddinggemma_on_llama_server(monkeypatch):
     monkeypatch.setattr(config, "effective_embedding_model", lambda: effective["model"])
     plan = embeddings.resolved_backend_for_model
 
-    assert plan("LAiM/embeddinggemma-300m") == "llama-server"
-    assert plan("LAiM/embeddinggemma-2") == "llama-server"
+    assert plan("unsloth/embeddinggemma-300m") == "llama-server"
+    assert plan("unsloth/embeddinggemma-2") == "llama-server"
     # Exact ids: a fine-tune need not publish the GGUF the preference relies on.
     assert plan("org/embeddinggemma-300m-finetune") == "sentence-transformers"
     # Only the plan: the runtime follows the saved record, so an env-configured model keeps its space.
-    assert embeddings._resolve_auto_for_model("LAiM/embeddinggemma-300m") == (
+    assert embeddings._resolve_auto_for_model("unsloth/embeddinggemma-300m") == (
         "sentence-transformers"
     )
     # The model in effect without a record runs on that default, and its Settings status must say so.
-    effective["model"] = "LAiM/embeddinggemma-300m"
-    assert plan("LAiM/embeddinggemma-300m") == "sentence-transformers"
+    effective["model"] = "unsloth/embeddinggemma-300m"
+    assert plan("unsloth/embeddinggemma-300m") == "sentence-transformers"
     effective["model"] = "org/previous-embedder"
 
     # A model saved on sentence-transformers keeps the space its documents were indexed in.
     stored["backend"] = "sentence-transformers"
-    assert plan("LAiM/embeddinggemma-300m") == "sentence-transformers"
+    assert plan("unsloth/embeddinggemma-300m") == "sentence-transformers"
     stored["backend"] = None
 
     monkeypatch.setattr(config, "EMBED_DEVICE", "gpu")
-    assert plan("LAiM/embeddinggemma-300m") == "sentence-transformers"
+    assert plan("unsloth/embeddinggemma-300m") == "sentence-transformers"
     monkeypatch.setattr(config, "EMBED_DEVICE", "auto")
 
     monkeypatch.setenv("RAG_EMBED_GGUF_REPO", "org/other-GGUF")
-    assert plan("LAiM/embeddinggemma-300m") == "sentence-transformers"
+    assert plan("unsloth/embeddinggemma-300m") == "sentence-transformers"
     monkeypatch.delenv("RAG_EMBED_GGUF_REPO")
 
     monkeypatch.setattr(config, "EMBED_BACKEND", "sentence-transformers")
-    assert plan("LAiM/embeddinggemma-300m") == "sentence-transformers"
+    assert plan("unsloth/embeddinggemma-300m") == "sentence-transformers"
     monkeypatch.setattr(config, "EMBED_BACKEND", "auto")
 
     monkeypatch.setattr(embeddings, "_llama_server_runtime_available", lambda: False)
-    assert plan("LAiM/embeddinggemma-300m") == "sentence-transformers"
+    assert plan("unsloth/embeddinggemma-300m") == "sentence-transformers"
 
 
 def test_a_resolution_that_never_asked_the_hardware_keeps_nothing(monkeypatch):
@@ -599,7 +599,7 @@ def test_float16_unsafe_model_avoids_float16(monkeypatch, tmp_path, device, nati
     monkeypatch.setattr(embeddings, "_load_device", lambda: device)
     monkeypatch.setattr(dtc, "native_bf16_supported", lambda: native)
     monkeypatch.setattr(dtc, "native_bf16_supported_xpu", lambda: native)
-    _shared_setup_2(monkeypatch, tmp_path, name = "LAiM/EmbeddingGemma-300m")
+    _shared_setup_2(monkeypatch, tmp_path, name = "unsloth/EmbeddingGemma-300m")
 
     assert observed["device"] == device
     assert list(observed["model_kwargs"].values()) == [expected]
@@ -1164,7 +1164,7 @@ def test_a_local_gguf_selects_llama_even_on_a_gpu_box(monkeypatch, tmp_path):
     # A folder holding one counts the same way.
     assert embeddings._resolve_auto_for_model(str(tmp_path)) == "llama-server"
     # An ordinary repo id is untouched, and costs no filesystem walk.
-    assert embeddings._resolve_auto_for_model("LAiM/bge-small-en-v1.5") == (
+    assert embeddings._resolve_auto_for_model("unsloth/bge-small-en-v1.5") == (
         "sentence-transformers"
     )
 

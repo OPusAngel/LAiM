@@ -69,9 +69,9 @@ test("reasoning budget and message round-trip through per-model storage", () => 
     reasoningBudget: 2048,
     reasoningBudgetMessage: "Reasoning budget exhausted",
   };
-  assert.equal(savePerModelConfig("LAiM/Test-GGUF", "Q4_K_M", config), true);
+  assert.equal(savePerModelConfig("unsloth/Test-GGUF", "Q4_K_M", config), true);
 
-  const resolved = resolveInitialConfig("LAiM/Test-GGUF", "Q4_K_M");
+  const resolved = resolveInitialConfig("unsloth/Test-GGUF", "Q4_K_M");
   assert.equal(resolved.remembered, true);
   assert.equal(resolved.config.reasoningBudget, 2048);
   assert.equal(
@@ -91,7 +91,7 @@ test("a record only claims v6 when it carries a reasoning setting", () => {
     )[0]?.version;
   store.clear();
   assert.equal(
-    savePerModelConfig("LAiM/Test-GGUF", "Q4_K_M", {
+    savePerModelConfig("unsloth/Test-GGUF", "Q4_K_M", {
       ...DEFAULT_PER_MODEL_CONFIG,
       nBatch: 512,
     }),
@@ -100,7 +100,7 @@ test("a record only claims v6 when it carries a reasoning setting", () => {
   assert.equal(storedVersion(), 2);
   store.clear();
   assert.equal(
-    savePerModelConfig("LAiM/Test-GGUF", "Q4_K_M", {
+    savePerModelConfig("unsloth/Test-GGUF", "Q4_K_M", {
       ...DEFAULT_PER_MODEL_CONFIG,
       reasoningBudget: 2048,
     }),

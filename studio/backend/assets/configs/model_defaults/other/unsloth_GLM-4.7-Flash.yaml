@@ -1,6 +1,6 @@
-# Model defaults for LAiM/GLM-4.7-Flash
+# Model defaults for unsloth/GLM-4.7-Flash
 # Based on GLM_Flash_A100(80GB).py
-# Also applies to: LAiM/GLM-4.7-Flash-LAiM-bnb-4bit, LAiM/GLM-4.7-Flash-bnb-4bit, THUDM/GLM-4.7-Flash
+# Also applies to: unsloth/GLM-4.7-Flash-unsloth-bnb-4bit, unsloth/GLM-4.7-Flash-bnb-4bit, THUDM/GLM-4.7-Flash
 
 training:
   max_seq_length: 2048
@@ -16,7 +16,7 @@ training:
   random_seed: 3407
   packing: false
   train_on_completions: true
-  gradient_checkpointing: "LAiM"
+  gradient_checkpointing: "unsloth"
   optim: "adamw_8bit"
   lr_scheduler_type: "linear"
 

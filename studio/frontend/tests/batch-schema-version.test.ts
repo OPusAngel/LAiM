@@ -16,7 +16,7 @@ const { savePerModelConfig, resolveInitialConfig } = await import(
   "../src/features/model-picker/model-config/per-model-config.ts"
 );
 
-const MODEL = "LAiM/Repo-GGUF";
+const MODEL = "unsloth/Repo-GGUF";
 
 function config(nBatch: number | null, nUbatch: number | null = null) {
   return {

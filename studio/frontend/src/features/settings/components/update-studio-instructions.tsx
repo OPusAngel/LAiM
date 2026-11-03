@@ -3,7 +3,7 @@
 
 import { SegmentedPill } from "@/components/segmented-control";
 import { copyToClipboard } from "@/lib/copy-to-clipboard";
-import { useT } from "@/i18n";
+import { translate, useT } from "@/i18n";
 import { Tick02Icon } from "@/lib/tick-icon";
 import { cn } from "@/lib/utils";
 import {
@@ -272,13 +272,13 @@ export function UpdateStudioInstructions({
         <div className="hub-tab-toggle inline-flex h-8 shrink-0 items-center rounded-full">
           <ShellToggleButton
             active={!windows}
-            label="MacOS / Linux"
+            label={translate("uxSettings.macOSLinuxi61uv")}
             pillGroup={`${pillId}-shell`}
             onClick={() => setShellOverride("unix")}
           />
           <ShellToggleButton
             active={windows}
-            label="Windows"
+            label={translate("uxSettings.windows1qfh5")}
             pillGroup={`${pillId}-shell`}
             onClick={() => setShellOverride("windows")}
           />

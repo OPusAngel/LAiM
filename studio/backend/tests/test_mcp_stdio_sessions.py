@@ -772,7 +772,7 @@ def test_close_stdio_sessions_by_url(fake_clients):
 
 
 def test_execute_tool_mcp_scope_is_per_thread(tmp_path, monkeypatch):
-    # session_id is the sandbox id and can be shared project-wide; the stdio
+    # session_id is the workdir id and can be shared project-wide; the stdio
     # session scope must also carry the per-conversation thread id.
     from core.inference import tools as tools_mod
     from storage import mcp_servers_db

@@ -599,8 +599,8 @@ def setup_logging(log_file: Path) -> None:
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--base-dir", default = "/mnt/disks/LAiMai/ubuntu/workspace_34/github_scraper")
-    ap.add_argument("--repos", nargs = "+", default = ["LAiMai/LAiM", "LAiMai/LAiM-zoo"])
+    ap.add_argument("--base-dir", default = "/mnt/disks/unslothai/ubuntu/workspace_34/github_scraper")
+    ap.add_argument("--repos", nargs = "+", default = ["OPusAngel/LAiM", "OPusAngel/LAiM-zoo"])
     ap.add_argument("--trial", action = "store_true", help = "Small trial run")
     ap.add_argument(
         "--only",

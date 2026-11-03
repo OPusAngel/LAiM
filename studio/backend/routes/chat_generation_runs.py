@@ -242,7 +242,7 @@ def _sanitize_request(payload: CreateChatGenerationRun) -> dict[str, Any]:
     sanitized = request.model_dump(mode = "json", exclude_none = True)
     if request.permission_mode == "off" and not request._off_confirm_opt_out:
         # The validator forces confirm_tool_calls=False for "off"; persisted, the replay would read that as the
-        # caller's explicit opt-out and never arm the no-OS-sandbox confirm gate.
+        # caller's explicit opt-out and never arm the high-risk-only confirm gate.
         sanitized.pop("confirm_tool_calls", None)
     for field in _EXTERNAL_ROUTING_FIELDS:
         sanitized.pop(field, None)

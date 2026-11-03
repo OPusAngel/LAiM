@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
+
 // Long pastes become a .txt attachment instead of flooding the composer.
 // TextAttachmentAdapter still sends the full text to the model.
 
@@ -25,7 +27,7 @@ const PASTED_TEXT_NAME_MAX_CHARS = 32;
 const PASTED_TEXT_NAME_SCAN_CHARS = 256;
 // Blank lines are stepped over one at a time, so the walk needs its own bound.
 const PASTED_TEXT_NAME_TOTAL_SCAN_CHARS = 64 * 1024;
-const PASTED_TEXT_FALLBACK_NAME = "Pasted text";
+const pastedTextFallbackName = () => translate("uxComponents.pastedTextxmpxr");
 const PASTED_TEXT_TAG = "pasted_text";
 // A preview is for reading, so render an opening rather than megabytes.
 export const PASTED_TEXT_PREVIEW_MAX_CHARS = 100_000;
@@ -160,7 +162,7 @@ export function pastedTextFileName(text: string): string {
     }
   }
   snippet = snippet.replace(/[\s.]+$/, "");
-  return `${snippet.length > 0 ? snippet : PASTED_TEXT_FALLBACK_NAME}.txt`;
+  return `${snippet.length > 0 ? snippet : pastedTextFallbackName()}.txt`;
 }
 
 export function createPastedTextFile(text: string): File {

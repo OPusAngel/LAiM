@@ -20,8 +20,8 @@ from test_llama_cpp_mtp_detection import (  # noqa: F401 (stubs are installed on
     _flags_dict,
 )
 
-_SUB_3B = "LAiM/Qwen3.5-0.8B-MTP-GGUF"
-_PLAIN = "LAiM/Qwen3-4B-Instruct-GGUF"
+_SUB_3B = "unsloth/Qwen3.5-0.8B-MTP-GGUF"
+_PLAIN = "unsloth/Qwen3-4B-Instruct-GGUF"
 
 
 def _backend(monkeypatch, *, eagle3 = True):
@@ -133,7 +133,7 @@ def test_trained_mtp_head_lifts_the_mla_default_off(monkeypatch, tmp_path):
     backend._nextn_predict_layers = 1
     backend._kv_lora_rank = 512
     monkeypatch.delenv("LAiM_MLA_MTP_ENABLED", raising = False)
-    model = "LAiM/GLM-4.7-Flash-GGUF"
+    model = "unsloth/GLM-4.7-Flash-GGUF"
     stock = _flags_dict(_flags(backend, "auto", model, None))
     assert stock.get("--spec-type") != "draft-mtp"
     path = _export(tmp_path, {"strategy": "mtp", "mtp_trained": True, "files": []})

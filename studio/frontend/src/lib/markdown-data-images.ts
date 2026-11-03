@@ -169,7 +169,7 @@ export function withLiteralUnknownTags(
   return literalTagPipeline(allowedTags, [], [], true);
 }
 
-/** Keep data images, keep tags outside the schema as text, resolve sandbox paths before URL hardening. */
+/** Keep data images, keep tags outside the schema as text, resolve workdir paths before URL hardening. */
 export function withDataImageSupport(
   allowedTags: Record<string, string[]>,
   beforeHarden: Pluggable[] = [],

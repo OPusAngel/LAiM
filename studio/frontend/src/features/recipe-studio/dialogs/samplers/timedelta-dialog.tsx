@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -47,9 +48,9 @@ export function TimedeltaDialog({
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="grid gap-1.5">
           <FieldLabel
-            label="dt_min"
+            label={translate("uxRecipestudio.dtMin14wej")}
             htmlFor={dtMinId}
-            hint="Minimum offset from reference datetime."
+            hint={translate("uxRecipestudio.minimumOffsetFromReferenceskhuc")}
           />
           <Input
             id={dtMinId}
@@ -61,9 +62,9 @@ export function TimedeltaDialog({
         </div>
         <div className="grid gap-1.5">
           <FieldLabel
-            label="dt_max"
+            label={translate("uxRecipestudio.dtMaxyteq3")}
             htmlFor={dtMaxId}
-            hint="Maximum offset from reference datetime."
+            hint={translate("uxRecipestudio.maximumOffsetFromReference12tsy")}
           />
           <Input
             id={dtMaxId}
@@ -76,9 +77,9 @@ export function TimedeltaDialog({
       </div>
       <div className="grid gap-1.5">
         <FieldLabel
-          label="Unit"
+          label={translate("uxRecipestudio.unitt3mdr")}
           htmlFor={unitId}
-          hint="Offset unit. D/h/m/s."
+          hint={translate("uxRecipestudio.offsetUnitDH19di0")}
         />
         <Select
           value={config.timedelta_unit ?? "D"}
@@ -87,7 +88,7 @@ export function TimedeltaDialog({
           }
         >
           <SelectTrigger className="nodrag w-full" id={unitId}>
-            <SelectValue placeholder="Select unit" />
+            <SelectValue placeholder={translate("uxRecipestudio.selectUnit15rxz")} />
           </SelectTrigger>
           <SelectContent>
             {TIMEDELTA_UNITS.map((unit) => (
@@ -100,9 +101,9 @@ export function TimedeltaDialog({
       </div>
       <div className="grid gap-1.5">
         <FieldLabel
-          label="Reference datetime column"
+          label={translate("uxRecipestudio.referenceDatetimeColumn1n480")}
           htmlFor={referenceId}
-          hint="Datetime column used as anchor before offset."
+          hint={translate("uxRecipestudio.datetimeColumnUsedAs4c6uq")}
         />
         <Select
           value={config.reference_column_name?.trim() || NONE_VALUE}
@@ -111,7 +112,7 @@ export function TimedeltaDialog({
           }
         >
           <SelectTrigger className="nodrag w-full" id={referenceId}>
-            <SelectValue placeholder="Select datetime column" />
+            <SelectValue placeholder={translate("uxRecipestudio.selectDatetimeColumn1hi0x")} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value={NONE_VALUE}>None</SelectItem>

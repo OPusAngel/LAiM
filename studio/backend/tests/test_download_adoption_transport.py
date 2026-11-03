@@ -18,26 +18,26 @@ def _claim(registry, key, transport):
 
 def test_a_running_job_reports_the_transport_it_started_on():
     registry = DownloadRegistry()
-    assert _claim(registry, "LAiM/Qwen3-4B-GGUF", "xet") == (True, "running")
+    assert _claim(registry, "unsloth/Qwen3-4B-GGUF", "xet") == (True, "running")
 
     # The second client asked for HTTP; the claim is refused and it adopts.
-    accepted, state = _claim(registry, "LAiM/Qwen3-4B-GGUF", "http")
+    accepted, state = _claim(registry, "unsloth/Qwen3-4B-GGUF", "http")
     assert accepted is False and state == "running"
-    assert registry.adoptable("LAiM/Qwen3-4B-GGUF") is True
+    assert registry.adoptable("unsloth/Qwen3-4B-GGUF") is True
     # What it must be told, rather than the http it asked for: pausing a Xet
     # run promises a resume that does not exist.
-    assert registry.job_transport("LAiM/Qwen3-4B-GGUF") == "xet"
+    assert registry.job_transport("unsloth/Qwen3-4B-GGUF") == "xet"
 
 
 def test_an_unknown_job_has_no_transport_to_report():
     registry = DownloadRegistry()
-    assert registry.job_transport("LAiM/never-started") is None
+    assert registry.job_transport("unsloth/never-started") is None
 
 
 def test_a_job_claimed_without_metadata_reports_nothing():
     registry = DownloadRegistry()
-    assert registry.claim("LAiM/bare", "http")[0] is True
-    assert registry.job_transport("LAiM/bare") is None
+    assert registry.claim("unsloth/bare", "http")[0] is True
+    assert registry.job_transport("unsloth/bare") is None
 
 
 def test_a_fresh_start_reports_the_transport_the_backend_resolved(monkeypatch):
@@ -74,7 +74,7 @@ def test_a_fallback_run_publishes_the_marker_that_decides_its_stop_control():
     from hub.services.download_lifecycle import active_download_refs
 
     registry = DownloadRegistry()
-    key = "LAiM/Qwen3-4B-GGUF"
+    key = "unsloth/Qwen3-4B-GGUF"
     assert (
         registry.claim(
             key,
@@ -95,7 +95,7 @@ def test_an_ordinary_run_publishes_no_cancel_marker():
     from hub.services.download_lifecycle import active_download_refs
 
     registry = DownloadRegistry()
-    key = "LAiM/Qwen3-4B-GGUF"
+    key = "unsloth/Qwen3-4B-GGUF"
     registry.claim(key, "http", repo_type = "model", repo_id = key)
     ref = active_download_refs(registry, key, with_variant = True)[0]
     assert ref.cancel_transport is None
@@ -105,7 +105,7 @@ def test_an_adopted_fallback_run_reports_its_marker_to_the_new_client():
     """The start response is the only source for that adoption path, so it has
     to carry the marker as well as the live transport."""
     registry = DownloadRegistry()
-    key = "LAiM/Qwen3-4B-GGUF"
+    key = "unsloth/Qwen3-4B-GGUF"
     registry.claim(
         key,
         "http",
@@ -121,7 +121,7 @@ def test_an_adopted_fallback_run_reports_its_marker_to_the_new_client():
 
 def test_an_ordinary_adopted_run_reports_no_marker():
     registry = DownloadRegistry()
-    key = "LAiM/Qwen3-4B-GGUF"
+    key = "unsloth/Qwen3-4B-GGUF"
     registry.claim(key, "xet", repo_type = "model", repo_id = key)
     assert registry.job_cancel_transport(key) is None
-    assert registry.job_cancel_transport("LAiM/never-started") is None
+    assert registry.job_cancel_transport("unsloth/never-started") is None

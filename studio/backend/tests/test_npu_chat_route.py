@@ -1329,7 +1329,7 @@ def test_the_npu_resident_answers_to_its_own_names_only(monkeypatch):
     for name in (model.model_path, model.id):
         assert routes._loaded_satisfies(name)
         assert routes._loaded_identity_satisfies(name)
-    for name in ("lemonade:gemma3-4b-FLM", "LAiM/Qwen3-0.6B-GGUF"):
+    for name in ("lemonade:gemma3-4b-FLM", "unsloth/Qwen3-0.6B-GGUF"):
         assert not routes._loaded_satisfies(name)
         assert not routes._loaded_identity_satisfies(name)
 

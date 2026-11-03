@@ -1475,7 +1475,7 @@ test("carries live form state, except what sensitive fields hide", () => {
   );
   assert.match(
     projectSourceDropzoneSource,
-    /data-reload-snapshot-sensitive\s*\n\s*aria-label=\{`Remove \$\{entry\.name\}`\}/,
+    /data-reload-snapshot-sensitive\s*\n\s*aria-label=\{translate\("uxRag\.removecucki", \{ p1: entry\.name \}\)\}/,
   );
   assert.match(
     attachmentSource,

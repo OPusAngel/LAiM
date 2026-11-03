@@ -33,7 +33,7 @@ Usage:
 
     # Pytest mode, external server — start an LAiM server yourself,
     # then point pytest at it. Fastest iteration loop.
-    LAiM studio run --model LAiM/Qwen3-1.7B-GGUF --gguf-variant UD-Q4_K_XL &
+    LAiM studio run --model unsloth/Qwen3-1.7B-GGUF --gguf-variant UD-Q4_K_XL &
     export LAiM_E2E_BASE_URL=http://127.0.0.1:8080
     export LAiM_E2E_API_KEY=sk-LAiM-...   # from the server banner
     pytest tests/test_studio_api.py -v
@@ -41,8 +41,8 @@ Usage:
     # Pytest mode, fixture-managed server — pytest launches and tears down
     # the server itself. One-shot verification, CI-friendly.
     pytest tests/test_studio_api.py -v \\
-        --LAiM-model LAiM/Qwen3-1.7B-GGUF \\
-        --LAiM-gguf-variant UD-Q4_K_XL
+        --LAiM-model unsloth/Qwen3-1.7B-GGUF \\
+        --unsloth-gguf-variant UD-Q4_K_XL
 
 The ``base_url`` / ``api_key`` parameters on the test functions resolve via
 the ``studio_server`` session fixture in ``conftest.py``.
@@ -67,7 +67,7 @@ from pathlib import Path
 
 # Configuration
 
-DEFAULT_MODEL = "LAiM/Qwen3-1.7B-GGUF"
+DEFAULT_MODEL = "unsloth/Qwen3-1.7B-GGUF"
 DEFAULT_VARIANT = "UD-Q4_K_XL"
 PORT = 18222  # high port unlikely to collide
 HOST = "127.0.0.1"
@@ -286,11 +286,11 @@ def test_curl_with_tools(base_url: str, api_key: str):
 
 # Standard OpenAI function-calling pass-through tests.
 #
-# Regression coverage for LAiMai/LAiM#4999: /v1/chat/completions used
+# Regression coverage for OPusAngel/LAiM#4999: /v1/chat/completions used
 # to strip standard OpenAI `tools`/`tool_choice`, so clients never got
 # structured tool_calls back. These exercise the pass-through that forwards
 # those fields to llama-server verbatim. Require a tool-capable GGUF
-# (supports_tools=True); the default LAiM/Qwen3-1.7B-GGUF qualifies.
+# (supports_tools=True); the default unsloth/Qwen3-1.7B-GGUF qualifies.
 
 _WEATHER_TOOL = {
     "type": "function",
@@ -681,7 +681,7 @@ def test_anthropic_with_tools(base_url: str, api_key: str):
             "tools": [
                 {
                     "name": "python",
-                    "description": "Execute Python code in a sandbox and return stdout/stderr.",
+                    "description": "Execute Python code in a workdir and return stdout/stderr.",
                     "input_schema": {
                         "type": "object",
                         "properties": {

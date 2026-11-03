@@ -1,6 +1,6 @@
-# Model defaults for LAiM/functiongemma-270m-it
+# Model defaults for unsloth/functiongemma-270m-it
 # Based on FunctionGemma_(270M).ipynb
-# Also applies to: LAiM/functiongemma-270m-it-LAiM-bnb-4bit, google/functiongemma-270m-it, LAiM/functiongemma-270m-it-LAiM-bnb-4bit
+# Also applies to: unsloth/functiongemma-270m-it-unsloth-bnb-4bit, google/functiongemma-270m-it, unsloth/functiongemma-270m-it-unsloth-bnb-4bit
 # added inference parameters from LAiM guides
 
 training:
@@ -17,7 +17,7 @@ training:
   random_seed: 3407
   packing: false
   train_on_completions: true
-  gradient_checkpointing: "LAiM"
+  gradient_checkpointing: "unsloth"
   optim: "adamw_8bit"
   lr_scheduler_type: "linear"
 

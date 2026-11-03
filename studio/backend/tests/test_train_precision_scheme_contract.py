@@ -344,7 +344,7 @@ def test_inference_still_offers_nvfp4_end_to_end():
     """The training guard must not be "fixed" by deleting NVFP4 from inference, where it is a
     legitimate Blackwell option on both the image and the video load forms."""
     req = DiffusionLoadRequest(
-        model_path = "LAiM/Z-Image-Turbo-GGUF",
+        model_path = "unsloth/Z-Image-Turbo-GGUF",
         transformer_quant = "nvfp4",
         text_encoder_quant = "nvfp4",
     )
@@ -353,7 +353,7 @@ def test_inference_still_offers_nvfp4_end_to_end():
     # The video load form too, through the schema rather than its source: video-page.tsx can
     # keep offering NVFP4 long after VideoLoadRequest stopped accepting it, and the only symptom
     # is a 422 from /video/load.
-    video = VideoLoadRequest(model_path = "LAiM/Wan2.2-TI2V-5B", transformer_quant = "nvfp4")
+    video = VideoLoadRequest(model_path = "unsloth/Wan2.2-TI2V-5B", transformer_quant = "nvfp4")
     assert video.transformer_quant == "nvfp4"
 
     for rel in (

@@ -30,7 +30,7 @@ from versions import (  # noqa: E402
 )
 
 SEED = 3407
-DEFAULT_MODEL = "LAiM/Qwen3-4B-Base"
+DEFAULT_MODEL = "unsloth/Qwen3-4B-Base"
 
 SYSTEM_PROMPT = "You are given a question. Answer it as briefly as you can."
 
@@ -192,7 +192,7 @@ def train(args, report: dict | None = None) -> dict:
             "down_proj",
         ],
         lora_alpha = args.lora_rank * 2,
-        use_gradient_checkpointing = "LAiM",
+        use_gradient_checkpointing = "unsloth",
         random_state = SEED,
     )
 

@@ -27,7 +27,7 @@ def _extract_function(name: str) -> str:
 
 
 class _FakePeftModel:
-    def __init__(self, name_or_path = "LAiM/gemma-4-31b-it-bnb-4bit"):
+    def __init__(self, name_or_path = "unsloth/gemma-4-31b-it-bnb-4bit"):
         self.config = types.SimpleNamespace(_name_or_path = name_or_path)
 
 
@@ -79,7 +79,7 @@ def _build_env(
         ]
     )
     if base_source is None:
-        base_source = ("LAiM/gemma-4-31b-it", False, None, False, None)
+        base_source = ("unsloth/gemma-4-31b-it", False, None, False, None)
 
     class _FS:
         def __init__(self, token = None):
@@ -185,7 +185,7 @@ def test_downloads_base_into_hub_cache(monkeypatch, tmp_path):
     fn(_FakePeftModel(), save_method = "merged_16bit", token = "tok")
     assert len(stubs.snapshot_download.calls) == 1
     _, kwargs = stubs.snapshot_download.calls[0]
-    assert kwargs["repo_id"] == "LAiM/gemma-4-31b-it"
+    assert kwargs["repo_id"] == "unsloth/gemma-4-31b-it"
     # No local_dir: the point is populating the persistent cache.
     assert "local_dir" not in kwargs
     assert "model-00001-of-00002.safetensors" in kwargs["allow_patterns"]
@@ -256,7 +256,7 @@ def test_quantized_base_skips(monkeypatch, tmp_path):
     fn, stubs = _build_env(
         monkeypatch,
         tmp_path,
-        base_source = ("LAiM/gemma-4-31b-it-bnb-4bit", False, None, True, "nf4"),
+        base_source = ("unsloth/gemma-4-31b-it-bnb-4bit", False, None, True, "nf4"),
     )
     fn(_FakePeftModel(), save_method = "merged_16bit")
     assert stubs.snapshot_download.calls == []
@@ -305,7 +305,7 @@ def test_listing_failure_is_swallowed(monkeypatch, tmp_path):
 def test_gpt_oss_bf16_mxfp4_swap_skips(monkeypatch, tmp_path):
     fn, stubs = _build_env(monkeypatch, tmp_path)
     fn(
-        _FakePeftModel(name_or_path = "LAiM/gpt-oss-20b-BF16"),
+        _FakePeftModel(name_or_path = "unsloth/gpt-oss-20b-BF16"),
         save_method = "mxfp4",
     )
     assert stubs.snapshot_download.calls == []
@@ -383,25 +383,25 @@ def test_fp8_base_prewarms_16bit_sibling_not_fp8_repo(monkeypatch, tmp_path):
     fn, stubs = _build_env(
         monkeypatch,
         tmp_path,
-        base_source = ("LAiM/Model-FP8", False, None, True, "fp8"),
-        fp8_sibling = "LAiM/Model",
+        base_source = ("unsloth/Model-FP8", False, None, True, "fp8"),
+        fp8_sibling = "unsloth/Model",
     )
-    fn(_FakePeftModel(name_or_path = "LAiM/Model-FP8"), save_method = "merged_16bit")
+    fn(_FakePeftModel(name_or_path = "unsloth/Model-FP8"), save_method = "merged_16bit")
     assert stubs.resolve_fp8_16bit_sibling.calls, "sibling resolver was not consulted"
     assert len(stubs.snapshot_download.calls) == 1
-    assert stubs.snapshot_download.calls[0][1]["repo_id"] == "LAiM/Model"
+    assert stubs.snapshot_download.calls[0][1]["repo_id"] == "unsloth/Model"
 
 
 def test_fp8_base_without_sibling_still_prewarms_fp8_repo(monkeypatch, tmp_path):
     fn, stubs = _build_env(
         monkeypatch,
         tmp_path,
-        base_source = ("LAiM/Model-FP8", False, None, True, "fp8"),
+        base_source = ("unsloth/Model-FP8", False, None, True, "fp8"),
         fp8_sibling = None,
     )
-    fn(_FakePeftModel(name_or_path = "LAiM/Model-FP8"), save_method = "merged_16bit")
+    fn(_FakePeftModel(name_or_path = "unsloth/Model-FP8"), save_method = "merged_16bit")
     assert len(stubs.snapshot_download.calls) == 1
-    assert stubs.snapshot_download.calls[0][1]["repo_id"] == "LAiM/Model-FP8"
+    assert stubs.snapshot_download.calls[0][1]["repo_id"] == "unsloth/Model-FP8"
 
 
 def test_prewarm_filters_shards_through_index(monkeypatch, tmp_path):

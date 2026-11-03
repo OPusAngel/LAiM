@@ -606,9 +606,9 @@ def _remote_untrainable_model_format(
     # included. Unknown admits, exactly as an unanswered auth-check does.
     #
     # And only where the TORCH loader runs. _run_mlx_training hands model_load_name straight to
-    # FastMLXModel.from_pretrained, and that loader never consults the upstream-to-LAiM
+    # FastMLXModel.from_pretrained, and that loader never consults the upstream-to-unsloth
     # mapper (LAiM_zoo/mlx/loader.py only strips bnb suffixes off ids already under
-    # LAiM/), so on Apple Silicon the worker really does fetch the gated upstream.
+    # unsloth/), so on Apple Silicon the worker really does fetch the gated upstream.
     # Embedding runs take _run_embedding_training, whose primary path is
     # `SentenceTransformer(model_name, ...)` with the name as given: same reasoning, separate
     # backend. Both are platform/route tests rather than device probes, so the parent may ask.
@@ -2322,7 +2322,7 @@ async def start_training(
             "target_modules": request.target_modules if request.target_modules else None,
             "gradient_checkpointing": request.gradient_checkpointing.strip()
             if request.gradient_checkpointing and request.gradient_checkpointing.strip()
-            else "LAiM",
+            else "unsloth",
             "offload_layers": request.offload_layers,
             "offload_vram_gb": request.offload_vram_gb,
             "offload_vram_gb_per_device": request.offload_vram_gb_per_device,

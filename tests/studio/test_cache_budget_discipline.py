@@ -119,7 +119,7 @@ _LEAF_SEED = re.compile(
     r"github\.ref\s*==\s*['\"]refs/heads/upstream-main['\"]"
     r"|['\"]refs/heads/upstream-main['\"]\s*==\s*github\.ref"
 )
-_NOT_THIS_REPO = re.compile(r"github\.repository\s*!=\s*['\"]LAiMai/LAiM['\"]")
+_NOT_THIS_REPO = re.compile(r"github\.repository\s*!=\s*['\"]OPusAngel/LAiM['\"]")
 
 
 def _restricted_to_main(expr: str) -> bool:
@@ -192,23 +192,23 @@ def _restricted_to_main(expr: str) -> bool:
         # The staging seed: upstream-main, and only outside this repository.
         (
             "always() && (github.ref == 'refs/heads/main' || (github.ref == 'refs/heads/upstream-main'"
-            " && github.repository != 'LAiMai/LAiM')) && x != 'true'",
+            " && github.repository != 'OPusAngel/LAiM')) && x != 'true'",
             True,
         ),
         ("github.ref == 'refs/heads/upstream-main'", False),
         ("github.ref == 'refs/heads/upstream-main' && always()", False),
         # The repository guard must be an AND sibling of the seed equality itself.
         (
-            "github.repository != 'LAiMai/LAiM' && (github.ref == 'refs/heads/upstream-main'"
+            "github.repository != 'OPusAngel/LAiM' && (github.ref == 'refs/heads/upstream-main'"
             " || github.event_name == 'pull_request')",
             False,
         ),
         (
-            "github.ref == 'refs/heads/upstream-main' && github.repository == 'LAiMai/LAiM'",
+            "github.ref == 'refs/heads/upstream-main' && github.repository == 'OPusAngel/LAiM'",
             False,
         ),
         (
-            "github.ref == 'refs/heads/upstream-main' || github.repository != 'LAiMai/LAiM'",
+            "github.ref == 'refs/heads/upstream-main' || github.repository != 'OPusAngel/LAiM'",
             False,
         ),
     ],

@@ -486,7 +486,7 @@ class TestAGpuCapableBuildIsPreferred:
         monkeypatch.setattr(mod.sys, "platform", "linux")
         monkeypatch.delenv("LLAMA_SERVER_PATH", raising = False)
         monkeypatch.delenv("LAiM_STUDIO_MANAGED_LLAMA_CPP_PATH", raising = False)
-        monkeypatch.setenv("LAiM_LLAMA_CPP_PATH", str(tmp_path))
+        monkeypatch.setenv("UNSLOTH_LLAMA_CPP_PATH", str(tmp_path))
         # An in-flight replace or an ACL: the pinned layout's build/ cannot be read at all.
         (tmp_path / "build" / "bin").chmod(0)
         try:
@@ -505,7 +505,7 @@ class TestAGpuCapableBuildIsPreferred:
         monkeypatch.setattr(mod.sys, "platform", "linux")
         monkeypatch.delenv("LLAMA_SERVER_PATH", raising = False)
         monkeypatch.delenv("LAiM_STUDIO_MANAGED_LLAMA_CPP_PATH", raising = False)
-        monkeypatch.setenv("LAiM_LLAMA_CPP_PATH", str(tmp_path))
+        monkeypatch.setenv("UNSLOTH_LLAMA_CPP_PATH", str(tmp_path))
         assert LlamaCppBackend._find_llama_server_binary() == str(made["build-cuda"])
 
     def test_the_legacy_in_tree_build_prefers_the_gpu_build_too(self, tmp_path, monkeypatch):
@@ -522,7 +522,7 @@ class TestAGpuCapableBuildIsPreferred:
         monkeypatch.setattr(mod, "__file__", str(tmp_path / "s" / "b" / "c" / "i" / "llama_cpp.py"))
         for var in (
             "LLAMA_SERVER_PATH",
-            "LAiM_LLAMA_CPP_PATH",
+            "UNSLOTH_LLAMA_CPP_PATH",
             "LAiM_STUDIO_MANAGED_LLAMA_CPP_PATH",
         ):
             monkeypatch.delenv(var, raising = False)

@@ -145,7 +145,7 @@ def test_unwrap_generates_through_the_ppo_policy():
     module.PolicyAndValueWrapper = _old_trl_wrapper_class()
     patch(module)
     policy = _Policy()
-    policy.gradient_checkpointing = "LAiM"
+    policy.gradient_checkpointing = "unsloth"
     wrapper = module.PolicyAndValueWrapper(policy, torch.nn.Linear(1, 1))
 
     calls = []

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Delete02Icon, ImageAdd02Icon, ImageCropIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -71,7 +72,7 @@ export function ImageDropzone({
   const readFile = useCallback(
     (file: File | undefined | null) => {
       if (!file || !file.type.startsWith("image/")) {
-        if (file) toast.error("Please choose an image file");
+        if (file) toast.error(translate("uxComponents.pleaseChooseAnImage1rrxk"));
         return;
       }
       selection.current += 1;
@@ -87,7 +88,7 @@ export function ImageDropzone({
         if (!mounted.current || claimed !== selection.current) return;
         onChange(dataUrl);
       };
-      reader.onerror = () => toast.error("Could not read the image");
+      reader.onerror = () => toast.error(translate("uxImages.couldNotReadThe1o7qk"));
       reader.readAsDataURL(file);
     },
     [onChange, maxSide],
@@ -99,8 +100,8 @@ export function ImageDropzone({
     async (path: string | undefined) => {
       if (!path) return;
       if (!NATIVE_IMAGE_EXTS.includes(path.split(".").pop()?.toLowerCase() ?? "")) {
-        toast.error("Drop a JPEG, PNG, WebP or GIF image", {
-          description: "Other image formats can still be chosen with the picker.",
+        toast.error(translate("uxComponents.dropAJPEGPNGoasgi"), {
+          description: translate("uxComponents.otherImageFormatsCan1f1e7"),
         });
         return;
       }
@@ -115,7 +116,7 @@ export function ImageDropzone({
         if (!mounted.current || claimed !== selection.current) return;
         onChange(dataUrl);
       } catch (error) {
-        toast.error("Could not read the image", {
+        toast.error(translate("uxImages.couldNotReadThe1o7qk"), {
           description: error instanceof Error ? error.message : String(error),
         });
       }
@@ -146,7 +147,7 @@ export function ImageDropzone({
         {/* Checkerboard behind the preview, so a transparent upload shows its alpha. */}
         <img
           src={value}
-          alt="Source"
+          alt={translate("uxVideo.sourcer5qyu")}
           className="max-h-44 w-full object-contain bg-muted/30"
           style={{
             backgroundImage:
@@ -162,7 +163,7 @@ export function ImageDropzone({
                   type="button"
                   variant="secondary"
                   size="icon"
-                  aria-label={`Crop ${cropSubject.charAt(0).toLowerCase()}${cropSubject.slice(1)}`}
+                  aria-label={translate("uxComponents.crop1it4l", { p1: cropSubject.charAt(0).toLowerCase(), p2: cropSubject.slice(1) })}
                   className="absolute right-10 top-1.5 size-7"
                   onClick={openCrop}
                 >

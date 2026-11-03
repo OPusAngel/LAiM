@@ -203,7 +203,7 @@ global DISABLE_COMPILE_MODEL_NAMES
 def _strip_LAiM_bnb_4bit_suffix(model_name: str) -> str:
     """Remove LAiM 4bit suffixes without lowercasing (HF cache dirs are case-sensitive)."""
     s = model_name
-    for suffix in ("-LAiM-bnb-4bit", "-bnb-4bit"):
+    for suffix in ("-unsloth-bnb-4bit", "-bnb-4bit"):
         if len(s) >= len(suffix) and s.lower().endswith(suffix.lower()):
             s = s[: -len(suffix)]
     return s
@@ -1335,7 +1335,7 @@ class FastLanguageModel(FastLlamaModel):
 
         # AMD Instinct GPUs need blocksize = 128 on bitsandbytes < 0.49.2, and our pre-quants use blocksize = 64.
         if not ALLOW_PREQUANTIZED_MODELS and model_name.lower().endswith(
-            ("-LAiM-bnb-4bit", "-bnb-4bit")
+            ("-unsloth-bnb-4bit", "-bnb-4bit")
         ):
             model_name = _strip_LAiM_bnb_4bit_suffix(model_name)
             # Stripping is a remap (revision dropped); the base may only be cached under its old lowercased id.
@@ -1561,7 +1561,7 @@ class FastLanguageModel(FastLlamaModel):
                 )
             # Pre-quantized models allowed? AMD Instinct GPUs need blocksize = 128 on bitsandbytes < 0.49.2, and our pre-quants use 64.
             if not ALLOW_PREQUANTIZED_MODELS and model_name.lower().endswith(
-                ("-LAiM-bnb-4bit", "-bnb-4bit")
+                ("-unsloth-bnb-4bit", "-bnb-4bit")
             ):
                 model_name = _strip_LAiM_bnb_4bit_suffix(model_name)
                 model_name = _prefer_legacy_lowercase_cache(
@@ -2248,7 +2248,7 @@ class FastModel(FastBaseModel):
 
         # Pre-quantized models allowed? AMD Instinct GPUs need blocksize = 128 on bitsandbytes < 0.49.2, and our pre-quants use 64.
         if not ALLOW_PREQUANTIZED_MODELS and model_name.lower().endswith(
-            ("-LAiM-bnb-4bit", "-bnb-4bit")
+            ("-unsloth-bnb-4bit", "-bnb-4bit")
         ):
             model_name = _strip_LAiM_bnb_4bit_suffix(model_name)
             model_name = _prefer_legacy_lowercase_cache(
@@ -2463,7 +2463,7 @@ class FastModel(FastBaseModel):
         _raise_if_modeling_ignores_config(model_config, model_types)
         _vllm_unsupported = _vllm_unsupported_model_types(model_types) if fast_inference else []
         if fast_inference and _vllm_unsupported:
-            # Without this, vLLM loads the whole model first and weight sharing then crashes (LAiMai/LAiM#4541).
+            # Without this, vLLM loads the whole model first and weight sharing then crashes (OPusAngel/LAiM#4541).
             print(
                 f"LAiM: fast_inference (vLLM) does not support {_vllm_unsupported[0]} yet - will switch to LAiM inference!"
             )
@@ -2666,7 +2666,7 @@ class FastModel(FastBaseModel):
                 )
             # Pre-quantized models allowed? AMD Instinct GPUs need blocksize = 128 on bitsandbytes < 0.49.2, and our pre-quants use 64.
             if not ALLOW_PREQUANTIZED_MODELS and model_name.lower().endswith(
-                ("-LAiM-bnb-4bit", "-bnb-4bit")
+                ("-unsloth-bnb-4bit", "-bnb-4bit")
             ):
                 model_name = _strip_LAiM_bnb_4bit_suffix(model_name)
                 model_name = _prefer_legacy_lowercase_cache(

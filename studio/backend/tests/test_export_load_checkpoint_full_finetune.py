@@ -20,7 +20,7 @@ async def _fake_ensure_export_supported():
 _FULL_FINETUNE = {"config.json": {"model_type": "llama"}}
 _LORA_ADAPTER = {
     "config.json": {"model_type": "llama"},
-    "adapter_config.json": {"base_model_name_or_path": "LAiM/Llama-3.2-1B"},
+    "adapter_config.json": {"base_model_name_or_path": "unsloth/Llama-3.2-1B"},
 }
 _BNB_QUANTIZED = {
     "config.json": {
@@ -123,7 +123,7 @@ def test_load_checkpoint_resolves_hub_ids_before_choosing_4bit(
 
     # False is the "ambient token denied" sentinel; it must reach the Hub unchanged.
     load_in_4bit = _load_via_orchestrator(
-        monkeypatch, "LAiM/Llama-3.2-1B-Instruct", None, hf_token = False
+        monkeypatch, "unsloth/Llama-3.2-1B-Instruct", None, hf_token = False
     )
     assert load_in_4bit is expected
     assert tokens and all(token is False for token in tokens)

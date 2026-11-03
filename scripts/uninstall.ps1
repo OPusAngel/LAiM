@@ -29,7 +29,7 @@ function Uninstall-LAiMStudio {
 LAiM Studio uninstaller (Windows PowerShell).
 
 Usage:
-  irm https://raw.githubusercontent.com/LAiMai/LAiM/main/scripts/uninstall.ps1 | iex
+  irm https://raw.githubusercontent.com/OPusAngel/LAiM/main/scripts/uninstall.ps1 | iex
   Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned; .\scripts\uninstall.ps1
 
 RemoteSigned is enough for the second form: a git clone carries no mark of the
@@ -1505,7 +1505,7 @@ Environment:
         Write-Host "If you installed LAiM Studio with LAiM_STUDIO_HOME or STUDIO_HOME"
         Write-Host "pointing at a custom directory, re-run this script with the same variable"
         Write-Host "set to also remove that install tree, e.g.:"
-        Write-Host "  `$env:LAiM_STUDIO_HOME = 'C:\your\path'; irm https://raw.githubusercontent.com/LAiMai/LAiM/main/scripts/uninstall.ps1 | iex"
+        Write-Host "  `$env:LAiM_STUDIO_HOME = 'C:\your\path'; irm https://raw.githubusercontent.com/OPusAngel/LAiM/main/scripts/uninstall.ps1 | iex"
     }
 }
 

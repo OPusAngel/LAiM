@@ -17,12 +17,12 @@ interface Status {
 
 /** What the store holds before an API request switches the resident model. */
 const STALE: Status = {
-  checkpoint: "LAiM/Qwen3-8B-GGUF",
+  checkpoint: "unsloth/Qwen3-8B-GGUF",
   ggufVariant: "Q8_0",
 };
 /** What every read of /api/inference/status answers once the switch has landed. */
 const SWITCHED: Status = {
-  checkpoint: "LAiM/Llama-3.1-8B-Instruct-GGUF",
+  checkpoint: "unsloth/Llama-3.1-8B-Instruct-GGUF",
   ggufVariant: "Q4_K_M",
 };
 

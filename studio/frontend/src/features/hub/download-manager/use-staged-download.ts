@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 
 import { toast } from "@/lib/toast";
@@ -189,18 +190,18 @@ export function useStagedDownload({
       if (inFlight.current === started) inFlight.current = null;
       // A start that never got off the ground will never complete, so clear the queue instead of leaving the head in place where the effect never re-runs. The pick dies with it.
       if (outcome === "error") {
-        toast.error("Could not start the download", {
-          description: "Check the connection, then select the model again.",
+        toast.error(translate("uxHub.couldNotStartThe1i3mo"), {
+          description: translate("uxHub.checkTheConnectionThenu67gr"),
         });
       } else if (outcome === "conflict") {
-        toast.info("Resume this download from Models", {
+        toast.info(translate("uxHub.resumeThisDownloadFrome7ixi"), {
           description:
-            "An earlier partial download used a different transport. Open the Model hub tab to resume or restart it.",
+            translate("uxHub.anEarlierPartialDownload16bi3"),
         });
       } else if (outcome === "busy") {
-        toast.info("Download already in progress", {
+        toast.info(translate("settings.general.rag.downloadBusy"), {
           description:
-            "Reselect this model once the running download finishes to load it.",
+            translate("uxHub.reselectThisModelOncenyvxa"),
         });
       }
       setQueue(null);

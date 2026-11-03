@@ -14,6 +14,8 @@ import {
   useSyncExternalStore,
 } from "react";
 import { runConfigInbox } from "./inbox";
+import { translate } from "@/i18n";
+
 import {
   receiveStartupRunConfigUrl,
   subscribeRunConfigSession,
@@ -54,8 +56,8 @@ export function SharedRunConfigLinkHandler({
       key={pending.id}
       fallback={
         <LazyImportFailure
-          message="Shared run settings could not load. Reload LAiM and reopen the link to try again."
-          reloadLabel="Reload LAiM"
+          message={translate("uxModelpicker.sharedRunSettingsCouldj0wmc")}
+          reloadLabel={translate("uxModelpicker.reloadLAiMi4cd0")}
           dismissLabel="Dismiss"
           onDismiss={() => runConfigInbox.clear(pending.id)}
           testId="shared-run-settings-unavailable"

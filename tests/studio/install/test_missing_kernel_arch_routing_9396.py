@@ -191,7 +191,7 @@ def test_the_reroute_is_not_gated_on_the_rocm_version_floor():
 
 
 def test_the_companion_pins_carry_the_211_floor_on_a_grouped_mm_leaf():
-    """gfx110X-all joined the torch 2.11 allowlist with LAiMai/LAiM#11814 (its 2.10 build
+    """gfx110X-all joined the torch 2.11 allowlist with OPusAngel/LAiM#11814 (its 2.10 build
     access-violates in _grouped_mm), so the reroute installs the floored trio; every companion
     stays bounded above, so none can drift to a different torch major."""
     calls = _run_install(gfx_devices = ("gfx1103",))

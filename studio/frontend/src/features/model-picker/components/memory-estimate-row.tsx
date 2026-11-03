@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate, useLocale } from "@/i18n";
 import { ChevronDown } from "lucide-react";
 import { useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
@@ -11,6 +12,7 @@ import {
 import type { MemoryEstimate } from "../api/memory-estimate";
 import {
   type MemoryFitVerdict,
+  type MemoryFitView,
   formatMemoryGb,
   glueNoteItems,
   memoryFigureCandidates,
@@ -203,6 +205,13 @@ export function MemoryEstimateRow({
   onExpandedChange: (next: boolean) => void;
 }) {
   const contentId = useId();
+  const locale = useLocale();
+  // The advisories and captions are composed in memory-fit.ts, which stays free of the
+  // locale store so node tests can drive it; it says its copy through this view.
+  const view = useMemo<MemoryFitView>(
+    () => ({ t: (key, values) => translate(key, values, locale), locale }),
+    [locale],
+  );
   if (!estimate?.available) {
     // Hide unavailable estimates without flickering during loading.
     return null;
@@ -223,11 +232,13 @@ export function MemoryEstimateRow({
       reclaimableTotalBytes,
       reclaimableGpuBytes,
     },
+    view,
   );
-  const kvNote = resolveKvNote(estimate);
+  const kvNote = resolveKvNote(estimate, view);
   const draftCacheNote = resolveDraftCacheNote(
     estimate.drafterRuntimeGpuBytes,
     estimate.drafterRuntimeBytes,
+    view,
   );
   return (
     <div className="flex flex-col border-b border-border pb-5">
@@ -236,15 +247,25 @@ export function MemoryEstimateRow({
         onClick={() => onExpandedChange(!expanded)}
         aria-expanded={expanded}
         aria-controls={contentId}
-        aria-label={`Estimated Memory Usage: ${expanded ? "Hide" : "Show"} breakdown`}
+        aria-label={translate(
+          "uxMemory.toggleAria",
+          {
+            action: translate(
+              expanded ? "uxMemory.toggleHide" : "uxMemory.toggleShow",
+              undefined,
+              locale,
+            ),
+          },
+          locale,
+        )}
         className="group flex min-h-8 w-full items-center justify-between gap-3 rounded-md text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       >
         <span className="flex min-w-0 items-center gap-2">
           <span className="min-w-0 text-ui-13 font-medium leading-[1.25] tracking-nav text-foreground">
-            Estimated Memory Usage
+            {translate("uxModelpicker.estimatedMemoryUsageqs6oo")}
           </span>
           <span className="shrink-0 rounded-md bg-[rgb(6_29_33_/_calc(0.04*var(--contrast-wash-gain,1)))] px-1.5 py-0.5 text-ui-10 font-medium uppercase tracking-wide text-muted-foreground dark:bg-muted">
-            Beta
+            {translate("uxModelpicker.beta67jzz")}
           </span>
         </span>
         <ChevronDown
@@ -263,8 +284,8 @@ export function MemoryEstimateRow({
               ? "RAM"
               : singleMemoryPool
                 ? isUnifiedMemory
-                  ? "Unified"
-                  : "Shared"
+                  ? translate("uxMemory.labelUnified", undefined, locale)
+                  : translate("uxMemory.labelShared", undefined, locale)
                 : "GPU"
           }
           bytes={
@@ -279,7 +300,7 @@ export function MemoryEstimateRow({
         />
         {singleMemoryPool || cpuOnly ? null : (
           <MemoryFigure
-            label="Total"
+            label={translate("uxModelpicker.total1c0as")}
             bytes={estimate.totalBytes}
             bounded={bounded}
             tone={MEMORY_VALUE_TONE[totalFit]}
@@ -288,46 +309,50 @@ export function MemoryEstimateRow({
       </div>
       <div id={contentId} hidden={!expanded} className="mt-3 space-y-3">
         <MemoryBreakdownLine
-          label="Weights"
+          label={translate("uxModelpicker.weights1lwji")}
           value={formatMemoryGb(estimate.weightsBytes)}
           note={
             estimate.gpuLayers != null && estimate.layerCount != null
-              ? `${estimate.gpuLayers} of ${estimate.layerCount + 1} layers on GPU`
+              ? translate(
+                  "uxMemory.layersOnGpu",
+                  { on: estimate.gpuLayers, total: estimate.layerCount + 1 },
+                  locale,
+                )
               : undefined
           }
         />
         <MemoryBreakdownLine
-          label="KV cache"
+          label={translate("uxModelpicker.kVCache1grlr")}
           value={
             estimate.kvEstimable
               ? formatMemoryGb(estimate.kvBytes - estimate.kvCheckpointBytes)
-              : "unknown"
+              : translate("uxMemory.labelUnknown", undefined, locale)
           }
           note={estimate.kvEstimable ? kvNote : undefined}
           muted={!estimate.kvEstimable}
         />
         {estimate.kvEstimable && estimate.kvCheckpointBytes > 0 && (
           <MemoryBreakdownLine
-            label="Context checkpoints"
+            label={translate("uxModelpicker.contextCheckpoints1lpyy")}
             value={formatMemoryGb(estimate.kvCheckpointBytes)}
-            note="host RAM, filled as conversations grow"
+            note={translate("uxMemory.checkpointsNote", undefined, locale)}
           />
         )}
         <MemoryBreakdownLine
-          label="Compute buffers"
+          label={translate("uxModelpicker.computeBuffers12o32")}
           value={formatMemoryGb(estimate.computeBytes)}
         />
         {/* Projector weights are already included above. */}
         {estimate.projectorRuntimeBytes > 0 && (
           <MemoryBreakdownLine
-            label="Vision encoder"
+            label={translate("uxModelpicker.visionEncoder1so80")}
             value={formatMemoryGb(estimate.projectorRuntimeBytes)}
           />
         )}
         {/* Draft cache is additional to the drafter's weights. */}
         {estimate.drafterRuntimeBytes > 0 && (
           <MemoryBreakdownLine
-            label="Draft cache"
+            label={translate("uxModelpicker.draftCache4nckn")}
             value={formatMemoryGb(estimate.drafterRuntimeBytes)}
             note={draftCacheNote}
           />

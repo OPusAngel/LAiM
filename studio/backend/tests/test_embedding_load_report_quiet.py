@@ -27,7 +27,7 @@ from core.rag.embeddings import _quiet_transformers_load  # noqa: E402
 
 _REPORT_LOGGER = "transformers.utils.loading_report"
 _BENIGN = (
-    "\x1b[1mBertModel LOAD REPORT\x1b[0m from: LAiM/bge-small-en-v1.5\n"
+    "\x1b[1mBertModel LOAD REPORT\x1b[0m from: unsloth/bge-small-en-v1.5\n"
     "Key                     | Status\n"
     "embeddings.position_ids | UNEXPECTED"
 )
@@ -288,7 +288,7 @@ def test_the_notes_section_is_not_read_as_a_key_row():
     # report serious and defeat the whole change.
     log, sink = _attach_sink()
     with_notes = (
-        "BertModel LOAD REPORT from: LAiM/bge-small-en-v1.5\n"
+        "BertModel LOAD REPORT from: unsloth/bge-small-en-v1.5\n"
         "embeddings.position_ids | UNEXPECTED\n"
         "\nNotes:\n"
         "- UNEXPECTED:\tcan be ignored when loading from different task/architecture."

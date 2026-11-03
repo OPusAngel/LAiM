@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,8 +40,8 @@ export function StopRunningChatsDialog() {
   // promised the opposite of what confirming does, for the destructive one.
   const unloads = effect === "unload";
   const lead = unloads
-    ? `${action || "Unloading the model"} leaves no model loaded, and every open ${sharer} shares it, `
-    : `${action ? `${action} reloads the model, ` : "Reloading the model "}which every open ${sharer} shares, `;
+    ? `${action || translate("uxChat.unloadingTheModelxfnf5")} leaves no model loaded, and every open ${sharer} shares it, `
+    : `${action ? `${action} reloads the model, ` : translate("uxChat.reloadingTheModelt8imp")}which every open ${sharer} shares, `;
   const shown = titles.slice(0, 5);
   const remaining = Math.max(0, titles.length - shown.length);
 
@@ -54,13 +55,8 @@ export function StopRunningChatsDialog() {
     >
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>
-            Stop {count} running {noun}?
-          </AlertDialogTitle>
-          <AlertDialogDescription>
-            {lead}so {count === 1 ? "this" : "these"} {noun} will stop
-            {hasNonChat ? "" : " generating"}. Work produced so far is kept.
-          </AlertDialogDescription>
+          <AlertDialogTitle>{translate("uxChat.stopRunningoyqeb", { p1: count, p2: noun })}</AlertDialogTitle>
+          <AlertDialogDescription>{translate("uxChat.soWillStopWorksqe9v", { p1: lead, p2: count === 1 ? "this" : "these", p3: noun, p4: hasNonChat ? "" : " generating" })}</AlertDialogDescription>
         </AlertDialogHeader>
         {shown.length > 0 && (
           <ul className="max-h-40 overflow-y-auto scroll-rounded rounded-md border bg-muted/40 px-3 py-2 text-sm">
@@ -70,18 +66,16 @@ export function StopRunningChatsDialog() {
               </li>
             ))}
             {remaining > 0 && (
-              <li className="py-0.5 text-muted-foreground">
-                and {remaining} more
-              </li>
+              <li className="py-0.5 text-muted-foreground">{translate("uxChat.andMore3puoi", { p1: remaining })}</li>
             )}
           </ul>
         )}
         <AlertDialogFooter>
           <AlertDialogCancel onClick={() => resolve(false)}>
-            Keep generating
+            {translate("uxChat.keepGenerating1moc6")}
           </AlertDialogCancel>
           <AlertDialogAction onClick={() => resolve(true)}>
-            {unloads ? "Stop and unload" : "Stop and reload"}
+            {unloads ? translate("uxChat.stopAndUnload5tr8w") : translate("uxChat.stopAndReload13bgg")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

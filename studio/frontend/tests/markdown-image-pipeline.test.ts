@@ -7,8 +7,8 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { Streamdown } from "streamdown";
 
-import { markdownSandboxImageSrc } from "../src/components/assistant-ui/sandbox-files.ts";
-import { rehypeSandboxImages } from "../src/components/assistant-ui/rehype-sandbox-images.ts";
+import { markdownWorkdirImageSrc } from "../src/components/assistant-ui/workdir-files.ts";
+import { rehypeWorkdirImages } from "../src/components/assistant-ui/rehype-workdir-images.ts";
 import { withDataImageSupport } from "../src/lib/markdown-data-images.ts";
 import { safeMarkdownUrl } from "../src/lib/safe-markdown-url.ts";
 
@@ -20,11 +20,11 @@ function render(markdown: string, scope = context) {
 		createElement(Streamdown, {
 			mode: "static",
 			children: markdown,
-			rehypePlugins: withDataImageSupport({}, [[rehypeSandboxImages, scope]]),
+			rehypePlugins: withDataImageSupport({}, [[rehypeWorkdirImages, scope]]),
 			urlTransform: safeMarkdownUrl,
 			components: {
 				img: ({ src }) => {
-					if (src) sources.push(markdownSandboxImageSrc(src, scope) ?? src);
+					if (src) sources.push(markdownWorkdirImageSrc(src, scope) ?? src);
 					return null;
 				},
 			},
@@ -44,7 +44,7 @@ test("relative Python images survive the full Markdown pipeline", () => {
 		const result = render(`![Plot](${src})`);
 		assert.deepEqual(
 			result.sources,
-			[`/api/inference/sandbox/thread-1/${file}`],
+			[`/api/inference/workdir/thread-1/${file}`],
 			src,
 		);
 		assert.doesNotMatch(result.html, /Image blocked/, src);
@@ -54,16 +54,16 @@ test("relative Python images survive the full Markdown pipeline", () => {
 test("relative images use project scope and explicit URLs keep their session", () => {
 	const scope = { threadId: "thread-2", projectId: "project-1" };
 	assert.deepEqual(render("![Plot](line_plot.png)", scope).sources, [
-		"/api/inference/sandbox/project-project-1/line_plot.png",
+		"/api/inference/workdir/project-project-1/line_plot.png",
 	]);
-	const src = "/api/inference/sandbox/original/line_plot.png";
+	const src = "/api/inference/workdir/original/line_plot.png";
 	assert.deepEqual(render(`![Plot](${src})`, scope).sources, [src]);
 });
 
 test("HTML image sources are resolved after raw HTML is parsed", () => {
 	assert.deepEqual(
 		render('<img src="outputs/line_plot.png" alt="Plot">').sources,
-		["/api/inference/sandbox/thread-1/outputs/line_plot.png"],
+		["/api/inference/workdir/thread-1/outputs/line_plot.png"],
 	);
 });
 
@@ -82,15 +82,15 @@ test("data images still render and remote image URLs stay blocked", () => {
 	}
 });
 
-test("URL normalization cannot turn traversal into another sandbox image", () => {
+test("URL normalization cannot turn traversal into another workdir image", () => {
 	for (const src of [
-		"/api/inference/sandbox/thread-1/../other/secret.png",
-		"/api/inference/sandbox/thread-1/%2e%2e/other/secret.png",
-		"/api/inference/sandbox/thread-1/outputs/../../other/secret.png",
-		"./api/inference/sandbox/thread-1/../other/secret.png",
-		"./api/inference/sandbox/thread-1/%2e%2e/other/secret.png",
-		"/api/inference/sandbox/thread-1/outputs%2F..%2F..%2Fother/secret.png",
-		"/api/inference/sandbox/thread-1/..%5Cother/secret.png",
+		"/api/inference/workdir/thread-1/../other/secret.png",
+		"/api/inference/workdir/thread-1/%2e%2e/other/secret.png",
+		"/api/inference/workdir/thread-1/outputs/../../other/secret.png",
+		"./api/inference/workdir/thread-1/../other/secret.png",
+		"./api/inference/workdir/thread-1/%2e%2e/other/secret.png",
+		"/api/inference/workdir/thread-1/outputs%2F..%2F..%2Fother/secret.png",
+		"/api/inference/workdir/thread-1/..%5Cother/secret.png",
 	]) {
 		assert.deepEqual(render(`![Plot](${src})`).sources, [], src);
 	}
@@ -113,25 +113,25 @@ test("encoded filenames and image formats resolve across Markdown, HTML, and sco
 		{
 			threadId: "thread-1",
 			projectId: null,
-			prefix: "/api/inference/sandbox/thread-1/",
+			prefix: "/api/inference/workdir/thread-1/",
 			query: "",
 		},
 		{
 			threadId: "thread-2",
 			projectId: null,
-			prefix: "/api/inference/sandbox/thread-2/",
+			prefix: "/api/inference/workdir/thread-2/",
 			query: "",
 		},
 		{
 			threadId: "thread-1",
 			projectId: "project-1",
-			prefix: "/api/inference/sandbox/project-project-1/",
+			prefix: "/api/inference/workdir/project-project-1/",
 			query: "",
 		},
 		{
 			threadId: "thread/id",
 			projectId: null,
-			prefix: "/api/inference/sandbox/_/",
+			prefix: "/api/inference/workdir/_/",
 			query: "?session=thread%2Fid",
 		},
 	];
@@ -177,8 +177,8 @@ test("path mutations cannot escape scope through Markdown or HTML", () => {
 		"",
 		"./",
 		"outputs/",
-		"/api/inference/sandbox/thread-1/",
-		"./api/inference/sandbox/thread-1/",
+		"/api/inference/workdir/thread-1/",
+		"./api/inference/workdir/thread-1/",
 	]) {
 		for (const segment of segments) {
 			const src = `${prefix}${segment}/secret.png`;

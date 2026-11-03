@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   createContext,
   type ReactElement,
@@ -172,7 +173,7 @@ async function requireStoredThread(threadId: string): Promise<void> {
     return;
   }
   if (!stored) {
-    throw new Error(`Thread ${threadId} was not persisted`);
+    throw new Error(translate("uxRag.threadWasNotPersistedhucgv", { p1: threadId }));
   }
 }
 
@@ -266,7 +267,7 @@ function ProjectBadge() {
       aria-hidden={true}
     >
       <HugeiconsIcon icon={Folder02Icon} strokeWidth={2} className="size-3" />
-      Project
+      {translate("studio.progress.project")}
     </span>
   );
 }
@@ -320,7 +321,7 @@ function LinkedFolderCard({
         <span className="shrink-0 text-muted-foreground tabular-nums">
           {indexing > 0 ? `${indexing}/${docs.length}` : docs.length}
         </span>
-        <span className="sr-only">linked folder, shared with the project</span>
+        <span className="sr-only">{translate("uxRag.linkedFolderSharedWith983e9")}</span>
       </div>
     );
   }
@@ -349,7 +350,7 @@ function LinkedFolderCard({
                 <HugeiconsIcon icon={Folder02Icon} strokeWidth={1.5} className="size-6" />
               )}
               <span>{indexing > 0 ? `Indexing ${indexing} of ${docs.length}` : count}</span>
-              <span className="sr-only">linked folder, shared with the project</span>
+              <span className="sr-only">{translate("uxRag.linkedFolderSharedWith983e9")}</span>
             </span>
           }
         />
@@ -487,7 +488,7 @@ function DocumentCard({
     </span>
   ) : failed ? (
     <span className="line-clamp-3 text-center text-ui-11 text-destructive">
-      Couldn't index
+      {translate("uxRag.couldnTIndexdpkpc")}
     </span>
   ) : (
     <AttachmentKindIcon kind={kind} className="size-6" />
@@ -537,7 +538,7 @@ function DocumentCard({
     <button
       type="button"
       onClick={onRemove}
-      aria-label={`Remove ${doc.filename}`}
+      aria-label={translate("uxRag.removecucki", { p1: doc.filename })}
       className={cn(
         "absolute flex size-5 items-center justify-center rounded-full bg-foreground text-background opacity-0 shadow-sm transition-opacity focus-visible:opacity-100 group-hover/attachment-card:opacity-100 group-focus-within/attachment-card:opacity-100 [@media(pointer:coarse)]:opacity-100",
         compact ? "top-1/2 right-1.5 -translate-y-1/2" : "top-1.5 right-1.5",
@@ -605,7 +606,7 @@ function DocumentCard({
           <button
             type="button"
             onClick={onRetry}
-            aria-label={`Retry ${doc.filename}`}
+            aria-label={translate("uxRag.retryywe8z", { p1: doc.filename })}
             className="LAiM-files-panel-action h-8 px-3 text-ui-12"
           >
             Retry
@@ -648,7 +649,7 @@ function DocumentCard({
         <button
           type="button"
           onClick={onRetry}
-          aria-label={`Retry ${doc.filename}`}
+          aria-label={translate("uxRag.retryywe8z", { p1: doc.filename })}
           className="absolute bottom-9 left-1/2 -translate-x-1/2 rounded-full bg-foreground px-2.5 py-0.5 text-ui-11 text-background shadow-sm"
         >
           Retry
@@ -682,7 +683,7 @@ function AddFilesCard({
         )}
       >
         <PlusIcon className="size-5 stroke-[1.5px]" />
-        Add files
+        {translate("uxRag.addFiles1pe8a")}
       </button>
     </div>
   );
@@ -773,7 +774,7 @@ function ChatFilesPanel({
       {acceptsDrop ? (
         <div className="LAiM-files-panel-drop-overlay" aria-hidden={true}>
           <PlusIcon className="size-5" />
-          Drop to chat with these files
+          {translate("uxRag.dropToChatWithuu4bl")}
         </div>
       ) : null}
       <div className="flex min-h-8 items-center gap-2 pl-1">
@@ -858,9 +859,7 @@ function ChatFilesPanel({
                 className="LAiM-files-panel-action"
                 aria-expanded={true}
                 onClick={() => setShowAll(false)}
-              >
-                Show less
-              </button>
+              >{translate("uxRag.showLessqn712")}</button>
             ) : null}
           </div>
           {overflowing && !showAll ? (
@@ -869,9 +868,7 @@ function ChatFilesPanel({
               className="LAiM-files-panel-show-all"
               aria-expanded={false}
               onClick={() => setShowAll(true)}
-            >
-              Show all
-            </button>
+            >{translate("uxRag.showAlldyo5s")}</button>
           ) : null}
         </div>
       ) : null}
@@ -888,14 +885,22 @@ const ATTACHMENT_TARGETS: {
   {
     value: "project",
     icon: Folder02Icon,
-    title: "The project",
-    description: "Every chat in this project can use them",
+    get title() {
+      return translate("uxRag.theProjecttbn20");
+    },
+    get description() {
+      return translate("uxRag.everyChatInThis1o3o3");
+    },
   },
   {
     value: "thread",
     icon: AttachmentIcon,
-    title: "This chat only",
-    description: "Other chats in the project won't see them",
+    get title() {
+      return translate("uxRag.thisChatOnly1g6vc");
+    },
+    get description() {
+      return translate("uxRag.otherChatsInTheliow2");
+    },
   },
 ];
 
@@ -918,8 +923,8 @@ function AttachmentTargetMenu({
         <button
           type="button"
           disabled={disabled}
-          aria-label="Choose where attached files go"
-          title="Choose where attached files go"
+          aria-label={translate("uxRag.chooseWhereAttachedFileso8t1g")}
+          title={translate("uxRag.chooseWhereAttachedFileso8t1g")}
           className="composer-pill-btn attachment-target-pill shrink-0 gap-1 !text-foreground/70 pl-3 pr-1.5"
         >
           <span className="text-ui-12">
@@ -936,7 +941,7 @@ function AttachmentTargetMenu({
         align="end"
         className="LAiM-plus-menu w-[calc(328px*var(--ui-space-scale,1))]"
       >
-        <DropdownMenuLabel>New files go to</DropdownMenuLabel>
+        <DropdownMenuLabel>{translate("uxRag.newFilesGoToqvbmm")}</DropdownMenuLabel>
         {ATTACHMENT_TARGETS.map((target) => (
           <DropdownMenuItem
             key={target.value}
@@ -1142,7 +1147,7 @@ export function ThreadDocumentsBar({
           .adoptPendingProjectAttachmentTarget(remoteId, claim);
         // a clear that landed while the row write was in flight is deleting this thread
         if (chatHistoryClearBoundary.capture() !== clearGeneration) {
-          throw new Error("Chat history was cleared");
+          throw new Error(translate("uxRag.chatHistoryWasClearedh05nq"));
         }
         // an older request can still finish after the component moved to another thread
         if (initGenerationRef.current === generation) {
@@ -1274,8 +1279,9 @@ export function ThreadDocumentsBar({
       // Nothing else holds these files: keep the offer while their path tokens are readable.
       const expiresAt = Math.min(...intents.map((intent) => intent.path.expiresAtMs));
       const offer = toast(`Add ${files} to ${target}?`, {
-        description:
-          "This chat retrieves from that knowledge base, not from files dropped in the chat.",
+        get description() {
+          return translate("uxRag.thisChatRetrievesFrom1woge");
+        },
         duration: Number.isFinite(expiresAt)
           ? Math.max(8_000, expiresAt - EXPIRY_GRACE_MS - Date.now())
           : Infinity,
@@ -1375,9 +1381,7 @@ export function ThreadDocumentsBar({
               type="button"
               onClick={() => setKbDialogFocus({ kbId })}
               className="LAiM-files-panel-action"
-            >
-              Manage files
-            </button>
+            >{translate("uxRag.manageFiles4dnoa")}</button>
           }
         />
       </>
@@ -1441,10 +1445,10 @@ export function ThreadDocumentsBar({
       <ChatFilesPanel
         key="files"
         icon={FileDatabaseIcon}
-        title="Chat with files"
+        title={translate("uxRag.chatWithFiles1tmwi")}
         titleSuffix="(RAG)"
         count={countSuffix}
-        info="Add or drop documents, spreadsheets, slides, e-books, email or code. The model searches them as you chat and cites what it uses."
+        info={translate("uxRag.addOrDropDocumentsisogj")}
         onDropItems={queueAttach}
         dropDisabledReason={busyReason}
         onClose={() => setRagPanelHidden(true)}
@@ -1453,10 +1457,8 @@ export function ThreadDocumentsBar({
           ragToolDisabled && fileCount > 0 ? (
             <span
               className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-ui-11 text-muted-foreground"
-              title="The selected model can't search documents, so these files aren't used. Pick a model with tool support to use them."
-            >
-              Not used
-            </span>
+              title={translate("uxRag.theSelectedModelCan1wtvh")}
+            >{translate("uxRag.notUsedqm153")}</span>
           ) : null
         }
         headerControls={
@@ -1484,9 +1486,7 @@ export function ThreadDocumentsBar({
                 disabled={busy}
                 onClick={pickFiles}
                 className="LAiM-files-panel-action"
-              >
-                Add files
-              </button>
+              >{translate("uxRag.addFiles71did")}</button>
             </HeaderTip>
           </>
         }
@@ -1550,12 +1550,8 @@ export function ThreadDocumentsBar({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Remove from project sources</AlertDialogTitle>
-            <AlertDialogDescription>
-              Remove "{removingShared?.filename}"? Every chat in this project
-              loses it, and the file and its indexed content are deleted. This
-              cannot be undone.
-            </AlertDialogDescription>
+            <AlertDialogTitle>{translate("uxCopy.removeFromProjectSourcesip7y0")}</AlertDialogTitle>
+            <AlertDialogDescription>{translate("uxRag.removeEveryChatInpv88k", { p1: removingShared?.filename })}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>

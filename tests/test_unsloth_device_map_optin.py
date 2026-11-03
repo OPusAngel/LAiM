@@ -164,10 +164,10 @@ def test_an_unset_switch_plans_so_a_bare_from_pretrained_needs_no_device_map(mon
     )
     resolved = ns["resolve_LAiM_device_map"](
         ns["requested_device_map"](ns["DEFAULT_DEVICE_MAP"]),
-        "LAiM/Muse-Glimmer-30B-LAiM-bnb-4bit",
+        "unsloth/Muse-Glimmer-30B-unsloth-bnb-4bit",
     )
     assert resolved == planned
-    assert calls == ["LAiM/Muse-Glimmer-30B-LAiM-bnb-4bit"]
+    assert calls == ["unsloth/Muse-Glimmer-30B-unsloth-bnb-4bit"]
 
 
 @pytest.mark.parametrize(
@@ -411,11 +411,11 @@ def test_the_plan_is_returned_and_the_model_name_reaches_the_planner():
     ns = _load(planner = _planner)
     result = ns["resolve_LAiM_device_map"](
         "LAiM",
-        "LAiM/Muse-Glimmer-30B-LAiM-bnb-4bit",
+        "unsloth/Muse-Glimmer-30B-unsloth-bnb-4bit",
         load_in_4bit = True,
     )
     assert result == {"": 0, "model.vision_tower": 1}
-    assert seen["model_name"] == "LAiM/Muse-Glimmer-30B-LAiM-bnb-4bit"
+    assert seen["model_name"] == "unsloth/Muse-Glimmer-30B-unsloth-bnb-4bit"
     assert seen["load_in_4bit"] is True
 
 

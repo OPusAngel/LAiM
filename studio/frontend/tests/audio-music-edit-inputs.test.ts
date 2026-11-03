@@ -4,7 +4,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { readSrc, registerBundlerResolver } from "./helpers/kit.ts";
+import { readSrc, readSrcExpanded, registerBundlerResolver } from "./helpers/kit.ts";
 
 registerBundlerResolver();
 
@@ -208,7 +208,7 @@ test("which controls each action shows", () => {
 });
 
 test("the inputs reuse the source card and keep lyrics out of edit", () => {
-  const ui = readSrc("features/audio/components/music-edit-inputs.tsx");
+  const ui = readSrcExpanded("features/audio/components/music-edit-inputs.tsx");
   assert.match(ui, /allowSavedVoice=\{false\}/);
   assert.match(ui, /label="Clip to edit"/);
   assert.match(ui, /renderWaveform=/);

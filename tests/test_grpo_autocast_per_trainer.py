@@ -282,9 +282,9 @@ def test_an_unstamped_model_still_takes_the_environments_finetuning_mode():
 
 def test_the_loaders_stamp_the_full_finetuning_answer_on_the_model():
     for rel in (
-        "LAiM/models/loader.py",
-        "LAiM/models/vision.py",
-        "LAiM/models/sentence_transformer.py",
+        "unsloth/models/loader.py",
+        "unsloth/models/vision.py",
+        "unsloth/models/sentence_transformer.py",
     ):
         src = (REPO_ROOT / rel).read_text(encoding = "utf-8")
         assert "_mark_full_finetuning(" in src, rel
@@ -380,7 +380,7 @@ def test_generation_without_a_forced_family_is_unchanged(dtype, expected):
 def test_the_loaders_stamp_the_forced_float32_answer_on_the_model():
     """The stamp has to exist for the trainer to read, on both loaders that
     consult the forced list."""
-    for rel in ("LAiM/models/loader.py", "LAiM/models/vision.py"):
+    for rel in ("unsloth/models/loader.py", "unsloth/models/vision.py"):
         src = (REPO_ROOT / rel).read_text(encoding = "utf-8")
         assert "_mark_forced_float32(" in src, rel
 
@@ -477,7 +477,7 @@ def _exit_scopes(fn):
 def test_every_loader_return_path_stamps_the_forced_float32_answer():
     """Each loader path that returns a model must stamp FORCE_FLOAT32 or the trainer falls back to env."""
     seen = 0
-    for rel in ("LAiM/models/loader.py", "LAiM/models/vision.py"):
+    for rel in ("unsloth/models/loader.py", "unsloth/models/vision.py"):
         tree = ast.parse((REPO_ROOT / rel).read_text(encoding = "utf-8"))
         for node in ast.walk(tree):
             if not (isinstance(node, ast.FunctionDef) and node.name == "from_pretrained"):
@@ -506,7 +506,7 @@ def test_every_loader_return_path_stamps_the_forced_float32_answer():
 def test_the_diffusion_dispatch_stamps_both_answers():
     """A DiffusionGemma load leaves FastModel through _dispatch_diffusion, which
     predates this stamp: unstamped, a T4 float32 load autocasts to float16."""
-    tree = ast.parse((REPO_ROOT / "LAiM/models/loader.py").read_text(encoding = "utf-8"))
+    tree = ast.parse((REPO_ROOT / "unsloth/models/loader.py").read_text(encoding = "utf-8"))
     helper = next(
         n
         for n in ast.walk(tree)

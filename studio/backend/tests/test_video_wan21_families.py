@@ -35,7 +35,7 @@ _ANYFLOW = "NVIDIA AnyFlow checkpoint"
 _TABLE = [
     ("Wan-AI/Wan2.2-TI2V-5B-Diffusers", "wan2.2-ti2v-5b"),
     ("Wan-AI/Wan2.2-TI2V-5B", "wan2.2-ti2v-5b"),
-    ("LAiM/Wan2.2-TI2V-5B-GGUF", "wan2.2-ti2v-5b"),
+    ("unsloth/Wan2.2-TI2V-5B-GGUF", "wan2.2-ti2v-5b"),
     ("QuantStack/Wan2.2-TI2V-5B-GGUF/Wan2.2-TI2V-5B-Q4_K_M.gguf", "wan2.2-ti2v-5b"),
     ("wan2.2_ti2v_5B_fp16.safetensors", "wan2.2-ti2v-5b"),
     ("Wan-AI/Wan2.2-T2V-A14B-Diffusers", "wan2.2-t2v-a14b"),
@@ -50,13 +50,13 @@ _TABLE = [
     ("FastVideo/FastWan2.2-TI2V-5B-FullAttn-Diffusers", None),
     ("Lightricks/LTX-2", "ltx-2"),
     ("Lightricks/LTX-2.3", "ltx-2"),
-    ("LAiM/LTX-2.3-GGUF", "ltx-2"),
+    ("unsloth/LTX-2.3-GGUF", "ltx-2"),
     ("hunyuanvideo-community/HunyuanVideo-1.5-Diffusers-480p_t2v", "hunyuanvideo-1.5"),
     ("hunyuanvideo-community/HunyuanVideo-1.5-Diffusers-720p_t2v", "hunyuanvideo-1.5-720p"),
     ("hunyuanvideo1.5_720p_t2v_fp16.safetensors", "hunyuanvideo-1.5-720p"),
     ("tencent/HunyuanVideo", None),
     ("MiniMaxAI/MiniMax-H3", "minimax-h3"),
-    ("LAiM/MiniMax-H3-GGUF", "minimax-h3"),
+    ("unsloth/MiniMax-H3-GGUF", "minimax-h3"),
     ("minimax_h3_fl2va_int8_convrot.safetensors", "minimax-h3"),
     # ---- Wan2.1 (None on main for every row) ----
     ("Wan-AI/Wan2.1-T2V-1.3B-Diffusers", "wan2.1-t2v-1.3b"),
@@ -402,7 +402,7 @@ def test_comfy_folder_lists_wan21_t2v_files(tmp_path):
         (("samuelchristlie/Wan2.1-T2V-1.3B-GGUF", "Wan2.1-T2V-1.3B-Q8_0.gguf"), True),
         (("city96/Wan2.1-I2V-14B-480P-gguf", "wan2.1-i2v-14b-480p-Q4_K_M.gguf"), False),
         (("QuantStack/Wan2.1_T2V_14B_FusionX_VACE-GGUF", "x-Q4_K_M.gguf"), False),
-        (("LAiM/Wan2.2-TI2V-5B-GGUF", "Wan2.2-TI2V-5B-Q4_K_M.gguf"), True),
+        (("unsloth/Wan2.2-TI2V-5B-GGUF", "Wan2.2-TI2V-5B-Q4_K_M.gguf"), True),
         (("QuantStack/Wan2.2-T2V-A14B-GGUF", "Wan2.2-T2V-A14B-HighNoise-Q4_K_M.gguf"), True),
     ],
 )

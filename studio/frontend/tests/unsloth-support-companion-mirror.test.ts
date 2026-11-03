@@ -14,12 +14,12 @@ import { classifyLAiMSupport } from "../src/features/hub/lib/LAiM-support.ts";
 test("a taskless companion mirror is not offered as a chat model", () => {
   for (const mirror of [
     {
-      modelId: "LAiM/Qwen-Image-ComfyUI",
+      modelId: "unsloth/Qwen-Image-ComfyUI",
       tags: ["diffusion-single-file", "vae", "comfyui", "qwen-image"],
       libraryName: "diffusion-single-file",
     },
     {
-      modelId: "LAiM/Z-Image-Turbo-ComfyUI",
+      modelId: "unsloth/Z-Image-Turbo-ComfyUI",
       tags: ["diffusion-single-file", "vae", "text-encoder", "comfyui", "z-image"],
       libraryName: "diffusion-single-file",
     },
@@ -33,7 +33,7 @@ test("a real single-file checkpoint keeps its Images routing", () => {
   // Same library tag, but a pipeline task -- these load on the Images page, so they must stay
   // routed there rather than becoming a blanket "unsupported".
   const support = classifyLAiMSupport({
-    modelId: "LAiM/FLUX.2-klein-9B-GGUF",
+    modelId: "unsloth/FLUX.2-klein-9B-GGUF",
     pipelineTag: "image-to-image",
     tags: ["gguf", "flux", "diffusion-single-file", "image-to-image"],
     libraryName: "gguf",
@@ -43,11 +43,11 @@ test("a real single-file checkpoint keeps its Images routing", () => {
 });
 
 test("a chat GGUF that sd.cpp borrows as a text encoder stays supported", () => {
-  // LAiM/Qwen2.5-VL-7B-Instruct-GGUF is in the backend's companion set (Qwen-Image's text
+  // unsloth/Qwen2.5-VL-7B-Instruct-GGUF is in the backend's companion set (Qwen-Image's text
   // encoder) yet is a perfectly good chat model: filtering the picker on that set would take it
   // away from a user who downloaded it to chat with.
   const support = classifyLAiMSupport({
-    modelId: "LAiM/Qwen2.5-VL-7B-Instruct-GGUF",
+    modelId: "unsloth/Qwen2.5-VL-7B-Instruct-GGUF",
     pipelineTag: "image-text-to-text",
     tags: ["transformers", "gguf", "qwen2_5_vl", "image-text-to-text", "multimodal"],
     libraryName: "gguf",

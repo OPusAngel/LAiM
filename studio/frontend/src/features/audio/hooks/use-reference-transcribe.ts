@@ -7,6 +7,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { transcribeAudioInput } from "../api";
 import { type AudioSourceSelection, sourceRefOf } from "../audio-run-request";
 import { sttEngineForRepoId, sttSidecarKeyFor } from "../catalog";
+import { translate } from "@/i18n";
+
 
 /** fills the prompt without a transcript entry or language hint for cross-lingual references. */
 export function useReferenceTranscribe({
@@ -56,7 +58,7 @@ export function useReferenceTranscribe({
           onTextRef.current(text, reference);
         } else {
           setError(
-            "No speech was heard in the clip. Type what's said instead.",
+            translate("uxAudio.noSpeechWasHeardlf7uc"),
           );
         }
       } catch (reason) {
@@ -64,7 +66,7 @@ export function useReferenceTranscribe({
         setError(
           reason instanceof Error && reason.message
             ? reason.message
-            : "Could not transcribe the clip.",
+            : translate("uxAudio.couldNotTranscribeTheapuwn"),
         );
       } finally {
         if (abort.current === controller) {

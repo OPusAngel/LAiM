@@ -1,6 +1,6 @@
-# Model defaults for LAiM/Meta-Llama-3.1-8B-Instruct-bnb-4bit
+# Model defaults for unsloth/Meta-Llama-3.1-8B-Instruct-bnb-4bit
 # Based on Llama3.1_(8B)-Inference.ipynb
-# Also applies to: "LAiM/Meta-Llama-3.1-8B-Instruct-LAiM-bnb-4bit", "meta-llama/Meta-Llama-3.1-8B-Instruct", "LAiM/Meta-Llama-3.1-8B-Instruct","RedHatAI/Llama-3.1-8B-Instruct-FP8","LAiM/Llama-3.1-8B-Instruct-FP8-Block","LAiM/Llama-3.1-8B-Instruct-FP8-Dynamic"
+# Also applies to: "unsloth/Meta-Llama-3.1-8B-Instruct-unsloth-bnb-4bit", "meta-llama/Meta-Llama-3.1-8B-Instruct", "unsloth/Meta-Llama-3.1-8B-Instruct","RedHatAI/Llama-3.1-8B-Instruct-FP8","unsloth/Llama-3.1-8B-Instruct-FP8-Block","unsloth/Llama-3.1-8B-Instruct-FP8-Dynamic"
 
 training:
   max_seq_length: 8192
@@ -16,7 +16,7 @@ training:
   random_seed: 3407
   packing: false
   train_on_completions: true
-  gradient_checkpointing: "LAiM"
+  gradient_checkpointing: "unsloth"
   optim: "adamw_8bit"
   lr_scheduler_type: "linear"
 

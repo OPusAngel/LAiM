@@ -3,6 +3,8 @@
 
 import { authFetch } from "@/features/auth/api";
 import { formatFastApiDetail } from "@/lib/format-fastapi-error";
+import { translate } from "@/i18n";
+
 
 export interface SavedHfTokenResponse {
   token: string | null;
@@ -28,11 +30,11 @@ async function parse(response: Response): Promise<SavedHfTokenResponse> {
     const detail =
       body && "detail" in body ? formatFastApiDetail(body.detail) : null;
     throw new Error(
-      detail || `Hugging Face credential request failed (${response.status})`,
+      detail || translate("uxHub.huggingFaceCredentialRequesty936q", { p1: response.status }),
     );
   }
   if (!isSavedHfTokenResponse(body)) {
-    throw new Error("Hugging Face credential request returned an invalid response");
+    throw new Error(translate("uxHub.huggingFaceCredentialRequestpllgx"));
   }
   return body;
 }

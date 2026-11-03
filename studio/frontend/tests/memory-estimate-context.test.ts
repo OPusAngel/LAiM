@@ -66,15 +66,15 @@ const sourceId = (
 
 test("two quantizations of one repository are different sources", () => {
   assert.notEqual(
-    sourceId("LAiM/Qwen3-8B-GGUF", "Q4_K_M"),
-    sourceId("LAiM/Qwen3-8B-GGUF", "F16"),
+    sourceId("unsloth/Qwen3-8B-GGUF", "Q4_K_M"),
+    sourceId("unsloth/Qwen3-8B-GGUF", "F16"),
   );
 });
 
 test("the same source is the same identity, so a slider step does not blank the row", () => {
   assert.equal(
-    sourceId("LAiM/Qwen3-8B-GGUF", "Q4_K_M"),
-    sourceId("LAiM/Qwen3-8B-GGUF", "Q4_K_M"),
+    sourceId("unsloth/Qwen3-8B-GGUF", "Q4_K_M"),
+    sourceId("unsloth/Qwen3-8B-GGUF", "Q4_K_M"),
   );
 });
 

@@ -133,7 +133,7 @@ def test_the_declared_zoo_floor_can_supply_the_declared_transformers_window() ->
     if ZOO_FLOOR_WITH_LIFTED_TRANSFORMERS_CAP is None:
         pytest.skip(
             "deferred: no LAiM_zoo release carrying the lifted transformers ceiling "
-            "(LAiMai/LAiM-zoo#1227) is published yet, and 2026.9.5 is the newest on "
+            "(OPusAngel/LAiM-zoo#1227) is published yet, and 2026.9.5 is the newest on "
             "PyPI, so pyproject.toml holds the zoo floor there. Until it ships, the window "
             "this file checks is wider than what pip actually resolves. Re-enable by "
             "setting ZOO_FLOOR_WITH_LIFTED_TRANSFORMERS_CAP to the release carrying #1227."

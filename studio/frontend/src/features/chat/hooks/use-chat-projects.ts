@@ -15,9 +15,11 @@ import {
   moveStoredChatItemToProject,
   updateStoredChatProject,
 } from "../utils/chat-history-storage";
-import { offerToDeleteKeptSandboxes } from "../utils/offer-kept-sandbox-files";
+import { offerToDeleteKeptWorkdirs } from "../utils/offer-kept-workdir-files";
 import type { SidebarItem } from "./use-chat-sidebar-items";
 import { readFullListProjectActivity } from "./use-sidebar-row-pages";
+import { translate } from "@/i18n";
+
 
 let cachedProjects: ProjectRecord[] = [];
 let projectsLoaded = false;
@@ -158,7 +160,7 @@ export async function renameChatProject(
   name: string,
 ): Promise<void> {
   const trimmed = name.trim();
-  if (!trimmed) throw new Error("Project name is required.");
+  if (!trimmed) throw new Error(translate("uxChat.projectNameIsRequiredc0sdo"));
   await updateStoredChatProject(projectId, { name: trimmed });
 }
 
@@ -174,10 +176,10 @@ export async function deleteChatProject(
   args: { deleteFiles?: boolean } = {},
 ): Promise<void> {
   const kept = await deleteStoredChatProject(projectId, args);
-  // The member chats went with the project, so their own sandboxes are reachable from nothing: the
-  // same offer an ordinary chat delete makes, and a sandbox the backend could not remove is kept
+  // The member chats went with the project, so their own workdirs are reachable from nothing: the
+  // same offer an ordinary chat delete makes, and a workdir the backend could not remove is kept
   // even when asked to go.
-  offerToDeleteKeptSandboxes(kept);
+  offerToDeleteKeptWorkdirs(kept);
 }
 
 export async function moveChatItemToProject(

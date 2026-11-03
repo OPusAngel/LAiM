@@ -143,7 +143,7 @@ def _loaded_diffusion(llama_cpp, *, recorded_layers, requested_ngl):
     """A backend that looks like a healthy diffusion runner, for the dedup guards."""
     b = llama_cpp.LlamaCppBackend()
     b._process, b._healthy, b._is_diffusion = object(), True, True
-    b._model_identifier = "LAiM/DiffusionGemma-GGUF"
+    b._model_identifier = "unsloth/DiffusionGemma-GGUF"
     b._hf_variant = b._gguf_path = b._cache_type_kv = None
     b._requested_n_ctx = 4096
     b._tensor_parallel = b._layer_preserves_tensor_intent = False
@@ -161,7 +161,7 @@ def _loaded_diffusion(llama_cpp, *, recorded_layers, requested_ngl):
 def _in_target_state(llama_cpp, b, *, mode, layers):
     return b.adopt_load_intent_if_matched(
         llama_cpp.GgufLoadIntent(
-            model_identifier = "LAiM/DiffusionGemma-GGUF",
+            model_identifier = "unsloth/DiffusionGemma-GGUF",
             n_ctx = 4096,
             gpu_memory_mode = mode,
             gpu_layers = layers,

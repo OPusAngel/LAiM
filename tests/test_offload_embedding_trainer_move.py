@@ -1,6 +1,6 @@
 """An offloaded embedding must stay in host RAM through the model.to(device) that Trainer.train() and
 Accelerator.prepare_model issue, else the first training step pulls it back onto the card
-(LAiMai/LAiM#7055: the 4.4 GB Gemma 4 E2B per-layer table on an 8 GB GPU). "meta" stands in for
+(OPusAngel/LAiM#7055: the 4.4 GB Gemma 4 E2B per-layer table on an 8 GB GPU). "meta" stands in for
 the accelerator so this runs on CPU."""
 
 import ast, functools, os, types

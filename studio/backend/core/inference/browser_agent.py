@@ -217,6 +217,38 @@ BROWSER_SELECT_TOOL = {
     },
 }
 
+BROWSER_UPLOAD_TOOL = {
+    "type": "function",
+    "function": {
+        "name": "browser_upload",
+        "description": (
+            "Put a file from the user's own computer into a file-picker input (an element whose "
+            "snapshot shows it as a file field) by its ref, without opening the OS file dialog and "
+            "without the user picking anything. path is the file's absolute path on this machine; the "
+            "bytes are read back through LAiM's own authenticated local route, so a page on the "
+            "internet can never read the disk. Set multiple only for a field that takes several "
+            "files, so the new one joins what it already holds. Do not submit the form afterwards "
+            "unless asked."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "ref": {"type": "string", "description": "The file field's ref, for example r12."},
+                "path": {
+                    "type": "string",
+                    "description": "Absolute path of the file on the user's machine.",
+                },
+                "mime": {
+                    "type": "string",
+                    "description": "Optional content type; guessed from the name when left out.",
+                },
+                "multiple": {"type": "boolean"},
+            },
+            "required": ["ref", "path"],
+        },
+    },
+}
+
 BROWSER_SCROLL_TOOL = {
     "type": "function",
     "function": {
@@ -304,6 +336,7 @@ BROWSER_TOOLS = [
     BROWSER_DRAG_TOOL,
     BROWSER_TYPE_TOOL,
     BROWSER_SELECT_TOOL,
+    BROWSER_UPLOAD_TOOL,
     BROWSER_SCROLL_TOOL,
     BROWSER_PRESS_KEY_TOOL,
     BROWSER_EVALUATE_TOOL,
@@ -321,6 +354,7 @@ _MIN_ACTION_TIMEOUT_S = 30.0
 _MAX_URL_CHARS = 4096
 _MAX_TEXT_CHARS = 8000
 _MAX_SCRIPT_CHARS = 8000
+_MAX_PATH_CHARS = 4096
 _HIDDEN_TAIL_RE = re.compile(r"(?:[ \t]*\r?\n){4,}|[ \t]{200,}")
 # Past any real screen: a point there is a mistake, not a far corner.
 _MAX_POINT = 100_000
@@ -465,6 +499,21 @@ def _validated_request(name: str, arguments: dict, website_policy: Optional[dict
         if _HIDDEN_TAIL_RE.search(script):
             raise ValueError("script has a long run of blank space; remove it.")
         return {"op": op, "script": script}
+    if name == "browser_upload":
+        ref = _ref(arguments)
+        if not ref:
+            raise ValueError("ref is required. Take one from the latest snapshot, for example r12.")
+        path = str(arguments.get("path") or "").strip()
+        if not path:
+            raise ValueError("path is required: the absolute path of the file on the user's machine.")
+        if len(path) > _MAX_PATH_CHARS:
+            raise ValueError(f"path is longer than {_MAX_PATH_CHARS} characters.")
+        request = {"op": op, "ref": ref, "path": path}
+        mime = arguments.get("mime")
+        if isinstance(mime, str) and mime.strip():
+            request["mime"] = mime.strip()[:200]
+        request["multiple"] = arguments.get("multiple") is True
+        return request
     if name in ("browser_type", "browser_select"):
         ref = _ref(arguments)
         if not ref:

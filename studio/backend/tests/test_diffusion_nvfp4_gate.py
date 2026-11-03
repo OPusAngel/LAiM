@@ -34,7 +34,7 @@ def _record(**overrides):
         "policy_id": "zimg_rg76_v1",
         "policy_version": 1,
         "checkpoint_sha256": "a" * 64,
-        "repo_id": "LAiM/Z-Image-Turbo-NVFP4",
+        "repo_id": "unsloth/Z-Image-Turbo-NVFP4",
         "filename": "Z-Image-Turbo-NVFP4.pt",
         "gptq": False,
         "all_pass": True,
@@ -112,7 +112,7 @@ def test_a_matching_record_reads_true_and_canonicalises_the_base(tmp_path):
     assert nvfp4_gate_passed("Z-Image", ZIMAGE_BASE.lower(), path = path) is True
     mirrors = [
         mirror
-        for mirror in ("LAiM/Z-Image-Turbo",)
+        for mirror in ("unsloth/Z-Image-Turbo",)
         if canonical_base(mirror).lower() == ZIMAGE_BASE.lower()
     ]
     for mirror in mirrors:

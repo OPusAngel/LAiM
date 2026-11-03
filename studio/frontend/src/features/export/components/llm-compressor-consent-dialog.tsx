@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,7 +42,7 @@ export function LlmCompressorConsentDialog() {
             <div className="min-w-0 flex-1 space-y-3">
               <div className="space-y-1">
                 <AlertDialogTitle>
-                  {blocked ? "Cannot install llm-compressor" : "Install llm-compressor?"}
+                  {blocked ? translate("uxExport.cannotInstallLlmCompressorbmb55") : translate("uxExport.installLlmCompressori9k69")}
                 </AlertDialogTitle>
                 <AlertDialogDescription asChild>
                   <div className="space-y-2 text-sm text-muted-foreground">
@@ -57,16 +58,12 @@ export function LlmCompressorConsentDialog() {
                             {probe.workspace_install_command}
                           </p>
                         ) : probe?.consent_kind === "shadow" ? (
-                          <p className="text-xs">
-                            Target:{" "}
-                            <span className="font-mono text-foreground break-all">
+                          <p className="text-xs">{translate("uxExport.targeti0d36", { p1: " " })}<span className="font-mono text-foreground break-all">
                               {probe.shadow_path}
                             </span>
                           </p>
                         ) : null}
-                        <p className="text-xs">
-                          Interpreter:{" "}
-                          <span className="font-mono text-foreground break-all">
+                        <p className="text-xs">{translate("uxExport.interpreteri5rg2", { p1: " " })}<span className="font-mono text-foreground break-all">
                             {probe?.python_executable}
                           </span>
                         </p>
@@ -82,7 +79,7 @@ export function LlmCompressorConsentDialog() {
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           {!blocked ? (
             <AlertDialogAction onClick={() => resolve(true)}>
-              Install and continue
+              {translate("uxExport.installAndContinuencz6x")}
             </AlertDialogAction>
           ) : null}
         </AlertDialogFooter>

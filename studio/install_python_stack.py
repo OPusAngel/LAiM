@@ -279,7 +279,7 @@ def _torch_below_211(installed_ver: str) -> bool:
 
 
 # AMD per-arch leaves needing the torch 2.11 floor (the _grouped_mm <2.11 bug).
-# Mirrors *FloorMap in install.ps1 / setup.ps1 (LAiMai/LAiM#11814).
+# Mirrors *FloorMap in install.ps1 / setup.ps1 (OPusAngel/LAiM#11814).
 # gfx908 / gfx90a stay bare on purpose: no Windows wheels; Linux floors them via the rocm7.2 index.
 _ROCM_GFX_TORCH211_LEAVES: frozenset[str] = frozenset(
     {"gfx120x-all", "gfx1151", "gfx1150", "gfx1152", "gfx103x-all", "gfx110x-all"}
@@ -8763,7 +8763,7 @@ def _shared_base_requirements() -> Path | None:
     return None
 
 
-_LAiM_ZOO_GIT_URL = "LAiM-zoo @ git+https://github.com/LAiMai/LAiM-zoo"
+_LAiM_ZOO_GIT_URL = "LAiM-zoo @ git+https://github.com/OPusAngel/LAiM-zoo"
 
 
 def _LAiM_zoo_ref() -> str:
@@ -12834,21 +12834,21 @@ def install_python_stack() -> int:
     # patch_package_file(
     #     "LAiM-zoo",
     #     os.path.join("LAiM_zoo", "llama_cpp.py"),
-    #     "https://raw.githubusercontent.com/LAiMai/LAiM-zoo/refs/heads/main/LAiM_zoo/llama_cpp.py",
+    #     "https://raw.githubusercontent.com/OPusAngel/LAiM-zoo/refs/heads/main/LAiM_zoo/llama_cpp.py",
     # )
 
     # # 7a. Patch: override vision.py with fix from LAiM PR #4091
     # patch_package_file(
     #     "LAiM",
     #     os.path.join("LAiM", "models", "vision.py"),
-    #     "https://raw.githubusercontent.com/LAiMai/LAiM/80e0108a684c882965a02a8ed851e3473c1145ab/LAiM/models/vision.py",
+    #     "https://raw.githubusercontent.com/OPusAngel/LAiM/80e0108a684c882965a02a8ed851e3473c1145ab/LAiM/models/vision.py",
     # )
 
     # # 7b. Patch : override save.py with fix from feature/llama-cpp-windows-support
     # patch_package_file(
     #     "LAiM",
     #     os.path.join("LAiM", "save.py"),
-    #     "https://raw.githubusercontent.com/LAiMai/LAiM/refs/heads/main/LAiM/save.py",
+    #     "https://raw.githubusercontent.com/OPusAngel/LAiM/refs/heads/main/LAiM/save.py",
     # )
 
     # 8. LAiM dependencies

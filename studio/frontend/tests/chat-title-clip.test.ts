@@ -420,12 +420,12 @@ test("a title on a saved connection is routed to it, and streamed", async () => 
   // Envelope: version.wrappedKey.nonce.ciphertext; the RSA-1024 wrap is 128 bytes.
   assert.equal(atob((held?.encrypted_api_key ?? "").split(".")[1] ?? "").length, 128);
   const local = await buildTitleRequest(
-    "LAiM/gemma-4-E2B-it-GGUF",
+    "unsloth/gemma-4-E2B-it-GGUF",
     "User: hi",
   );
   assert.deepEqual(
     [local?.model, local?.stream, local && "provider_id" in local],
-    ["LAiM/gemma-4-E2B-it-GGUF", true, false],
+    ["unsloth/gemma-4-E2B-it-GGUF", true, false],
   );
   assert.deepEqual(
     local?.messages?.map((m) => m.role),
@@ -477,7 +477,7 @@ test("a connection that cannot serve the title yields no request at all", async 
     await buildTitleRequest("external::conn-1::qwen3-30b", "x"),
     null,
   );
-  assert.ok(await buildTitleRequest("LAiM/gemma-4-E2B-it-GGUF", "x"));
+  assert.ok(await buildTitleRequest("unsloth/gemma-4-E2B-it-GGUF", "x"));
 });
 
 test("reasoning is asked off only where the connection's model allows it", async () => {
@@ -537,8 +537,8 @@ test("what answered is read from the reply, whichever kind of turn it was", () =
     "external::conn-a::gpt-5.5",
   );
   assert.equal(
-    research({ model: "LAiM/gemma-4-E2B-it-GGUF" }),
-    "LAiM/gemma-4-E2B-it-GGUF",
+    research({ model: "unsloth/gemma-4-E2B-it-GGUF" }),
+    "unsloth/gemma-4-E2B-it-GGUF",
   );
   assert.equal(research({ model: "external::conn-a::m" }), "");
   for (const missing of [
@@ -564,8 +564,8 @@ test("what answered is read from the reply, whichever kind of turn it was", () =
     assert.equal(research({ model: "m", ...external }, status), "", status);
   }
   assert.equal(
-    withRun("LAiM/gemma-4-E2B-it-GGUF"),
-    "LAiM/gemma-4-E2B-it-GGUF",
+    withRun("unsloth/gemma-4-E2B-it-GGUF"),
+    "unsloth/gemma-4-E2B-it-GGUF",
   );
   assert.equal(withRun("external::conn-b::m"), "external::conn-b::m");
   assert.equal(withRun("external::conn-b::m", "failed"), "external::conn-b::m");
@@ -582,7 +582,7 @@ test("what answered is read from the reply, whichever kind of turn it was", () =
 test("a title is asked of the connection that answered, or of no connection", () => {
   const A = "external::conn-a::m";
   const B = "external::conn-b::m";
-  const local = "LAiM/gemma-4-E2B-it-GGUF";
+  const local = "unsloth/gemma-4-E2B-it-GGUF";
   for (const [answered, active, expected] of [
     [A, B, A],
     [A, local, A],
@@ -721,7 +721,7 @@ test("title sampling fields follow the provider's capabilities", async () => {
     ["temperature", "top_p", "top_k", "repetition_penalty"].filter(
       (k) => r !== null && k in r,
     );
-  const local = await buildTitleRequest("LAiM/gemma-4-E2B-it-GGUF", "x");
+  const local = await buildTitleRequest("unsloth/gemma-4-E2B-it-GGUF", "x");
   assert.deepEqual(fields(local), [
     "temperature",
     "top_p",
@@ -748,7 +748,7 @@ test("a Responses custom connection still asks reasoning off", async () => {
 });
 
 test("the title budget is floored at the provider's minimum output", async () => {
-  const local = await buildTitleRequest("LAiM/gemma-4-E2B-it-GGUF", "x");
+  const local = await buildTitleRequest("unsloth/gemma-4-E2B-it-GGUF", "x");
   assert.equal(local?.max_tokens, 24);
   stageConnection({ providerType: "kimi", hasApiKey: true });
   const kimi = await buildTitleRequest("external::conn-1::kimi-k2-thinking", "x");

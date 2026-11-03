@@ -13,9 +13,9 @@ import {
 test("non-chat entries never reach the chat example picker", () => {
   const models = chatModelsFromCatalog({
     data: [
-      { id: "LAiM/Qwen3-8B-GGUF", loaded: true, quant: "Q4_K_M" },
+      { id: "unsloth/Qwen3-8B-GGUF", loaded: true, quant: "Q4_K_M" },
       {
-        id: "LAiM/Z-Image-Turbo-GGUF",
+        id: "unsloth/Z-Image-Turbo-GGUF",
         loaded: true,
         quant: "Q4_K_S",
         task: "text-to-image",
@@ -23,22 +23,22 @@ test("non-chat entries never reach the chat example picker", () => {
       { id: "Lightricks/LTX-2", loaded: false, task: "text-to-video" },
       { id: "tiny", loaded: false, task: "automatic-speech-recognition" },
       {
-        id: "LAiM/orpheus-3b-0.1-ft-GGUF",
+        id: "unsloth/orpheus-3b-0.1-ft-GGUF",
         loaded: false,
         quant: "Q8_0",
         task: "text-to-speech",
       },
       {
-        id: "LAiM/Llama-3.2-1B-Instruct-GGUF",
+        id: "unsloth/Llama-3.2-1B-Instruct-GGUF",
         loaded: false,
         task: "text-generation",
       },
     ],
   });
   assert.deepEqual(models, [
-    { id: "LAiM/Qwen3-8B-GGUF", loaded: true, quant: "Q4_K_M" },
+    { id: "unsloth/Qwen3-8B-GGUF", loaded: true, quant: "Q4_K_M" },
     {
-      id: "LAiM/Llama-3.2-1B-Instruct-GGUF",
+      id: "unsloth/Llama-3.2-1B-Instruct-GGUF",
       loaded: false,
       quant: undefined,
     },
@@ -67,8 +67,8 @@ test("malformed bodies yield no models", () => {
 test("the audio examples see only speech and transcription models", () => {
   const models = audioModelsFromCatalog({
     data: [
-      { id: "LAiM/Qwen3-8B-GGUF", loaded: true, quant: "Q4_K_M" },
-      { id: "LAiM/Z-Image-Turbo-GGUF", loaded: true, task: "text-to-image" },
+      { id: "unsloth/Qwen3-8B-GGUF", loaded: true, quant: "Q4_K_M" },
+      { id: "unsloth/Z-Image-Turbo-GGUF", loaded: true, task: "text-to-image" },
       { id: "tiny", loaded: true, task: "automatic-speech-recognition" },
       {
         id: "audio-cpp/audio.cpp-gguf/Kokoro-82M-GGUF",

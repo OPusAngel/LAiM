@@ -126,12 +126,12 @@ class TestVisionCacheSubprocessPath:
         """When the raw-config reader is inconclusive (None), the transformers
         5.x subprocess fires only on the first call; the second is cached."""
         # First call: raw None -> subprocess
-        assert is_vision_model("LAiM/Qwen3.5-2B") is True
+        assert is_vision_model("unsloth/Qwen3.5-2B") is True
         # Second call: cache hit, no subprocess
-        assert is_vision_model("LAiM/Qwen3.5-2B") is True
+        assert is_vision_model("unsloth/Qwen3.5-2B") is True
 
         mock_subprocess.assert_called_once()
-        assert _vision_detection_cache[("LAiM/Qwen3.5-2B", None, False)] is True
+        assert _vision_detection_cache[("unsloth/Qwen3.5-2B", None, False)] is True
 
     @patch("utils.models.model_config._raw_config_has_vision_config", return_value = True)
     @patch("utils.models.model_config._is_vision_model_subprocess", return_value = None)
@@ -140,11 +140,11 @@ class TestVisionCacheSubprocessPath:
         self, mock_needs_t5, mock_subprocess, mock_raw_config
     ):
         # The raw config.json read is the primary path; a definitive answer there never reaches the subprocess.
-        assert is_vision_model("LAiM/gemma-4-E4B-it") is True
-        assert is_vision_model("LAiM/gemma-4-E4B-it") is True
+        assert is_vision_model("unsloth/gemma-4-E4B-it") is True
+        assert is_vision_model("unsloth/gemma-4-E4B-it") is True
 
         mock_raw_config.assert_called_once_with(
-            "LAiM/gemma-4-E4B-it", hf_token = None, local_files_only = False
+            "unsloth/gemma-4-E4B-it", hf_token = None, local_files_only = False
         )
         mock_subprocess.assert_not_called()
 

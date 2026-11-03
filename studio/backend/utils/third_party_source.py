@@ -97,7 +97,7 @@ _IMPORT_LOCK = threading.RLock()
 
 # Published on the Hub rather than on PyPI, so the modelling code is fetched. Pinned to
 # a revision: without one the import executes whatever the branch points at today.
-_DEEPSEEK_OCR_REPOSITORY = "LAiM/DeepSeek-OCR"
+_DEEPSEEK_OCR_REPOSITORY = "unsloth/DeepSeek-OCR"
 _DEEPSEEK_OCR_REVISION = "84cced885e9ae0de9f2307915a255ac04fd6e8ec"
 _DEEPSEEK_OCR_PACKAGE = "deepseek_ocr"
 _DEEPSEEK_OCR_MODULES = (
@@ -124,7 +124,7 @@ _DEEPSEEK_OCR_CONTENTS = frozenset({"__init__.py", *_DEEPSEEK_OCR_MODULES})
 
 _DAC_REPOSITORY = "ibm-research/DAC.speech.v1.0"
 SNAC_REPOSITORY = "hubertsiuzdak/snac_24khz"
-SPARK_TTS_REPOSITORY = "LAiM/Spark-TTS-0.5B"
+SPARK_TTS_REPOSITORY = "unsloth/Spark-TTS-0.5B"
 SPEECH_CODEC_REPOSITORIES = {
     "snac": (SNAC_REPOSITORY,),
     "bicodec": (SPARK_TTS_REPOSITORY,),

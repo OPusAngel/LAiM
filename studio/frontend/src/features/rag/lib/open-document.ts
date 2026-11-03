@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { MAX_DOCUMENT_PREVIEW_BYTES } from "@/components/file-viewer";
 import { openFileInBrowser } from "@/features/browser";
 import { isTauri } from "@/lib/api-base";
@@ -16,7 +17,7 @@ export function openRagDocumentExternally(
   documentId: string,
   filename: string,
 ): void {
-  const failed = () => toast.error(`Could not open ${filename}`);
+  const failed = () => toast.error(translate("uxRag.couldNotOpenf9nq5", { p1: filename }));
   if (isTauri) {
     getDocumentFileUrl(documentId)
       .then(async (url) => {
@@ -28,8 +29,8 @@ export function openRagDocumentExternally(
   }
   const tab = window.open("about:blank", "_blank");
   if (!tab) {
-    toast.error(`Your browser blocked the new tab for ${filename}`, {
-      description: "Allow popups for Studio and try again.",
+    toast.error(translate("uxRag.yourBrowserBlockedThe0nwfo", { p1: filename }), {
+      description: translate("uxRag.allowPopupsForStudio1syoe"),
     });
     return;
   }
@@ -47,9 +48,9 @@ export function offerRagDocumentOutside(
   documentId: string,
   filename: string,
 ): void {
-  toast.message(`${filename} is too large to preview in Studio`, {
+  toast.message(translate("uxRag.isTooLargeToye067", { p1: filename }), {
     action: {
-      label: "Open",
+      label: translate("browser.suggestedMenu.open"),
       onClick: () => openRagDocumentExternally(documentId, filename),
     },
   });
@@ -103,7 +104,7 @@ export function openRagDocumentInBrowser(
     })
     .catch(() => {
       if (latestOpen.get(documentId) === ticket) {
-        toast.error(`Could not open ${filename}`);
+        toast.error(translate("uxRag.couldNotOpenf9nq5", { p1: filename }));
       }
     });
 }

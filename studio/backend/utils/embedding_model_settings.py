@@ -84,7 +84,7 @@ def validate_embedding_model(value: Any) -> str:
     if cleaned is None:
         raise ValueError(
             "Embedding model must be a Hugging Face repo id (e.g. "
-            "'LAiM/bge-small-en-v1.5') or a local model path, up to "
+            "'unsloth/bge-small-en-v1.5') or a local model path, up to "
             f"{MAX_EMBEDDING_MODEL_LENGTH} characters."
         )
     return cleaned

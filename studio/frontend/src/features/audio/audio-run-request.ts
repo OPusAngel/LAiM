@@ -5,6 +5,8 @@
 
 /** Mirrors AUDIO_INPUT_MAX_BYTES in studio/backend/utils/upload_limits.py. */
 export const AUDIO_INPUT_MAX_BYTES = 200 * 1024 * 1024;
+import { translate } from "@/i18n";
+
 
 export const REFERENCE_MAX_SECONDS = 30;
 
@@ -45,7 +47,7 @@ export function clipReference(clip: {
   return {
     kind: "clip",
     id: clip.id,
-    name: clip.prompt || "Generated clip",
+    name: clip.prompt || translate("uxAudio.generatedClipkbw6f"),
     durationS: clip.duration_s,
     transcript: (spoken && clip.prompt) || null,
     language: null,
@@ -360,7 +362,7 @@ export function buildVoiceCreateBody(
 ): Record<string, unknown> {
   const source = cleanRef(request.source);
   if (!source || "voice_id" in source) {
-    throw new Error("A saved voice is made from an upload or a history clip.");
+    throw new Error(translate("uxAudio.aSavedVoiceIss5afa"));
   }
   const body: Record<string, unknown> = {
     source,

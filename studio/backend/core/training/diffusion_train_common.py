@@ -158,8 +158,8 @@ def _component_only_repos() -> dict[str, tuple[str, str, str]]:
 
     A pre-cast text-encoder repo (``te_prequant_repos``, in both registries) ships a single
     component archive: no ``model_index.json``, no VAE, no scheduler, no pipeline, so
-    ``from_pretrained`` on one can only fail. Nothing in the NAME says so: ``LAiM/LTX-2-FP8``
-    carries the ``ltx-2`` token, so the detectors claim it and the ``LAiM/*`` trust gate passes
+    ``from_pretrained`` on one can only fail. Nothing in the NAME says so: ``unsloth/LTX-2-FP8``
+    carries the ``ltx-2`` token, so the detectors claim it and the ``unsloth/*`` trust gate passes
     it. The registries' own tables are the only authority on what a repo holds, so read them rather
     than special-casing repo ids.
 
@@ -205,7 +205,7 @@ def _refuse_component_only_repo(base_model: str) -> None:
     """Raise for a base model that is a family's component checkpoint rather than a model. Runs from
     ``resolve_trainable_family``, so it fires in the ``/diffusion/start`` preflight BEFORE the
     resident GPU workloads are freed. Without it the name match resolved a real family, the trust
-    gate passed the ``LAiM/*`` repo, the gated-access probe ignored the resulting
+    gate passed the ``unsloth/*`` repo, the gated-access probe ignored the resulting
     ``model_index.json`` 404 (a 404 is not an access problem), and the run evicted the user's
     loaded model before failing inside ``from_pretrained`` in the child."""
     hit = _component_only_repos().get(str(base_model or "").strip().lower())
@@ -2074,7 +2074,7 @@ def _refuse_ltx23_training_base(base_model: str) -> None:
 
 def _assert_trusted_base_model(base_model: str, *, allow_modular: bool = False) -> None:
     """Gate the training base model the same way the inference backend gates non-GGUF loads: a local
-    path or a trusted repo (``LAiM/*`` or an allowlisted official base). This runs BEFORE
+    path or a trusted repo (``unsloth/*`` or an allowlisted official base). This runs BEFORE
     ``from_pretrained`` so an untrusted remote repo (which could ship pickle weights) is never
     fetched or deserialised. ``allow_modular`` is for a trainer whose loader is
     ``ModularPipeline.from_pretrained``: a local MiniMax-H3 pipeline carries
@@ -2089,7 +2089,7 @@ def _assert_trusted_base_model(base_model: str, *, allow_modular: bool = False) 
     if not trusted:
         raise ValueError(
             f"Refusing to train from untrusted base model '{base_model}'. Use a local path or "
-            f"a trusted repo (an LAiM/* repo or an official base)."
+            f"a trusted repo (an unsloth/* repo or an official base)."
         )
     # An existing LOCAL base is loaded as a full pipeline, which needs an index; reject a non-pipeline local dir
     # before /diffusion/start frees the GPU models.
@@ -2485,7 +2485,7 @@ _CONFIG_ALIASES = {
 
 
 def _coerce_gradient_checkpointing(value: Any) -> bool:
-    """LAiM sends gradient_checkpointing as a string ("none" / "true" / "LAiM"); the disable
+    """LAiM sends gradient_checkpointing as a string ("none" / "true" / "unsloth"); the disable
     words are False, anything else truthy is True. A real bool passes through."""
     if isinstance(value, str):
         return value.strip().lower() not in ("", "none", "false", "0", "no", "off")

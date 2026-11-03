@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import {
   Empty,
@@ -98,26 +99,26 @@ export function LlmScoresTab({
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <FieldLabel
-          label="Scorers"
-          hint="Rubrics used by LLM Judge to score each generated row."
+          label={translate("uxRecipestudio.scorers1cac4")}
+          hint={translate("uxRecipestudio.rubricsUsedByLLMolxmx")}
         />
         {scores.length > 0 && (
           <Button type="button" size="xs" variant="outline" onClick={addScore}>
-            Add scorer
+            {translate("uxRecipestudio.addScorer1x7bi")}
           </Button>
         )}
       </div>
       {scores.length === 0 && (
         <Empty className="rounded-xl border border-dashed border-border/70 p-5">
           <EmptyHeader>
-            <EmptyTitle className="text-sm">No scorers yet</EmptyTitle>
+            <EmptyTitle className="text-sm">{translate("uxRecipestudio.noScorersYetqxd44")}</EmptyTitle>
             <EmptyDescription className="text-xs">
-              Add a scorer rubric before running judge generation.
+              {translate("uxRecipestudio.addAScorerRubric1l0vz")}
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent className="max-w-none">
             <Button type="button" size="sm" onClick={addScore}>
-              Add first scorer
+              {translate("uxRecipestudio.addFirstScorerr6np5")}
             </Button>
           </EmptyContent>
         </Empty>
@@ -129,7 +130,7 @@ export function LlmScoresTab({
         >
           <div className="flex items-center justify-between gap-2">
             <p className="text-xs font-semibold text-foreground">
-              {score.name.trim() || `Scorer ${index + 1}`}
+              {score.name.trim() || translate("uxRecipestudio.scorer519et", { p1: index + 1 })}
             </p>
             <Button
               type="button"
@@ -142,7 +143,7 @@ export function LlmScoresTab({
           </div>
           <Input
             className="nodrag h-8 text-xs"
-            placeholder="Score name"
+            placeholder={translate("uxRecipestudio.scoreName3plc0")}
             value={score.name}
             onChange={(event) =>
               updateScore(index, { name: event.target.value })
@@ -150,7 +151,7 @@ export function LlmScoresTab({
           />
           <Textarea
             className="corner-squircle nodrag min-h-[calc(56px*var(--ui-space-scale,1))] text-xs"
-            placeholder="Score description"
+            placeholder={translate("uxRecipestudio.scoreDescription1qy32")}
             value={score.description}
             onChange={(event) =>
               updateScore(index, { description: event.target.value })
@@ -164,7 +165,7 @@ export function LlmScoresTab({
               >
                 <Input
                   className="nodrag h-7 text-xs"
-                  placeholder="Value"
+                  placeholder={translate("uxRecipestudio.value1m2g8")}
                   value={option.value}
                   onChange={(event) =>
                     updateOption(index, optionIndex, {
@@ -174,7 +175,7 @@ export function LlmScoresTab({
                 />
                 <Input
                   className="nodrag h-7 text-xs"
-                  placeholder="Description"
+                  placeholder={translate("skills.descriptionLabel")}
                   value={option.description}
                   onChange={(event) =>
                     updateOption(index, optionIndex, {
@@ -197,9 +198,7 @@ export function LlmScoresTab({
               size="xs"
               variant="outline"
               onClick={() => addOption(index)}
-            >
-              Add option
-            </Button>
+            >{translate("uxRecipestudio.addOptionqw5oq")}</Button>
           </div>
         </div>
       ))}

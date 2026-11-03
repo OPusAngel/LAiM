@@ -21,7 +21,7 @@ def _studio():
     return _studio_mod
 
 
-_BASE = ["--model", "LAiM/Qwen3-1.7B-GGUF"]
+_BASE = ["--model", "unsloth/Qwen3-1.7B-GGUF"]
 
 
 def test_run_exposes_secure_option_default_off():

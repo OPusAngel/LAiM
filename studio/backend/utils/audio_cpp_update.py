@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
-"""In-app audio.cpp runtime update: the third phase of the combined llama.cpp update item (utils.llama_cpp_update chains run_chained_phase after the whisper phase). Like llama.cpp and whisper.cpp, the target tracks the newest LAiMai/audio.cpp release (or the release LAiM_AUDIO_CPP_TAG names, which needs no network call), looked up through utils.audio_cpp_freshness. Only the LAiM Studio-managed tree is offered, the same predicate the Audio page notice reads. The mechanics (the streamed installer run, the chained job) live in utils.prebuilt.update_flow; this module keeps the audio.cpp policy."""
+"""In-app audio.cpp runtime update: the third phase of the combined llama.cpp update item (utils.llama_cpp_update chains run_chained_phase after the whisper phase). Like llama.cpp and whisper.cpp, the target tracks the newest unslothai/audio.cpp release (or the release LAiM_AUDIO_CPP_TAG names, which needs no network call), looked up through utils.audio_cpp_freshness. Only the LAiM Studio-managed tree is offered, the same predicate the Audio page notice reads. The mechanics (the streamed installer run, the chained job) live in utils.prebuilt.update_flow; this module keeps the audio.cpp policy."""
 
 from __future__ import annotations
 

@@ -21,6 +21,8 @@ import {
   deletePerModelConfigsForOverrideKeys,
   normalizePerModelConfig,
 } from "../model-config/per-model-config";
+import { translate } from "@/i18n";
+
 
 const OVERRIDES_URL = "/api/settings/openai-auto-switch/overrides";
 
@@ -217,7 +219,7 @@ export async function fetchModelOverrides(): Promise<ApiModelOverrides> {
   const res = await authFetch(OVERRIDES_URL);
   if (!res.ok) {
     throw new Error(
-      await readFastApiError(res, "Failed to load saved model settings"),
+      await readFastApiError(res, translate("uxModelpicker.failedToLoadSavedhtjue")),
     );
   }
   const body = (await res.json()) as { overrides?: ApiModelOverrides };
@@ -242,7 +244,7 @@ export async function fetchLoadModelOverride(
   const res = await authFetch(`${OVERRIDES_URL}?${query.toString()}`);
   if (!res.ok) {
     throw new Error(
-      await readFastApiError(res, "Failed to load saved model settings"),
+      await readFastApiError(res, translate("uxModelpicker.failedToLoadSavedhtjue")),
     );
   }
   const body = (await res.json()) as {
@@ -629,7 +631,7 @@ async function sendModelOverride(
   });
   if (!res.ok) {
     throw new Error(
-      await readFastApiError(res, "Failed to save model settings for the API"),
+      await readFastApiError(res, translate("uxModelpicker.failedToSaveModel1x12d")),
     );
   }
   const body = (await res.json()) as {

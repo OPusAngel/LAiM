@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -93,8 +94,8 @@ function ConvertInputs({
       <div data-tour="audio-convert-source">
         <AudioSourceInput
           id="convert-source"
-          label="Recording"
-          hint={`The speech or singing to convert. Converts the first ${maxMinutes} minutes.`}
+          label={translate("uxAudio.recording1s70r")}
+          hint={translate("uxAudio.theSpeechOrSingingnnm4t", { p1: maxMinutes })}
           value={source}
           onChange={store.setSource}
           disabled={disabled}
@@ -103,17 +104,17 @@ function ConvertInputs({
           onStatusChange={convert.setSourceStatus}
           usesFirstSeconds={caps?.source_max_seconds ?? 300}
           maxRecordSeconds={caps?.source_max_seconds ?? 300}
-          expiredMessage="This recording expired. Add it again."
-          recordHint="Speak or sing what to convert."
+          expiredMessage={translate("uxAudio.thisRecordingExpiredAdd9731s")}
+          recordHint={translate("uxAudio.speakOrSingWhat5mjzq")}
         />
       </div>
 
       <div data-tour="audio-convert-target">
         {caps?.target === "builtin" ? (
           <Field
-            label="Target voice"
+            label={translate("uxAudio.targetVoice1lyes")}
             htmlFor="convert-builtin-voice"
-            hint="This model converts to its built-in voices only."
+            hint={translate("uxAudio.thisModelConvertsTo15uke")}
           >
             <Select
               value={convert.builtinVoice}
@@ -139,15 +140,15 @@ function ConvertInputs({
         ) : (
           <AudioSourceInput
             id="convert-target"
-            label="Target voice"
-            hint="A few seconds of the voice the recording should take."
+            label={translate("uxAudio.targetVoice1lyes")}
+            hint={translate("uxAudio.aFewSecondsOf123x3")}
             value={convert.target}
             onChange={store.setTarget}
             disabled={disabled}
             handleRef={convert.targetHandle}
             onStatusChange={convert.setTargetStatus}
             usesFirstSeconds={30}
-            expiredMessage="This voice clip expired. Add it again."
+            expiredMessage={translate("uxAudio.thisVoiceClipExpiredbl7cn")}
           />
         )}
       </div>
@@ -155,10 +156,10 @@ function ConvertInputs({
       {caps && caps.modes.length > 1 ? (
         <div className="grid gap-1.5">
           <span className="text-ui-13 font-medium text-foreground">
-            The recording is
+            {translate("uxAudio.theRecordingIshag3z")}
           </span>
           <PillTabs
-            ariaLabel="Speech or singing"
+            ariaLabel={translate("uxAudio.speechOrSinging0h4hn")}
             value={convert.mode}
             onValueChange={(mode) =>
               store.setMode(mode === "singing" ? "singing" : "speech")
@@ -168,8 +169,8 @@ function ConvertInputs({
             compact={true}
             className="[&>button]:px-3"
             tabs={[
-              { value: "speech", label: "Speech" },
-              { value: "singing", label: "Singing" },
+              { value: "speech", label: translate("uxAudio.speech1few1") },
+              { value: "singing", label: translate("uxAudio.singing17758") },
             ]}
           />
         </div>
@@ -182,7 +183,7 @@ function ConvertInputs({
               htmlFor="convert-pitch-auto"
               className="flex items-center justify-between gap-3 text-ui-13 font-medium text-foreground"
             >
-              Match the target's pitch
+              {translate("uxCopy.matchTheTargetSnci43")}
               <Switch
                 id="convert-pitch-auto"
                 checked={convert.pitchAuto}
@@ -195,12 +196,12 @@ function ConvertInputs({
           convert.pitchAuto &&
           !pitchSupport.shiftWithAuto ? (
             <p className="text-ui-11p5 leading-snug text-muted-foreground">
-              Turn off to set the pitch shift yourself.
+              {translate("uxAudio.turnOffToSet1r3sj")}
             </p>
           ) : (
             <ParamSlider
               label={
-                pitchSupport.auto && convert.pitchAuto ? "Extra shift" : "Pitch"
+                pitchSupport.auto && convert.pitchAuto ? translate("uxAudio.extraShiftox1e7") : "Pitch"
               }
               value={convert.pitch}
               min={-24}
@@ -210,8 +211,8 @@ function ConvertInputs({
               format={(v) => `${v > 0 ? "+" : ""}${v} st`}
               info={
                 pitchSupport.auto && convert.pitchAuto
-                  ? "Semitones added after matching the target's pitch, e.g. +12 to sing an octave up."
-                  : "Semitones. +12 is an octave up; try -12 to +12 when the target voice is much lower or higher."
+                  ? translate("uxAudio.semitonesAddedAfterMatching4nx0d")
+                  : translate("uxAudio.semitones12IsAnhcd0j")
               }
               onChange={(next) => store.setPitch(Math.round(next))}
             />
@@ -243,9 +244,9 @@ function SourceTextField({
           htmlFor={CONVERT_SOURCE_TEXT_FIELD_ID}
           className="text-ui-13 font-medium text-foreground"
         >
-          What's said in the recording
+          {translate("uxCopy.whatSSaidInhfl69")}
           <span className="ml-1.5 font-normal text-muted-foreground">
-            Required
+            {translate("uxAudio.requiredmq0co")}
           </span>
         </label>
         <Button
@@ -257,7 +258,7 @@ function SourceTextField({
           onClick={() => void transcriber.transcribe(source)}
         >
           <HugeiconsIcon icon={SpeechToTextIcon} className="size-3.5" />
-          {transcriber.transcribing ? "Transcribing…" : "Transcribe"}
+          {transcriber.transcribing ? translate("uxAudio.transcribingEllipsislwgf7") : translate("uxAudio.transcribeActionm87c0")}
         </Button>
       </div>
       <Textarea
@@ -266,7 +267,7 @@ function SourceTextField({
         disabled={transcriber.transcribing}
         aria-busy={transcriber.transcribing}
         onChange={(event) => store.setSourceText(event.target.value)}
-        placeholder="Type the words in the recording, or press Transcribe."
+        placeholder={translate("uxAudio.typeTheWordsIn1tj1x")}
         className="min-h-16"
       />
       {transcriber.error ? (
@@ -277,13 +278,11 @@ function SourceTextField({
             variant="link"
             className="h-auto p-0 text-ui-11p5 font-medium text-foreground"
             onClick={() => void transcriber.transcribe(source)}
-          >
-            Try again
-          </Button>
+          >{translate("uxAudio.tryAgainqnlxc")}</Button>
         </p>
       ) : (
         <p className="text-ui-11p5 leading-snug text-muted-foreground">
-          Taking the target's style rebuilds the delivery from these words.
+          {translate("uxAudio.takingTheTargetSbog55")}
         </p>
       )}
     </div>
@@ -384,7 +383,7 @@ function useSourceSide(clip: AudioGalleryClip | null): {
   const [side, setSide] = useState<{ src?: string; unavailable?: string }>({});
   useEffect(() => {
     if (!savedUrl && !sourceId) {
-      setSide({ unavailable: "The source is not saved with this clip." });
+      setSide({ get unavailable() { return translate("uxAudio.theSourceIsNotftftv"); } });
       return;
     }
     let url: string | null = null;
@@ -410,7 +409,7 @@ function useSourceSide(clip: AudioGalleryClip | null): {
       .catch(() => {
         if (!cancelled)
           setSide({
-            unavailable: "The source recording is no longer available.",
+            get unavailable() { return translate("uxAudio.theSourceRecordingIsqt523"); },
           });
       });
     return () => {
@@ -449,9 +448,9 @@ export function ConvertOutput({
       renderPlayer={(clip, src, focusRef) => (
         <ABCompare
           key={clip.id}
-          ariaLabel="Compare the source and the converted voice"
-          a={{ label: "Source", ...sourceSide }}
-          b={{ label: "Converted", src }}
+          ariaLabel={translate("uxAudio.compareTheSourceAndx426n")}
+          a={{ label: translate("uxVideo.sourcer5qyu"), ...sourceSide }}
+          b={{ label: translate("uxAudio.converted1jewu"), src }}
           side={compareSide === "source" ? "a" : "b"}
           onSideChange={(side) =>
             setCompareSide(side === "a" ? "source" : "converted")
@@ -463,7 +462,7 @@ export function ConvertOutput({
         picks.length > 0 ? (
           <div
             className="flex flex-wrap justify-center gap-2"
-            aria-label="Recommended models"
+            aria-label={translate("uxAudio.recommendedModelsu5i1l")}
           >
             {picks.map((model) => (
               <Button
@@ -472,17 +471,15 @@ export function ConvertOutput({
                 variant="outline"
                 size="sm"
                 onClick={() => onPickModel?.(model.id)}
-              >
-                Use {model.name}
-              </Button>
+              >{translate("uxAudio.usejk2qp", { p1: model.name })}</Button>
             ))}
           </div>
         ) : null
       }
       emptyText={
         modelReady
-          ? "Converted recordings land here. Add a recording and the target voice, and press Generate."
-          : "Converted recordings land here. Load a model that can convert a voice, add a recording, and press Generate."
+          ? translate("uxAudio.convertedRecordingsLandHere8tf6z")
+          : translate("uxAudio.convertedRecordingsLandHerehj6ej")
       }
     />
   );

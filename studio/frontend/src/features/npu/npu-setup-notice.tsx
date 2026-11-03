@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { AlertCircleIcon } from "@hugeicons/core-free-icons";
@@ -12,10 +13,7 @@ export function NpuSetupNotice({ catalog }: { catalog: NpuCatalog }) {
   const problems = status.validation?.problems ?? [];
   return (
     <div className="flex flex-col gap-2 px-2.5 pb-2 text-xs">
-      <p className="text-muted-foreground">
-        {status.hardware.name ?? "AMD NPU"} found. These models run on the NPU,
-        separately from the GPU models listed below.
-      </p>
+      <p className="text-muted-foreground">{translate("uxFeatures.foundTheseModelsRun4bm5d", { p1: status.hardware.name ?? "AMD NPU" })}</p>
       {status.error || problems.length > 0 ? (
         <div className="flex gap-2 rounded-lg bg-destructive/10 p-2.5 text-destructive">
           <HugeiconsIcon
@@ -31,7 +29,7 @@ export function NpuSetupNotice({ catalog }: { catalog: NpuCatalog }) {
                 rel="noreferrer"
                 className="underline underline-offset-2"
               >
-                NPU driver setup
+                {translate("uxCopy.nPUDriverSetup1jdk4")}
               </a>
             ) : null}
           </div>
@@ -40,8 +38,7 @@ export function NpuSetupNotice({ catalog }: { catalog: NpuCatalog }) {
       {!ready || !status.runtime_installed ? (
         <div className="flex items-center justify-between gap-3 rounded-lg bg-muted/50 p-3">
           <span className="text-muted-foreground">
-            Enabling downloads Lemonade (about 7 MB) and FastFlowLM (about 40
-            MB), then checks the NPU driver.
+            {translate("uxCopy.enablingDownloadsLemonadeAbout1fvpm")}
           </span>
           <Button size="sm" onClick={() => void enable()} disabled={enabling}>
             {enabling ? <Spinner className="size-3.5" /> : null}

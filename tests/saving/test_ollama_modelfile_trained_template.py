@@ -33,10 +33,10 @@ def _tokenizer(name):
 
 
 def test_base_model_gets_the_trained_template():
-    tokenizer = _tokenizer("LAiM/llama-3-8b-bnb-4bit")
+    tokenizer = _tokenizer("unsloth/llama-3-8b-bnb-4bit")
     apply_chat_template(CONVERSATIONS, tokenizer = tokenizer, chat_template = ALPACA)
 
-    modelfile = create_ollama_modelfile(tokenizer, "LAiM/llama-3-8b", "x.gguf")
+    modelfile = create_ollama_modelfile(tokenizer, "unsloth/llama-3-8b", "x.gguf")
 
     assert modelfile is not None
     assert modelfile.startswith("FROM x.gguf\n")
@@ -46,30 +46,30 @@ def test_base_model_gets_the_trained_template():
 
 
 def test_instruct_model_trained_on_a_custom_template_keeps_it():
-    tokenizer = _tokenizer("LAiM/llama-3-8b-Instruct")
+    tokenizer = _tokenizer("unsloth/llama-3-8b-Instruct")
     apply_chat_template(CONVERSATIONS, tokenizer = tokenizer, chat_template = ALPACA)
 
-    modelfile = create_ollama_modelfile(tokenizer, "LAiM/llama-3-8b-Instruct", "x.gguf")
+    modelfile = create_ollama_modelfile(tokenizer, "unsloth/llama-3-8b-Instruct", "x.gguf")
 
     assert "### Instruction:" in modelfile
     assert "<|start_header_id|>" not in modelfile
 
 
 def test_stock_template_picked_after_training_leaves_the_mapped_template():
-    tokenizer = _tokenizer("LAiM/llama-3-8b-Instruct")
+    tokenizer = _tokenizer("unsloth/llama-3-8b-Instruct")
     apply_chat_template(CONVERSATIONS, tokenizer = tokenizer, chat_template = ALPACA)
     tokenizer = get_chat_template(tokenizer, chat_template = "alpaca")
 
-    modelfile = create_ollama_modelfile(tokenizer, "LAiM/llama-3-8b-Instruct", "x.gguf")
+    modelfile = create_ollama_modelfile(tokenizer, "unsloth/llama-3-8b-Instruct", "x.gguf")
 
     assert "<|start_header_id|>" in modelfile
     assert "### Instruction:" not in modelfile
 
 
 def test_instruct_model_without_a_custom_template_uses_its_own():
-    tokenizer = _tokenizer("LAiM/llama-3-8b-Instruct")
+    tokenizer = _tokenizer("unsloth/llama-3-8b-Instruct")
 
-    modelfile = create_ollama_modelfile(tokenizer, "LAiM/llama-3-8b-Instruct", "x.gguf")
+    modelfile = create_ollama_modelfile(tokenizer, "unsloth/llama-3-8b-Instruct", "x.gguf")
 
     assert "FROM x.gguf\n" in modelfile
     assert "<|start_header_id|>" in modelfile

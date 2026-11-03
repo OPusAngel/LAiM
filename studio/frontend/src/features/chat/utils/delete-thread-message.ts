@@ -22,6 +22,8 @@ import {
   hasResearchMetadata,
   reconcileServerManagedMessages,
 } from "./research-message-sync";
+import { translate } from "@/i18n";
+
 
 // A copy of the list, not of what is in it. assistant-ui replaces parts and attachments rather
 // than mutating them, and the records built from these are serialized straight into the PUT
@@ -98,7 +100,7 @@ async function withStoredResearchMessages(
   // wholesale, so the read failure has to surface as itself rather than as a later 409.
   const stored = await listChatMessages(remoteId).catch((error: unknown) => {
     throw new Error(
-      `Could not read the stored research messages for thread ${remoteId} before syncing`,
+      translate("uxChat.couldNotReadThegbvuj", { p1: remoteId }),
       { cause: error },
     );
   });

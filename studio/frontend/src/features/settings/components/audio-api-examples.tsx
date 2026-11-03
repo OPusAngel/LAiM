@@ -3,7 +3,7 @@
 
 import { SegmentedPill } from "@/components/segmented-control";
 import { usePlatformStore } from "@/config/env";
-import { useT } from "@/i18n";
+import { translate, useT } from "@/i18n";
 import type { TranslationKey } from "@/i18n";
 import { copyToClipboard } from "@/lib/copy-to-clipboard";
 import { Tick02Icon } from "@/lib/tick-icon";
@@ -54,8 +54,8 @@ import { HighlightedCode } from "./usage-examples";
 
 const LANGS: { id: AudioApiLang; label: string }[] = [
   { id: "curl", label: "curl" },
-  { id: "python", label: "Python" },
-  { id: "javascript", label: "JavaScript" },
+  { id: "python", get label() { return translate("uxSettings.python1r830"); } },
+  { id: "javascript", get label() { return translate("uxSettings.javaScriptsczm2"); } },
 ];
 
 const TAB_LABEL: Record<AudioApiTab, TranslationKey> = {

@@ -354,7 +354,7 @@ def test_this_file_is_triggered_by_everything_it_scans() -> None:
     triggers = workflow.get("on", workflow.get(True)) or {}
     paths = (triggers.get("pull_request") or {}).get("paths") or []
 
-    required = (".github/workflows/**", "LAiM/**", "tests/test_trl_cap_sites.py")
+    required = (".github/workflows/**", "unsloth/**", "tests/test_trl_cap_sites.py")
     missing = [name for name in required if name not in paths]
     assert not missing, (
         f"version-compat-ci.yml's pull_request.paths does not cover {missing}, so a PR "

@@ -35,8 +35,8 @@ test("a backend with no video route at all still lists the other runtimes", () =
   // parseJson throws on and settled() turns into null.
   const rows = mergeLoadedModels([
     describeInferenceStatus({
-      active_model: "LAiM/Qwen3-4B-GGUF",
-      loaded: ["LAiM/Qwen3-4B-GGUF"],
+      active_model: "unsloth/Qwen3-4B-GGUF",
+      loaded: ["unsloth/Qwen3-4B-GGUF"],
       is_gguf: true,
       gguf_variant: "Q4_K_M",
     } as never),
@@ -45,7 +45,7 @@ test("a backend with no video route at all still lists the other runtimes", () =
     describeSttStatus(UNREACHABLE),
   ]);
   assert.equal(rows.length, 1, "one dead runtime must not blank the others");
-  assert.equal(rows[0].name, "LAiM/Qwen3-4B-GGUF");
+  assert.equal(rows[0].name, "unsloth/Qwen3-4B-GGUF");
 });
 
 test("every runtime unreachable is an empty list, never a crash", () => {
@@ -120,7 +120,7 @@ test("an engine block explicitly nulled is skipped, not read as legacy", () => {
 test("a chat payload missing every optional field still renders", () => {
   // The oldest shape this has to survive: a name and nothing else.
   const rows = describeInferenceStatus({
-    active_model: "LAiM/Qwen3-4B",
+    active_model: "unsloth/Qwen3-4B",
   } as never);
   assert.equal(rows.length, 1);
   assert.equal(rows[0].detail, "Transformers", "the ladder needs no flags");
@@ -183,7 +183,7 @@ test("a backend with no gguf_variant field still reports the compute dtype", () 
   // keep the line it has always shown rather than losing its precision part entirely.
   const rows = describeDiffusionStatus({
     loaded: true,
-    repo_id: "LAiM/Z-Image-Turbo-GGUF",
+    repo_id: "unsloth/Z-Image-Turbo-GGUF",
     family: "z-image",
     model_kind: "gguf",
     dtype: "bfloat16",
@@ -209,8 +209,8 @@ test("a chat runtime caching past the active model marks the extras inactive", (
   // Only the Transformers backend can do this, and only the active model is
   // ejectable by the normal path -- the rest need naming directly.
   const rows = describeInferenceStatus({
-    active_model: "LAiM/Qwen3-4B",
-    loaded: ["LAiM/Qwen3-4B", "LAiM/Llama-3.2-3B"],
+    active_model: "unsloth/Qwen3-4B",
+    loaded: ["unsloth/Qwen3-4B", "unsloth/Llama-3.2-3B"],
   } as never);
   assert.equal(rows.length, 2);
   assert.equal(rows[0].inactive, undefined);
@@ -220,15 +220,15 @@ test("a chat runtime caching past the active model marks the extras inactive", (
 
 test("a duplicate in the loaded list is not listed twice", () => {
   const rows = describeInferenceStatus({
-    active_model: "LAiM/Qwen3-4B",
-    loaded: ["LAiM/Qwen3-4B", "LAiM/Llama-3.2-3B", "LAiM/Llama-3.2-3B"],
+    active_model: "unsloth/Qwen3-4B",
+    loaded: ["unsloth/Qwen3-4B", "unsloth/Llama-3.2-3B", "unsloth/Llama-3.2-3B"],
   } as never);
   assert.equal(rows.length, 2);
 });
 
 test("the same row arriving from two sources is merged once", () => {
   const row = describeInferenceStatus({
-    active_model: "LAiM/Qwen3-4B",
+    active_model: "unsloth/Qwen3-4B",
   } as never);
   assert.equal(mergeLoadedModels([row, row]).length, 1);
 });

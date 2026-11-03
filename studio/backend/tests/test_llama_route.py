@@ -66,7 +66,7 @@ def test_status_response_exposes_source_build():
         "stale": False,
         "installed_tag": None,
         "latest_tag": "b9585",
-        "published_repo": "LAiMai/llama.cpp",
+        "published_repo": "unslothai/llama.cpp",
         "installed_at_utc": None,
         "age_days": None,
         "source_build": True,
@@ -86,7 +86,7 @@ def test_status_response_exposes_update_size_bytes():
         "stale": False,
         "installed_tag": "b9493",
         "latest_tag": "b9518",
-        "published_repo": "LAiMai/llama.cpp",
+        "published_repo": "unslothai/llama.cpp",
         "installed_at_utc": None,
         "age_days": None,
         "source_build": False,
@@ -125,14 +125,14 @@ def test_changelog_response_exposes_structured_links():
                 "summary": "MTP for Qwen",
                 "links": [
                     {
-                        "label": "LAiMai/llama.cpp#144",
-                        "url": "https://github.com/LAiMai/llama.cpp/pull/144",
+                        "label": "unslothai/llama.cpp#144",
+                        "url": "https://github.com/unslothai/llama.cpp/pull/144",
                     }
                 ],
             }
         ],
         total_changes = 1,
-        release_url = "https://github.com/LAiMai/llama.cpp/releases/tag/new",
+        release_url = "https://github.com/unslothai/llama.cpp/releases/tag/new",
     )
 
     assert model.model_dump()["changes"][0]["links"][0]["label"].endswith("#144")

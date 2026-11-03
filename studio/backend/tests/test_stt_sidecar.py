@@ -148,13 +148,13 @@ class _CaptureInference:
 
 def test_five_curated_whisper_models_are_offered():
     assert STT_MODELS == {
-        "tiny": "LAiM/whisper-tiny",
-        "base": "LAiM/whisper-base",
-        "small": "LAiM/whisper-small",
-        "large-v3-turbo": "LAiM/whisper-large-v3-turbo",
-        "large-v3": "LAiM/whisper-large-v3",
+        "tiny": "unsloth/whisper-tiny",
+        "base": "unsloth/whisper-base",
+        "small": "unsloth/whisper-small",
+        "large-v3-turbo": "unsloth/whisper-large-v3-turbo",
+        "large-v3": "unsloth/whisper-large-v3",
     }
-    assert all(repo.startswith(("LAiM/", "LAiMai/")) for repo in STT_MODELS.values())
+    assert all(repo.startswith(("unsloth/", "unslothai/")) for repo in STT_MODELS.values())
     assert DEFAULT_STT_MODEL in STT_MODELS
 
 
@@ -198,7 +198,7 @@ def test_model_id_accepts_defaults_and_custom_hub_repositories():
     assert resolve_model_id(None) == DEFAULT_STT_MODEL
     assert resolve_model_id("large-v3") == "large-v3"
     assert resolve_model_id("openai/whisper-medium") == "openai/whisper-medium"
-    assert resolve_model_repo("tiny") == "LAiM/whisper-tiny"
+    assert resolve_model_repo("tiny") == "unsloth/whisper-tiny"
     assert resolve_model_repo("openai/whisper-medium") == "openai/whisper-medium"
 
 

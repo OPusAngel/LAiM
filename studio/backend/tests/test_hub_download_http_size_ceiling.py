@@ -89,11 +89,11 @@ def test_the_size_is_measured_per_variant_not_per_repo(monkeypatch):
     """The 46GB variant in a repo that also holds a 54GB one keeps HTTP."""
     monkeypatch.setattr(dl, "_repo_siblings", lambda *a, **k: tuple(_flash_next_siblings()))
     assert (
-        dl.largest_download_file_bytes("model", "LAiM/M-GGUF", variant = "ud-q5_k_xl")
+        dl.largest_download_file_bytes("model", "unsloth/M-GGUF", variant = "ud-q5_k_xl")
         == _OVERSIZED
     )
     assert (
-        dl.largest_download_file_bytes("model", "LAiM/M-GGUF", variant = "ud-q4_k_xl")
+        dl.largest_download_file_bytes("model", "unsloth/M-GGUF", variant = "ud-q4_k_xl")
         == _UNDER_THE_CEILING
     )
 
@@ -103,7 +103,7 @@ def test_a_scoped_file_list_is_measured_on_its_own_files(monkeypatch):
     assert (
         dl.largest_download_file_bytes(
             "model",
-            "LAiM/M-GGUF",
+            "unsloth/M-GGUF",
             files = ["UD-Q4_K_XL/M-UD-Q4_K_XL-00002-of-00002.gguf"],
         )
         == 20_000_000_000
@@ -113,7 +113,7 @@ def test_a_scoped_file_list_is_measured_on_its_own_files(monkeypatch):
 def test_a_model_snapshot_is_measured_on_the_files_it_actually_fetches(monkeypatch):
     """Ignored exports must not affect snapshot transport selection."""
     monkeypatch.setattr(dl, "_repo_siblings", lambda *a, **k: tuple(_flash_next_siblings()))
-    assert dl.largest_download_file_bytes("model", "LAiM/M-GGUF") == 1_024
+    assert dl.largest_download_file_bytes("model", "unsloth/M-GGUF") == 1_024
 
 
 def test_an_ignored_oversized_export_does_not_decide_the_transport(monkeypatch):
@@ -134,12 +134,12 @@ def test_a_dataset_is_measured_unfiltered(monkeypatch):
 
 def test_unreadable_metadata_measures_nothing(monkeypatch):
     monkeypatch.setattr(dl, "_repo_siblings", lambda *a, **k: ())
-    assert dl.largest_download_file_bytes("model", "LAiM/M-GGUF") is None
+    assert dl.largest_download_file_bytes("model", "unsloth/M-GGUF") is None
 
 
 def test_an_unresolvable_variant_measures_nothing(monkeypatch):
     monkeypatch.setattr(dl, "_repo_siblings", lambda *a, **k: tuple(_flash_next_siblings()))
-    assert dl.largest_download_file_bytes("model", "LAiM/M-GGUF", variant = "nope") is None
+    assert dl.largest_download_file_bytes("model", "unsloth/M-GGUF", variant = "nope") is None
 
 
 def test_a_finalized_blob_is_not_a_file_this_download_has_to_fetch(monkeypatch, tmp_path):
@@ -158,7 +158,7 @@ def test_a_finalized_blob_is_not_a_file_this_download_has_to_fetch(monkeypatch, 
     )
 
     assert (
-        dl.largest_download_file_bytes("model", "LAiM/M-GGUF", variant = "ud-q5_k_xl")
+        dl.largest_download_file_bytes("model", "unsloth/M-GGUF", variant = "ud-q5_k_xl")
         == 43_500_000_000
     )
 
@@ -171,11 +171,11 @@ def test_a_scoped_job_is_measured_on_its_own_file_list(monkeypatch):
         scoped_files = ("UD-Q5_K_XL/M-UD-Q5_K_XL-00001-of-00002.gguf",),
         hub_cache = None,
     )
-    assert dl._largest_file_bytes_for_job("model", "LAiM/M-GGUF", metadata) == _OVERSIZED
+    assert dl._largest_file_bytes_for_job("model", "unsloth/M-GGUF", metadata) == _OVERSIZED
     assert (
         dl._largest_file_bytes_for_job(
             "model",
-            "LAiM/M-GGUF",
+            "unsloth/M-GGUF",
             _types.SimpleNamespace(variant = "@ab-big", scoped_files = (), hub_cache = None),
         )
         is None
@@ -184,7 +184,7 @@ def test_a_scoped_job_is_measured_on_its_own_file_list(monkeypatch):
 
 def test_a_probe_failure_never_escapes_into_the_watcher(monkeypatch):
     monkeypatch.setattr(dl, "largest_download_file_bytes", _raise)
-    assert dl._largest_file_bytes_for_job("model", "LAiM/M-GGUF") is None
+    assert dl._largest_file_bytes_for_job("model", "unsloth/M-GGUF") is None
 
 
 def _raise(*a, **k):
@@ -338,12 +338,12 @@ class _ImmediateThread:
 
 def _claimed_registry():
     registry = download_registry.DownloadRegistry()
-    key = download_registry.normalize_job_key("LAiM/M-GGUF::UD-Q5_K_XL")
+    key = download_registry.normalize_job_key("unsloth/M-GGUF::UD-Q5_K_XL")
     assert registry.claim(
         key,
         download_registry.TRANSPORT_XET,
         repo_type = "model",
-        repo_id = "LAiM/M-GGUF",
+        repo_id = "unsloth/M-GGUF",
         variant = "UD-Q5_K_XL",
         blob_hashes = frozenset({"blob"}),
     )[0]
@@ -385,11 +385,11 @@ def _run_worker(registry, key, proc):
         key,
         proc,
         hf_token = None,
-        label = "LAiM/M-GGUF",
+        label = "unsloth/M-GGUF",
         log_prefix = "Download",
         logger = dl.logger,
         repo_type = "model",
-        repo_id = "LAiM/M-GGUF",
+        repo_id = "unsloth/M-GGUF",
         transport = download_registry.TRANSPORT_XET,
         watch_name = "model-watch",
     )
@@ -409,7 +409,7 @@ def test_the_ladder_does_not_spend_the_job_on_a_doomed_http_retry(monkeypatch, t
 
     assert rungs == [], "an oversized download was retried over a transport that cannot serve it"
     state, error, _generation = dl.idle_status(
-        registry, key, repo_type = "model", repo_id = "LAiM/M-GGUF", variant = "UD-Q5_K_XL"
+        registry, key, repo_type = "model", repo_id = "unsloth/M-GGUF", variant = "UD-Q5_K_XL"
     )
     assert state == "error"
     assert "xet transport failed" in error
@@ -474,11 +474,11 @@ def test_a_failed_xet_respawn_does_not_drop_to_https_either(monkeypatch, tmp_pat
             registry,
             key,
             hf_token = None,
-            label = "LAiM/M-GGUF",
+            label = "unsloth/M-GGUF",
             log_prefix = "Download",
             logger = dl.logger,
             repo_type = "model",
-            repo_id = "LAiM/M-GGUF",
+            repo_id = "unsloth/M-GGUF",
             watch_name = "model-watch",
             retry_transport = download_registry.TRANSPORT_XET,
             xet_attempt = 2,
@@ -488,7 +488,7 @@ def test_a_failed_xet_respawn_does_not_drop_to_https_either(monkeypatch, tmp_pat
 
     assert download_registry.TRANSPORT_HTTP not in rungs
     state, error, _generation = dl.idle_status(
-        registry, key, repo_type = "model", repo_id = "LAiM/M-GGUF", variant = "UD-Q5_K_XL"
+        registry, key, repo_type = "model", repo_id = "unsloth/M-GGUF", variant = "UD-Q5_K_XL"
     )
     assert state == "error"
     assert "HTTPS cannot fetch" in error
@@ -520,7 +520,7 @@ def test_the_rung_is_judged_on_the_cache_the_worker_leaves_behind(monkeypatch, t
     key, registry = _claimed_registry()
 
     assert dl._largest_file_bytes_for_job(
-        "model", "LAiM/M-GGUF", _metadata_of(registry, key)
+        "model", "unsloth/M-GGUF", _metadata_of(registry, key)
     ) == (_OVERSIZED)
 
     class _LandsTheBigShard(_Proc):
@@ -555,7 +555,7 @@ def test_a_final_xet_attempt_with_no_http_rung_is_still_watched(monkeypatch, tmp
     assert _WATCHDOG_STARTS, "a final Xet worker was left unwatched"
     assert rungs == []
     state, error, _generation = dl.idle_status(
-        registry, key, repo_type = "model", repo_id = "LAiM/M-GGUF", variant = "UD-Q5_K_XL"
+        registry, key, repo_type = "model", repo_id = "unsloth/M-GGUF", variant = "UD-Q5_K_XL"
     )
     assert state == "error"
     assert "HTTPS cannot fetch" in error
@@ -608,8 +608,8 @@ def test_a_failed_refresh_serves_the_listing_it_already_read(monkeypatch):
     """A dropped refresh must not turn a measured size into an unmeasured one."""
     _hub_answers_once(monkeypatch)
 
-    first = dl.largest_download_file_bytes("model", "LAiM/M-GGUF", variant = "ud-q5_k_xl")
-    second = dl.largest_download_file_bytes("model", "LAiM/M-GGUF", variant = "ud-q5_k_xl")
+    first = dl.largest_download_file_bytes("model", "unsloth/M-GGUF", variant = "ud-q5_k_xl")
+    second = dl.largest_download_file_bytes("model", "unsloth/M-GGUF", variant = "ud-q5_k_xl")
 
     assert _OneShotHfApi.calls == 2, "the second measurement must really have gone to the hub"
     assert first == _OVERSIZED
@@ -657,7 +657,7 @@ def test_the_http_rung_stays_closed_when_the_refresh_fails(monkeypatch, tmp_path
 
     assert rungs == [], "a doomed HTTP retry was spent on a size the refresh could not re-read"
     state, error, _generation = dl.idle_status(
-        registry, key, repo_type = "model", repo_id = "LAiM/M-GGUF", variant = "UD-Q5_K_XL"
+        registry, key, repo_type = "model", repo_id = "unsloth/M-GGUF", variant = "UD-Q5_K_XL"
     )
     assert state == "error"
     assert "HTTPS cannot fetch" in error
@@ -721,7 +721,7 @@ def test_a_caller_denied_the_ambient_login_measures_anonymously(monkeypatch):
     seen = _record_probe_tokens(monkeypatch)
 
     dl.largest_download_file_bytes(
-        "model", "LAiM/M-GGUF", variant = "ud-q5_k_xl", allow_ambient_token = False
+        "model", "unsloth/M-GGUF", variant = "ud-q5_k_xl", allow_ambient_token = False
     )
 
     assert seen == [False]
@@ -731,7 +731,7 @@ def test_a_ui_session_still_measures_under_the_ambient_login(monkeypatch):
     seen = _record_probe_tokens(monkeypatch)
 
     dl.largest_download_file_bytes(
-        "model", "LAiM/M-GGUF", variant = "ud-q5_k_xl", allow_ambient_token = True
+        "model", "unsloth/M-GGUF", variant = "ud-q5_k_xl", allow_ambient_token = True
     )
 
     assert seen == [None]
@@ -741,8 +741,8 @@ def test_an_anonymous_probe_does_not_read_an_ambient_cache_entry(monkeypatch):
     """The two boundaries take separate cache identities, so neither serves the other."""
     seen = _record_probe_tokens(monkeypatch)
 
-    dl.largest_download_file_bytes("model", "LAiM/M-GGUF", allow_ambient_token = True)
-    dl.largest_download_file_bytes("model", "LAiM/M-GGUF", allow_ambient_token = False)
+    dl.largest_download_file_bytes("model", "unsloth/M-GGUF", allow_ambient_token = True)
+    dl.largest_download_file_bytes("model", "unsloth/M-GGUF", allow_ambient_token = False)
 
     assert seen == [None, False]
     assert len(dl._REPO_SIBLINGS) == 2
@@ -768,11 +768,11 @@ def test_the_watcher_probes_under_the_jobs_own_boundary(monkeypatch, tmp_path):
         key,
         _Proc(1, b"xet transport failed"),
         hf_token = None,
-        label = "LAiM/M-GGUF",
+        label = "unsloth/M-GGUF",
         log_prefix = "Download",
         logger = dl.logger,
         repo_type = "model",
-        repo_id = "LAiM/M-GGUF",
+        repo_id = "unsloth/M-GGUF",
         transport = download_registry.TRANSPORT_XET,
         watch_name = "model-watch",
         allow_ambient_token = False,
@@ -804,7 +804,7 @@ def _download(model_downloads, **over):
 
     from hub.schemas.downloads import DownloadModelRequest
 
-    body = {"repo_id": "LAiM/M-GGUF", "transport_mode": "http"}
+    body = {"repo_id": "unsloth/M-GGUF", "transport_mode": "http"}
     body.update(over)
     return asyncio.run(model_downloads.download_model_response(DownloadModelRequest(**body)))
 
@@ -864,7 +864,7 @@ def test_nothing_left_to_fetch_is_zero_not_unknown(monkeypatch, tmp_path):
         lambda *a, **k: iter([blobs.parent]),
     )
 
-    assert dl.largest_download_file_bytes("model", "LAiM/M-GGUF") == 0
+    assert dl.largest_download_file_bytes("model", "unsloth/M-GGUF") == 0
 
 
 def _evicting_probe(values):
@@ -892,7 +892,7 @@ def test_an_evicted_listing_does_not_reopen_the_http_rung(monkeypatch, tmp_path)
 
     assert rungs == [], "an evicted listing reopened a rung that cannot serve this download"
     state, error, _generation = dl.idle_status(
-        registry, key, repo_type = "model", repo_id = "LAiM/M-GGUF", variant = "UD-Q5_K_XL"
+        registry, key, repo_type = "model", repo_id = "unsloth/M-GGUF", variant = "UD-Q5_K_XL"
     )
     assert state == "error"
     assert "HTTPS cannot fetch" in error

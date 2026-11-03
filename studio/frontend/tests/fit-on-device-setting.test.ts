@@ -55,28 +55,28 @@ test("a model is hidden only when it exceeds GPU memory plus RAM", () => {
   const gpu = { memoryTotalGb: 8, systemRamAvailableGb: 32, budgetKnown: true };
   assert.equal(
     hfModelFitsDevice(
-      { id: "LAiM/a-GGUF", isGguf: true, estimatedSizeBytes: 4 * GB },
+      { id: "unsloth/a-GGUF", isGguf: true, estimatedSizeBytes: 4 * GB },
       gpu,
     ),
     true,
   );
   assert.equal(
     hfModelFitsDevice(
-      { id: "LAiM/b-GGUF", isGguf: true, estimatedSizeBytes: 14 * GB },
+      { id: "unsloth/b-GGUF", isGguf: true, estimatedSizeBytes: 14 * GB },
       gpu,
     ),
     true,
   );
   assert.equal(
     hfModelFitsDevice(
-      { id: "LAiM/c-GGUF", isGguf: true, estimatedSizeBytes: 40 * GB },
+      { id: "unsloth/c-GGUF", isGguf: true, estimatedSizeBytes: 40 * GB },
       gpu,
     ),
     false,
   );
   assert.equal(
     hfModelFitsDevice(
-      { id: "LAiM/c-GGUF", isGguf: true, estimatedSizeBytes: 40 * GB },
+      { id: "unsloth/c-GGUF", isGguf: true, estimatedSizeBytes: 40 * GB },
       { memoryTotalGb: 0, systemRamAvailableGb: 0 },
     ),
     true,

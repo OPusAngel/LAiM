@@ -39,6 +39,8 @@ import {
 } from "../stores/chat-runtime-store";
 import { usePlatformStore } from "@/config/env";
 import { capturedContextLength } from "./preset-policy";
+import { translate } from "@/i18n";
+
 
 /** Load/runtime knobs saved in a chat preset (excludes per-model-only blobs). */
 export type PresetLoadConfig = Pick<
@@ -361,7 +363,7 @@ export function formatPresetLoadConfigSummary(
   }
   const parts: string[] = [];
   if (config.customContextLength != null) {
-    parts.push(`Ctx ${config.customContextLength.toLocaleString()}`);
+    parts.push(translate("uxChat.ctxb3r5c", { p1: config.customContextLength.toLocaleString() }));
   }
   if (config.kvCacheDtype) {
     parts.push(`KV ${config.kvCacheDtype}`);
@@ -376,21 +378,21 @@ export function formatPresetLoadConfigSummary(
     parts.push(`${config.nParallel} slots`);
   }
   if (config.reasoningBudget !== -1) {
-    parts.push(`Reasoning ${config.reasoningBudget}`);
+    parts.push(translate("uxChat.reasoningg5b31", { p1: config.reasoningBudget }));
   }
   // A marker, not the text: the message is free prose up to 8 KiB. Without it a
   // message-only preset is non-default but summarises to null, hiding both lines.
   if (config.reasoningBudgetMessage) {
-    parts.push("Budget msg");
+    parts.push(translate("uxChat.budgetMsg9q3hf"));
   }
   if (config.nBatch != null) {
-    parts.push(`Batch ${config.nBatch}`);
+    parts.push(translate("uxChat.batchyucxi", { p1: config.nBatch }));
   }
   if (config.nUbatch != null) {
     parts.push(`uBatch ${config.nUbatch}`);
   }
   if (config.loadMode) {
-    parts.push(`Load ${config.loadMode}`);
+    parts.push(translate("uxChat.loadqvuoe", { p1: config.loadMode }));
   }
   if (config.specDraftCacheDtype) {
     parts.push(`Draft KV ${config.specDraftCacheDtype}`);
@@ -402,7 +404,7 @@ export function formatPresetLoadConfigSummary(
     parts.push(`Cache RAM ${config.cacheRam}`);
   }
   if (config.gpuMemoryMode === "manual") {
-    parts.push("GPU manual");
+    parts.push(translate("uxChat.gPUManual6ai2n"));
   }
   if (config.gpuLayers != null && config.gpuLayers >= 0) {
     parts.push(`${config.gpuLayers} layers`);

@@ -44,7 +44,7 @@ def test_sft_loss_type_default_is_nll_after_LAiM_patch():
     assert cfg.loss_type == "nll", (
         f"SFTConfig.loss_type resolved to {cfg.loss_type!r}, expected 'nll'. "
         "If TRL changed its default again, update the sft_trainer replacement in "
-        "LAiM/models/rl.py -- do NOT add loss_type to the global replacements "
+        "unsloth/models/rl.py -- do NOT add loss_type to the global replacements "
         "dict, it is an unrelated field in DPO/KTO/GRPO."
     )
 
@@ -276,7 +276,7 @@ def test_trl_chunked_ce_divides_by_num_items_without_consulting_the_flag():
     assert _divides_by_num_items(fn), (
         "TRL's _chunked_cross_entropy_loss no longer divides by num_items_in_batch. "
         "If TRL now gates this on model_accepts_loss_kwargs, the loss_type pin in "
-        "LAiM/models/rl.py may no longer be needed -- re-measure before removing."
+        "unsloth/models/rl.py may no longer be needed -- re-measure before removing."
     )
 
     try:
@@ -318,7 +318,7 @@ def test_LAiM_get_batch_samples_is_installed_and_shaped_as_expected():
 
     assert source.endswith("return batch_samples, num_items_in_batch"), (
         "get_batch_samples no longer ends in the expected 2-tuple return. "
-        "LAiM/models/_utils.py raises NotImplementedError on this exact check."
+        "unsloth/models/_utils.py raises NotImplementedError on this exact check."
     )
 
 

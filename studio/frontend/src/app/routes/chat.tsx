@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { validateChatSearch } from "@/features/chat";
 import { createRoute } from "@tanstack/react-router";
 import { requireAuth } from "../auth-guards";
@@ -11,7 +12,7 @@ import { Route as rootRoute } from "./__root";
 export const Route = createRoute({
   getParentRoute: () => rootRoute,
   path: "/chat",
-  staticData: { title: "Chat" },
+  staticData: { title: translate("shell.commandPalette.chat") },
   beforeLoad: () => requireAuth(),
   validateSearch: (search: Record<string, unknown>) => validateChatSearch(search),
   component: () => null,

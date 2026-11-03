@@ -14,25 +14,25 @@ import {
 test("reload target carries the remembered config", () => {
   assert.deepEqual(
     resolveReloadTarget(
-      { id: "LAiM/qwen3", kind: "model", ggufVariant: null },
+      { id: "unsloth/qwen3", kind: "model", ggufVariant: null },
       (id, variant) => ({ config: { id, variant, maxSeqLength: 8192 } }),
     ),
     {
-      id: "LAiM/qwen3",
+      id: "unsloth/qwen3",
       kind: "model",
       ggufVariant: null,
-      config: { id: "LAiM/qwen3", variant: null, maxSeqLength: 8192 },
+      config: { id: "unsloth/qwen3", variant: null, maxSeqLength: 8192 },
     },
   );
 });
 
 test("reload target keeps a GGUF quant for cached repos", () => {
   const target = resolveReloadTarget(
-    { id: "LAiM/qwen3-GGUF", kind: "gguf", ggufVariant: "Q4_K_M" },
+    { id: "unsloth/qwen3-GGUF", kind: "gguf", ggufVariant: "Q4_K_M" },
     (id, variant) => ({ config: { key: `${id}:${variant}` } }),
   );
   assert.equal(target?.ggufVariant, "Q4_K_M");
-  assert.deepEqual(target?.config, { key: "LAiM/qwen3-GGUF:Q4_K_M" });
+  assert.deepEqual(target?.config, { key: "unsloth/qwen3-GGUF:Q4_K_M" });
 });
 
 test("reload target accepts a direct .gguf file without a quant", () => {
@@ -67,7 +67,7 @@ test("reloadLastModel awaits durable history before loading", async () => {
   const loaded: ReloadTarget[] = [];
   const target = await reloadLastModel({
     readLastLoad: async () => ({
-      id: "LAiM/llama",
+      id: "unsloth/llama",
       kind: "model",
       ggufVariant: null,
     }),
@@ -76,6 +76,6 @@ test("reloadLastModel awaits durable history before loading", async () => {
       loaded.push(next);
     },
   });
-  assert.equal(target.id, "LAiM/llama");
+  assert.equal(target.id, "unsloth/llama");
   assert.deepEqual(loaded, [target]);
 });

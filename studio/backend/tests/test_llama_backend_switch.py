@@ -82,7 +82,7 @@ def _write_install(dir_: Path, **marker_fields) -> str:
     marker = {
         "tag": "b9596",
         "release_tag": "b9596-mix-abc",
-        "published_repo": "LAiMai/llama.cpp",
+        "published_repo": "unslothai/llama.cpp",
         "installed_at_utc": "2020-01-01T00:00:00Z",
         "asset": "app-b9596-mix-abc-linux-x64-cuda12.tar.gz",
         "install_kind": "linux-cuda",
@@ -364,7 +364,7 @@ def test_update_failure_names_the_environment_pinned_backend(
         lambda backend_request = None: {
             "spec": {
                 "install_dir": install_dir,
-                "repo": "LAiMai/llama.cpp",
+                "repo": "unslothai/llama.cpp",
                 "asset": None,
                 "script": tmp_path / "install_llama_prebuilt.py",
                 "pin_release_tag": "b9597-mix-new",
@@ -396,7 +396,7 @@ def test_an_automatic_update_does_not_blame_a_backend_nobody_requested(monkeypat
         lambda backend_request = None: {
             "spec": {
                 "install_dir": install_dir,
-                "repo": "LAiMai/llama.cpp",
+                "repo": "unslothai/llama.cpp",
                 "asset": None,
                 "script": tmp_path / "install_llama_prebuilt.py",
                 "pin_release_tag": "b9597-mix-new",
@@ -832,7 +832,7 @@ def test_whisper_repair_installs_the_backend_llama_landed_on(monkeypatch, tmp_pa
     )
 
     result = whisper_upd.run_repair_phase(
-        {"install_dir": tmp_path, "repo": "LAiMai/whisper.cpp", "script": tmp_path / "i.py"},
+        {"install_dir": tmp_path, "repo": "unslothai/whisper.cpp", "script": tmp_path / "i.py"},
         lambda progress: None,
     )
 

@@ -106,7 +106,7 @@ def code_blocks(text):
 
     The opening fence is 0-3 spaces then three or more backticks or tildes; the
     close is the same character, at least as long, with nothing after it. The
-    line-start anchor is what stops the inline ```LAiM/LAiM``` span in the
+    line-start anchor is what stops the inline ```unsloth/LAiM``` span in the
     Docker paragraph from opening a block and swallowing the rest of the file.
     """
     blocks, current, char, length = [], None, None, 0

@@ -1,12 +1,10 @@
 [package]
 name = "LAiM-studio"
-# Placeholder, not the released app version. release-desktop.yml rewrites this
-# field (and the LAiM-studio entry in Cargo.lock) to the dispatched
-# studio_version before every release build, so editing it here changes nothing
-# that ships. tauri.conf.json declares no version of its own, which is why the
-# app version comes from this field rather than from there. The stale CalVer
-# below is also the wrong shape: release builds always write SemVer, e.g. 0.1.52-beta.
-version = "2026.4.8"
+# The shipped app version: LAiM's first release, 1.0.0. tauri.conf.json declares no version of its
+# own, so `getVersion()` in Settings > About and the NSIS artifact name (LAiM_1.0.0_x64-setup.exe)
+# both read this field. Keep it in step with LAiM_RELEASE_VERSION in
+# studio/frontend/src/lib/laim-release.ts, which is the number the About tab prints beside it.
+version = "1.0.0"
 description = "LAiM Desktop App"
 authors = ["M.M.Engineers"]
 edition = "2021"

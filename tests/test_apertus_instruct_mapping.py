@@ -4,8 +4,8 @@ import os
 
 MAPPER_PATH = os.path.join(os.path.dirname(__file__), os.pardir, "LAiM", "models", "mapper.py")
 
-# Never published on the Hub: only the GGUF and -LAiM-bnb-4bit 70B repos exist.
-UNPUBLISHED_16BIT = "LAiM/Apertus-70B-Instruct-2509"
+# Never published on the Hub: only the GGUF and -unsloth-bnb-4bit 70B repos exist.
+UNPUBLISHED_16BIT = "unsloth/Apertus-70B-Instruct-2509"
 
 
 def _load_mappers():
@@ -24,17 +24,17 @@ def test_apertus_instruct_upstream_is_the_instruct_repo():
     for size in ("70B", "8B"):
         instruct_upstream = f"swiss-ai/Apertus-{size}-Instruct-2509"
         base_upstream = f"swiss-ai/Apertus-{size}-2509"
-        LAiM_4bit = f"LAiM/Apertus-{size}-Instruct-2509-LAiM-bnb-4bit"
+        LAiM_4bit = f"unsloth/Apertus-{size}-Instruct-2509-unsloth-bnb-4bit"
 
         assert float_to_int.get(instruct_upstream) == LAiM_4bit, instruct_upstream
 
         assert float_to_int.get(base_upstream) != LAiM_4bit, base_upstream
         assert (
-            map_to_16bit.get(base_upstream) != f"LAiM/Apertus-{size}-Instruct-2509"
+            map_to_16bit.get(base_upstream) != f"unsloth/Apertus-{size}-Instruct-2509"
         ), base_upstream
 
     assert (
-        map_to_16bit.get("swiss-ai/Apertus-8B-Instruct-2509") == "LAiM/Apertus-8B-Instruct-2509"
+        map_to_16bit.get("swiss-ai/Apertus-8B-Instruct-2509") == "unsloth/Apertus-8B-Instruct-2509"
     )
 
 

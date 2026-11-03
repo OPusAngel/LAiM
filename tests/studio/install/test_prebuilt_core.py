@@ -42,7 +42,7 @@ WSPEC.loader.exec_module(iwp)
 LLAMA_DESCRIPTOR = core.ComponentDescriptor(
     component = "llama.cpp",
     log_prefix = "llama-prebuilt",
-    published_repo = "LAiMai/llama.cpp",
+    published_repo = "unslothai/llama.cpp",
     manifest_asset_name = "llama-prebuilt-manifest.json",
     sha256_asset_name = "llama-prebuilt-sha256.json",
     metadata_filename = "LAiM_LLAMA_PREBUILT_INFO.json",
@@ -885,7 +885,7 @@ def test_module_ops_prefers_module_globals_over_core_defaults(component):
 
 def _github_api_403(headers):
     return urllib.error.HTTPError(
-        "https://api.github.com/repos/LAiMai/llama.cpp/releases/tags/b1",
+        "https://api.github.com/repos/unslothai/llama.cpp/releases/tags/b1",
         403,
         "rate limit exceeded",
         headers,
@@ -925,7 +925,7 @@ def test_github_api_403_without_a_reachable_reset_makes_one_request():
     with pytest.raises(urllib.error.HTTPError):
         core.download_bytes(
             component.ops,
-            "https://api.github.com/repos/LAiMai/llama.cpp/releases/tags/b1",
+            "https://api.github.com/repos/unslothai/llama.cpp/releases/tags/b1",
         )
 
     assert len(requests) == 1
@@ -1017,7 +1017,7 @@ def test_a_download_that_drops_once_is_retried_to_completion(monkeypatch, tmp_pa
     destination = tmp_path / "app-windows-x64-cpu.zip"
     core.download_file(
         component.ops,
-        "https://github.com/LAiMai/llama.cpp/releases/download/b1/a.zip",
+        "https://github.com/unslothai/llama.cpp/releases/download/b1/a.zip",
         destination,
     )
 

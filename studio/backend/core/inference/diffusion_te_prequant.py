@@ -51,7 +51,7 @@ TE_PREQUANT_FORMAT_INT8_CONVROT = "LAiM_prequant_text_encoder_int8_convrot_v1"
 TE_INT8_CONVROT_FILES: dict[str, dict[str, tuple[str, str]]] = {
     "qwen-image-2.1": {
         "text_encoder": (
-            "LAiM/Qwen-Image-2.1-FP8",
+            "unsloth/Qwen-Image-2.1-FP8",
             "Qwen-Image-2.1-text_encoder-INT8-ConvRot.safetensors",
         ),
     },
@@ -269,7 +269,7 @@ def _is_fp8_te_name(name: Optional[str]) -> bool:
 def te_prequant_repo_stem(repo_id: str, component: str, scheme: str) -> str:
     """The extensionless checkpoint name for ``(component, scheme)`` in ``repo_id``: hosted repos
     are named <Model>-FP8 (or -INT8 / -quantized) and carry <Model>-<component>-<SCHEME> files,
-    e.g. LAiM/LTX-2-FP8 -> LTX-2-text_encoder-FP8."""
+    e.g. unsloth/LTX-2-FP8 -> LTX-2-text_encoder-FP8."""
     model = repo_id.rsplit("/", 1)[-1]
     for suffix in ("-fp8", "-int8", "-quantized"):
         if model.lower().endswith(suffix):

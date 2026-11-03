@@ -21,7 +21,7 @@ export interface ProjectRecord {
   name: string;
   instructions?: string;
   rootPath?: string | null;
-  sandboxPath?: string | null;
+  workdirPath?: string | null;
   workingFolder?: string | null;
   archived: boolean;
   createdAt: number;

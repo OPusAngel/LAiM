@@ -16,7 +16,7 @@ import {
   useTrainingTransformersUpgradeNotice,
 } from "@/features/training";
 import { useGpuInfo } from "@/hooks";
-import { type TranslationKey, useLocale, useT } from "@/i18n";
+import { translate, type TranslationKey, useLocale, useT } from "@/i18n";
 import { cn } from "@/lib/utils";
 import { InformationCircleIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -527,7 +527,7 @@ export function RunPreviewCard({
         {gpu.available && (
           <MetaRow
             label={t("studio.preview.vram")}
-            title={`${gpu.memoryTotalGb} GiB`}
+            title={translate("uxStudio.giBvuqr0", { p1: gpu.memoryTotalGb })}
             value={`${Math.round(gpu.memoryTotalGb)} GiB`}
           />
         )}

@@ -636,7 +636,7 @@ def normalize_model_allowlist(entries) -> Optional[list[str]]:
             continue
         if _MODEL_ALLOWLIST_ENTRY.fullmatch(entry) is None:
             raise ValueError(
-                f"{entry!r} is not a Hugging Face model id such as LAiM/Qwen3-4B-GGUF or LAiM/*"
+                f"{entry!r} is not a Hugging Face model id such as unsloth/Qwen3-4B-GGUF or unsloth/*"
             )
         entry = entry.lower()
         if entry not in normalized:

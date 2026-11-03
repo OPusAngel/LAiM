@@ -20,7 +20,7 @@ FORWARD_CLIENT = ("192.0.2.1", 0)
 FORWARD_BASE_URL = "http://LAiM-mcp.invalid"
 HF_TOKEN_HEADER = "X-LAiM-HF-Token"
 
-# The route families MCP tools use. Anything else, notably auth, sandbox and the local-person settings, is a programming error.
+# The route families MCP tools use. Anything else, notably auth, workdir and the local-person settings, is a programming error.
 ALLOWED_PREFIXES = (
     "/api/inference/",
     "/v1/",

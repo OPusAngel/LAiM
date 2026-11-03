@@ -127,7 +127,7 @@ class _OcrModel:
 def _backend(model):
     backend = InferenceBackend.__new__(InferenceBackend)
     backend._generation_lock = threading.Lock()
-    backend.active_model_name = "LAiM/DeepSeek-OCR-2"
+    backend.active_model_name = "unsloth/DeepSeek-OCR-2"
     backend.models = {
         backend.active_model_name: {"model": model, "tokenizer": "tok", "is_vision": True}
     }

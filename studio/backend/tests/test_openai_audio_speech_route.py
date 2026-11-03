@@ -44,7 +44,7 @@ def _make_client(monkeypatch, generate = None):
         calls.append({"text": text, "payload": payload, **kwargs})
         if generate is not None:
             return await generate(text)
-        return _WAV, 24000, "LAiM/orpheus-3b-0.1-ft", "snac"
+        return _WAV, 24000, "unsloth/orpheus-3b-0.1-ft", "snac"
 
     saved = []
 
@@ -78,7 +78,7 @@ def test_persists_clip_to_gallery(monkeypatch):
     assert len(saved) == 1
     meta = saved[0]["meta"]
     assert meta["prompt"] == "persist me"
-    assert meta["model"] == "LAiM/orpheus-3b-0.1-ft"
+    assert meta["model"] == "unsloth/orpheus-3b-0.1-ft"
     assert meta["audio_type"] == "snac"
     assert meta["sample_rate"] == 24000
     assert isinstance(meta["duration_s"], float)
@@ -958,7 +958,7 @@ def test_speech_opens_a_monitor_row(monkeypatch):
     assert rows[0]["status"] == "completed"
     assert rows[0]["prompt_preview"] == "hello sloth"
     # Relabelled to the loaded TTS model, not the informational body.model.
-    assert rows[0]["model"] == "LAiM/orpheus-3b-0.1-ft"
+    assert rows[0]["model"] == "unsloth/orpheus-3b-0.1-ft"
 
 
 def test_v1_audio_generate_opens_a_monitor_row_and_the_chat_mount_does_not(monkeypatch):
@@ -973,7 +973,7 @@ def test_v1_audio_generate_opens_a_monitor_row_and_the_chat_mount_does_not(monke
     assert (row["endpoint"], row["status"], row["model"]) == (
         "/v1/audio/generate",
         "completed",
-        "LAiM/orpheus-3b-0.1-ft",
+        "unsloth/orpheus-3b-0.1-ft",
     )
 
 
@@ -1041,7 +1041,7 @@ def test_a_failure_before_the_relabel_does_not_leak_the_requested_path(
 def test_an_ordinary_model_id_is_still_recorded_verbatim(monkeypatch):
     # The redaction must not rewrite the ids clients actually send.
     cli, calls, saved = _make_client(monkeypatch, generate = _boom)
-    for requested in ("tts-1", "gpt-4o-mini-tts", "LAiM/orpheus-3b-0.1-ft"):
+    for requested in ("tts-1", "gpt-4o-mini-tts", "unsloth/orpheus-3b-0.1-ft"):
         api_monitor.clear()
         assert (
             cli.post("/v1/audio/speech", json = {"input": "hi", "model": requested}).status_code

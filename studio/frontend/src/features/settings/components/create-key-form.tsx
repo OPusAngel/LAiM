@@ -4,13 +4,13 @@
 import { SegmentedPill } from "@/components/segmented-control";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useT } from "@/i18n";
+import { translate, useT } from "@/i18n";
 import { cn } from "@/lib/utils";
 import { useId, useState } from "react";
 import { createApiKey } from "../api/api-keys";
 
 const EXPIRY_PRESETS = [
-  { label: "Never", value: null as number | null },
+  { get label() { return translate("browser.agentSettings.never"); }, value: null as number | null },
   { label: "7d", value: 7 },
   { label: "30d", value: 30 },
   { label: "90d", value: 90 },

@@ -1018,7 +1018,7 @@ class Payload:
             detail["failures"] = [
                 f"only {len(cards)} card visible, so auto tensor-parallel placement "
                 f"was NOT exercised; this proves nothing about "
-                f"LAiMai/LAiM#10355"
+                f"OPusAngel/LAiM#10355"
             ]
             detail["void"] = True
             return self.record("auto_tensor_split", False, detail)
@@ -1041,7 +1041,7 @@ class Payload:
         if first.get("tensor_split") is None:
             failures.append(
                 f"the live llama-server has NO --tensor-split after a load that asked "
-                f"for {ratio}. This is LAiMai/LAiM#10355: auto mode emitted "
+                f"for {ratio}. This is OPusAngel/LAiM#10355: auto mode emitted "
                 f"--split-mode tensor and dropped the ratio"
             )
         elif first.get("tensor_split_ratio") != split_ratio(",".join(str(x) for x in ratio)):
@@ -2609,7 +2609,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     ap.add_argument(
         "--image-model",
         dest = "image_model",
-        default = "LAiM/sdxl-turbo",
+        default = "unsloth/sdxl-turbo",
         help = "diffusion repo for the image-generation assertion",
     )
     ap.add_argument(
@@ -2634,9 +2634,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help = "start Studio with --password and log in with it; 'auto' generates one",
     )
     # MTP-GGUF: multi-token prediction is a distinct llama.cpp serving path.
-    ap.add_argument("--chat-model", default = "LAiM/Qwen3.5-2B-MTP-GGUF")
+    ap.add_argument("--chat-model", default = "unsloth/Qwen3.5-2B-MTP-GGUF")
     ap.add_argument("--chat-variant", default = "UD-Q4_K_XL")
-    ap.add_argument("--train-model", default = "LAiM/Qwen3.5-2B")
+    ap.add_argument("--train-model", default = "unsloth/Qwen3.5-2B")
     ap.add_argument("--max-steps", type = int, default = 8)
     ap.add_argument("--quantization", default = "q8_0")
     ap.add_argument(

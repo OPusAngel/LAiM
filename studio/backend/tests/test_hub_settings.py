@@ -497,7 +497,7 @@ def test_hub_decisions_are_remembered_per_endpoint(store, monkeypatch):
     from utils.security import trusted_org
 
     checks, apis = [], MagicMock()
-    apis.return_value.model_info.return_value = SimpleNamespace(id = "LAiM/x", author = "LAiM")
+    apis.return_value.model_info.return_value = SimpleNamespace(id = "unsloth/x", author = "LAiM")
     monkeypatch.setattr(validation, "_cache", {})
     monkeypatch.setattr(
         validation,
@@ -513,7 +513,7 @@ def test_hub_decisions_are_remembered_per_endpoint(store, monkeypatch):
     for endpoint in ("https://a.example.com", "https://b.example.com"):
         hub_settings.set_hub_settings(endpoint, False)
         validation.validate_hf_token("hf_x", rate_key = "k")
-        assert trusted_org.is_trusted_org_repo("LAiM/x")
+        assert trusted_org.is_trusted_org_repo("unsloth/x")
         assert not auto_download._is_not_servable("org/repo", None)
         auto_download._mark_not_servable("org/repo", None, endpoint)
     assert checks == ["https://a.example.com", "https://b.example.com"]
@@ -578,11 +578,11 @@ def test_modelscope_answers_never_open_the_shared_cache_or_trust_code(store, mon
     with pytest.raises(HTTPException) as refused:
         account_access.authorize_download("org/repo", "model", None)
     assert refused.value.status_code == 403
-    assert trusted_org.is_trusted_org_repo("LAiM/Qwen3-8B", verify_remote = False) is False
+    assert trusted_org.is_trusted_org_repo("unsloth/Qwen3-8B", verify_remote = False) is False
 
     monkeypatch.setenv(hub_settings.SOURCE_ENV, hub_settings.HUGGINGFACE)
     assert account_access.repo_is_public("org/repo") is True
-    assert trusted_org.is_trusted_org_repo("LAiM/Qwen3-8B", verify_remote = False) is True
+    assert trusted_org.is_trusted_org_repo("unsloth/Qwen3-8B", verify_remote = False) is True
 
 
 def test_route_switches_the_source(client, store, monkeypatch):

@@ -501,7 +501,7 @@ def repo_remote_code_files(
         except Exception as exc:
             raise RemoteCodeUnscannable(f"{model_name}: could not list repo files ({exc})") from exc
         repo_file_set = set(repo_files)
-        # Scan every present .py PLUS own-repo auto_map targets that ACTUALLY EXIST in this revision. Scanning every .py rather than the closure is DELIBERATE: the entry can reach a sibling via absolute import / importlib / exec, so closure-only scanning is a real bypass, and over-blocking is the safe direction for an RCE gate (HIGH approvable; only CRITICAL hard-blocks). An auto_map target absent from the listing is a STALE ref (LAiM/PaddleOCR-VL names processing_ppocrvl.py but ships processing_paddleocr_vl.py); transformers cannot execute an absent file, so drop the stale ref rather than fail closed. This also absorbs a mis-derived dotted name (sub.mod.py vs sub/mod.py).
+        # Scan every present .py PLUS own-repo auto_map targets that ACTUALLY EXIST in this revision. Scanning every .py rather than the closure is DELIBERATE: the entry can reach a sibling via absolute import / importlib / exec, so closure-only scanning is a real bypass, and over-blocking is the safe direction for an RCE gate (HIGH approvable; only CRITICAL hard-blocks). An auto_map target absent from the listing is a STALE ref (unsloth/PaddleOCR-VL names processing_ppocrvl.py but ships processing_paddleocr_vl.py); transformers cannot execute an absent file, so drop the stale ref rather than fail closed. This also absorbs a mis-derived dotted name (sub.mod.py vs sub/mod.py).
         present_py = {f for f in repo_files if f.endswith(".py")}
         stale_refs = own_refs - repo_file_set
         for fn in sorted(stale_refs):

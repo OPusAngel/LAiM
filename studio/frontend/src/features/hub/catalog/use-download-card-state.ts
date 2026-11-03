@@ -4,6 +4,8 @@
 import type { DownloadJob, DownloadPresentation } from "../download-manager";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { DownloadStopMode } from "./download-cancel-indicator";
+import { translate } from "@/i18n";
+
 
 /** What the button on a partial row does. Never "Redownload": whichever
  * transport wrote the partial, files already on disk are kept and only the
@@ -26,7 +28,7 @@ export function partialResumeLabel(partialResumable = false): string {
 export function partialDownloadHint(partialResumable = false): string {
   const label = partialResumeLabel(partialResumable);
   return partialResumable
-    ? `Partial download. Click ${label} to pick up where it stopped.`
+    ? translate("uxHub.partialDownloadClickTod5mb4", { p1: label })
     : `Partial download. Click ${label} to finish it. The interrupted file starts over; other files already on disk are kept.`;
 }
 
@@ -65,7 +67,7 @@ export function downloadActionAriaLabel(
 ): string | undefined {
   if (cancelling) return "Cancelling…";
   if (!downloading) return undefined;
-  return stopMode === "pause" ? "Pause download" : "Cancel download";
+  return stopMode === "pause" ? translate("uxHub.pauseDownload336kq") : translate("uxHub.cancelDownload4qfjn");
 }
 
 export function downloadActionLabel(

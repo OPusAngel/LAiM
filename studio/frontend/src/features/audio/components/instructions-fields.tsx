@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import type { NativeAudioInstructionsKind } from "../audio-page-policy";
@@ -23,25 +24,25 @@ export function InstructionsField({
     <Field
       label={
         instructionsKind === "music"
-          ? "Music description"
+          ? translate("uxAudio.musicDescriptionnplvh")
           : instructionsKind === "scene"
-            ? "Scene description"
+            ? translate("uxAudio.sceneDescriptiontsg31")
             : instructionsKind === "voice"
-              ? "Voice or style description"
-              : "Style instructions"
+              ? translate("uxAudio.voiceOrStyleDescriptionlu32c")
+              : translate("uxAudio.styleInstructionsw8lxy")
       }
       hint={
         instructionsKind === "music"
           ? musicNeedsDescription
-            ? "Describe genre, tempo, mood, vocals, and arrangement. This model requires it separately from the lyrics."
-            : "Optional genre, tempo, mood, vocals, and arrangement. Without it, the text above is used as the prompt."
+            ? translate("uxAudio.describeGenreTempoMood4l304")
+            : translate("uxAudio.optionalGenreTempoMoodwrvh2")
           : instructionsKind === "scene"
-            ? "Optional Higgs TTS 2 scene guidance such as room acoustics, recording conditions, or background ambience."
+            ? translate("uxAudio.optionalHiggsTTS21swpl")
             : instructionsKind === "voice"
               ? voiceRequired
-                ? "Required by this model. Describe the voice, accent, age and delivery."
-                : "Optional. Used by Qwen3-TTS VoiceDesign, Qwen3-TTS CustomVoice and VoxCPM2; other models ignore it."
-              : "Optional MOSS Local guidance such as speaking style, emotion, pace, or delivery."
+                ? translate("uxAudio.requiredByThisModel3grt6")
+                : translate("uxAudio.optionalUsedByQwen3mghtx")
+              : translate("uxAudio.optionalMOSSLocalGuidancerspmp")
       }
       htmlFor="audio-instructions"
     >
@@ -53,12 +54,12 @@ export function InstructionsField({
         }
         placeholder={
           instructionsKind === "music"
-            ? "Acoustic pop, 96 BPM, warm female lead, fingerpicked guitar and soft piano…"
+            ? translate("uxAudio.acousticPop96BPMvsvsu")
             : instructionsKind === "scene"
-              ? "Close-mic studio recording in a quiet, softly treated room…"
+              ? translate("uxAudio.closeMicStudioRecording7d56i")
               : instructionsKind === "voice"
-                ? "A warm, low female voice, speaking slowly and calmly…"
-                : "Warm, measured delivery with a calm conversational tone…"
+                ? translate("uxAudio.aWarmLowFemaleaoeh9")
+                : translate("uxAudio.warmMeasuredDeliveryWithi845j")
         }
         className="min-h-24"
       />
@@ -75,15 +76,15 @@ export function MossLanguageField({
 }) {
   return (
     <Field
-      label="Language"
+      label={translate("settings.appearance.language.title")}
       htmlFor="audio-language"
-      hint="Optional, but MOSS Local v1.5 recommends a language tag when known (for example English, Arabic, or French)."
+      hint={translate("uxAudio.optionalButMOSSLocaly2bdd")}
     >
       <Input
         id="audio-language"
         value={audioLanguage}
         onChange={(event) => setAudioLanguage(event.target.value)}
-        placeholder="English"
+        placeholder={translate("settings.apiKeys.decisionApi.modelEnglish")}
       />
     </Field>
   );

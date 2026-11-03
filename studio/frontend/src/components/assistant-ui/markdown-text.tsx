@@ -5,7 +5,7 @@
 
 import { openImageViewer } from "@/components/image-viewer";
 import { filesOpenInBrowser, openFileInBrowser } from "@/features/browser";
-import { useT } from "@/i18n";
+import { translate, useT } from "@/i18n";
 import {
   ArtifactCard,
   useChatProjectScope,
@@ -105,20 +105,20 @@ import { AudioPlayer } from "./audio-player";
 import {
   type ContextFile,
   FileContextMenu,
-  loadSandboxFile,
+  loadWorkdirFile,
   WebLinkContextMenu,
 } from "./link-context-menu";
 import {
   decodeSegment,
-  markdownSandboxImageSrc,
-  sandboxFileForHref,
-  sandboxSessionIdFor,
-  sandboxSessionInSrc,
-} from "./sandbox-files";
+  markdownWorkdirImageSrc,
+  workdirFileForHref,
+  workdirSessionIdFor,
+  workdirSessionInSrc,
+} from "./workdir-files";
 import { MARKDOWN_TABLE_ICONS, MarkdownTable } from "./markdown-table";
 import { SearchImageElement, SearchImagesContext } from "./search-image";
-import { useSandboxImage } from "./use-sandbox-image";
-import { rehypeSandboxImages } from "./rehype-sandbox-images";
+import { useWorkdirImage } from "./use-workdir-image";
+import { rehypeWorkdirImages } from "./rehype-workdir-images";
 import { LAiMDarkTheme, LAiMLightTheme } from "./code-themes";
 import { stabilizeStreamingMarkdown } from "./streaming-markdown";
 import {
@@ -208,10 +208,10 @@ const STREAMDOWN_IMMEDIATE_UPDATES = {
  * Registering `img` replaces Streamdown's own renderer WHOLESALE (its `Components` map is keyed by tag, so the
  * default `img` is only a default), so everything that renderer did for a `data:` image is restated here: wrapper,
  * hidden-when-failed, fallback text, hover download. What it could not do is the reason this exists: an on-disk
- * answer image arrives as `![plot](/api/inference/sandbox/<sid>/plot.png)`, survives sanitize() because it carries
+ * answer image arrives as `![plot](/api/inference/workdir/<sid>/plot.png)`, survives sanitize() because it carries
  * no scheme, and then reaches the DOM as a plain same-origin <img src>, with no Authorization header, 401s, and
  * renders as "Image not available". That case is rewritten into an authed fetch -> object URL first (see
- * `use-sandbox-image`); a `data:` URI keeps going straight through, untouched.
+ * `use-workdir-image`); a `data:` URI keeps going straight through, untouched.
  */
 const MarkdownImage = memo(function MarkdownImage(props: ComponentProps<"img">) {
   // `node` is Streamdown's ExtraProps; it must not reach the DOM.
@@ -231,29 +231,29 @@ const MarkdownImage = memo(function MarkdownImage(props: ComponentProps<"img">) 
   const activeThreadId = useChatRuntimeStore((state) => state.activeThreadId);
   const projectId = useChatProjectScope();
   const file = src
-    ? markdownSandboxImageSrc(src, {
+    ? markdownWorkdirImageSrc(src, {
         threadId: remoteId ?? activeThreadId ?? undefined,
         projectId,
       })
     : null;
-  const sandbox = useSandboxImage(file);
+  const workdir = useWorkdirImage(file);
   const [failedSrc, setFailedSrc] = useState<string | null>(null);
-  // A sandbox src is renderable only once the authed fetch has produced a blob: until then it is
+  // A workdir src is renderable only once the authed fetch has produced a blob: until then it is
   // absent, never raw. `data:`/`blob:` keep going through exactly as they were.
   const resolved =
     file === null
       ? src
-      : sandbox.state.status === "loaded"
-        ? sandbox.state.url
+      : workdir.state.status === "loaded"
+        ? workdir.state.url
         : undefined;
   const failedNow =
     (resolved != null && failedSrc === resolved) ||
-    (file !== null && sandbox.state.status === "failed");
+    (file !== null && workdir.state.status === "failed");
   // Hidden when it failed and has no intrinsic size to fall back on, as Streamdown's own renderer does.
   const sized = dom.width != null || dom.height != null;
   // Download naming follows the replaced renderer: a real extension on the path wins whole (alt must never override
   // a real filename); otherwise any extension in alt is STRIPPED and one inferred from the blob's type is appended,
-  // so alt="plot" downloads "plot.png", not "plot". Split before DECODING, so a raw `#`/`?` keeps its delimiter
+  // so alt={translate("uxComponents.plot1hrjf")} downloads "plot.png", not "plot". Split before DECODING, so a raw `#`/`?` keeps its delimiter
   // meaning, then decode: `loss curve #1.png` must save under its real name, not as `loss%20curve%20%231.png`.
   const downloadName = (blobType: string): string => {
     const tail =
@@ -277,7 +277,7 @@ const MarkdownImage = memo(function MarkdownImage(props: ComponentProps<"img">) 
       className="group relative my-4 inline-block"
     >
       <img
-        ref={file === null ? undefined : sandbox.ref}
+        ref={file === null ? undefined : workdir.ref}
         data-streamdown="image"
         src={resolved}
         alt={alt}
@@ -302,8 +302,8 @@ const MarkdownImage = memo(function MarkdownImage(props: ComponentProps<"img">) 
               title,
               fileName: downloadName,
               load: () =>
-                file !== null && sandbox.state.status === "loaded"
-                  ? Promise.resolve(sandbox.state.blob)
+                file !== null && workdir.state.status === "loaded"
+                  ? Promise.resolve(workdir.state.blob)
                   : urlToBlob(resolved),
               // Already showing here, so a host that refuses the fetch can still be enlarged.
               fallbackUrl: /^https?:/i.test(resolved) ? resolved : undefined,
@@ -316,7 +316,7 @@ const MarkdownImage = memo(function MarkdownImage(props: ComponentProps<"img">) 
           data-streamdown="image-fallback"
           className="text-muted-foreground text-xs italic"
         >
-          Image not available
+          {translate("uxCopy.imageNotAvailable12u8q")}
         </span>
       )}
       {/* Kept from the replaced renderer: the hover tint over the image. */}
@@ -324,18 +324,18 @@ const MarkdownImage = memo(function MarkdownImage(props: ComponentProps<"img">) 
       {!failedNow && resolved ? (
         <button
           type="button"
-          title="Download image"
+          title={translate("uxComponents.downloadImagewxvc7")}
           className="aui-chat-icon-btn absolute right-2 bottom-2 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-border bg-background/90 opacity-0 backdrop-blur-sm transition-all duration-200 group-hover:opacity-100"
           onClick={async () => {
             // Reuse fetched bytes under the desktop CSP.
             try {
               const blob =
-                file !== null && sandbox.state.status === "loaded"
-                  ? sandbox.state.blob
+                file !== null && workdir.state.status === "loaded"
+                  ? workdir.state.blob
                   : await urlToBlob(resolved);
               await downloadFile(blob, downloadName(blob.type), blob.type);
             } catch (error) {
-              if (!isDownloadCancelled(error)) toast.error("Could not save file.");
+              if (!isDownloadCancelled(error)) toast.error(translate("uxComponents.couldNotSaveFile6d220"));
             }
           }}
         >
@@ -356,13 +356,13 @@ const LINK_CLASS =
  /** A link in an answer; a file the chat's tools wrote opens the file rather than routing the app to its path. */
 function MarkdownLink({ href, children, ...props }: ComponentProps<"a">) {
   const { node: _node, ...dom } = props as ComponentProps<"a"> & { node?: unknown };
-  const file = href ? sandboxFileForHref(href) : null;
+  const file = href ? workdirFileForHref(href) : null;
   // Only file links subscribe to the chat's scope; links re-render per streamed token.
   if (href && file !== null) {
     return (
-      <SandboxFileLink href={href} file={file} dom={dom}>
+      <WorkdirFileLink href={href} file={file} dom={dom}>
         {children}
-      </SandboxFileLink>
+      </WorkdirFileLink>
     );
   }
   const link = (
@@ -383,7 +383,7 @@ function MarkdownLink({ href, children, ...props }: ComponentProps<"a">) {
   return href ? <WebLinkContextMenu href={href}>{link}</WebLinkContextMenu> : link;
 }
 
-function SandboxFileLink({
+function WorkdirFileLink({
   href,
   file,
   dom,
@@ -399,20 +399,20 @@ function SandboxFileLink({
   const activeThreadId = useChatRuntimeStore((state) => state.activeThreadId);
   const projectId = useChatProjectScope();
   const sessionId =
-    sandboxSessionInSrc(href) ??
-    sandboxSessionIdFor(remoteId ?? activeThreadId ?? undefined, projectId);
+    workdirSessionInSrc(href) ??
+    workdirSessionIdFor(remoteId ?? activeThreadId ?? undefined, projectId);
   if (sessionId) {
     const target: ContextFile = {
       name: file.slice(file.lastIndexOf("/") + 1),
-      load: () => loadSandboxFile(sessionId, file),
-      sandbox: { sessionId, file },
+      load: () => loadWorkdirFile(sessionId, file),
+      workdir: { sessionId, file },
     };
     const openFile = () => {
       if (filesOpenInBrowser()) {
         void target
           .load()
           .then((blob) =>
-            openFileInBrowser({ blob, name: target.name, contentType: blob.type, key: `sandbox:${sessionId}:${file}` }),
+            openFileInBrowser({ blob, name: target.name, contentType: blob.type, key: `workdir:${sessionId}:${file}` }),
           )
           .catch(() => toast.error(t("linkMenu.openFailed", { name: target.name })));
         return;
@@ -584,7 +584,7 @@ function SvgPreview({ source }: { source: string }) {
     <div className="mt-2 flex justify-center rounded-lg border border-border bg-[#f9e2de] p-4 dark:bg-neutral-100">
       <img
         src={dataUri}
-        alt="SVG preview"
+        alt={translate("uxComponents.sVGPreviewssty5")}
         style={{ maxWidth: "100%", maxHeight: 512 }}
       />
     </div>
@@ -595,7 +595,7 @@ function downloadTextFile(filename: string, text: string): void {
   void downloadFile(text, filename, "text/plain;charset=utf-8").catch(
     (error) => {
       if (!isDownloadCancelled(error)) {
-        toast.error("Could not save file.");
+        toast.error(translate("uxComponents.couldNotSaveFile6d220"));
       }
     },
   );
@@ -634,7 +634,7 @@ function MermaidCopyButton({ source }: { source: string }) {
     <button
       type="button"
       className="absolute top-3.5 right-20 z-20 cursor-pointer text-muted-foreground transition-all hover:text-foreground"
-      title="Copy Mermaid source"
+      title={translate("uxComponents.copyMermaidSource1xgsg")}
       onClick={async () => {
         if (!(await copyToClipboard(source))) {
           return;
@@ -668,7 +668,7 @@ export function CodeBlockActions({
         <button
           type="button"
           className={ACTION_BUTTON_CLASS}
-          title="Copy code"
+          title={translate("uxComponents.copyCode106qg")}
           disabled={disabled}
           onClick={async () => {
             const text = typeof source === "function" ? source() : source;
@@ -687,7 +687,7 @@ export function CodeBlockActions({
         <button
           type="button"
           className={ACTION_BUTTON_CLASS}
-          title="Download file"
+          title={translate("uxComponents.downloadFile1irss")}
           disabled={disabled}
           onClick={() => {
             downloadTextFile(
@@ -761,7 +761,7 @@ function StreamdownBlockContent(props: BlockProps) {
   if (props.isIncomplete && hasMermaidFence) {
     return (
       <div className="my-4 flex h-48 items-center justify-center rounded-xl border border-border bg-muted/30 text-sm text-muted-foreground animate-pulse">
-        Loading diagram...
+        {translate("uxComponents.loadingDiagram1xdod")}
       </div>
     );
   }
@@ -791,7 +791,7 @@ function StreamdownBlockContent(props: BlockProps) {
   ) {
     return (
       <div className="my-4 flex h-48 items-center justify-center rounded-xl border border-border bg-muted/30 text-sm text-muted-foreground animate-pulse">
-        Loading HTML preview...
+        {translate("uxComponents.loadingHTMLPreview1bn17")}
       </div>
     );
   }
@@ -831,7 +831,7 @@ function StreamdownBlockContent(props: BlockProps) {
         : null;
     if (htmlSource) {
       return (
-        <ArtifactCard code={htmlSource} title="HTML preview" source="fence" />
+        <ArtifactCard code={htmlSource} title={translate("uxComponents.hTMLPreview1b19v")} source="fence" />
       );
     }
 
@@ -1469,12 +1469,12 @@ function MarkdownTextRenderer({
   const highlightCode = useContext(CodeHighlightModeContext) === "all";
   const threadId = remoteId ?? activeThreadId ?? undefined;
   // Streamdown's memo comparator ignores rehypePlugins.
-  const sandboxScopeKey = JSON.stringify([threadId, projectId]);
+  const workdirScopeKey = JSON.stringify([threadId, projectId]);
   const rehypePlugins = useMemo(
     () =>
       // Streamdown caches processors by plugin name and serialized options.
       withDataImageSupport(STREAMDOWN_ALLOWED_TAGS, [
-        [rehypeSandboxImages, { threadId, projectId }],
+        [rehypeWorkdirImages, { threadId, projectId }],
       ]),
     [threadId, projectId],
   );
@@ -1545,7 +1545,7 @@ function MarkdownTextRenderer({
       <SearchImagesContext.Provider value={searchImages}>
         <div data-status={statusType} className="min-w-0 max-w-full">
           <Streamdown
-            key={`${messageId}:${incrementalCache.renderGeneration}:${renderKey}:${sandboxScopeKey}`}
+            key={`${messageId}:${incrementalCache.renderGeneration}:${renderKey}:${workdirScopeKey}`}
             mode="streaming"
             parseIncompleteMarkdown={!incrementalRender}
             remend={pendingLinkRepair ? LITERAL_LINK_REMEND : undefined}

@@ -21,7 +21,7 @@ def test_default_models_returns_static_defaults_before_top_fetch(monkeypatch):
 
     def _slow_fetch(self: InferenceOrchestrator) -> None:
         time.sleep(sleep_seconds)
-        self._top_gguf_cache = ["LAiM/slow-GGUF"]
+        self._top_gguf_cache = ["unsloth/slow-GGUF"]
         self._top_models_ready.set()
 
     monkeypatch.setattr(InferenceOrchestrator, "_fetch_top_models", _slow_fetch)
@@ -33,10 +33,10 @@ def test_default_models_returns_static_defaults_before_top_fetch(monkeypatch):
 
     assert elapsed < 0.5, f"default_models blocked for {elapsed:.2f}s"
     assert defaults == orchestrator._static_models
-    assert "LAiM/slow-GGUF" not in defaults
+    assert "unsloth/slow-GGUF" not in defaults
 
     deadline = time.monotonic() + sleep_seconds + 5
     while not orchestrator._top_models_ready.is_set() and time.monotonic() < deadline:
         time.sleep(0.05)
 
-    assert "LAiM/slow-GGUF" in orchestrator.default_models
+    assert "unsloth/slow-GGUF" in orchestrator.default_models

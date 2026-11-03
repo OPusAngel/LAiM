@@ -10,7 +10,7 @@ import { loadWithStubs } from "./helpers/module-stubs.ts";
 
 function useActiveConfigFor(patch: Record<string, unknown>, gguf = true) {
   const state = {
-    params: { checkpoint: "LAiM/Qwen3-0.6B-GGUF", maxSeqLength: 2048 },
+    params: { checkpoint: "unsloth/Qwen3-0.6B-GGUF", maxSeqLength: 2048 },
     loadedLlamaExtraArgs: null,
     ...patch,
   };
@@ -100,7 +100,7 @@ test("a loaded NPU model's runtime length is not read back as a context pin", ()
   const params = { checkpoint: "lemonade:qwen3-0.6b-FLM", maxSeqLength: 4096 };
   assert.equal(useActiveConfigFor({ params }, false).maxSeqLength, null);
   assert.equal(
-    useActiveConfigFor({ params: { ...params, checkpoint: "LAiM/Qwen3-0.6B" } }, false)
+    useActiveConfigFor({ params: { ...params, checkpoint: "unsloth/Qwen3-0.6B" } }, false)
       .maxSeqLength,
     4096,
   );

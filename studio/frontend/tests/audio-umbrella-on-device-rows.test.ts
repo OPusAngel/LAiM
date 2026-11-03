@@ -125,8 +125,8 @@ test("On Device rows name a folder by its folder and group it with LAiM's", () =
   assert.equal(onDeviceRepoLabel("someone/Model-GGUF"), "someone/Model-GGUF");
   assert.equal(isFeaturedOnDeviceRepoId(CLONE_FOLDER), true);
   assert.equal(isFeaturedOnDeviceRepoId(ASR_FOLDER), true);
-  assert.equal(isFeaturedOnDeviceRepoId("LAiM/Qwen3-8B-GGUF"), true);
-  assert.equal(isFeaturedOnDeviceRepoId("LAiMai/Foo"), true);
+  assert.equal(isFeaturedOnDeviceRepoId("unsloth/Qwen3-8B-GGUF"), true);
+  assert.equal(isFeaturedOnDeviceRepoId("unslothai/Foo"), true);
   assert.equal(isFeaturedOnDeviceRepoId(UMBRELLA), false);
   assert.equal(isFeaturedOnDeviceRepoId("someone/Model-GGUF"), false);
 });

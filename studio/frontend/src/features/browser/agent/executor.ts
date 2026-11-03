@@ -42,6 +42,11 @@ export type BrowserAction = {
   fullPage?: boolean;
   query?: string;
   limit?: number;
+  /** `upload`: a file on the user's machine, read back through /api/browser/local-file. */
+  path?: string;
+  mime?: string;
+  maxBytes?: number;
+  multiple?: boolean;
   /** How long the server waits for this answer. */
   timeoutS?: number;
   policy: SitePolicy;
@@ -107,6 +112,10 @@ export function parseBrowserAction(value: unknown): BrowserAction | null {
     fullPage: raw.full_page === true,
     query: str(raw.query, 256),
     limit: typeof raw.limit === "number" && Number.isInteger(raw.limit) ? raw.limit : undefined,
+    path: str(raw.path, 4096),
+    mime: str(raw.mime, 200),
+    maxBytes: typeof raw.max_bytes === "number" && Number.isInteger(raw.max_bytes) && raw.max_bytes > 0 ? raw.max_bytes : undefined,
+    multiple: raw.multiple === true,
     timeoutS: typeof raw.timeout_s === "number" && raw.timeout_s > 0 ? Math.min(raw.timeout_s, 3600) : undefined,
     policy: { allowedDomains: strings(raw.allowed_domains), blockedDomains: strings(raw.blocked_domains) },
   };
@@ -458,7 +467,7 @@ async function pageCall(tab: BrowserTab, request: Record<string, unknown>): Prom
     if (answer) return answer;
     // The page may still be mounting after a navigation.
     if (Date.now() - started > PAGE_READY_MS) {
-      throw new Error("the page is not answering; it may still be loading, or it is not a web page. Try browser_snapshot again.");
+      throw new Error(translate("uxBrowser.thePageIsNotv54lh"));
     }
     await sleep(250);
   }
@@ -748,6 +757,8 @@ async function perform(action: BrowserAction, context: Run): Promise<Result> {
       return moveTo(ready, action, context, here);
     case "drag":
       return dragBetween(ready, action, context, here);
+    case "upload":
+      return uploadFile(ready, action, context, here);
     case "evaluate":
       return runScript(ready, action, context, here);
   }
@@ -1040,6 +1051,176 @@ async function dragBetween(tab: BrowserTab, action: BrowserAction, context: Run,
   return afterward(tab, before, action, context, since, up.note);
 }
 
+// A file the agent puts into a page's field travels from LAiM's own route (the only reader of the
+// user's disk, auth included) into the page through the agent's command channel. The native view
+// caps a command at 64 KiB (browser_view_agent in src-tauri), so the bytes go as base64 pieces.
+const UPLOAD_CHUNK_RAW_BYTES = 32_768;
+const UPLOAD_DEFAULT_MAX_BYTES = 32 * 1024 * 1024;
+// Errors the panel itself writes here: `note` and `error` reach the model outside the untrusted fence.
+const UPLOAD_TOO_BIG = "the file is larger than the browser agent can upload (32 MB); ask the user to upload it themselves.";
+const UPLOAD_NO_ROUTE = "Studio could not read that file: it is not there, not a plain file, or too large.";
+const UPLOAD_INTERRUPTED = "the upload stopped before the file arrived; try it again.";
+const UPLOAD_CHUNK_FAILED = "the page stopped answering while the file was going in; take a snapshot and try again.";
+
+/** A name is a label the page shows; only its last segment, without separators, ever travels. */
+const baseName = (path: string): string => {
+  const parts = path.split(/[\\/]+/);
+  return parts[parts.length - 1] ?? "";
+};
+
+const EXTENSION_TYPES: Record<string, string> = {
+  txt: "text/plain", md: "text/markdown", markdown: "text/markdown", csv: "text/csv", tsv: "text/tab-separated-values",
+  json: "application/json", xml: "application/xml", html: "text/html", htm: "text/html", css: "text/css",
+  pdf: "application/pdf", zip: "application/zip", gz: "application/gzip", tar: "application/x-tar",
+  epub: "application/epub+zip", rtf: "application/rtf", ics: "text/calendar", vcf: "text/vcard",
+  doc: "application/msword",
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  png: "image/png", jpg: "image/jpeg", jpeg: "image/jpeg", gif: "image/gif", webp: "image/webp",
+  svg: "image/svg+xml", bmp: "image/bmp", avif: "image/avif", ico: "image/vnd.microsoft.icon",
+  heic: "image/heic", heif: "image/heif", tif: "image/tiff", tiff: "image/tiff",
+  mp3: "audio/mpeg", wav: "audio/wav", ogg: "audio/ogg", oga: "audio/ogg", m4a: "audio/mp4", aac: "audio/aac",
+  flac: "audio/flac", opus: "audio/opus", weba: "audio/webm",
+  mp4: "video/mp4", m4v: "video/mp4", mov: "video/quicktime", webm: "video/webm", mkv: "video/x-matroska",
+  avi: "video/x-msvideo",
+};
+
+/** The type a file of this extension is given (the model's own wins when it names one). */
+function mimeForPath(name: string, given?: string): string {
+  if (given) return given.slice(0, 200);
+  const extension = /\.([a-z0-9]+)$/i.exec(name)?.[1]?.toLowerCase();
+  return extension ? (EXTENSION_TYPES[extension] ?? "application/octet-stream") : "application/octet-stream";
+}
+
+/** base64 without one 64 KiB string per chunk: the page re-joins the pieces it is given. */
+function piecesToBase64(chunks: Uint8Array[]): string {
+  const table = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+  const out: string[] = [];
+  for (const chunk of chunks) {
+    let text = "";
+    let index = 0;
+    for (; index + 2 < chunk.length; index += 3) {
+      const n = (chunk[index] << 16) | (chunk[index + 1] << 8) | chunk[index + 2];
+      text += table[(n >> 18) & 63] + table[(n >> 12) & 63] + table[(n >> 6) & 63] + table[n & 63];
+      if (text.length >= 16_384) {
+        out.push(text);
+        text = "";
+      }
+    }
+    const rest = chunk.length - index;
+    if (rest === 1) {
+      const n = chunk[index] << 16;
+      text += `${table[(n >> 18) & 63]}${table[(n >> 12) & 63]}==`;
+    } else if (rest === 2) {
+      const n = (chunk[index] << 16) | (chunk[index + 1] << 8);
+      text += `${table[(n >> 18) & 63]}${table[(n >> 12) & 63]}${table[(n >> 6) & 63]}=`;
+    }
+    if (text) out.push(text);
+  }
+  return out.join("");
+}
+
+/** The file's bytes, from Studio's own authenticated route; null if the route refuses the file, a
+ *  negative total if it is more than the cap. */
+async function readLocalFilePieces(
+  path: string,
+  maxBytes: number,
+  signal?: AbortSignal,
+): Promise<{ chunks: Uint8Array[]; total: number } | null> {
+  const url = `/api/browser/local-file?path=${encodeURIComponent(path)}`;
+  const head = await authFetch(url, { method: "HEAD", signal: AbortSignal.timeout(POST_TIMEOUT_MS) }).catch(() => null);
+  if (!head?.ok) return null;
+  const size = Number(head.headers.get("content-length") ?? "");
+  if (Number.isFinite(size) && size > 0 && size <= maxBytes) {
+    const chunks: Uint8Array[] = [];
+    for (let start = 0; start < size; start += UPLOAD_CHUNK_RAW_BYTES) {
+      if (signal?.aborted) return null;
+      const end = Math.min(size - 1, start + UPLOAD_CHUNK_RAW_BYTES - 1);
+      const part = await authFetch(url, { headers: { Range: `bytes=${start}-${end}` }, signal: AbortSignal.timeout(POST_TIMEOUT_MS) }).catch(() => null);
+      if (!part?.ok) return null;
+      chunks.push(new Uint8Array(await part.arrayBuffer()));
+    }
+    return { chunks, total: size };
+  }
+  if (size > maxBytes) return { chunks: [], total: -1 };
+  // A route that says no length (HEAD refused): read it whole, and stop if that is past the cap.
+  const whole = await authFetch(url, { signal }).catch(() => null);
+  if (!whole?.ok) return null;
+  const bytes = new Uint8Array(await whole.arrayBuffer());
+  if (bytes.length > maxBytes) return { chunks: [], total: -1 };
+  const chunks: Uint8Array[] = [];
+  for (let start = 0; start < bytes.length; start += UPLOAD_CHUNK_RAW_BYTES) {
+    chunks.push(bytes.subarray(start, Math.min(bytes.length, start + UPLOAD_CHUNK_RAW_BYTES)));
+  }
+  return { chunks, total: bytes.length };
+}
+
+/** browser_upload: a file from the user's machine into a page's file field, no dialog opened. */
+async function uploadFile(tab: BrowserTab, action: BrowserAction, context: Run, before: string): Promise<Result> {
+  const { signal } = context;
+  const ref = action.ref ?? "";
+  const name = baseName(action.path ?? "");
+  if (!name) return { ok: false, error: "path is not a file on the user's machine." };
+  const described = await pageCall(tab, { op: "describe", ref });
+  if (!described.ok || !described.info) {
+    return { ok: false, error: described.error ?? `${ref} could not be found.` };
+  }
+  if (described.info.tag !== "input" || described.info.type !== "file") {
+    return { ok: false, error: `${ref} is not a file field, so no file can be put in it.` };
+  }
+  const host = hostOfUrl(before) || "this site";
+  // gateElement's own asks (a sign-in, a consequential label) win first; a file leaves the machine,
+  // so it is asked for whatever the site's action permission says, unless the site fully allows acts.
+  const rule = ruleFor(before, permissions(context)).rule;
+  const gate = gateElement("submit", described.info, before, action.policy, permissions(context));
+  if (gate.kind === "allow" && rule.actions !== "allow" && context.fullAccess !== true) {
+    // `ask: "submit"` sends the user's file to the site: it is asked every time, never kept by
+    // Always allow as one click on one button would be.
+    const refused = await pass({ kind: "ask", ask: "submit", host, name, detail: action.path ?? "", prompt: `Send ${name} from the user's machine to ${host}?` }, context, false);
+    if (refused) return { ok: false, error: refused };
+  }
+  if (gate.kind === "ask") {
+    const refused = await pass(gate, context);
+    if (refused) return { ok: false, error: refused };
+  }
+  if (signal?.aborted) return { ok: false, error: STOPPED };
+  const since = Date.now();
+  const file = await readLocalFilePieces(action.path ?? "", action.maxBytes ?? UPLOAD_DEFAULT_MAX_BYTES, signal);
+  if (!file) return { ok: false, error: UPLOAD_NO_ROUTE };
+  if (file.total < 0) return { ok: false, error: UPLOAD_TOO_BIG };
+  if (signal?.aborted) return { ok: false, error: STOPPED };
+  const mime = mimeForPath(name, action.mime);
+  // The page holds the pieces under the file's name and fills the field on the last one. Nothing of
+  // the page's travels in these commands: the base64 is ours, and `name` is a path segment.
+  const chunks: string[] = [];
+  for (const chunk of piecesToBase64(file.chunks).match(/[\s\S]{1,32768}/g) ?? []) chunks.push(chunk);
+  if (!chunks.length) chunks.push("");
+  const note = `Added ${name} to the file field on ${host}; it has not been sent unless the page did so itself.`;
+  for (let index = 0; index < chunks.length; index++) {
+    const more = index < chunks.length - 1;
+    const piece = await pageCall(tab, {
+      op: "upload",
+      ref,
+      name,
+      mime,
+      data: chunks[index],
+      more,
+      ...(action.multiple === true ? { multiple: true } : {}),
+    }).catch(() => null);
+    if (!piece) return { ok: false, error: more ? UPLOAD_INTERRUPTED : UPLOAD_CHUNK_FAILED };
+    if (piece.ok !== true) return { ok: false, error: piece.error ?? UPLOAD_CHUNK_FAILED };
+    if (signal?.aborted) return { ok: false, error: STOPPED };
+  }
+  const after = await settle(tab.id, before, since, signal);
+  if (!after) return { ok: false, error: "the browser tab closed." };
+  const now = tabUrl(after);
+  // A page that reads the file itself and moves on is arrived at, as a click that navigates is.
+  if (now && now !== before) return arrive(after, before, action, context, since, note);
+  const seen = await observe(after, context, note);
+  return seen;
+}
+
 /** An unlabelled point (a canvas) may be a Buy button nothing can read: ask once per site per chat. */
 function opaqueGate(info: ElementInfo, pageUrl: string, context: Run): (Gate & { kind: "ask" }) | null {
   if (info.role !== "element" || info.name.trim() || info.href) return null;
@@ -1059,19 +1240,23 @@ async function unchanged(tab: BrowserTab, point: { x: number; y: number }, hit: 
 const SCRIPT_WAIT_MS = 15_000;
 const SCRIPTS_OFF = "The user doesn't let the agent run scripts on pages.";
 
-/** A script bypasses every rule above, so it is shown verbatim and asked every time, whatever the site permissions. */
+/** A script bypasses every rule above, so Settings can ask for it separately: "ask" shows it verbatim
+ *  first, whatever the site permissions. LAiM's default is "allow", so it runs with the site's rights. */
 async function runScript(tab: BrowserTab, action: BrowserAction, context: Run, before: string): Promise<Result> {
   const { signal } = context;
   const script = action.script ?? "";
   if (!script.trim()) return { ok: false, error: "the script is empty." };
-  // The document the user sees as they approve: a reload or a page at the same address is another one.
+  // The document the script runs in, and the one shown as the user approves: a reload, or a page back
+  // at the same address, is another document.
   const doc = (await pageCall(tab, { op: "status" })).doc;
   if (!doc) return { ok: false, error: "the page is not answering; take a snapshot." };
-  const refused = await pass({ kind: "ask", ask: "script", host: hostOfUrl(before), name: "", detail: script, prompt: "" }, context);
-  if (refused) return { ok: false, error: refused };
-  if (signal?.aborted) return { ok: false, error: STOPPED };
-  // Settings can change while the question is open.
-  if (useBrowserAgentStore.getState().scriptAccess === "never") return { ok: false, error: SCRIPTS_OFF };
+  if (useBrowserAgentStore.getState().scriptAccess === "ask") {
+    const refused = await pass({ kind: "ask", ask: "script", host: hostOfUrl(before), name: "", detail: script, prompt: "" }, context);
+    if (refused) return { ok: false, error: refused };
+    if (signal?.aborted) return { ok: false, error: STOPPED };
+    // Settings can change while the question is open.
+    if (useBrowserAgentStore.getState().scriptAccess === "never") return { ok: false, error: SCRIPTS_OFF };
+  }
   const current = useBrowserStore.getState().tabs.find((candidate) => candidate.id === tab.id);
   if (!current || current.loading || tabUrl(current) !== before) {
     return { ok: false, error: "the page changed while the user was asked, so the script did not run; take a snapshot." };

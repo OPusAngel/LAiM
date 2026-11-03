@@ -61,7 +61,7 @@ def _preview(
 
 
 def test_flattening_an_empty_structured_field_keeps_the_run(tmp_path: Path, provider) -> None:
-    # LAiMai/LAiM#4675: {{ response.question }} on an empty optional field failed the whole preview.
+    # OPusAngel/LAiM#4675: {{ response.question }} on an empty optional field failed the whole preview.
     pytest.importorskip("data_designer")
     seed = tmp_path / "seed.csv"
     seed.write_text("n\n1\n2\n", encoding = "utf-8")

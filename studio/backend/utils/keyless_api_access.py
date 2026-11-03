@@ -27,7 +27,7 @@ APPROVED_DUMMY_BEARERS = frozenset(
 )
 KEYLESS_ADMISSION_STATE_KEY = "keyless_api_admitted"
 
-# Named by method and normalized path: /v1 also aliases model loading, media, sandbox, validation, and streaming side-effect routes.
+# Named by method and normalized path: /v1 also aliases model loading, media, workdir, validation, and streaming side-effect routes.
 _INFERENCE_ROUTES = frozenset(
     {
         ("POST", "/v1/chat/completions"),

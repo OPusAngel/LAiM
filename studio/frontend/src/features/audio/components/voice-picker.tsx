@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -92,7 +93,7 @@ export function VoicePicker({
     } catch {
       if (request !== previewRequest.current) return;
       setPlayingId(null);
-      toast.error(`Could not play ${voice.name}.`);
+      toast.error(translate("uxAudio.couldNotPlayj21bf", { p1: voice.name }));
     }
   };
 
@@ -105,12 +106,12 @@ export function VoicePicker({
       await remove(voice.id);
       voiceUrls.delete(voice.id);
       if (voice.id === selectedId) onDeselect?.();
-      toast.success(`Deleted ${voice.name}.`);
+      toast.success(translate("uxAudio.deletedhfaaz", { p1: voice.name }));
     } catch (reason) {
       toast.error(
         reason instanceof Error
           ? reason.message
-          : "Could not delete the voice.",
+          : translate("uxAudio.couldNotDeleteTheluq6k"),
       );
     }
   };
@@ -134,14 +135,12 @@ export function VoicePicker({
                 variant="link"
                 className="h-auto p-0 text-ui-12 font-medium text-foreground"
                 onClick={() => void refresh()}
-              >
-                Try again
-              </Button>
+              >{translate("uxAudio.tryAgainqnlxc")}</Button>
             </>
           ) : loading || !loaded ? (
-            "Loading saved voices…"
+            translate("uxAudio.loadingSavedVoicesyqoqj")
           ) : (
-            "No saved voices yet. Add a reference on Clone, then press Save voice."
+            translate("uxAudio.noSavedVoicesYetit48a")
           )}
         </p>
       ) : (
@@ -163,7 +162,7 @@ export function VoicePicker({
                   size="icon"
                   className="size-[calc(28px*var(--ui-space-scale,1))] shrink-0"
                   aria-label={
-                    playing ? `Pause ${voice.name}` : `Play ${voice.name}`
+                    playing ? translate("uxAudio.pausenqa8z", { p1: voice.name }) : translate("uxAudio.play7wng0", { p1: voice.name })
                   }
                   onClick={() => void togglePlay(voice)}
                 >
@@ -202,7 +201,7 @@ export function VoicePicker({
                     <HugeiconsIcon
                       icon={Tick02Icon}
                       className="size-3.5 shrink-0 text-foreground"
-                      aria-label="Selected"
+                      aria-label={translate("uxAudio.selected1ucoe")}
                     />
                   ) : null}
                 </button>
@@ -213,7 +212,7 @@ export function VoicePicker({
                       variant="ghost"
                       size="icon"
                       className="size-[calc(28px*var(--ui-space-scale,1))] shrink-0"
-                      aria-label={`More for ${voice.name}`}
+                      aria-label={translate("uxAudio.moreFor3gbzp", { p1: voice.name })}
                       disabled={disabled}
                     >
                       <HugeiconsIcon
@@ -228,9 +227,7 @@ export function VoicePicker({
                         icon={PencilEdit02Icon}
                         strokeWidth={1.75}
                         className="size-icon"
-                      />
-                      Rename…
-                    </DropdownMenuItem>
+                      />{translate("uxAudio.rename0cl5t")}</DropdownMenuItem>
                     <DropdownMenuItem
                       variant="destructive"
                       onClick={() => void handleDelete(voice)}
@@ -240,7 +237,7 @@ export function VoicePicker({
                         strokeWidth={1.75}
                         className="size-icon"
                       />
-                      Delete
+                      {translate("common.delete")}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

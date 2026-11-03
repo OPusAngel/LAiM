@@ -10,7 +10,7 @@ from types import SimpleNamespace
 import pytest
 
 ROOT = Path(__file__).parents[2]
-LOADER = ROOT / "LAiM/models/loader.py"
+LOADER = ROOT / "unsloth/models/loader.py"
 
 
 def _loader(cls):
@@ -38,7 +38,7 @@ def test_reports_actual_repo_after_mapping_and_capability_normalization(cls, exa
 
     def mapper(name, **kwargs):
         mapping_calls.append(name)
-        return "org/resolved-LAiM-bnb-4bit"
+        return "org/resolved-unsloth-bnb-4bit"
 
     scope = dict(
         model_name = "org/requested",
@@ -51,7 +51,7 @@ def test_reports_actual_repo_after_mapping_and_capability_normalization(cls, exa
         trust_remote_code = False,
         get_model_name = mapper,
         ALLOW_PREQUANTIZED_MODELS = prequant,
-        _strip_LAiM_bnb_4bit_suffix = lambda name: name.removesuffix("-LAiM-bnb-4bit"),
+        _strip_LAiM_bnb_4bit_suffix = lambda name: name.removesuffix("-unsloth-bnb-4bit"),
         _prefer_legacy_lowercase_cache = lambda name, *a: name,
         on_model_resolved = reports.append,
         os = os,
@@ -64,7 +64,7 @@ def test_reports_actual_repo_after_mapping_and_capability_normalization(cls, exa
     expected = (
         "org/requested"
         if exact
-        else "org/resolved-LAiM-bnb-4bit"
+        else "org/resolved-unsloth-bnb-4bit"
         if prequant
         else "org/resolved"
     )
@@ -93,14 +93,14 @@ def test_adapter_base_resolution_updates_report_before_base_config_load(cls):
         token = None,
         trust_remote_code = False,
         ALLOW_PREQUANTIZED_MODELS = True,
-        get_model_name = lambda *a, **k: "org/base-LAiM-bnb-4bit",
+        get_model_name = lambda *a, **k: "org/base-unsloth-bnb-4bit",
         _prefer_legacy_lowercase_cache = lambda name, *a: name,
         on_model_resolved = reports.append,
         kwargs = {},
     )
     module = ast.Module(body = block.body[:end], type_ignores = [])
     exec(compile(ast.fix_missing_locations(module), str(LOADER), "exec"), scope)
-    assert reports == ["org/base-LAiM-bnb-4bit"]
+    assert reports == ["org/base-unsloth-bnb-4bit"]
 
 
 def test_callback_is_consumed_by_loaders_and_forwarded_only_to_delegated_loader():
@@ -164,9 +164,9 @@ def test_stripped_prequant_base_can_use_the_legacy_lowercase_cache(cls):
         load_in_fp8 = False,
         token = None,
         trust_remote_code = False,
-        get_model_name = lambda name, **k: "Org/Resolved-LAiM-bnb-4bit",
+        get_model_name = lambda name, **k: "Org/Resolved-unsloth-bnb-4bit",
         ALLOW_PREQUANTIZED_MODELS = False,
-        _strip_LAiM_bnb_4bit_suffix = lambda name: name.removesuffix("-LAiM-bnb-4bit"),
+        _strip_LAiM_bnb_4bit_suffix = lambda name: name.removesuffix("-unsloth-bnb-4bit"),
         _prefer_legacy_lowercase_cache = lambda name, *a: name.lower(),
         on_model_resolved = reports.append,
         os = os,

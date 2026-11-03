@@ -1,4 +1,5 @@
 import { isTauri } from "@/lib/api-base";
+import { translate } from "@/i18n";
 import { toast } from "@/lib/toast";
 import { useEffect, useRef, useState } from "react";
 import { registerNativeAttachmentPath, registerNativeModelPath } from "./api";
@@ -307,26 +308,26 @@ export function useNativeModelDrop(
               dropped.kind === "video" ||
               (dropped.kind === "attach" && dropped.video.length > 0);
             if (needsImages && !canAttachImages(currentOptions)) {
-              toast.error("Attaching images is unavailable right now", {
-                description: "Retry once this chat is ready for attachments.",
+              toast.error(translate("uxNativeintents.attachingImagesIsUnavailable1fbqc"), {
+                description: translate("uxNativeintents.retryOnceThisChat1ujqi"),
               });
               return;
             }
             if (needsDocuments && !canAttachDocs(currentOptions)) {
-              toast.error("Attaching files is unavailable right now", {
-                description: "Retry once this chat is ready for attachments.",
+              toast.error(translate("uxNativeintents.attachingFilesIsUnavailable1u7ap"), {
+                description: translate("uxNativeintents.retryOnceThisChat1ujqi"),
               });
               return;
             }
             if (needsAudio && !canAttachAudio(currentOptions)) {
-              toast.error("Attaching audio is unavailable right now", {
-                description: "Retry once this chat is ready for attachments.",
+              toast.error(translate("uxNativeintents.attachingAudioIsUnavailable4nbkh"), {
+                description: translate("uxNativeintents.retryOnceThisChat1ujqi"),
               });
               return;
             }
             if (needsVideo && !canAttachVideo(currentOptions)) {
-              toast.error("Attaching video is unavailable right now", {
-                description: "Retry once this chat is ready for attachments.",
+              toast.error(translate("uxNativeintents.attachingVideoIsUnavailableewupt"), {
+                description: translate("uxNativeintents.retryOnceThisChat1ujqi"),
               });
               return;
             }
@@ -390,7 +391,7 @@ export function useNativeModelDrop(
                   registered.videoFailed >
                 0
               ) {
-                toast.error("Could not attach dropped files", {
+                toast.error(translate("uxNativeintents.couldNotAttachDropped1vbt0"), {
                   description:
                     registered.error?.message ?? "Some files were skipped.",
                 });
@@ -406,7 +407,7 @@ export function useNativeModelDrop(
               if (needsVideo && failureKey) {
                 store.failVideoDropRegistration(failureKey);
               }
-              toast.error("Could not attach dropped files", {
+              toast.error(translate("uxNativeintents.couldNotAttachDropped1vbt0"), {
                 description:
                   error instanceof Error ? error.message : String(error),
               });
@@ -428,13 +429,13 @@ export function useNativeModelDrop(
               await currentOptions.onAutoLoad?.(intent);
             } catch (error) {
               addIntent(intent);
-              toast.error("Could not load dropped model", {
+              toast.error(translate("uxNativeintents.couldNotLoadDropped2974n"), {
                 description:
                   error instanceof Error ? error.message : String(error),
               });
             }
           } catch (error) {
-            toast.error("Could not use dropped model", {
+            toast.error(translate("uxNativeintents.couldNotUseDropped5csly"), {
               description:
                 error instanceof Error ? error.message : String(error),
             });

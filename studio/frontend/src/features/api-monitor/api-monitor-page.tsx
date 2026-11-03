@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { useAppShellReadySignal } from "@/components/app-readiness";
 import { GuidedTour, useGuidedTourController } from "@/features/tour";
 import { apiMonitorTourSteps } from "./tour";
@@ -64,11 +65,11 @@ const V1_PREFIX_RE = /^\/v1\//;
 const DETAIL_FETCH_ATTEMPTS = 3;
 
 const STATUS_FILTERS: { value: MonitorStatusFilter; label: string }[] = [
-  { value: "all", label: "All requests" },
-  { value: "running", label: "In flight" },
-  { value: "completed", label: "Completed" },
-  { value: "error", label: "Errors" },
-  { value: "cancelled", label: "Cancelled" },
+  { value: "all", get label() { return translate("uxApimonitor.allRequests6b8c0"); } },
+  { value: "running", get label() { return translate("uxApimonitor.inFlight1p0n5"); } },
+  { value: "completed", get label() { return translate("settings.profile.stats.trainingCompleted"); } },
+  { value: "error", get label() { return translate("uxApimonitor.errors1swmt"); } },
+  { value: "cancelled", get label() { return translate("uxApimonitor.cancelled1a3t1"); } },
 ];
 
 function formatTime(value: number): string {
@@ -256,7 +257,7 @@ function RequestRow({
     entry.error ||
     entry.reply_preview ||
     entry.prompt_preview ||
-    (entry.status === "running" ? "Waiting for output…" : "No preview");
+    (entry.status === "running" ? translate("uxApimonitor.waitingForOutputusnyk") : translate("uxApimonitor.noPreviewyfbda"));
   // A lifecycle row has no payload, so it reads as a status line.
   if (isLifecycleEntry(entry)) {
     return (
@@ -368,12 +369,10 @@ function PayloadBlock({
         </h3>
         <div className="flex items-center gap-1">
           {truncated || preview !== body ? (
-            <span className="text-ui-10 text-muted-foreground">
-              preview only
-            </span>
+            <span className="text-ui-10 text-muted-foreground">{translate("uxApimonitor.previewOnlyf570k")}</span>
           ) : null}
           {body && !truncated ? (
-            <CopyButton value={body} label={`Copy ${title.toLowerCase()}`} />
+            <CopyButton value={body} label={translate("uxApimonitor.copyjlta9", { p1: title.toLowerCase() })} />
           ) : null}
         </div>
       </div>
@@ -385,7 +384,7 @@ function PayloadBlock({
           tone === "error" && "bg-red-500/5 text-red-700 dark:text-red-400",
         )}
       >
-        {loading && !body ? "Loading…" : preview || "–"}
+        {loading && !body ? translate("uxChat.loadingkapgw") : preview || "–"}
       </pre>
     </section>
   );
@@ -393,16 +392,16 @@ function PayloadBlock({
 
 function requestStatusLabel(entry: ApiMonitorEntry): string {
   if (entry.status !== "running") return entry.status;
-  if (entry.running_phase === "token_generation") return "Token generation";
-  if (entry.running_phase !== "prompt_processing") return "Running";
+  if (entry.running_phase === "token_generation") return translate("uxApimonitor.tokenGenerationvbkpk");
+  if (entry.running_phase !== "prompt_processing") return translate("uxApimonitor.runningStatusrblhe");
   const progress = entry.prompt_progress;
   if (progress?.percent != null) {
-    return `Prompt processing · ${Math.round(progress.percent)}%`;
+    return translate("uxApimonitor.promptProcessingPercentc5ilb", { p1: Math.round(progress.percent) });
   }
   if (progress?.processed != null) {
-    return `Prompt processing · ${formatCount(progress.processed)} tokens`;
+    return translate("uxApimonitor.promptProcessingTokensxxylu", { p1: formatCount(progress.processed) });
   }
-  return "Prompt processing";
+  return translate("uxApimonitor.promptProcessingy8gkq");
 }
 
 function RequestDetail({
@@ -459,55 +458,73 @@ function RequestDetail({
 
       <dl className="grid grid-cols-2 gap-x-4 gap-y-3 rounded-xl border border-border/60 bg-card px-4 py-3 sm:grid-cols-3">
         {[
-          { label: "Started", value: formatTime(entry.started_at) },
-          { label: "Duration", value: formatDuration(entry.duration_ms) },
+          { get label() { return translate("uxApimonitor.started163dn"); }, value: formatTime(entry.started_at) },
+          { get label() { return translate("uxVideo.duration1n1du"); }, value: formatDuration(entry.duration_ms) },
           {
-            label: "Prompt tokens",
+            get label() {
+              return translate("uxApimonitor.promptTokens5gng6");
+            },
             value:
               entry.prompt_tokens != null
                 ? formatCount(entry.prompt_tokens)
                 : "–",
           },
           {
-            label: "Completion tokens",
+            get label() {
+              return translate("uxApimonitor.completionTokens366rs");
+            },
             value:
               entry.completion_tokens != null
                 ? formatCount(entry.completion_tokens)
                 : "–",
           },
           {
-            label: "Total tokens",
+            get label() {
+              return translate("settings.profile.stats.totalTokens");
+            },
             value:
               entry.total_tokens != null
                 ? formatCount(entry.total_tokens)
                 : "–",
           },
           {
-            label: "Context",
+            get label() {
+              return translate("settings.chat.groups.contextTitle");
+            },
             value:
               entry.context_length != null
                 ? formatCount(entry.context_length)
                 : "–",
           },
           {
-            label: "First token",
+            get label() {
+              return translate("uxApimonitor.firstTokenbuzem");
+            },
             value: entry.ttft_ms != null ? formatDuration(entry.ttft_ms) : "–",
           },
           // Duration minus this is the queue wait, not slow decoding.
           {
-            label: "Generating",
+            get label() {
+              return translate("shell.navigation.chatGenerating");
+            },
             value: entry.decode_ms != null ? formatDuration(entry.decode_ms) : "–",
           },
           {
-            label: "Prompt speed",
+            get label() {
+              return translate("uxApimonitor.promptSpeedixafj");
+            },
             value: formatTokPerSec(entry.prompt_tok_per_sec) ?? "–",
           },
           {
-            label: "Generation speed",
+            get label() {
+              return translate("uxApimonitor.generationSpeeds7oqb");
+            },
             value: formatTokPerSec(entry.tok_per_sec) ?? "–",
           },
           {
-            label: "Stop reason",
+            get label() {
+              return translate("uxApimonitor.stopReasonhxl9l");
+            },
             value: entry.stop_reason ?? "–",
           },
         ].map((item) => (
@@ -525,24 +542,24 @@ function RequestDetail({
       {entry.context_usage != null ? (
         <div className="flex flex-col gap-1.5">
           <span className="text-ui-11 font-semibold uppercase tracking-wider text-muted-foreground">
-            Context used
+            {translate("uxApimonitor.contextUseda1ktd")}
           </span>
           <ContextUsageBar value={entry.context_usage} />
         </div>
       ) : null}
 
       {entry.error ? (
-        <PayloadBlock title="Error" body={entry.error} tone="error" />
+        <PayloadBlock title={translate("common.error")} body={entry.error} tone="error" />
       ) : null}
 
       <PayloadBlock
-        title="Prompt"
+        title={translate("uxVideo.prompt1lmzx")}
         body={prompt}
         truncated={entry.prompt_truncated && detail?.prompt == null}
         loading={loading}
       />
       <PayloadBlock
-        title="Reply"
+        title={translate("uxApimonitor.reply1m7jl")}
         body={reply}
         truncated={entry.reply_truncated && !detailIsCurrent}
         loading={loading}
@@ -723,10 +740,10 @@ export function ApiMonitorPage(): ReactElement {
   const loggingDisabled = data?.logging_enabled === false;
   const statusCopy =
     serverStatus === "generating"
-      ? "Serving requests"
+      ? translate("uxApimonitor.servingRequestsia3h1")
       : serverStatus === "ready"
-        ? "Ready"
-        : "No model loaded";
+        ? translate("uxApimonitor.readyStatusswvf2")
+        : translate("uxChat.noModelLoadedbb8lt");
 
   return (
     <main className="mx-auto flex w-full max-w-6xl 3xl:max-w-[calc(1440px*var(--ui-space-scale,1))] 4xl:max-w-[calc(1760px*var(--ui-space-scale,1))] flex-col gap-6 px-6 pb-10 pt-12 max-sm:px-4 max-sm:pt-8 font-heading sm:px-10">
@@ -737,7 +754,7 @@ export function ApiMonitorPage(): ReactElement {
             API
           </h1>
           <p className="text-sm text-muted-foreground">
-            Live traffic through LAiM&apos;s OpenAI-compatible server.
+            {translate("uxApimonitor.liveTrafficThroughLAiMae1ph")}
           </p>
         </div>
         <div data-tour="api-toolbar" className="flex flex-wrap items-center gap-2">
@@ -788,14 +805,14 @@ export function ApiMonitorPage(): ReactElement {
               {unloading ? "Ejecting" : "Eject"}
             </Button>
           </ToolbarTooltip>
-          <ToolbarTooltip label="Refresh">
+          <ToolbarTooltip label={translate("common.refresh")}>
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={refresh}
               disabled={refreshing}
-              aria-label="Refresh"
+              aria-label={translate("common.refresh")}
               className="size-9 rounded-full p-0"
             >
               <HugeiconsIcon
@@ -805,7 +822,7 @@ export function ApiMonitorPage(): ReactElement {
               />
             </Button>
           </ToolbarTooltip>
-          <ToolbarTooltip label="Clear log">
+          <ToolbarTooltip label={translate("uxApimonitor.clearLog1eqo6")}>
             <Button
               type="button"
               variant="outline"
@@ -815,7 +832,7 @@ export function ApiMonitorPage(): ReactElement {
                 setSelectedId(null);
                 void clear();
               }}
-              aria-label="Clear log"
+              aria-label={translate("uxApimonitor.clearLog1eqo6")}
               className="size-9 rounded-full p-0"
             >
               <HugeiconsIcon
@@ -825,7 +842,7 @@ export function ApiMonitorPage(): ReactElement {
               />
             </Button>
           </ToolbarTooltip>
-          <ToolbarTooltip label="API settings">
+          <ToolbarTooltip label={translate("uxApimonitor.aPISettingsp1v78")}>
             <Button
               type="button"
               variant="outline"
@@ -833,7 +850,7 @@ export function ApiMonitorPage(): ReactElement {
               onClick={() =>
                 useSettingsDialogStore.getState().openDialog("api-keys")
               }
-              aria-label="API settings"
+              aria-label={translate("uxApimonitor.aPISettingsp1v78")}
               className="size-9 rounded-full p-0"
             >
               <HugeiconsIcon
@@ -861,17 +878,17 @@ export function ApiMonitorPage(): ReactElement {
           </span>
           <div className="flex min-w-0 flex-col">
             <span className="text-ui-10 font-medium uppercase tracking-wider text-muted-foreground">
-              Base URL
+              {translate("uxApimonitor.baseURLvry90")}
             </span>
             <span className="truncate font-mono text-ui-12 text-foreground">
               {baseUrl}
             </span>
           </div>
-          <CopyButton value={baseUrl} label="Copy API base URL" />
+          <CopyButton value={baseUrl} label={translate("uxApimonitor.copyAPIBaseURL17w78")} />
         </div>
         <div className="flex min-w-0 flex-col">
           <span className="text-ui-10 font-medium uppercase tracking-wider text-muted-foreground">
-            Status
+            {translate("settings.accounts.status")}
           </span>
           <span className="flex items-center gap-1.5 text-ui-12 text-foreground">
             <span
@@ -891,7 +908,7 @@ export function ApiMonitorPage(): ReactElement {
         {data?.queue ? (
           <div className="flex min-w-0 flex-col">
             <span className="text-ui-10 font-medium uppercase tracking-wider text-muted-foreground">
-              Slots
+              {translate("uxApimonitor.slots1qws1")}
             </span>
             <span
               className={cn(
@@ -899,14 +916,21 @@ export function ApiMonitorPage(): ReactElement {
                 data.queue.queued > 0 && "text-amber-700 dark:text-amber-500",
               )}
             >
-              {data.queue.active}/{data.queue.capacity} busy
-              {data.queue.queued > 0 ? ` · ${data.queue.queued} queued` : ""}
+              {translate("uxApimonitor.busyOfTotalq83nv", {
+                p1: data.queue.active,
+                p2: data.queue.capacity,
+              })}
+              {data.queue.queued > 0
+                ? translate("uxApimonitor.queuedCountw57tc", {
+                    p1: data.queue.queued,
+                  })
+                : ""}
             </span>
           </div>
         ) : null}
         <div className="flex min-w-0 flex-1 flex-col">
           <span className="text-ui-10 font-medium uppercase tracking-wider text-muted-foreground">
-            Loaded model
+            {translate("uxApimonitor.loadedModelks3b3")}
           </span>
           <span className="truncate text-ui-12 text-foreground">
             {data?.active_model ?? "None"}
@@ -917,7 +941,7 @@ export function ApiMonitorPage(): ReactElement {
         </div>
         {paused ? (
           <span className="rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 text-ui-11 font-medium text-amber-700 dark:text-amber-500">
-            Paused
+            {translate("promptQueue.paused")}
           </span>
         ) : null}
       </section>
@@ -930,18 +954,18 @@ export function ApiMonitorPage(): ReactElement {
 
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         <StatCard
-          label="In flight"
+          label={translate("uxApimonitor.inFlight1p0n5")}
           value={formatCount(stats.active)}
           tone={stats.active > 0 ? "active" : "default"}
         />
         <StatCard
-          label="Requests"
+          label={translate("uxApimonitor.requestsefmne")}
           value={formatCount(stats.total)}
           hint={loggingDisabled ? "recording off" : "recent window"}
         />
-        <StatCard label="Completed" value={formatCount(stats.completed)} />
+        <StatCard label={translate("settings.profile.stats.trainingCompleted")} value={formatCount(stats.completed)} />
         <StatCard
-          label="Errors"
+          label={translate("uxApimonitor.errors1swmt")}
           value={formatCount(stats.errors)}
           tone={stats.errors > 0 ? "error" : "default"}
           hint={
@@ -951,7 +975,7 @@ export function ApiMonitorPage(): ReactElement {
           }
         />
         <StatCard
-          label="Avg latency"
+          label={translate("uxApimonitor.avgLatency1y780")}
           value={
             stats.avgDurationMs == null
               ? "–"
@@ -964,13 +988,13 @@ export function ApiMonitorPage(): ReactElement {
           }
         />
         <StatCard
-          label="Throughput"
+          label={translate("uxApimonitor.throughput2uuq3")}
           value={
             stats.tokensPerSecond == null
               ? "–"
               : `${stats.tokensPerSecond.toFixed(1)} tok/s`
           }
-          hint={`${formatCount(stats.totalTokens)} tokens · generation only`}
+          hint={translate("uxApimonitor.tokensGenerationOnlyu84gz", { p1: formatCount(stats.totalTokens) })}
         />
       </section>
 
@@ -979,8 +1003,8 @@ export function ApiMonitorPage(): ReactElement {
           <Input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search model, endpoint, preview or error"
-            aria-label="Search API requests"
+            placeholder={translate("uxApimonitor.searchModelEndpointPreview1gl55")}
+            aria-label={translate("uxApimonitor.searchAPIRequestsknmuu")}
             className="h-9 w-full min-w-0 flex-1 max-sm:basis-full rounded-full border-none bg-muted shadow-none dark:bg-background sm:w-64 sm:flex-none"
           />
           <Select
@@ -990,7 +1014,7 @@ export function ApiMonitorPage(): ReactElement {
             }
           >
             <SelectTrigger
-              aria-label="Filter by status"
+              aria-label={translate("uxApimonitor.filterByStatus100ru")}
               className="h-9 w-[calc(150px*var(--ui-space-scale,1))] rounded-full border-none bg-muted shadow-none dark:bg-background"
             >
               <SelectValue />
@@ -1003,9 +1027,7 @@ export function ApiMonitorPage(): ReactElement {
               ))}
             </SelectContent>
           </Select>
-          <span className="ml-auto shrink-0 text-ui-11 text-muted-foreground">
-            {formatCount(visible.length)} of {formatCount(entries.length)}
-          </span>
+          <span className="ml-auto shrink-0 text-ui-11 text-muted-foreground">{translate("uxApimonitor.ofopx20", { p1: formatCount(visible.length), p2: formatCount(entries.length) })}</span>
         </div>
 
         <div
@@ -1048,8 +1070,7 @@ export function ApiMonitorPage(): ReactElement {
               />
             ) : (
               <p className="flex h-full items-center justify-center px-6 py-10 text-center text-sm text-muted-foreground">
-                Select a request to inspect its prompt, reply, tokens and
-                errors.
+                {translate("uxCopy.selectARequestTo2x3fw")}
               </p>
             )}
           </div>

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
+
 "use client";
 
 import { ArtifactCard } from "@/features/chat";
@@ -34,7 +36,7 @@ const RenderHtmlToolUIImpl: ToolCallMessagePartComponent = ({
   const code = typeof parsedArgs.code === "string" ? parsedArgs.code : "";
   const hasCode = code.trim().length > 0;
   const title =
-    typeof parsedArgs.title === "string" ? parsedArgs.title : "HTML preview";
+    typeof parsedArgs.title === "string" ? parsedArgs.title : translate("uxComponents.hTMLPreview1b19v");
   const isRunning = isToolCallRunning(status);
   const codeIsStreaming = propStatus.code === "streaming";
 
@@ -88,16 +90,16 @@ const RenderHtmlToolUIImpl: ToolCallMessagePartComponent = ({
         <span className="grid min-w-0 flex-1 gap-1">
           <span className="truncate text-sm font-medium leading-tight text-foreground">
             {errorText
-              ? "HTML preview error"
+              ? translate("uxComponents.htmlPreviewErrorf9ofe")
               : isStaleGeneratingArtifact
-                ? "HTML preview interrupted"
-                : "HTML preview unavailable"}
+                ? translate("uxComponents.htmlPreviewInterruptedzp7v8")
+                : translate("uxComponents.htmlPreviewUnavailablef55xs")}
           </span>
           <span className="truncate text-ui-11 leading-none text-muted-foreground">
             {errorText ??
               (isStaleGeneratingArtifact
-                ? "Refresh stopped this preview"
-                : "HTML preview")}
+                ? translate("uxComponents.refreshStoppedPreview0mkil")
+                : translate("uxComponents.hTMLPreview1b19v"))}
           </span>
         </span>
       </div>

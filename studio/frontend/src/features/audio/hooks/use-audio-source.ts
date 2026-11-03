@@ -16,6 +16,8 @@ import {
   sourceFileUrl,
 } from "../audio-run-request";
 import { decodePeaks } from "../components/waveform-decode";
+import { translate } from "@/i18n";
+
 import {
   INITIAL_AUDIO_SOURCE_STATE,
   audioFileProblem,
@@ -171,8 +173,8 @@ export function useAudioSource({
               type: "fail",
               message:
                 value.kind === "voice"
-                  ? "This saved voice was deleted. Pick another one."
-                  : "This clip was deleted. Pick another one.",
+                  ? translate("uxAudio.thisSavedVoiceWaspxrn9")
+                  : translate("uxAudio.thisClipWasDeletedilye6"),
             });
           }
           return;
@@ -241,7 +243,7 @@ export function useAudioSource({
         if (controller.signal.aborted) return;
         dispatch({
           type: "fail",
-          message: errorText(error, "The upload failed. Try another file."),
+          message: errorText(error, translate("uxAudio.theUploadFailedTry3xthi")),
         });
       } finally {
         if (uploadAbort.current === controller) uploadAbort.current = null;
@@ -284,8 +286,7 @@ export function useAudioSource({
       stopStream();
       dispatch({
         type: "fail",
-        message:
-          "This browser cannot record audio here. Upload a file instead.",
+        get message() { return translate("uxAudio.thisBrowserCannotRecordbt8pf"); },
       });
       return;
     }

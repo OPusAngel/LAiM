@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { useState } from "react";
 
 export type FamilyOverrideArtifactKind = "diffusers_pipeline" | "diffusers_modular_pipeline";
@@ -38,7 +39,7 @@ export const FAMILY_OVERRIDE_HINT =
 /** Options come from the backend registry, so a new family cannot leave the UI stale. */
 export function familyOverrideOptions(supported: readonly string[] | null | undefined): [string, string][] {
   const names = [...new Set(supported ?? [])].filter(Boolean);
-  return [["auto", "Auto (detect)"], ...names.map((n): [string, string] => [n, LABELS[n] ?? n])];
+  return [["auto", translate("uxModelpicker.autoDetect5yj9y")], ...names.map((n): [string, string] => [n, LABELS[n] ?? n])];
 }
 
 export function explicitFamily(value: unknown): string | undefined {
@@ -91,7 +92,7 @@ export function useFamilyOverride(
     familyOverride,
     setFamilyOverride,
     familySelect: {
-      label: "Family",
+      label: translate("uxVideo.family1ii54"),
       hint: FAMILY_OVERRIDE_HINT,
       value: familyOverride,
       onValueChange: setFamilyOverride,

@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
-"""stdio MCP runs a local command as the backend user, outside the sandbox, and
+"""stdio MCP runs a local command as the backend user, outside the workdir, and
 sk-LAiM API keys authenticate the same routes the UI uses. So these pin that
 only a UI session may define a command, and that http(s) MCP stays usable from an
 API key. list_tools_async is stubbed to fail if called, so a gate placed after the

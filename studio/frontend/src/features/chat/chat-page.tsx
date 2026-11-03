@@ -128,7 +128,7 @@ import {
   SaveTemporaryChatMenu,
   TemporaryChatSaveBridge,
 } from "./components/temporary-chat-save";
-import { useT } from "@/i18n";
+import { translate, useT } from "@/i18n";
 import { Tooltip as TooltipPrimitive } from "radix-ui";
 import {
   type CSSProperties,
@@ -246,7 +246,6 @@ import {
   SharedComposer,
 } from "./shared-composer";
 import { BypassPermissionsConfirmDialog } from "./bypass-permissions-menu-item";
-import { RootSandboxSetupDialog } from "./sandbox-setup-dialog";
 import {
   CHAT_CODE_TOOLS_ENABLED_KEY,
   CHAT_IMAGE_TOOLS_ENABLED_KEY,
@@ -324,7 +323,7 @@ const FullViewChatButton = lazy(() =>
   })),
 );
 
-// Sandboxed page frames stay outside the trap: same-origin access would weaken their isolation.
+// Workdired page frames stay outside the trap: same-origin access would weaken their isolation.
 const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
@@ -1090,7 +1089,7 @@ function useCompareVariant(pairId: string): {
       )
       .catch((error) => {
         if (!isExpectedBackgroundChatStorageError(error)) {
-          console.error("Could not read a comparison's stored threads", error);
+          console.error(translate("uxChat.couldNotReadAu5cso"), error);
         }
         settle(
           comparePairReadState({ failed: true }, checkpointIsLora, retryCount),
@@ -1120,10 +1119,10 @@ function CompareUnreadable({
   return (
     <div className="flex min-h-0 min-w-0 flex-1 basis-0 flex-col items-center justify-center gap-3 p-6 text-center">
       <p className="text-sm text-muted-foreground">
-        Could not load this comparison's history.
+        {translate("uxChat.couldNotLoadThiszrug7")}
       </p>
       <Button variant="outline" size="sm" onClick={onRetry}>
-        Try again
+        {translate("browser.error.retry")}
       </Button>
     </div>
   );
@@ -1298,7 +1297,7 @@ function CompareShell({
           <div className="LAiM-composer-shell mx-auto w-full max-w-[var(--custom-chat-max-width,48rem)]">{composer}</div>
           {showModelDisclaimer && (
             <p className="composer-footer-note">
-              LLMs can make mistakes. Double-check responses.
+              {translate("uxChat.lLMsCanMakeMistakes43ocz")}
             </p>
           )}
         </div>
@@ -1381,13 +1380,13 @@ const LoraCompareContent = memo(function LoraCompareContent({
   ]);
 
   const sendUnavailableReason = !threadsSettled
-    ? "Loading comparison history."
+    ? translate("uxChat.loadingComparisonHistoryn5he1")
     : checkpointIsLora === null
-      ? "Checking the loaded model."
+      ? translate("uxChat.checkingTheLoadedModelaxihx")
       : !checkpointIsLora ||
           (pairLoraModelId !== undefined &&
             !modelIdsMatch(pairLoraModelId, checkpoint))
-        ? "Load the LoRA saved with this comparison before sending."
+        ? translate("uxChat.loadTheLoRASavedrjzbm")
         : undefined;
 
   return (
@@ -1421,7 +1420,7 @@ const LoraCompareContent = memo(function LoraCompareContent({
           header={
             <div className="shrink-0 px-3 py-1.5">
               <span className="text-ui-10 font-semibold uppercase tracking-wider text-muted-foreground">
-                Base Model
+                {translate("uxExport.baseModeleirl9")}
               </span>
             </div>
           }
@@ -1439,7 +1438,7 @@ const LoraCompareContent = memo(function LoraCompareContent({
           header={
             <div className="shrink-0 px-3 py-1.5 text-start lg:text-end lg:pr-[calc(4rem*var(--ui-space-scale,1)+var(--studio-chat-header-right-inset,var(--studio-window-control-inset,0px)))]">
               <span className="text-ui-10 font-semibold uppercase tracking-wider text-primary">
-                Fine-tuned
+                {translate("uxModelpicker.fineTuned4r7hw")}
               </span>
             </div>
           }
@@ -1481,7 +1480,7 @@ function GeneralCompareHeader({
   onModelsChange?: (deletedModel?: DeletedModelRef) => void;
   deleteDisabled?: boolean;
   side: "left" | "right";
-  label?: "Base Model" | "Fine-tuned";
+  label?: "base" | "tuned";
 }): ReactElement {
   // Controlled so the body-portaled popover cannot linger over another tab off-route.
   const active = useChatActive();
@@ -1523,10 +1522,12 @@ function GeneralCompareHeader({
           className={cn(
             "pointer-events-none hidden h-[var(--studio-chat-control-height,34px)] shrink-0 items-center text-ui-10 font-semibold uppercase tracking-wider sm:flex",
             side === "right" && "ml-auto",
-            label === "Fine-tuned" ? "text-primary" : "text-muted-foreground",
+            label === "tuned" ? "text-primary" : "text-muted-foreground",
           )}
         >
-          {label}
+          {label === "tuned"
+            ? translate("uxChat.fineTunedQw7zt")
+            : translate("uxChat.baseModelv5v00")}
         </span>
       ) : null}
     </div>
@@ -1538,7 +1539,7 @@ function generalCompareLabels(
   loraModels: LoraModelOption[],
   model1: CompareModelSelection,
   model2: CompareModelSelection,
-): ["Base Model" | "Fine-tuned" | undefined, "Base Model" | "Fine-tuned" | undefined] {
+): ["base" | "tuned" | undefined, "base" | "tuned" | undefined] {
   const baseOf = (sel: CompareModelSelection) =>
     sel.isLora
       ? loraModels.find((lora) => lora.id === sel.id)?.baseModel
@@ -1548,8 +1549,8 @@ function generalCompareLabels(
     return Boolean(loraBase && base.id) &&
       normalizeModelRef(loraBase) === normalizeModelRef(base.id);
   };
-  if (isTunedFrom(model1, model2)) return ["Fine-tuned", "Base Model"];
-  if (isTunedFrom(model2, model1)) return ["Base Model", "Fine-tuned"];
+  if (isTunedFrom(model1, model2)) return ["tuned", "base"];
+  if (isTunedFrom(model2, model1)) return ["base", "tuned"];
   return [undefined, undefined];
 }
 
@@ -1676,7 +1677,7 @@ const GeneralCompareContent = memo(function GeneralCompareContent({
             model1ThreadId={model1ThreadId}
             model2ThreadId={model2ThreadId}
             sendUnavailableReason={
-              threadsSettled ? undefined : "Loading comparison history."
+              threadsSettled ? undefined : translate("uxChat.loadingComparisonHistoryn5he1")
             }
           />
         ) : (
@@ -1787,10 +1788,10 @@ const PROJECT_CHAT_EXPORT_OPTIONS: Array<{
   label: string;
   format: ProjectChatExportFormat;
 }> = [
-  { label: "Training JSONL", format: "raw-jsonl" },
-  { label: "Message JSONL", format: "messages-jsonl" },
+  { get label() { return translate("composer.plus.exportTrainingJsonl"); }, format: "raw-jsonl" },
+  { get label() { return translate("composer.plus.exportMessageJsonl"); }, format: "messages-jsonl" },
   { label: "CSV", format: "csv" },
-  { label: "ShareGPT JSONL", format: "sharegpt-jsonl" },
+  { get label() { return translate("uxChat.shareGPTJSONL10utz"); }, format: "sharegpt-jsonl" },
   {
     label: CONVERSATION_MARKDOWN_LABEL,
     format: CONVERSATION_MARKDOWN_FORMAT,
@@ -1925,7 +1926,7 @@ function ProjectLanding({
   const fileProjectInSection = useFileProjectInSection();
   const [creatingSection, setCreatingSection] = useState(false);
 
-  /** A project workspace is a bigger thing to remove than a chat's sandbox, so it asks from
+  /** A project workspace is a bigger thing to remove than a chat's workdir, so it asks from
    *  scratch rather than following the chat preference, as the sidebar does it. */
   function openProjectDelete(): void {
     setDeleteFilesOnDelete(false);
@@ -1944,7 +1945,7 @@ function ProjectLanding({
       useChatRuntimeStore.getState().setActiveProjectId(null);
       navigate({ to: "/chat", search: { new: createThreadNonce() } });
     } catch (err) {
-      toast.error("Failed to delete project", {
+      toast.error(translate("library.chats.toast.projectDeleteFailed"), {
         description: err instanceof Error ? err.message : undefined,
       });
     }
@@ -1981,7 +1982,7 @@ function ProjectLanding({
         await renameChatItem(item, trimmed);
       } catch (err) {
         setPendingRename(null);
-        toast.error("Failed to rename chat", {
+        toast.error(translate("shell.toast.failedToRenameChat"), {
           description: err instanceof Error ? err.message : undefined,
         });
       }
@@ -2024,7 +2025,7 @@ function ProjectLanding({
       try {
         await archiveChatItem(item, activeThreadId ?? undefined, noopView);
       } catch (err) {
-        toast.error("Failed to archive chat", {
+        toast.error(translate("uxChat.failedToArchiveChat1fs9u"), {
           description: err instanceof Error ? err.message : undefined,
         });
       }
@@ -2039,7 +2040,7 @@ function ProjectLanding({
           deleteFiles,
         });
       } catch (err) {
-        toast.error("Failed to delete chat", {
+        toast.error(translate("shell.toast.failedToDeleteChat"), {
           description: err instanceof Error ? err.message : undefined,
         });
       }
@@ -2065,7 +2066,7 @@ function ProjectLanding({
       try {
         await moveChatItemToProject(item, targetId);
       } catch (err) {
-        toast.error("Failed to move chat", {
+        toast.error(translate("uxChat.failedToMoveChathwane"), {
           description: err instanceof Error ? err.message : undefined,
         });
       }
@@ -2078,7 +2079,7 @@ function ProjectLanding({
       try {
         await exportProjectChatItem(item, format);
       } catch (error) {
-        if (!isDownloadCancelled(error)) toast.error("Export failed.");
+        if (!isDownloadCancelled(error)) toast.error(translate("composer.plus.exportFailed"));
       }
     },
     [],
@@ -2089,7 +2090,7 @@ function ProjectLanding({
       try {
         await saveProjectChatItemAsSource(item, projectId);
       } catch {
-        toast.error("Failed to save to project sources.");
+        toast.error(translate("uxChat.failedToSaveTo1hosz"));
       }
     },
     [projectId],
@@ -2181,7 +2182,7 @@ function ProjectLanding({
             return [
               item.id,
               {
-                snippet: "Compare chat",
+                snippet: translate("uxChat.compareChat8pa09"),
                 date: formatProjectChatDate(item.createdAt),
               },
             ] as const;
@@ -2266,7 +2267,7 @@ function ProjectLanding({
                   <button
                     ref={triggerRef}
                     type="button"
-                    aria-label="Project options"
+                    aria-label={translate("uxChat.projectOptions1yhqf")}
                     className="inline-flex size-9 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring data-[state=open]:bg-muted data-[state=open]:text-foreground"
                   >
                     <HugeiconsIcon icon={MoreHorizontalIcon} strokeWidth={1.75} className="size-5" />
@@ -2286,7 +2287,7 @@ function ProjectLanding({
 
             <ProjectComposer
               disabled={Boolean(pendingNewThreadId)}
-              placeholder={`New chat in ${projectName}`}
+              placeholder={translate("uxChat.newChatInxxb5d", { p1: projectName })}
             />
 
             <div className="mt-9 flex items-center gap-2">
@@ -2311,9 +2312,7 @@ function ProjectLanding({
             {projectTab === "sources" ? (
               <Suspense
                 fallback={
-                  <div className="mt-8 rounded-[26px] bg-muted/30 px-6 py-10 text-center text-sm text-muted-foreground">
-                    Loading sources…
-                  </div>
+                  <div className="mt-8 rounded-[26px] bg-muted/30 px-6 py-10 text-center text-sm text-muted-foreground">{translate("uxChat.loadingSourcesq1zs1")}</div>
                 }
               >
                 <ProjectSourcesPanel projectId={projectId} />
@@ -2367,7 +2366,7 @@ function ProjectLanding({
                             }}
                             onFocus={(event) => event.currentTarget.select()}
                             maxLength={120}
-                            aria-label="Rename chat"
+                            aria-label={translate("shell.dialog.renameChat.title")}
                             className="w-full border-0 bg-transparent text-ui-15 leading-5 text-foreground outline-none"
                           />
                         </div>
@@ -2412,7 +2411,7 @@ function ProjectLanding({
                             ref={triggerRef}
                             type="button"
                             onClick={(event) => event.stopPropagation()}
-                            aria-label="Chat options"
+                            aria-label={translate("browser.fullView.options")}
                             className="absolute right-3 top-1/2 inline-flex size-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full text-muted-foreground outline-none transition-opacity hover:bg-[color-mix(in_oklab,var(--foreground)_calc(10%*var(--contrast-wash-gain,1)),transparent)] md:pointer-fine:opacity-0 md:pointer-fine:pointer-events-none focus-visible:opacity-100 focus-visible:pointer-events-auto group-hover:opacity-100 group-hover:pointer-events-auto data-[state=open]:opacity-100 data-[state=open]:pointer-events-auto"
                           >
                             <HugeiconsIcon
@@ -2445,8 +2444,8 @@ function ProjectLanding({
                           />
                           <span>
                             {pinnedChatIdSet.has(item.id)
-                              ? "Unpin chat"
-                              : "Pin chat"}
+                              ? translate("uxChat.unpinChatzzo6y")
+                              : translate("uxChat.pinChath6aek")}
                           </span>
                         </DropdownMenuItem>
                         <DropdownMenuSub>
@@ -2518,7 +2517,7 @@ function ProjectLanding({
                             strokeWidth={1.75}
                             className="size-icon"
                           />
-                          <span>Project sources</span>
+                          <span>{translate("uxChat.projectSourcesxfvh1")}</span>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
@@ -2559,11 +2558,8 @@ function ProjectLanding({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete chat</AlertDialogTitle>
-            <AlertDialogDescription>
-              This permanently deletes "{confirmingDelete?.title}". This cannot
-              be undone.
-            </AlertDialogDescription>
+            <AlertDialogTitle>{translate("uxChat.deleteChataejuz")}</AlertDialogTitle>
+            <AlertDialogDescription>{translate("uxChat.thisPermanentlyDeletesThisanlzp", { p1: confirmingDelete?.title })}</AlertDialogDescription>
           </AlertDialogHeader>
           <DeleteChatFilesSwitch
             id="chat-landing-delete-files"
@@ -2616,10 +2612,8 @@ function ProjectLanding({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete project</AlertDialogTitle>
-            <AlertDialogDescription>
-              Delete "{projectName}"? Its chats will be permanently deleted.
-            </AlertDialogDescription>
+            <AlertDialogTitle>{translate("uxChat.deleteProjectxr5do")}</AlertDialogTitle>
+            <AlertDialogDescription>{translate("uxChat.deleteItsChatsWillxrr27", { p1: projectName })}</AlertDialogDescription>
           </AlertDialogHeader>
           {/* Same offer the sidebar makes, naming the folder when the record carries one. */}
           <DeleteChatFilesSwitch
@@ -2628,13 +2622,13 @@ function ProjectLanding({
             onCheckedChange={setDeleteFilesOnDelete}
             description={
               currentProject?.rootPath ??
-              "The project workspace folder will be removed from disk."
+              translate("uxChat.theProjectWorkspaceFolder7dw2n")
             }
           />
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={() => void commitProjectDelete()}>
-              {deleteFilesOnDelete ? "Delete all" : "Delete"}
+              {deleteFilesOnDelete ? translate("uxChat.deleteAllscuzt") : "Delete"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -2729,8 +2723,10 @@ export function ChatPage({
       .then((thread) => {
         if (canceled || thread) return;
         useChatRuntimeStore.getState().setActiveThreadId(null);
-        toast.info("Chat not found", {
-          description: "That thread no longer exists, so we opened a new chat.",
+        toast.info(translate("uxChat.chatNotFound1p1lq"), {
+          get description() {
+            return translate("uxChat.thatThreadNoLonger1cg2e");
+          },
         });
         navigate({
           to: "/chat",
@@ -2951,8 +2947,10 @@ export function ChatPage({
     if (!connectionsEnabled && isExternalModelId(inferenceCheckpoint)) {
       clearCheckpoint();
       if (turnedOff) {
-        toast.info("Connections disabled", {
-          description: "Switched away from the hosted model.",
+        toast.info(translate("uxChat.connectionsDisabledbhoqq"), {
+          get description() {
+            return translate("uxChat.switchedAwayFromThepjme2");
+          },
         });
       }
     }
@@ -3159,7 +3157,7 @@ export function ChatPage({
         selection.modelId,
       ) === true;
     const canSearch = supportsBuiltinWebSearch || supportsStudioToolsHere;
-    // Read out of the placement rule, not off the LAiM-tools flag: a model on a sandbox-owning
+    // Read out of the placement rule, not off the LAiM-tools flag: a model on a workdir-owning
     // provider that cannot use it runs nothing either way.
     const canRunCode = codeToolCanRun({
       hostedCodeExecutionForThisTurn: supportsBuiltinCodeExecution,
@@ -3534,8 +3532,10 @@ export function ChatPage({
             normalizeModelRef(selection.id) &&
           (loadingModel.ggufVariant ?? null) === (selection.ggufVariant ?? null);
         if (isLoadingThisPick) {
-          toast.info("This model is already loading", {
-            description: "It's downloading as part of the load in progress.",
+          toast.info(translate("uxChat.thisModelIsAlready1v0hu"), {
+            get description() {
+              return translate("uxChat.itSDownloadingAs16ype");
+            },
           });
           // The duplicate click is the only pick this guard refuses.
           return;
@@ -3549,20 +3549,25 @@ export function ChatPage({
             presentation: selection.downloadPresentation,
             // Handed over, not raised here, so one start makes one toast.
             callerToast: {
-              title: "Downloading in the background",
-              description:
-                "It'll be ready to load once the current model finishes.",
+              get title() {
+                return translate("uxChat.downloadingInTheBackgroundvmlne");
+              },
+              get description() {
+                return translate("uxChat.itLlBeReady3xygo");
+              },
             },
           });
           if (outcome === "conflict") {
-            toast.info("Resume this download from Models", {
-              description:
-                "An earlier partial download used a different transport. Open the Model hub tab to resume or restart it.",
+            toast.info(translate("uxChat.resumeThisDownloadFrome7ixi"), {
+              get description() {
+                return translate("uxChat.anEarlierPartialDownload16bi3");
+              },
             });
           } else if (outcome === "busy") {
-            toast.info("Download already in progress", {
-              description:
-                "Another download for this model is still running. Reselect it once that finishes to load it.",
+            toast.info(translate("settings.general.rag.downloadBusy"), {
+              get description() {
+                return translate("uxChat.anotherDownloadForThis2d0p0");
+              },
             });
           }
           return;
@@ -3676,8 +3681,12 @@ export function ChatPage({
         // Notice-only: #9663 removed this surface's own toast, so it must not return on an HTTP start or
         // once the three notices are spent.
         callerToast: {
-          title: "Downloading model",
-          description: "It'll load automatically once the download finishes.",
+          get title() {
+            return translate("studio.progress.phase.downloadingModel");
+          },
+          get description() {
+            return translate("uxChat.itLlLoadAutomaticallyj3ms7");
+          },
           noticeOnly: true,
           // The cleanup below only reaches a toast that already exists; a raise still in flight would
           // promise an auto-load onComplete then refuses.
@@ -3693,16 +3702,18 @@ export function ChatPage({
       if (outcome === "conflict") {
         // Keep pendingHubAutoLoad bound so this surface's cleanup does not wipe the conflict requestStart
         // just recorded; resolving it from the Hub completes the download and onComplete auto-loads.
-        toast.info("Resume this download from Models", {
-          description:
-            "An earlier partial download used a different transport. Open the Model hub tab to resume or restart it.",
+        toast.info(translate("uxChat.resumeThisDownloadFrome7ixi"), {
+          get description() {
+            return translate("uxChat.anEarlierPartialDownload16bi3");
+          },
         });
         return;
       }
       if (outcome === "busy") {
-        toast.info("Download already in progress", {
-          description:
-            "Another download for this model is still running. Reselect it once that finishes to load it.",
+        toast.info(translate("settings.general.rag.downloadBusy"), {
+          get description() {
+            return translate("uxChat.anotherDownloadForThis2d0p0");
+          },
         });
       }
       setPendingHubAutoLoad((current) => (current === pending ? null : current));
@@ -3725,7 +3736,7 @@ export function ChatPage({
   const loadNativeModelIntent = useCallback(
     async (intent: NativeIntent, loadingDescription: string) => {
       const label =
-        intent.path.displayLabel || intent.displayLabel || "Local GGUF model";
+        intent.path.displayLabel || intent.displayLabel || translate("uxChat.localGGUFModelkz87b");
       await stageOrLoad({
         id: label,
         nativePathToken: intent.path.token,
@@ -3744,8 +3755,8 @@ export function ChatPage({
       loadNativeModelIntent(
         intent,
         hasActiveModel
-          ? "Replacing with dropped local GGUF model."
-          : "Loading dropped local GGUF model.",
+          ? translate("uxChat.replacingWithDroppedLocals2ysn")
+          : translate("uxChat.loadingDroppedLocalGGUFinsgf"),
       ),
     [hasActiveModel, loadNativeModelIntent],
   );
@@ -3782,7 +3793,7 @@ export function ChatPage({
     dropsUnsupportedReason:
       view.mode === "single"
         ? undefined
-        : "Dropped files need a single chat. Open one, then drop it there.",
+        : translate("uxChat.droppedFilesNeedA4eie8"),
     attachmentScope,
     attachmentTargetKey: artifactViewKey,
     nativePathLeasesSupported,
@@ -4047,9 +4058,10 @@ export function ChatPage({
         }
 
         if (showImageCompatibilityWarning) {
-          toast.warning("Selected model may not handle earlier images", {
-            description:
-              "This chat already includes images. Text-only models can ignore them or fail on follow-up replies.",
+          toast.warning(translate("uxChat.selectedModelMayNotcviug"), {
+            get description() {
+              return translate("uxChat.thisChatAlreadyIncludes1vbhp");
+            },
             duration: 6000,
           });
         }
@@ -4101,8 +4113,10 @@ export function ChatPage({
       // A file-picked GGUF is reachable only via its native path token, which the desktop host prunes
       // after a TTL. Reusing an expired token fails with an opaque error, so prompt to re-select.
       if (nativeToken && nativeExpiry != null && Date.now() >= nativeExpiry) {
-        toast.error("This local model file's access has expired.", {
-          description: "Re-select the model file to reload it.",
+        toast.error(translate("uxChat.thisLocalModelFile1dxu6"), {
+          get description() {
+            return translate("uxChat.reSelectTheModel1u1ui");
+          },
         });
         return;
       }
@@ -4219,7 +4233,7 @@ export function ChatPage({
         state.reasoningStyle === "reasoning_effort" ||
         state.reasoningStyle === "enable_thinking_effort";
       if (!state.supportsReasoning || !isEffort || levels.length === 0) {
-        toast.info("This model has no reasoning effort setting");
+        toast.info(translate("uxChat.thisModelHasNoeibvx"));
         return;
       }
       const current = levels.indexOf(state.reasoningEffort);
@@ -4274,7 +4288,7 @@ export function ChatPage({
       const state = useChatRuntimeStore.getState();
       const next = !state.params.fastMode;
       state.setParams({ ...state.params, fastMode: next });
-      toast.success(next ? "Fast mode on" : "Fast mode off");
+      toast.success(next ? translate("uxChat.fastModeOn5h8zg") : translate("uxChat.fastModeOffu5tuh"));
     },
     { enabled: active && fastModeSupported },
   );
@@ -4665,7 +4679,6 @@ export function ChatPage({
           so it must live at one stable root, or Compare mode's composers would each render a copy.
           It also portals to body, so gate it on `active`. */}
       {active && <BypassPermissionsConfirmDialog />}
-      {active && <RootSandboxSetupDialog />}
       {/* The MCP servers dialog: its chord has to work before MCP is switched on, and the pill that
           used to own it only renders once it is. Mounted through the route change so it can close
           itself on the way out. */}
@@ -4704,8 +4717,8 @@ export function ChatPage({
                 type="button"
                 variant="ghost"
                 size="icon-sm"
-                title="New chat"
-                aria-label="New chat"
+                title={translate("linkMenu.newChat")}
+                aria-label={translate("linkMenu.newChat")}
                 onClick={handleDesktopNewChat}
                 className="!size-[calc(30px*var(--ui-space-scale,1))] shrink-0 rounded-[10px] text-muted-foreground"
               >
@@ -4768,7 +4781,7 @@ export function ChatPage({
             )}
             {view.mode !== "compare" && currentProjectId && (
               <nav
-                aria-label="Project location"
+                aria-label={translate("uxChat.projectLocationryipl")}
                 className="flex h-[var(--studio-chat-control-height,34px)] min-w-0 items-center gap-1.5 self-center text-ui-13p5 tracking-nav text-muted-foreground"
               >
                 <ProjectSwitcher
@@ -4786,7 +4799,7 @@ export function ChatPage({
                       /
                     </span>
                     <span className="min-w-0 truncate">
-                      {currentChatTitle ?? "New chat"}
+                      {currentChatTitle ?? translate("uxChat.newChat6w7i5")}
                     </span>
                   </>
                 ) : null}
@@ -4799,7 +4812,7 @@ export function ChatPage({
                 onLoad={() =>
                   loadNativeModelIntent(
                     pendingNativeModelIntent,
-                    "Loading selected local GGUF model.",
+                    translate("uxChat.loadingSelectedLocalGGUFq0m12"),
                   )
                 }
               />
@@ -4808,17 +4821,17 @@ export function ChatPage({
               <ModelLoadInlineStatus
                 label={
                   loadProgress?.phase === "starting"
-                    ? "Starting model…"
+                    ? translate("uxChat.startingModel4qzzc")
                     : loadingModel.isDownloaded || loadingModel.isCachedLora
-                      ? "Loading model…"
-                      : "Downloading model…"
+                      ? translate("uxChat.loadingModel35rqs")
+                      : translate("uxChat.downloadingModelsw8tk")
                 }
                 title={
                   loadingModel.isDownloaded
-                    ? `Loading ${loadingModel.displayName} from cache.`
+                    ? translate("uxChat.loadingFromCache2rm2p", { p1: loadingModel.displayName })
                     : loadingModel.isCachedLora
-                      ? `Loading ${loadingModel.displayName} into memory.`
-                      : `Loading ${loadingModel.displayName}. This may include downloading.`
+                      ? translate("uxChat.loadingIntoMemorybsfgb", { p1: loadingModel.displayName })
+                      : translate("uxChat.loadingThisMayIncludedejw3", { p1: loadingModel.displayName })
                 }
                 progressPercent={loadProgress?.percent}
                 progressLabel={loadProgress?.label}
@@ -4894,7 +4907,7 @@ export function ChatPage({
                       openResearchPanel(latestResearchRunId);
                     }}
                     className="relative flex size-[calc(30px*var(--ui-space-scale,1))] cursor-pointer items-center justify-center rounded-[10px] text-nav-fg transition-colors hover:bg-nav-surface-hover hover:text-[#061d21] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:hover:text-[#f9e2de]"
-                    aria-label="Open research activity"
+                    aria-label={translate("uxChat.openResearchActivity14rsg")}
                     aria-pressed={openResearchRunId === latestResearchRunId}
                   >
                     <HugeiconsIcon
@@ -4908,7 +4921,7 @@ export function ChatPage({
                   </button>
                 </TooltipPrimitive.Trigger>
                 <TooltipContent side="bottom" sideOffset={6} className="tooltip-compact">
-                  Research activity
+                  {translate("uxChat.researchActivitytal2m")}
                 </TooltipContent>
               </Tooltip>
             ) : null}
@@ -4922,7 +4935,7 @@ export function ChatPage({
                       setSettingsOpen(true);
                     }}
                     className="flex size-[calc(30px*var(--ui-space-scale,1))] cursor-pointer items-center justify-center rounded-[10px] text-nav-fg transition-colors hover:bg-nav-surface-hover hover:text-[#061d21] dark:hover:text-[#f9e2de] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                    aria-label="Open run settings"
+                    aria-label={translate("shell.aria.openRunSettings")}
                   >
                     <HugeiconsIcon
                       icon={LayoutAlignRightIcon}
@@ -4936,7 +4949,7 @@ export function ChatPage({
                   sideOffset={6}
                   className="tooltip-compact"
                 >
-                  Open run settings
+                  {translate("shell.aria.openRunSettings")}
                 </TooltipContent>
               </Tooltip>
             )}

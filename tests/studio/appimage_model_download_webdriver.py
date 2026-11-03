@@ -29,7 +29,7 @@ from appimage_test_support import (
 )
 
 
-REPO_ID = "LAiM/FLUX.2-klein-4B-GGUF"
+REPO_ID = "unsloth/FLUX.2-klein-4B-GGUF"
 FILENAME = "FLUX.2-klein-4B-Q4_K_M.gguf"
 MODEL_BYTES = 1_048_576
 REPO_ROOT = Path(__file__).resolve().parents[2]

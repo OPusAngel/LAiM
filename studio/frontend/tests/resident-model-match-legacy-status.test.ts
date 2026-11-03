@@ -23,7 +23,7 @@ const { residentModelMatchesPick } = await import(
   "../src/features/chat/lib/resident-model-match.ts"
 );
 
-const REPO = "LAiM/Qwen3-0.6B-GGUF";
+const REPO = "unsloth/Qwen3-0.6B-GGUF";
 const Q = "Q4_K_M";
 const RESIDENT_SHA = "50968a4468ef4233ed78cd7c3de230dd1d61a56b";
 const NEWER_SHA = "d7f544eead698dbd1f15126ef60b45a1e1933222";
@@ -151,7 +151,7 @@ test("a models-- dir that is not the cache layout is not treated as a snapshot",
   // to be wrong about and the public-id arm still applies.
   assert.equal(
     residentModelMatchesPick(
-      { active_model: "LAiM/Qwen3-0.6B-GGUF", gguf_variant: Q },
+      { active_model: "unsloth/Qwen3-0.6B-GGUF", gguf_variant: Q },
       {
         id: "/hf/hub/models--LAiM--Qwen3-0.6B-GGUF/blobs/abc",
         ggufVariant: Q,

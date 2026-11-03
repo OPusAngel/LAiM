@@ -30,7 +30,7 @@ import {
 } from "@/features/training";
 import { NOTIFICATION_PREF_KEYS } from "@/hooks/use-notification-frequency";
 import { useHfTokenValidation } from "@/hooks";
-import { LOCALE_STORAGE_KEY, useT } from "@/i18n";
+import { translate, LOCALE_STORAGE_KEY, useT } from "@/i18n";
 import { isTauri } from "@/lib/api-base";
 import {
   SPELLCHECK_STORAGE_KEY,
@@ -124,7 +124,6 @@ const PREFS_KEYS: string[] = [
   CHAT_PROJECT_ATTACHMENT_TARGET_KEY,
   "LAiM_chat_auto_title",
   "LAiM_chat_permission_mode",
-  "LAiM_chat_sandbox_level",
   // Legacy confirm key: loadPermissionMode falls back to it, so clear both or a reset restores it.
   "LAiM_chat_confirm_tool_calls",
   "LAiM_hf_token",
@@ -527,7 +526,7 @@ export function GeneralTab() {
                 name="hf-token"
                 autoComplete="new-password"
                 spellCheck={false}
-                placeholder="hf_…"
+                placeholder={translate("uxSettings.hf118zp")}
                 value={draftToken}
                 onChange={(e) => {
                   const value = e.target.value;

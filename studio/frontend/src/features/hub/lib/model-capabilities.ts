@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { EMBEDDING_TAGS } from "./hf-model-meta";
 
 export type CapabilityKey =
@@ -261,7 +262,7 @@ export function detectCapabilities(
       lowerId,
     )
   ) {
-    out.push({ key: "vision", label: "Vision" });
+    out.push({ key: "vision", label: translate("uxModelpicker.visionvap9v") });
   }
   if (
     hasAny(AUDIO_TAGS) ||
@@ -269,10 +270,10 @@ export function detectCapabilities(
       lowerId,
     )
   ) {
-    out.push({ key: "audio", label: "Audio" });
+    out.push({ key: "audio", label: translate("shell.navigation.audio") });
   }
   if (hasAny(TOOL_TAGS) || /tool[-_]use|function[-_]call/.test(lowerId)) {
-    out.push({ key: "tools", label: "Tool use" });
+    out.push({ key: "tools", label: translate("uxHub.toolUsexc05t") });
   }
   if (
     hasAny(REASONING_TAGS) ||
@@ -280,7 +281,7 @@ export function detectCapabilities(
       lowerId,
     )
   ) {
-    out.push({ key: "reasoning", label: "Reasoning" });
+    out.push({ key: "reasoning", label: translate("uxModelpicker.reasoning13g72") });
   }
   if (
     hasAny(CODE_TAGS) ||
@@ -288,10 +289,10 @@ export function detectCapabilities(
       lowerId,
     )
   ) {
-    out.push({ key: "code", label: "Code" });
+    out.push({ key: "code", label: translate("library.preview.code") });
   }
   if (hasAny(CONVERSATIONAL_TAGS) || CONVERSATIONAL_ID_RE.test(lowerId)) {
-    out.push({ key: "conversational", label: "Conversational" });
+    out.push({ key: "conversational", label: translate("uxHub.conversational1rkre") });
   }
   if (
     hasAny(EMBEDDING_TAGS) ||
@@ -299,7 +300,7 @@ export function detectCapabilities(
       lowerId,
     )
   ) {
-    out.push({ key: "embedding", label: "Embeddings" });
+    out.push({ key: "embedding", label: translate("uxHub.embeddingsfqh6b") });
   }
   const imageGenName =
     /stable[-_]?diffusion|\bsdxl\b|\bflux\b|qwen[-_]?image|hunyuan[-_]?(?:video|image)|(?:^|[-_/.])wan2|latent[-_]?consistency|[-_]lcm\b|dreamshaper/.test(
@@ -318,7 +319,7 @@ export function detectCapabilities(
   if ((imageGenTagged || imageGenName) && (kinds.image || kinds.video)) {
     out.push({
       key: "diffusion",
-      label: kinds.video ? "Video gen" : "Image gen",
+      label: kinds.video ? translate("uxHub.videoGenwopx5") : translate("uxHub.imageGen5lwsp"),
     });
   }
   const languageCodes = new Set<string>();
@@ -330,7 +331,7 @@ export function detectCapabilities(
     if (COMMON_LANGUAGE_TAGS.has(code)) languageCodes.add(code);
   }
   if (tagSet.has("multilingual") || languageCodes.size >= 3) {
-    out.push({ key: "multilingual", label: "Multilingual" });
+    out.push({ key: "multilingual", label: translate("settings.apiKeys.decisionApi.modelMultilingual") });
   }
   return out;
 }

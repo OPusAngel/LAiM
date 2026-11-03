@@ -3,6 +3,7 @@
 
 // JSX-free so the node test runner can load it; edit-panels.tsx adds the Components.
 
+import { translate } from "@/i18n";
 import {
   DELIVERY_NEEDS_FIRERED,
   EDIT_ADAPTERS,
@@ -20,7 +21,7 @@ function editPanelLogic(adapter: EditAdapter): EditPanelLogic {
     id: `edit-${family}`,
     families: [family],
     workflows: ["edit"],
-    title: "How edits apply",
+    title: translate("uxAudio.howEditsApply31dec"),
     claims: adapter.claims,
     adapter,
     // DotTTS-MF is dots_tts too but cannot edit.

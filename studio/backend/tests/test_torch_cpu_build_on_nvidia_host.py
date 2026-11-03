@@ -2120,7 +2120,7 @@ def _hardware_source() -> str:
 
 
 def test_the_hardware_module_loads_without_the_rest_of_the_package(tmp_path):
-    """tests/python/test_e2e_no_torch_sandbox.py executes this module on its own.
+    """tests/python/test_e2e_no_torch_workdir.py executes this module on its own.
 
     It builds a minimal stub tree -- loggers, structlog, utils/hardware -- and nothing
     else, so a top-level import of anything further inside utils makes the module
@@ -2137,7 +2137,7 @@ def test_the_hardware_module_loads_without_the_rest_of_the_package(tmp_path):
         if module == "utils.hardware" or module.startswith("utils.hardware."):
             continue
         assert not module.startswith("utils"), (
-            f"{module} is imported at module scope; the no-torch sandbox stubs only "
+            f"{module} is imported at module scope; the no-torch workdir stubs only "
             "utils.hardware, so import it inside the function that needs it"
         )
 
@@ -2474,7 +2474,7 @@ def test_the_ranking_callers_still_see_an_empty_map(monkeypatch):
         ("AMD Radeon 780M Graphics", True),
         # Polaris: no wheel family, CPU torch on purpose.
         ("AMD Radeon RX 580", False),
-        # RDNA 1: routed on Windows through AMD's multi-arch index (LAiMai/LAiM#11755).
+        # RDNA 1: routed on Windows through AMD's multi-arch index (OPusAngel/LAiM#11755).
         ("AMD Radeon RX 5700 XT", True),
         ("", False),
     ],

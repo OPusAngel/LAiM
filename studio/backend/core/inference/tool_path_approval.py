@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
-"""Approval decisions for file access that leaves the session sandbox.
+"""Approval decisions for file access that leaves the session workdir.
 
 Split out of ``tools.py`` because it is a subsystem rather than a handful of helpers: the read and
 write silent roots, the shared ``_path_needs_approval`` predicate, and the two operand scanners that
@@ -33,13 +33,13 @@ _BORROWED = (
     "_MAX_PATH_SCAN_CHARS",
     "_PATH_CTORS",
     "_REDIR_PREFIX_RE",
-    "_SANDBOX_SITE_DIR",
+    "_TOOL_SITE_DIR",
     "_WIN_DRIVE_RE",
     "_WRAPPER_VALUE_FLAGS_BY_CMD",
     "_folded_path",
     "_glob_token_sensitive",
     "_has_kwarg_splat",
-    "_legacy_sandbox_root",
+    "_legacy_workdir_root",
     "_mode_arg_writes",
     "_parse_python",
     "_posix_join",
@@ -47,7 +47,7 @@ _BORROWED = (
     "_token_command_base",
     "_tree_nodes",
     "current_account_id",
-    "sandbox_root",
+    "session_workdir_root",
 )
 
 
@@ -79,8 +79,8 @@ def _bind(namespace) -> None:
 
 
 # The tool child runs unconfined for the installation owner (account_confinement returns None there), so the session
-# sandbox is a working DIRECTORY, not a boundary: an absolute path in a tool call reaches the real filesystem with the
-# user's own permissions. A RELATIVE path resolves inside that workdir, so it stays silent and ordinary in-sandbox work
+# workdir is a working DIRECTORY, not a boundary: an absolute path in a tool call reaches the real filesystem with the
+# user's own permissions. A RELATIVE path resolves inside that workdir, so it stays silent and ordinary in-workdir work
 # is untouched; an absolute path outside the roots below is the host's own data, and auto mode asks before it is read
 # or written.
 _SYSTEM_READ_SILENT_ROOTS = (
@@ -218,12 +218,12 @@ def _build_silent_roots() -> "tuple[tuple[str, ...], tuple[str, ...]]":
 
     # Only the OUTPUT subdirectories are silent, never the studio home itself. studio_root() holds studio.db (chat
     # history, provider and MCP configuration) and auth/ alongside them, and in the default layout
-    # shared_sandbox_root() resolves to that same directory, so granting either one would hand a tool everything
+    # shared_workdir_root() resolves to that same directory, so granting either one would hand a tool everything
     # Studio owns -- which is the opposite of what this gate is for.
     write_roots = _silent_root_list(
         (
-            sandbox_root,
-            _legacy_sandbox_root,
+            session_workdir_root,
+            _legacy_workdir_root,
             tmp_root,
             # Not the SHARED bases: `shared_project_workspaces_root()` is the ancestor of every
             # account's `Accounts/<id>/Projects`, and `shared_tmp_root()` of every account's tmp,
@@ -238,7 +238,7 @@ def _build_silent_roots() -> "tuple[tuple[str, ...], tuple[str, ...]]":
         )
     )
     # Several of those producers fall back to the studio home when their own subdirectory is not configured
-    # (tmp_root and shared_sandbox_root both do in the default layout), and one such fallback silently grants
+    # (tmp_root and shared_workdir_root both do in the default layout), and one such fallback silently grants
     # everything Studio owns. Drop any root that IS the studio home or an ancestor of it; the narrow
     # subdirectories under it are kept, so this cannot be defeated by adding another producer later.
     write_roots = _excluding_ancestors_of_studio_home(write_roots)
@@ -254,7 +254,7 @@ def _build_silent_roots() -> "tuple[tuple[str, ...], tuple[str, ...]]":
                     getattr(sys, "base_exec_prefix", ""),
                     os.path.dirname(sys.executable),
                     os.environ.get("VIRTUAL_ENV", ""),
-                    _SANDBOX_SITE_DIR,
+                    _TOOL_SITE_DIR,
                 ),
                 # Model folders the user registered with Studio, plus the well-known LM Studio / Ollama locations. These
                 # hold weights, not documents, and reading them is the point of the app.
@@ -374,7 +374,7 @@ _SILENT_ROOT_ENV_KEYS = (
     "LAiM_STUDIO_PROJECTS_HOME",
     "LAiM_STUDIO_DOCUMENTS_HOME",
     "OLLAMA_MODELS",
-    "LAiM_STUDIO_SANDBOX_HOME",
+    "LAiM_STUDIO_WORKDIR_HOME",
     "HF_HOME",
     "HF_HUB_CACHE",
     "HUGGINGFACE_HUB_CACHE",
@@ -419,12 +419,12 @@ def _looks_absolute(text: str) -> bool:
         uri_path = _file_uri_path(text)
         return bool(uri_path) and _looks_absolute(uri_path)
     if text[0] == "~":
-        # A PLAIN `~` is the sandbox: `_build_safe_env` and `_build_bypass_env` both set the child's
+        # A PLAIN `~` is the workdir: `_build_safe_env` and `_build_bypass_env` both set the child's
         # HOME to the tool workdir, so the shell and `expanduser` alike resolve `~/notes.txt` to a
         # file inside the session. `~alice` still names a host account, so it stays absolute.
         return not (len(text) == 1 or text[1] in "/\\")
     # A single leading backslash is root-relative on Windows (it resolves from the current drive's root), not a
-    # sandbox-relative name, so it counts alongside the UNC `\\server\share` form.
+    # workdir-relative name, so it counts alongside the UNC `\\server\share` form.
     if text[0] == "\\":
         return True
     # `C:notes.txt` is DRIVE-relative: it resolves against drive C's own current directory, which is
@@ -497,7 +497,7 @@ def _names_a_managed_account_subtree(candidate: str) -> bool:
 
 
 def _path_needs_approval(text, *, writing: bool = False) -> bool:
-    """True when reading (or, with ``writing``, creating/overwriting) this path leaves the sandbox
+    """True when reading (or, with ``writing``, creating/overwriting) this path leaves the workdir
     for the user's own filesystem.
 
     Order matters: the credential checks run first, so the allowlist below can never turn
@@ -560,9 +560,9 @@ def _path_needs_approval(text, *, writing: bool = False) -> bool:
     # outside it, and the lexical answer would have allowed the read. Resolved only here, where the
     # answer would otherwise be silence, so the stat is paid on the paths that are about to be
     # allowed rather than on every token. A link planted between this and the open is not covered;
-    # that TOCTOU gap is the OS sandbox's to close.
+    # that TOCTOU gap is the operating system's to close.
     resolved = _resolved_fs_text(candidate)
-    # Against the RESOLVED roots as well: a root that is itself a symlink (a sandbox under a
+    # Against the RESOLVED roots as well: a root that is itself a symlink (a workdir under a
     # macOS `/tmp`, `/dev/stdout`) would otherwise reject everything under it.
     if resolved != candidate and not _contained_in(resolved, roots):
         if not _contained_in(resolved, tuple(_resolved_fs_text(r) for r in roots)):
@@ -636,7 +636,7 @@ def _credential_under_silent_root(candidate: str) -> bool:
 # `help test`: "unary expressions ... are often used to examine the status of a file", and
 # the answer is existence, type, ownership and timestamps of whatever they are given.
 # Changing directory to an absolute path re-points every RELATIVE operand that follows it, which is how the
-# rest of this scan decides a command stays in the sandbox. `cd /usr/lib && ls` still stays silent.
+# rest of this scan decides a command stays in the workdir. `cd /usr/lib && ls` still stays silent.
 _PATH_READ_COMMANDS = frozenset(
     """
     cat zcat bzcat xzcat lzcat lz4cat zstdcat iconv test [ [[ tac head tail less more wc stat
@@ -689,7 +689,7 @@ _PATH_DEST_FIRST_COMMANDS = frozenset({"zip"})
 
 
 # Commands whose SOURCE operand is checked as a write. `mv --help`: "Rename SOURCE to DEST", so the
-# source is gone afterwards. `ln` does not remove its target, but it hands the sandbox a name that
+# source is gone afterwards. `ln` does not remove its target, but it hands the workdir a name that
 # WRITES to it: after `ln -s /scan/model.gguf local`, an ordinary relative write through `local`
 # lands outside. `cp` and `rsync` read theirs and leave them alone.
 _PATH_SOURCE_MUTATING_COMMANDS = frozenset({"mv", "ln"})
@@ -1001,7 +1001,7 @@ _PATH_FLAG_SPECS = {
         "--unified": "skip",
     },
     # `git -C <path>` runs the whole command in that directory, so `git -C /media/private-repo show
-    # HEAD:secret.txt` prints a file outside the sandbox with nothing in an operand position to show
+    # HEAD:secret.txt` prints a file outside the workdir with nothing in an operand position to show
     # for it. `git -h` gives the form as `git [-C <path>] [--git-dir=<path>] ... <command>`.
     "git": {
         "-C": "read",
@@ -1014,7 +1014,7 @@ _PATH_FLAG_SPECS = {
         "--output": "write",
         "-o": "write",
         # `git clone -h`: `--[no-]separate-git-dir <gitdir>` puts the repository metadata there,
-        # which is a write outside the sandbox while every remaining operand stays relative.
+        # which is a write outside the workdir while every remaining operand stays relative.
         "--separate-git-dir": "write",
         "-c": "skip",
         "--exec-path": "skip",
@@ -1032,7 +1032,7 @@ _PATH_FLAG_SPECS = {
         "--output": "write",
         # `--output-dir <dir>` is where `-O` puts what it downloads (`curl --help all`), and `-O`
         # itself contributes no operand, so without this an ordinary download wrote outside the
-        # sandbox with nothing in the command for the gate to look at.
+        # workdir with nothing in the command for the gate to look at.
         "--output-dir": "write",
         "-O": "skip",
         "-d": "skip",
@@ -1086,7 +1086,7 @@ _PATH_FLAG_SPECS = {
         "-f": "read",
         "--from-file": "read",
         # `jq --help`: `-L directory` searches modules there, so the filter can `include` a file
-        # from outside the sandbox without naming it.
+        # from outside the workdir without naming it.
         "-L": "read",
         "--library-path": "read",
         "--arg": "skip",
@@ -1305,7 +1305,7 @@ def _terminal_path_operands(tokens, text = None) -> "list[tuple[str, bool]]":
     # the pass above. Not instead of: `cat `echo /media/x`` puts the path in the outer command's
     # operand position too, and replacing the tokens dropped exactly that reading.
     # A `cd` to an absolute directory moves where every RELATIVE path after it lands, and those are
-    # the paths this scan deliberately treats as sandbox-local. Rather than tracking a working
+    # the paths this scan deliberately treats as workdir-local. Rather than tracking a working
     # directory (which the classifier has no state for), the destination is charged as a write when
     # anything after it writes: `cd /models && touch weights.gguf` then asks, while `cd /models &&
     # ls` does not.
@@ -1567,7 +1567,7 @@ def _segment_path_operands(segment) -> "list[tuple[str, bool]]":
     if command.endswith(".exe"):
         command = command[: -len(".exe")]
     args = segment[index + 1 :]
-    # `/media/alice/tool --flag` RUNS a file outside the sandbox, which reads it before anything the
+    # `/media/alice/tool --flag` RUNS a file outside the workdir, which reads it before anything the
     # rest of this scan looks at. Taking the basename dropped the only spelling of that path, so the
     # command word is reported as a read of its own before it is reduced to a name.
     # A path ending in a separator names a DIRECTORY and can never be the binary, which is what
@@ -2030,7 +2030,7 @@ def _add_flag_operand(operands, kind, value: str, write_cmd: bool, creating: boo
     operands.append((value, writing))
 
 
-def _terminal_reaches_outside_sandbox(tokens, text: "str | None" = None) -> bool:
+def _terminal_reaches_outside_workdir(tokens, text: "str | None" = None) -> bool:
     """True when a command list reads or writes an absolute path outside the silent roots.
 
     *text*, when given, is the command the tokens came from. A POSIX lexer treats a backslash as an
@@ -2115,7 +2115,7 @@ _PY_INSTANCE_READ_CTORS = {
 # `io.open_code(path)` opens that file in binary mode (it is what the interpreter itself
 # uses to read source), so it reads a path exactly as `open` does.
 # The stat family alongside the `os.path.get*` helpers that wrap it: they answer existence,
-# size, ownership and timestamps for a path outside the sandbox.
+# size, ownership and timestamps for a path outside the workdir.
 # The predicate family answers existence and type for a path, which is the same disclosure
 # `test -e` and `os.stat` make.
 # os.chdir re-points every relative path that follows, the same way `cd` does in the shell.
@@ -2246,7 +2246,7 @@ _PY_PATH_SUBPROCESS_CALLS = frozenset(
 _PY_PATH_MOVE_CALLS = frozenset({"move", "rename", "renames", "replace"})
 
 
-# `os.symlink(target, name)` does not remove its target, but it hands the sandbox a name that WRITES
+# `os.symlink(target, name)` does not remove its target, but it hands the workdir a name that WRITES
 # to it, so the target is checked as a write for the same reason the terminal `ln` source is. The
 # call itself creates the escape, which is what separates it from the pre-existing-symlink residual.
 _PY_PATH_LINK_CALLS = frozenset({"link", "symlink"})
@@ -2390,7 +2390,7 @@ def _python_function_aliases(tree, module_aliases: "dict | None" = None) -> dict
             # outright let it through. The first modelled binding is kept, and a later one is
             # ignored rather than replacing it, which is the fail-closed reading of an order this
             # whole-tree pass does not track. Nothing is gated by the binding alone: the name has to
-            # be CALLED with a path outside the sandbox before it reaches an approval.
+            # be CALLED with a path outside the workdir before it reaches an approval.
             if target.id in seen_twice:
                 # A first binding that was not itself modelled leaves room for a later one.
                 if real and real != target.id:
@@ -2734,7 +2734,7 @@ def _python_path_bindings(
                 continue
             # A name this value is DERIVED from may itself have held other paths, and folding with
             # the primary binding alone loses them: `base = 'local'; base = '/media/x'; p = base +
-            # '/f'` folded p to `local/f` only, so the out-of-sandbox read through p was invisible.
+            # '/f'` folded p to `local/f` only, so the outside the workdir read through p was invisible.
             # One alternate is substituted at a time rather than the full cartesian product, which
             # keeps this linear in the number of rebindings.
             derived: "list[str]" = []
@@ -2791,12 +2791,12 @@ def _capped_alternates(values) -> "list[str]":
         return values
 
     # Ranked by what the value would COST, not by whether it happens to be absolute: a path under a
-    # silent root needs no approval, so filling the cap with sandbox rebindings would drop the one
+    # silent root needs no approval, so filling the cap with workdir rebindings would drop the one
     # `/media/...` value that does. Ordering by need keeps the bound on work, not coverage.
     # The cap is spent here, before the access mode is known, so BOTH modes have to be represented
     # or one of them starves. The write-silent roots are a subset of the read-silent ones, which
     # gives a total order: a value gated for reading is gated for writing too, a value like
-    # `/usr/share` is gated only for writing, and a sandbox path is gated for neither. Ranking on
+    # `/usr/share` is gated only for writing, and a workdir path is gated for neither. Ranking on
     # read alone dropped `/usr/share` and let the `open(p, "w")` that followed overwrite it in
     # silence; ranking on "either mode" let nine `/usr/...` rebindings crowd out the one `/media/...`
     # value. Ordering by strength keeps both.
@@ -3235,7 +3235,7 @@ def _python_path_operands(tree) -> "list[tuple[str, bool]]":
             add(given, not _sqlite_opens_read_only(node, given))
         elif name in _PY_TEMPFILE_CALLS:
             # `tempfile.mkstemp(dir = "/media/x")` CREATES its file in that directory; without the
-            # keyword it lands in the sandbox's own TMPDIR, which is silent.
+            # keyword it lands in the workdir's own TMPDIR, which is silent.
             add(next((kw.value for kw in _call_keywords(node) if kw.arg == "dir"), None), True)
         elif name in _PY_PATH_OPENING_CTORS:
             # The mode applies to the keyword spelling of the path too (`h5py.File(name = ...,
@@ -3275,7 +3275,7 @@ def _python_path_operands(tree) -> "list[tuple[str, bool]]":
     return operands
 
 
-def _python_reaches_outside_sandbox(tree, code = None) -> bool:
+def _python_reaches_outside_workdir(tree, code = None) -> bool:
     """True when python code reads or writes an absolute path outside the silent roots."""
     # No separator, tilde or drive colon anywhere in the source means no absolute path can be spelled in it, so the
     # two AST walks below are pure cost. Ordinary numeric / dataframe work takes this exit.

@@ -3,6 +3,8 @@
 
 import { authFetch } from "@/features/auth";
 import { readFastApiError } from "@/lib/format-fastapi-error";
+import { translate } from "@/i18n";
+
 
 export type InferenceEngine = "auto" | "vllm" | "sglang";
 export interface EngineStatus {
@@ -94,7 +96,7 @@ export async function listEngines(): Promise<EngineStatus[]> {
   const response = await authFetch("/api/engines");
   if (!response.ok) {
     throw new Error(
-      await readFastApiError(response, "Could not read inference engines"),
+      await readFastApiError(response, translate("uxModelpicker.couldNotReadInferencemxzxv")),
     );
   }
   return response.json();
@@ -112,7 +114,7 @@ export async function changeEngine(
   );
   if (!response.ok) {
     throw new Error(
-      await readFastApiError(response, "Could not change inference engine"),
+      await readFastApiError(response, translate("uxModelpicker.couldNotChangeInference6e5ag")),
     );
   }
   window.dispatchEvent(new Event("studio-engines-changed"));

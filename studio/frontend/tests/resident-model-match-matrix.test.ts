@@ -36,8 +36,8 @@ type Row = {
   resident: boolean;
 };
 
-const REPO = "LAiM/Qwen3-0.6B-GGUF";
-const OTHER = "LAiM/gemma-4-12b-GGUF";
+const REPO = "unsloth/Qwen3-0.6B-GGUF";
+const OTHER = "unsloth/gemma-4-12b-GGUF";
 const Q = "Q4_K_M";
 
 // One snapshot of one repo, spelled the way each host spells it.
@@ -229,18 +229,18 @@ ROWS.push({
   host: "linux",
   what: "a safetensors repo is resident under its own id",
   status: {
-    active_model: "LAiM/Qwen3-0.6B",
-    model_identifier: "LAiM/Qwen3-0.6B",
+    active_model: "unsloth/Qwen3-0.6B",
+    model_identifier: "unsloth/Qwen3-0.6B",
   },
-  pick: { id: "LAiM/Qwen3-0.6B" },
+  pick: { id: "unsloth/Qwen3-0.6B" },
   resident: true,
 });
 ROWS.push({
   host: "linux",
   what: "a LoRA adapter is not its base model",
   status: {
-    active_model: "LAiM/Qwen3-0.6B",
-    model_identifier: "LAiM/Qwen3-0.6B",
+    active_model: "unsloth/Qwen3-0.6B",
+    model_identifier: "unsloth/Qwen3-0.6B",
   },
   pick: { id: "dev/my-qwen3-lora" },
   resident: false,
@@ -329,7 +329,7 @@ ROWS.push({
     model_identifier: null,
     gguf_variant: Q,
   },
-  pick: { id: "LAiM/Qwen3-0.6B-Q4_K_M.gguf" },
+  pick: { id: "unsloth/Qwen3-0.6B-Q4_K_M.gguf" },
   resident: false,
 });
 

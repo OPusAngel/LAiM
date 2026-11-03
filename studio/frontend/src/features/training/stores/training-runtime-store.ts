@@ -16,6 +16,8 @@ import type {
   TrainingSeriesPoint,
   TrainingStatusResponse,
 } from "../types/runtime";
+import { translate } from "@/i18n";
+
 
 const ACTIVE_TRAINING_PHASES = new Set<TrainingPhase>([
   "downloading_model",
@@ -55,7 +57,7 @@ const initialState: TrainingRuntimeState = {
   phase: "idle",
   isTrainingRunning: false,
   evalEnabled: false,
-  message: "Ready to train",
+  get message() { return translate("uxFeatures.readyToTrainpvc5g"); },
   error: null,
   warnings: [],
   isHydrating: false,

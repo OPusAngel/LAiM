@@ -47,7 +47,7 @@ test("cache-aware plans with only checkpoints do not request an asset download",
 test("encoder configuration does not mislabel a decoder asset group", () => {
   assert.equal(
     assetLabel({
-      repoId: "LAiM/Qwen-Image-2.1",
+      repoId: "unsloth/Qwen-Image-2.1",
       bytes: 1.4e9,
       files: [
         "text_encoder/config.json",
@@ -60,7 +60,7 @@ test("encoder configuration does not mislabel a decoder asset group", () => {
   );
   assert.equal(
     assetLabel({
-      repoId: "LAiM/Qwen-Image-2.1-FP8",
+      repoId: "unsloth/Qwen-Image-2.1-FP8",
       bytes: 9.4e9,
       files: ["Qwen-Image-2.1-text_encoder-FP8.safetensors"],
     }),

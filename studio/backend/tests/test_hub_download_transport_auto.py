@@ -407,14 +407,14 @@ def test_optional_loader_retries_with_gpu_init_disabled(monkeypatch):
     sentinel = _types.ModuleType("fake_zoo_module")
 
     def _fake_import(name):
-        seen = os.environ.get("LAiM_ZOO_DISABLE_GPU_INIT")
+        seen = os.environ.get("UNSLOTH_ZOO_DISABLE_GPU_INIT")
         attempts.append(seen)
         if seen != "1":
             raise NotImplementedError("LAiM cannot find any torch accelerator? You need a GPU.")
         return sentinel
 
     monkeypatch.setattr(importlib, "import_module", _fake_import)
-    monkeypatch.delenv("LAiM_ZOO_DISABLE_GPU_INIT", raising = False)
+    monkeypatch.delenv("UNSLOTH_ZOO_DISABLE_GPU_INIT", raising = False)
     monkeypatch.setattr(shim, "_gpu_present", lambda: False)
     monkeypatch.setattr(shim, "_import_light", lambda name: None)
 
@@ -422,7 +422,7 @@ def test_optional_loader_retries_with_gpu_init_disabled(monkeypatch):
     assert attempts == [None, "1"]
     # The flag is scoped to the retry: it must not leak into unrelated later imports.
 
-    assert "LAiM_ZOO_DISABLE_GPU_INIT" not in os.environ
+    assert "UNSLOTH_ZOO_DISABLE_GPU_INIT" not in os.environ
 
 
 def test_optional_loader_returns_none_when_truly_absent(monkeypatch):
@@ -498,7 +498,7 @@ def test_download_start_probe_loads_health_after_cached_browse(monkeypatch):
 
 def test_gpu_init_override_is_serialized(monkeypatch):
     """The optional-module retry must not leak the process-wide GPU-init override: a leaked
-    LAiM_ZOO_DISABLE_GPU_INIT=1 is inherited by every spawned worker for the life of the process.
+    UNSLOTH_ZOO_DISABLE_GPU_INIT=1 is inherited by every spawned worker for the life of the process.
 
     Scope: this races the loader against itself. The cross-loader interleave with _load_shared is
     not reproducible by thread timing, and is established by construction instead (both take the
@@ -506,7 +506,7 @@ def test_gpu_init_override_is_serialized(monkeypatch):
     """
     import threading
 
-    monkeypatch.delenv("LAiM_ZOO_DISABLE_GPU_INIT", raising = False)
+    monkeypatch.delenv("UNSLOTH_ZOO_DISABLE_GPU_INIT", raising = False)
 
     def _always_fail(name):
         time.sleep(0.005)  # widen the window the lock has to close
@@ -524,7 +524,7 @@ def test_gpu_init_override_is_serialized(monkeypatch):
     for thread in threads:
         thread.join()
 
-    assert "LAiM_ZOO_DISABLE_GPU_INIT" not in os.environ
+    assert "UNSLOTH_ZOO_DISABLE_GPU_INIT" not in os.environ
 
 
 def test_both_loaders_share_one_env_lock():
@@ -533,7 +533,7 @@ def test_both_loaders_share_one_env_lock():
     import inspect
     for fn in (shim._load_shared, shim._load_optional):
         source = inspect.getsource(fn)
-        assert "LAiM_ZOO_DISABLE_GPU_INIT" in source
+        assert "UNSLOTH_ZOO_DISABLE_GPU_INIT" in source
         assert (
             "with _load_lock:" in source
         ), f"{fn.__name__} mutates the GPU-init override outside the shared _load_lock"

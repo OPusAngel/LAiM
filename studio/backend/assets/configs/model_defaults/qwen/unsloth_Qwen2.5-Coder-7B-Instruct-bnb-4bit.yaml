@@ -1,6 +1,6 @@
-# Model defaults for LAiM/Qwen2.5-Coder-7B-Instruct-bnb-4bit
+# Model defaults for unsloth/Qwen2.5-Coder-7B-Instruct-bnb-4bit
 # Based on CodeForces-cot-Finetune_for_Reasoning_on_CodeForces.ipynb
-# Also applies to: LAiM/Qwen2.5-Coder-7B-Instruct, Qwen/Qwen2.5-Coder-7B-Instruct
+# Also applies to: unsloth/Qwen2.5-Coder-7B-Instruct, Qwen/Qwen2.5-Coder-7B-Instruct
 
 training:
   max_seq_length: 32768
@@ -16,7 +16,7 @@ training:
   random_seed: 3407
   packing: false
   train_on_completions: true
-  gradient_checkpointing: "LAiM"
+  gradient_checkpointing: "unsloth"
   optim: "adamw_8bit"
   lr_scheduler_type: "linear"
 

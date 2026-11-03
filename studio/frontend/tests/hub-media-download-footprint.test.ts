@@ -14,7 +14,7 @@ installLocalStorageFake();
 
 const GGUF_BYTES = 5_390_223_072;
 const COMPANION_BYTES = 18_900_000_000;
-const GGUF_REPO = "LAiM/Qwen-Image-2.1-GGUF";
+const GGUF_REPO = "unsloth/Qwen-Image-2.1-GGUF";
 
 let planBody: Record<string, unknown> = {};
 const requests: { url: string; body: Record<string, unknown> }[] = [];

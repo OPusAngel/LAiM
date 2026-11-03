@@ -18,6 +18,8 @@ import {
   type ExportStatus,
 } from "../api/export-api";
 import type { ExportMethod } from "../constants";
+import { translate } from "@/i18n";
+
 
 // Here, not in export-api: tests swap that module for a stub of its request functions.
 function exportDrafterFrom(
@@ -34,7 +36,7 @@ function exportDrafterFrom(
 /** Thrown by status recovery when the backend reports the op was cancelled. */
 class ExportCanceledError extends Error {
   constructor() {
-    super("Export canceled");
+    super(translate("uxExport.exportCanceledbv22b"));
     this.name = "ExportCanceledError";
   }
 }
@@ -64,7 +66,7 @@ async function recoverViaStatus(
   let sawActive = false;
 
   while (Date.now() - start < RECOVERY_MAX_MS) {
-    if (!isCurrent()) throw new Error("Export run superseded");
+    if (!isCurrent()) throw new Error(translate("uxExport.exportRunSuperseded461y2"));
     await sleep(RECOVERY_POLL_INTERVAL_MS);
 
     let st: ExportStatus;
@@ -79,7 +81,7 @@ async function recoverViaStatus(
         Date.now() - start > RECOVERY_GRACE_MS &&
         statusFails >= RECOVERY_MAX_STATUS_FAILS
       ) {
-        throw new Error("Lost connection to the export server.");
+        throw new Error(translate("uxExport.lostConnectionExportcadve"));
       }
       continue;
     }
@@ -96,18 +98,18 @@ async function recoverViaStatus(
         return { outputPath: st.last_op_output_path ?? null };
       }
       if (st.last_op_status === "cancelled") throw new ExportCanceledError();
-      throw new Error(st.last_op_error || "Export failed");
+      throw new Error(st.last_op_error || translate("uxExport.exportFailede9cfe"));
     }
 
     // Inactive but our op was never observed: the POST likely died before the
     // backend started it. Allow a grace window for the op to appear, then fail.
     if (Date.now() - start > RECOVERY_GRACE_MS) {
       throw new Error(
-        "The export request failed before the server started the operation.",
+        translate("uxExport.exportRequestFailedph57w"),
       );
     }
   }
-  throw new Error("Timed out waiting for the export to finish.");
+  throw new Error(translate("uxExport.timedOutWaitingnt4q9"));
 }
 
 /** Every quant in the run folder's gguf/export.json, else the ones requested. */
@@ -351,7 +353,7 @@ export const useExportRuntimeStore = create<ExportRuntimeStore>()((set, get) => 
             ...base,
             isExporting: false,
             phase: "error" as const,
-            error: status.last_op_error ?? "Export failed",
+            error: status.last_op_error ?? translate("uxExport.exportFailede9cfe"),
           };
         }
         if (status.last_op_status === "cancelled") {
@@ -466,7 +468,7 @@ export const useExportRuntimeStore = create<ExportRuntimeStore>()((set, get) => 
       // 1. Load the model source into a fresh export subprocess.
       if (params.sourceMode === "checkpoint") {
         if (!params.checkpointPath) {
-          throw new Error("No checkpoint selected");
+          throw new Error(translate("uxExport.noCheckpointSelectedhsnvj"));
         }
         const checkpointPath = params.checkpointPath;
         await runRecoverableOp(() =>
@@ -501,7 +503,7 @@ export const useExportRuntimeStore = create<ExportRuntimeStore>()((set, get) => 
         const selections =
           params.mergedSelections && params.mergedSelections.length > 0
             ? params.mergedSelections
-            : [{ formatType: "16-bit (FP16)", compressedMethod: null, label: "16-bit" }];
+            : [{ formatType: "16-bit (FP16)", compressedMethod: null, get label() { return translate("uxExport.16Bitv40tu"); } }];
         for (let i = 0; i < selections.length; i += 1) {
           if (!isCurrent()) return;
           set({ quantIndex: i });
@@ -579,7 +581,7 @@ export const useExportRuntimeStore = create<ExportRuntimeStore>()((set, get) => 
         );
         if (outputPath) {
           outputs.push({
-            label: params.loraGguf ? "GGUF LoRA adapter" : "LoRA adapter",
+            label: params.loraGguf ? translate("uxExport.gGUFLoRAAdapterac2vp") : translate("uxExport.loRAAdapterky9f1"),
             path: outputPath,
           });
         }
@@ -612,7 +614,7 @@ export const useExportRuntimeStore = create<ExportRuntimeStore>()((set, get) => 
           phase: "error",
           isExporting: false,
           reconnecting: false,
-          error: err instanceof Error ? err.message : "Export failed",
+          error: err instanceof Error ? err.message : translate("uxExport.exportFailede9cfe"),
         });
       }
     } finally {

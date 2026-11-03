@@ -53,7 +53,7 @@ import {
   useHubModelSearch,
 } from "@/features/hub";
 import { useDebouncedValue, useWheelScrollRef } from "@/hooks";
-import { useT } from "@/i18n";
+import { translate, useT } from "@/i18n";
 import { isTauri } from "@/lib/api-base";
 import { ChevronDownStandardIcon } from "@/lib/chevron-icons";
 import { MicIcon } from "@/lib/mic-icon";
@@ -103,19 +103,19 @@ const STT_RUNTIME_NAMES = new Set(["whisper.cpp", "llama.cpp"]);
 // Languages shared by browser speech recognition and local STT.
 const DICTATION_LANGUAGES: { value: string; label: string }[] = [
   { value: "auto", label: "" }, // label rendered via i18n
-  { value: "en-US", label: "English (US)" },
-  { value: "en-GB", label: "English (UK)" },
+  { value: "en-US", get label() { return translate("uxSettings.englishUS1pok2"); } },
+  { value: "en-GB", get label() { return translate("uxSettings.englishUK1ppbi"); } },
   { value: "zh-CN", label: "中文 (简体)" },
   { value: "ja-JP", label: "日本語" },
   { value: "ko-KR", label: "한국어" },
-  { value: "es-ES", label: "Español" },
-  { value: "fr-FR", label: "Français" },
-  { value: "de-DE", label: "Deutsch" },
-  { value: "it-IT", label: "Italiano" },
-  { value: "pt-BR", label: "Português (Brasil)" },
+  { value: "es-ES", get label() { return translate("uxSettings.espaOl773xp"); } },
+  { value: "fr-FR", get label() { return translate("uxSettings.franAis1x2ms"); } },
+  { value: "de-DE", get label() { return translate("uxSettings.deutsch1vqgm"); } },
+  { value: "it-IT", get label() { return translate("uxSettings.italianoup8h7"); } },
+  { value: "pt-BR", get label() { return translate("uxSettings.portuguSBrasil1dswe"); } },
   { value: "ru-RU", label: "Русский" },
-  { value: "sv-SE", label: "Svenska" },
-  { value: "da-DK", label: "Dansk" },
+  { value: "sv-SE", get label() { return translate("uxSettings.svenskae6tli"); } },
+  { value: "da-DK", get label() { return translate("uxSettings.dansk1cw56"); } },
   { value: "hi-IN", label: "हिन्दी" },
   { value: "ar-SA", label: "العربية" },
   { value: "he-IL", label: "עברית" },
@@ -135,7 +135,7 @@ function sttModelSource(model: SttModel): string {
     return sttModelName(model);
   }
   return isCuratedSttModel(model) && !MTMD_STT_MODELS.has(model)
-    ? `LAiMai/whisper-${model}-GGUF`
+    ? `unslothai/whisper-${model}-GGUF`
     : getSttModelRepo(model);
 }
 
@@ -1225,7 +1225,7 @@ export function VoiceTab() {
               <Input
                 value={sttProviderModel}
                 onChange={(event) => setSttProviderModel(event.target.value)}
-                placeholder="whisper-1"
+                placeholder={translate("uxSettings.whisper1mj3kz")}
                 aria-label={t("settings.voice.dictation.customModelLabel")}
                 className="w-56"
               />
@@ -1671,7 +1671,7 @@ export function VoiceTab() {
                   <Input
                     value={ttsProviderModel}
                     onChange={(e) => setTtsProviderModel(e.target.value)}
-                    placeholder="kokoro"
+                    placeholder={translate("uxSettings.kokorom998q")}
                     className="h-8 w-56 max-w-72"
                     aria-label={t("settings.voice.readAloud.customModelLabel")}
                   />
@@ -1685,7 +1685,7 @@ export function VoiceTab() {
                   <Input
                     value={ttsProviderVoice}
                     onChange={(e) => setTtsProviderVoice(e.target.value)}
-                    placeholder="alloy"
+                    placeholder={translate("uxSettings.alloy1d0y3")}
                     className="h-8 w-56 max-w-72"
                     aria-label={t("settings.voice.readAloud.voiceLabel")}
                   />

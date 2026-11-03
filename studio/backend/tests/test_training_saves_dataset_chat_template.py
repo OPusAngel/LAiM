@@ -92,7 +92,7 @@ def trainer(monkeypatch):
 
     monkeypatch.setattr(tmod, "should_use_mlx_training_backend", lambda *a, **k: False)
     t = tmod.LAiMTrainer()
-    t.model_name = "LAiM/Llama-3.2-1B"
+    t.model_name = "unsloth/Llama-3.2-1B"
     t.tokenizer = _BaseModelTokenizer()
     return t
 

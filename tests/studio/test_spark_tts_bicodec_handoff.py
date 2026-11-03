@@ -121,20 +121,20 @@ def _run(
 @pytest.mark.parametrize(
     "model_name, revision",
     [
-        ("LAiM/Spark-TTS-0.5B", None),
+        ("unsloth/Spark-TTS-0.5B", None),
         ("Spark-TTS-0.5B/LLM", None),
-        ("LAiM/Spark-TTS-0.5B", "c80b03b6"),
+        ("unsloth/Spark-TTS-0.5B", "c80b03b6"),
     ],
 )
 def test_hub_model_codec_gets_the_downloaded_root_before_load_model(model_name, revision):
     downloads, codec_roots = _run(model_name, revision = revision)
-    assert downloads == [("LAiM/Spark-TTS-0.5B", revision)]
+    assert downloads == [("unsloth/Spark-TTS-0.5B", revision)]
     assert codec_roots == [os.path.abspath("/hf/hub/LAiM/Spark-TTS-0.5B/snapshots/abc")]
 
 
 def test_cached_snapshot_codec_gets_the_snapshot_root_offline(tmp_path):
     snapshot = tmp_path / "models--LAiM--Spark-TTS-0.5B" / "snapshots" / "c80b03b6"
-    downloads, codec_roots = _run("LAiM/Spark-TTS-0.5B", str(snapshot), local_files_only = True)
+    downloads, codec_roots = _run("unsloth/Spark-TTS-0.5B", str(snapshot), local_files_only = True)
     assert downloads == []
     assert codec_roots == [str(snapshot)]
 
@@ -152,12 +152,12 @@ def test_a_local_spark_folder_is_used_in_place(tmp_path, pick_llm):
 
 @pytest.mark.parametrize("repo_dir", [r"C:\models\Spark-TTS-0.5B", "/srv/Spark-TTS-0.5B"])
 def test_a_root_load_model_already_set_is_kept(repo_dir):
-    downloads, codec_roots = _run("LAiM/Spark-TTS-0.5B", repo_dir = repo_dir)
+    downloads, codec_roots = _run("unsloth/Spark-TTS-0.5B", repo_dir = repo_dir)
     assert downloads == []
     assert codec_roots == [repo_dir]
 
 
-def _fetch(resolve, model_name = "LAiM/Spark-TTS-0.5B"):
+def _fetch(resolve, model_name = "unsloth/Spark-TTS-0.5B"):
     tree = ast.parse(_WORKER.read_text(encoding = "utf-8"))
     node = next(
         n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == "_fetch_spark_tts_repo"
@@ -182,7 +182,7 @@ def _fetch(resolve, model_name = "LAiM/Spark-TTS-0.5B"):
     queue = SimpleNamespace(put = lambda event: events.append(event["type"]))
     trainer = SimpleNamespace(
         resolve_spark_tts_repo = lambda on_model_resolved: resolve(on_model_resolved),
-        spark_tts_hub_repo = lambda: "LAiM/Spark-TTS-0.5B",
+        spark_tts_hub_repo = lambda: "unsloth/Spark-TTS-0.5B",
     )
     hf_xet = SimpleNamespace(start_watchdog = start_watchdog)
     with patch.dict("sys.modules", {"utils": SimpleNamespace(), "utils.hf_xet_fallback": hf_xet}):
@@ -194,8 +194,8 @@ def _fetch(resolve, model_name = "LAiM/Spark-TTS-0.5B"):
 
 
 def test_the_early_spark_download_runs_under_the_model_load_watchdog():
-    events, watched = _fetch(lambda report: report("LAiM/Spark-TTS-0.5B"))
-    assert watched == [["LAiM/Spark-TTS-0.5B"]]
+    events, watched = _fetch(lambda report: report("unsloth/Spark-TTS-0.5B"))
+    assert watched == [["unsloth/Spark-TTS-0.5B"]]
     assert events == [
         "model_load_started",
         "model_load_resolved",
@@ -214,4 +214,4 @@ def test_a_failed_spark_download_still_closes_the_model_load_lifecycle():
 
 def test_the_watchdog_watches_the_repo_behind_the_llm_alias():
     _, watched = _fetch(lambda report: None, model_name = "Spark-TTS-0.5B/LLM")
-    assert watched == [["Spark-TTS-0.5B/LLM", "LAiM/Spark-TTS-0.5B"]]
+    assert watched == [["Spark-TTS-0.5B/LLM", "unsloth/Spark-TTS-0.5B"]]

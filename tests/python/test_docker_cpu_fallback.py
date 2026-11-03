@@ -131,9 +131,9 @@ class TestRunShDegradesWithoutNvidia:
         )
 
     def test_the_untagged_published_name_is_recognised(self, tmp_path):
-        """`LAiM/LAiM` is :latest to Docker, so the AMD notice has to treat it as a
+        """`unsloth/LAiM` is :latest to Docker, so the AMD notice has to treat it as a
         published image rather than as somebody else's."""
-        _, stderr = _invoke_run_sh(tmp_path, nvidia = False, amd = True, image = "LAiM/LAiM")
+        _, stderr = _invoke_run_sh(tmp_path, nvidia = False, amd = True, image = "unsloth/LAiM")
         assert "runs on the CPU" in stderr, stderr
         assert "up to that image" not in stderr, stderr
 
@@ -143,7 +143,7 @@ class TestRunShDegradesWithoutNvidia:
         argv, stderr = _invoke_run_sh(tmp_path, nvidia = False, amd = True, image = "myorg/custom:rocm")
         assert "/dev/kfd" in argv
         assert "runs on the CPU" not in stderr, stderr
-        assert "myorg/custom:rocm" in stderr and "LAiM/LAiM" in stderr, stderr
+        assert "myorg/custom:rocm" in stderr and "unsloth/LAiM" in stderr, stderr
 
     def test_the_group_lookup_is_guarded_on_getent_existing(self):
         """A host with no getent at all (busybox, some slim images) must skip the

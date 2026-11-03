@@ -47,6 +47,8 @@ import {
   validateUsedProviders,
 } from "./validate";
 import { isLikelyImageValue } from "../image-preview";
+import { translate } from "@/i18n";
+
 
 function pushUniqueJson(
   label: string,
@@ -154,7 +156,7 @@ export function buildRecipePayload(
           if (firstSeed?.seed_columns && firstSeed.seed_columns.length > 0) {
             if (!firstSeed.seed_columns.includes(columnName)) {
               errors.push(
-                `LLM ${config.name}: image context column '${columnName}' not found in seed columns.`,
+                translate("uxRecipestudio.lLMImageContextColumn2ynqb", { p1: config.name, p2: columnName }),
               );
             }
           }
@@ -165,7 +167,7 @@ export function buildRecipePayload(
             );
             if (!hasImageLikeValue) {
               errors.push(
-                `LLM ${config.name}: image context column '${columnName}' has no image-like values in preview rows.`,
+                translate("uxRecipestudio.lLMImageContextColumnh0fcc", { p1: config.name, p2: columnName }),
               );
             }
           }
@@ -212,7 +214,7 @@ export function buildRecipePayload(
       const built = buildToolProfilePayload(config, errors);
       for (const provider of built.mcp_providers) {
         pushUniqueJson(
-          "MCP provider",
+          translate("uxRecipestudio.mCPProvider0qq9v"),
           String(provider.name),
           provider,
           mcpProviderJsonByName,
@@ -222,7 +224,7 @@ export function buildRecipePayload(
       }
       if (built.tool_config) {
         pushUniqueJson(
-          "Tool config",
+          translate("uxRecipestudio.toolConfigfh64t"),
           String(built.tool_config.tool_alias),
           built.tool_config,
           toolConfigJsonByAlias,
@@ -250,7 +252,7 @@ export function buildRecipePayload(
   validateUsedProviders(modelProviderConfigs, modelConfigConfigs, errors);
   for (const toolAlias of llmToolAliasesUsed) {
     if (!toolConfigJsonByAlias.has(toolAlias)) {
-      errors.push(`Tool alias ${toolAlias}: missing tool config.`);
+      errors.push(translate("uxRecipestudio.toolAliasMissingToolcg8x1", { p1: toolAlias }));
     }
   }
 

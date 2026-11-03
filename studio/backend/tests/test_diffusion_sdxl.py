@@ -50,12 +50,12 @@ def test_sdxl_detection_by_repo_and_override():
     assert detect_family("some-org/stable-diffusion-xl-anime").name == "sdxl"
     assert detect_family("x", override = "sdxl").name == "sdxl"
     # A GGUF DiT family must NOT be swallowed by the SDXL match.
-    assert detect_family("LAiM/FLUX.1-schnell-GGUF").name == "flux.1"
+    assert detect_family("unsloth/FLUX.1-schnell-GGUF").name == "flux.1"
 
 
 def test_dit_families_keep_transformer_denoiser():
     # The generalisation must not change existing DiT families: they stay on pipe.transformer and their single file is transformer-only.
-    for rid in ("LAiM/FLUX.1-schnell-GGUF", "LAiM/Qwen-Image-GGUF", "LAiM/Z-Image-GGUF"):
+    for rid in ("unsloth/FLUX.1-schnell-GGUF", "unsloth/Qwen-Image-GGUF", "unsloth/Z-Image-GGUF"):
         fam = detect_family(rid)
         assert fam.denoiser_attr == "transformer"
         assert fam.single_file_is_pipeline is False

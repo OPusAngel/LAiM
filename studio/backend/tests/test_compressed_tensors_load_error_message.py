@@ -84,7 +84,7 @@ def _load_failure(
     native = False,
 ) -> HTTPException:
     inference_route = _load_route_module()
-    model_path = "LAiM/gemma-4-E2B-it-NVFP4"
+    model_path = "unsloth/gemma-4-E2B-it-NVFP4"
     model_label = "gemma-4-E2B-it-NVFP4" if native else model_path
     request = LoadRequest(model_path = model_path)
     backend = MagicMock(active_model_name = None)
@@ -114,7 +114,7 @@ def _validation_failure(
     native = False,
 ) -> HTTPException:
     inference_route = _load_route_module()
-    model_path = "LAiM/gemma-4-E2B-it-NVFP4"
+    model_path = "unsloth/gemma-4-E2B-it-NVFP4"
     model_label = "gemma-4-E2B-it-NVFP4" if native else model_path
     request = ValidateModelRequest(model_path = model_path)
     with (
@@ -220,7 +220,7 @@ def test_the_message_survives_the_trip_out_of_the_inference_worker(message):
     which rewrites 404s, auth failures and OOM into its own sentences. Not this one.
     """
     from utils.utils import format_error_message
-    assert format_error_message(ImportError(message), "LAiM/gemma-4-E2B-it-NVFP4") == message
+    assert format_error_message(ImportError(message), "unsloth/gemma-4-E2B-it-NVFP4") == message
 
 
 def _quantizer_refusal_messages():
@@ -276,7 +276,7 @@ def test_no_other_quantization_family_is_re_routed_into_this_refusal():
 def test_the_mlx_refusal_is_unchanged():
     """The signature this route already recognised keeps its own wording."""
     error = _load_failure(
-        "LAiM: 'LAiM/gemma-4-E2B-it-NVFP4' has per-module MLX quantization "
+        "LAiM: 'unsloth/gemma-4-E2B-it-NVFP4' has per-module MLX quantization "
         "metadata {'config_groups': {'group_1': {'format': 'nvfp4-pack-quantized'}}}",
         exception_type = RuntimeError,
     )

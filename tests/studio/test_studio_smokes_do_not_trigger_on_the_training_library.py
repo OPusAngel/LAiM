@@ -28,7 +28,7 @@ AGENT_GUIDES = "local-agent-guides-ci.yml"
 
 DERIVED_FILTERS = STUDIO_SMOKES + (AGENT_GUIDES,)
 
-FORBIDDEN = {"LAiM/**", "studio/**"}
+FORBIDDEN = {"unsloth/**", "studio/**"}
 
 EXECUTED = re.compile(r"(?:\./)?(\.github/(?:scripts|actions)/[A-Za-z0-9_./-]+)")
 
@@ -120,7 +120,7 @@ def test_no_studio_smoke_triggers_on_the_training_library_or_all_of_studio(name)
         offending = FORBIDDEN & set(_paths(doc, event))
         assert not offending, (
             f"{name} {event}.paths lists {sorted(offending)}. The install is --no-torch, so "
-            "LAiM/** cannot reach the venv under test, and studio/** also matches the "
+            "unsloth/** cannot reach the venv under test, and studio/** also matches the "
             "Tauri shell and docs the smoke never touches. Name the directories the job "
             "observes instead."
         )

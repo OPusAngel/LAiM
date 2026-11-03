@@ -1227,14 +1227,14 @@ class TestEstimateMemoryRoute:
             mc, "_iter_hf_cache_snapshots", lambda name, cache_dir = None: asked.append(name) or found
         )
         if ri._mlx_estimate_available():
-            for alias in ("LAiM/Qwen3-4B-bnb-4bit", "LAiM/Qwen3-4B-LAiM-bnb-4bit"):
+            for alias in ("unsloth/Qwen3-4B-bnb-4bit", "unsloth/Qwen3-4B-unsloth-bnb-4bit"):
                 assert (
                     ri._local_mlx_model_dir(
                         SimpleNamespace(path = None, is_local = False, identifier = alias)
                     )
                     is None
                 )
-            assert asked == ["LAiM/Qwen3-4B", "LAiM/Qwen3-4B"]
+            assert asked == ["unsloth/Qwen3-4B", "unsloth/Qwen3-4B"]
         for made in (
             "stub/config.json",
             "new/config.json",
@@ -4472,7 +4472,7 @@ class TestProbeFollowsTheLoadersRoute:
     def test_the_probe_hands_the_forward_pass_a_model_in_eval_mode(self):
         import mlx.core as mx
         config = json.loads(
-            (Path(_local_snapshot("LAiM/Qwen3-4B-Thinking-2507")) / "config.json").read_text()
+            (Path(_local_snapshot("unsloth/Qwen3-4B-Thinking-2507")) / "config.json").read_text()
         )
         assert next(iter(mm._probe_models(config, mx.bfloat16)))[0]().training is False
 
@@ -4608,14 +4608,14 @@ def test_the_estimate_prices_the_chunk_the_loader_reports(monkeypatch, reported,
         from core.inference import mlx_inference as mi
         monkeypatch.setattr(mi, "mlx_prefill_chunk", lambda **kw: reported)
     breakdown = mm.mlx_memory_breakdown(
-        _local_snapshot("LAiM/Qwen3-4B-Thinking-2507"),
+        _local_snapshot("unsloth/Qwen3-4B-Thinking-2507"),
         n_ctx = 32768,
         load_in_4bit = True,
         kv_bits = 4,
     )
     assert breakdown is not None and breakdown.compute_bytes == compute
     override = mm.mlx_memory_breakdown(
-        _local_snapshot("LAiM/Qwen3-4B-Thinking-2507"),
+        _local_snapshot("unsloth/Qwen3-4B-Thinking-2507"),
         n_ctx = 32768,
         load_in_4bit = True,
         kv_bits = 4,
@@ -4962,7 +4962,7 @@ class TestShardsTheLoaderReads:
     "repo, n_ctx, kv_bits, weights, kv, compute, layers, caption",
     [
         (
-            "LAiM/Qwen3-4B-Thinking-2507",
+            "unsloth/Qwen3-4B-Thinking-2507",
             32768,
             None,
             2_822_044_672,
@@ -4972,7 +4972,7 @@ class TestShardsTheLoaderReads:
             "bf16",
         ),
         (
-            "LAiM/Qwen3-4B-Thinking-2507",
+            "unsloth/Qwen3-4B-Thinking-2507",
             32768,
             4,
             2_822_044_672,
@@ -4982,7 +4982,7 @@ class TestShardsTheLoaderReads:
             "4-bit",
         ),
         (
-            "LAiM/Qwen3.6-35B-A3B-UD-MLX-4bit",
+            "unsloth/Qwen3.6-35B-A3B-UD-MLX-4bit",
             32768,
             None,
             21_634_993_114,
@@ -4991,7 +4991,7 @@ class TestShardsTheLoaderReads:
             40,
             "bf16",
         ),
-        ("LAiM/gemma-3-270m-it", 8192, None, 392_058_112, 65_258_496, 725_729_935, 18, "bf16"),
+        ("unsloth/gemma-3-270m-it", 8192, None, 392_058_112, 65_258_496, 725_729_935, 18, "bf16"),
         (
             "mlx-community/deepseek-vl2-tiny-4bit",
             4096,
@@ -5083,7 +5083,7 @@ def test_a_real_checkpoint_is_priced_to_the_byte(
 def test_the_caption_names_a_width_the_real_conversion_reaches(kv_bits, caption):
     _on_bfloat16_chip()
     breakdown = mm.mlx_memory_breakdown(
-        _local_snapshot("LAiM/Qwen3-4B-Thinking-2507"),
+        _local_snapshot("unsloth/Qwen3-4B-Thinking-2507"),
         n_ctx = 32768,
         load_in_4bit = True,
         kv_bits = kv_bits,
@@ -5141,7 +5141,7 @@ class TestTheContextSearch:
 @pytest.mark.parametrize("budget_gib, fitted", [(6, 18_432), (12, 61_952), (24, 149_504)])
 def test_a_real_checkpoint_is_fitted_to_the_byte(budget_gib, fitted):
     _on_bfloat16_chip()
-    snapshot = _local_snapshot("LAiM/Qwen3-4B-Thinking-2507")
+    snapshot = _local_snapshot("unsloth/Qwen3-4B-Thinking-2507")
     budget = budget_gib * 1024**3
     assert (
         mm.mlx_fit_context(snapshot, budget_bytes = budget, max_ctx = 262_144, load_in_4bit = True)
@@ -5174,10 +5174,10 @@ def test_a_companion_drafter_adds_its_stored_weights_and_a_cache_to_the_load():
 @pytest.mark.parametrize(
     "repo, kv_bits, whole_prompt",
     [
-        ("LAiM/Qwen3-4B-Thinking-2507", 4, False),
-        ("LAiM/Qwen3-4B-Thinking-2507", None, True),
-        ("LAiM/gemma-3-270m-it", None, False),
-        ("LAiM/Qwen3.6-35B-A3B-UD-MLX-4bit", None, False),
+        ("unsloth/Qwen3-4B-Thinking-2507", 4, False),
+        ("unsloth/Qwen3-4B-Thinking-2507", None, True),
+        ("unsloth/gemma-3-270m-it", None, False),
+        ("unsloth/Qwen3.6-35B-A3B-UD-MLX-4bit", None, False),
     ],
 )
 def test_the_total_never_falls_as_the_context_grows(repo, kv_bits, whole_prompt):

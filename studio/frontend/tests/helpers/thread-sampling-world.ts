@@ -50,8 +50,8 @@ const BOUNDS: Record<string, { min: number; max: number }> = {
   presencePenalty: { min: 0, max: 2 },
 };
 
-export const QWEN = "LAiM/Qwen3.5-9B-GGUF";
-export const LLAMA = "LAiM/Llama-4-8B";
+export const QWEN = "unsloth/Qwen3.5-9B-GGUF";
+export const LLAMA = "unsloth/Llama-4-8B";
 export const EXTERNAL = "external::anthropic::claude-opus-5";
 
 /** What the installation is holding before anything happens. */

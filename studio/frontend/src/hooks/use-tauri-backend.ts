@@ -9,6 +9,7 @@ import {
   useSyncExternalStore,
 } from "react";
 import { isTauri, setApiBase } from "@/lib/api-base";
+import { translate } from "@/i18n";
 import {
   MANAGED_ENVIRONMENT_BUSY,
   MANAGED_ENVIRONMENT_UPDATING,
@@ -859,7 +860,7 @@ export function useTauriBackend() {
       const detail =
         event instanceof CustomEvent && typeof event.detail === "string"
           ? event.detail
-          : "Desktop authentication failed. Update or repair the managed LAiM install, then restart LAiM.";
+          : translate("uxFeatures.desktopAuthenticationFailedvo778");
       setAuthFailure(detail);
     };
     window.addEventListener("tauri-auth-failed", onAuthFailed);

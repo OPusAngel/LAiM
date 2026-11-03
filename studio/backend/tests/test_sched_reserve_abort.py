@@ -97,7 +97,7 @@ def test_classifier_surfaces_actionable_message():
     msg = LlamaCppBackend._classify_llama_start_failure(
         _ABORT_TAIL,
         gguf_path = "/x/GLM-5.2-UD-Q6_K-00001-of-00014.gguf",
-        model_identifier = "LAiM/GLM-5.2-GGUF",
+        model_identifier = "unsloth/GLM-5.2-GGUF",
         returncode = -6,
     )
     assert msg == LlamaCppBackend._sched_reserve_abort_message()
@@ -118,20 +118,20 @@ def test_classifier_generic_fallback_unchanged_for_unknown_crash():
 def test_memo_round_trip_and_isolation(tmp_path):
     binary = tmp_path / "llama-server"
     binary.write_text("x")
-    b, model = str(binary), "LAiM/GLM-5.2-GGUF"
+    b, model = str(binary), "unsloth/GLM-5.2-GGUF"
 
     LlamaCppBackend._sched_reserve_abort_keys.clear()
     assert not LlamaCppBackend._sched_reserve_aborts(b, model)
     LlamaCppBackend._record_sched_reserve_abort(b, model)
     assert LlamaCppBackend._sched_reserve_aborts(b, model)
-    assert not LlamaCppBackend._sched_reserve_aborts(b, "LAiM/Qwen3.5-4B-MTP-GGUF")
+    assert not LlamaCppBackend._sched_reserve_aborts(b, "unsloth/Qwen3.5-4B-MTP-GGUF")
     LlamaCppBackend._sched_reserve_abort_keys.clear()
 
 
 def test_memo_invalidated_by_binary_mtime_change(tmp_path):
     binary = tmp_path / "llama-server"
     binary.write_text("v1")
-    b, model = str(binary), "LAiM/GLM-5.2-GGUF"
+    b, model = str(binary), "unsloth/GLM-5.2-GGUF"
 
     LlamaCppBackend._sched_reserve_abort_keys.clear()
     LlamaCppBackend._record_sched_reserve_abort(b, model)
@@ -266,7 +266,7 @@ def test_a_changed_setting_is_allowed_to_retry(crashing, change):
 def test_hub_cache_hint_does_not_defeat_the_memo(crashing):
     crashing.load()
     before = crashing.spawns
-    hint = (str(crashing.gguf), "LAiM/GLM-5.2-GGUF", "main", ((crashing.gguf.name, 1),))
+    hint = (str(crashing.gguf), "unsloth/GLM-5.2-GGUF", "main", ((crashing.gguf.name, 1),))
     crashing.load(verified_gguf = hint)
     assert crashing.spawns == before
 

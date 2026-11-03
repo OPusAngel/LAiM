@@ -152,7 +152,7 @@ class TestIsEmbeddingGguf:
         assert backend.is_embedding_gguf is True
 
     def test_true_for_embedding_name_hint_without_pooling_type(self, tmp_path, backend):
-        backend._model_identifier = "LAiM/Qwen3-Embedding-4B"
+        backend._model_identifier = "unsloth/Qwen3-Embedding-4B"
         backend._read_gguf_metadata(
             _make_gguf(tmp_path, "qwen3", filename = "Qwen3-Embedding-4B-Q4_K_M.gguf")
         )

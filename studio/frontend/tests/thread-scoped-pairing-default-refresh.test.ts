@@ -30,8 +30,8 @@ const STORE_URL = new URL(
   import.meta.url,
 ).href;
 
-const MODEL_A = "LAiM/Model-A";
-const MODEL_B = "LAiM/Model-B";
+const MODEL_A = "unsloth/Model-A";
+const MODEL_B = "unsloth/Model-B";
 const SAVED_CHAT = "chat-read-still-out";
 const SNAPSHOT_LESS_CHAT = "chat-with-no-snapshot";
 

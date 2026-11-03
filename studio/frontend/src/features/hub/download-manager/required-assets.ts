@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
+
 export interface PlannedDownloadEntry {
   repoId: string;
   files?: string[];
@@ -26,7 +28,7 @@ export function selectDownloadEntries<T extends PlannedDownloadEntry>(
   return entries.filter((entry) => includeAssets || entry.checkpoint !== false);
 }
 export function formatDownloadBytes(bytes: number): string {
-  if (!Number.isFinite(bytes) || bytes <= 0) return "Size unknown";
+  if (!Number.isFinite(bytes) || bytes <= 0) return translate("uxHub.sizeUnknown1c2w0");
   if (bytes >= 1e12) return `${(bytes / 1e12).toFixed(1)} TB`;
   if (bytes >= 1e9) return `${(bytes / 1e9).toFixed(1)} GB`;
   if (bytes >= 1e6) return `${(bytes / 1e6).toFixed(1)} MB`;
@@ -34,7 +36,7 @@ export function formatDownloadBytes(bytes: number): string {
 }
 export function assetLabel(
   entry: PlannedDownloadEntry,
-  fallback: string = entry.repoId.split("/").pop() || "Required files",
+  fallback: string = entry.repoId.split("/").pop() || translate("uxHub.requiredFiless0ovl"),
 ): string {
   const files = entry.files ?? [];
   const weights = files.filter((f) =>
@@ -42,9 +44,9 @@ export function assetLabel(
   );
   const encoder = weights.some((f) => /text_encoder|clip|t5|qwen.*vl/i.test(f));
   const decoder = weights.some((f) => /vae|decoder|codec/i.test(f));
-  if (encoder && decoder) return "Encoder & decoder";
-  if (encoder) return "Text encoder";
-  if (decoder) return "Decoder & configuration";
+  if (encoder && decoder) return translate("uxHub.encoderDecoder6qi9b");
+  if (encoder) return translate("uxHub.textEncoder0dom1");
+  if (decoder) return translate("uxHub.decoderConfigurationdqmld");
   return fallback;
 }
 

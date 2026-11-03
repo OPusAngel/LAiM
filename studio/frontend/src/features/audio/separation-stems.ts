@@ -4,6 +4,8 @@
 // Free of app imports so the node test runner can load it directly.
 
 import type { AudioGalleryClip } from "./api";
+import { translate } from "@/i18n";
+
 
 /** Display order. Mirrors _STEM_ORDER in studio/backend/routes/inference.py. */
 export const STEM_ORDER: readonly string[] = [
@@ -105,7 +107,7 @@ export function groupSeparationClips(
     );
     return {
       groupId: key,
-      title: first?.prompt || "Separated track",
+      title: first?.prompt || translate("uxAudio.separatedTrack9sech"),
       model: first?.model ?? "",
       durationS: Math.max(0, ...ordered.map((clip) => clip.duration_s || 0)),
       createdAt: first?.created_at ?? "",

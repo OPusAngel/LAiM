@@ -3,7 +3,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { getLocale } from "@/i18n";
+import { translate, getLocale } from "@/i18n";
 import { toast } from "@/lib/toast";
 import { useAui } from "@assistant-ui/react";
 import { YoutubeIcon } from "@hugeicons/core-free-icons";
@@ -114,8 +114,8 @@ export function YoutubeTranscriptPrompt({
     } catch (error) {
       if (controller.signal.aborted) return;
       setFetching(false);
-      toast.error("Could not attach the transcript", {
-        description: error instanceof Error ? error.message : "Unknown error",
+      toast.error(translate("uxChat.couldNotAttachTheg6m81"), {
+        description: error instanceof Error ? error.message : translate("uxChat.unknownErrorb575w"),
       });
     }
   }, [aui, fetching, onClose, url]);
@@ -123,7 +123,7 @@ export function YoutubeTranscriptPrompt({
   return (
     <div
       className="relative z-0 mx-7 mb-[calc(-8px*var(--ui-space-scale,1))] rounded-t-[18px] rounded-b-none border border-border/45 bg-background/90 px-5 py-2 text-muted-foreground shadow-none backdrop-blur-md dark:bg-card/85"
-      aria-label="Attach YouTube transcript"
+      aria-label={translate("uxChat.attachYouTubeTranscriptmtg2n")}
     >
       <div className="grid h-10 grid-cols-[minmax(0,1fr)_auto] items-center gap-2.5">
         <div className="flex min-w-0 items-center gap-2.5">
@@ -134,8 +134,8 @@ export function YoutubeTranscriptPrompt({
           />
           <div className="truncate text-sm">
             {fetching
-              ? "Fetching the transcript…"
-              : "Attach this video's transcript?"}
+              ? translate("uxChat.fetchingTheTranscript1xfji")
+              : translate("uxChat.attachThisVideoSzm604")}
           </div>
         </div>
         {fetching ? (
@@ -156,9 +156,7 @@ export function YoutubeTranscriptPrompt({
               size="sm"
               className="h-7 px-2 text-xs"
               onClick={() => void attach()}
-            >
-              Attach transcript
-            </Button>
+            >{translate("uxChat.attachTranscripty95bm")}</Button>
           </div>
         )}
       </div>

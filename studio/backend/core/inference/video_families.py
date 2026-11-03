@@ -83,8 +83,8 @@ def unsupported_ltx_version(*names: Optional[str]) -> Optional[str]:
 def unsupported_ltx_message(version: str, subject: str) -> str:
     return (
         f"{subject} is LTX-{version}, which Studio does not support yet. Studio runs LTX-2.0 / LTX-2.3 "
-        "(Lightricks/LTX-2.3 or LAiM/LTX-2.3-GGUF) and LTX-2.5 (Lightricks/LTX-2.5-Diffusers or "
-        "LAiM/LTX-2.5-GGUF)."
+        "(Lightricks/LTX-2.3 or unsloth/LTX-2.3-GGUF) and LTX-2.5 (Lightricks/LTX-2.5-Diffusers or "
+        "unsloth/LTX-2.5-GGUF)."
     )
 
 
@@ -377,7 +377,7 @@ _LTX_VIDEO_09_RE = (
 )
 _LTX_VIDEO_09_REFUSAL = (
     "This is an LTX-Video 0.9.x checkpoint, a different architecture from LTX-2 that Studio does not "
-    "run. Load LTX-2 or LTX-2.3 instead (for example LAiM/LTX-2.3-GGUF)."
+    "run. Load LTX-2 or LTX-2.3 instead (for example unsloth/LTX-2.3-GGUF)."
 )
 # Last path segment of each identifier only: an owner or parent folder named i2v does not make a checkpoint I2V.
 _HV15_I2V_RE = r"(?<![a-z0-9])i2v(?![a-z0-9])(?=[^/\\|]*[/\\]*\s*(?:$|\|))"
@@ -513,13 +513,13 @@ _FAMILIES: tuple[VideoFamily, ...] = (
             "measured GPU-bound: 1.0018x resident for 3.93 GB held; streamed, its group onloads wait on the host "
             "(27 per step at 16 GB), which a graph cannot record"
         ),
-        gguf_repo = "LAiM/MiniMax-H3-GGUF",
+        gguf_repo = "unsloth/MiniMax-H3-GGUF",
         # Hosted pre-quantized FL2VA denoisers. The modular workflow builds each component through its own
         # from_pretrained, so there is no dense module to quantise in place: these are the ONLY way to run the 66.3 GB
         # transformer quantized, and seeding one also stops that download. Both schemes live in ONE repo, at the root,
         # named <Model>-<SCHEME>.pt, the layout every image-side prequant repo uses and the one prequant_repo_filename
         # builds without help.
-        prequant_repos = (("int8", "LAiM/MiniMax-H3-FP8"), ("fp8", "LAiM/MiniMax-H3-FP8")),
+        prequant_repos = (("int8", "unsloth/MiniMax-H3-FP8"), ("fp8", "unsloth/MiniMax-H3-FP8")),
         # The INT8 denoiser is ConvRot-rotated (see diffusion_convrot): its weights live in a Hadamard-rotated basis and
         # are wrong unless the loader rotates the activations to match, so it carries the v2 format tag an LAiM
         # predating that code refuses. Shipping it under its own name rather than over MiniMax-H3-INT8.pt keeps both
@@ -565,7 +565,7 @@ _FAMILIES: tuple[VideoFamily, ...] = (
             int8_convrot = ConvRotSpec(
                 group = 0,
                 suffixes = (),
-                variant_repos = ("LAiM/LTX-2.5-FP8",),
+                variant_repos = ("unsloth/LTX-2.5-FP8",),
                 default_on = True,
             ),
             # ComfyUI's LTX-2.5 templates run the int8-convrot DiT; LPIPS 0.265 = compile floor (FP8 0.366).
@@ -598,13 +598,13 @@ _FAMILIES: tuple[VideoFamily, ...] = (
         # resolves LTX-2.5-INT8-ConvRot.safetensors (rotation in its metadata), LTX-2.5-INT8 with
         # LAiM_DIFFUSION_INT8_CONVROT=0; fp8 resolves LTX-2.5-FP8.safetensors.
         prequant_variant_repos = (
-            ("lightricks/ltx-2.5-diffusers", "int8", "LAiM/LTX-2.5-FP8"),
-            ("lightricks/ltx-2.5-diffusers", "fp8", "LAiM/LTX-2.5-FP8"),
+            ("lightricks/ltx-2.5-diffusers", "int8", "unsloth/LTX-2.5-FP8"),
+            ("lightricks/ltx-2.5-diffusers", "fp8", "unsloth/LTX-2.5-FP8"),
         ),
         # File sizes (decimal GB): int8 keeps the audio stream, AV cross-attention and adaLN in bf16; fp8 quantizes them.
         prequant_resident_gb_by_scheme = (("int8", 25.11), ("fp8", 19.06)),
         # Dev DiT at the root, distilled under distilled/; the pack above supplies VAEs and connectors.
-        gguf_repo = "LAiM/LTX-2.5-GGUF",
+        gguf_repo = "unsloth/LTX-2.5-GGUF",
         # Family defaults (8 + 3 steps, CFG 1) are the distilled DiT's.
         gguf_default_subdir = "distilled",
         gguf_root_label = "dev",
@@ -647,11 +647,11 @@ _FAMILIES: tuple[VideoFamily, ...] = (
         # transformer 37.8 bf16; Gemma3-12B TE ~24.4 RESIDENT (the hub stores it fp32 but the pipeline loads bf16); VAE
         # 2.4 + connectors 2.9 + audio 0.2. The old 50.4 figure double-counted the fp32 store.
         bf16_components_gb = (37.8, 24.4, 5.5),
-        gguf_repo = "LAiM/LTX-2.3-GGUF",
+        gguf_repo = "unsloth/LTX-2.3-GGUF",
         # pre-cast Gemma3-12B TE (fp32 ~49 GB on the hub, pre-cast ~13.2 GB): the biggest download win
-        te_prequant_repos = (("fp8", "text_encoder", "LAiM/LTX-2-FP8"),),
+        te_prequant_repos = (("fp8", "text_encoder", "unsloth/LTX-2-FP8"),),
         # Hosted 2.3 DISTILLED DiT, used only by the 2.3 single-file assembly. fp8 only: LTX-2.3-INT8.pt predates the int8 excludes.
-        prequant_variant_repos = (("lightricks/ltx-2.3", "fp8", "LAiM/LTX-2.3-FP8"),),
+        prequant_variant_repos = (("lightricks/ltx-2.3", "fp8", "unsloth/LTX-2.3-FP8"),),
         # no steady gain on LTX's VAE / vocoder convs, but a per-shape re-tune (first render 26 s vs 10 s)
         cudnn_benchmark = False,
         # Block RMSNorm (hidden 4096) R0_BLOCK 4096 vs 2048 tie on B200: 3 of 6 cold servers rendered another clip.
@@ -680,9 +680,9 @@ _FAMILIES: tuple[VideoFamily, ...] = (
         base_repo = "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
         # fp8 / int8 share one repo, files Wan2.2-TI2V-5B-<SCHEME>.pt. Sizes from Hub metadata (2026-08-04).
         prequant_repos = (
-            ("nvfp4", "LAiM/Wan2.2-TI2V-5B-NVFP4"),
-            ("fp8", "LAiM/Wan2.2-TI2V-5B-FP8"),
-            ("int8", "LAiM/Wan2.2-TI2V-5B-FP8"),
+            ("nvfp4", "unsloth/Wan2.2-TI2V-5B-NVFP4"),
+            ("fp8", "unsloth/Wan2.2-TI2V-5B-FP8"),
+            ("int8", "unsloth/Wan2.2-TI2V-5B-FP8"),
         ),
         prequant_filenames = (("nvfp4", "Wan2.2-TI2V-5B-NVFP4.pt"),),
         prequant_resident_gb_by_scheme = (("nvfp4", 2.9), ("fp8", 5.1), ("int8", 5.0)),
@@ -708,7 +708,7 @@ _FAMILIES: tuple[VideoFamily, ...] = (
         # UMT5 keeps its overflowing `wo` in fp32 itself; the VAE stays fp32 (vae_force_fp32).
         fp16_guard = "native",
         # Byte-identical mirror of QuantStack/Wan2.2-TI2V-5B-GGUF (13 quants + companion VAE).
-        gguf_repo = "LAiM/Wan2.2-TI2V-5B-GGUF",
+        gguf_repo = "unsloth/Wan2.2-TI2V-5B-GGUF",
         # expand_timesteps on the loaded config keeps the first-frame latent clean.
         i2v_pipeline_class = "WanImageToVideoPipeline",
     ),
@@ -731,9 +731,9 @@ _FAMILIES: tuple[VideoFamily, ...] = (
         base_repo = "Wan-AI/Wan2.2-T2V-A14B-Diffusers",
         # fp8 / int8: expert 2 is <name>-2.pt, not the derived transformer_2 name, so it needs its own row.
         prequant_repos = (
-            ("nvfp4", "LAiM/Wan2.2-T2V-A14B-NVFP4"),
-            ("fp8", "LAiM/Wan2.2-T2V-A14B-FP8"),
-            ("int8", "LAiM/Wan2.2-T2V-A14B-FP8"),
+            ("nvfp4", "unsloth/Wan2.2-T2V-A14B-NVFP4"),
+            ("fp8", "unsloth/Wan2.2-T2V-A14B-FP8"),
+            ("int8", "unsloth/Wan2.2-T2V-A14B-FP8"),
         ),
         prequant_filenames = (
             ("nvfp4", "Wan2.2-T2V-A14B-NVFP4.pt"),
@@ -832,7 +832,7 @@ _FAMILIES: tuple[VideoFamily, ...] = (
         transformer_class = "HunyuanVideo15Transformer3DModel",
         base_repo = "hunyuanvideo-community/HunyuanVideo-1.5-Diffusers-480p_t2v",
         unsupported_checkpoints = ((_HV15_I2V_RE, _HV15_I2V_REFUSAL),),
-        prequant_repos = (("nvfp4", "LAiM/HunyuanVideo-1.5-NVFP4"),),
+        prequant_repos = (("nvfp4", "unsloth/HunyuanVideo-1.5-NVFP4"),),
         prequant_filenames = (("nvfp4", "HunyuanVideo-1.5-Diffusers-480p_t2v-NVFP4.pt"),),
         prequant_resident_gb_by_scheme = (("nvfp4", 4.8),),
         # No bare "hunyuanvideo" alias: it would also claim the incompatible 1.0 repos.
@@ -872,7 +872,7 @@ _FAMILIES: tuple[VideoFamily, ...] = (
         base_repo = "hunyuanvideo-community/HunyuanVideo-1.5-Diffusers-720p_t2v",
         unsupported_checkpoints = ((_HV15_I2V_RE, _HV15_I2V_REFUSAL),),
         # RTN, not GPTQ: the 720p transformer is separately trained; 480p corrections do not apply.
-        prequant_repos = (("nvfp4", "LAiM/HunyuanVideo-1.5-NVFP4"),),
+        prequant_repos = (("nvfp4", "unsloth/HunyuanVideo-1.5-NVFP4"),),
         prequant_filenames = (("nvfp4", "HunyuanVideo-1.5-Diffusers-720p_t2v-NVFP4.pt"),),
         prequant_resident_gb_by_scheme = (("nvfp4", 4.8),),
         aliases = ("hunyuanvideo-1.5-diffusers-720p_t2v", "hv15-720p"),

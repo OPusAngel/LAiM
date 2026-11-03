@@ -1,7 +1,13 @@
 ﻿// SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { SegmentedPill } from "@/components/segmented-control";
+import {
+  HF_SOURCE_OWNER,
+  displayOwnerLabel,
+  isHfFirstPartyOwner,
+} from "@/config/hub-source";
 import { useVllmAvailable, useVllmPlatform } from "@/features/model-picker";
 import {
   Tooltip,
@@ -133,7 +139,7 @@ export function HubListHeader({
           <button
             type="button"
             onClick={onBack}
-            aria-label="Back to feed"
+            aria-label={translate("uxHub.backToFeed178ok")}
             // Pull the button left so the inset chevron lines up with the
             // avatars below, just inside the row hover's left edge.
             className="hub-section-chevron -ml-3 inline-flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground"
@@ -161,7 +167,7 @@ export function HubListHeader({
             <TooltipTrigger asChild={true}>
               <button
                 type="button"
-                aria-label="Refresh"
+                aria-label={translate("common.refresh")}
                 onClick={onRefresh}
                 // Tiny drop so the icon aligns with the heading text.
                 className="inline-flex size-7 shrink-0 translate-y-px cursor-pointer items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
@@ -174,7 +180,7 @@ export function HubListHeader({
               </button>
             </TooltipTrigger>
             <TooltipContent side="bottom" className="tooltip-compact">
-              Refresh from Hugging Face
+              {translate("uxHub.refreshFromHuggingFace1nnke")}
             </TooltipContent>
           </Tooltip>
         )}
@@ -185,19 +191,19 @@ export function HubListHeader({
           {onViewChange && (
             <div
               className="hub-tab-toggle relative inline-flex h-8 shrink-0 items-center rounded-full"
-              aria-label="Results layout"
+              aria-label={translate("uxHub.resultsLayout1unpz")}
             >
               <ViewToggleButton
                 pillId={viewPillId}
                 active={view === "two"}
-                label="Two columns"
+                label={translate("uxHub.twoColumnsukudw")}
                 icon={LayoutTwoColumnIcon}
                 onClick={() => onViewChange("two")}
               />
               <ViewToggleButton
                 pillId={viewPillId}
                 active={view === "split"}
-                label="Split view"
+                label={translate("uxHub.splitViewmjygh")}
                 icon={ViewSidebarLeftIcon}
                 onClick={() => onViewChange("split")}
               />
@@ -240,7 +246,7 @@ function TitleMarkers({
       {format === "checkpoint" && (
         <span
           role="img"
-          aria-label="Safetensors"
+          aria-label={translate("uxHub.safetensors1cksa")}
           className={cn(STATUS_DOT_CLASS, "bg-format-checkpoint")}
         />
       )}
@@ -248,28 +254,28 @@ function TitleMarkers({
       {partial && !downloading && (
         <span
           role="img"
-          aria-label="Partial download"
+          aria-label={translate("uxHub.partialDownload1ynvx")}
           className={cn(STATUS_DOT_CLASS, "bg-status-warning")}
         />
       )}
       {partial && downloading && (
         <span
           role="img"
-          aria-label="Downloading"
+          aria-label={translate("browser.downloads.inProgressLabel")}
           className={cn(STATUS_DOT_CLASS, DOWNLOADING_DOT_CLASS)}
         />
       )}
       {unsupported && (
         <span
           role="img"
-          aria-label="May not be supported yet"
+          aria-label={translate("uxHub.mayNotBeSupportedbants")}
           className={cn(STATUS_DOT_CLASS, "bg-status-danger")}
         />
       )}
       {onDevice && (
         <span
           role="img"
-          aria-label="On device"
+          aria-label={translate("settings.general.rag.onDevice")}
           className={cn(STATUS_DOT_CLASS, "bg-status-success")}
         />
       )}
@@ -280,10 +286,10 @@ function TitleMarkers({
 function VerifiedOwner({ owner }: { owner: string }) {
   return (
     <span className="flex min-w-0 items-center gap-1">
-      <span className="truncate">{owner}</span>
-      {owner.toLowerCase() === "LAiM" && (
+      <span className="truncate">{displayOwnerLabel(owner)}</span>
+      {isHfFirstPartyOwner(owner) && (
         <span
-          aria-label="Verified LAiM"
+          aria-label={translate("uxHub.verifiedLAiMqmy0j")}
           className="hub-verified-badge size-3.5 shrink-0 text-verified"
         />
       )}

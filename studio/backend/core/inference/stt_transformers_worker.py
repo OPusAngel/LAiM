@@ -742,7 +742,7 @@ class WhisperWorker:
 class InProcessWhisperEngine:
     """The pre-spawn engine, kept for hosts where no child can be created.
 
-    A sandboxed deployment or a frozen POSIX build may refuse spawn outright,
+    A locked down deployment or a frozen POSIX build may refuse spawn outright,
     and dictation worked there before this module existed, so it still has to.
     Presents the same surface as WhisperWorker, so the sidecar cannot tell the
     two apart.

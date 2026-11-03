@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
-import { readSrc } from "./kit.ts";
+import { readSrcExpanded } from "./kit.ts";
 
 /** Host first, then hooks in call order, so a spanning pattern reads in source order. */
 export const AUDIO_WORKSPACE_FILES = [
@@ -30,5 +30,5 @@ export const AUDIO_WORKSPACE_FILES = [
 export type AudioWorkspaceFile = (typeof AUDIO_WORKSPACE_FILES)[number];
 
 export function readAudioWorkspaceSource(): string {
-  return AUDIO_WORKSPACE_FILES.map((file) => readSrc(file)).join("\n");
+  return AUDIO_WORKSPACE_FILES.map((file) => readSrcExpanded(file)).join("\n");
 }

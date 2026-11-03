@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { type ReactElement, useEffect, useMemo, useState } from "react";
 
 import {
@@ -85,11 +86,9 @@ export function DiffusionSamples({
   return (
     <section className="flex flex-col gap-2">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-sm font-semibold">
-          Samples at step {current.step}
-        </span>
+        <span className="text-sm font-semibold">{translate("uxImages.samplesAtStep9o1rs", { p1: current.step })}</span>
         <span className="text-ui-11 text-muted-foreground">
-          Same prompts and seeds every round
+          {translate("uxImages.samePromptsAndSeeds1cw19")}
         </span>
       </div>
       <div className="flex flex-wrap gap-1">

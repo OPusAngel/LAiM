@@ -9,7 +9,6 @@ import { persist } from "zustand/middleware";
 export type PlusMenuItemId =
   | "deepResearch"
   | "chatWithFiles"
-  | "browserUse"
   | "mcp"
   | "skills"
   | "savedPrompts"
@@ -21,7 +20,6 @@ export type PlusMenuItemId =
 export const PLUS_MENU_ORDER: PlusMenuItemId[] = [
   "deepResearch",
   "chatWithFiles",
-  "browserUse",
   "mcp",
   "skills",
   "savedPrompts",
@@ -31,11 +29,11 @@ export const PLUS_MENU_ORDER: PlusMenuItemId[] = [
 ];
 
 // Chat with files and Skills sit at the top level; everything else, MCP included, lives under
-// "More". Projects is a workspace the user opts into, not a per-message attachment.
+// "More". Projects is a workspace the user opts into, not a per-message attachment. Browser use is
+// not in this menu at all: Settings > Browser is its only switch.
 const DEFAULT_PINS: Record<PlusMenuItemId, boolean> = {
   deepResearch: true,
   chatWithFiles: true,
-  browserUse: true,
   mcp: false,
   skills: true,
   projects: false,

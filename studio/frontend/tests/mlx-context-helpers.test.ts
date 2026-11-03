@@ -9,6 +9,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 import {
+  englishView,
   installLocalStorageFake,
   registerBundlerResolver,
 } from "./helpers/kit.ts";
@@ -109,13 +110,13 @@ test("a limit kept as a per-request budget travels beside the enforcement verdic
 
 test("a budgeted limit is advised on as a refusal, not as a slowdown or a decoration", () => {
   const advice = (extra: Record<string, unknown>) =>
-    deriveContextUsageBar({ used: 30000, total: 32768, isMlx: true, ...extra })?.advice;
+    deriveContextUsageBar({ used: 30000, total: 32768, isMlx: true, ...extra }, englishView)?.advice;
 
   assert.equal(advice({ contextEnforced: false, contextBudget: 32768 }), "mlx-refuses-past-limit");
   assert.equal(advice({ contextEnforced: false }), "unenforced-limit");
   assert.equal(advice({ contextEnforced: true }), "mlx-near-limit");
   assert.equal(
-    deriveContextUsageBar({ used: 100, total: 32768, isMlx: true, contextBudget: 32768 })?.advice,
+    deriveContextUsageBar({ used: 100, total: 32768, isMlx: true, contextBudget: 32768 }, englishView)?.advice,
     "none",
   );
 });
@@ -222,7 +223,7 @@ test("the usage bar names the three ways a window can end", () => {
       isMlx: true,
       contextEnforced: true,
       ...extra,
-    })?.advice;
+    }, englishView)?.advice;
   assert.equal(at(1000), "none");
   assert.equal(at(30000), "mlx-near-limit");
   assert.equal(at(40000), "mlx-past-limit");
@@ -358,7 +359,7 @@ test("a load response's two window facts and width reach the bar together", () =
       contextEnforced: wide.loadedContextEnforced,
       contextUnboundedWhenBatched: wide.loadedContextUnboundedWhenBatched,
       parallelSlots: wide.loadedParallelSlots,
-    })?.advice,
+    }, englishView)?.advice,
     "unenforced-limit",
   );
 

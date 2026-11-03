@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
-import { sandboxSessionIdFor } from "@/components/assistant-ui/sandbox-files";
-import { revealSandbox } from "@/components/assistant-ui/sandbox-reveal";
+import { workdirSessionIdFor } from "@/components/assistant-ui/workdir-files";
+import { revealWorkdir } from "@/components/assistant-ui/workdir-reveal";
 import {
-  MAX_SANDBOX_UPLOAD_BYTES,
-  uploadToSandbox,
-} from "@/components/assistant-ui/sandbox-upload";
+  MAX_WORKDIR_UPLOAD_BYTES,
+  uploadToWorkdir,
+} from "@/components/assistant-ui/workdir-upload";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import {
   Tooltip,
@@ -21,7 +21,7 @@ import { openFilePicker } from "@/lib/open-file-picker";
 import { toast } from "@/lib/toast";
 import { useState, type ComponentProps, type ComponentType } from "react";
 import type { SidebarItem } from "../hooks/use-chat-sidebar-items";
-import { getSidebarItemThreadIds, sandboxSessionIdsHolding } from "./chat-row-menu";
+import { getSidebarItemThreadIds, workdirSessionIdsHolding } from "./chat-row-menu";
 
 /** A 404 means no folder yet (made on a tool's first write), not a failure. */
 function reportRevealError(
@@ -42,7 +42,7 @@ function reportRevealError(
 
 /**
  * "Open chat folder" (desktop app only). A compare chat outside a project spans two
- * sandboxes, so it gets no item.
+ * workdirs, so it gets no item.
  */
 export function OpenChatFolderItem({
   item,
@@ -53,11 +53,11 @@ export function OpenChatFolderItem({
 }) {
   const t = useT();
   const threadIds = getSidebarItemThreadIds(item);
-  const sandboxSessionId =
+  const workdirSessionId =
     item.type === "single" || item.projectId
-      ? sandboxSessionIdFor(threadIds[0] ?? item.id, item.projectId)
+      ? workdirSessionIdFor(threadIds[0] ?? item.id, item.projectId)
       : undefined;
-  if (!sandboxSessionId) return null;
+  if (!workdirSessionId) return null;
   if (!isTauri) return <OpenChatFolderUnavailableItem Item={Item} />;
   return (
     <Item
@@ -65,16 +65,16 @@ export function OpenChatFolderItem({
       onSelect={() => {
         void (async () => {
           try {
-            // Read from history: a chat moved between projects keeps its old sandbox.
+            // Read from history: a chat moved between projects keeps its old workdir.
             const ids = threadIds.length > 0 ? threadIds : [item.id];
-            const distinct = await sandboxSessionIdsHolding(ids);
+            const distinct = await workdirSessionIdsHolding(ids);
             if (distinct.length > 1) {
               toast.error(t("library.chats.folder.manyFolders"), {
                 description: t("library.chats.folder.manyFoldersDescription"),
               });
               return;
             }
-            await revealSandbox(distinct[0] ?? sandboxSessionId);
+            await revealWorkdir(distinct[0] ?? workdirSessionId);
           } catch (error) {
             reportRevealError(error, t, "chat");
           }
@@ -99,16 +99,16 @@ export function UploadToChatFolderItem({
   Item?: ComponentType<ComponentProps<typeof DropdownMenuItem>>;
 }) {
   const t = useT();
-  const sandboxSessionId =
+  const workdirSessionId =
     item.type === "single" || item.projectId
-      ? sandboxSessionIdFor(getSidebarItemThreadIds(item)[0] ?? item.id, item.projectId)
+      ? workdirSessionIdFor(getSidebarItemThreadIds(item)[0] ?? item.id, item.projectId)
       : undefined;
-  if (!sandboxSessionId) return null;
+  if (!workdirSessionId) return null;
   return (
     <Item
       title={t("library.chats.folder.uploadTitle")}
       onSelect={() =>
-        openFilePicker("*", (files) => void uploadToChatFolder(sandboxSessionId, files, t))
+        openFilePicker("*", (files) => void uploadToChatFolder(workdirSessionId, files, t))
       }
     >
       <HugeiconsIcon icon={Upload01Icon} strokeWidth={1.75} className="size-icon" />
@@ -128,12 +128,12 @@ async function uploadToChatFolder(
   for (const file of files) {
     const failed = (description: string) =>
       toast.error(t("library.chats.folder.uploadFailed", { name: file.name }), { description });
-    if (file.size > MAX_SANDBOX_UPLOAD_BYTES) {
+    if (file.size > MAX_WORKDIR_UPLOAD_BYTES) {
       failed(t("library.toast.uploadTooLarge", { name: file.name }));
       continue;
     }
     try {
-      added.push((await uploadToSandbox(sessionId, file, overwrite)).name);
+      added.push((await uploadToWorkdir(sessionId, file, overwrite)).name);
     } catch (error) {
       // A 409 on a replace is a folder holding the name: offering Replace again would loop.
       if (!overwrite && (error as { status?: number } | null)?.status === 409) taken.push(file);
@@ -171,8 +171,8 @@ export function OpenProjectFolderItem({
   Item?: ComponentType<ComponentProps<typeof DropdownMenuItem>>;
 }) {
   const t = useT();
-  const sandboxSessionId = sandboxSessionIdFor(undefined, projectId);
-  if (!sandboxSessionId) return null;
+  const workdirSessionId = workdirSessionIdFor(undefined, projectId);
+  if (!workdirSessionId) return null;
   if (!isTauri) {
     return (
       <OpenChatFolderUnavailableItem
@@ -186,7 +186,7 @@ export function OpenProjectFolderItem({
     <Item
       title={t("library.chats.folder.openProjectTitle")}
       onSelect={() => {
-        void revealSandbox(sandboxSessionId).catch((error: unknown) =>
+        void revealWorkdir(workdirSessionId).catch((error: unknown) =>
           reportRevealError(error, t, "project"),
         );
       }}

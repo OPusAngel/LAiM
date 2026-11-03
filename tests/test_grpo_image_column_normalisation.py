@@ -2,7 +2,7 @@
 # Copyright 2026-present the LAiM AI Inc. team. All rights reserved.
 
 """A singular `image` column holding a list takes the plural path: TRL wraps the cell
-again, so two images reach the processor as [[[img, img]]]. LAiMai/LAiM#3605."""
+again, so two images reach the processor as [[[img, img]]]. OPusAngel/LAiM#3605."""
 
 import textwrap
 

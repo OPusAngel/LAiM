@@ -9,14 +9,16 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { XIcon } from "lucide-react";
 import type { ReactElement, ReactNode } from "react";
 import type { DocumentStatus } from "../types/rag";
+import { translate } from "@/i18n";
+
 
 export const STAGE_LABELS: Record<string, string> = {
-  parsing: "Reading document",
-  ocr: "Reading scanned pages",
-  captioning: "Reading charts and figures",
-  chunking: "Preparing text",
-  embedding: "Indexing text",
-  storing: "Saving document",
+  get parsing() { return translate("uxRag.readingDocumentuz94m"); },
+  get ocr() { return translate("uxRag.readingScannedPagess6hoi"); },
+  get captioning() { return translate("uxRag.readingChartsAndFiguresqqyf7"); },
+  get chunking() { return translate("uxRag.preparingTextncick"); },
+  get embedding() { return translate("uxRag.indexingTextbbe9x"); },
+  get storing() { return translate("uxRag.savingDocument65a3a"); },
 };
 
 export function DocumentStatusChip({
@@ -52,7 +54,7 @@ export function DocumentStatusChip({
     <button
       type="button"
       onClick={onOpen}
-      aria-label={`Preview ${filename}`}
+      aria-label={translate("uxRag.previewwf3sy", { p1: filename })}
       className="truncate rounded-sm text-left underline-offset-2 hover:underline focus-visible:underline focus-visible:outline-none"
     >
       {filename}
@@ -94,7 +96,7 @@ export function DocumentStatusChip({
         <button
           type="button"
           onClick={onRetry}
-          aria-label={`Retry ${filename}`}
+          aria-label={translate("uxRag.retryywe8z", { p1: filename })}
           className="shrink-0 text-ui-10 font-medium underline-offset-2 hover:underline"
         >
           Retry
@@ -112,7 +114,7 @@ export function DocumentStatusChip({
         <button
           type="button"
           onClick={onRemove}
-          aria-label={`Remove ${filename}`}
+          aria-label={translate("uxRag.removecucki", { p1: filename })}
           className="shrink-0 rounded-full text-muted-foreground hover:text-foreground"
         >
           <XIcon className="size-3" />

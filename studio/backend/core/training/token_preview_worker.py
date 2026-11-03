@@ -110,7 +110,10 @@ def _mask(tokenizer, model_name: str, encoded: dict, final_format: str) -> tuple
     """Labels for each row via apply_completion_masking, the call the training worker makes."""
     from datasets import Dataset
     from LAiM.chat_templates import train_on_responses_only
-    from utils.datasets.completion_masking import apply_completion_masking
+    from utils.datasets.completion_masking import (
+        preset_marker_value,
+        apply_completion_masking,
+    )
 
     markers: dict[str, Any] = {}
     notes: list[str] = []
@@ -122,10 +125,10 @@ def _mask(tokenizer, model_name: str, encoded: dict, final_format: str) -> tuple
         **_ignored,
     ):
         inner = getattr(trainer.processing_class, "tokenizer", trainer.processing_class)
-        markers["instruction_part"] = instruction_part or getattr(
-            inner, "_LAiM_input_part", None
+        markers["instruction_part"] = instruction_part or preset_marker_value(
+            inner, "instruction"
         )
-        markers["response_part"] = response_part or getattr(inner, "_LAiM_output_part", None)
+        markers["response_part"] = response_part or preset_marker_value(inner, "response")
         label_fn = train_on_responses_only(
             None,
             instruction_part = instruction_part,

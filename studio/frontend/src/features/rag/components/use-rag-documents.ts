@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   consumeNativePathToken,
   type NativeIntent,
@@ -202,7 +203,7 @@ export function useRagDocuments(
             error: error ?? "Indexing failed",
             progress: null,
           });
-          toast.error(`Couldn't index ${filename}`, {
+          toast.error(translate("uxRag.couldnTIndexi266f", { p1: filename }), {
             description: error ?? "Indexing failed",
           });
         } else {
@@ -335,7 +336,7 @@ export function useRagDocuments(
           !opts?.silentErrors &&
           !useRagAvailabilityStore.getState().isUnavailable()
         ) {
-          toast.error("Failed to load documents", {
+          toast.error(translate("uxRag.failedToLoadDocumentslg368"), {
             description: err instanceof Error ? err.message : String(err),
           });
         }
@@ -588,7 +589,7 @@ export function useRagDocuments(
         } else {
           setDocuments((rows) => rows.filter((row) => row.id !== tempId));
         }
-        toast.error(`Couldn't upload ${name}`, { description: message });
+        toast.error(translate("uxRag.couldnTUploadgsrdr", { p1: name }), { description: message });
       }
     },
     [trackJob, patchDoc],
@@ -664,14 +665,14 @@ export function useRagDocuments(
                 ? await overrideScope()
                 : await overrideScope;
           if (!activeScope) {
-            throw new Error("Could not start a chat to attach them to.");
+            throw new Error(translate("uxRag.couldNotStartAj1wv9"));
           }
         } catch (err) {
           if (generation !== uploadGenerationRef.current) return;
           // Materialization failed: drop the chips so they don't hang "pending".
           const tempIds = new Set(fresh.map((f) => f.tempId));
           setDocuments((rows) => rows.filter((row) => !tempIds.has(row.id)));
-          toast.error("Couldn't attach documents", {
+          toast.error(translate("uxRag.couldnTAttachDocuments1anno"), {
             description: err instanceof Error ? err.message : String(err),
           });
           return;
@@ -745,7 +746,7 @@ export function useRagDocuments(
         setDocuments(prev);
         if (prevSig !== undefined) sigByDocId.current.set(documentId, prevSig);
         if (prevRetry !== undefined) retryItems.current.set(documentId, prevRetry);
-        toast.error("Delete failed", {
+        toast.error(translate("uxRag.deleteFailed10vm5"), {
           description: err instanceof Error ? err.message : String(err),
         });
         return false;

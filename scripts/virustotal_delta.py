@@ -6,7 +6,7 @@
 
 Six antivirus-hardening passes shipped without a before-and-after number, because nobody had one.
 There is one now: `install.ps1` at commit `1ad44677d` -- the revision reported in
-LAiMai/LAiM#10805 -- is `ec29980b...`, and VirusTotal holds its verdict. That gives this work a
+OPusAngel/LAiM#10805 -- is `ec29980b...`, and VirusTotal holds its verdict. That gives this work a
 baseline for the first time, and this tool is the diff against it.
 
 Three numbers, because they move independently and mean different things:

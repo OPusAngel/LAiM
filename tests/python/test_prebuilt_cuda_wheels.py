@@ -56,7 +56,7 @@ def env(
     }
 
 
-OUR_BASE = "https://github.com/LAiMai/LAiM/releases/download/prebuilt-wheels-cu13/"
+OUR_BASE = "https://github.com/unslothai/unsloth/releases/download/prebuilt-wheels-cu13/"
 
 
 def triggers(doc: dict) -> dict:
@@ -423,7 +423,7 @@ class TestReleaseNotes:
         ]
         entries.append(("deadbeef", "SHA256SUMS"))
         return prebuilt_wheels.render_notes(
-            entries, tag = "prebuilt-wheels-cu13", repo = "LAiMai/LAiM"
+            entries, tag = "prebuilt-wheels-cu13", repo = "OPusAngel/LAiM"
         )
 
     def test_the_body_is_one_sentence_naming_what_is_attached(self):

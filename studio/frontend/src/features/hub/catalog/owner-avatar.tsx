@@ -2,6 +2,7 @@
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { cn } from "@/lib/utils";
+import { HF_SOURCE_OWNER } from "@/config/hub-source";
 import { useEffect, useState } from "react";
 import { ownerPaletteColor } from "../lib/avatar-theme";
 import { useHfOwnerAvatar } from "../lib/hf-owner-avatar";
@@ -9,6 +10,10 @@ import {
   type ProviderLogo,
   resolveOwnerProviderLogo,
 } from "../lib/provider-logos";
+
+function isLAiMOwner(owner: string): boolean {
+  return owner.trim().toLowerCase() === HF_SOURCE_OWNER;
+}
 
 type AvatarSize = "xs" | "sm" | "md" | "lg";
 
@@ -18,20 +23,6 @@ const SIZES: Record<AvatarSize, string> = {
   md: "size-9 rounded-[12px] text-ui-13",
   lg: "size-12 rounded-[15px] text-ui-16",
 };
-
-const LAiM_OWNER_LOGO: ProviderLogo = {
-  id: "LAiM",
-  name: "LAiM",
-  logoPath: "/rounded.png",
-  treatment: "original",
-  background: "transparent",
-  fit: "cover",
-  prefixes: [],
-};
-
-function isLAiMOwner(owner: string): boolean {
-  return owner.trim().toLowerCase() === "LAiM";
-}
 
 const AVATAR_IMAGE_RETRY_BASE_MS = 60_000;
 const AVATAR_IMAGE_RETRY_MAX_MS = 30 * 60_000;
@@ -83,12 +74,15 @@ export function OwnerAvatar({
     );
   }
 
-  if (isLAiMOwner(owner) && !remote) {
+  if (isLAiMOwner(owner)) {
+    // Unmatched first-party repos still show the org's real avatar rather than the
+    // app mark: the publisher icon must say what the model is, not where it was listed.
     return (
-      <ProviderLogoTile
-        provider={LAiM_OWNER_LOGO}
+      <DefaultAvatar
+        owner={owner}
         size={size}
         className={className}
+        remote={true}
       />
     );
   }
@@ -107,15 +101,11 @@ export function useAvatarImageUrl(
   repoName?: string,
 ): string | null {
   const provider = resolveOwnerProviderLogo(owner, repoName);
-  const isLAiM = isLAiMOwner(owner);
-  const remoteUrl = useHfOwnerAvatar(
-    owner.trim() || "?",
-    provider == null && !isLAiM,
-  );
+  const remoteUrl = useHfOwnerAvatar(owner.trim() || "?", provider == null);
   if (provider) {
     return provider.treatment === "original" ? provider.logoPath : null;
   }
-  return isLAiM ? LAiM_OWNER_LOGO.logoPath : remoteUrl;
+  return remoteUrl;
 }
 
 function ProviderLogoTile({

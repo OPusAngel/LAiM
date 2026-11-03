@@ -23,8 +23,8 @@ import {
 } from "../src/features/chat/lib/per-model-params.ts";
 import type { InferenceParams } from "../src/features/chat/types/runtime.ts";
 
-const QWEN = "LAiM/Qwen3.5-9B-GGUF";
-const LLAMA = "LAiM/Llama-4-8B";
+const QWEN = "unsloth/Qwen3.5-9B-GGUF";
+const LLAMA = "unsloth/Llama-4-8B";
 
 function params(overrides: Partial<InferenceParams> = {}): InferenceParams {
   return {
@@ -401,7 +401,7 @@ for (const [label, id] of [
     "/home/d/.cache/huggingface/hub/models--LAiM--Qwen3-0.6B",
   ],
   ["a provider-qualified id", "external::anthropic::claude-opus-5"],
-  ["a non-ASCII repo id", "LAiM/通義千問-7B"],
+  ["a non-ASCII repo id", "unsloth/通義千問-7B"],
 ] as const) {
   test(`${label} is remembered and replayed unchanged`, () => {
     const recorded = record(

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { useAppShellReadySignal } from "@/components/app-readiness";
 import { apiUrl } from "@/lib/api-base";
 import { normalizeAccountUsername, transitionBrowserAccount } from "@/lib/account-transition";
@@ -16,6 +17,7 @@ import { useEffect, useRef, useState } from "react";
 import type { ReactElement } from "react";
 import type { SyntheticEvent } from "react";
 import { refreshSession } from "../api";
+import { translateAuthDetail } from "../auth-error-text";
 import {
   deadlineFromStatus,
   formatCountdown,
@@ -141,7 +143,11 @@ export function AuthForm({ mode }: AuthFormProps): ReactElement | null {
         }
       } catch (err: unknown) {
         if (!canceled) {
-          setError(err instanceof Error ? err.message : "Failed to load.");
+          setError(
+            err instanceof Error
+              ? translateAuthDetail(err.message)
+              : translate("uxFeatures.failedToLoad18nxx"),
+          );
         }
       } finally {
         if (!canceled) setStatusLoading(false);
@@ -179,21 +185,25 @@ export function AuthForm({ mode }: AuthFormProps): ReactElement | null {
 
   let helperText: string | null = null;
   if (initialized === false) {
-    helperText = "Auth is still bootstrapping the default admin account.";
+    helperText = translate("uxFeatures.authIsStillBootstrapping3cq2x");
   } else if (isLoginMode && requiresPasswordChange) {
-    helperText = "Sign in once with the seeded credentials to change the password.";
+    helperText = translate("uxFeatures.signInOnceWithThe7pdzq");
   } else if (!isLoginMode && !requiresPasswordChange) {
-    helperText = "Password already updated. Use the login screen.";
+    helperText = translate("uxFeatures.passwordAlreadyUpdated1fgnw");
   }
-  const title = isLoginMode ? "Welcome back" : "Setup your account";
-  const subtitle = isLoginMode  
-    ? "Sign in with your password."
-    : "Create a new password";
-  const submitLabel = isLoginMode ? "Login" : "Change password";
+  const title = isLoginMode
+    ? translate("uxFeatures.welcomeBack98t84")
+    : translate("uxFeatures.setupYourAccountpf3iq");
+  const subtitle = isLoginMode
+    ? translate("uxFeatures.signInWithYour2yn77")
+    : translate("uxFeatures.createANewPassword4dg6b");
+  const submitLabel = isLoginMode
+    ? translate("uxApp.loginnubop")
+    : translate("uxFeatures.changePasswordz0me4");
   const showSwitchLink = !isLoginMode;
-  const switchText = "Password already setup? ";
+  const switchText = translate("uxFeatures.passwordAlreadySetupg5td0");
   const switchLinkTo = "/login";
-  const switchLinkText = "Back to login";
+  const switchLinkText = translate("uxFeatures.backToLoginv3tkm");
   const currentPassword = password || window.__LAiM_BOOTSTRAP__?.password || "";
   // On first boot the backend injects __LAiM_BOOTSTRAP__ and we silently
   // reuse that password; the Current password input is only rendered for the
@@ -228,25 +238,25 @@ export function AuthForm({ mode }: AuthFormProps): ReactElement | null {
       if (currentPassword.length < 8) {
         setError(
           currentPassword
-            ? "Current password must be at least 8 characters."
-            : "Unable to initialize setup. Reload the page and try again.",
+            ? translate("uxFeatures.currentPasswordMustBeqy2tp")
+            : translate("uxFeatures.unableToInitializeSetup023an"),
         );
         return;
       }
       if (newPassword.length < 8) {
-        setError("New password must be at least 8 characters.");
+        setError(translate("uxFeatures.newPasswordMustBeAtooh7c"));
         return;
       }
       if (/\s/.test(newPassword)) {
-        setError("New password cannot contain spaces.");
+        setError(translate("uxFeatures.newPasswordCannotContainz61yu"));
         return;
       }
       if (newPassword !== confirmPassword) {
-        setError("Passwords do not match.");
+        setError(translate("uxFeatures.passwordsDoNotMatchbuglm"));
         return;
       }
       if (currentPassword === newPassword) {
-        setError("New password must be different from your current password.");
+        setError(translate("uxFeatures.newPasswordMustBeDifferentacsbo"));
         return;
       }
     }
@@ -306,11 +316,11 @@ export function AuthForm({ mode }: AuthFormProps): ReactElement | null {
         });
 
         if (!response.ok) {
-          let message = "Password update failed.";
+          let message = translate("uxFeatures.passwordUpdateFailedo5dhi");
           const errorPayload = (await response
             .json()
             .catch(() => null)) as { detail?: string } | null;
-          if (errorPayload?.detail) message = errorPayload.detail;
+          if (errorPayload?.detail) message = translateAuthDetail(errorPayload.detail);
           throw new Error(message);
         }
 
@@ -341,7 +351,10 @@ export function AuthForm({ mode }: AuthFormProps): ReactElement | null {
       // ".\LAiM_studio\Scripts\LAiM.exe ..." -- that only resolves inside
       // the LAiM home dir and fails with CommandNotFoundException elsewhere.
       // Show the backend message as-is.
-      const msg = err instanceof Error ? err.message : "Auth failed.";
+      const msg =
+        err instanceof Error
+          ? translateAuthDetail(err.message)
+          : translate("uxFeatures.authFailedv5g9s");
       setError(msg);
     } finally {
       setLoading(false);
@@ -354,7 +367,7 @@ export function AuthForm({ mode }: AuthFormProps): ReactElement | null {
     <div className="w-full max-w-sm space-y-6">
       <div className="space-y-1.5 text-center">
         <MascotImg
-          src="Sloth emojis/large sloth wave.png"
+          src="LAiM_anim.webp"
           className="mx-auto mb-2 h-20 w-20 object-contain"
         />
         <h2 className="text-2xl font-semibold text-foreground">{title}</h2>
@@ -365,16 +378,9 @@ export function AuthForm({ mode }: AuthFormProps): ReactElement | null {
         <p className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-center text-sm text-amber-600">
           {hasExpired(deadlineAt - nowMs) ? (
             <>
-              This instance is shutting down: it was reachable on the network
-              and its default password was never changed.
-            </>
+              {translate("uxFeatures.thisInstanceIsShuttingdxa25")}</>
           ) : (
-            <>
-              This instance is reachable on the network and still uses its
-              default password, so it shuts down in{" "}
-              {formatCountdown(deadlineAt - nowMs)}. Setting a password here
-              keeps it running.
-            </>
+            <>{translate("uxFeatures.thisInstanceIsReachablej7e80", { p1: " ", p2: formatCountdown(deadlineAt - nowMs) })}</>
           )}
         </p>
       )}
@@ -393,7 +399,7 @@ export function AuthForm({ mode }: AuthFormProps): ReactElement | null {
         )}
         {isLoginMode && loginMode === "multi" && (
           <div className="space-y-2">
-            <Label htmlFor="username">Username</Label>
+            <Label htmlFor="username">{translate("uxFeatures.username2zi1f")}</Label>
             <Input
               id="username"
               name="username"
@@ -405,13 +411,13 @@ export function AuthForm({ mode }: AuthFormProps): ReactElement | null {
               required
             />
             <p id="setup-code-hint" className="text-sm text-muted-foreground">
-              First sign in? Paste the setup code your administrator gave you as the password.
+              {translate("uxFeatures.firstSignInPasteknbbe")}
             </p>
           </div>
         )}
         {isLoginMode && (
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">{translate("uxFeatures.passwordd9l6i")}</Label>
             <div className="relative">
               <Input
                 id="password"
@@ -445,7 +451,7 @@ export function AuthForm({ mode }: AuthFormProps): ReactElement | null {
           <>
             {!hasBootstrapPassword && (
               <div className="space-y-2">
-                <Label htmlFor="current-password">Current password</Label>
+                <Label htmlFor="current-password">{translate("uxFeatures.currentPassword7mqo6")}</Label>
                 <div className="relative">
                   <Input
                     id="current-password"
@@ -479,13 +485,13 @@ export function AuthForm({ mode }: AuthFormProps): ReactElement | null {
                     id="current-setup-code-hint"
                     className="text-sm text-muted-foreground"
                   >
-                    Paste the setup code you just signed in with as the current password.
+                    {translate("uxCopy.pasteTheSetupCode1bjke")}
                   </p>
                 )}
               </div>
             )}
             <div className="space-y-2">
-              <Label htmlFor="new-password">New password</Label>
+              <Label htmlFor="new-password">{translate("uxFeatures.newPassword3kjv2")}</Label>
               <div className="relative">
                 <Input
                   id="new-password"
@@ -513,7 +519,7 @@ export function AuthForm({ mode }: AuthFormProps): ReactElement | null {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirm-password">Confirm password</Label>
+              <Label htmlFor="confirm-password">{translate("uxFeatures.confirmPasswordnjfhc")}</Label>
               <Input
                 id="confirm-password"
                 type="password"
@@ -533,10 +539,10 @@ export function AuthForm({ mode }: AuthFormProps): ReactElement | null {
               aria-live="polite"
             >
               {showWhitespaceWarning
-                ? "New password cannot contain spaces."
+                ? translate("uxFeatures.newPasswordCannotContainz61yu")
                 : showPasswordMismatchWarning
-                  ? "Please ensure passwords match."
-                  : "Must be at least 8 characters."}
+                  ? translate("uxFeatures.pleaseEnsurePasswordsn0rxc")
+                  : translate("uxFeatures.mustBeAtLeastmbgij")}
             </p>
           </>
         )}
@@ -561,7 +567,7 @@ export function AuthForm({ mode }: AuthFormProps): ReactElement | null {
             invalidChangePasswordForm
           }
         >
-          {loading ? "Please wait..." : submitLabel}
+          {loading ? translate("uxFeatures.pleaseWait4e0su") : submitLabel}
         </Button>
       </form>
 

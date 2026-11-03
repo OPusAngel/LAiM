@@ -176,7 +176,7 @@ def _add_gguf_picks(
     A bare id means the quant a plain load takes, ranked by the ``preferred_quant`` the chat
     resolver and /v1/models already share, so one id cannot mean different weights per surface.
     Only the checkpoints ``default_gguf_scope`` names are ranked (the root ones when there are
-    any, or a curated repo's default subdirectory such as LAiM/LTX-2.5-GGUF's distilled/), so
+    any, or a curated repo's default subdirectory such as unsloth/LTX-2.5-GGUF's distilled/), so
     one id cannot mean different weights here than in the picker.
     """
     from core.inference.openai_auto_download import preferred_quant

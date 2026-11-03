@@ -68,7 +68,7 @@ export function runHelpAction(action: HelpAction): void {
       openLink("https://LAiM.ai/docs/new/changelog");
       return;
     case "help-send-feedback":
-      openLink("https://github.com/LAiMai/LAiM/issues");
+      openLink("https://github.com/OPusAngel/LAiM/issues");
       return;
   }
 }

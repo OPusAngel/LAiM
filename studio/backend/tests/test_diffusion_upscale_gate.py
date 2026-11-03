@@ -21,9 +21,9 @@ from core.inference.diffusion_memory import (
     image_activation_verdict,
 )
 
-_QWEN_HINT = "qwen-image|LAiM/Qwen-Image-2512-GGUF|Qwen/Qwen-Image"
-_ZIMAGE_HINT = "z-image|LAiM/Z-Image-Turbo-GGUF|Tongyi-MAI/Z-Image-Turbo"
-_Q21_HINT = "qwen-image-2.1|LAiM/Qwen-Image-2.1-GGUF|Qwen/Qwen-Image-2.1"
+_QWEN_HINT = "qwen-image|unsloth/Qwen-Image-2512-GGUF|Qwen/Qwen-Image"
+_ZIMAGE_HINT = "z-image|unsloth/Z-Image-Turbo-GGUF|Tongyi-MAI/Z-Image-Turbo"
+_Q21_HINT = "qwen-image-2.1|unsloth/Qwen-Image-2.1-GGUF|Qwen/Qwen-Image-2.1"
 _Q21_COND_WEIGHT = 0.32  # diffusion_families: qwen-image-2.1 condition_pixel_weight
 
 

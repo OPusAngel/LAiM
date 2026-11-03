@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import type { TourStep } from "@/features/tour";
 
 /** The list and the learning-recipe cards are two branches of one slot; neither mounts until ready. */
@@ -15,13 +16,13 @@ export function buildDataRecipesTourSteps({
     {
       id: "new",
       target: "recipes-new",
-      title: "Build a dataset",
-      body: (
+      title: translate("uxDatarecipes.buildADataseta4grp"),
+      get body() {
+        return (
         <>
-          A recipe turns raw documents into training data. Start empty, or from
-          a learning recipe already wired up for a common job.
-        </>
-      ),
+          {translate("uxDatarecipes.aRecipeTurnsRaw1tgmw")}</>
+      );
+      },
     },
   ];
 
@@ -32,24 +33,24 @@ export function buildDataRecipesTourSteps({
       ? {
           id: "list",
           target: "recipes-list",
-          title: "Your recipes",
-          body: (
+          title: translate("uxDatarecipes.yourRecipes1cy9z"),
+          get body() {
+            return (
             <>
-              Open one to edit its steps or rerun it. Recipes are saved on this
-              device, and a run's dataset is ready to pick on the Train page.
-            </>
-          ),
+              {translate("uxDatarecipes.openOneToEdit1ojln")}</>
+          );
+          },
         }
       : {
           id: "templates",
           target: "recipes-templates",
-          title: "Learning recipes",
-          body: (
+          title: translate("uxDatarecipes.learningRecipesrpi0k"),
+          get body() {
+            return (
             <>
-              Worked examples you can open and run as they are. The fastest way
-              to see how nodes connect.
-            </>
-          ),
+              {translate("uxDatarecipes.workedExamplesYouCan4u1df")}</>
+          );
+          },
         },
   );
 

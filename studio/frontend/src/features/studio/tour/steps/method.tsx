@@ -1,18 +1,21 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { ReadMore, type TourStep } from "@/features/tour";
 
 export const studioMethodStep: TourStep = {
   id: "method",
   target: "studio-method",
-  title: "Training method",
-  body: (
+  get title() {
+    return translate("uxStudio.trainingMethod1k0xc");
+  },
+  get body() {
+    return (
     <>
-      QLoRA trains adapters on a 4-bit base and needs the least VRAM. LoRA does
-      the same in 16-bit. Full fine-tune updates every weight. Continued
-      pretraining is for teaching a new domain or language.{" "}
+      {translate("uxTour.qLoRATrainsAdaptersOn49tuo")}
       <ReadMore href="https://LAiM.ai/docs/basics/lora-hyperparameters-guide" />
     </>
-  ),
+  );
+  },
 };

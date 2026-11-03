@@ -295,7 +295,7 @@ def install_studio(
     branch: str,
     home: Path,
     repo: Optional[Path] = None,
-    remote: str = "https://github.com/LAiMai/LAiM",
+    remote: str = "https://github.com/OPusAngel/LAiM",
     reuse_clone: bool = True,
 ) -> StudioInstall:
     home = Path(home).resolve()

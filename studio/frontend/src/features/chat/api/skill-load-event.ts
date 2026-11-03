@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
+
 /** UI-only card for a backend skill load; excluded from model history, provider frames sanitized. */
 export function skillLoadCardEvent(
   event: Record<string, unknown>,
@@ -21,6 +23,6 @@ export function skillLoadCardEvent(
       : {}),
     ...(pending
       ? {}
-      : { result: event.detail ?? "Skill loading unavailable." }),
+      : { result: event.detail ?? translate("uxChat.skillLoadingUnavailablecdszn") }),
   };
 }

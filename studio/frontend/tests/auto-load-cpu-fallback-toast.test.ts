@@ -8,7 +8,7 @@ import { readSrc, registerBundlerResolver } from "./helpers/kit.ts";
 
 registerBundlerResolver();
 
-const { CPU_FALLBACK_MESSAGE, loadFallbackNotice } = await import(
+const { cpuFallbackMessage, loadFallbackNotice } = await import(
   "../src/features/chat/utils/mmproj-fallback.ts"
 );
 const { offloadWarning } = await import(
@@ -48,7 +48,7 @@ test("an auto-load that fell back to CPU warns instead of claiming plain success
   assert.equal(notice.degraded, true, "a CPU fallback is not a plain success");
   assert.match(notice.title, ON_CPU_SUFFIX);
   assert.match(notice.description ?? "", GPU_DISABLED);
-  assert.equal(notice.description, CPU_FALLBACK_MESSAGE);
+  assert.equal(notice.description, cpuFallbackMessage());
 });
 
 test("a load with no fallback stays a plain success", () => {
@@ -88,7 +88,7 @@ test("a known CPU fallback is not also reported as a split", () => {
     offload,
   );
   assert.equal(notice.title, "Loaded Qwen3 on CPU");
-  assert.equal(notice.description, CPU_FALLBACK_MESSAGE);
+  assert.equal(notice.description, cpuFallbackMessage());
 });
 
 test("a split load that also lost vision says both", () => {

@@ -20,7 +20,7 @@ from core.inference.video_minimax_h3 import (
 from utils.host_memory import cgroup_swap_allowance_bytes
 
 GIB = 1024**3
-# The published LAiM/MiniMax-H3-GGUF sizes: Q4_K denoiser, Q4_K_M encoder, video + audio VAE.
+# The published unsloth/MiniMax-H3-GGUF sizes: Q4_K denoiser, Q4_K_M encoder, video + audio VAE.
 Q4 = dict(dit_bytes = int(10.64 * GIB), te_bytes = int(16.97 * GIB), vae_bytes = int(5.41 * GIB))
 AUTO = ("--offload-to-cpu", "--diffusion-fa", "--max-vram", "-1")
 LOW_VRAM = (

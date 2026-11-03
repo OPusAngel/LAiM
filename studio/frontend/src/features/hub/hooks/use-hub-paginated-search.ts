@@ -3,6 +3,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { sanitizeHubErrorMessage } from "../lib/network";
+import { translate } from "@/i18n";
+
 
 interface HfPaginatedState<T> {
   results: T[];
@@ -247,7 +249,7 @@ export function useHubPaginatedSearch<T>(
           isLoading: false,
           isLoadingMore: false,
           hasMore: false,
-          error: hubErrorText(err, "Search failed"),
+          error: hubErrorText(err, translate("uxHub.searchFailedj7hag")),
           queryKey,
         });
       })
@@ -373,7 +375,7 @@ export function useHubPaginatedSearch<T>(
         setState((prev) => ({
           ...prev,
           isLoadingMore: false,
-          error: hubErrorText(err, "Failed to load more"),
+          error: hubErrorText(err, translate("uxHub.failedToLoadMorepkda0")),
         }));
       })
       .finally(() => {

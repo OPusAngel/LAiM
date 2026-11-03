@@ -171,7 +171,7 @@ def _has_torch() -> bool:
         try:
             from utils.torch_warmup import purge_partial_import
         except Exception:
-            # Also exec'd standalone (tests/python/test_e2e_no_torch_sandbox.py); nothing to purge.
+            # Also exec'd standalone (tests/python/test_e2e_no_torch_workdir.py); nothing to purge.
             pass
         else:
             purge_partial_import("torch")
@@ -412,7 +412,7 @@ def _linux_amd_gfx_candidates() -> list[str]:
 
 
 def _hidden_console_kwargs() -> Dict[str, Any]:
-    """subprocess kwargs that keep a console window from flashing on Windows. Imported here rather than at module scope because test_e2e_no_torch_sandbox.py executes this module against a stub tree with no utils.subprocess_compat, and a top-level import would make it unloadable there."""
+    """subprocess kwargs that keep a console window from flashing on Windows. Imported here rather than at module scope because test_e2e_no_torch_workdir.py executes this module against a stub tree with no utils.subprocess_compat, and a top-level import would make it unloadable there."""
     try:
         from utils.subprocess_compat import windows_hidden_subprocess_kwargs
     except Exception:
@@ -5747,8 +5747,8 @@ def _estimate_fp16_model_size_bytes_from_vllm_utils(config) -> Optional[int]:
     if config is None:
         return None
 
-    previous_LAiM_present = os.environ.get("LAiM_IS_PRESENT")
-    os.environ["LAiM_IS_PRESENT"] = "1"
+    previous_LAiM_present = os.environ.get("UNSLOTH_IS_PRESENT")
+    os.environ["UNSLOTH_IS_PRESENT"] = "1"
     try:
         from LAiM_zoo import vllm_utils as _vllm_utils
 
@@ -5776,9 +5776,9 @@ def _estimate_fp16_model_size_bytes_from_vllm_utils(config) -> Optional[int]:
         return None
     finally:
         if previous_LAiM_present is None:
-            os.environ.pop("LAiM_IS_PRESENT", None)
+            os.environ.pop("UNSLOTH_IS_PRESENT", None)
         else:
-            os.environ["LAiM_IS_PRESENT"] = previous_LAiM_present
+            os.environ["UNSLOTH_IS_PRESENT"] = previous_LAiM_present
 
     model_size_gb = 1024.0 - memory_left_for_kv_cache_gb
     if model_size_gb <= 0:
@@ -5831,7 +5831,7 @@ def estimate_required_model_memory_gb(
     max_seq_length: int = 2048,
     lora_rank: int = 16,
     target_modules: Optional[list] = None,
-    gradient_checkpointing: str = "LAiM",
+    gradient_checkpointing: str = "unsloth",
     optimizer: str = "adamw_8bit",
 ) -> tuple[Optional[float], Dict[str, Any]]:
     from .vram_estimation import (
@@ -6180,7 +6180,7 @@ def auto_select_gpu_ids(
     max_seq_length: int = 2048,
     lora_rank: int = 16,
     target_modules: Optional[list] = None,
-    gradient_checkpointing: str = "LAiM",
+    gradient_checkpointing: str = "unsloth",
     optimizer: str = "adamw_8bit",
     required_override_gb: Optional[float] = None,
 ) -> tuple[Optional[list[int]], Dict[str, Any]]:
@@ -6387,7 +6387,7 @@ def prepare_gpu_selection(
     max_seq_length: int = 2048,
     lora_rank: int = 16,
     target_modules: Optional[list] = None,
-    gradient_checkpointing: str = "LAiM",
+    gradient_checkpointing: str = "unsloth",
     optimizer: str = "adamw_8bit",
     required_override_gb: Optional[float] = None,
 ) -> tuple[Optional[list[int]], Dict[str, Any]]:
@@ -7292,7 +7292,7 @@ def safe_num_proc(desired: Optional[int] = None) -> int:
 
     # Every number reaching here is a backend heuristic, but downstream it looks like user intent and is only clamped by free memory, so a 64-core host sends 16 workers to Dataset.map -- the shape of #2693, and slower besides (32 workers measured 14.2s against 6.3s in-process).
     if desired > _STUDIO_NUM_PROC_CAP:
-        # No mention of LAiM_DATASET_NUM_PROC here: this function returns an int >= 1 and cannot express the in-process the hatch promises. The hatch is read in dataset_map_num_proc, whose value reaches Dataset.map.
+        # No mention of UNSLOTH_DATASET_NUM_PROC here: this function returns an int >= 1 and cannot express the in-process the hatch promises. The hatch is read in dataset_map_num_proc, whose value reaches Dataset.map.
         logger.info(
             f"num_proc {desired} -> {_STUDIO_NUM_PROC_CAP}: tokenization stops "
             f"scaling well before this and each worker holds its own tokenizer copy."
@@ -7327,7 +7327,7 @@ def dataset_map_num_proc(
     ``serial_as_none`` says how to spell "run in-process" for the layer reading the value back. Leave it True at a map() call site, where None is the only value that builds no pool. Pass False when the result is written into a config (SFTConfig.dataset_num_proc): a config None means "auto-size me" to every downstream reader, so only 1 survives that round trip.
     """
     if sys.platform in ("win32", "darwin"):
-        # LAiM_DATASET_NUM_PROC is an unvetoed escape hatch in the shared policy, so a user who has read the dead-worker message and accepted spawn workers must not be overruled here. Only the hatch can produce a count on this platform.
+        # UNSLOTH_DATASET_NUM_PROC is an unvetoed escape hatch in the shared policy, so a user who has read the dead-worker message and accepted spawn workers must not be overruled here. Only the hatch can produce a count on this platform.
         if _num_proc_override_is_set():
             return _bounded_by_the_shared_policy(desired, serial_as_none)
         # None is safe at either layer here: workers are unusable on a spawn platform, so every auto-sizer that reads a config None vetoes too. A 1 would be worse -- only the SFT map site is rewritten, so DPO/KTO/CPO/ORPO/Reward/PRM would hand it to Dataset.map and get a Pool(1) whose child re-imports the user's __main__ (#3211 / #3397).
@@ -7400,7 +7400,7 @@ def _shared_policy():
 
 
 def _num_proc_override_is_set() -> bool:
-    """Whether the escape hatch decided the count, not merely whether it is set: the policy ignores an unparseable or negative value with a warning, so reading the variable directly would let LAiM_DATASET_NUM_PROC=-1 skip the multi-GPU cap while contributing nothing."""
+    """Whether the escape hatch decided the count, not merely whether it is set: the policy ignores an unparseable or negative value with a warning, so reading the variable directly would let UNSLOTH_DATASET_NUM_PROC=-1 skip the multi-GPU cap while contributing nothing."""
     policy = _shared_policy()
     if policy is None:
         return False

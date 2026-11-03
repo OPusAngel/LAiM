@@ -5,6 +5,7 @@ import {
   ChevronDownIcon,
   XIcon,
 } from "lucide-react";
+import { translate, useT } from "@/i18n";
 import { Tick02Icon } from "@/lib/tick-icon";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { FileDatabaseIcon } from "@hugeicons/core-free-icons";
@@ -41,6 +42,7 @@ export function KnowledgeBaseComposerButton({
   /** False in Compare, which renders no files panel to show. */
   hasFilesPanel?: boolean;
 } = {}) {
+  const t = useT();
   const ragEnabled = useChatRuntimeStore((s) => s.ragEnabled);
   const setRagEnabled = useChatRuntimeStore((s) => s.setRagEnabled);
   const ragDisabled = useRagToolDisabled();
@@ -119,9 +121,9 @@ export function KnowledgeBaseComposerButton({
           <button
             type="button"
             className="composer-pill-btn"
-            data-pill-label="RAG"
+            data-pill-label={t("composer.pill.rag")}
             data-active={ragDisabled ? "false" : "true"}
-            aria-label="Retrieval source"
+            aria-label={translate("uxRag.retrievalSource1bm6a")}
           >
             {/* Icon doubles as an off switch: hover swaps to an X; clicking it
                 turns RAG off without opening the menu. In compact icon-only
@@ -129,7 +131,7 @@ export function KnowledgeBaseComposerButton({
                 the trigger and open the menu instead. */}
             <span
               role="button"
-              aria-label="Turn off retrieval"
+              aria-label={translate("uxRag.turnOffRetrievaljjoa9")}
               tabIndex={-1}
               onPointerDown={(e) => {
                 if (e.currentTarget.closest('[data-pill-compact="true"]')) return;
@@ -149,7 +151,7 @@ export function KnowledgeBaseComposerButton({
               />
               <XIcon className="composer-pill-x" />
             </span>
-            <span>RAG</span>
+            <span>{t("composer.pill.rag")}</span>
             <ChevronDownIcon strokeWidth={1.5} className="composer-pill-caret size-[calc(15px*var(--ui-space-scale,1))]" />
           </button>
         </DropdownMenuTrigger>
@@ -174,7 +176,7 @@ export function KnowledgeBaseComposerButton({
               <>
                 <DropdownMenuItem onSelect={() => setRagPanelHidden(false)} className="gap-2.5">
                   <FileGlyph strokeWidth={1.75} />
-                  <span className="truncate">Show files</span>
+                  <span className="truncate">{translate("uxRag.showFilesbmi4o")}</span>
                   {ragPanelFileCount > 0 ? (
                     <span className="inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-muted px-1.5 text-ui-12 font-medium tabular-nums text-muted-foreground">
                       {ragPanelFileCount}
@@ -185,7 +187,7 @@ export function KnowledgeBaseComposerButton({
               </>
             ) : null}
             <DropdownMenuLabel className="flex items-center justify-between gap-3">
-              <span className="shrink-0">Retrieve from</span>
+              <span className="shrink-0">{translate("uxRag.retrieveFromdo5v5")}</span>
               {isOwner ? <EmbeddingModelMenuChip onOpen={() => setView("embedding")} /> : null}
             </DropdownMenuLabel>
             <DropdownMenuItem
@@ -196,7 +198,7 @@ export function KnowledgeBaseComposerButton({
                   : "relative"
               }
             >
-              <span className="truncate">This thread's documents</span>
+              <span className="truncate">{translate("uxRag.thisThreadSDocumentsjvno6")}</span>
               {ragSource.type === "thread" ? (
                 <HugeiconsIcon
                   icon={Tick02Icon}
@@ -234,9 +236,7 @@ export function KnowledgeBaseComposerButton({
                 setMenuOpen(false);
                 setDialogOpen(true);
               }}
-            >
-              Manage knowledge bases…
-            </DropdownMenuItem>
+            >{translate("uxRag.manageKnowledgeBasesg6gne")}</DropdownMenuItem>
             </>
           )}
         </DropdownMenuContent>

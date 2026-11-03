@@ -121,8 +121,8 @@ def test_select_lora_targets_explicit_override_wins():
 @pytest.mark.parametrize(
     "repo, expected",
     [
-        ("LAiM/Qwen-Image-2512-LAiM-bnb-4bit", True),
-        ("LAiM/Z-Image-Turbo-LAiM-bnb-4bit", True),
+        ("unsloth/Qwen-Image-2512-unsloth-bnb-4bit", True),
+        ("unsloth/Z-Image-Turbo-unsloth-bnb-4bit", True),
         ("some/model-int4", True),
         ("black-forest-labs/FLUX.1-dev", False),
         ("Tongyi-MAI/Z-Image-Turbo", False),
@@ -188,7 +188,7 @@ def test_zimage_offers_the_undistilled_base_the_upstream_recipe_trains_on():
     fam = detect_family("Tongyi-MAI/Z-Image")
     assert fam is not None and fam.name == "z-image"
     assert fam.train_base_repos == (
-        "LAiM/Z-Image-Turbo-LAiM-bnb-4bit",
+        "unsloth/Z-Image-Turbo-unsloth-bnb-4bit",
         "Tongyi-MAI/Z-Image-Turbo",
         "Tongyi-MAI/Z-Image",
     )
@@ -265,7 +265,7 @@ def test_the_gate_reads_the_repo_the_run_will_fetch(monkeypatch, tmp_path):
     monkeypatch.setattr(
         diffusion_families,
         "prefer_ungated_mirror",
-        lambda base, token = None: "LAiM/FLUX.1-dev"
+        lambda base, token = None: "unsloth/FLUX.1-dev"
         if base.lower() == "black-forest-labs/flux.1-dev"
         else base,
     )
@@ -276,7 +276,7 @@ def test_the_gate_reads_the_repo_the_run_will_fetch(monkeypatch, tmp_path):
     )
     with pytest.raises(Exception):  # noqa: B017, PT011 -- the dataset, not the gate
         run_dit_lora_training(cfg)
-    assert seen == ["LAiM/FLUX.1-dev"]
+    assert seen == ["unsloth/FLUX.1-dev"]
 
     # Control: with no mirror at all the canonical id is still what gets checked, so a
     # genuinely gated fetch without a token keeps failing here rather than mid-download.
@@ -315,12 +315,12 @@ def test_family_train_infos_lists_dit_families(dit_train_host):
     assert klein["deploy_bases"]["black-forest-labs/FLUX.2-klein-base-9B"] == (
         "black-forest-labs/FLUX.2-klein-9B"
     )
-    assert klein["deploy_bases"]["LAiM/FLUX.2-klein-base-9B"] == ("LAiM/FLUX.2-klein-9B")
+    assert klein["deploy_bases"]["unsloth/FLUX.2-klein-base-9B"] == ("unsloth/FLUX.2-klein-9B")
     assert klein["base_specs"]["black-forest-labs/FLUX.2-klein-base-9B"] == {
         "params": "9B",
         "qlora_vram_gb": 18,
     }
-    assert klein["base_specs"]["LAiM/FLUX.2-klein-base-9B"] == {
+    assert klein["base_specs"]["unsloth/FLUX.2-klein-base-9B"] == {
         "params": "9B",
         "qlora_vram_gb": 18,
     }

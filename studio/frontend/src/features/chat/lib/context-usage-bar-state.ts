@@ -2,14 +2,25 @@
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 // its own plain module so the node suite can drive it: the component is JSX the runner cannot import
+// Wording and number grouping arrive through `view`, so this stays free of the locale store.
+
+import type { InterpolationValues, TranslationKey } from "@/i18n";
+
+export type ContextUsageBarView = {
+  t: (key: TranslationKey, values?: InterpolationValues) => string;
+  locale: string;
+};
 
 export const formatTokenCount = (n: number): string => {
   if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
   return String(n);
 };
 
-export const formatTokenCountFull = (n: number): string => {
-  return n.toLocaleString();
+export const formatTokenCountFull = (
+  n: number,
+  locale: string,
+): string => {
+  return n.toLocaleString(locale);
 };
 
 export type ContextUsageBarInput = {
@@ -93,20 +104,24 @@ export type ContextUsageBarState = {
 };
 
 // a counted zero and an uncounted chat differ: an unmeasured prompt must not read as 0% of the window
-export function deriveContextUsageBar({
-  used,
-  total,
-  cached,
-  cacheWrites,
-  promptTokens,
-  completionTokens,
-  isMlx,
-  contextEnforced,
-  contextUnboundedWhenBatched,
-  parallelSlots,
-  contextBudget,
-  estimated,
-}: ContextUsageBarInput): ContextUsageBarState | null {
+export function deriveContextUsageBar(
+  {
+    used,
+    total,
+    cached,
+    cacheWrites,
+    promptTokens,
+    completionTokens,
+    isMlx,
+    contextEnforced,
+    contextUnboundedWhenBatched,
+    parallelSlots,
+    contextBudget,
+    estimated,
+  }: ContextUsageBarInput,
+  view: ContextUsageBarView,
+): ContextUsageBarState | null {
+  const { t, locale } = view;
   const limit = typeof total === "number" && total > 0 ? total : null;
   const usedTokens =
     typeof used === "number" && Number.isFinite(used) ? used : null;
@@ -114,13 +129,13 @@ export function deriveContextUsageBar({
   // no per-turn rows and no limit advice: neither is known from a guess
   if (estimated && usedTokens !== null && usedTokens > 0) {
     const approx = `~${formatTokenCount(usedTokens)}`;
-    const approxFull = `~${formatTokenCountFull(usedTokens)}`;
+    const approxFull = `~${formatTokenCountFull(usedTokens, locale)}`;
     if (limit === null) {
       return {
-        face: `${approx} tokens`,
+        face: t("uxContext.tokensFace", { count: approx }),
         compactFace: approx,
-        label: `Estimated context usage: ${approx} tokens`,
-        totalRowName: "Estimated tokens",
+        label: t("uxContext.labelEstimatedTokens", { approx }),
+        totalRowName: t("uxContext.rowEstimatedTokens"),
         totalRowValue: approxFull,
         percent: null,
         hasUsageDetails: false,
@@ -130,9 +145,12 @@ export function deriveContextUsageBar({
     return {
       face: `${approx} / ${formatTokenCount(limit)}`,
       compactFace: null,
-      label: `Estimated context usage: ${approx} of ${formatTokenCount(limit)} tokens`,
-      totalRowName: "Estimated total",
-      totalRowValue: `${approxFull} / ${formatTokenCountFull(limit)}`,
+      label: t("uxContext.labelEstimatedOfTokens", {
+        approx,
+        total: formatTokenCount(limit),
+      }),
+      totalRowName: t("uxContext.rowEstimatedTotal"),
+      totalRowValue: `${approxFull} / ${formatTokenCountFull(limit, locale)}`,
       percent: Math.min((usedTokens / limit) * 100, 100),
       hasUsageDetails: false,
       advice: "none",
@@ -148,12 +166,13 @@ export function deriveContextUsageBar({
     // nothing to show: no window to name, and no counted usage to report against one
     if (usedTokens === null) return null;
     if (usedTokens <= 0 && !hasUsageDetails) return null;
+    const count = formatTokenCount(usedTokens);
     return {
-      face: `${formatTokenCount(usedTokens)} tokens`,
-      compactFace: formatTokenCount(usedTokens),
-      label: `Token usage: ${formatTokenCount(usedTokens)} tokens`,
-      totalRowName: "Total tokens",
-      totalRowValue: formatTokenCountFull(usedTokens),
+      face: t("uxContext.tokensFace", { count }),
+      compactFace: count,
+      label: t("uxContext.labelTokenUsage", { count }),
+      totalRowName: t("uxContext.rowTotalTokens"),
+      totalRowValue: formatTokenCountFull(usedTokens, locale),
       percent: null,
       hasUsageDetails,
       advice: "none",
@@ -161,12 +180,13 @@ export function deriveContextUsageBar({
   }
 
   if (usedTokens === null) {
+    const count = formatTokenCount(limit);
     return {
-      face: `— / ${formatTokenCount(limit)}`,
+      face: `— / ${count}`,
       compactFace: null,
-      label: `Context window: ${formatTokenCount(limit)} tokens, usage not counted yet`,
-      totalRowName: "Context window",
-      totalRowValue: formatTokenCountFull(limit),
+      label: t("uxContext.labelContextWindow", { count }),
+      totalRowName: t("uxContext.rowContextWindow"),
+      totalRowValue: formatTokenCountFull(limit, locale),
       percent: null,
       hasUsageDetails,
       advice: "none",
@@ -177,9 +197,12 @@ export function deriveContextUsageBar({
   return {
     face: `${formatTokenCount(usedTokens)} / ${formatTokenCount(limit)}`,
     compactFace: null,
-    label: `Context usage: ${formatTokenCount(usedTokens)} of ${formatTokenCount(limit)} tokens`,
-    totalRowName: "Total",
-    totalRowValue: `${formatTokenCountFull(usedTokens)} / ${formatTokenCountFull(limit)}`,
+    label: t("uxContext.labelContextUsage", {
+      used: formatTokenCount(usedTokens),
+      total: formatTokenCount(limit),
+    }),
+    totalRowName: t("uxContext.rowTotal"),
+    totalRowValue: `${formatTokenCountFull(usedTokens, locale)} / ${formatTokenCountFull(limit, locale)}`,
     percent,
     hasUsageDetails,
     advice: contextLimitAdvice(

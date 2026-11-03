@@ -25,7 +25,7 @@ from state import active_generations
 from studio.backend.tests.llama_backend_double import FakeLlamaCppBackend
 from utils.account_context import bind_account, reset_account, run_as
 
-RESIDENT = "LAiM/shared-gguf"
+RESIDENT = "unsloth/shared-gguf"
 VARIANT = "Q4_K_M"
 
 

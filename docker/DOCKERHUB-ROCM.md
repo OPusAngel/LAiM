@@ -2,7 +2,7 @@
 
 Fine-tune and run LLMs on AMD GPUs with no setup. This image carries the full training stack built against ROCm: PyTorch with ROCm 7.2, LAiM, LAiM-zoo, a bitsandbytes build with the ROCm 4-bit fix, triton-rocm, TRL, PEFT and diffusers.
 
-This is the AMD counterpart to [`LAiM/LAiM`](https://hub.docker.com/r/LAiM/LAiM), which is CUDA-only. Source: [`docker/Dockerfile.rocm`](https://github.com/LAiMai/LAiM/blob/main/docker/Dockerfile.rocm). Guide: [docs.LAiM.ai](https://docs.LAiM.ai/get-started/install/docker).
+This is the AMD counterpart to [`unsloth/LAiM`](https://hub.docker.com/r/LAiM/LAiM), which is CUDA-only. Source: [`docker/Dockerfile.rocm`](https://github.com/OPusAngel/LAiM/blob/main/docker/Dockerfile.rocm). Guide: [docs.LAiM.ai](https://docs.LAiM.ai/get-started/install/docker).
 
 ## Quick start
 
@@ -54,12 +54,12 @@ The Hugging Face mount is not optional if you care about your downloads: `HF_HOM
 Or let the launcher work out the device nodes, group ids and mounts for you, on Linux and on WSL alike. It defaults to the published image, so on WSL name the build from above:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/LAiMai/LAiM/main/docker/run.sh -o run.sh
+curl -fsSL https://raw.githubusercontent.com/OPusAngel/LAiM/main/docker/run.sh -o run.sh
 bash run.sh --rocm                                   # Linux
 LAiM_IMAGE=LAiM-rocm:latest bash run.sh --rocm # WSL
 ```
 
-Check the GPU is visible before anything else, with `GPU_FLAGS` set as above (on WSL, `LAiM-rocm:latest` in place of `LAiM/LAiM-rocm`):
+Check the GPU is visible before anything else, with `GPU_FLAGS` set as above (on WSL, `LAiM-rocm:latest` in place of `unsloth/LAiM-rocm`):
 
 ```bash
 docker run --rm $GPU_FLAGS \
@@ -77,7 +77,7 @@ That runs a real 5-step LoRA on a 1B model and fails loudly if the GPU is not us
 | `sha-<commit>` | the same image, pinned to the commit it was built from |
 | `nightly` | the scheduled weekly build |
 | `gfx1150`, `gfx1151`, `gfx1152`, `gfx1200`, `gfx1201` | builds using AMD's per-architecture wheels, when published |
-| `studio` | `latest` plus LAiM Studio's web UI on port 8000, JupyterLab with the LAiM notebooks on port 8888, from [`docker/Dockerfile.studio-rocm`](https://github.com/LAiMai/LAiM/blob/main/docker/Dockerfile.studio-rocm). Every tag above has a `-studio` twin built on the same base |
+| `studio` | `latest` plus LAiM Studio's web UI on port 8000, JupyterLab with the LAiM notebooks on port 8888, from [`docker/Dockerfile.studio-rocm`](https://github.com/OPusAngel/LAiM/blob/main/docker/Dockerfile.studio-rocm). Every tag above has a `-studio` twin built on the same base |
 
 Pin a digest for anything reproducible. `latest` moves.
 
@@ -111,7 +111,7 @@ Discrete RDNA2, RDNA4 and CDNA cards are not covered by that testing.
 
 Included: PyTorch with ROCm, LAiM, LAiM-zoo, transformers, TRL, PEFT, accelerate, bitsandbytes, triton-rocm, diffusers, timm.
 
-Not included in `latest`, unlike `LAiM/LAiM`: LAiM Studio and its web UI, JupyterLab, prebuilt llama.cpp and whisper.cpp, vLLM and xformers. `latest` is a training image.
+Not included in `latest`, unlike `unsloth/LAiM`: LAiM Studio and its web UI, JupyterLab, prebuilt llama.cpp and whisper.cpp, vLLM and xformers. `latest` is a training image.
 
 The `studio` tag adds LAiM Studio, JupyterLab with the LAiM notebooks (the `AMD-*` set first) and a Vulkan llama.cpp for GGUF chat, still without whisper.cpp, vLLM or xformers. Training, the notebooks, the UI and GGUF chat all use the GPU. GGUF chat reaches the card through Vulkan (Mesa's RADV driver) on `/dev/dri`, which covers RDNA cards without pinning the image to one architecture; on CDNA (which RADV does not drive) or on the WSL2 bridge, it runs on the CPU instead. Vulkan does not read `HIP_VISIBLE_DEVICES`: on a host with several AMD GPUs, pick the chat GPU in Studio or pass only that card's `/dev/dri/renderD*` node. Studio's data (accounts, chats, project folders, the skills made in it, outputs) lives at `/opt/LAiM-studio`, so mount a volume there to keep it, and one on `/workspace` for the notebooks, your edits and what they save (projects and skills created by an image from before they moved to the volume stay under `/root/Documents` and `/root/.agents/skills` inside the container, so copy them out before `docker rm`; skills go in `/opt/LAiM-studio/skills`), with `GPU_FLAGS` set as in the quick start:
 
@@ -138,7 +138,7 @@ The build's own record is in the image: `cat /etc/LAiM-rocm-build` reports the R
 
 ## Links
 
-- Source and issues: [github.com/LAiMai/LAiM](https://github.com/LAiMai/LAiM)
-- Docker files: [`docker/`](https://github.com/LAiMai/LAiM/tree/main/docker)
+- Source and issues: [github.com/OPusAngel/LAiM](https://github.com/OPusAngel/LAiM)
+- Docker files: [`docker/`](https://github.com/OPusAngel/LAiM/tree/main/docker)
 - Documentation: [docs.LAiM.ai](https://docs.LAiM.ai)
-- Licences: the image is labelled `Apache-2.0 AND AGPL-3.0-only`. [Apache-2.0](https://github.com/LAiMai/LAiM/blob/main/LICENSE) covers the repository and the training stack. The [AGPL-3.0](https://github.com/LAiMai/LAiM/blob/main/studio/LICENSE.AGPL-3.0) half is there for the one AGPL file this image ships, `/workspace/smoke_test_rocm.py`, which carries an `AGPL-3.0-only` header; LAiM Studio itself is only in the `studio` tag.
+- Licences: the image is labelled `Apache-2.0 AND AGPL-3.0-only`. [Apache-2.0](https://github.com/OPusAngel/LAiM/blob/main/LICENSE) covers the repository and the training stack. The [AGPL-3.0](https://github.com/OPusAngel/LAiM/blob/main/studio/LICENSE.AGPL-3.0) half is there for the one AGPL file this image ships, `/workspace/smoke_test_rocm.py`, which carries an `AGPL-3.0-only` header; LAiM Studio itself is only in the `studio` tag.

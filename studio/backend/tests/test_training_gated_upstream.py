@@ -64,14 +64,14 @@ transformers = sys.modules["transformers"]
 
 
 _TABLES = (
-    {"LAiM/gemma-3-270m-it-LAiM-bnb-4bit": "LAiM/gemma-3-270m-it"},
+    {"unsloth/gemma-3-270m-it-unsloth-bnb-4bit": "unsloth/gemma-3-270m-it"},
     {
-        "google/gemma-3-270m-it": "LAiM/gemma-3-270m-it-LAiM-bnb-4bit",
-        "meta-llama/meta-llama-3-70b-instruct": "LAiM/llama-3-70b-instruct-bnb-4bit",
+        "google/gemma-3-270m-it": "unsloth/gemma-3-270m-it-unsloth-bnb-4bit",
+        "meta-llama/meta-llama-3-70b-instruct": "unsloth/llama-3-70b-instruct-bnb-4bit",
     },
     {
-        "google/gemma-3-270m-it": "LAiM/gemma-3-270m-it",
-        "google/gemma-4-26b-a4b": "LAiM/gemma-4-26B-A4B",
+        "google/gemma-3-270m-it": "unsloth/gemma-3-270m-it",
+        "google/gemma-4-26b-a4b": "unsloth/gemma-4-26B-A4B",
     },
 )
 
@@ -118,18 +118,18 @@ def mapper(monkeypatch):
 @pytest.mark.parametrize(
     "name,load_in_4bit,mirror",
     [
-        ("google/gemma-3-270m-it", False, "LAiM/gemma-3-270m-it"),
-        ("Google/Gemma-3-270M-it", False, "LAiM/gemma-3-270m-it"),
+        ("google/gemma-3-270m-it", False, "unsloth/gemma-3-270m-it"),
+        ("Google/Gemma-3-270M-it", False, "unsloth/gemma-3-270m-it"),
         # A 4-bit load resolves through the 4-bit table, which can map a different model.
-        ("google/gemma-3-270m-it", True, "LAiM/gemma-3-270m-it-LAiM-bnb-4bit"),
-        ("meta-llama/Meta-Llama-3-70B-Instruct", True, "LAiM/llama-3-70b-instruct-bnb-4bit"),
+        ("google/gemma-3-270m-it", True, "unsloth/gemma-3-270m-it-unsloth-bnb-4bit"),
+        ("meta-llama/Meta-Llama-3-70B-Instruct", True, "unsloth/llama-3-70b-instruct-bnb-4bit"),
         ("meta-llama/Meta-Llama-3-70B-Instruct", False, None),
-        ("google/gemma-4-26B-A4B", False, "LAiM/gemma-4-26B-A4B"),
+        ("google/gemma-4-26B-A4B", False, "unsloth/gemma-4-26B-A4B"),
         ("google/gemma-4-26B-A4B", True, None),
         # A public LAiM repo is not automatically a fixed point: see
         # test_an_LAiM_id_is_not_a_fixed_point. get_model_name resolves this one back
         # through INT_TO_FLOAT_MAPPER for a 16-bit load.
-        ("LAiM/gemma-3-270m-it-LAiM-bnb-4bit", False, "LAiM/gemma-3-270m-it"),
+        ("unsloth/gemma-3-270m-it-unsloth-bnb-4bit", False, "unsloth/gemma-3-270m-it"),
         ("google/gemma-2-2b-jpn-it", True, None),
         ("google/gemma-2-2b-jpn-it", False, None),
         ("/models/google/gemma-3-270m-it", True, None),
@@ -145,10 +145,10 @@ def test_mirror_is_the_repo_the_loader_substitutes(mapper, name, load_in_4bit, m
     "name,mirror",
     [
         # get_model_name corrects these after the table lookup. The uncorrected name
-        # LAiM/Qwen3-30B-A3B-LAiM-bnb-4bit does not exist on the Hub at all.
-        ("Qwen/Qwen3-30B-A3B", "LAiM/Qwen3-30B-A3B"),
-        ("Qwen/Qwen3-30B-A3B-Base", "LAiM/Qwen3-30B-A3B-Base"),
-        ("Qwen/Qwen3-32B", "LAiM/Qwen3-32B-bnb-4bit"),
+        # LAiM/Qwen3-30B-A3B-unsloth-bnb-4bit does not exist on the Hub at all.
+        ("Qwen/Qwen3-30B-A3B", "unsloth/Qwen3-30B-A3B"),
+        ("Qwen/Qwen3-30B-A3B-Base", "unsloth/Qwen3-30B-A3B-Base"),
+        ("Qwen/Qwen3-32B", "unsloth/Qwen3-32B-bnb-4bit"),
     ],
 )
 def test_the_loader_corrections_are_applied_to_the_mirror(name, mirror):
@@ -160,7 +160,7 @@ def test_corrections_are_read_from_the_real_loader_source():
     corrections = LAiM_mirror._bad_mappings()
     assert corrections
     assert all(key == key.lower() for key in corrections)
-    assert "LAiM/qwen3-30b-a3b-LAiM-bnb-4bit" in corrections
+    assert "unsloth/qwen3-30b-a3b-unsloth-bnb-4bit" in corrections
 
 
 @pytest.mark.parametrize(
@@ -191,7 +191,7 @@ def test_mapper_is_read_from_the_file_without_importing_LAiM(monkeypatch, tmp_pa
     (package / "models" / "mapper.py").write_text(
         "INT_TO_FLOAT_MAPPER = {}\n"
         "FLOAT_TO_INT_MAPPER = {}\n"
-        "MAP_TO_LAiM_16bit = {'google/gemma-3-270m-it': 'LAiM/gemma-3-270m-it'}\n"
+        "MAP_TO_LAiM_16bit = {'google/gemma-3-270m-it': 'unsloth/gemma-3-270m-it'}\n"
     )
     # Ships beside mapper.py in every real install, and the corrections are read from it.
     (package / "models" / "loader_utils.py").write_text("BAD_MAPPINGS = {}\n")
@@ -202,7 +202,7 @@ def test_mapper_is_read_from_the_file_without_importing_LAiM(monkeypatch, tmp_pa
     LAiM_mirror._mapper_tables.cache_clear()
     try:
         assert LAiM_mirror.LAiM_public_mirror("google/gemma-3-270m-it", False) == (
-            "LAiM/gemma-3-270m-it"
+            "unsloth/gemma-3-270m-it"
         )
     finally:
         LAiM_mirror._mapper_tables.cache_clear()
@@ -220,7 +220,7 @@ def test_an_unreadable_mapper_redirects_nothing(monkeypatch):
 @pytest.mark.parametrize(
     "load_name,local_only,revision,expected",
     [
-        (None, False, None, "LAiM/gemma-3-270m-it-LAiM-bnb-4bit"),
+        (None, False, None, "unsloth/gemma-3-270m-it-unsloth-bnb-4bit"),
         # A pinned revision loads with use_exact_model_name, so the loader keeps the upstream.
         (None, False, "0123456789abcdef0123456789abcdef01234567", "google/gemma-3-270m-it"),
         ("/hf/models--google--gemma-3-270m-it/snapshots/abc", True, None, None),
@@ -291,7 +291,7 @@ def test_pre_detect_follows_the_requested_load_mode(mapper, monkeypatch):
         "google/gemma-3-270m-it", load_in_4bit = False
     )
 
-    assert reads == ["LAiM/gemma-3-270m-it"] * 3
+    assert reads == ["unsloth/gemma-3-270m-it"] * 3
 
 
 class _Session:
@@ -525,7 +525,7 @@ def test_pre_detect_follows_the_sidecar_flip_like_the_load_does(
 
 @pytest.mark.parametrize(
     "bnb_ok,expected",
-    [(True, "LAiM/gemma-3-270m-it-LAiM-bnb-4bit"), (False, "LAiM/gemma-3-270m-it")],
+    [(True, "unsloth/gemma-3-270m-it-unsloth-bnb-4bit"), (False, "unsloth/gemma-3-270m-it")],
 )
 def test_pre_detect_follows_the_bitsandbytes_fallback(mapper, monkeypatch, bnb_ok, expected):
     # from_pretrained clears load_in_4bit when bitsandbytes is unusable, BEFORE it calls
@@ -557,7 +557,7 @@ def test_load_model_gate_checks_the_repo_the_loader_fetches(mapper, monkeypatch)
 
     trainer = trainer_mod.LAiMTrainer()
     assert trainer.load_model("google/gemma-3-270m-it", load_in_4bit = False) is False
-    assert checked == ["LAiM/gemma-3-270m-it"]
+    assert checked == ["unsloth/gemma-3-270m-it"]
 
 
 def test_mlx_has_no_mirror_so_the_check_still_runs(mapper, monkeypatch):
@@ -678,7 +678,7 @@ def test_the_security_scan_covers_the_repo_the_loader_substitutes(mapper, monkey
         "trust_remote_code": False,
     }
     assert worker_mod._model_load_security_error(config, "google/gemma-3-270m-it", None) is None
-    assert "LAiM/gemma-3-270m-it-LAiM-bnb-4bit" in scanned
+    assert "unsloth/gemma-3-270m-it-unsloth-bnb-4bit" in scanned
 
 
 def test_the_security_scan_covers_both_load_modes(mapper, monkeypatch):
@@ -718,8 +718,8 @@ def test_the_security_scan_covers_both_load_modes(mapper, monkeypatch):
         )
         is None
     )
-    assert "LAiM/gemma-3-270m-it" in scanned
-    assert "LAiM/gemma-3-270m-it-LAiM-bnb-4bit" in scanned
+    assert "unsloth/gemma-3-270m-it" in scanned
+    assert "unsloth/gemma-3-270m-it-unsloth-bnb-4bit" in scanned
 
 
 def test_the_security_scan_imports_nothing_heavy():
@@ -755,13 +755,13 @@ def test_the_security_scan_imports_nothing_heavy():
     [
         # Verified against LAiM.models.loader_utils.get_model_name. A 16-bit load of an
         # explicit dynamic-quant id resolves back through INT_TO_FLOAT_MAPPER...
-        ("LAiM/gemma-3-270m-it-LAiM-bnb-4bit", False, "LAiM/gemma-3-270m-it"),
+        ("unsloth/gemma-3-270m-it-unsloth-bnb-4bit", False, "unsloth/gemma-3-270m-it"),
         # ...while a 4-bit load keeps it, so the tables resolve nothing and BAD_MAPPINGS is
         # applied to the input name instead, landing on a DIFFERENT repo.
-        ("LAiM/Qwen3-30B-A3B-LAiM-bnb-4bit", True, "LAiM/Qwen3-30B-A3B"),
+        ("unsloth/Qwen3-30B-A3B-unsloth-bnb-4bit", True, "unsloth/Qwen3-30B-A3B"),
         # An id the loader really does leave alone still answers None.
-        ("LAiM/gemma-3-270m-it-LAiM-bnb-4bit", True, None),
-        ("LAiM/gemma-3-270m-it", False, None),
+        ("unsloth/gemma-3-270m-it-unsloth-bnb-4bit", True, None),
+        ("unsloth/gemma-3-270m-it", False, None),
     ],
 )
 def test_an_LAiM_id_is_not_a_fixed_point(mapper, name, load_in_4bit, mirror):
@@ -847,7 +847,7 @@ def test_a_configured_16bit_load_does_not_scan_the_4bit_mirror(mapper, monkeypat
         )
         is None
     )
-    assert scanned == ["google/gemma-3-270m-it", "LAiM/gemma-3-270m-it"]
+    assert scanned == ["google/gemma-3-270m-it", "unsloth/gemma-3-270m-it"]
 
 
 def test_the_scan_covers_the_repo_left_after_the_4bit_suffix_is_stripped(mapper, monkeypatch):
@@ -884,16 +884,16 @@ def test_the_scan_covers_the_repo_left_after_the_4bit_suffix_is_stripped(mapper,
     )
     # Lower case: that is how the mapper stores this value, and the strip preserves whatever
     # case it is handed (HF cache directories are case sensitive).
-    assert "LAiM/llama-3-70b-instruct-bnb-4bit" in scanned
-    assert "LAiM/llama-3-70b-instruct" in scanned
+    assert "unsloth/llama-3-70b-instruct-bnb-4bit" in scanned
+    assert "unsloth/llama-3-70b-instruct" in scanned
 
 
 @pytest.mark.parametrize(
     "name,stripped",
     [
-        ("LAiM/gemma-3-270m-it-LAiM-bnb-4bit", "LAiM/gemma-3-270m-it"),
-        ("LAiM/llama-3-70b-Instruct-bnb-4bit", "LAiM/llama-3-70b-Instruct"),
-        ("LAiM/gemma-3-270m-it", "LAiM/gemma-3-270m-it"),
+        ("unsloth/gemma-3-270m-it-unsloth-bnb-4bit", "unsloth/gemma-3-270m-it"),
+        ("unsloth/llama-3-70b-Instruct-bnb-4bit", "unsloth/llama-3-70b-Instruct"),
+        ("unsloth/gemma-3-270m-it", "unsloth/gemma-3-270m-it"),
     ],
 )
 def test_the_suffix_strip_matches_the_loader(name, stripped):
@@ -981,4 +981,4 @@ def test_a_lora_adapter_base_gets_its_own_mirror_scanned(mapper, monkeypatch):
         is None
     )
     assert "google/gemma-3-270m-it" in scanned
-    assert "LAiM/gemma-3-270m-it-LAiM-bnb-4bit" in scanned
+    assert "unsloth/gemma-3-270m-it-unsloth-bnb-4bit" in scanned

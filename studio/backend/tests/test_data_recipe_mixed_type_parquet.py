@@ -64,7 +64,7 @@ def fixture_provider():
 def test_full_run_keeps_a_structured_field_whose_type_varies_by_row(
     tmp_path: Path, provider
 ) -> None:
-    # LAiMai/LAiM#5848: the Output Format box takes a JSON shape, so nothing pins a field's type; one row
+    # OPusAngel/LAiM#5848: the Output Format box takes a JSON shape, so nothing pins a field's type; one row
     # answering with text and another with an object failed the whole run after every LLM call was paid for.
     pytest.importorskip("data_designer")
     from core.data_recipe.service import build_config_builder, create_data_designer

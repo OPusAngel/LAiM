@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { type ChatSearch, useChatRuntimeStore } from "@/features/chat";
 import { toast } from "@/lib/toast";
 import { modelConfigDraftKey } from "../model-config/model-config-draft";
@@ -107,7 +108,7 @@ export function navigateRunConfig(
     }
     clearModelConfigHandoff(pending.id);
     runConfigInbox.clear(pending.id);
-    toast.error("Could not open the model’s run settings.");
+    toast.error(translate("uxModelpicker.couldNotOpenThem62l2"));
   });
 }
 
@@ -162,12 +163,12 @@ export function openRunConfigTarget(
   if (!target.meta.isGguf) {
     runConfigInbox.clear(pending.id);
     toast.error(
-      "Shared run settings apply only to GGUF models. Reopen the link and choose a GGUF model.",
+      translate("uxModelpicker.sharedRunSettingsApply1sii8"),
     );
     return;
   }
   const controller = new AbortController();
-  const loadingToast = toast.loading("Resolving shared model…");
+  const loadingToast = toast.loading(translate("uxModelpicker.resolvingSharedModelddvuw"));
   resolveCachedRunConfigTarget(target, {
     hfToken,
     inventoryVersion: context.inventoryVersion,
@@ -203,7 +204,7 @@ export function openRunConfigTarget(
       toast.error(
         error instanceof RunConfigResolutionError
           ? error.message
-          : "Could not resolve the shared model. Reopen the link to try again.",
+          : translate("uxModelpicker.couldNotResolveTheqr7yk"),
       );
     })
     .finally(() => toast.dismiss(loadingToast));

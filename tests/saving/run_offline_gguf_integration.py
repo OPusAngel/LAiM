@@ -12,7 +12,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-REPO = "LAiM/gemma-3-270m-it-bnb-4bit"
+REPO = "unsloth/gemma-3-270m-it-bnb-4bit"
 CACHE_ROOT = Path(
     os.environ.get("HF_HOME") or os.path.join(tempfile.gettempdir(), "hf_offline_test_cache")
 )

@@ -7,6 +7,7 @@
 //
 // Reasoning effort is the one new value here; the chat's own is a single global level.
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -192,23 +193,19 @@ export function ConnectedModelSettingsDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>{displayName} settings</DialogTitle>
+          <DialogTitle>{translate("uxModelpicker.settingsoi3r0", { p1: displayName })}</DialogTitle>
           <DialogDescription>
-            Model defaults. Chats with their own system prompt keep it.
+            {translate("uxModelpicker.modelDefaultsChatsWithu4gdu")}
           </DialogDescription>
         </DialogHeader>
 
         {rememberParamsPerModel ? null : (
-          <p className="rounded-md border border-border bg-muted px-3 py-2 text-xs leading-relaxed text-muted-foreground">
-            "Remember settings per model" is off in Settings → Chat, so the
-            prompt and output cap below are stored but never restored. Reasoning
-            effort is kept separately and still applies.
-          </p>
+          <p className="rounded-md border border-border bg-muted px-3 py-2 text-xs leading-relaxed text-muted-foreground">{translate("uxModelpicker.rememberSettingsPerModels1oqa")}</p>
         )}
 
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="connected-model-system-prompt">System prompt</Label>
+            <Label htmlFor="connected-model-system-prompt">{translate("uxModelpicker.systemPromptv6nj0")}</Label>
             <Textarea
               id="connected-model-system-prompt"
               value={systemPrompt}
@@ -219,10 +216,8 @@ export function ConnectedModelSettingsDialog({
 
           <div className="flex items-center justify-between gap-4">
             <Label htmlFor="connected-model-max-tokens">
-              Max output tokens
-              <span className="ml-1 font-normal text-muted-foreground">
-                ({minCap.toLocaleString()} to {maxCap.toLocaleString()})
-              </span>
+              {translate("uxModelpicker.maxOutputTokens1ipzn")}
+              <span className="ml-1 font-normal text-muted-foreground">{translate("uxModelpicker.toxx3kp", { p1: minCap.toLocaleString(), p2: maxCap.toLocaleString() })}</span>
             </Label>
             <Input
               id="connected-model-max-tokens"
@@ -238,13 +233,13 @@ export function ConnectedModelSettingsDialog({
 
           {efforts.length > 0 ? (
             <div className="flex items-center justify-between gap-4">
-              <Label htmlFor="connected-model-effort">Reasoning effort</Label>
+              <Label htmlFor="connected-model-effort">{translate("uxModelpicker.reasoningEffortfvl8g")}</Label>
               <Select value={effort} onValueChange={setEffortDraft}>
                 <SelectTrigger id="connected-model-effort" className="w-40">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={FOLLOW_CHAT}>Follow chat</SelectItem>
+                  <SelectItem value={FOLLOW_CHAT}>{translate("uxModelpicker.followChatn9r0n")}</SelectItem>
                   {efforts.map((level) => (
                     <SelectItem key={level} value={level}>
                       {level}
@@ -258,7 +253,7 @@ export function ConnectedModelSettingsDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {translate("browser.agentSettings.cancel")}
           </Button>
           <Button onClick={save}>Save</Button>
         </DialogFooter>

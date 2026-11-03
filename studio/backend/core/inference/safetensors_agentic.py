@@ -637,7 +637,6 @@ def run_safetensors_tool_loop(
     mcp_image = None,
     bypass_permissions: bool = False,
     permission_mode: Optional[str] = None,
-    sandbox_level: Optional[str] = None,
     reasoning_prefilled: bool = False,
     continue_final_message: bool = False,
     markup = None,
@@ -703,24 +702,20 @@ def run_safetensors_tool_loop(
 
     # Mirrors the GGUF loop: "full" and bypass_permissions are the same switch;
     # unset defaults to "auto", unknown falls back to the stricter "ask"; "off"
-    # keeps the sandbox but never prompts. An explicit confirm_tool_calls=True with
+    # never prompts. An explicit confirm_tool_calls=True with
     # no mode is already resolved to "ask" at the request layer, so it never
     # arrives here as an ambiguous unset.
     from core.inference.tool_stream_exec import stream_tool_execution
     from state.tool_policy import (
         account_tool_stream,
         needs_tool_confirmation,
-        normalize_sandbox_level,
         normalize_tool_permissions,
-        requires_os_isolation,
-        runs_without_os_sandbox,
         tool_call_may_prompt,
     )
 
     permission_mode, bypass_permissions = normalize_tool_permissions(
         permission_mode, bypass_permissions
     )
-    sandbox_level = normalize_sandbox_level(sandbox_level)
     stream_tool_execution = account_tool_stream(stream_tool_execution)
     from core.inference.skill_mentions import load_mentioned_skills
 
@@ -1582,27 +1577,16 @@ def run_safetensors_tool_loop(
                 assistant_msg.setdefault("tool_calls", []).append(decision.as_assistant_tool_call())
 
             # Bypass wins here too, so a direct internal caller with both flags
-            # never prompts. "auto" pauses only high-risk calls; "off" pauses only a
-            # high-risk python/terminal call without OS isolation.
+            # never prompts. "auto" pauses only high-risk calls.
             needs_confirm = needs_tool_confirmation(
                 confirm_tool_calls = bool(confirm_tool_calls),
                 bypass_permissions = bypass_permissions,
                 permission_mode = permission_mode,
                 name = decision.tool_name,
                 arguments = decision.arguments,
-                sandbox_level = sandbox_level,
             )
             # Sending the user's image always asks, whatever the permission mode.
             needs_confirm = needs_confirm or image_share is not None
-            strict_isolation = requires_os_isolation(
-                confirm_tool_calls = bool(confirm_tool_calls),
-                bypass_permissions = bypass_permissions,
-                permission_mode = permission_mode,
-                name = decision.tool_name,
-                arguments = decision.arguments,
-                prompted = needs_confirm,
-                sandbox_level = sandbox_level,
-            )
             approval_id = new_approval_id() if needs_confirm else ""
             decision_slot = begin_tool_decision(session_id, approval_id) if needs_confirm else None
             start_event = decision.tool_start_event()
@@ -1683,14 +1667,9 @@ def run_safetensors_tool_loop(
                 # stream while the tool blocks (the SSE route turns heartbeats into
                 # keepalives). execute_tool is injectable; pass output_callback
                 # only when it accepts it.
-                # Only a call the user answered: the executor lets it reach the host paths it names.
-                _host_access_approved = _decision not in (None, "deny")
-
                 def _invoke_tool(
                     _output_callback,
                     _decision = decision,
-                    _approved = _host_access_approved,
-                    _strict = strict_isolation,
                 ):
                     kwargs = dict(
                         cancel_event = cancel_event,
@@ -1698,19 +1677,9 @@ def run_safetensors_tool_loop(
                         session_id = session_id,
                         thread_id = thread_id,
                         rag_scope = rag_scope,
-                        disable_sandbox = bypass_permissions,
                     )
-                    # Run unasked only because the OS sandbox was on: refuse if it is not any more.
-                    if _strict and _accepts_kwarg(execute_tool, "tool_execution_mode"):
-                        kwargs["tool_execution_mode"] = "required"
-                    elif runs_without_os_sandbox(
-                        _decision.tool_name, sandbox_level
-                    ) and _accepts_kwarg(execute_tool, "tool_execution_mode"):
-                        kwargs["tool_execution_mode"] = "software"
                     if _accepts_kwarg(execute_tool, "conversation_branch"):
                         kwargs["conversation_branch"] = _extend_live_branch(conversation)
-                    if _approved and _accepts_kwarg(execute_tool, "host_access_approved"):
-                        kwargs["host_access_approved"] = True
                     # And the room the model has left, as the GGUF loop does: without a
                     # budget the tool's clamp is skipped and a model-chosen top_k of 8
                     # appends roughly 4K tokens to an already full prompt.

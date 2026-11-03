@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -85,9 +86,7 @@ function SwitchRow({
           <span
             id={id}
             className="text-ui-11p5 font-normal text-muted-foreground"
-          >
-            Always on
-          </span>
+          >{translate("uxAudio.alwaysOnux4sp")}</span>
         ) : (
           <Switch
             id={id}
@@ -109,7 +108,7 @@ function SwitchRow({
           <GenerateActions
             actions={[
               {
-                label: `Use ${SPEAKERS_MODEL_NAME}`,
+                get label() { return translate("uxAudio.useo93ya", { p1: SPEAKERS_MODEL_NAME }); },
                 onClick: onUseSpeakersModel,
               },
             ]}
@@ -146,25 +145,25 @@ export function TranscribeRail({
       <div data-tour="audio-record">
         <AudioSourceInput
           id="transcribe-source"
-          label="Audio"
-          hint="Up to 30 minutes. Drop a file, record, or reuse a clip."
+          label={translate("shell.navigation.audio")}
+          hint={translate("uxAudio.upTo30Minutesfuxum")}
           value={source}
           onChange={(next) => useAudioTranscribeStore.setState({ source: next })}
           disabled={disabled}
           handleRef={sourceHandle}
           onStatusChange={onSourceStatusChange}
           maxRecordSeconds={RECORDING_MAX_SECONDS}
-          expiredMessage="This upload expired. Add it again."
+          expiredMessage={translate("uxAudio.thisUploadExpiredAdddeb0x")}
           usesFirstSeconds={null}
-          recordHint="Record up to 30 minutes, then transcribe it."
+          recordHint={translate("uxAudio.recordUpTo30ok5hd")}
         />
       </div>
 
       {languages.length > 1 ? (
         <Field
-          label="Language"
+          label={translate("settings.appearance.language.title")}
           htmlFor="transcribe-language"
-          hint="Picking the spoken language helps with short or noisy clips."
+          hint={translate("uxAudio.pickingTheSpokenLanguagelq3h2")}
         >
           <Select
             value={languageValue}
@@ -213,10 +212,10 @@ export function TranscribeRail({
 }
 
 const FORMAT_LABELS: Record<TranscriptExportFormat, string> = {
-  txt: "Text (.txt)",
-  srt: "Subtitles (.srt)",
-  vtt: "Web subtitles (.vtt)",
-  json: "JSON with timings (.json)",
+  get txt() { return translate("uxAudio.textFormat2c2dr"); },
+  get srt() { return translate("uxAudio.subtitlesFormatf61bc"); },
+  get vtt() { return translate("uxAudio.webSubtitlesFormat49pa3"); },
+  get json() { return translate("uxAudio.jsonTimingsFormatzkhfv"); },
 };
 
 export function TranscribeOutput({
@@ -297,7 +296,7 @@ export function TranscribeOutput({
           <section
             id="transcribe-result"
             tabIndex={-1}
-            aria-label="Transcript"
+            aria-label={translate("uxAudio.transcript1j216")}
             aria-busy={busy === "loading" ? true : undefined}
             className={cn(
               "flex flex-col gap-3 transition-opacity duration-150 focus-visible:outline-none motion-reduce:transition-none",
@@ -318,7 +317,7 @@ export function TranscribeOutput({
                   onClick={handleCopyTranscript}
                 >
                   <HugeiconsIcon icon={Copy01Icon} className="mr-2 size-3.5" />
-                  Copy
+                  {translate("chatMenu.copy")}
                 </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild={true}>
@@ -327,7 +326,7 @@ export function TranscribeOutput({
                         icon={Download01Icon}
                         className="mr-2 size-3.5"
                       />
-                      Download
+                      {translate("imageViewer.download")}
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start">
@@ -345,7 +344,7 @@ export function TranscribeOutput({
                     <DropdownMenuTrigger asChild={true}>
                       <Button variant="secondary" size="sm">
                         <HugeiconsIcon icon={SentIcon} className="mr-2 size-3.5" />
-                        Send to
+                        {translate("uxAudio.sendToxvnh7")}
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="start">
@@ -370,22 +369,19 @@ export function TranscribeOutput({
                   </span>
                 ) : null}
                 {!transcriptRecord && !transcriptExported && (
-                  <span>· Not saved</span>
+                  <span>{translate("uxAudio.notSaved6rrip")}</span>
                 )}
               </div>
             </TranscriptView>
           </section>
         ) : transcriptError ? (
           <div className="flex flex-col gap-1" role="alert">
-            <p className="text-ui-13 font-medium text-destructive">
-              Could not transcribe {transcribedName ?? "that audio"}.
-            </p>
+            <p className="text-ui-13 font-medium text-destructive">{translate("uxAudio.couldNotTranscribeshx6h", { p1: transcribedName ?? "that audio" })}</p>
             <p className="text-ui-13 text-muted-foreground">{transcriptError}</p>
           </div>
         ) : busy !== "transcribing" ? (
           <p className="text-ui-13 text-muted-foreground">
-            Record or upload audio to transcribe. Completed transcripts are saved
-            to history.
+            {translate("uxCopy.recordOrUploadAudio1bexf")}
           </p>
         ) : null}
       </div>
@@ -450,9 +446,9 @@ export function TranscribeFooter({
     startedAt === null ? 0 : Math.max(0, Math.floor((now - startedAt) / 1000));
   const status =
     busy === "loading" || progress?.phase === "loading"
-      ? `Loading ${modelName || "the model"}…`
+      ? translate("uxAudio.loadingu10bo", { p1: modelName || "the model" })
       : progress?.phase === "downloading_aligner"
-        ? "Downloading the timing aligner…"
+        ? translate("uxAudio.downloadingTheTimingAlignerhruzj")
         : stopping
           ? "Stopping…"
           : "Transcribing…";
@@ -472,7 +468,7 @@ export function TranscribeFooter({
           </output>
           <Progress
             indeterminate
-            aria-label="Transcription in progress"
+            aria-label={translate("uxAudio.transcriptionInProgress88g28")}
             className="h-1.5"
           />
         </>
@@ -491,7 +487,7 @@ export function TranscribeFooter({
                 : undefined
           }
           aria-keyshortcuts="Control+Enter Meta+Enter"
-          title={running ? undefined : `Transcribe (${shortcutLabel})`}
+          title={running ? undefined : translate("uxAudio.transcribeby1se", { p1: shortcutLabel })}
         >
           {running ? (
             <>
@@ -499,7 +495,7 @@ export function TranscribeFooter({
               {stopping ? "Stopping…" : "Stop"}
             </>
           ) : busy === "loading" ? (
-            "Loading model…"
+            translate("uxAudio.loadingModelowixn")
           ) : (
             "Transcribe"
           )}

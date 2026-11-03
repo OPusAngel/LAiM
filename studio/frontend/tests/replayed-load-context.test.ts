@@ -11,7 +11,7 @@ registerBundlerResolver();
 const RUNTIME = readSrc("features/chat/hooks/use-chat-model-runtime.ts");
 const policy = await import("../src/features/chat/presets/preset-policy.ts");
 
-const MODEL = "LAiM/Qwen3.6-27B-MTP-GGUF";
+const MODEL = "unsloth/Qwen3.6-27B-MTP-GGUF";
 const VARIANT = "UD-Q8_K_XL";
 const LOADED = 120064;
 
@@ -77,7 +77,7 @@ test("a typed context is the user's own", () => {
 
 test("loads that send no context are not replays", () => {
   assert.equal(replayed({ presetSource: "builtin-default" }).replayed, false);
-  assert.equal(replayed({ modelId: "LAiM/Other-GGUF" }).replayed, false);
+  assert.equal(replayed({ modelId: "unsloth/Other-GGUF" }).replayed, false);
   assert.equal(replayed({ gpuMemoryMode: "manual" }).replayed, false);
 });
 

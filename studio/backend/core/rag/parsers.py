@@ -341,7 +341,7 @@ def _html(raw: str) -> list[Page]:
 
 
 # pymupdf4llm can corrupt positioned RTL and Indic glyphs; use logical-order
-# get_text() at LAiMai/LAiM#5351 thresholds
+# get_text() at OPusAngel/LAiM#5351 thresholds
 _SHAPED_PRESENTATION_FORMS = re.compile("[\ufb1d-\ufdff\ufe70-\ufefc]")
 _PDF_FALLBACK_MIN_BAD_GLYPHS = 5
 _PDF_FALLBACK_BAD_GLYPH_RATIO = 0.0005

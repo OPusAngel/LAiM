@@ -3,7 +3,7 @@
 
 """A cached snapshot that loads from a subdirectory must still resolve.
 
-``LAiM/Spark-TTS-0.5B`` keeps everything trainable under ``LLM/``; its snapshot root
+``unsloth/Spark-TTS-0.5B`` keeps everything trainable under ``LLM/``; its snapshot root
 holds only ``README.md`` and ``config.yaml`` (verified against the Hub file listing), so a
 resolver that insists on a root-level ``config.json`` plus root-level weights finds
 nothing. The remote preflight already expands those load roots through
@@ -20,8 +20,8 @@ import pytest
 from core.training import training as training_mod
 
 
-_REPO = "LAiM/Spark-TTS-0.5B"
-_PLAIN_REPO = "LAiM/Llama-3.2-1B-Instruct"
+_REPO = "unsloth/Spark-TTS-0.5B"
+_PLAIN_REPO = "unsloth/Llama-3.2-1B-Instruct"
 
 
 @pytest.fixture

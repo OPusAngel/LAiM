@@ -414,7 +414,7 @@ if [ -n "$REF" ]; then
         # non-zero means the lookup never happened, and falling through to main pairs
         # the requested LAiM revision with an unrelated zoo one across a private API
         _ls_rc=0
-        git ls-remote --exit-code https://github.com/LAiMai/LAiM-zoo.git \
+        git ls-remote --exit-code https://github.com/OPusAngel/LAiM-zoo.git \
             "$REF" >/dev/null 2>&1 || _ls_rc=$?
         if [ "$_ls_rc" = "0" ]; then
             _zoo_ref="$REF"
@@ -422,7 +422,7 @@ if [ -n "$REF" ]; then
             _zoo_ref="main"
             log "LAiM-zoo has no ref '${REF}'; using zoo main"
         else
-            echo "LAiM-studio-update: could not reach LAiMai/LAiM-zoo (git ls-remote exit ${_ls_rc}); refusing to guess the zoo ref." >&2
+            echo "LAiM-studio-update: could not reach OPusAngel/LAiM-zoo (git ls-remote exit ${_ls_rc}); refusing to guess the zoo ref." >&2
             echo "LAiM-studio-update: retry, or pin it yourself with --zoo-ref <ref>." >&2
             exit 1
         fi
@@ -435,7 +435,7 @@ if [ -n "$REF" ]; then
     # a sibling of the real src, so the swap below is a same-filesystem rename
     STAGE="$(mktemp -d "$SRC_DIR/.src-update.XXXXXX")"
     if ! { git -C "$STAGE" init -q \
-            && git -C "$STAGE" remote add origin https://github.com/LAiMai/LAiM \
+            && git -C "$STAGE" remote add origin https://github.com/OPusAngel/LAiM \
             && git -C "$STAGE" fetch -q --depth 1 origin "$REF" \
             && git -C "$STAGE" checkout -q FETCH_HEAD; }; then
         echo "LAiM-studio-update: could not fetch LAiM ref '${REF}'; nothing was changed." >&2
@@ -465,7 +465,7 @@ if [ -n "$REF" ]; then
     INSTALLING=1
     # shellcheck disable=SC2086
     if ! "$PY" -m pip install $NO_DEPS ${DEP_ARGS[@]+"${DEP_ARGS[@]}"} -e "$_spec" \
-            "git+https://github.com/LAiMai/LAiM-zoo.git@${_zoo_ref}#egg=LAiM_zoo"; then
+            "git+https://github.com/OPusAngel/LAiM-zoo.git@${_zoo_ref}#egg=LAiM_zoo"; then
         fail_after_restore "pip could not install '${REF}'"
     fi
 else

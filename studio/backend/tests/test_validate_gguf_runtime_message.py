@@ -50,7 +50,7 @@ class TestValidateGgufRuntimeMessage(unittest.TestCase):
 
     def test_missing_llama_server_returns_actionable_message(self):
         route = _load_route_module("inf_route_runtime_msg_1", "routes/inference.py")
-        err = self._validate(route, "LAiM/Qwen3-1.7B-GGUF", LlamaServerNotFoundError(_GGUF_MSG))
+        err = self._validate(route, "unsloth/Qwen3-1.7B-GGUF", LlamaServerNotFoundError(_GGUF_MSG))
         self.assertEqual(err.status_code, 400)
         self.assertIn("LAiM studio setup", err.detail)
         self.assertIn("llama.cpp runtime", err.detail)
@@ -91,14 +91,14 @@ class TestLoadGgufRuntimeMessage(unittest.TestCase):
 
     def test_missing_llama_server_returns_actionable_message(self):
         route = _load_route_module("inf_route_load_runtime_msg_1", "routes/inference.py")
-        err = self._load(route, "LAiM/Qwen3-1.7B-GGUF", LlamaServerNotFoundError(_GGUF_MSG))
+        err = self._load(route, "unsloth/Qwen3-1.7B-GGUF", LlamaServerNotFoundError(_GGUF_MSG))
         self.assertEqual(err.status_code, 400)
         self.assertIn("LAiM studio setup", err.detail)
         self.assertIn("llama.cpp runtime", err.detail)
 
     def test_other_load_errors_still_500(self):
         route = _load_route_module("inf_route_load_runtime_msg_2", "routes/inference.py")
-        err = self._load(route, "LAiM/some-model", RuntimeError("totally different failure"))
+        err = self._load(route, "unsloth/some-model", RuntimeError("totally different failure"))
         self.assertEqual(err.status_code, 500)
 
 

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import {
   Select,
   SelectContent,
@@ -72,15 +73,15 @@ export const aceStepMusicalPanel: AudioToolPanel<AceStepMusicalValue> = {
   ...aceStepMusicalLogic,
   Component: ({ value, onChange, disabled }) => (
     <PanelSection
-      title="Musical controls"
-      hint="Optional. Anything left on Auto is chosen by the model."
+      title={translate("uxAudio.musicalControls1vsxu")}
+      hint={translate("uxAudio.optionalAnythingLeftOn165ep")}
     >
       <div className="grid gap-1.5">
         <label
           htmlFor="music-bpm-auto"
           className="flex items-center justify-between gap-3 text-ui-13 font-medium text-foreground"
         >
-          Set the tempo
+          {translate("uxCopy.setTheTempo1dk80")}
           <Switch
             id="music-bpm-auto"
             checked={value.bpm !== null}
@@ -104,7 +105,7 @@ export const aceStepMusicalPanel: AudioToolPanel<AceStepMusicalValue> = {
         ) : null}
       </div>
       <div className="grid grid-cols-2 gap-3">
-        <Field label="Key" htmlFor="music-key">
+        <Field label={translate("uxAudio.key1kwqd")} htmlFor="music-key">
           <AutoSelect
             id="music-key"
             value={value.keyscale}
@@ -113,7 +114,7 @@ export const aceStepMusicalPanel: AudioToolPanel<AceStepMusicalValue> = {
             disabled={disabled}
           />
         </Field>
-        <Field label="Time signature" htmlFor="music-time-signature">
+        <Field label={translate("uxAudio.timeSignature1abl1")} htmlFor="music-time-signature">
           <AutoSelect
             id="music-time-signature"
             value={value.timesignature}
@@ -124,9 +125,9 @@ export const aceStepMusicalPanel: AudioToolPanel<AceStepMusicalValue> = {
         </Field>
       </div>
       <Field
-        label="Keep out"
+        label={translate("uxAudio.keepOut1tutd")}
         htmlFor="music-avoid"
-        hint="Sounds or styles to avoid, such as “distorted guitar, shouting”."
+        hint={translate("uxFeatures.soundsOrStylesTo1ix7g")}
       >
         <Textarea
           id="music-avoid"
@@ -138,14 +139,14 @@ export const aceStepMusicalPanel: AudioToolPanel<AceStepMusicalValue> = {
           className="min-h-12"
         />
       </Field>
-      <Field label="Sampler" htmlFor="music-ace-sampler">
+      <Field label={translate("uxImages.sampler1419s")} htmlFor="music-ace-sampler">
         <AutoSelect
           id="music-ace-sampler"
           value={value.sampler}
           onChange={(sampler) => onChange({ ...value, sampler })}
           options={[
-            { value: "euler", label: "Euler (faster)" },
-            { value: "heun", label: "Heun (smoother, slower)" },
+            { value: "euler", label: translate("uxAudio.eulerFaster19e9t") },
+            { value: "heun", label: translate("uxAudio.heunSmootherSlower61vjs") },
           ]}
           disabled={disabled}
         />
@@ -157,7 +158,7 @@ export const aceStepMusicalPanel: AudioToolPanel<AceStepMusicalValue> = {
 export const yueCompositionPanel: AudioToolPanel<YueCompositionValue> = {
   ...yueCompositionLogic,
   Component: ({ value, onChange, disabled }) => (
-    <PanelSection title="Planning" hint={YUE_COT_LABELS[value.cot].hint}>
+    <PanelSection title={translate("uxAudio.planning1vvl5")} hint={YUE_COT_LABELS[value.cot].hint}>
       <PillTabs
         ariaLabel="Planning"
         value={value.cot}
@@ -182,10 +183,10 @@ export const stableAudioSamplerPanel: AudioToolPanel<StableAudioSamplerValue> =
       const steps = stepsRange(specs);
       return (
         <PanelSection
-          title="Sampler"
-          hint="Optional. More steps can sound cleaner and take longer."
+          title={translate("uxImages.sampler1419s")}
+          hint={translate("uxAudio.optionalMoreStepsCan1oqop")}
         >
-          <Field label="Method" htmlFor="music-sa-sampler">
+          <Field label={translate("studio.wizard.methodLabel")} htmlFor="music-sa-sampler">
             <AutoSelect
               id="music-sa-sampler"
               value={value.sampler}
@@ -195,7 +196,7 @@ export const stableAudioSamplerPanel: AudioToolPanel<StableAudioSamplerValue> =
             />
           </Field>
           <ParamSlider
-            label="Steps"
+            label={translate("settings.profile.stats.trainingSteps")}
             value={value.steps ?? steps.default}
             min={steps.min}
             max={steps.max}

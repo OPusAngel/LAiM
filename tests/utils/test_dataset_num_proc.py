@@ -519,7 +519,7 @@ def _narrow_num_proc_replacement():
 
 
 def test_zoo_sft_prepare_dataset_anchor_has_not_drifted():
-    """LAiM/models/rl_replacements.py rewrites LAiM_zoo's
+    """unsloth/models/rl_replacements.py rewrites LAiM_zoo's
     sft_prepare_dataset by exact string match. A Zoo release that touches those
     lines makes _require_replace raise at import time, so catch drift here."""
     source = _zoo_dataset_utils_source()
@@ -775,7 +775,7 @@ def test_the_two_copies_have_not_drifted():
         return ast.dump(ast.parse(ast.unparse(tree)))
 
     assert _shape(MODULE_PATH) == _shape(zoo_file), (
-        "LAiM/dataset_num_proc.py and LAiM_zoo/dataset_num_proc.py "
+        "unsloth/dataset_num_proc.py and LAiM_zoo/dataset_num_proc.py "
         "have diverged; the zoo copy is the source of truth"
     )
 
@@ -1345,7 +1345,7 @@ def test_the_fallback_does_not_sit_behind_a_torch_import():
         for node in ast.parse(utils_init.read_text(encoding = "utf-8")).body
         if isinstance(node, ast.ImportFrom)
     }
-    assert reached, "LAiM/utils/__init__.py stopped importing anything; re-check the premise"
+    assert reached, "unsloth/utils/__init__.py stopped importing anything; re-check the premise"
 
     for path in (
         REPO_ROOT / "LAiM" / "chat_templates.py",

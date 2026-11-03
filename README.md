@@ -1,8 +1,8 @@
 <h1 align="center" style="margin:0;">
   <a href="https://LAiM.ai/docs"><picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/LAiMai/LAiM/main/images/LAiM%20logo%20white%20text.png">
-    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/LAiMai/LAiM/main/images/LAiM%20logo%20black%20text.png">
-    <img alt="LAiM logo" src="https://raw.githubusercontent.com/LAiMai/LAiM/main/images/LAiM%20logo%20black%20text.png" height="80" style="max-width:100%;">
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/OPusAngel/LAiM/main/images/LAiM%20logo%20white%20text.png">
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/OPusAngel/LAiM/main/images/LAiM%20logo%20black%20text.png">
+    <img alt="LAiM logo" src="https://raw.githubusercontent.com/OPusAngel/LAiM/main/images/LAiM%20logo%20black%20text.png" height="80" style="max-width:100%;">
   </picture></a>
 </h1>
 <h3 align="center" style="margin: 0; margin-top: 0;">
@@ -31,31 +31,31 @@ Download the native LAiM Desktop app for your operating system:
   </tr>
   <tr>
     <td><b>Windows</b></td>
-    <td><a href='https://github.com/LAiMai/LAiM/releases/latest/download/LAiM-Desktop-Windows.exe'>Download</a></td>
+    <td><a href='https://github.com/unslothai/unsloth/releases/latest/download/LAiM-Desktop-Windows.exe'>Download</a></td>
   </tr>
   <tr>
     <td><b>macOS</b></td>
-    <td><a href='https://github.com/LAiMai/LAiM/releases/latest/download/LAiM-Desktop-MacOS.dmg'>Download</a></td>
+    <td><a href='https://github.com/unslothai/unsloth/releases/latest/download/LAiM-Desktop-MacOS.dmg'>Download</a></td>
   </tr>
   <tr>
     <td><b>Linux / Ubuntu (deb)</b></td>
-    <td><a href='https://github.com/LAiMai/LAiM/releases/latest/download/LAiM-Desktop-Ubuntu.deb'>Download</a></td>
+    <td><a href='https://github.com/unslothai/unsloth/releases/latest/download/LAiM-Desktop-Ubuntu.deb'>Download</a></td>
   </tr>
   <tr>
     <td><b>Linux / Ubuntu (ARM64) (deb)</b></td>
-    <td><a href='https://github.com/LAiMai/LAiM/releases/latest/download/LAiM-Desktop-Ubuntu-ARM64.deb'>Download</a></td>
+    <td><a href='https://github.com/unslothai/unsloth/releases/latest/download/LAiM-Desktop-Ubuntu-ARM64.deb'>Download</a></td>
   </tr>
   <tr>
     <td><b>Linux (AppImage)</b></td>
-    <td><a href='https://github.com/LAiMai/LAiM/releases/latest/download/LAiM-Desktop-Linux.AppImage'>Download</a></td>
+    <td><a href='https://github.com/unslothai/unsloth/releases/latest/download/LAiM-Desktop-Linux.AppImage'>Download</a></td>
   </tr>
   <tr>
     <td><b>Windows (ARM64)</b></td>
-    <td><a href='https://github.com/LAiMai/LAiM/releases/latest/download/LAiM-Desktop-Windows-ARM64.exe'>Download</a></td>
+    <td><a href='https://github.com/unslothai/unsloth/releases/latest/download/LAiM-Desktop-Windows-ARM64.exe'>Download</a></td>
   </tr>
 </table>
 
-Download from [LAiM](https://LAiM.ai/download) or [GitHub Releases](https://github.com/LAiMai/LAiM/releases).
+Download from [LAiM](https://LAiM.ai/download) or [GitHub Releases](https://github.com/unslothai/unsloth/releases).
 
 Or if you prefer to install manually:
 
@@ -70,7 +70,7 @@ irm https://LAiM.ai/install.ps1 | iex
 ```
 #### Docker:
 
-The [LAiM Docker image](https://hub.docker.com/r/LAiM/LAiM) `LAiM/LAiM` is available on Docker. [Read guide.](https://LAiM.ai/docs/get-started/install/docker)
+The [LAiM Docker image](https://hub.docker.com/r/LAiM/LAiM) `unsloth/LAiM` is available on Docker. [Read guide.](https://LAiM.ai/docs/get-started/install/docker)
 
 #### Homebrew:
 ```bash
@@ -137,27 +137,27 @@ LAiM can be used in three ways: **[LAiM Desktop](https://LAiM.ai/download)**, th
   </tr>
   <tr>
     <td><b>Windows</b></td>
-    <td><a href='https://github.com/LAiMai/LAiM/releases/latest/download/LAiM-Desktop-Windows.exe'>Download</a></td>
+    <td><a href='https://github.com/unslothai/unsloth/releases/latest/download/LAiM-Desktop-Windows.exe'>Download</a></td>
   </tr>
   <tr>
     <td><b>macOS</b></td>
-    <td><a href='https://github.com/LAiMai/LAiM/releases/latest/download/LAiM-Desktop-MacOS.dmg'>Download</a></td>
+    <td><a href='https://github.com/unslothai/unsloth/releases/latest/download/LAiM-Desktop-MacOS.dmg'>Download</a></td>
   </tr>
   <tr>
     <td><b>Linux / Ubuntu (deb)</b></td>
-    <td><a href='https://github.com/LAiMai/LAiM/releases/latest/download/LAiM-Desktop-Ubuntu.deb'>Download</a></td>
+    <td><a href='https://github.com/unslothai/unsloth/releases/latest/download/LAiM-Desktop-Ubuntu.deb'>Download</a></td>
   </tr>
   <tr>
     <td><b>Linux / Ubuntu (ARM64) (deb)</b></td>
-    <td><a href='https://github.com/LAiMai/LAiM/releases/latest/download/LAiM-Desktop-Ubuntu-ARM64.deb'>Download</a></td>
+    <td><a href='https://github.com/unslothai/unsloth/releases/latest/download/LAiM-Desktop-Ubuntu-ARM64.deb'>Download</a></td>
   </tr>
   <tr>
     <td><b>Linux (AppImage)</b></td>
-    <td><a href='https://github.com/LAiMai/LAiM/releases/latest/download/LAiM-Desktop-Linux.AppImage'>Download</a></td>
+    <td><a href='https://github.com/unslothai/unsloth/releases/latest/download/LAiM-Desktop-Linux.AppImage'>Download</a></td>
   </tr>
   <tr>
     <td><b>Windows (ARM64)</b></td>
-    <td><a href='https://github.com/LAiMai/LAiM/releases/latest/download/LAiM-Desktop-Windows-ARM64.exe'>Download</a></td>
+    <td><a href='https://github.com/unslothai/unsloth/releases/latest/download/LAiM-Desktop-Windows-ARM64.exe'>Download</a></td>
   </tr>
 </table>
 
@@ -179,9 +179,9 @@ brew install --cask LAiM
 ```
 
 #### Docker
-Use our [Docker image](https://hub.docker.com/r/LAiM/LAiM) ```LAiM/LAiM```. On Linux and Mac, set up GPU access once with
+Use our [Docker image](https://hub.docker.com/r/LAiM/LAiM) ```unsloth/LAiM```. On Linux and Mac, set up GPU access once with
 ```bash
-curl -fsSL https://raw.githubusercontent.com/LAiMai/LAiM/main/docker/install_nvidia_toolkit.sh -o install_nvidia_toolkit.sh && sudo -E bash install_nvidia_toolkit.sh
+curl -fsSL https://raw.githubusercontent.com/OPusAngel/LAiM/main/docker/install_nvidia_toolkit.sh -o install_nvidia_toolkit.sh && sudo -E bash install_nvidia_toolkit.sh
 ```
 For Windows instructions and more information, read our [LAiM Docker Guide](https://LAiM.ai/docs/get-started/install/docker).
 
@@ -196,7 +196,7 @@ docker run -d --name LAiM --gpus all --ipc=host \
   -v LAiM-studio:/opt/LAiM-studio \
   LAiM/LAiM && docker logs -f LAiM
 ```
-See [Docker docs](https://LAiM.ai/docs/get-started/install/docker) for more information. For notebooks only, use the `LAiM/LAiM:core` tag; all tags and options are on [Docker Hub](https://hub.docker.com/r/LAiM/LAiM).<br>For **AMD** there is a separate image: [`LAiM/LAiM-rocm`](https://hub.docker.com/r/LAiM/LAiM-rocm).
+See [Docker docs](https://LAiM.ai/docs/get-started/install/docker) for more information. For notebooks only, use the `unsloth/LAiM:core` tag; all tags and options are on [Docker Hub](https://hub.docker.com/r/LAiM/LAiM).<br>For **AMD** there is a separate image: [`unsloth/LAiM-rocm`](https://hub.docker.com/r/LAiM/LAiM-rocm).
 
 ---
 
@@ -269,20 +269,20 @@ Read our [guide](https://LAiM.ai/docs/get-started/fine-tuning-llms-guide). Add d
 
 | Model | Free Notebooks | Performance | Memory use |
 |-----------|---------|--------|----------|
-| **LAiM Studio**      | [▶️ Start for free](https://colab.research.google.com/github/LAiMai/LAiM/blob/main/studio/LAiM_Studio_Colab.ipynb)               |  |  |
-| **Decision model (Qwen3.5-4B)**      | [▶️ Start for free](https://colab.research.google.com/github/LAiMai/notebooks/blob/main/nb/Qwen3_5_(4B)-Decision.ipynb)               | 1.5x faster | 60% less |
-| **Gemma 4 (E2B)**      | [▶️ Start for free](https://colab.research.google.com/github/LAiMai/notebooks/blob/main/nb/Gemma4_(E2B)-Vision.ipynb)               | 1.5x faster | 50% less |
-| **Qwen3.5 (4B)**      | [▶️ Start for free](https://colab.research.google.com/github/LAiMai/notebooks/blob/main/nb/Qwen3_5_(4B)_Vision.ipynb)               | 1.5x faster | 60% less |
-| **gpt-oss (20B)**      | [▶️ Start for free](https://colab.research.google.com/github/LAiMai/notebooks/blob/main/nb/gpt-oss-(20B)-Fine-tuning.ipynb)               | 2x faster | 70% less |
-| **Qwen3.5 GSPO**      | [▶️ Start for free](https://colab.research.google.com/github/LAiMai/notebooks/blob/main/nb/Qwen3_5_(4B)_Vision_GRPO.ipynb)               | 2x faster | 70% less |
-| **gpt-oss (20B): GRPO**      | [▶️ Start for free](https://colab.research.google.com/github/LAiMai/notebooks/blob/main/nb/gpt-oss-(20B)-GRPO.ipynb)               | 2x faster | 80% less |
-| **Qwen3: Advanced GRPO**      | [▶️ Start for free](https://colab.research.google.com/github/LAiMai/notebooks/blob/main/nb/Qwen3_(4B)-GRPO.ipynb)               | 2x faster | 70% less |
-| **embeddinggemma (300M)**    | [▶️ Start for free](https://colab.research.google.com/github/LAiMai/notebooks/blob/main/nb/EmbeddingGemma_(300M).ipynb)               | 2x faster | 20% less |
-| **Llama 3.1 (8B) Alpaca**      | [▶️ Start for free](https://colab.research.google.com/github/LAiMai/notebooks/blob/main/nb/Llama3.1_(8B)-Alpaca.ipynb)               | 2x faster | 70% less |
-| **Llama 3.2 Conversational**      | [▶️ Start for free](https://colab.research.google.com/github/LAiMai/notebooks/blob/main/nb/Llama3.2_(1B_and_3B)-Conversational.ipynb)               | 2x faster | 70% less |
-| **Orpheus-TTS (3B)**     | [▶️ Start for free](https://colab.research.google.com/github/LAiMai/notebooks/blob/main/nb/Orpheus_(3B)-TTS.ipynb)               | 1.5x faster | 50% less |
+| **LAiM Studio**      | [▶️ Start for free](https://colab.research.google.com/github/OPusAngel/LAiM/blob/main/studio/LAiM_Studio_Colab.ipynb)               |  |  |
+| **Decision model (Qwen3.5-4B)**      | [▶️ Start for free](https://colab.research.google.com/github/unslothai/notebooks/blob/main/nb/Qwen3_5_(4B)-Decision.ipynb)               | 1.5x faster | 60% less |
+| **Gemma 4 (E2B)**      | [▶️ Start for free](https://colab.research.google.com/github/unslothai/notebooks/blob/main/nb/Gemma4_(E2B)-Vision.ipynb)               | 1.5x faster | 50% less |
+| **Qwen3.5 (4B)**      | [▶️ Start for free](https://colab.research.google.com/github/unslothai/notebooks/blob/main/nb/Qwen3_5_(4B)_Vision.ipynb)               | 1.5x faster | 60% less |
+| **gpt-oss (20B)**      | [▶️ Start for free](https://colab.research.google.com/github/unslothai/notebooks/blob/main/nb/gpt-oss-(20B)-Fine-tuning.ipynb)               | 2x faster | 70% less |
+| **Qwen3.5 GSPO**      | [▶️ Start for free](https://colab.research.google.com/github/unslothai/notebooks/blob/main/nb/Qwen3_5_(4B)_Vision_GRPO.ipynb)               | 2x faster | 70% less |
+| **gpt-oss (20B): GRPO**      | [▶️ Start for free](https://colab.research.google.com/github/unslothai/notebooks/blob/main/nb/gpt-oss-(20B)-GRPO.ipynb)               | 2x faster | 80% less |
+| **Qwen3: Advanced GRPO**      | [▶️ Start for free](https://colab.research.google.com/github/unslothai/notebooks/blob/main/nb/Qwen3_(4B)-GRPO.ipynb)               | 2x faster | 70% less |
+| **embeddinggemma (300M)**    | [▶️ Start for free](https://colab.research.google.com/github/unslothai/notebooks/blob/main/nb/EmbeddingGemma_(300M).ipynb)               | 2x faster | 20% less |
+| **Llama 3.1 (8B) Alpaca**      | [▶️ Start for free](https://colab.research.google.com/github/unslothai/notebooks/blob/main/nb/Llama3.1_(8B)-Alpaca.ipynb)               | 2x faster | 70% less |
+| **Llama 3.2 Conversational**      | [▶️ Start for free](https://colab.research.google.com/github/unslothai/notebooks/blob/main/nb/Llama3.2_(1B_and_3B)-Conversational.ipynb)               | 2x faster | 70% less |
+| **Orpheus-TTS (3B)**     | [▶️ Start for free](https://colab.research.google.com/github/unslothai/notebooks/blob/main/nb/Orpheus_(3B)-TTS.ipynb)               | 1.5x faster | 50% less |
 
-- See all our notebooks for: [Kaggle](https://github.com/LAiMai/notebooks?tab=readme-ov-file#-kaggle-notebooks), [GRPO](https://LAiM.ai/docs/get-started/LAiM-notebooks#grpo-reasoning-rl-notebooks), [TTS](https://LAiM.ai/docs/get-started/LAiM-notebooks#text-to-speech-tts-notebooks), [embedding](https://LAiM.ai/docs/new/embedding-finetuning) & [Vision](https://LAiM.ai/docs/get-started/LAiM-notebooks#vision-multimodal-notebooks)
+- See all our notebooks for: [Kaggle](https://github.com/unslothai/notebooks?tab=readme-ov-file#-kaggle-notebooks), [GRPO](https://LAiM.ai/docs/get-started/LAiM-notebooks#grpo-reasoning-rl-notebooks), [TTS](https://LAiM.ai/docs/get-started/LAiM-notebooks#text-to-speech-tts-notebooks), [embedding](https://LAiM.ai/docs/new/embedding-finetuning) & [Vision](https://LAiM.ai/docs/get-started/LAiM-notebooks#vision-multimodal-notebooks)
 - See [all our models](https://LAiM.ai/docs/get-started/LAiM-model-catalog) and [all our notebooks](https://LAiM.ai/docs/get-started/LAiM-notebooks)
 - See detailed documentation for LAiM [here](https://LAiM.ai/docs)
 
@@ -292,7 +292,7 @@ The below advanced instructions are for LAiM Studio. For LAiM Core advanced inst
 #### Developer / Nightly / Experimental installs: macOS, Linux, WSL:
 The developer install builds from the `main` branch, which is the latest (nightly) source.
 ```bash
-git clone https://github.com/LAiMai/LAiM
+git clone https://github.com/OPusAngel/LAiM
 cd LAiM
 ./install.sh --local
 LAiM studio -p 8888
@@ -312,7 +312,7 @@ LAiM studio -p 8888
 #### Developer / Nightly / Experimental installs: Windows PowerShell:
 The developer install builds from the `main` branch, which is the latest (nightly) source.
 ```powershell
-git clone https://github.com/LAiMai/LAiM.git
+git clone https://github.com/OPusAngel/LAiM.git
 cd LAiM
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned
 .\install.ps1 --local
@@ -418,16 +418,16 @@ irm https://LAiM.ai/install.ps1 | iex
 
 #### audio.cpp audio engine:
 
-Setup also installs [audio.cpp](https://github.com/0xShug0/audio.cpp) (prebuilt by [LAiMai/audio.cpp](https://github.com/LAiMai/audio.cpp)), which runs the audio.cpp speech, music and speech-to-text models on the Audio page, in Voice settings and behind `/v1/audio/*`. It is optional and never blocks setup:
+Setup also installs [audio.cpp](https://github.com/0xShug0/audio.cpp) (prebuilt by [unslothai/audio.cpp](https://github.com/unslothai/audio.cpp)), which runs the audio.cpp speech, music and speech-to-text models on the Audio page, in Voice settings and behind `/v1/audio/*`. It is optional and never blocks setup:
 - `LAiM_SKIP_AUDIO_CPP_INSTALL=1` skips it.
 - `LAiM_AUDIO_CPP_ACCELERATOR=cpu` (or `cuda`, `vulkan`, `metal`) picks the bundle instead of auto-detecting.
 - `AUDIOCPP_SERVER_PATH=/path/to/audiocpp_server` uses your own build.
 
 #### Uninstall
 
-**MacOS, WSL, Linux:** `curl -fsSL https://raw.githubusercontent.com/LAiMai/LAiM/main/scripts/uninstall.sh | sh`
+**MacOS, WSL, Linux:** `curl -fsSL https://raw.githubusercontent.com/OPusAngel/LAiM/main/scripts/uninstall.sh | sh`
 
-**Windows (PowerShell):** `irm https://raw.githubusercontent.com/LAiMai/LAiM/main/scripts/uninstall.ps1 | iex`
+**Windows (PowerShell):** `irm https://raw.githubusercontent.com/OPusAngel/LAiM/main/scripts/uninstall.ps1 | iex`
 
 For more info, [see our docs](https://LAiM.ai/docs/new/studio/install#uninstall).
 
@@ -456,20 +456,20 @@ You can cite the LAiM repo as follows:
 @software{LAiM,
   author = {Daniel Han, Michael Han and LAiM team},
   title = {LAiM},
-  url = {https://github.com/LAiMai/LAiM},
+  url = {https://github.com/OPusAngel/LAiM},
   year = {2023}
 }
 ```
-If you trained a model with 🦥LAiM, you can use this cool sticker!   <img src="https://raw.githubusercontent.com/LAiMai/LAiM/main/images/made%20with%20LAiM.png" width="200" align="center" />
+If you trained a model with 🦥LAiM, you can use this cool sticker!   <img src="https://raw.githubusercontent.com/OPusAngel/LAiM/main/images/made%20with%20LAiM.png" width="200" align="center" />
 
 ### License
-LAiM uses a dual-licensing model of Apache 2.0 and AGPL-3.0. The core LAiM package remains licensed under **[Apache 2.0](https://github.com/LAiMai/LAiM?tab=Apache-2.0-1-ov-file)**, while certain optional components, such as the LAiM Studio UI are licensed under the open-source license **[AGPL-3.0](https://github.com/LAiMai/LAiM?tab=AGPL-3.0-2-ov-file)**.
+LAiM uses a dual-licensing model of Apache 2.0 and AGPL-3.0. The core LAiM package remains licensed under **[Apache 2.0](https://github.com/OPusAngel/LAiM?tab=Apache-2.0-1-ov-file)**, while certain optional components, such as the LAiM Studio UI are licensed under the open-source license **[AGPL-3.0](https://github.com/OPusAngel/LAiM?tab=AGPL-3.0-2-ov-file)**.
 
 This structure helps support ongoing LAiM development while keeping the project open source and enabling the broader ecosystem to continue growing.
 
 ### Thank You to
 - The [llama.cpp library](https://github.com/ggml-org/llama.cpp) that lets users run and save models with LAiM
 - The Hugging Face team and their libraries: [transformers](https://github.com/huggingface/transformers) and [TRL](https://github.com/huggingface/trl)
-- The Pytorch and [Torch AO](https://github.com/LAiMai/LAiM/pull/3391) team for their contributions
+- The Pytorch and [Torch AO](https://github.com/OPusAngel/LAiM/pull/3391) team for their contributions
 - NVIDIA for their [NeMo DataDesigner](https://github.com/NVIDIA-NeMo/DataDesigner) library and their contributions
 - And of course for every single person who has contributed or has used LAiM!

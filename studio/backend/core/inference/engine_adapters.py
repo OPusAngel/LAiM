@@ -85,7 +85,7 @@ class EngineAdapter:
     def environment(self, gpu_count):
         if self.name == "vllm":
             # vLLM 0.30+ DeepSeek-OCR encoder kernel reads a plain-float LOG2E global, a NameError on
-            # Triton 3.7 (LAiMai/LAiM#3911). The knob only lifts that error and is not in the cache key.
+            # Triton 3.7 (OPusAngel/LAiM#3911). The knob only lifts that error and is not in the cache key.
             env = {"TRITON_ALLOW_NON_CONSTEXPR_GLOBALS": "1"}
             if gpu_count > 1:
                 env["VLLM_HOST_IP"] = "127.0.0.1"

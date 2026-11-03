@@ -60,7 +60,7 @@ def list_local_datasets(
 
 @router.get("/download-progress", deprecated = True)
 async def get_dataset_download_progress(
-    repo_id: str = Query(..., description = "HuggingFace dataset repo ID, e.g. 'LAiM/LaTeX_OCR'"),
+    repo_id: str = Query(..., description = "HuggingFace dataset repo ID, e.g. 'unsloth/LaTeX_OCR'"),
     hf_token: HfTokenArg = Depends(get_request_hf_token),
     current_subject: str = Depends(get_current_subject),
 ):

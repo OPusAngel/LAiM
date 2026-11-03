@@ -2,6 +2,8 @@
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { isTauri } from "@/lib/api-base";
+import { translate } from "@/i18n";
+
 
 // Native IPC, so it works outside a user gesture (e.g. after an await).
 async function copyWithTauriClipboard(text: string): Promise<boolean> {
@@ -110,7 +112,7 @@ export async function copyToClipboardFrom(
       await navigator.clipboard.write([
         new ClipboardItem({
           "text/plain": payload.then((text) => {
-            if (!text) throw new Error("nothing to copy");
+            if (!text) throw new Error(translate("uxFeatures.nothingToCopyst9he"));
             return new Blob([text], { type: "text/plain" });
           }),
         }),
@@ -137,6 +139,6 @@ export async function asPng(blob: Blob): Promise<Blob> {
   canvas.getContext("2d")?.drawImage(bitmap, 0, 0);
   bitmap.close();
   return new Promise((resolve, reject) =>
-    canvas.toBlob((png) => (png ? resolve(png) : reject(new Error("PNG encoding failed"))), "image/png"),
+    canvas.toBlob((png) => (png ? resolve(png) : reject(new Error(translate("uxFeatures.pNGEncodingFailedywvmr")))), "image/png"),
   );
 }

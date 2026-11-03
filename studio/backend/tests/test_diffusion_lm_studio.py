@@ -278,7 +278,7 @@ def test_unsupported_lora_options_fail_loudly(captured_peft, dora, loftq):
 @_needs_torch
 def test_prepare_routes_diffusion_before_any_other_branch(captured_peft):
     t = _trainer(model = SimpleNamespace(named_modules = lambda: iter(()), config = object()))
-    t._use_gradient_checkpointing = "LAiM"
+    t._use_gradient_checkpointing = "unsloth"
     t._audio_type = "csm"  # would otherwise take an audio branch
     assert t.prepare_model_for_training(use_lora = True, target_modules = list(_DEFAULT))
     assert captured_peft[-1]["target_modules"] is None
@@ -316,7 +316,7 @@ def test_autoregressive_detection_is_a_no_op(monkeypatch):
     monkeypatch.setattr(trainer_mod, "diffusion_lm_profile_for_model", lambda *a, **k: None)
     t = _trainer(profile = None)
     t.is_vlm = True
-    t._detect_diffusion_lm("LAiM/gemma-3-4b-it", None, False, None)
+    t._detect_diffusion_lm("unsloth/gemma-3-4b-it", None, False, None)
     assert t.diffusion_lm_profile is None and t.is_vlm is True and t.warnings == []
 
 

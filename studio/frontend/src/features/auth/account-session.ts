@@ -66,7 +66,7 @@ export function useLoginMode() {
   useEffect(ensureLoginMode, []);
   return mode;
 }
-/** The server enforces the same owner-only rule for unsandboxed tool calls. */
+/** The server enforces the same owner-only rule for unrestricted tool calls. */
 export function useFullAccessAllowed(): boolean {
   return useIsAccountOwner();
 }

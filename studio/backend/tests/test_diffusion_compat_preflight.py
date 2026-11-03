@@ -33,7 +33,7 @@ from core.inference.diffusion_families import (
 
 KLEIN_4B_BASE = "black-forest-labs/FLUX.2-klein-4B"
 KLEIN_9B_BASE = "black-forest-labs/FLUX.2-klein-9B"
-KLEIN_4B_GGUF = "LAiM/FLUX.2-klein-4B-GGUF"
+KLEIN_4B_GGUF = "unsloth/FLUX.2-klein-4B-GGUF"
 KLEIN_4B_FILE = "flux-2-klein-4b-Q4_K_M.gguf"
 
 FLUX2_FAMILY = types.SimpleNamespace(name = "flux.2-klein", single_file_is_pipeline = False)
@@ -441,7 +441,7 @@ def test_a_known_ungated_mirror_is_checked_like_its_upstream(monkeypatch, tmp_pa
     _stub_range_reads(monkeypatch, {KLEIN_4B_FILE: _gguf_header(3072, tmp_path)})
     from core.inference.diffusion_families import canonical_base
 
-    mirror = "LAiM/FLUX.2-klein-9B"
+    mirror = "unsloth/FLUX.2-klein-9B"
     assert canonical_base(mirror).lower() == KLEIN_9B_BASE.lower(), "mirror table changed"
 
     reason = diffusion_compat.flux2_pick_mismatch(
@@ -458,7 +458,7 @@ def test_a_non_flux2_family_costs_no_request_at_all(monkeypatch, tmp_path):
     assert (
         diffusion_compat.flux2_pick_mismatch(
             types.SimpleNamespace(name = "z-image"),
-            "LAiM/Z-Image-Turbo-GGUF",
+            "unsloth/Z-Image-Turbo-GGUF",
             "z.gguf",
             KLEIN_9B_BASE,
         )
@@ -799,12 +799,12 @@ def test_the_load_refuses_before_prefetching_or_unloading_anything(monkeypatch, 
 def test_the_native_encoder_follows_the_header_over_the_filename():
     # A renamed or hand-picked 9B checkpoint says nothing in its id, and the 4B encoder fails deep
     # inside sd-cli. The header knows.
-    fam = detect_family("LAiM/FLUX.2-klein-4B-GGUF")
+    fam = detect_family("unsloth/FLUX.2-klein-4B-GGUF")
     assert fam is not None and fam.name == "flux.2-klein"
 
-    by_name = sd_cpp_text_encoders_for(fam, "LAiM/FLUX.2-klein-4B-GGUF", "my-checkpoint.gguf")
+    by_name = sd_cpp_text_encoders_for(fam, "unsloth/FLUX.2-klein-4B-GGUF", "my-checkpoint.gguf")
     by_header = sd_cpp_text_encoders_for(
-        fam, "LAiM/FLUX.2-klein-4B-GGUF", "my-checkpoint.gguf", inner_dim = 4096
+        fam, "unsloth/FLUX.2-klein-4B-GGUF", "my-checkpoint.gguf", inner_dim = 4096
     )
 
     assert by_name == fam.sd_cpp_text_encoders  # today's answer: the 4B encoder
@@ -813,25 +813,25 @@ def test_the_native_encoder_follows_the_header_over_the_filename():
 
 
 def test_the_header_also_overrides_a_misleading_9b_filename():
-    fam = detect_family("LAiM/FLUX.2-klein-9B-GGUF")
+    fam = detect_family("unsloth/FLUX.2-klein-9B-GGUF")
     assert fam is not None
 
     picked = sd_cpp_text_encoders_for(
-        fam, "LAiM/FLUX.2-klein-9B-GGUF", "flux-2-klein-9b-Q4_K_M.gguf", inner_dim = 3072
+        fam, "unsloth/FLUX.2-klein-9B-GGUF", "flux-2-klein-9b-Q4_K_M.gguf", inner_dim = 3072
     )
 
     assert picked == fam.sd_cpp_text_encoders  # the file really is 4B
 
 
 def test_an_unmapped_or_absent_inner_dim_keeps_the_filename_rule():
-    fam = detect_family("LAiM/FLUX.2-klein-9B-GGUF")
+    fam = detect_family("unsloth/FLUX.2-klein-9B-GGUF")
     assert fam is not None
-    nine_b = sd_cpp_text_encoders_for(fam, "LAiM/FLUX.2-klein-9B-GGUF", "klein-9b.gguf")
+    nine_b = sd_cpp_text_encoders_for(fam, "unsloth/FLUX.2-klein-9B-GGUF", "klein-9b.gguf")
 
     for inner_dim in (None, 1234):
         assert (
             sd_cpp_text_encoders_for(
-                fam, "LAiM/FLUX.2-klein-9B-GGUF", "klein-9b.gguf", inner_dim = inner_dim
+                fam, "unsloth/FLUX.2-klein-9B-GGUF", "klein-9b.gguf", inner_dim = inner_dim
             )
             == nine_b
         )
@@ -1737,10 +1737,10 @@ def test_qwen_image_2_1_takes_the_dynamic_4bit_text_encoder():
     fam = detect_family("Qwen/Qwen-Image-2.1")
     assert fam.sd_cpp_text_encoders == (
         (
-            "LAiM/Qwen3-VL-8B-Instruct-GGUF",
+            "unsloth/Qwen3-VL-8B-Instruct-GGUF",
             "Qwen3-VL-8B-Instruct-UD-Q4_K_XL.gguf",
             "llm",
         ),
         # The vision projector native editing needs, pinned by name for the same reason.
-        ("LAiM/Qwen3-VL-8B-Instruct-GGUF", "mmproj-F16.gguf", "llm_vision"),
+        ("unsloth/Qwen3-VL-8B-Instruct-GGUF", "mmproj-F16.gguf", "llm_vision"),
     )

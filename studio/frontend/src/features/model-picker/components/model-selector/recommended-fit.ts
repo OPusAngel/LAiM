@@ -6,6 +6,10 @@
 
 import { classifyGgufFit } from "../../../../lib/gguf-fit.ts";
 import {
+  HF_SOURCE_OWNER,
+  isHfFirstPartyRepo,
+} from "../../../../config/hub-source.ts";
+import {
   LOADING_OVERHEAD_GB,
   checkVramFit,
   estimateLoadingVram,
@@ -19,6 +23,8 @@ import {
   classifyMediaGgufFit,
   type curatedArtifactFit,
 } from "./model-catalog.ts";
+import { translate } from "@/i18n";
+
 
 const GGUF_SUFFIX_RE = /-GGUF(?:$|-)/i;
 // Mirrors the backend's _looks_like_mlx_repo: owner prefix, or a bounded mlx token in the leaf.
@@ -488,11 +494,13 @@ export function orderRecommendedRows<
   if (!familyOf) return ordered;
   // First-party rows lead. A family ranks at its best listed artifact and keeps its rows together;
   // unlisted families go last, except first-party ones the LAiM listing can never return
-  // (LAiMai/*), which keep their curated place on top.
+  // (unslothai/*), which keep their curated place on top.
   const keyOf = (r: T) => familyOf(r.id) ?? r.id.toLowerCase();
-  const firstParty = (id: string) => /^LAiM(ai)?\//i.test(id);
+  const firstParty = (id: string) => isHfFirstPartyRepo(id);
   const listable = new Set(
-    ordered.filter((r) => /^LAiM\//i.test(r.id)).map(keyOf),
+    ordered
+      .filter((r) => r.id.toLowerCase().startsWith(`${HF_SOURCE_OWNER}/`))
+      .map(keyOf),
   );
   const rank = new Map<string, number>();
   results.forEach((r, i) => {
@@ -579,7 +587,7 @@ export function curatedBudgetText(
     budget.device === "RAM"
       ? `${Number(budget.deviceGb.toFixed(2))}GB available RAM`
       : `a ${gpuGb}GB GPU`;
-  return `Needs ~${needGb}GB for weights (budget: ~${budgetGb}GB, 70% of ${of})`;
+  return translate("uxModelpicker.needsGBForWeightsxg1a4", { p1: needGb, p2: budgetGb, p3: of });
 }
 
 export function recommendedEmptyState({

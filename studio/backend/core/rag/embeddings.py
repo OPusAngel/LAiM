@@ -874,7 +874,7 @@ def _model_names_gguf_repo(model: str | None) -> bool:
 
 # ST under auto stays on the CPU in float32 (_device); llama-server offloads. Exact ids: a fine-tune may lack the -GGUF.
 _LLAMA_SERVER_PREFERRED_MODELS = frozenset(
-    {"LAiM/embeddinggemma-300m", "LAiM/embeddinggemma-2"}
+    {"unsloth/embeddinggemma-300m", "unsloth/embeddinggemma-2"}
 )
 
 

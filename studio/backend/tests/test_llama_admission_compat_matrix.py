@@ -245,7 +245,7 @@ class TestOldCallers:
             _TOOL_LOOP_HOOKS
         ), f"the hooks must stay together in order, got {hooks}"
 
-    def test_the_sandbox_level_was_appended_rather_than_inserted(self):
+    def test_the_workdir_level_was_appended_rather_than_inserted(self):
         import inspect
 
         from core.inference.llama_cpp import LlamaCppBackend
@@ -253,7 +253,7 @@ class TestOldCallers:
         names = list(
             inspect.signature(LlamaCppBackend.generate_chat_completion_with_tools).parameters
         )
-        assert names.index("sandbox_level") == names.index("instruction_anchor_ids") + 1
+        assert names.index("workdir_level") == names.index("instruction_anchor_ids") + 1
         assert names[-1] == "compact_context"
         assert names.index("promote_reasoning_only") == names.index("permission_mode") + 1
 

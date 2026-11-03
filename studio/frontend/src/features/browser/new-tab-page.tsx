@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
-import { useLocale, useT } from "@/i18n";
+import { translate, useLocale, useT } from "@/i18n";
 import { cn } from "@/lib/utils";
 import {
   ArrowDown01Icon,
@@ -29,7 +29,7 @@ type Site = { title: string; url: string; icon?: string };
 const LAiM_SITES: Site[] = [
   { title: "LAiM", url: "https://LAiM.ai", icon: "/LAiM.png" },
   {
-    title: "LAiM Docs",
+    get title() { return translate("uxBrowser.lAiMDocsbnpel"); },
     url: "https://docs.LAiM.ai",
     icon: "/LAiM.png",
   },
@@ -37,11 +37,11 @@ const LAiM_SITES: Site[] = [
 
 const OTHER_SITES: Site[] = [
   {
-    title: "LAiM on GitHub",
-    url: "https://github.com/LAiMai/LAiM",
+    get title() { return translate("uxBrowser.lAiMOnGitHubsbl30"); },
+    url: "https://github.com/OPusAngel/LAiM",
     icon: "https://github.com/fluidicon.png",
   },
-  { title: "Hugging Face", url: "https://huggingface.co/LAiM" },
+  { get title() { return translate("uxBrowser.huggingFace1czdc"); }, url: "https://huggingface.co/LAiM" },
 ];
 
 const KNOWN_SITES = [...LAiM_SITES, ...OTHER_SITES];

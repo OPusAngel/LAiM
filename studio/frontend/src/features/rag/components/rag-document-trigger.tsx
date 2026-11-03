@@ -13,6 +13,8 @@ import {
   openRagDocumentInBrowser,
 } from "../lib/open-document";
 import { asViewerFile, fetchSourceFile, isViewableSource } from "./source-file";
+import { translate } from "@/i18n";
+
 
 /**
  * Opens an indexed document from `children` (a button): in Studio's browser when it can show the
@@ -51,7 +53,7 @@ export function RagDocumentTrigger({
       if (!file) {
         // Past the viewer's limit (uploads go up to 200 MB): still let it open outside Studio.
         offerRagDocumentOutside(documentId, filename);
-        throw new Error(`Couldn't preview ${filename}`);
+        throw new Error(translate("uxRag.couldnTPreviewk55xh", { p1: filename }));
       }
       return asViewerFile(file);
     };

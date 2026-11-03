@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
-// Rows drop the "LAiM/" prefix but keep every other owner, which is what
+// Rows drop the "unsloth/" prefix but keep every other owner, which is what
 // tells the two apart.
 
 import assert from "node:assert/strict";
@@ -15,17 +15,17 @@ import {
 
 test("LAiM is the owner whose prefix rows hide", () => {
   assert.equal(
-    isLAiMOwner(splitRepoLabel("LAiM/gemma-4-26b").owner),
+    isLAiMOwner(splitRepoLabel("unsloth/gemma-4-26b").owner),
     true,
   );
-  // Case as the Hub listing returns it.
-  assert.equal(isLAiMOwner("LAiM"), true);
-  assert.equal(isLAiMOwner("LAiMai"), true);
+  // Case as the Hub listing returns it, plus the second first-party org.
+  assert.equal(isLAiMOwner("Unsloth"), true);
+  assert.equal(isLAiMOwner("unslothai"), true);
 });
 
 test("other owners keep their prefix", () => {
   assert.equal(isLAiMOwner(splitRepoLabel("Qwen/Qwen3-8B").owner), false);
-  assert.equal(isLAiMOwner("LAiM-community"), false);
+  assert.equal(isLAiMOwner("unsloth-community"), false);
   // A bare model name has no owner to hide.
   assert.equal(isLAiMOwner(splitRepoLabel("gemma-4-26b").owner), false);
 });

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AUTH_SESSION_ENDING_EVENT } from "@/features/auth";
 import { useVoiceSettingsStore } from "@/features/settings";
@@ -124,7 +125,7 @@ export function useTranscription({
       transcriptRecord !== null ||
       transcriptExported ||
       window.confirm(
-        "This transcript could not be saved. Download it before continuing, or continue and discard it?",
+        translate("uxAudio.thisTranscriptCouldNotwcjzl"),
       )
     );
   }, [transcript, transcriptRecord, transcriptExported]);
@@ -143,7 +144,7 @@ export function useTranscription({
         speakerNames,
       } : null,
     )) {
-      toast.error("Could not update transcript recovery. Download unsaved text before leaving.");
+      toast.error(translate("uxAudio.couldNotUpdateTranscript15o9s"));
     }
     if (isTauri) {
       void import("@tauri-apps/api/core")
@@ -154,7 +155,7 @@ export function useTranscription({
           }),
         )
         .catch(() =>
-          toast.error("Could not update transcript close protection."),
+          toast.error(translate("uxAudio.couldNotUpdateTranscriptibjsu")),
         );
     }
     if (!unsaved) return;
@@ -165,13 +166,13 @@ export function useTranscription({
     const confirmLogout = (event: Event) => {
       if (
         !window.confirm(
-          "This transcript could not be saved. Download it before logging out, or log out and discard it?",
+          translate("uxAudio.thisTranscriptCouldNotd2bdp"),
         )
       ) {
         event.preventDefault();
       } else if (!writeTranscriptDraft(draftKey, null)) {
         event.preventDefault();
-        toast.error("Could not discard the transcript recovery copy. Try again.");
+        toast.error(translate("uxAudio.couldNotDiscardThe11kge"));
       }
     };
     window.addEventListener("beforeunload", warn);
@@ -185,7 +186,7 @@ export function useTranscription({
   const prepareTranscriptionModel = useCallback(async () => {
     const repo = selectedSttRepoRef.current ?? lastSttRepo;
     if (!repo) {
-      toast.info("Pick a speech-to-text model first.");
+      toast.info(translate("uxAudio.pickASpeechTo1tv3v"));
       return null;
     }
     selectedSttRepoRef.current = repo;
@@ -281,14 +282,14 @@ export function useTranscription({
         setTranscriptRecord(result.record);
         setTranscriptDetails(detailsFrom(result));
         if (!result.text)
-          toast.info("The model heard no speech in that audio.");
+          toast.info(translate("uxAudio.theModelHeardNolaxv6"));
         else if (!result.record)
           toast.error(
-            "Transcript could not be saved. Download a copy to keep it.",
+            translate("uxAudio.transcriptCouldNotBe1xnu1"),
           );
       } catch (error) {
         if (controller.signal.aborted) {
-          setTranscriptError("Transcription cancelled.");
+          setTranscriptError(translate("uxAudio.transcriptionCancelledl8fd3"));
           return;
         }
         if (
@@ -300,7 +301,7 @@ export function useTranscription({
           return;
         }
         const message =
-          error instanceof Error ? error.message : "Transcription failed.";
+          error instanceof Error ? error.message : translate("uxAudio.transcriptionFailedsch53");
         setTranscriptError(message);
         toast.error(message);
       } finally {
@@ -342,7 +343,7 @@ export function useTranscription({
       })
       .catch((error: unknown) => {
         if (transcriptVersion.current === version)
-          toastFailure("Could not load this transcript's timing", error);
+          toastFailure(translate("uxAudio.couldNotLoadThisw13u1"), error);
       });
   }, []);
 
@@ -360,7 +361,7 @@ export function useTranscription({
         setSpeakerNames((current) =>
           (current[id] ?? "") === name ? withName(current, id, previous) : current,
         );
-        toastFailure("Could not rename the speaker", error);
+        toastFailure(translate("uxAudio.couldNotRenameThetmsza"), error);
       });
     },
     [speakerNames, transcriptRecord],
@@ -369,8 +370,8 @@ export function useTranscription({
   const handleCopyTranscript = useCallback(() => {
     void copyToClipboard(transcript).then((ok) =>
       ok
-        ? toast.success("Transcript copied")
-        : toast.error("Could not copy the transcript."),
+        ? toast.success(translate("uxAudio.transcriptCopied1b9lt"))
+        : toast.error(translate("uxAudio.couldNotCopyThe1ow4m")),
     );
   }, [transcript]);
 

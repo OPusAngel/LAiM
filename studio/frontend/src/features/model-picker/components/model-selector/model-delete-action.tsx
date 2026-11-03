@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils";
 import { Delete02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { type ReactNode, useCallback, useState } from "react";
+import { translate } from "@/i18n";
+
 
 interface ModelDeleteActionProps {
   ariaLabel: string;
@@ -43,7 +45,7 @@ export function ModelDeleteAction({
       setOpen(false);
     } catch (err) {
       toast.error(
-        err instanceof Error ? err.message : "Failed to delete model",
+        err instanceof Error ? err.message : translate("uxModelpicker.failedToDeleteModelis1ob"),
       );
     } finally {
       setDeleting(false);

@@ -7,26 +7,26 @@
 
 import assert from "node:assert/strict";
 import test from "node:test";
-import { readSrc } from "./helpers/kit.ts";
+import { readSrc, readSrcExpanded } from "./helpers/kit.ts";
 
-const pickers = readSrc(
+const pickers = readSrcExpanded(
   "features/model-picker/components/model-selector/pickers.tsx",
 );
-const marks = readSrc(
+const marks = readSrcExpanded(
   "features/model-picker/components/model-selector/connected-model-meta.ts",
 );
-const connectedPins = readSrc(
+const connectedPins = readSrcExpanded(
   "features/model-picker/components/model-selector/pinned-connected-models.ts",
 );
-const onDevicePins = readSrc(
+const onDevicePins = readSrcExpanded(
   "features/model-picker/components/model-selector/pinned-models.ts",
 );
-const selector = readSrc("features/model-picker/components/model-selector.tsx");
-const settingsStore = readSrc(
+const selector = readSrcExpanded("features/model-picker/components/model-selector.tsx");
+const settingsStore = readSrcExpanded(
   "features/settings/stores/settings-dialog-store.ts",
 );
-const connectionsTab = readSrc("features/settings/tabs/connections-tab.tsx");
-const providersDialog = readSrc("features/chat/chat-providers-dialog.tsx");
+const connectionsTab = readSrcExpanded("features/settings/tabs/connections-tab.tsx");
+const providersDialog = readSrcExpanded("features/chat/chat-providers-dialog.tsx");
 
 test("a connected row draws its badges through ModelRow", () => {
   // The same component the On Device rows use, so the glyph set cannot drift into a second one.
@@ -98,14 +98,14 @@ test("modality comes from the resolvers the app already has", () => {
   // an external selection has no row there and `add` rejects every audio file it is given.
   assert.match(marks, /audio: false,/);
   assert.doesNotMatch(marks, /includes\("audio"\)/);
-  const audioAdapter = readSrc("features/chat/audio-attachment-adapter.ts");
+  const audioAdapter = readSrcExpanded("features/chat/audio-attachment-adapter.ts");
   assert.match(
     audioAdapter,
     /const activeModel = state\.models\.find\(\(m\) => m\.id === checkpoint\);/,
   );
   assert.match(audioAdapter, /if \(modelLoaded && !activeModel\?\.hasAudioInput\) \{/);
   assert.match(
-    readSrc("features/chat/lib/attached-media-gate.ts"),
+    readSrcExpanded("features/chat/lib/attached-media-gate.ts"),
     /if \(audio && !activeModel\?\.hasAudioInput\) \{/,
   );
   // So the filter drops its Audio option rather than offering one that matches nothing.
@@ -317,7 +317,7 @@ test("the connected sort and modality filter drive the list", () => {
 });
 
 test("per-model prompt and cap reuse the memory Chat already keeps", () => {
-  const settingsDialog = readSrc(
+  const settingsDialog = readSrcExpanded(
     "features/model-picker/components/model-selector/connected-model-settings-dialog.tsx",
   );
   // Not a second store: the editor writes into paramsByModel, which rememberParamsPerModel has
@@ -342,7 +342,7 @@ test("per-model prompt and cap reuse the memory Chat already keeps", () => {
   // And the save is the only place a pin is read for display: the info box does not print one,
   // so a withdrawn level has nowhere left to be claimed as applying.
   assert.doesNotMatch(
-    readSrc(
+    readSrcExpanded(
       "features/model-picker/components/model-selector/connected-model-info-dialog.tsx",
     ),
     /pinnedEffort/,
@@ -359,7 +359,7 @@ test("per-model prompt and cap reuse the memory Chat already keeps", () => {
     /if \(liveEffortDraft !== null\) \{\s*const pinned = liveEffortDraft === FOLLOW_CHAT \? null : liveEffortDraft;\s*setModelReasoningEffort\(checkpointId, pinned\);/,
   );
   // Which is the listener that makes that reachable.
-  const effortStore = readSrc(
+  const effortStore = readSrcExpanded(
     "features/model-picker/components/model-selector/model-reasoning-effort.ts",
   );
   assert.match(
@@ -369,7 +369,7 @@ test("per-model prompt and cap reuse the memory Chat already keeps", () => {
   // And the chat subscribes to the active model's pin for the same reason: the normalization
   // reads it through a getState helper, so a cross-tab change reached the dialog but not the
   // composer. Its own effect, since rerunning that whole block would reset the pills too.
-  const chatPage = readSrc("features/chat/chat-page.tsx");
+  const chatPage = readSrcExpanded("features/chat/chat-page.tsx");
   assert.match(
     chatPage,
     /const activePinnedEffort = useModelReasoningEffortStore\(\s*\(state\) => state\.effortByModel\[inferenceCheckpoint\],/,
@@ -392,7 +392,7 @@ test("per-model prompt and cap reuse the memory Chat already keeps", () => {
   // Whether the level came from a pin is asked of the store, never inferred from the trigger:
   // absence is a clear for the pin effect but not for a refresh, and it is a clear the user can
   // also cause from the composer, where resolving afresh would undo the level just chosen.
-  assert.match(readSrc("features/chat/stores/chat-runtime-store.ts"), /if \(!pinned && !pinHoldsLiveEffort\(\)\) return;/);
+  assert.match(readSrcExpanded("features/chat/stores/chat-runtime-store.ts"), /if \(!pinned && !pinHoldsLiveEffort\(\)\) return;/);
   // Switching to an unpinned model resolves from the chat's own level, not from the outgoing
   // model's pin, which is what the live value holds.
   assert.match(
@@ -407,13 +407,13 @@ test("per-model prompt and cap reuse the memory Chat already keeps", () => {
   // was applied: pinning the level already in the store recorded nothing, and the thread opened
   // next had its own level held back behind that pin with no record to hand back.
   assert.match(
-    readSrc("features/chat/stores/chat-runtime-store.ts"),
+    readSrcExpanded("features/chat/stores/chat-runtime-store.ts"),
     /export function pinHoldsLiveEffort\(\): boolean \{\s*return \(\s*pinOwnsLiveReasoningEffort\(useChatRuntimeStore\.getState\(\)\) \|\|\s*effortDisplacedByPin !== null\s*\);/,
   );
   // And the chat's own level is recorded as the snapshot is held back, so the pin can be handed
   // back the level of the chat that is open now rather than the one before it.
   assert.match(
-    readSrc("features/chat/stores/chat-runtime-store.ts"),
+    readSrcExpanded("features/chat/stores/chat-runtime-store.ts"),
     /if \(key === "reasoningEffort" && pinOwnsLiveReasoningEffort\(state\)\) \{[\s\S]{0,500}?effortDisplacedByPin = value as ReasoningEffort;/,
   );
   // Leaving a pinned model for a local one hands the chat's level to the clamp, which narrows it
@@ -421,12 +421,12 @@ test("per-model prompt and cap reuse the memory Chat already keeps", () => {
   // where the model has actually become resident, never where one was picked: picking an uncached
   // model only queues a download, and the load can still abort at a lease, a confirmation or a
   // token prompt without the model ever changing.
-  const localLoad = readSrc("features/chat/hooks/use-chat-model-runtime.ts");
+  const localLoad = readSrcExpanded("features/chat/hooks/use-chat-model-runtime.ts");
   assert.match(
     localLoad,
     /const existingReasoningEffort =\s*\(pinHoldsLiveEffort\(\) \? takeEffortDisplacedByPin\(\) : null\) \?\?\s*useChatRuntimeStore\.getState\(\)\.reasoningEffort;/,
   );
-  const statusApply = readSrc("features/chat/lib/apply-inference-status-to-store.ts");
+  const statusApply = readSrcExpanded("features/chat/lib/apply-inference-status-to-store.ts");
   assert.match(
     statusApply,
     /const effortToClamp =\s*\(pinHoldsLiveEffort\(\) \? takeEffortDisplacedByPin\(\) : null\) \?\?\s*prevState\.reasoningEffort;/,
@@ -452,7 +452,7 @@ test("per-model prompt and cap reuse the memory Chat already keeps", () => {
     settingsDialog,
     /const efforts = externalReasoningTakesEffort\(reasoning\)\s*\? reasoning\.reasoningEffortLevels\.filter\(\(level\) => level !== "none"\)\s*: \[\];/,
   );
-  const capabilities = readSrc("features/chat/provider-capabilities.ts");
+  const capabilities = readSrcExpanded("features/chat/provider-capabilities.ts");
   assert.match(
     capabilities,
     /export function externalReasoningTakesEffort\([\s\S]{0,120}?return caps\.supportsReasoning && caps\.reasoningStyle === "reasoning_effort";/,
@@ -466,7 +466,7 @@ test("per-model prompt and cap reuse the memory Chat already keeps", () => {
   // The info box stops listing the ladder for them too: the levels are empty unless a level is
   // what the style sends, so a bare thinking switch reports "Supported" instead of a ladder of
   // rungs it never takes.
-  const infoDialog = readSrc(
+  const infoDialog = readSrcExpanded(
     "features/model-picker/components/model-selector/connected-model-info-dialog.tsx",
   );
   assert.match(
@@ -497,11 +497,11 @@ test("per-model prompt and cap reuse the memory Chat already keeps", () => {
 });
 
 test("the cap offers the bounds every request is clamped to", () => {
-  const settingsDialog = readSrc(
+  const settingsDialog = readSrcExpanded(
     "features/model-picker/components/model-selector/connected-model-settings-dialog.tsx",
   );
-  const adapter = readSrc("features/chat/api/chat-adapter.ts");
-  const sheet = readSrc("features/chat/chat-settings-sheet.tsx");
+  const adapter = readSrcExpanded("features/chat/api/chat-adapter.ts");
+  const sheet = readSrcExpanded("features/chat/chat-settings-sheet.tsx");
   // The same two helpers the chat's own Max Tokens control bounds itself with, and the adapter
   // clamps every outbound request to, so a stored cap cannot differ from the one actually sent.
   assert.match(sheet, /getExternalMaxOutputTokens\(/);
@@ -532,7 +532,7 @@ test("the cap offers the bounds every request is clamped to", () => {
 });
 
 test("live effort edits use the shared runtime action", () => {
-  const dialog = readSrc(
+  const dialog = readSrcExpanded(
     "features/model-picker/components/model-selector/connected-model-settings-dialog.tsx",
   );
   assert.match(dialog, /reconcilePinnedReasoningEffort\(\{/);
@@ -562,7 +562,7 @@ test("a row with no heading over it still names its connection", () => {
 });
 
 test("the store write merges per key and reaches the live params", () => {
-  const runtime = readSrc("features/chat/stores/chat-runtime-store.ts");
+  const runtime = readSrcExpanded("features/chat/stores/chat-runtime-store.ts");
   assert.match(
     runtime,
     /saveSettingsPatch\(\{ inferenceParamsByModel: \{ \[modelId\]: patch \} \}\)/,
@@ -617,7 +617,7 @@ test("the store write merges per key and reaches the live params", () => {
 });
 
 test("a pinned reasoning effort wins, unless the catalogue withdrew it", () => {
-  const effort = readSrc(
+  const effort = readSrcExpanded(
     "features/model-picker/components/model-selector/model-reasoning-effort.ts",
   );
   // Asking for a level the provider rejects fails the request, so an unavailable pin falls back.
@@ -625,7 +625,7 @@ test("a pinned reasoning effort wins, unless the catalogue withdrew it", () => {
     effort,
     /if \(!effort \|\| \(allowed && !allowed\.includes\(effort\)\)\) return null;/,
   );
-  const caps = readSrc("features/chat/provider-capabilities.ts");
+  const caps = readSrcExpanded("features/chat/provider-capabilities.ts");
   // Ahead of the catalogue and the per-provider defaults: the user set this one deliberately.
   assert.match(
     caps,
@@ -637,7 +637,7 @@ test("a pinned reasoning effort wins, unless the catalogue withdrew it", () => {
   );
   // One resolver for every caller, so a reload and a resync cannot answer differently from a
   // switch. The pin used to be read by the switch alone.
-  const chatPage = readSrc("features/chat/chat-page.tsx");
+  const chatPage = readSrcExpanded("features/chat/chat-page.tsx");
   assert.match(
     chatPage,
     /externalReasoningTakesEffort\(reasoningCaps\)\s*\? pinnedReasoningEffort\(value, effortLevels\)/,
@@ -665,7 +665,7 @@ test("a pinned reasoning effort wins, unless the catalogue withdrew it", () => {
 });
 
 test("the info box is a dialog, so it is wide enough and closable", () => {
-  const infoDialog = readSrc(
+  const infoDialog = readSrcExpanded(
     "features/model-picker/components/model-selector/connected-model-info-dialog.tsx",
   );
   // AlertDialog caps at max-w-md and asks a question; this reports, and needs Dialog's close X.
@@ -718,10 +718,10 @@ test("a row's name starts where its heading's label does", () => {
 });
 
 test("reasoning is read through the resolver the composer uses", () => {
-  const infoDialog = readSrc(
+  const infoDialog = readSrcExpanded(
     "features/model-picker/components/model-selector/connected-model-info-dialog.tsx",
   );
-  const settingsDialog = readSrc(
+  const settingsDialog = readSrcExpanded(
     "features/model-picker/components/model-selector/connected-model-settings-dialog.tsx",
   );
   // Reading the catalogue directly reported every Codex model as unpublished while the composer
@@ -754,9 +754,9 @@ test("a Codex connection resolves against OpenAI's catalogue", async () => {
 });
 
 test("the published context window reaches the row and the info box", () => {
-  const catalog = readSrc("features/chat/model-catalog.ts");
-  const snapshot = readSrc("features/chat/model-catalog-snapshot.ts");
-  const infoDialog = readSrc(
+  const catalog = readSrcExpanded("features/chat/model-catalog.ts");
+  const snapshot = readSrcExpanded("features/chat/model-catalog-snapshot.ts");
+  const infoDialog = readSrcExpanded(
     "features/model-picker/components/model-selector/connected-model-info-dialog.tsx",
   );
   assert.match(snapshot, /context\?: number;/);

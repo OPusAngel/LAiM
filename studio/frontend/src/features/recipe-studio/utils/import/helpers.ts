@@ -2,6 +2,8 @@
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { extractRefs as extractJinjaRefs } from "../refs";
+import { translate } from "@/i18n";
+
 
 export function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value && typeof value === "object" && !Array.isArray(value));
@@ -29,7 +31,7 @@ export function parseJson(
   } catch (error) {
     return {
       data: null,
-      error: error instanceof Error ? error.message : "Invalid JSON.",
+      error: error instanceof Error ? error.message : translate("uxRecipestudio.invalidJSON9b0jz"),
     };
   }
 }

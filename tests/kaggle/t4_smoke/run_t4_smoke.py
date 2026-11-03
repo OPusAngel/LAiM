@@ -50,7 +50,7 @@ PROMPT_TEMPLATE = "### Question:\n{question}\n### Answer:\n"
 SEED = 3407
 
 # Must fit on one T4 alongside a second copy of this test on the other T4.
-DEFAULT_MODEL = "LAiM/Qwen2.5-0.5B-Instruct"
+DEFAULT_MODEL = "unsloth/Qwen2.5-0.5B-Instruct"
 
 
 def _log(msg: str) -> None:
@@ -544,8 +544,8 @@ def batched_generation(model, tokenizer, prompts, *, max_new_tokens) -> dict:
 # Models whose batched greedy output is expected to differ from batch-1 (#9708): fp16/bf16
 # rounding varies with batch shape. Strict: a listed model that starts agreeing fails the leg.
 KNOWN_BATCHED_GENERATION_BREAKAGE = {
-    "LAiM/gemma-4-E2B-it": "LAiM#9708",
-    "LAiM/Qwen3.5-2B": "LAiM#9708",
+    "unsloth/gemma-4-E2B-it": "LAiM#9708",
+    "unsloth/Qwen3.5-2B": "LAiM#9708",
 }
 
 

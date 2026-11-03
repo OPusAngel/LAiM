@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { LlamaUpdateChangelogPanel } from "@/components/update/llama-update-changelog-panel";
 import { resyncInferenceStatusAfterServerModelChange } from "@/features/chat";
@@ -398,7 +399,7 @@ export function LlamaUpdateBanner({
             type="button"
             onClick={dismiss}
             className="absolute top-2.5 right-3 flex size-6 items-center justify-center rounded-full text-muted-foreground/60 transition-colors hover:bg-muted hover:text-foreground"
-            aria-label={`Dismiss ${label} update notification`}
+            aria-label={translate("uxComponents.dismissUpdateNotificationse27x", { p1: label })}
           >
             <svg
               aria-hidden="true"
@@ -458,7 +459,7 @@ export function LlamaUpdateBanner({
           <div
             className="mb-1.5 mt-4 h-1 overflow-hidden rounded-full bg-muted"
             role="progressbar"
-            aria-label={`Updating ${label}`}
+            aria-label={translate("uxComponents.updating21oab", { p1: label })}
             aria-valuemin={0}
             aria-valuemax={100}
             aria-valuenow={
@@ -506,7 +507,7 @@ export function LlamaUpdateBanner({
                 onClick={snooze}
                 data-testid="llama-update-snooze-button"
               >
-                Remind me later
+                {translate("uxCopy.remindMeLateracf87")}
               </Button>
               <Button
                 size="sm"

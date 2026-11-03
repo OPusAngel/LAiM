@@ -5,6 +5,8 @@ import { accountDatabaseName } from "@/lib/account-transition";
 import { normalizeNonEmptyName } from "@/utils";
 import Dexie from "dexie";
 import { RecipeApiError, recipeRequest } from "./recipes-api";
+import { translate } from "@/i18n";
+
 
 // One-time copy of the browser-only stores into studio.db. The server import is insert-only and
 // honours deletions, so a retry after a partial run (or a cleared flag) cannot clobber or revive
@@ -119,7 +121,7 @@ async function submit(
     }
     if (rows.length === 1) {
       // biome-ignore lint/suspicious/noConsole: the record stays in IndexedDB
-      console.warn(`Skipped legacy Data Recipe ${kind} record:`, error.message);
+      console.warn(translate("uxDatarecipes.skippedLegacyDataRecipeexjgw", { p1: kind }), error.message);
       return;
     }
     for (const row of rows) await submit(account, kind, [row]);

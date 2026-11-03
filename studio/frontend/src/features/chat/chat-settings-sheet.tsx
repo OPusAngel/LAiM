@@ -60,7 +60,7 @@ import {
   useChatSettingsWidth,
 } from "@/hooks/use-chat-settings-width";
 import { useIsCompact } from "@/hooks/use-mobile";
-import { useT } from "@/i18n";
+import { translate, useT } from "@/i18n";
 import { ChevronDownStandardIcon } from "@/lib/chevron-icons";
 import { toast } from "@/lib/toast";
 import { cornerInsets, watchChatSettingsInset } from "@/lib/toast-offset";
@@ -154,7 +154,7 @@ function getPromptVariablesError(raw: string): string | null {
   } catch {
     return 'Use valid JSON, for example { "env": "staging" }.';
   }
-  return "Variables must be a JSON object.";
+  return translate("uxChat.variablesMustBeAou52u");
 }
 
 function hasPromptVariableSyntax(prompt: string): boolean {
@@ -363,7 +363,7 @@ function CollapsibleSection({
           <button
             type="button"
             onClick={toggle}
-            aria-label={open ? `Collapse ${label}` : `Expand ${label}`}
+            aria-label={open ? translate("uxChat.collapseic5r8", { p1: label }) : translate("uxChat.expandthl3p", { p1: label })}
             className="flex shrink-0 cursor-pointer items-center leading-none transition-colors hover:text-nav-fg"
           >
             <ChevronDown
@@ -385,7 +385,7 @@ function CollapsibleSection({
             <button
               type="button"
               onClick={toggle}
-              aria-label={open ? `Collapse ${label}` : `Expand ${label}`}
+              aria-label={open ? translate("uxChat.collapseic5r8", { p1: label }) : translate("uxChat.expandthl3p", { p1: label })}
               className="flex shrink-0 cursor-pointer items-center leading-none transition-colors hover:text-nav-fg"
             >
               <ChevronDown
@@ -445,18 +445,18 @@ function specFallbackMessage({
 }): string {
   switch (reason) {
     case "mla_mtp_disabled":
-      return "MTP is disabled by default for this model architecture because it currently runs slower than standard decoding. Choose MTP in the model picker to force it.";
+      return translate("uxChat.mTPIsDisabledBy7bzyu");
     case "mtp_partial_offload":
       // Not the default copy: this build does support MTP, so telling the user to update llama.cpp
       // would name the wrong cause. Says what the placement IS rather than that the model could
       // not fit, since a Manual layer count is a placement the user picked and more layers is the
       // useful remedy. Describes the placement MTP WOULD need, not the one that runs: the partial
       // verdict is priced with MTP's rollback reserve still in it.
-      return "With MTP on, part of this model would have to run on the CPU, where MTP's extra state costs more than the drafting wins back, so Auto turned it off for this load. Give the GPU room for every layer to get it back, or choose MTP in Settings to force it.";
+      return translate("uxChat.withMTPOnPartmsx0n");
     case "drafter_no_vram":
       // Not "without speculative decoding": the backend puts zero-VRAM ngram-mod in the drafter's
       // place where the build has it, so only the drafter is off.
-      return `This model fits in VRAM but its ${drafter} drafter does not, so Auto kept your context length and turned ${drafter} off for this load. Choose ${drafter} in Settings to force it, at a smaller context.`;
+      return translate("uxChat.thisModelFitsInubleo", { p1: drafter, p2: drafter, p3: drafter });
     case "runtime_error":
       return `${drafter} could not start for this model on the installed llama.cpp build, so it is running without speculative decoding.`;
     case "drafter_unloadable":
@@ -468,19 +468,19 @@ function specFallbackMessage({
       if (drafter === "DSpark") {
         return isLocalGguf
           ? "No matching DSpark sidecar was found. Place its dspark-*.gguf beside the model or in its dspark folder, then reload the model."
-          : "The DSpark sidecar could not be downloaded, so this model is running without speculative decoding. Check network or Hugging Face access, then reload it.";
+          : translate("uxChat.theDSparkSidecarCould82yz3");
       }
       if (drafter === "DFlash") {
         return isLocalGguf
           ? "No matching DFlash sidecar was found. Place its dflash-*.gguf beside the model, then reload the model."
-          : "The DFlash sidecar could not be downloaded, so this model is running without speculative decoding. Check network or Hugging Face access, then reload it.";
+          : translate("uxChat.theDFlashSidecarCouldtwmsm");
       }
       return isLocalGguf
         ? "This local model supports MTP, but no matching drafter file was found. Place its mtp-*.gguf beside the model or in its MTP folder, then reload the model."
-        : "This model supports MTP, but its drafter file could not be downloaded, so MTP is off and it falls back to n-gram speculative decoding where the llama.cpp build supports it. Check your network connection or Hugging Face access, then reload the model to retry the drafter.";
+        : translate("uxChat.thisModelSupportsMTPiv13q");
     default:
       return `${drafter} is not available in the installed llama.cpp build, so this model is running without it.${
-        updateAvailable ? " Update llama.cpp to enable it." : ""
+        updateAvailable ? translate("uxChat.updateLlamaCppTotbgcn") : ""
       }`;
   }
 }
@@ -630,13 +630,22 @@ export function ChatSettingsPanel({
     const result = await applyLlamaUpdate();
     if (result.ok) {
       const reloadHint = result.reloadRequired
-        ? ` Reload your model to enable ${speculativeDrafterLabel}.`
+        ? translate("uxChat.reloadModelForDrafterY36hp", {
+            p1: speculativeDrafterLabel,
+          })
         : "";
       toast.success(
-        `llama.cpp updated to ${result.tag ?? "the latest build"}.${reloadHint}`,
+        translate("uxChat.llamaUpdatedToS62nq", {
+          p1: result.tag ?? translate("uxChat.theLatestBuildK81vy"),
+          p2: reloadHint,
+        }),
       );
     } else {
-      toast.error(`Update failed: ${result.error ?? "unknown error"}`);
+      toast.error(
+        translate("uxChat.updateFailedN48ks", {
+          p1: result.error ?? translate("uxChat.unknownErrorV73mb"),
+        }),
+      );
     }
   }, [applyLlamaUpdate, speculativeDrafterLabel]);
   const loadedEffectiveContext = customContextLength ?? loadedContextLength;
@@ -966,7 +975,7 @@ export function ChatSettingsPanel({
       setActivePreset(name);
       setActivePresetSource(getPresetSource(name));
       if (p.loadConfig && params.checkpoint) {
-        toast.info("Reload the model to apply load settings from this preset.");
+        toast.info(translate("uxChat.reloadTheModelTo1iaf2"));
       }
     }
   }
@@ -977,7 +986,7 @@ export function ChatSettingsPanel({
     }
     const trimmed = rawName.trim();
     if (!trimmed) {
-      toast.error("Enter a preset name");
+      toast.error(translate("uxChat.enterAPresetName5ddgj"));
       return;
     }
     const usedNames = new Set([
@@ -1044,7 +1053,7 @@ export function ChatSettingsPanel({
 
   function saveSystemPromptEditor() {
     if (systemVariablesError) {
-      toast.error("Fix prompt variables before saving", {
+      toast.error(translate("uxChat.fixPromptVariablesBefore2xpvg"), {
         description: systemVariablesError,
       });
       return;
@@ -1133,12 +1142,12 @@ export function ChatSettingsPanel({
       <div className="flex h-[var(--studio-chat-header-height,48px)] shrink-0 items-start gap-2 bg-panel-surface pl-[calc(18px*var(--ui-space-scale,1))] pr-[calc(18px*var(--ui-space-scale,1))] pt-[var(--studio-chat-header-padding-top,11px)]">
         {isCompact ? (
           <span className="flex h-[var(--studio-chat-control-height,34px)] flex-1 items-center text-ui-16 font-semibold tracking-[0em] dark:tracking-[0.015em] text-nav-fg">
-            Run settings
+            {translate("uxModelpicker.runSettingsmw4kg")}
           </span>
         ) : (
           <>
             <span className="flex h-[var(--studio-chat-control-height,34px)] flex-1 items-center text-ui-16 font-semibold tracking-[0em] dark:tracking-[0.015em] text-nav-fg">
-              Run settings
+              {translate("uxModelpicker.runSettingsmw4kg")}
             </span>
             <Tooltip key={open ? "open" : "closed"}>
                 <TooltipPrimitive.Trigger asChild={true}>
@@ -1147,7 +1156,7 @@ export function ChatSettingsPanel({
                   type="button"
                   onClick={() => onOpenChange?.(false)}
                   className="mt-[calc((var(--studio-chat-control-height,33px)-30px*var(--ui-space-scale,1))/2)] flex size-[calc(30px*var(--ui-space-scale,1))] cursor-pointer items-center justify-center rounded-[10px] text-nav-icon-idle dark:text-nav-fg-muted transition-colors hover:bg-nav-surface-hover hover:text-[#061d21] dark:hover:text-[#f9e2de] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                  aria-label="Close run settings"
+                  aria-label={translate("uxChat.closeRunSettings15lyc")}
                 >
                   <HugeiconsIcon
                     icon={PanelRightIcon}
@@ -1161,7 +1170,7 @@ export function ChatSettingsPanel({
                 sideOffset={6}
                 className="tooltip-compact"
               >
-                Close run settings
+                {translate("uxChat.closeRunSettings15lyc")}
               </TooltipContent>
             </Tooltip>
           </>
@@ -1178,7 +1187,7 @@ export function ChatSettingsPanel({
       >
       <div className="px-[calc(18px*var(--ui-space-scale,1))] pt-3">
         {(hasModelContent || modelConfig) && (
-              <CollapsibleSection label="Model" defaultOpen={true} first={true}>
+              <CollapsibleSection label={translate("settings.voice.dictation.customModelLabel")} defaultOpen={true} first={true}>
             <div className="flex flex-col gap-5">
               {modelConfig}
               {showSpecFallback && (
@@ -1199,7 +1208,7 @@ export function ChatSettingsPanel({
                       disabled={llamaUpdating}
                       data-test-id="mtp-update-button"
                     >
-                      {llamaUpdating ? "Updating..." : "Update llama.cpp"}
+                      {llamaUpdating ? "Updating..." : translate("uxChat.updateLlamaCppyyoyi")}
                     </Button>
                   )}
                 </div>
@@ -1212,19 +1221,9 @@ export function ChatSettingsPanel({
               {showContextVramWarning && (
                 <p className="text-ui-11 text-amber-500">
                   {isUnifiedMemory ? (
-                    <>
-                      Context length is above Studio&apos;s free-memory estimate
-                      ({maxContextLength?.toLocaleString()} tokens). It may
-                      still load, but macOS may have to compress or swap other
-                      apps and generation may slow down. Lower the context,
-                      leave it on Auto, or set the KV cache to q8_0.
-                    </>
+                    <>{translate("uxChat.contextLengthIsAboveav2dk", { p1: maxContextLength?.toLocaleString() })}</>
                   ) : (
-                    <>
-                      Context length exceeds the estimated VRAM capacity (
-                      {maxContextLength?.toLocaleString()} tokens). The
-                      model may use system RAM.
-                    </>
+                    <>{translate("uxChat.contextLengthExceedsTheu26qn", { p1: maxContextLength?.toLocaleString() })}</>
                   )}
                 </p>
               )}
@@ -1233,23 +1232,17 @@ export function ChatSettingsPanel({
         )}
 
         <CollapsibleSection
-          label="Preset"
+          label={translate("uxChat.preset1jsxh")}
           headerAction={
             <InfoHint>
               Saving a preset also stores current load settings (
               {loadSettingNames}).
               {currentLoadSummary ? (
-                <>
-                  {" "}
-                  Active now: {currentLoadSummary}.
-                </>
+                <>{translate("uxChat.activeNowwqpi8", { p1: " ", p2: currentLoadSummary })}</>
               ) : null}
               {activePresetLoadSummary &&
               activePresetLoadSummary !== currentLoadSummary ? (
-                <>
-                  {" "}
-                  Saved in preset: {activePresetLoadSummary}.
-                </>
+                <>{translate("uxChat.savedInPreset7uwpy", { p1: " ", p2: activePresetLoadSummary })}</>
               ) : null}
             </InfoHint>
           }
@@ -1261,7 +1254,7 @@ export function ChatSettingsPanel({
                   <DropdownMenuTrigger asChild={true}>
                 <div
                   className="w-full min-w-0 cursor-pointer outline-none focus-visible:outline-none"
-                  aria-label="Open preset list"
+                  aria-label={translate("uxChat.openPresetListd5aud")}
                 >
                   <InputGroup className="panel-input-group">
                     <InputGroupInput
@@ -1281,7 +1274,7 @@ export function ChatSettingsPanel({
                         }
                         e.stopPropagation();
                       }}
-                      placeholder="Preset name"
+                      placeholder={translate("uxChat.presetNameo0iip")}
                       maxLength={80}
                       autoComplete="off"
                       className={cn(
@@ -1289,7 +1282,7 @@ export function ChatSettingsPanel({
                         presetSaveState.isSaveReady &&
                           "placeholder:text-primary/50",
                       )}
-                      aria-label="Inference preset name"
+                      aria-label={translate("uxChat.inferencePresetName1iohf")}
                     />
                     <InputGroupAddon
                       align="inline-end"
@@ -1367,9 +1360,9 @@ export function ChatSettingsPanel({
                 title={
                   activeCustomPreset
                     ? activeBuiltinPreset
-                      ? "Reset selected preset to built-in defaults"
-                      : "Delete selected preset"
-                    : "No saved override to delete"
+                      ? translate("uxChat.resetSelectedPresetToher6s")
+                      : translate("uxChat.deleteSelectedPreset1m26f")
+                    : translate("uxChat.noSavedOverrideTofffyh")
                 }
               >
                 Delete
@@ -1379,15 +1372,14 @@ export function ChatSettingsPanel({
         </CollapsibleSection>
 
         {showPromptCachingControl && activeExternalProvider ? (
-          <CollapsibleSection label="Provider" defaultOpen={true}>
+          <CollapsibleSection label={translate("uxChat.providerevz7q")} defaultOpen={true}>
             <div className="flex min-h-8 items-center justify-between gap-3">
               <div className="flex min-w-0 items-center gap-1.5">
                 <span className="min-w-0 text-ui-13 font-medium leading-[1.25] tracking-nav text-nav-fg">
-                  Prompt caching
+                  {translate("uxChat.promptCachingl0i7g")}
                 </span>
                 <InfoHint>
-                      Reuse compatible prompt prefixes for lower latency and
-                      cost.
+                      {translate("uxCopy.reuseCompatiblePromptPrefixestyglp")}
                 </InfoHint>
               </div>
               <Switch
@@ -1399,21 +1391,17 @@ export function ChatSettingsPanel({
                     enablePromptCaching: checked,
                   });
                 }}
-                aria-label="Enable prompt caching"
+                aria-label={translate("uxChat.enablePromptCaching7mds5")}
               />
             </div>
             {showPromptCacheTtlControl && promptCachingEnabled ? (
               <div className="flex min-h-8 items-center justify-between gap-3 pt-5">
                 <div className="flex min-w-0 items-center gap-1.5">
                   <span className="min-w-0 text-ui-13 font-medium leading-[1.25] tracking-nav text-nav-fg">
-                    Cache TTL
+                    {translate("uxChat.cacheTTL1lrwi")}
                   </span>
                   <InfoHint>
-                    Anthropic exposes a 5 minute and a 1 hour ephemeral
-                        cache pool. The 1 hour pool costs 2x base input on write
-                        vs 1.25x for 5 minute, but reads stay 0.1x for both, so
-                        a single read landing more than 5 minutes after the
-                        write pays off the premium.
+                    {translate("uxCopy.anthropicExposesA516x53")}
                   </InfoHint>
                 </div>
                 <Select
@@ -1431,13 +1419,13 @@ export function ChatSettingsPanel({
                     icon={ChevronDownStandardIcon}
                     iconClassName="size-3.5"
                     className="panel-select-trigger shrink-0"
-                    aria-label="Prompt cache TTL"
+                    aria-label={translate("uxChat.promptCacheTTL1lnsu")}
                   >
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="5m">5 minutes</SelectItem>
-                    <SelectItem value="1h">1 hour</SelectItem>
+                    <SelectItem value="5m">{translate("uxChat.5Minutes1t033")}</SelectItem>
+                    <SelectItem value="1h">{translate("uxChat.1Hour94dg9")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -1446,22 +1434,17 @@ export function ChatSettingsPanel({
               <div className="flex min-h-8 items-center justify-between gap-3 pt-5">
                 <div className="flex min-w-0 items-center gap-1.5">
                   <span className="min-w-0 text-ui-13 font-medium leading-[1.25] tracking-nav text-nav-fg">
-                    Fast mode
+                    {translate("uxChat.fastModee1cu5")}
                   </span>
                   <InfoHint>
-                    Research preview. Up to 2.5x higher output tokens per
-                    second on Claude Opus 5 and 4.8 at 2x standard Opus
-                    pricing.
-                    Switching between fast and standard invalidates the
-                    prompt cache and is incompatible with the Priority
-                    service tier.
+                    {translate("uxCopy.researchPreviewUpTo1j1ts")}
                   </InfoHint>
                 </div>
                 <Switch
                   className="panel-switch shrink-0"
                   checked={Boolean(params.fastMode)}
                   onCheckedChange={set("fastMode")}
-                  aria-label="Fast mode"
+                  aria-label={translate("uxChat.fastModee1cu5")}
                 />
               </div>
             ) : null}
@@ -1469,7 +1452,7 @@ export function ChatSettingsPanel({
         ) : null}
 
         {showOpenAICodeExecSection && activeExternalProvider ? (
-          <CollapsibleSection label="Code Execution" defaultOpen={false}>
+          <CollapsibleSection label={translate("uxChat.codeExecutiono7fqi")} defaultOpen={false}>
             <OpenAICodeExecSection
               provider={activeExternalProvider}
               apiKey={openAiApiKeyForSection}
@@ -1480,7 +1463,7 @@ export function ChatSettingsPanel({
         ) : null}
 
         <CollapsibleSection
-          label="System Prompt"
+          label={translate("uxChat.systemPromptae4pi")}
           defaultOpen={true}
           onLabelClick={openSystemPromptEditor}
           headerAction={
@@ -1490,7 +1473,7 @@ export function ChatSettingsPanel({
                   type="button"
                   onClick={openSystemPromptEditor}
                   className="nav-icon-btn text-nav-icon-idle hover:bg-panel-surface-hover hover:text-[#061d21] dark:hover:text-[#f9e2de]"
-                  aria-label="Edit system prompt"
+                  aria-label={translate("uxChat.editSystemPromptczz9k")}
                 >
                   <HugeiconsIcon
                     icon={Edit03Icon}
@@ -1503,9 +1486,7 @@ export function ChatSettingsPanel({
                 side="top"
                 sideOffset={6}
                 className="tooltip-compact"
-              >
-                Edit prompt
-              </TooltipContent>
+              >{translate("uxChat.editPromptwvqrk")}</TooltipContent>
             </Tooltip>
           }
         >
@@ -1531,8 +1512,8 @@ export function ChatSettingsPanel({
                   openSystemPromptEditor();
                 }
               }}
-              placeholder="Example: You are a helpful assistant..."
-              aria-label="System prompt"
+              placeholder={translate("uxChat.exampleYouAreA1cvco")}
+              aria-label={translate("uxChat.systemPromptfkcu0")}
               className={cn(
                 "block size-full resize-none bg-transparent px-3.5 py-2.5 text-left text-ui-13 font-medium leading-relaxed text-nav-fg outline-none placeholder:text-muted-foreground",
                 systemPromptOverflows && "cursor-pointer",
@@ -1541,41 +1522,41 @@ export function ChatSettingsPanel({
           </div>
         </CollapsibleSection>
 
-        <CollapsibleSection label="Sampling" defaultOpen={true}>
+        <CollapsibleSection label={translate("uxChat.sampling18rwz")} defaultOpen={true}>
           <div className="flex flex-col gap-5">
             {showTemperature ? (
               <ParamSlider
-                label="Temperature"
+                label={translate("settings.resources.liveMonitor.temperature")}
                 value={params.temperature}
                 min={0}
                 max={2}
                 step={0.01}
                 onChange={set("temperature")}
-                info="Controls randomness. Lower values make output focused and deterministic; higher values increase variety and creativity."
+                info={translate("uxChat.controlsRandomnessLowerValuespc80y")}
               />
             ) : null}
             {showTopP ? (
               <ParamSlider
-                label="Top P"
+                label={translate("uxChat.topP116ix")}
                 value={params.topP}
                 min={0}
                 max={1}
                 step={0.05}
                 onChange={set("topP")}
                 format={(v) => (v === 1 ? "Off" : undefined)}
-                info="Nucleus sampling. Restricts choices to the smallest set of tokens whose cumulative probability reaches this threshold. 1.0 = off."
+                info={translate("uxChat.nucleusSamplingRestrictsChoicesovqbk")}
               />
             ) : null}
             {showTopK ? (
               <ParamSlider
-                label="Top K"
+                label={translate("uxChat.topK18o87")}
                 value={params.topK}
                 min={0}
                 max={100}
                 step={1}
                 onChange={set("topK")}
                 format={(v) => (v === 0 ? "Off" : undefined)}
-                info="Limits sampling to the K most likely tokens at each step. 0 = off."
+                info={translate("uxChat.limitsSamplingToTheobd6s")}
               />
             ) : null}
             {showMinP ? (
@@ -1588,25 +1569,25 @@ export function ChatSettingsPanel({
                         if (isMinPMode(value)) set("minPMode")(value);
                       }}
                     >
-                      <SelectTrigger aria-label="Min P mode" className="w-full">
+                      <SelectTrigger aria-label={translate("uxChat.minPModeuks7q")} className="w-full">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="server-default">
-                          Server default
+                          {translate("uxChat.serverDefault1ca3v")}
                         </SelectItem>
                         <SelectItem value="custom">Custom</SelectItem>
                       </SelectContent>
                     </Select>
                     {effectiveMinPMode(params) === "server-default" ? (
                       <p className="text-ui-11 text-muted-foreground">
-                        Uses the server’s sampling settings.
+                        {translate("uxChat.usesTheServerSnfp2a")}
                       </p>
                     ) : null}
                   </div>
                 ) : null}
                 <ParamSlider
-                  label="Min P"
+                  label={translate("uxChat.minP1sv4d")}
                   value={params.minP}
                   disabled={
                     isVllm && effectiveMinPMode(params) === "server-default"
@@ -1615,36 +1596,36 @@ export function ChatSettingsPanel({
                   max={1}
                   step={0.01}
                   onChange={set("minP")}
-                  info="Drops tokens whose probability is below this fraction of the top token's probability. Filters unlikely candidates."
+                  info={translate("uxChat.dropsTokensWhoseProbabilityw6coc")}
                 />
               </div>
             ) : null}
             {showRepetitionPenalty ? (
               <ParamSlider
-                label="Repetition Penalty"
+                label={translate("uxChat.repetitionPenalty18rwn")}
                 value={params.repetitionPenalty}
                 min={1}
                 max={2}
                 step={0.05}
                 onChange={set("repetitionPenalty")}
                 format={(v) => (v === 1 ? "Off" : undefined)}
-                info="Down-weights tokens that have already appeared, reducing repetition. 1.0 = off; higher values penalize more strongly."
+                info={translate("uxChat.downWeightsTokensThatcdg9f")}
               />
             ) : null}
             {showPresencePenalty ? (
               <ParamSlider
-                label="Presence Penalty"
+                label={translate("uxChat.presencePenalty197nw")}
                 value={params.presencePenalty}
                 min={0}
                 max={2}
                 step={0.1}
                 onChange={set("presencePenalty")}
                 format={(v) => (v === 0 ? "Off" : undefined)}
-                info="Penalizes any token that has already appeared at least once, encouraging the model to introduce new topics. 0 = off."
+                info={translate("uxChat.penalizesAnyTokenThatgdd1c")}
               />
             ) : null}
             <ParamSlider
-              label="Max Tokens"
+              label={translate("uxChat.maxTokens989yw")}
               value={params.maxTokens}
               min={
                 isExternalModel
@@ -1657,24 +1638,15 @@ export function ChatSettingsPanel({
               format={(v) =>
                 !isExternalModel && v >= maxTokensMax ? "Max" : undefined
               }
-              info="Maximum number of tokens to generate per response. Generation stops at this limit or when the model emits an end-of-sequence token."
+              info={translate("uxChat.maximumNumberOfTokensj5vfb")}
             />
             {showSeed ? (
               <div className="flex min-h-8 items-center justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-1.5">
                   <span className="min-w-0 text-ui-13 font-medium leading-[1.25] tracking-nav text-nav-fg">
-                    Seed
+                    {translate("uxVideo.seed1lu3q")}
                   </span>
-                  <InfoHint>
-                    Pins the sampling draw so the same prompt and settings can
-                    reproduce the same reply. Leave blank to draw a fresh seed
-                    each request. It only fixes the draw, so the other sampling
-                    settings have to stay put as well; at Temperature 0 decoding
-                    is already greedy and a seed changes nothing. Matching a
-                    reply also needs the model loaded with Parallel Slots at 1
-                    and Speculative Decoding off, since both change how tokens
-                    are batched and that moves the result.
-                  </InfoHint>
+                  <InfoHint>{translate("uxChat.pinsTheSamplingDrawapcxt")}</InfoHint>
                 </div>
                 {/* A plain field, sized like the model rows': the input group
                     it used to sit in is 36px and full width. */}
@@ -1700,8 +1672,8 @@ export function ChatSettingsPanel({
                     // Blur is the only commit, so Enter has to reach it.
                     if (e.key === "Enter") e.currentTarget.blur();
                   }}
-                  placeholder="Random"
-                  aria-label="Seed"
+                  placeholder={translate("uxChat.randomi2496")}
+                  aria-label={translate("uxVideo.seed1lu3q")}
                   className="panel-field h-8 w-[calc(84px*var(--ui-space-scale,1))] shrink-0"
                 />
               </div>
@@ -1710,7 +1682,7 @@ export function ChatSettingsPanel({
         </CollapsibleSection>
 
             {showStudioToolLoopControls ? (
-          <CollapsibleSection label="Tools">
+          <CollapsibleSection label={translate("composer.pill.tools")}>
             <div className="flex flex-col gap-5">
               {isExternalModel ? null : (
                 <>
@@ -1732,7 +1704,7 @@ export function ChatSettingsPanel({
             ) : null}
 
             {isExternalModel ? null : (
-          <CollapsibleSection label="Retrieval">
+          <CollapsibleSection label={translate("uxChat.retrievalste5q")}>
             <RetrievalSettingsSection />
           </CollapsibleSection>
             )}
@@ -1747,16 +1719,15 @@ export function ChatSettingsPanel({
       >
         <DialogContent className="corner-squircle dialog-soft-surface sm:max-w-3xl">
           <DialogHeader>
-            <DialogTitle>Edit System Prompt</DialogTitle>
+            <DialogTitle>{translate("uxCopy.editSystemPromptmau36")}</DialogTitle>
             <DialogDescription>
-              This prompt is part of the current configuration and saves with
-              the preset.
+              {translate("uxCopy.thisPromptIsPartegqlp")}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
             <div className="space-y-0.5 px-0.5">
               <div className="flex items-center justify-between gap-3">
-                <div className="text-ui-11 font-medium">Prompt editor</div>
+                <div className="text-ui-11 font-medium">{translate("uxChat.promptEditorjs0ht")}</div>
                 <Button
                   type="button"
                   variant="ghost"
@@ -1766,7 +1737,7 @@ export function ChatSettingsPanel({
                   aria-expanded={systemVariablesOpen}
                 >
                   <Braces className="size-3.5" />
-                  Variables
+                  {translate("uxChat.variablesxqivz")}
                   <ChevronDown
                     className={cn(
                       "size-3.5 transition-transform",
@@ -1775,32 +1746,26 @@ export function ChatSettingsPanel({
                   />
                 </Button>
               </div>
-              <p className="text-ui-11 text-muted-foreground">
-                Use this for longer edits. Save writes back to the active
-                configuration only. Insert variables with {"{{ env }}"}.
-              </p>
+              <p className="text-ui-11 text-muted-foreground">{translate("uxChat.useThisForLonger54zlo", { p1: "{{ env }}" })}</p>
             </div>
             {systemVariablesOpen ? (
               <div className="space-y-2 px-0.5">
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div className="space-y-0.5">
                     <div className="text-ui-11 font-medium">
-                      Prompt variables
+                      {translate("uxChat.promptVariables1oce3")}
                     </div>
-                    <p className="text-ui-11 text-muted-foreground">
-                      Define values as JSON below, then use each key in your
-                      prompt, like {"{{ env }}"}.
-                    </p>
+                    <p className="text-ui-11 text-muted-foreground">{translate("uxChat.defineValuesAsJSONycty1", { p1: "{{ env }}" })}</p>
                   </div>
                   <div className="flex flex-col items-end gap-1">
                     <span className="text-ui-10 text-muted-foreground">
-                      Built-in, fill in automatically
+                      {translate("uxChat.builtInFillIn12qwf")}
                     </span>
                     <div className="flex flex-wrap justify-end gap-1">
                       {["{{$date}}", "{{$time}}", "{{$now}}"].map((token) => (
                         <span
                           key={token}
-                          title={`${token} is replaced automatically when you send`}
+                          title={translate("uxChat.isReplacedAutomaticallyWhenn4lma", { p1: token })}
                           className="rounded-full bg-muted px-2 py-0.5 font-mono text-ui-10 text-muted-foreground"
                         >
                           {token}
@@ -1822,7 +1787,7 @@ export function ChatSettingsPanel({
                       "ring-1 ring-destructive focus-visible:ring-destructive",
                   )}
                   rows={5}
-                  aria-label="Prompt variables JSON"
+                  aria-label={translate("uxChat.promptVariablesJSON85bjo")}
                   aria-invalid={Boolean(systemVariablesError)}
                 />
                 {systemVariablesError ? (
@@ -1830,10 +1795,7 @@ export function ChatSettingsPanel({
                     {systemVariablesError}
                   </p>
                 ) : (
-                  <p className="px-1 text-ui-11 text-muted-foreground">
-                    Names you don&apos;t define are left unchanged, so a stray
-                    {" {{ typo }} "}stays visible in the prompt.
-                  </p>
+                  <p className="px-1 text-ui-11 text-muted-foreground">{translate("uxChat.namesYouDonT29sx4", { p1: " {{ typo }} " })}</p>
                 )}
               </div>
             ) : null}
@@ -1843,7 +1805,7 @@ export function ChatSettingsPanel({
               <Textarea
                 value={systemPromptDraft}
                 onChange={(event) => setSystemPromptDraft(event.target.value)}
-                placeholder="You are a helpful assistant..."
+                placeholder={translate("uxChat.youAreAHelpful1cb6u")}
                 fieldSizing="fixed"
                 className="min-h-[min(calc(20rem*var(--ui-space-scale,1)),48dvh)] max-h-[48dvh] overflow-y-auto rounded-none border-0 text-sm leading-6 focus-visible:ring-0"
                 rows={14}
@@ -1893,8 +1855,8 @@ export function ChatSettingsPanel({
       <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetContent side="right" className="w-[min(calc(18rem*var(--ui-space-scale,1)),100vw)] p-0 font-heading">
           <SheetHeader className="sr-only">
-            <SheetTitle>Run settings</SheetTitle>
-            <SheetDescription>Chat inference settings</SheetDescription>
+            <SheetTitle>{translate("uxChat.runSettingshtgkw")}</SheetTitle>
+            <SheetDescription>{translate("uxCopy.chatInferenceSettings1qjs9")}</SheetDescription>
           </SheetHeader>
           <div data-tour="chat-settings" className="flex h-full flex-col">
             {settingsContent}
@@ -1969,7 +1931,7 @@ function MaxToolCallsSlider() {
 
   return (
     <ParamSlider
-      label="Max Tool Calls Per Message"
+      label={translate("uxChat.maxToolCallsPerbadz3")}
       value={sliderValue}
       min={0}
       max={41}
@@ -1990,7 +1952,7 @@ function ToolCallTimeoutSlider() {
 
   return (
     <ParamSlider
-      label="Max Tool Call Duration"
+      label={translate("uxChat.maxToolCallDurationz8vho")}
       value={sliderValue}
       min={1}
       max={31}
@@ -2000,7 +1962,7 @@ function ToolCallTimeoutSlider() {
         v >= 31 ? "Max" : v === 1 ? "1 minute" : `${v} minutes`
       }
       valueSize={10}
-      info="Per-call wall-clock limit. Long-running tool executions are terminated when this elapses; the model continues with what completed."
+      info={translate("uxChat.perCallWallClockk0ery")}
     />
   );
 }
@@ -2015,12 +1977,9 @@ function AutoHealToolCallsToggle() {
     <div className="flex min-h-8 items-center justify-between gap-3">
       <div className="flex min-w-0 items-center gap-1.5">
         <span className="min-w-0 text-ui-13 font-medium leading-[1.25] tracking-nav text-nav-fg">
-          Auto-Healing Tool Calls
+          {translate("uxChat.autoHealingToolCallsgeh1y")}
         </span>
-        <InfoHint>
-          LAiM auto-fixes broken tool calls so inference output is never
-          broken.
-        </InfoHint>
+        <InfoHint>{translate("uxChat.lAiMAutoFixesBrokenxsua8")}</InfoHint>
       </div>
       <Switch
         className="panel-switch shrink-0"
@@ -2039,11 +1998,10 @@ function NudgeToolCallsToggle() {
     <div className="flex min-h-8 items-center justify-between gap-3">
       <div className="flex min-w-0 items-center gap-1.5">
         <span className="min-w-0 text-ui-13 font-medium leading-[1.25] tracking-nav text-nav-fg">
-          Nudge Tool Calls
+          {translate("uxChat.nudgeToolCallsellsx")}
         </span>
         <InfoHint>
-          When a tool call cannot be repaired, re-ask the model once so the
-          intended tool still runs. API requests stay opt-in.
+          {translate("uxCopy.whenAToolCall1f9iy")}
         </InfoHint>
       </div>
       <Switch
@@ -2067,12 +2025,10 @@ function DeduplicateToolCallsToggle() {
     <div className="flex min-h-8 items-center justify-between gap-3">
       <div className="flex min-w-0 items-center gap-1.5">
         <span className="min-w-0 text-ui-13 font-medium leading-[1.25] tracking-nav text-nav-fg">
-          Deduplicate Tool Calls
+          {translate("uxChat.deduplicateToolCalls159ox")}
         </span>
         <InfoHint>
-          Skips a tool call identical to one that already succeeded in this
-          response and tells the model it was a duplicate. Turn off to let a
-          repeated call run again.
+          {translate("uxCopy.skipsAToolCall1vwc7")}
         </InfoHint>
       </div>
       <Switch
@@ -2094,20 +2050,13 @@ function ConfirmToolCallsToggle() {
       <div className="flex min-w-0 flex-col gap-0.5">
         <div className="flex min-w-0 items-center gap-1.5">
           <span className="min-w-0 text-ui-13 font-medium leading-[1.25] tracking-nav text-nav-fg">
-            Confirm tool calls
+            {translate("uxChat.confirmToolCallsb9v1c")}
           </span>
-          <InfoHint>
-            When on, every local LAiM tool call pauses for your approval
-            before it runs (the "Ask for approval" level). When off, tool calls
-            run without prompts inside the sandbox (the "Run automatically"
-            level); on a computer without a working OS sandbox, risky Python
-            and Terminal calls still ask.
-            Provider-hosted tools are not gated here.
-          </InfoHint>
+          <InfoHint>{translate("uxChat.whenOnEveryLocal65ppu")}</InfoHint>
         </div>
         {permissionMode === "full" ? (
           <span className="text-ui-11 text-muted-foreground">
-            Overridden by Full access
+            {translate("uxChat.overriddenByFullAccesswddwj")}
           </span>
         ) : null}
       </div>
@@ -2135,18 +2084,17 @@ function BypassPermissionsToggle() {
     <div className="flex flex-col gap-2">
       <div className="flex min-w-0 items-center gap-1.5">
         <span className="whitespace-nowrap text-ui-13 font-medium leading-[1.25] tracking-nav text-nav-fg">
-          Tool permissions
+          {translate("settings.general.permissions.sectionTitle")}
         </span>
         <InfoHint>
-          Choose how LAiM approves tool calls before they run. Full access
-          disables confirmations and the code sandbox.
+          {translate("uxCopy.chooseHowLAiMApproveskz606")}
         </InfoHint>
       </div>
       {/* Full width, styled like the panel selects/preset input. */}
       <PermissionModeDropdown triggerClassName="h-9 w-full justify-between rounded-full border-0 bg-[var(--panel-input-surface)] px-3.5 text-ui-13 font-medium text-nav-fg shadow-none hover:bg-[var(--panel-input-surface)]" />
       {permissionMode === "full" ? (
         <span className="text-ui-11 text-muted-foreground">
-          Tool calls run with no confirmation and no sandbox.
+          {translate("uxChat.toolCallsRunWith1hbvx")}
         </span>
       ) : null}
     </div>

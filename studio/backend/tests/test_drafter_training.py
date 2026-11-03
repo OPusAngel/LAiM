@@ -602,7 +602,7 @@ def test_capability_refuses_without_the_zoo_drafter_trainers(monkeypatch):
     monkeypatch.setattr(
         drafter, "_text_config", lambda *a, **k: pytest.fail("config read before the zoo check")
     )
-    cap = drafter.capability_in_process("LAiM/Qwen3.5-2B")
+    cap = drafter.capability_in_process("unsloth/Qwen3.5-2B")
     assert cap["supported"] is False and cap["strategy"] is None
     assert "LAiM_zoo" in cap["reason"]
 

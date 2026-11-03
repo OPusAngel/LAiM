@@ -7,12 +7,12 @@
 
 import assert from "node:assert/strict";
 import test from "node:test";
-import { readSrcAsync } from "./helpers/kit.ts";
+import { readSrcAsync, readSrcAsyncExpanded } from "./helpers/kit.ts";
 
-const DIALOG = await readSrcAsync(
+const DIALOG = await readSrcAsyncExpanded(
   "features/chat/components/edit-project-dialog.tsx",
 );
-const FOLDERS = await readSrcAsync(
+const FOLDERS = await readSrcAsyncExpanded(
   "features/rag/components/linked-folders-manager.tsx",
 );
 
@@ -72,7 +72,7 @@ test("the other folder lists keep the panel layout", async () => {
     "features/rag/components/knowledge-base-dialog.tsx",
     "features/rag/components/project-sources-panel.tsx",
   ]) {
-    const source = await readSrcAsync(path);
+    const source = await readSrcAsyncExpanded(path);
     assert.ok(
       !source.includes('variant="card"'),
       `${path} was switched to the dialog's card layout`,

@@ -353,7 +353,7 @@ class ToolCallCompletion:
         return message
 
     def mcp_images(self) -> list[dict]:
-        """Images returned by an MCP server or the sandbox image viewer.
+        """Images returned by an MCP server or the file viewer.
 
         The envelope is a plain suffix, so any tool whose output happens to end in
         one -- terminal output, a fetched page -- would otherwise have its bytes
@@ -746,7 +746,7 @@ def coerce_tool_arguments(
             # and wrapping it whole becomes the argument's value. Observed on `python`, which has a single `code`
             # argument and so was healable: a truncated call arrived as `{"code":"html = ...`, the entire fragment was
             # passed as the PROGRAM, and the model read its own file back as `{"code":"html = ...` and spent the rest of
-            # the turn convinced the sandbox had mangled it. Same defect `edit_file` had; having a single string
+            # the turn convinced the workdir had mangled it. Same defect `edit_file` had; having a single string
             # argument only hid it.
             key = (
                 None
@@ -1041,24 +1041,24 @@ def _strip_rag_sources_sentinel(result: str) -> str:
 
 # Only these emit the file envelope, and only their output is defused first. An MCP tool or a fetched page ending in a
 # well-formed __FILES__ line is content, not an envelope, and stripping it would take that line away from the model.
-_SANDBOX_TOOLS = frozenset({"python", "terminal"})
+_LOCAL_CODE_TOOLS = frozenset({"python", "terminal"})
 # edit_file emits it too, for a file it created.
-_FILE_SENTINEL_TOOLS = _SANDBOX_TOOLS | {"edit_file"}
+_FILE_SENTINEL_TOOLS = _LOCAL_CODE_TOOLS | {"edit_file"}
 
 # Only an MCP result can carry the UI envelope; mcp_client defuses tool-written ones.
 _MCP_TOOL_PREFIX = "mcp__"
 
-# Same rule for the other two envelopes. The image one is emitted by the sandbox tools
+# Same rule for the other two envelopes. The image one is emitted by the local tools
 # through `_created_file_sentinels` and by Gemini's hosted code_execution through the
 # provider; the source map by the retrieval tools that append `RAG_SOURCES_SENTINEL`. A
 # document an MCP tool read, or a page that was fetched, ending in a well-formed one of
 # either is content the model needs, and cutting it leaves the model reasoning over less
 # than the card the user is looking at.
-_IMAGE_SENTINEL_TOOLS = _SANDBOX_TOOLS | {"code_execution"}
+_IMAGE_SENTINEL_TOOLS = _LOCAL_CODE_TOOLS | {"code_execution"}
 _SOURCE_MAP_TOOLS = frozenset({"search_knowledge_base", "search_conversation"})
 # Invalidated by workspace writes, but reading an image is not new work that licenses a rerun.
 _WORKSPACE_READ_TOOLS = frozenset({"view_image"})
-_WORKSPACE_TOOLS = _SANDBOX_TOOLS | {"edit_file"} | _WORKSPACE_READ_TOOLS
+_WORKSPACE_TOOLS = _LOCAL_CODE_TOOLS | {"edit_file"} | _WORKSPACE_READ_TOOLS
 
 
 def _reruns_after_new_work(tool_name: Any) -> bool:

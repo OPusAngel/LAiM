@@ -78,7 +78,7 @@ def test_an_intact_install_reports_nothing(site):
 def test_superseded_metadata_is_not_treated_as_file_damage(site):
     removed = "studio/frontend/dist/assets/removed-hash.js"
     _make_dist(site, "LAiM", {removed: b"old\n"}, version = "1.0")
-    _make_dist(site, "LAiM", {"LAiM/__init__.py": b"new\n"}, version = "2.0")
+    _make_dist(site, "LAiM", {"unsloth/__init__.py": b"new\n"}, version = "2.0")
     (site / removed).unlink()
 
     assert _deps().damaged_installed_files() == []
@@ -101,8 +101,8 @@ def test_duplicate_metadata_names_are_canonicalized(site):
 
 
 def test_duplicate_metadata_conflicts_can_be_scoped_by_canonical_name(site):
-    _make_dist(site, "LAiM", {"LAiM/old.py": b"old\n"}, version = "1.0")
-    _make_dist(site, "LAiM", {"LAiM/new.py": b"new\n"}, version = "2.0")
+    _make_dist(site, "LAiM", {"unsloth/old.py": b"old\n"}, version = "1.0")
+    _make_dist(site, "LAiM", {"unsloth/new.py": b"new\n"}, version = "2.0")
     _make_dist(site, "foo_bar", {"foo_bar/old.py": b"old\n"}, version = "1.0")
     _make_dist(site, "foo_bar", {"foo_bar/new.py": b"new\n"}, version = "2.0")
 
@@ -116,7 +116,7 @@ def test_duplicate_metadata_conflicts_can_be_scoped_by_canonical_name(site):
 
 def test_duplicate_metadata_does_not_hide_another_packages_damage(site):
     _make_dist(site, "LAiM", {"studio/old.py": b"old\n"}, version = "1.0")
-    _make_dist(site, "LAiM", {"LAiM/__init__.py": b"new\n"}, version = "2.0")
+    _make_dist(site, "LAiM", {"unsloth/__init__.py": b"new\n"}, version = "2.0")
     _make_dist(
         site,
         "fastapi",
@@ -627,7 +627,7 @@ def test_an_installer_rewritten_lockfile_is_not_damage(site):
     _make_dist(
         site,
         "LAiM",
-        {"LAiM/__init__.py": b"u\n", lock: b"L" * 27225},
+        {"unsloth/__init__.py": b"u\n", lock: b"L" * 27225},
         record_sizes = {lock: 28473},
     )
     assert _deps().damaged_installed_files() == []
@@ -635,7 +635,7 @@ def test_an_installer_rewritten_lockfile_is_not_damage(site):
 
 def test_a_deleted_installer_rewritten_file_is_still_damage(site):
     lock = "studio/backend/core/data_recipe/oxc-validator/package-lock.json"
-    _make_dist(site, "LAiM", {"LAiM/__init__.py": b"u\n", lock: b"L" * 100})
+    _make_dist(site, "LAiM", {"unsloth/__init__.py": b"u\n", lock: b"L" * 100})
     (site / lock).unlink()
     found = _deps().damaged_installed_files()
     assert len(found) == 1 and "package-lock.json is missing" in found[0]
@@ -668,12 +668,12 @@ def test_runtime_damage_still_fails_when_ignored_rows_are_present(site):
     _make_dist(
         site,
         "LAiM",
-        {"LAiM/__init__.py": b"u\n", lock: b"L" * 10},
+        {"unsloth/__init__.py": b"u\n", lock: b"L" * 10},
         record_sizes = {lock: 28473},
     )
     (site / "LAiM" / "__init__.py").unlink()
     found = _deps().damaged_installed_files()
-    assert len(found) == 1 and "LAiM/__init__.py is missing" in found[0]
+    assert len(found) == 1 and "unsloth/__init__.py is missing" in found[0]
 
 
 def test_ignored_rows_do_not_consume_the_finding_budget(site):

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { PillTabs } from "@/features/model-picker/components/model-selector/pill-tabs";
 import { cn } from "@/lib/utils";
@@ -172,8 +173,8 @@ export function ABCompare({
         compact={true}
         className="[&>button]:px-3"
         tabs={[
-          { value: "original", label: "Original" },
-          { value: "edited", label: "Edited" },
+          { value: "original", label: translate("uxAudio.original1983n") },
+          { value: "edited", label: translate("uxAudio.editedpc4lq") },
         ]}
       />
       <div className="flex items-center gap-2">
@@ -184,7 +185,7 @@ export function ABCompare({
           size="icon"
           className="size-[calc(32px*var(--ui-space-scale,1))] shrink-0"
           aria-label={
-            ab.playing ? `Pause ${current.label}` : `Play ${current.label}`
+            ab.playing ? translate("uxAudio.pausenqa8z", { p1: current.label }) : translate("uxAudio.play7wng0", { p1: current.label })
           }
           disabled={!src}
           onClick={toggle}
@@ -197,7 +198,7 @@ export function ABCompare({
         <div
           role="slider"
           tabIndex={src ? 0 : -1}
-          aria-label={`${current.label} playback position`}
+          aria-label={translate("uxAudio.playbackPosition9holb", { p1: current.label })}
           aria-valuemin={0}
           aria-valuemax={Math.round(duration)}
           aria-valuenow={Math.round(ab.position)}

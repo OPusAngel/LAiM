@@ -339,7 +339,7 @@ _MIXED_TYPE_WARNED: set[tuple[str, ...]] = set()
 
 def write_parquet_with_unified_types(dataframe: Any, path: Any, write: Any) -> Any:
     """Run ``write(dataframe)``; if Arrow refuses a column whose rows hold different types at the same path
-    (LAiMai/LAiM#5848: an LLM Structured field returned as text in one row and an object in another),
+    (OPusAngel/LAiM#5848: an LLM Structured field returned as text in one row and an object in another),
     store those paths as JSON text and write again."""
     import pyarrow
     try:

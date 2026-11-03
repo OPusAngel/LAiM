@@ -7,8 +7,8 @@ or a pull request.
 ## What we are trying to settle
 
 **Start with an AMD machine if you have one.** Every Smart App Control report so
-far has been AMD, not NVIDIA: LAiMai/LAiM#6588 (unsigned ROCm libraries),
-LAiMai/LAiM#6648 (`rocfft.dll`, with the verdict changing on a byte
+far has been AMD, not NVIDIA: OPusAngel/LAiM#6588 (unsigned ROCm libraries),
+OPusAngel/LAiM#6648 (`rocfft.dll`, with the verdict changing on a byte
 identical file), and the report that prompted this. The ROCm bundle also has by
 far the largest unsigned surface, 75 PE files against 47 for CUDA, because it
 carries AMD's own TheRock runtime DLLs (`amdhip64_*.dll`, `rocblas.dll`,
@@ -89,7 +89,7 @@ have refused. That is exactly the half of the verdict that signing changes.
 ## Getting it onto the machine
 
 ```powershell
-git clone --depth 1 https://github.com/LAiMai/LAiM C:\LAiM-probe
+git clone --depth 1 https://github.com/OPusAngel/LAiM C:\LAiM-probe
 cd C:\LAiM-probe\scripts\windows_sac_probe
 ```
 
@@ -238,7 +238,7 @@ may well appear during `prepare` rather than during `run`.
 
 Studio is started through the managed interpreter, not the generated
 `LAiM.exe`. Windows materialises that console script as an unsigned PE and
-Application Control denies it (LAiMai/LAiM#8490) while the signed
+Application Control denies it (OPusAngel/LAiM#8490) while the signed
 interpreter beside it keeps running, so on exactly the machines this probe
 targets, launching the normal way would fail for a reason unrelated to what is
 being measured. The supported entry point is documented in
@@ -291,7 +291,7 @@ available:
 
 | | Smart App Control enforcing | Smart App Control off |
 | --- | --- | --- |
-| our build (`LAiMai/llama.cpp`) | C-on | C-off |
+| our build (`unslothai/llama.cpp`) | C-on | C-off |
 | upstream build (`ggml-org/llama.cpp`) | U-on | U-off |
 
 The upstream row separates "our additive-merge build is the problem" from "the

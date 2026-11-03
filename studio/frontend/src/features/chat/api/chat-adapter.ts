@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { attachedMediaUnavailableReason } from "../lib/attached-media-gate";
 import { externalModelLabel } from "../lib/external-model-label";
 import { mlxRuntimeStateFrom } from "../lib/mlx-runtime-state";
@@ -21,7 +22,7 @@ import {
   serverTuningLoadPayload,
 } from "../lib/server-tuning-fields";
 import { authFetch, getAuthToken } from "@/features/auth";
-import { withSandboxAttachmentPaths } from "../sandbox-attachments";
+import { withWorkdirAttachmentPaths } from "../workdir-attachments";
 import { prepareHfTokenForUse } from "@/features/hf-auth";
 import { DOWNLOAD_KIND } from "@/features/hub/download-manager/constants";
 import {
@@ -80,14 +81,14 @@ import { shownBrowserChat } from "@/features/browser/panel-availability";
 import { projectHasSources } from "@/features/rag/api/rag-api";
 import {
   IMAGE_SENTINEL_TOOLS,
-  SANDBOX_FILE_TOOLS,
-  SANDBOX_RUN_TOOLS,
+  WORKDIR_FILE_TOOLS,
+  WORKDIR_RUN_TOOLS,
   extractCreatedFiles,
-  isSandboxFileList,
-  isSandboxToolResult,
-  type SandboxFile,
-  sandboxSessionIdFor,
-} from "@/components/assistant-ui/sandbox-files";
+  isWorkdirFileList,
+  isWorkdirToolResult,
+  type WorkdirFile,
+  workdirSessionIdFor,
+} from "@/components/assistant-ui/workdir-files";
 import { apiUrl } from "@/lib/api-base";
 import {
   type McpUiToolResult,
@@ -460,20 +461,31 @@ const EXTERNAL_ROUTING_REFUSALS: Record<
   { title: string; description: string; error: string }
 > = {
   "connections-disabled": {
-    title: "Connections are disabled.",
-    description:
-      "Turn on Enable connections in Settings → Connections to use hosted models.",
-    error: "Connections disabled.",
+    get title() {
+      return translate("uxChat.connectionsAreDisabled1q495");
+    },
+    get description() {
+      return translate("uxChat.turnOnEnableConnections1s1mh");
+    },
+    get error() { return translate("uxChat.connectionsDisabledggbvj"); },
   },
   "connection-missing": {
-    title: "Connection not found.",
-    description: "Open Settings → Connections and add it again.",
-    error: "Connection not found.",
+    get title() {
+      return translate("uxChat.connectionNotFound1dtwq");
+    },
+    get description() {
+      return translate("uxChat.openSettingsConnectionsAnd115y7");
+    },
+    get error() { return translate("uxChat.connectionNotFoundadaem"); },
   },
   "missing-api-key": {
-    title: "Missing API key for selected connection.",
-    description: "Open Settings → Connections and set the API key again.",
-    error: "Missing connection API key.",
+    get title() {
+      return translate("uxChat.missingAPIKeyForflz4g");
+    },
+    get description() {
+      return translate("uxChat.openSettingsConnectionsAndxgpj9");
+    },
+    get error() { return translate("uxChat.missingConnectionAPIKeythmba"); },
   },
 };
 
@@ -1136,7 +1148,7 @@ export function toolResultModelText(
     isMcpUiToolResult(result, toolName) ||
     isMcpImageToolResult(result) ||
     isSearchImagesToolResult(result) ||
-    isSandboxWrapper(result, toolName)
+    isWorkdirWrapper(result, toolName)
   ) {
     return result.text;
   }
@@ -1145,12 +1157,12 @@ export function toolResultModelText(
 
 /** A wrapper this app added, not a result merely shaped like one: unwrapping someone else's
  *  MCP result drops every other field it returned. */
-function isSandboxWrapper(
+function isWorkdirWrapper(
   result: unknown,
   toolName?: string,
 ): result is { text: string; sessionId: string } {
-  if (toolName !== undefined && !SANDBOX_FILE_TOOLS.has(toolName)) return false;
-  return isSandboxToolResult(result);
+  if (toolName !== undefined && !WORKDIR_FILE_TOOLS.has(toolName)) return false;
+  return isWorkdirToolResult(result);
 }
 
 /** Exactly the live parser's wrapper: text and images, no other field. */
@@ -1213,7 +1225,7 @@ function serializeToolResultPart(
     (isMcpImageToolResult(result) &&
       (isImageToolName(tc.toolName) || isBareMcpImageWrapper(result))) ||
     isSearchImagesToolResult(result) ||
-    isSandboxWrapper(result, tc.toolName ?? "")
+    isWorkdirWrapper(result, tc.toolName ?? "")
   ) {
     // Replay the stdout the model saw, not the card's sessionId/images/files; image tokens go with
     // it, since a token resolves only against the message whose search produced it.
@@ -2277,7 +2289,6 @@ export async function buildLocalTokenCountExtras(
     bypassPermissions,
     deepResearchEnabled,
     permissionMode,
-    sandboxLevel,
     maxToolCallsPerMessage,
     ragAutoInject,
     ragAutoInjectMinScore,
@@ -2290,11 +2301,20 @@ export async function buildLocalTokenCountExtras(
   // past this false gets the server default on both sides.
   // The completion always sends thread_id; the server dates a thread's prompt from it.
   const threadField = threadId ? { thread_id: threadId } : {};
-  if (!supportsTools) {
+  // Local checkpoints run LAiM's code tools even when their chat template cannot render
+  // tool calls: the backend loop parses the calls out of the model's text in Agent modes.
+  // With no checkpoint there is nothing local to run.
+  if (
+    !supportsTools &&
+    (!state.params.checkpoint || isExternalModelId(state.params.checkpoint))
+  ) {
     return {
       enable_tools: false,
+      // Empty, not omitted: a server-side `--enable-tools` outranks the false above, and an omitted
+      // list is the whole catalogue to it -- web_search included, which is what this pill is off to
+      // prevent. An explicit [] runs no built-in tool even under that override.
+      enabled_tools: [],
       bypass_permissions: bypassPermissions,
-      sandbox_level: sandboxLevel,
       ...threadField,
     };
   }
@@ -2326,8 +2346,9 @@ export async function buildLocalTokenCountExtras(
     // along because `--enable-tools` still outranks that false in _effective_enable_tools.
     return {
       enable_tools: false,
+      // See the branch above: the empty list is what that override has nothing to add to.
+      enabled_tools: [],
       bypass_permissions: bypassPermissions,
-      sandbox_level: sandboxLevel,
       ...threadField,
     };
   }
@@ -2339,7 +2360,6 @@ export async function buildLocalTokenCountExtras(
     // Ask holds first-pass retrieval behind the gate, so the count prices a pending RAG
     // turn rather than declining one the completion never retrieves for.
     permission_mode: permissionMode,
-    sandbox_level: sandboxLevel,
     // Off suppresses the loop, and the relay renders no schemas or nudge: same zero.
     max_tool_calls_per_message: maxToolCallsPerMessage,
     // Full access swaps the python/terminal descriptions and adds a nudge
@@ -2479,7 +2499,7 @@ export async function resolveChatInstructions(
   });
 }
 
-// Answered once per thread and reused: sandbox, RAG scope and instructions each resolve the
+// Answered once per thread and reused: workdir, RAG scope and instructions each resolve the
 // project, and navigating between them would mix two projects into one request.
 const composerProjectByPendingThread = new Map<string, string | null>();
 
@@ -2534,12 +2554,12 @@ export async function resolveProjectId(
   return composerProjectId ?? null;
 }
 
-async function resolveSandboxSessionId(
+async function resolveWorkdirSessionId(
   threadId: string | undefined,
   readThreadRecord?: ThreadRecordReader,
 ): Promise<string | undefined> {
   const projectId = await resolveProjectId(threadId, readThreadRecord);
-  return sandboxSessionIdFor(threadId, projectId);
+  return workdirSessionIdFor(threadId, projectId);
 }
 
 /** Wait for an in-progress model load to finish (polls store every 500ms). */
@@ -3078,8 +3098,8 @@ async function resolveAutoLoadCandidate(
     ggufVariant,
     maxSeqLength: source.maxSeqLength,
     successLabel: ggufVariant
-      ? `Loaded ${source.id} (${ggufVariant})`
-      : `Loaded ${source.id}`,
+      ? translate("uxChat.loadedrtdes", { p1: source.id, p2: ggufVariant })
+      : translate("uxChat.loadede3vqm", { p1: source.id }),
   });
   if (!source.listVariants) {
     const variants =
@@ -3115,7 +3135,7 @@ async function resolveAutoLoadCandidate(
 }
 
 // Fetched only when the device genuinely has nothing on it.
-const DEFAULT_CHAT_MODEL_REPO = "LAiM/gemma-4-E2B-it-GGUF";
+const DEFAULT_CHAT_MODEL_REPO = "unsloth/gemma-4-E2B-it-GGUF";
 const DEFAULT_CHAT_MODEL_VARIANT = "UD-Q4_K_XL";
 const DEFAULT_CHAT_MODEL_LABEL = "Gemma 4 E2B";
 
@@ -3191,11 +3211,9 @@ async function ensureDefaultModelDownloaded(
   };
   const totalLabel = formatDownloadBytes(expectedBytes);
   const description =
-    `LAiM couldn’t find an existing model. LAiM is now getting ` +
-    `${DEFAULT_CHAT_MODEL_LABEL} ready for use. You can stop the download or ` +
-    `manage models later in the 'Model hub'`;
+    translate("uxChat.lAiMCouldnTFindbqoa8", { p1: DEFAULT_CHAT_MODEL_LABEL });
   setToast(
-    `Getting ${DEFAULT_CHAT_MODEL_LABEL} ready`,
+    translate("uxChat.gettingReady9i481", { p1: DEFAULT_CHAT_MODEL_LABEL }),
     description,
     cancelDownload,
   );
@@ -3238,7 +3256,7 @@ async function ensureDefaultModelDownloaded(
         const total = formatDownloadBytes(job.expectedBytes) || totalLabel;
         if (!done || !total) return;
         setToast(
-          `Getting ${DEFAULT_CHAT_MODEL_LABEL} ready (${done} of ${total})`,
+          translate("uxChat.gettingReadyOfwvdtw", { p1: DEFAULT_CHAT_MODEL_LABEL, p2: done, p3: total }),
           description,
           cancelDownload,
         );
@@ -3333,7 +3351,7 @@ async function waitForSettledServerStatus(options?: {
         return { outcome: "settled", status };
       }
       if (status && !announced) {
-        toast.info("Waiting for model to finish loading…");
+        toast.info(translate("uxChat.waitingForModelTo1hcz6"));
         announced = true;
       }
       if (Date.now() >= deadline) return { outcome: "still-loading" };
@@ -3348,11 +3366,11 @@ async function waitForSettledServerStatus(options?: {
 function reportBlockedServerLoad(outcome: ServerLoadBlocked): void {
   const stillLoading = outcome === "still-loading";
   toast.error(
-    stillLoading ? "A model is still loading" : "Could not reach the model server",
+    stillLoading ? translate("uxChat.aModelIsStilloge3m") : translate("uxChat.couldNotReachTheazdu8"),
     {
       description: stillLoading
-        ? "Send again once it finishes, or pick a model in the top bar."
-        : "Check that the server is running, then send again.",
+        ? translate("uxChat.sendAgainOnceItmcnxx")
+        : translate("uxChat.checkThatTheServerekzfk"),
     },
   );
 }
@@ -3406,10 +3424,10 @@ async function autoLoadSmallestModel(options?: AutoLoadOptions): Promise<{
   const specSettings = resolveSpeculativeSettingsForLoad();
   const lastLoaded = await readLastLocalModelLoad(options?.abortSignal);
   let autoLoadToastDismissed = false;
-  const toastId = toast.message("Loading a model…", {
+  const toastId = toast.message(translate("uxChat.loadingAModelyy7w9"), {
     description: lastLoaded
-      ? "Loading last used model."
-      : "Auto-selecting the smallest downloaded model.",
+      ? translate("uxChat.loadingLastUsedModelw7mw9")
+      : translate("uxChat.autoSelectingTheSmallest819rp"),
     duration: Number.POSITIVE_INFINITY,
     closeButton: true,
     icon: createLoadingToastIcon(),
@@ -3428,7 +3446,7 @@ async function autoLoadSmallestModel(options?: AutoLoadOptions): Promise<{
       description,
       duration: Number.POSITIVE_INFINITY,
       action: onCancel
-        ? { label: "Cancel", onClick: () => onCancel() }
+        ? { get label() { return translate("browser.agentSettings.cancel"); }, onClick: () => onCancel() }
         : undefined,
     });
   };
@@ -3494,7 +3512,7 @@ async function autoLoadSmallestModel(options?: AutoLoadOptions): Promise<{
       label,
       // Older backends and non-Error throws carry no detail; still name the model that failed.
       detail:
-        detail || "The server did not report a reason. Check the LAiM logs.",
+        detail || translate("uxChat.theServerDidNotby073"),
       blamesModel,
     };
   }
@@ -3645,7 +3663,7 @@ async function autoLoadSmallestModel(options?: AutoLoadOptions): Promise<{
       const preparedToken = await prepareHfTokenForUse(hfToken);
       if (!preparedToken.proceed) {
         // Raised before loadModel, so route it through the same helper or every later candidate reopens the dialog.
-        const cancelled = Object.assign(new Error("Model load cancelled."), {
+        const cancelled = Object.assign(new Error(translate("uxChat.modelLoadCancelledfwwlw")), {
           LAiMUserCancelled: true,
         });
         recordCandidateFailure(failureLabel, cancelled);
@@ -4157,7 +4175,7 @@ async function autoLoadSmallestModel(options?: AutoLoadOptions): Promise<{
           if (!candidate) break;
           candidateResolvedFor.add(sourceKey);
           updateAutoLoadToast(
-            isRemembered ? "Loading last used model…" : "Loading a model…",
+            isRemembered ? translate("uxChat.loadingLastUsedModelz2hlh") : translate("uxChat.loadingAModelv0flt"),
             candidate.ggufVariant
               ? `${candidate.id} (${candidate.ggufVariant})`
               : candidate.id,
@@ -4196,12 +4214,12 @@ async function autoLoadSmallestModel(options?: AutoLoadOptions): Promise<{
       if (loadFailure.current) {
         toast.error(
           loadFailure.current.blamesModel
-            ? `Could not load ${loadFailure.current.label}`
+            ? translate("uxChat.couldNotLoad66x18", { p1: loadFailure.current.label })
             : loadFailure.current.detail,
           {
             description: loadFailure.current.blamesModel
               ? loadFailure.current.detail
-              : `Stopped before loading ${loadFailure.current.label}.`,
+              : translate("uxChat.stoppedBeforeLoadingtz2e1", { p1: loadFailure.current.label }),
             duration: 10000,
             closeButton: true,
           },
@@ -4258,9 +4276,10 @@ async function autoLoadSmallestModel(options?: AutoLoadOptions): Promise<{
       if (download !== "ready") {
         toast.dismiss(toastId);
         if (download === "cancelled") {
-          toast.message(`${DEFAULT_CHAT_MODEL_LABEL} download stopped`, {
-            description:
-              "No model is loaded. Pick one from the top bar, or download another from the Hub, then send again.",
+          toast.message(translate("uxChat.downloadStoppedet3rl", { p1: DEFAULT_CHAT_MODEL_LABEL }), {
+            get description() {
+              return translate("uxChat.noModelIsLoaded1aa4f");
+            },
             duration: 8000,
             closeButton: true,
           });
@@ -4272,7 +4291,7 @@ async function autoLoadSmallestModel(options?: AutoLoadOptions): Promise<{
         };
       }
       updateAutoLoadToast(
-        `Loading ${DEFAULT_CHAT_MODEL_LABEL}…`,
+        translate("uxChat.loading68gwz", { p1: DEFAULT_CHAT_MODEL_LABEL }),
         `${DEFAULT_CHAT_MODEL_REPO} (${DEFAULT_CHAT_MODEL_VARIANT})`,
       );
       loadAttempts += 1;
@@ -4394,7 +4413,7 @@ async function autoLoadSmallestModel(options?: AutoLoadOptions): Promise<{
           ggufVariant: DEFAULT_CHAT_MODEL_VARIANT,
         });
         showAutoLoadSuccess(
-          `Loaded ${DEFAULT_CHAT_MODEL_LABEL} (${DEFAULT_CHAT_MODEL_VARIANT})`,
+          translate("uxChat.loadedrtdes", { p1: DEFAULT_CHAT_MODEL_LABEL, p2: DEFAULT_CHAT_MODEL_VARIANT }),
           loadResp.cpu_fallback_reason,
           loadResp.mmproj_fallback_reason,
           offloadCountsFrom(loadResp),
@@ -4589,7 +4608,7 @@ export function createOpenAIStreamAdapter(
       // the user left, and a message sent with another chat's tools is not recoverable.
       if (!(await awaitThreadScopedPairing(runThreadId))) {
         throw new Error(
-          "This chat's settings could not be loaded, so the message was not sent. Reopen the chat and try again.",
+          translate("uxChat.thisChatSSettingsdmuke"),
         );
       }
       let runtime = useChatRuntimeStore.getState();
@@ -4655,7 +4674,7 @@ export function createOpenAIStreamAdapter(
         transitionSignal: AbortSignal = abortSignal,
       ) {
         if (runtime.modelLoading) {
-          toast.info("Waiting for model to finish loading…");
+          toast.info(translate("uxChat.waitingForModelTo1hcz6"));
           try {
             await waitForModelReady(transitionSignal);
           } catch (error) {
@@ -4677,16 +4696,16 @@ export function createOpenAIStreamAdapter(
             if (!resolution.loadFailureReported) {
               toast.error(
                 resolution.blockedByTrustRemoteCode
-                  ? "This model needs custom code approval"
-                  : "No model loaded",
+                  ? translate("uxChat.thisModelNeedsCustom8vudw")
+                  : translate("uxChat.noModelLoadedbb8lt"),
                 {
                   description: resolution.blockedByTrustRemoteCode
-                    ? "Select it from the top bar to review and approve its custom code, or pick another model."
-                    : "Pick a model in the top bar, then retry.",
+                    ? translate("uxChat.selectItFromThedkseo")
+                    : translate("uxChat.pickAModelInloxmx"),
                 },
               );
             }
-            throw new Error("Load a model first.");
+            throw new Error(translate("uxChat.loadAModelFirstxqwx9"));
           }
         }
         // The turn's own settings, not the store's now: the model selector stays usable while a turn
@@ -4733,16 +4752,16 @@ export function createOpenAIStreamAdapter(
                 },
               })
           : withResolvedModel(sendTimeRuntime);
-        if (!resolvedThreadId) throw new Error("Research requires a saved chat.");
+        if (!resolvedThreadId) throw new Error(translate("uxChat.researchRequiresASavedes15u"));
         if (!unstable_assistantMessageId) {
           throw new Error(
-            "Deep research could not bind its assistant message. Please retry the send.",
+            translate("uxChat.deepResearchCouldNot9eu0x"),
           );
         }
         const userMessage = [...messages]
           .reverse()
           .find((m) => m.role === "user");
-        if (!userMessage) throw new Error("Research requires a user message.");
+        if (!userMessage) throw new Error(translate("uxChat.researchRequiresAUsern0toe"));
         const userMessageIndex = rawMessages.indexOf(userMessage);
         const userMessageParentId =
           userMessageIndex > 0 ? rawMessages[userMessageIndex - 1]!.id : null;
@@ -4769,7 +4788,7 @@ export function createOpenAIStreamAdapter(
             ) !== true)
         ) {
           throw new Error(
-            "Deep research requires a selected local model or a connection whose provider supports LAiM tools.",
+            translate("uxChat.deepResearchRequiresAnvvpa"),
           );
         }
         const reasoningRequested =
@@ -5030,7 +5049,7 @@ export function createOpenAIStreamAdapter(
         }
       };
       if (runtime.modelLoading) {
-        toast.info("Waiting for model to finish loading…");
+        toast.info(translate("uxChat.waitingForModelTo1hcz6"));
         try {
           await waitForModelReady(abortSignal);
         } catch (error) {
@@ -5054,17 +5073,17 @@ export function createOpenAIStreamAdapter(
           if (!resolution.loadFailureReported) {
             toast.error(
               resolution.blockedByTrustRemoteCode
-                ? "This model needs custom code approval"
-                : "No model loaded",
+                ? translate("uxChat.thisModelNeedsCustom8vudw")
+                : translate("uxChat.noModelLoadedbb8lt"),
               {
                 description: resolution.blockedByTrustRemoteCode
-                  ? "Select it from the top bar to review and approve its custom code, or pick another model."
-                  : "Pick a model in the top bar, then retry.",
+                  ? translate("uxChat.selectItFromThedkseo")
+                  : translate("uxChat.pickAModelInloxmx"),
               },
             );
           }
           clearSelectedImageEditReference();
-          throw new Error("Load a model first.");
+          throw new Error(translate("uxChat.loadAModelFirstxqwx9"));
         }
       }
 
@@ -5136,13 +5155,13 @@ export function createOpenAIStreamAdapter(
         params.checkpoint,
         runtime.activeGgufVariant,
       );
-      const sandboxSessionId = await resolveSandboxSessionId(
+      const workdirSessionId = await resolveWorkdirSessionId(
         resolvedThreadId,
         readThreadRecord,
       );
       const toolConfirmationScopeId = resolvedThreadId
-        ? `${sandboxSessionId || "_default"}:${resolvedThreadId}`
-        : sandboxSessionId || "_default";
+        ? `${workdirSessionId || "_default"}:${resolvedThreadId}`
+        : workdirSessionId || "_default";
       const {
         supportsTools,
         toolsEnabled,
@@ -5170,7 +5189,7 @@ export function createOpenAIStreamAdapter(
           runtime.setDeepResearchEnabled(false);
         }
         runtime = { ...runtime, deepResearchEnabled: false };
-        toast.info("Deep Research needs a model that supports tools");
+        toast.info(translate("uxChat.deepResearchNeedsA7naqr"));
       }
       // A chat inside a project retrieves from its indexed sources even with the Docs pill off;
       // the probe is cached.
@@ -5283,11 +5302,12 @@ export function createOpenAIStreamAdapter(
 
       if (selectedImageEditReference && !imageGenerationEnabledForThisTurn) {
         clearSelectedImageEditReference();
-        toast.error("Image editing is unavailable", {
-          description:
-            "Select an OpenAI image-generation model, then retry the edit.",
+        toast.error(translate("uxChat.imageEditingIsUnavailable1epim"), {
+          get description() {
+            return translate("uxChat.selectAnOpenAIImage18ng8");
+          },
         });
-        throw new Error("Image generation edit unavailable.");
+        throw new Error(translate("uxChat.imageGenerationEditUnavailableh1iln"));
       }
 
       // Resolve before the outbound build's standalone tests/studio slice. Match
@@ -5320,11 +5340,11 @@ export function createOpenAIStreamAdapter(
         externalSelection?.modelId,
       );
       const survivingMessages = pruneOutboundHistory(messages, replayReasoning);
-      const { messages: renderedMessages, sandboxAttachments } =
+      const { messages: renderedMessages, workdirAttachments } =
         supportsStudioToolsForThisTurn &&
         studioLocalCodeTools.includes("python")
-          ? withSandboxAttachmentPaths(survivingMessages)
-          : { messages: survivingMessages, sandboxAttachments: [] };
+          ? withWorkdirAttachmentPaths(survivingMessages)
+          : { messages: survivingMessages, workdirAttachments: [] };
       // toOpenAIMessages emits assistant tool_calls plus role="tool" follow-ups; the backend Gemini
       // translator rebuilds the functionCall/functionResponse parts.
       let outboundMessages = renderedMessages
@@ -5353,11 +5373,12 @@ export function createOpenAIStreamAdapter(
         );
         if (!referenceMessage) {
           clearSelectedImageEditReference();
-          toast.error("This generated image cannot be edited", {
-            description:
-              "The original image reference is missing. Generate the image again, then retry the edit.",
+          toast.error(translate("uxChat.thisGeneratedImageCannot1jfx4"), {
+            get description() {
+              return translate("uxChat.theOriginalImageReferencepk35a");
+            },
           });
-          throw new Error("Generated image edit reference missing.");
+          throw new Error(translate("uxChat.generatedImageEditReferenceeshcz"));
         }
         let insertAt = outboundMessages.length;
         for (let i = outboundMessages.length - 1; i >= 0; i -= 1) {
@@ -5401,11 +5422,12 @@ export function createOpenAIStreamAdapter(
         !resumedThought &&
         !hasGeminiReplayContinuation
       ) {
-        toast.error("This response cannot be resumed", {
-          description:
-            "It stopped mid-thought, and only GGUF and MLX models can resume a thought. Use Retry instead.",
+        toast.error(translate("uxChat.thisResponseCannotBe1ck78"), {
+          get description() {
+            return translate("uxChat.itStoppedMidThoughtkol1r");
+          },
         });
-        throw new Error("A response that stopped mid-thought cannot be resumed here.");
+        throw new Error(translate("uxChat.aResponseThatStoppedd4inz"));
       }
       const continuationCompaction = continuation
         ? providerCompactionForTarget(
@@ -5482,7 +5504,7 @@ export function createOpenAIStreamAdapter(
       ) {
         const webLabel = providerShipsWebFetch
           ? "web search or web fetch"
-          : "web search";
+          : translate("uxChat.webSearch7q7tn");
         // Treat search and fetch as one "any web tool" axis: checking webSearch alone mis-fired when only Fetch was on.
         const anyWebEnabledForThisTurn =
           webSearchEnabledForThisTurn || webFetchEnabledForThisTurn;
@@ -5716,7 +5738,7 @@ export function createOpenAIStreamAdapter(
         generationUserMessage,
       );
       if (extraToolImages.length > 0) {
-        throw new Error("Attach only one image for MCP tools per message.");
+        throw new Error(translate("uxChat.attachOnlyOneImage6c44q"));
       }
       const currentTurnCarriesMedia = Boolean(
         // A tool-only image needs the live stream to ask before it is sent.
@@ -5777,7 +5799,7 @@ export function createOpenAIStreamAdapter(
         runtime.setThreadRunning(threadKey, true, { owner: audioCancel });
         try {
           yield {
-            content: [{ type: "text" as const, text: "Generating audio..." }],
+            content: [{ type: "text" as const, get text() { return translate("uxChat.generatingAudio8cd4b"); } }],
           };
 
           const result = await generateAudio(
@@ -5811,8 +5833,8 @@ export function createOpenAIStreamAdapter(
           };
         } catch (err) {
           if (!runSignal.aborted) {
-            toast.error("Audio generation failed", {
-              description: err instanceof Error ? err.message : "Unknown error",
+            toast.error(translate("uxChat.audioGenerationFailed1q62z"), {
+              description: err instanceof Error ? err.message : translate("uxChat.unknownErrorb575w"),
             });
           }
           throw err;
@@ -6568,7 +6590,7 @@ export function createOpenAIStreamAdapter(
         }
         if (!stopPlan.postLegacyCancel) return;
         const body: Record<string, string> = { cancel_id: cancelId };
-        if (sandboxSessionId) body.session_id = sandboxSessionId;
+        if (workdirSessionId) body.session_id = workdirSessionId;
         // Plain fetch, not authFetch: authFetch redirects to login on 401, kicking the user out mid-stop.
         const token = getAuthToken();
         // apiUrl so the cancel POST reaches the right origin in Tauri builds (webview origin is not
@@ -6635,18 +6657,18 @@ export function createOpenAIStreamAdapter(
               ? responseModelId
               : selectedModelSummary?.name || responseModelId) ||
             params.checkpoint ||
-            "Unknown model",
+            translate("uxChat.unknownModelc21iy"),
           responseModelId:
             responseModelId || externalSelection?.modelId || params.checkpoint,
           ...(externalProvider?.id ? { providerId: externalProvider.id } : {}),
           providerName:
             externalProvider?.name ??
-            (isExternalRequest ? "External provider" : "Local model"),
+            (isExternalRequest ? translate("uxChat.externalProviderz6w12") : translate("uxChat.localModelt5w5z")),
           providerType: externalProvider?.providerType ?? "local",
           startedAt: streamStartTime,
           finishedAt,
           durationMs: finishedAt - streamStartTime,
-          ...(sandboxSessionId ? { sessionId: sandboxSessionId } : {}),
+          ...(workdirSessionId ? { sessionId: workdirSessionId } : {}),
           cancelId,
           toolCalls: Array.from(
             new Set(
@@ -6847,7 +6869,7 @@ export function createOpenAIStreamAdapter(
                 ? { presence_penalty: params.presencePenalty }
                 : {}),
               // studioLocalCodeTools, not codeToolsEnabled: a Tools pill that resolved to the provider's
-              // sandbox is a hosted request and belongs below, where this body would 400 on permission_mode.
+              // workdir is a hosted request and belongs below, where this body would 400 on permission_mode.
               ...(supportsStudioToolsForThisTurn &&
               (toolsEnabled ||
                 studioLocalCodeTools.length > 0 ||
@@ -6871,7 +6893,7 @@ export function createOpenAIStreamAdapter(
                       ...browserTools,
                       // Hosted tools with no local stand-in; their pills stay lit regardless, so listing only local
                       // names dropped Images/Fetch whenever another tool selected this branch. Search is excluded
-                      // (LAiM runs it above); Code rides along only when it resolved to the provider's sandbox.
+                      // (LAiM runs it above); Code rides along only when it resolved to the provider's workdir.
                       ...(imageGenerationEnabledForThisTurn
                         ? ["image_generation"]
                         : []),
@@ -6880,7 +6902,6 @@ export function createOpenAIStreamAdapter(
                     ],
                     mcp_enabled: mcpEnabledForChat,
                     permission_mode: permissionMode,
-                    sandbox_level: runtime.sandboxLevel,
                     ...(permissionMode === "auto" || permissionMode === "off"
                       ? {}
                       : { confirm_tool_calls: permissionMode === "ask" }),
@@ -6901,12 +6922,12 @@ export function createOpenAIStreamAdapter(
                     // This branch runs the tools here, so say so by name: enabled_tools ["web_search"] is
                     // byte-identical to an older bundle's hosted search.
                     run_tools_locally: true,
-                    ...(sandboxSessionId
-                      ? { session_id: sandboxSessionId }
+                    ...(workdirSessionId
+                      ? { session_id: workdirSessionId }
                       : {}),
                     ...userMessageIdField,
-                    ...(sandboxAttachments.length > 0
-                      ? { sandbox_attachments: sandboxAttachments }
+                    ...(workdirAttachments.length > 0
+                      ? { session_attachments: workdirAttachments }
                       : {}),
                     ...(ragEnabled || projectRagEnabled
                       ? {
@@ -6960,7 +6981,12 @@ export function createOpenAIStreamAdapter(
                   // Explicit false: an omitted field falls back to the server's tools-on default, which
                   // would bill provider server tools.
                   :
-                    { enable_tools: false }),
+                    {
+                      enable_tools: false,
+                      // And the empty catalogue, so a server-side `--enable-tools` cannot answer this
+                      // turn with built-ins -- including the web_search this pill turned off.
+                      enabled_tools: [],
+                    }),
               // Also on this body: a provider whose models run Studio tools can hand off too, and omitting
               // it makes arming research a no-op.
               ...(deepResearchArmed ? { deep_research_armed: true } : {}),
@@ -7060,9 +7086,9 @@ export function createOpenAIStreamAdapter(
               findLatestUserExtraAudioBase64(currentTurnMessages),
             video_base64: findLatestUserVideoBase64(currentTurnMessages),
             cancel_id: cancelId,
-            ...(sandboxSessionId ? { session_id: sandboxSessionId } : {}),
-            ...(sandboxAttachments.length > 0
-              ? { sandbox_attachments: sandboxAttachments }
+            ...(workdirSessionId ? { session_id: workdirSessionId } : {}),
+            ...(workdirAttachments.length > 0
+              ? { session_attachments: workdirAttachments }
               : {}),
             ...(resolvedThreadId ? { thread_id: resolvedThreadId } : {}),
             ...userMessageIdField,
@@ -7074,16 +7100,15 @@ export function createOpenAIStreamAdapter(
             // Sent for every local chat, since `LAiM run --enable-tools` can open the tool loop with
             // no pill lit. "auto" OMITS confirm_tool_calls (an explicit true would force a stream and
             // defeat the safe-only exception); "off" omits it too, since an explicit false opts out of
-            // its risky-call prompt without an OS sandbox; "ask" sends true, full sends false.
-            // sandbox_level "low" runs Python/Terminal on software safeguards only; Full access overrides it.
+            // its risky-call prompt without an OS workdir; "ask" sends true, full sends false.
             permission_mode: permissionMode,
-            sandbox_level: runtime.sandboxLevel,
             ...(permissionMode === "auto" || permissionMode === "off"
               ? {}
               : { confirm_tool_calls: permissionMode === "ask" }),
             bypass_permissions: bypassPermissions,
             ...(deepResearchArmed ? { deep_research_armed: true } : {}),
-            ...(supportsTools &&
+            ...((supportsTools ||
+              (!isExternalRequest && Boolean(params.checkpoint))) &&
               (toolsEnabled ||
                 codeToolsEnabled ||
                 mcpEnabledForChat ||
@@ -7150,9 +7175,10 @@ export function createOpenAIStreamAdapter(
                     return mins >= 9999 ? 9999 : mins * 60;
                   })(),
                 }
-              : // Explicit false keeps UI-off tools disabled; --enable-tools still overrides it
-                // and sees no exhaustive enabled_tools list, so it can supply the default catalog.
-                { enable_tools: false }),
+              : // Explicit false keeps UI-off tools disabled; --enable-tools still overrides it,
+                // so the empty catalogue rides along: it is the list that override would otherwise
+                // replace with the default catalog, web_search included.
+                { enable_tools: false, enabled_tools: [] }),
           };
         };
 
@@ -7239,7 +7265,7 @@ export function createOpenAIStreamAdapter(
                           new DOMException("Aborted", "AbortError");
                       }
                       throw new Error(
-                        "The server accepted the request without starting a generation run",
+                        translate("uxChat.theServerAcceptedThezprlf"),
                       );
                     }
                   } else {
@@ -7297,13 +7323,13 @@ export function createOpenAIStreamAdapter(
                 throw new ChatGenerationTerminalError(
                   "failed",
                   generationRun?.error ||
-                    "The LAiM backend restarted during generation.",
+                    translate("uxChat.theLAiMBackendRestarteduvfpx"),
                 );
               }
               if (generationStatus === "cancelled" && !runSignal.aborted) {
                 throw new ChatGenerationTerminalError(
                   "cancelled",
-                  "Generation was cancelled.",
+                  translate("uxChat.generationWasCancelleds8uuf"),
                 );
               }
             };
@@ -7375,16 +7401,12 @@ export function createOpenAIStreamAdapter(
                   rollingContextNoticeThreads.add(resolvedThreadId);
                   // Once per thread per page load; the durable record is the notice on the turn that compacted.
                   const archived = contextTruncation?.archived_messages ?? 0;
-                  toast.info("This conversation was compacted", {
+                  toast.info(translate("uxChat.thisConversationWasCompacted1djnr"), {
                     description: archived
-                      ? "It got long, so older turns were removed from the model's " +
-                        "context. They are saved and searchable, and relevant parts are " +
-                        "brought back automatically."
+                      ? translate("uxChat.itGotLongSojyaaf")
                       : contextTruncation?.summarized
-                        ? "The full conversation is still visible and saved. " +
-                          "The provider summarized older turns so the chat can continue."
-                        : "The full conversation is still visible and saved. " +
-                          "LAiM removed complete older turns from this request so the chat can continue.",
+                        ? translate("uxChat.theFullConversationIsu9a69")
+                        : translate("uxChat.theFullConversationIsuf3hn"),
                     duration: 8000,
                   });
                 }
@@ -7778,7 +7800,7 @@ export function createOpenAIStreamAdapter(
                       .setToolConfirmation(
                         id,
                         approvalId,
-                        sandboxSessionId ?? "",
+                        workdirSessionId ?? "",
                         toolConfirmationScopeId,
                         toolEvent.image_disclosure as ImageDisclosure | undefined,
                       );
@@ -7820,9 +7842,9 @@ export function createOpenAIStreamAdapter(
                     // Pulled out first, ahead of __IMAGES__, so the image slice below is unchanged. Only from the
                     // tools that emit it: elsewhere that line is content.
                     const { text: withUi, files: createdFiles } =
-                      SANDBOX_FILE_TOOLS.has(toolCallParts[idx].toolName ?? "")
+                      WORKDIR_FILE_TOOLS.has(toolCallParts[idx].toolName ?? "")
                         ? extractCreatedFiles(rawEvent)
-                        : { text: rawEvent, files: [] as SandboxFile[] };
+                        : { text: rawEvent, files: [] as WorkdirFile[] };
                     // Ahead of the image slice, which parses to end of string.
                     const { text: rawResult, ui: mcpUi } =
                       extractMcpUiEnvelope(
@@ -7837,7 +7859,7 @@ export function createOpenAIStreamAdapter(
                     const imgMarker = "\n__IMAGES__:";
                     // Same rule again. The backend keeps this line for the model when the tool is not one that
                     // emits the envelope, so the card keeps it too, rather than hiding it and fetching a
-                    // sandbox file that was never written.
+                    // workdir file that was never written.
                     const imgIdx = IMAGE_SENTINEL_TOOLS.has(
                       toolCallParts[idx].toolName ?? "",
                     )
@@ -7849,7 +7871,7 @@ export function createOpenAIStreamAdapter(
                           text: string;
                           images: string[];
                           sessionId: string;
-                          files?: SandboxFile[];
+                          files?: WorkdirFile[];
                         }
                       | McpImageToolResult
                       | McpUiToolResult
@@ -7863,7 +7885,7 @@ export function createOpenAIStreamAdapter(
                           prompt?: string;
                         };
                     const imageB64 = toolEvent.image_b64 as string | undefined;
-                    // A valid MCP image envelope wins; an invalid marker falls through so a sandbox __IMAGES__
+                    // A valid MCP image envelope wins; an invalid marker falls through so a workdir __IMAGES__
                     // suffix still renders.
                     const mcpCandidate = splitMcpImages(rawResult);
                     const mcpImages: McpImageToolResult | null =
@@ -7888,9 +7910,9 @@ export function createOpenAIStreamAdapter(
                       parsedResult = mcpImages;
                     } else if (imgIdx !== -1) {
                       const text = rawResult.slice(0, imgIdx);
-                      // Fall back to "_default", the backend sandbox dir used when there is no
+                      // Fall back to "_default", the backend workdir dir used when there is no
                       // session_id (see tools.py _get_workdir).
-                      const sessionId = sandboxSessionId || "_default";
+                      const sessionId = workdirSessionId || "_default";
                       try {
                         const images = JSON.parse(
                           rawResult.slice(imgIdx + imgMarker.length),
@@ -7906,7 +7928,7 @@ export function createOpenAIStreamAdapter(
                       }
                     } else if (
                       createdFiles.length > 0 ||
-                      SANDBOX_RUN_TOOLS.has(toolCallParts[idx].toolName ?? "")
+                      WORKDIR_RUN_TOOLS.has(toolCallParts[idx].toolName ?? "")
                     ) {
                       // Structured even with neither files nor images, because the session is the only record of
                       // WHERE this call ran: _created_file_sentinels emits nothing when a concurrent call shared
@@ -7914,7 +7936,7 @@ export function createOpenAIStreamAdapter(
                       parsedResult = {
                         text: rawResult,
                         images: [],
-                        sessionId: sandboxSessionId || "_default",
+                        sessionId: workdirSessionId || "_default",
                         files: createdFiles,
                       };
                     } else if (webImages.length > 0) {
@@ -8717,7 +8739,7 @@ export function createOpenAIStreamAdapter(
                 yield* startDeepResearch(deepResearchHandoff.question, runSignal);
                 return;
               } catch (researchError) {
-                toast.error("Deep research could not start", {
+                toast.error(translate("uxChat.deepResearchCouldNot1u4lk"), {
                   description:
                     researchError instanceof Error
                       ? researchError.message
@@ -8735,7 +8757,7 @@ export function createOpenAIStreamAdapter(
             yield* startDeepResearch(deepResearchHandoff.question, runSignal);
           } catch (error) {
             // The reply the model already wrote stays; the user can send again.
-            toast.error("Deep research could not start", {
+            toast.error(translate("uxChat.deepResearchCouldNot1u4lk"), {
               description:
                 error instanceof Error ? error.message : String(error),
             });
@@ -8927,9 +8949,10 @@ export function createOpenAIStreamAdapter(
               marker.truncation.checkpoint_started === true,
           )
         ) {
-          toast.info("This chat was not compacted", {
-            description:
-              "Compaction needs the conversation archive and the default checkpoint policy.",
+          toast.info(translate("uxChat.thisChatWasNotecla1"), {
+            get description() {
+              return translate("uxChat.compactionNeedsTheConversationyue2a");
+            },
           });
         }
         const finalTiming = buildTiming(
@@ -8955,8 +8978,10 @@ export function createOpenAIStreamAdapter(
           // Saved as complete that is a blank bubble with no way out.
           (hasRenderableContent(finalContent) ? null : "empty");
         if (continuation && !producedReplyText && !finalIncompleteReason) {
-          toast("The model had nothing to add", {
-            description: "It ended the reply where it already stopped.",
+          toast(translate("uxChat.theModelHadNothing1rwln"), {
+            get description() {
+              return translate("uxChat.itEndedTheReply1mowl");
+            },
           });
         }
         yield {
@@ -9005,7 +9030,7 @@ export function createOpenAIStreamAdapter(
         };
       } catch (err) {
         settleFirstTokenErr(
-          err instanceof Error ? err : new Error("Generation failed"),
+          err instanceof Error ? err : new Error(translate("uxChat.generationFaileddu5od")),
         );
         if (!runSignal.aborted) {
           const msg = err instanceof Error ? err.message : String(err);
@@ -9022,11 +9047,13 @@ export function createOpenAIStreamAdapter(
               clearTimeout(cleanupTimer);
               minPRecoveryGuard.dispose();
             };
-            toast.error("Min P is incompatible with speculative decoding", {
-              description: `This server requires Min P to be disabled. Set it to 0, then retry. ${msg}`,
+            toast.error(translate("uxChat.minPIsIncompatible16hlh"), {
+              get description() { return translate("uxChat.thisServerRequiresMinfy3lw", { p1: msg }); },
               duration: 8000,
               action: {
-                label: "Set Min P to 0",
+                get label() {
+                  return translate("uxChat.setMinPToqgft0");
+                },
                 onClick: () => {
                   const valid = minPRecoveryGuard.isValid();
                   disposeRecovery();
@@ -9043,31 +9070,31 @@ export function createOpenAIStreamAdapter(
               onAutoClose: disposeRecovery,
             });
           } else if (err instanceof GenerationLengthError) {
-            toast.error("Response ran out of tokens", {
+            toast.error(translate("uxChat.responseRanOutOf1jpaa"), {
               // The error already chose between the Max Tokens and Context Length remedies; repeating the
               // Max Tokens advice here overrode that choice in the one place the user reads.
               description:
                 msg ||
-                "The model used the full Max Tokens budget while thinking " +
-                  "and did not produce a final answer. Increase Max Tokens in " +
-                  "chat Settings or turn off thinking, then retry.",
+                translate("uxChat.theModelUsedThe7ym9p"),
               duration: 8000,
             });
           } else if (err instanceof ChatGenerationTerminalError) {
             if (err.generationStatus === "failed") {
-              toast.error("Response interrupted", {
+              toast.error(translate("uxChat.responseInterruptedmu5se"), {
                 description:
                   err.message ||
-                  "The LAiM backend stopped during generation.",
+                  translate("uxChat.theLAiMBackendStopped6n6ce"),
                 duration: 8000,
               });
             }
           } else if (err instanceof StreamInterruptedError) {
             // Connection dropped mid-turn: surface it explicitly (the rethrow also marks the message).
-            toast.error("Response interrupted", {
-              description:
-                "The connection dropped before the model finished. " +
-                "The partial answer is kept. Use Retry to regenerate.",
+            toast.error(translate("uxChat.responseInterruptedmu5se"), {
+              get description() {
+                return `${translate("uxChat.theConnectionDroppedBeforegco1r")}${translate(
+                  "uxChat.thePartialAnswerIsqrjvm",
+                )}`;
+              },
               duration: 8000,
             });
           } else if (isContextLimitError(msg)) {
@@ -9095,35 +9122,25 @@ export function createOpenAIStreamAdapter(
               `${irreducible?.context_length?.toLocaleString()}-token window leaves for the prompt. ` +
               "The earlier turns were already removed and it still does not fit, so " +
               "shortening the conversation will not help. ";
-            toast.error("Context limit reached", {
+            toast.error(translate("uxChat.contextLimitReached179rp"), {
               description: oneTurnIsTheProblem
                 ? userCanShortenIt
-                  ? `This message is ${tooLong}` +
-                    'Shorten this message, or raise "Context Length" ' +
-                    "in the chat Settings panel (⚙ in the top-right)."
-                  : `The last tool result is ${tooLong}` +
-                    'Raise "Context Length" in the chat Settings panel (⚙ in the top-right), ' +
-                    "or ask for less output from that tool."
+                  ? translate("uxChat.thisMessageIsShortenfp7px", { p1: tooLong })
+                  : translate("uxChat.theLastToolResultmoo4r", { p1: tooLong })
                 : historyCannotHelp(irreducible)
                   // No one turn to name, and the bulk is in the parts eviction never touches. Both levers
                   // are named, neither claimed as the cause.
                   ?
-                    "Even with every earlier turn dropped, this prompt would still be " +
-                    "too long, so shortening the conversation will not help. " +
-                    'Raise "Context Length" in the chat Settings panel (⚙ in the top-right), ' +
-                    "or reduce what every request carries: the system prompt and any " +
-                    "tools that are enabled."
+                    translate("uxChat.evenWithEveryEarlier14hz5")
                   // llama-server runs with --no-context-shift, a hard error instead of silently dropping
                   // old KV turns, so point at the control that raises the ceiling.
                   :
-                    "The conversation has filled the model's context window. " +
-                    'Increase "Context Length" in the chat Settings panel (⚙ in the top-right), ' +
-                    "or start a new chat.",
+                    translate("uxChat.theConversationHasFilled4mfej"),
               duration: 8000,
             });
           } else {
-            toast.error("Generation failed", {
-              description: msg || "Unknown error",
+            toast.error(translate("uxChat.generationFailed1jpoj"), {
+              description: msg || translate("uxChat.unknownErrorb575w"),
             });
           }
         }
@@ -9230,7 +9247,7 @@ export function createOpenAIStreamAdapter(
           } else if (runSignal.aborted) {
             settleFirstTokenErr(new Error("Cancelled"));
           } else {
-            settleFirstTokenErr(new Error("No tokens received"));
+            settleFirstTokenErr(new Error(translate("uxChat.noTokensReceivedr12e5")));
           }
         }
         // serverCancel narrows both clears: runs with no resolved thread id share the "__default" key.

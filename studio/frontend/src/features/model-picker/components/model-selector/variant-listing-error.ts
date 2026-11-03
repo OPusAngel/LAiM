@@ -3,6 +3,8 @@
 
 // Read by property, not instanceof: DOMException does not inherit from Error in older WebKit, so
 // `err instanceof Error` misses exactly the aborts this needs to classify.
+import { translate } from "@/i18n";
+
 function propString(err: unknown, key: "name" | "message"): string {
   if (typeof err !== "object" || err === null) return "";
   const value = (err as Record<string, unknown>)[key];
@@ -16,7 +18,7 @@ function propString(err: unknown, key: "name" | "message"): string {
 export function describeVariantListingError(err: unknown): string {
   const name = propString(err, "name");
   if (name === "TimeoutError" || name === "AbortError") {
-    return "Timed out listing quantizations. Check your connection to Hugging Face, then retry.";
+    return translate("uxModelpicker.timedOutListingQuantizationspygc0");
   }
-  return propString(err, "message") || "Failed to load variants";
+  return propString(err, "message") || translate("uxModelpicker.failedToLoadVariantsyo2h8");
 }

@@ -39,6 +39,9 @@ OPENAI_CODEX_LOOPBACK_PORTS = (1455,)
 OPENAI_CODEX_CALLBACK_PATH = "/auth/callback"
 
 OPENAI_CODEX_DEVICE_REDIRECT_URI = f"{OPENAI_CODEX_ISSUER}/deviceauth/callback"
+# Measured against a live connection: /codex/models answers the same six entries with this
+# originator as with `codex_cli_rs` and a CLI-shaped User-Agent, so a short picker is the
+# account's plan showing through, not our client identity being filtered.
 OPENAI_CODEX_ORIGINATOR = "LAiM_studio"
 OPENAI_CODEX_API_BASE = "https://chatgpt.com/backend-api"
 OPENAI_CODEX_RESPONSES_URL = f"{OPENAI_CODEX_API_BASE}/codex/responses"

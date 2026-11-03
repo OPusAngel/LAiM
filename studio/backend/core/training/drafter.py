@@ -176,7 +176,7 @@ _CAPABILITY_TTL_S = 600
 _TOKEN_ENV = "LAiM_DRAFTER_PROBE_TOKEN"
 _PROBE = """
 import json, os, sys
-os.environ.setdefault("LAiM_IS_PRESENT", "1")
+os.environ.setdefault("UNSLOTH_IS_PRESENT", "1")
 sys.path.insert(0, os.getcwd())
 token = os.environ.pop({env!r}, "")
 token = False if token == "0" else (token or None)

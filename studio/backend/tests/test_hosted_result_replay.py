@@ -648,7 +648,7 @@ def test_the_hosted_cap_follows_the_configured_local_one(executed, monkeypatch):
 
 
 def test_a_hosted_page_keeps_a_files_line_of_its_own(executed):
-    """Only the sandbox tools emit the ``__FILES__`` envelope.
+    """Only the workdir tools emit the ``__FILES__`` envelope.
 
     A fetched page ending in a well formed one is content, so the stripper is
     given the tool's name, as the local path does. Otherwise the tail of the

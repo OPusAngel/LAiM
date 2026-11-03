@@ -18,7 +18,7 @@ const GGUF_SUFFIX = /(\.gguf|-gguf)$/i;
 const FONT_FAMILY =
   'ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace';
 
-/** Repo or file basename without a trailing -GGUF: `LAiM/FLUX.2-klein-4B-GGUF` -> `FLUX.2-klein-4B`. */
+/** Repo or file basename without a trailing -GGUF: `unsloth/FLUX.2-klein-4B-GGUF` -> `FLUX.2-klein-4B`. */
 export function stampModelName(model: string | null | undefined): string {
   const base = (model ?? "").trim().split(PATH_SEP).filter(Boolean).pop() ?? "";
   return base.replace(GGUF_SUFFIX, "");

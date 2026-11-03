@@ -37,7 +37,7 @@ def test_the_flag_is_what_changes_the_policy():
     assert _csp(True) != _csp(False)
 
 
-def test_the_sandbox_holds_in_both_variants():
+def test_the_workdir_holds_in_both_variants():
     # Network access widens what the canvas may fetch, never how it is isolated.
     for csp in (_csp(False), _csp(True)):
         assert "sandbox allow-scripts" in csp

@@ -84,7 +84,7 @@ print("=" * 80 + "\n")
 print("🤖 Loading base vision model...")
 try:
     model, tokenizer = FastVisionModel.from_pretrained(
-        model_name = "LAiM/Qwen2-VL-2B-Instruct",
+        model_name = "unsloth/Qwen2-VL-2B-Instruct",
         max_seq_length = 2048,
         load_in_4bit = True,
         load_in_8bit = False,
@@ -106,7 +106,7 @@ try:
         lora_alpha = 32,
         lora_dropout = 0,
         bias = "none",
-        use_gradient_checkpointing = "LAiM",
+        use_gradient_checkpointing = "unsloth",
         random_state = 3407,
         use_rslora = False,
         loftq_config = None,

@@ -22,12 +22,13 @@ register("./helpers/memory-estimate-resolver.mjs", import.meta.url);
 
 const auth = await import("./helpers/store-stubs/auth.ts");
 const native = await import("./helpers/native-path-stub.ts");
+const { englishView } = await import("./helpers/kit.ts");
 const {
   fetchMemoryEstimate,
   resetMemoryEstimateRouteMemo,
 } = await import("../src/features/model-picker/api/memory-estimate.ts");
 
-const REQUEST = { modelPath: "LAiM/Qwen3-8B-GGUF", ggufVariant: "Q4_K_M" };
+const REQUEST = { modelPath: "unsloth/Qwen3-8B-GGUF", ggufVariant: "Q4_K_M" };
 
 /** A complete, current response. The skew cases below delete fields from it. */
 const FULL = {
@@ -275,7 +276,7 @@ test("a missing kv_estimable degrades to the floor path, not a confident total",
     freeGpuCapacityGb: 23,
     usableSystemRamGb: 60,
     singleMemoryPool: false,
-  });
+  }, englishView);
   assert.equal(result.bounded, true);
   assert.equal(result.prefix, "≥ ");
   assert.equal(result.advisory?.tone, "warn");

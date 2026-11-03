@@ -15,15 +15,15 @@ const repoIdForSidecarKey = (key: string, engine: AudioSttEngine) => {
   const repos: Record<string, string> =
     engine === "gguf"
       ? {
-          tiny: "LAiMai/whisper-tiny-GGUF",
-          base: "LAiMai/whisper-base-GGUF",
-          small: "LAiMai/whisper-small-GGUF",
+          tiny: "unslothai/whisper-tiny-GGUF",
+          base: "unslothai/whisper-base-GGUF",
+          small: "unslothai/whisper-small-GGUF",
         }
       : {
-          tiny: "LAiM/whisper-tiny",
-          base: "LAiM/whisper-base",
-          small: "LAiM/whisper-small",
-          "qwen3-asr-0.6b": "LAiMai/Qwen3-ASR-0.6B-GGUF",
+          tiny: "unsloth/whisper-tiny",
+          base: "unsloth/whisper-base",
+          small: "unsloth/whisper-small",
+          "qwen3-asr-0.6b": "unslothai/Qwen3-ASR-0.6B-GGUF",
         };
   return repos[key] ?? key;
 };
@@ -42,7 +42,7 @@ test("STT On Device inventory follows all sidecar download engines", () => {
     ),
     [
       {
-        repoId: "LAiM/whisper-small",
+        repoId: "unsloth/whisper-small",
         sidecarKey: "small",
         engine: "transformers",
       },
@@ -52,12 +52,12 @@ test("STT On Device inventory follows all sidecar download engines", () => {
         engine: "transformers",
       },
       {
-        repoId: "LAiMai/whisper-small-GGUF",
+        repoId: "unslothai/whisper-small-GGUF",
         sidecarKey: "small",
         engine: "gguf",
       },
       {
-        repoId: "LAiMai/Qwen3-ASR-0.6B-GGUF",
+        repoId: "unslothai/Qwen3-ASR-0.6B-GGUF",
         sidecarKey: "qwen3-asr-0.6b",
         engine: "mtmd",
       },
@@ -76,12 +76,12 @@ test("legacy top-level downloads are retained without duplicate rows", () => {
     ),
     [
       {
-        repoId: "LAiM/whisper-tiny",
+        repoId: "unsloth/whisper-tiny",
         sidecarKey: "tiny",
         engine: "transformers",
       },
       {
-        repoId: "LAiM/whisper-base",
+        repoId: "unsloth/whisper-base",
         sidecarKey: "base",
         engine: "transformers",
       },
@@ -90,11 +90,11 @@ test("legacy top-level downloads are retained without duplicate rows", () => {
 });
 
 test("only exact curated Qwen artifacts use the finite MTMD runtime", () => {
-  assert.equal(sttEngineForRepoId("LAiMai/Qwen3-ASR-0.6B-GGUF"), "mtmd");
+  assert.equal(sttEngineForRepoId("unslothai/Qwen3-ASR-0.6B-GGUF"), "mtmd");
   assert.equal(sttEngineForRepoId("Qwen/Qwen3-ASR-0.6B"), "transformers");
   assert.equal(sttEngineForRepoId("community/Qwen3-ASR-finetune"), "transformers");
   assert.equal(
     sttRepoIdForSidecarKey("qwen3-asr-0.6b", "mtmd"),
-    "LAiMai/Qwen3-ASR-0.6B-GGUF",
+    "unslothai/Qwen3-ASR-0.6B-GGUF",
   );
 });

@@ -67,7 +67,7 @@ def test_a_managed_load_reads_the_owners_llama_cpp_path(tmp_path, monkeypatch):
     binary.write_text("")
     binary.chmod(0o755)
     monkeypatch.delenv("LLAMA_SERVER_PATH", raising = False)
-    monkeypatch.delenv("LAiM_LLAMA_CPP_PATH", raising = False)
+    monkeypatch.delenv("UNSLOTH_LLAMA_CPP_PATH", raising = False)
     run_as(OWNER, llama_cpp_path_settings.set_custom_llama_cpp_path, str(binary.parent))
     assert run_as(ALICE, llama_cpp_path_settings.get_stored_custom_llama_cpp_path) is not None
     assert run_as(ALICE, llama_cpp_path_settings.custom_llama_cpp_path_source) == "studio"

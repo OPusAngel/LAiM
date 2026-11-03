@@ -25,7 +25,7 @@ def _format(rows, mapping = None):
     ds = Dataset.from_dict({"image": images, **rows})
     info = format_and_template_dataset(
         ds,
-        model_name = "LAiM/Qwen2.5-VL-3B-Instruct",
+        model_name = "unsloth/Qwen2.5-VL-3B-Instruct",
         tokenizer = None,
         is_vlm = True,
         dataset_name = "org/ds",

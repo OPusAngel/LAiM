@@ -498,7 +498,7 @@ def prepare_for_training_mode(f):
         # We do this at the START of train() (not the end) so that
         # evaluate() / log() still work after train() completes.
         # HF's WandbCallback.setup() will call wandb.init() for the new run.
-        # See: https://github.com/LAiMai/LAiM/issues/3954
+        # See: https://github.com/OPusAngel/LAiM/issues/3954
         if getattr(self, '_LAiM_training_completed', False):
             try:
                 import wandb
@@ -1479,7 +1479,7 @@ def _guard_kbit_prep_against_peft_models():
 def _widen_sft_config_instance_check(patched_config):
     """Keep a config that subclasses TRL's own ``SFTConfig`` from being downcast to one.
 
-    Replacing ``trl.trainer.sft_trainer.SFTConfig`` leaves two live classes of that name: ours, and the pristine one every ``SFTConfig`` subclass in TRL still derives from (``GKDConfig``, and any other trainer whose config builds on SFT). ``SFTTrainer.__init__`` guards with ``isinstance(args, TrainingArguments) and not isinstance(args, SFTConfig)`` and rebuilds ``args = SFTConfig(**args.to_dict())`` when it fires. Against our class that test is true for a ``GKDConfig``, so the config is rebuilt as a plain SFT one and every field the subclass added is dropped: ``lmbda``, ``beta``, ``temperature``, ``teacher_model_name_or_path``, ``teacher_model_init_kwargs``, ``disable_dropout`` and ``seq_kd`` all vanish with only an "is not a valid SFTConfig argument" line each, and the rebuilt config carries the mirrored ``eos_token`` placeholder, which then raises. See LAiMai/LAiM#1941.
+    Replacing ``trl.trainer.sft_trainer.SFTConfig`` leaves two live classes of that name: ours, and the pristine one every ``SFTConfig`` subclass in TRL still derives from (``GKDConfig``, and any other trainer whose config builds on SFT). ``SFTTrainer.__init__`` guards with ``isinstance(args, TrainingArguments) and not isinstance(args, SFTConfig)`` and rebuilds ``args = SFTConfig(**args.to_dict())`` when it fires. Against our class that test is true for a ``GKDConfig``, so the config is rebuilt as a plain SFT one and every field the subclass added is dropped: ``lmbda``, ``beta``, ``temperature``, ``teacher_model_name_or_path``, ``teacher_model_init_kwargs``, ``disable_dropout`` and ``seq_kd`` all vanish with only an "is not a valid SFTConfig argument" line each, and the rebuilt config carries the mirrored ``eos_token`` placeholder, which then raises. See OPusAngel/LAiM#1941.
 
     The guard exists to convert a plain ``TrainingArguments``; a subclass of ``SFTConfig`` already is an SFT config, so widen the test to accept the pristine class while calling the name still builds ours. A plain ``TrainingArguments`` is still converted, so SFT itself is untouched.
     """
@@ -1914,7 +1914,7 @@ def _note_grpo_hidden_states_success(model):
 def _minimise_logits_kwarg(forward_signature, args, forward_kwargs):
     """Ask the model for as few logits as it will give us, and say which kwarg did it.
 
-    We are about to overwrite ``outputs.logits`` with hidden states, so every logit the forward computes is thrown away. transformers spells the limit ``logits_to_keep`` (measured on 4.57.6, 5.0.0 and 5.15.0, none of which declares ``num_logits_to_keep``); the second name is for us, since ``LAiM/models/llama.py`` and ``mistral.py`` patch in forwards declaring both and ``vision.py`` probes for the old name FIRST for VLM stacks carrying only it. Either name reads the value as ``slice(-value, None)``, so the DEFAULT of 0 means the whole sequence, and the GRPO trainer passes no value at all: the lm_head projects every position over the full vocabulary. Muse Glimmer 30B on a Kaggle 2xT4 measured 1002 MiB per chunk over a 202048-wide vocabulary, invisible on one card but fatal once accelerate copies it across a layer-split model.
+    We are about to overwrite ``outputs.logits`` with hidden states, so every logit the forward computes is thrown away. transformers spells the limit ``logits_to_keep`` (measured on 4.57.6, 5.0.0 and 5.15.0, none of which declares ``num_logits_to_keep``); the second name is for us, since ``unsloth/models/llama.py`` and ``mistral.py`` patch in forwards declaring both and ``vision.py`` probes for the old name FIRST for VLM stacks carrying only it. Either name reads the value as ``slice(-value, None)``, so the DEFAULT of 0 means the whole sequence, and the GRPO trainer passes no value at all: the lm_head projects every position over the full vocabulary. Muse Glimmer 30B on a Kaggle 2xT4 measured 1002 MiB per chunk over a 202048-wide vocabulary, invisible on one card but fatal once accelerate copies it across a layer-split model.
 
     1, not 0: 0 means "all of them", and a model that computes its own loss from ``labels`` needs real logits, so that case is left alone.
     """
@@ -2632,7 +2632,7 @@ def _patch_trl_rl_trainers_impl(trainer_file = "grpo_trainer"):
             "elif use_bf16 or use_fp16:\n"
             "    # transformers <5 exported this itself from fp16/bf16; 5.x dropped the write, so an\n"
             "    # explicit flag left it unset and GRPO readers defaulted to 'fp16', wrapping a\n"
-            "    # bfloat16 model in a float16 autocast. See LAiMai/LAiM#4891.\n"
+            "    # bfloat16 model in a float16 autocast. See OPusAngel/LAiM#4891.\n"
             "    os.environ['ACCELERATE_MIXED_PRECISION'] = 'bf16' if use_bf16 else 'fp16'\n"
             "    if hasattr(args, 'mixed_precision'): args.mixed_precision = 'bf16' if use_bf16 else 'fp16'\n"
             "\n"

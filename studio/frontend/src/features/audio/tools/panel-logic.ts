@@ -3,6 +3,7 @@
 
 // JSX-free so the node test runner can load it; clone-panels.tsx / speak-panels.tsx add Components.
 
+import { translate } from "@/i18n";
 import type { AudioOptionSpec } from "../audio-options";
 import { type AudioSourceSelection, sourceRefOf } from "../audio-run-request";
 import { INDEX_TTS2_EMOTIONS, emotionVectorString } from "../clone-policy";
@@ -41,7 +42,9 @@ export const qwen3TimbreLogic: AudioToolPanelLogic<TimbreOnlyValue> = {
   id: "qwen3-timbre",
   families: ["qwen3_tts"],
   workflows: ["clone"],
-  title: "Timbre only",
+  get title() {
+    return translate("uxAudio.timbreOnly8fjk2");
+  },
   claims: ["x_vector_only_mode"],
   initial: (specs) => ({
     timbreOnly: boolDefault(specs, "x_vector_only_mode", false),
@@ -69,10 +72,10 @@ export interface EmotionValue {
 
 export function emotionSourceProblem(status: AudioSourceStatus): string | null {
   if (status.phase === "uploading" || status.phase === "recording") {
-    return "Waiting for the emotion clip to finish uploading.";
+    return translate("uxAudio.waitingForTheEmotionsiv6w");
   }
   if (status.phase === "error") return status.message;
-  if (status.phase === "expired") return "The emotion clip expired. Add it again.";
+  if (status.phase === "expired") return translate("uxAudio.theEmotionClipExpired6l2b8");
   return null;
 }
 
@@ -83,7 +86,9 @@ export const indexTts2EmotionLogic: AudioToolPanelLogic<EmotionValue> = {
   id: "index-emotion",
   families: ["index_tts2"],
   workflows: ["clone"],
-  title: "Emotion",
+  get title() {
+    return translate("uxAudio.emotionru67m");
+  },
   claims: [
     "emotion_vector",
     "emotion_alpha",
@@ -144,7 +149,9 @@ export const chatterboxExpressivenessLogic: AudioToolPanelLogic<ExpressivenessVa
     id: "chatterbox-expressiveness",
     families: ["chatterbox"],
     workflows: ["clone"],
-    title: "Expressiveness",
+    get title() {
+      return translate("uxAudio.expressiveness1f34j");
+    },
     claims: ["exaggeration", "guidance_scale"],
     initial: (specs) => ({
       exaggeration: numberDefault(specs, "exaggeration", 0.5),
@@ -172,7 +179,9 @@ export const cosyVoiceModeLogic: AudioToolPanelLogic<CosyVoiceModeValue> = {
   id: "cosyvoice-mode",
   families: ["cosyvoice3"],
   workflows: ["clone"],
-  title: "Mode",
+  get title() {
+    return translate("settings.debugging.mode");
+  },
   claims: ["template_name", "instruction"],
   initial: () => ({ mode: "zero_shot", instruction: "" }),
   toRequest: (value) => {
@@ -204,26 +213,28 @@ export interface SpeedDialectValue {
 }
 
 export const F5_DIALECTS: readonly { value: string; label: string }[] = [
-  { value: "UNK", label: "Auto" },
-  { value: "MSA", label: "Modern Standard Arabic" },
-  { value: "SAU", label: "Saudi" },
-  { value: "UAE", label: "Emirati" },
-  { value: "ALG", label: "Algerian" },
-  { value: "IRQ", label: "Iraqi" },
-  { value: "EGY", label: "Egyptian" },
-  { value: "MAR", label: "Moroccan" },
-  { value: "OMN", label: "Omani" },
-  { value: "TUN", label: "Tunisian" },
-  { value: "LEV", label: "Levantine" },
-  { value: "SDN", label: "Sudanese" },
-  { value: "LBY", label: "Libyan" },
+  { value: "UNK", get label() { return translate("settings.appearance.custom.sentAttachments.auto"); } },
+  { value: "MSA", get label() { return translate("uxAudio.modernStandardArabic1jjh4"); } },
+  { value: "SAU", get label() { return translate("uxAudio.saudif80v6"); } },
+  { value: "UAE", get label() { return translate("uxAudio.emirati6hksq"); } },
+  { value: "ALG", get label() { return translate("uxAudio.algerian1yuyu"); } },
+  { value: "IRQ", get label() { return translate("uxAudio.iraqi15w5e"); } },
+  { value: "EGY", get label() { return translate("uxAudio.egyptian6ppdg"); } },
+  { value: "MAR", get label() { return translate("uxAudio.moroccan1y00x"); } },
+  { value: "OMN", get label() { return translate("uxAudio.omaniocj4z"); } },
+  { value: "TUN", get label() { return translate("uxAudio.tunisian1dzf1"); } },
+  { value: "LEV", get label() { return translate("uxAudio.levantinezr0gi"); } },
+  { value: "SDN", get label() { return translate("uxAudio.sudanese1de2c"); } },
+  { value: "LBY", get label() { return translate("uxAudio.libyanm4jwj"); } },
 ];
 
 export const f5SpeedDialectLogic: AudioToolPanelLogic<SpeedDialectValue> = {
   id: "f5-speed-dialect",
   families: ["f5_tts"],
   workflows: ["clone"],
-  title: "Speed and dialect",
+  get title() {
+    return translate("uxAudio.speedAndDialect1bemh");
+  },
   claims: ["speed", "dialect"],
   initial: () => ({ speed: 1, dialect: "UNK" }),
   toRequest: (value) => ({
@@ -250,7 +261,9 @@ export const speakVoiceLogic: AudioToolPanelLogic<SpeakVoiceValue> = {
   id: "speak-voice",
   families: [],
   workflows: ["speak"],
-  title: "Voice",
+  get title() {
+    return translate("settings.tabs.voice");
+  },
   claims: [],
   // Speak sends no transcript, so a model that needs one (Fish Audio) clones only on Clone.
   appliesTo: (ctx) =>
@@ -279,7 +292,9 @@ export const vibeVoiceDialogueLogic: AudioToolPanelLogic<null> = {
   id: "vibevoice-dialogue",
   families: ["vibevoice"],
   workflows: ["speak"],
-  title: "Dialogue",
+  get title() {
+    return translate("uxAudio.dialoguese4bj");
+  },
   claims: [],
   initial: () => null,
   toRequest: () => ({}),

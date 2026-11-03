@@ -9,12 +9,14 @@ import {
 import { cn } from "@/lib/utils";
 import { Settings02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { translate } from "@/i18n";
+
 
 export function ModelLoadSettingsAction({
   ariaLabel,
   onConfigure,
   className,
-  tooltip = "Configure run settings before loading model",
+  tooltip = translate("uxModelpicker.configureRunSettingsBefore0xdh6"),
 }: {
   ariaLabel: string;
   onConfigure: () => void;

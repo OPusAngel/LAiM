@@ -3,7 +3,7 @@
 
 """Library state in studio.db.
 
-The Library lists files that already live elsewhere (chat uploads, generated images, sandbox
+The Library lists files that already live elsewhere (chat uploads, generated images, workdir
 files), so it only stores what those sources cannot: folders, and a per-item overlay of display
 name, favorite flag and folder. Files uploaded straight into the Library are the one source it
 owns; their bytes sit under ``account_path("library")``.

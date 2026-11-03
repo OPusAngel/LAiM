@@ -62,7 +62,7 @@ class _Self:
 # (recorded on model, args.gradient_checkpointing, expected restored value)
 # A recorded mode, including None, wins over args.
 _MATRIX = [
-    ("LAiM", False, "LAiM"),  # args=False must NOT win
+    ("unsloth", False, "unsloth"),  # args=False must NOT win
     (True, False, True),
     (False, True, False),
     (None, True, None),  # explicit None is restored, not treated as "unrecorded"

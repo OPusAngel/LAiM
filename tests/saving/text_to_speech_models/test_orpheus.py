@@ -42,7 +42,7 @@ print(f"{'='*80}")
 
 
 model, tokenizer = FastLanguageModel.from_pretrained(
-    model_name = "LAiM/orpheus-3b-0.1-ft",
+    model_name = "unsloth/orpheus-3b-0.1-ft",
     max_seq_length = 2048,
     dtype = None,
     load_in_4bit = False,
@@ -66,7 +66,7 @@ model = FastLanguageModel.get_peft_model(
     lora_alpha = 64,
     lora_dropout = 0,
     bias = "none",
-    use_gradient_checkpointing = "LAiM",
+    use_gradient_checkpointing = "unsloth",
     random_state = 3407,
     use_rslora = False,
     loftq_config = None,
@@ -122,7 +122,7 @@ print(f"{'='*80}")
 
 
 model, tokenizer = FastLanguageModel.from_pretrained(
-    model_name = "LAiM/orpheus-3b-0.1-ft",
+    model_name = "unsloth/orpheus-3b-0.1-ft",
     max_seq_length = 2048,
     dtype = None,
     load_in_4bit = False,

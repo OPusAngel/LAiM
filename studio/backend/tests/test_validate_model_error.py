@@ -174,8 +174,8 @@ def test_resolve_loaded_trc_falls_back_to_raw_auto_map(monkeypatch):
 @pytest.mark.parametrize(
     "model_identifier, expected_target",
     [
-        ("Spark-TTS-0.5B/LLM", "LAiM/Spark-TTS-0.5B"),
-        ("LAiM/Spark-TTS-0.5B", "LAiM/Spark-TTS-0.5B"),
+        ("Spark-TTS-0.5B/LLM", "unsloth/Spark-TTS-0.5B"),
+        ("unsloth/Spark-TTS-0.5B", "unsloth/Spark-TTS-0.5B"),
     ],
 )
 def test_requires_trc_checks_bicodec_load_subdirectory(

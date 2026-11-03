@@ -76,8 +76,8 @@ def test_prefers_git_for_windows_over_path(monkeypatch, tmp_path):
 
 def test_untrusted_path_bash_is_rejected(monkeypatch, tmp_path):
     # A bash in a user-writable dir (Scoop, a per-user Git, a project checkout)
-    # would run every sandboxed command, defeating the PATH/PATHEXT hardening in
-    # _build_safe_env: the command passed the blocklist, then the shell itself is
+    # would run every unrestricted command, defeating the PATH/PATHEXT hardening in
+    # _build_bypass_env: the command passed the blocklist, then the shell itself is
     # attacker-controlled. cmd is worse to write for but stays trusted.
     scoop_bash = tmp_path / "scoop" / "shims" / "bash.exe"
     scoop_bash.parent.mkdir(parents = True)
@@ -114,8 +114,8 @@ def test_trusted_path_bash_behind_an_untrusted_shim_is_found(monkeypatch, tmp_pa
     ],
 )
 def test_wsl_launcher_is_rejected(monkeypatch, wsl_path):
-    # WSL's bash runs in a different filesystem, so the sandbox workdir would not
-    # apply. Falling back to cmd is worse but stays inside the sandbox. The dir
+    # WSL's bash runs in a different filesystem, so the workdir workdir would not
+    # apply. Falling back to cmd is worse but stays inside the workdir. The dir
     # is trusted here so the marker is the only thing that can reject these.
     monkeypatch.setattr(tools, "_is_trusted_windows_program_dir", lambda _dir: True)
     assert tools._is_trusted_windows_bash(wsl_path) is False
@@ -188,7 +188,7 @@ def test_multiline_script_runs_every_line_on_windows():
 def test_paths_note_names_the_real_platform():
     # A note that only cites /mnt/data and /tmp/outputs reads as "you are on
     # Linux", and models then decline to launch Windows programs that do exist.
-    note = tools._SANDBOX_PATHS_NOTE
+    note = tools._WORKDIR_PATHS_NOTE
     if sys.platform == "win32":
         assert "Windows" in note
         assert "/mnt/data" not in note
@@ -217,12 +217,12 @@ def test_posix_shell_note_is_empty(monkeypatch):
 
 @pytest.mark.parametrize("bash", [r"C:\Program Files\Git\bin\bash.exe", None])
 def test_notes_never_recommend_a_blocked_program(monkeypatch, bash):
-    # powershell/pwsh are in _BLOCKED_COMMANDS_WIN, so a sandboxed user who
+    # powershell/pwsh are in _BLOCKED_COMMANDS_WIN, so a unrestricted user who
     # follows the prompt gets a hard block instead of a command. `cmd /c start`
     # is not blocked, which makes naming it worse: it advertises the gap.
     monkeypatch.setattr(sys, "platform", "win32")
     monkeypatch.setattr(tools, "_windows_bash", lambda: bash)
-    text = (tools._build_sandbox_paths_note() + tools._build_terminal_shell_note()).lower()
+    text = (tools._build_workdir_paths_note() + tools._build_terminal_shell_note()).lower()
     for program in tools._BLOCKED_COMMANDS_WIN:
         assert program not in text
     assert "start-process" not in text
@@ -236,7 +236,7 @@ def test_terminal_tool_description_is_the_two_notes_appended():
     description = tools.TERMINAL_TOOL["function"]["description"]
     assert description == (
         "Execute a terminal command and return stdout/stderr."
-        + tools._SANDBOX_PATHS_NOTE
+        + tools._WORKDIR_PATHS_NOTE
         + tools._TERMINAL_SHELL_NOTE
     )
 
@@ -249,15 +249,15 @@ def test_windows_shell_note_is_never_empty(monkeypatch, bash):
     monkeypatch.setattr(tools, "_windows_bash", lambda: bash)
     note = tools._build_terminal_shell_note()
     assert note.startswith(" The shell is ")
-    assert note not in tools._build_sandbox_paths_note()
+    assert note not in tools._build_workdir_paths_note()
 
 
 def test_python_tool_description_omits_the_shell():
     # The shell note on the python description would point a model at
     # subprocess/os.system as a way around the terminal blocklist, and none of
-    # it applies to the python sandbox anyway.
+    # it applies to the python workdir anyway.
     description = tools.PYTHON_TOOL["function"]["description"]
-    assert tools._SANDBOX_PATHS_NOTE in description
+    assert tools._WORKDIR_PATHS_NOTE in description
     assert "shell" not in description.lower()
     if sys.platform == "win32":
         assert tools._TERMINAL_SHELL_NOTE not in description
@@ -268,7 +268,7 @@ def test_notes_say_where_commands_run(monkeypatch):
     # cannot see, and hand back manual instructions instead.
     monkeypatch.setattr(sys, "platform", "win32")
     monkeypatch.setattr(tools, "_windows_bash", lambda: r"C:\Program Files\Git\bin\bash.exe")
-    assert "user's own machine" in tools._build_sandbox_paths_note()
+    assert "user's own machine" in tools._build_workdir_paths_note()
     assert "opens a window on the user's desktop" in tools._build_terminal_shell_note()
 
 

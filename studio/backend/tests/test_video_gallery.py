@@ -40,7 +40,7 @@ def _meta(**over):
         "steps": 30,
         "guidance": 6.0,
         "seed": 7,
-        "model": "LAiM/some-video-model",
+        "model": "unsloth/some-video-model",
         "created_at": 100.0,
     }
     base.update(over)
@@ -61,7 +61,7 @@ def test_save_writes_pair_and_round_trips():
     assert len(listed) == 1
     assert listed[0]["prompt"] == "a sloth surfing" and listed[0]["seed"] == 7
     # Meta fields survive the sidecar round-trip untouched.
-    assert listed[0]["num_frames"] == 49 and listed[0]["model"] == "LAiM/some-video-model"
+    assert listed[0]["num_frames"] == 49 and listed[0]["model"] == "unsloth/some-video-model"
 
 
 def test_url_shape():

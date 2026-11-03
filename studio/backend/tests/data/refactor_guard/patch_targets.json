@@ -1192,12 +1192,7 @@
     "tests/test_gpu_selection.py",
     "tests/test_gpu_selection.py",
     "tests/test_gpu_selection.py",
-    "tests/test_gpu_selection.py",
-    "tests/test_gpu_selection_sandbox.py",
-    "tests/test_gpu_selection_sandbox.py",
-    "tests/test_gpu_selection_sandbox.py",
-    "tests/test_gpu_selection_sandbox.py",
-    "tests/test_gpu_selection_sandbox.py"
+    "tests/test_gpu_selection.py"
   ],
   "utils.hardware.hardware.estimate_required_model_memory_gb": [
     "tests/test_gpu_selection.py",
@@ -1276,11 +1271,6 @@
     "tests/test_gpu_selection.py",
     "tests/test_gpu_selection.py",
     "tests/test_gpu_selection.py",
-    "tests/test_gpu_selection_sandbox.py",
-    "tests/test_gpu_selection_sandbox.py",
-    "tests/test_gpu_selection_sandbox.py",
-    "tests/test_gpu_selection_sandbox.py",
-    "tests/test_gpu_selection_sandbox.py",
     "tests/test_training_gpu_arch_gate.py",
     "tests/test_training_gpu_arch_gate.py",
     "tests/test_training_gpu_arch_gate.py",

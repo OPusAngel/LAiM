@@ -1002,7 +1002,7 @@ def test_a_chat_load_refused_by_a_busy_decision_server_is_retryable(owner, statu
     from models.inference import LoadRequest
     from routes import inference as inference_route
 
-    path = "LAiM/Qwen3-0.6B-GGUF"
+    path = "unsloth/Qwen3-0.6B-GGUF"
     with (
         patch.object(
             inference_route,

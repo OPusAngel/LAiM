@@ -14,9 +14,9 @@ sys.path.insert(0, str(ROOT / ".github" / "scripts" / "kaggle_t4_ci"))
 import legs  # noqa: E402
 
 DIRECTIVE = {
-    "default": "LAiM/Qwen3-0.6B",
-    "latest_compile": "LAiM/gemma-4-E2B-it",
-    "vision_fla_compile": "LAiM/Qwen3.5-2B",
+    "default": "unsloth/Qwen3-0.6B",
+    "latest_compile": "unsloth/gemma-4-E2B-it",
+    "vision_fla_compile": "unsloth/Qwen3.5-2B",
     "gptoss": None,  # the leg has its own loader and does not take --model
 }
 

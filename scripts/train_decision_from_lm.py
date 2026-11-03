@@ -50,7 +50,7 @@ def _record_metrics(model, tokenizer, items) -> dict:
 
 def main():
     parser = argparse.ArgumentParser(description = __doc__)
-    parser.add_argument("--model", default = "LAiM/Qwen3.5-2B")
+    parser.add_argument("--model", default = "unsloth/Qwen3.5-2B")
     parser.add_argument(
         "--sources", default = ",".join(DEFAULT_SOURCES), help = "comma separated, or 'none'"
     )

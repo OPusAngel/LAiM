@@ -32,7 +32,7 @@ const EMBEDDING_TASKS: readonly PipelineType[] = [
 ];
 /** Listed first on the empty search, ahead of LAiM's embedders by downloads, where a new
  *  release would sit at the bottom. The older embeddinggemma-300m follows it from the listing. */
-const PINNED_EMBEDDING_MODELS: readonly string[] = ["LAiM/embeddinggemma-2"];
+const PINNED_EMBEDDING_MODELS: readonly string[] = ["unsloth/embeddinggemma-2"];
 type EmbeddingModelPickerProps = {
   value: string;
   /** Fires once, on a pick. Typing is a search, not a selection. */

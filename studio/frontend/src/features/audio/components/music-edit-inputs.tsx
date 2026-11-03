@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Textarea } from "@/components/ui/textarea";
 import { ParamSlider } from "@/features/chat";
 import { PillTabs } from "@/features/model-picker/components/model-selector/pill-tabs";
@@ -93,10 +94,10 @@ export function MusicEditInputs({
     <div className="grid gap-4">
       <AudioSourceInput
         id={SOURCE_ID}
-        label="Clip to edit"
+        label={translate("uxAudio.clipToEdit15vzt")}
         hint={
           rule.max_source_s
-            ? `Up to ${formatEditLimit(rule.max_source_s)} of music.`
+            ? translate("uxAudio.upToOfMusics5fh8", { p1: formatEditLimit(rule.max_source_s) })
             : undefined
         }
         value={draft.source}
@@ -111,8 +112,8 @@ export function MusicEditInputs({
         allowHistory={true}
         allowSavedVoice={false}
         usesFirstSeconds={null}
-        expiredMessage="This clip expired. Add it again."
-        recordHint="Play or sing the part you want to change."
+        expiredMessage={translate("uxAudio.thisClipExpiredAdd9fci8")}
+        recordHint={translate("uxAudio.playOrSingThejsuay")}
         handleRef={sourceHandleRef}
         onStatusChange={onSourceStatusChange}
         renderWaveform={(preview) =>
@@ -151,10 +152,10 @@ export function MusicEditInputs({
       {actions.length > 0 ? (
         <div className="grid gap-1.5">
           <span className="text-ui-13 font-medium text-foreground">
-            What to do
+            {translate("uxAudio.whatToDo1lhgu")}
           </span>
           <PillTabs
-            ariaLabel="What to do with the clip"
+            ariaLabel={translate("uxAudio.whatToDoWithbkvsk")}
             value={action ?? ""}
             onValueChange={(next) => {
               const nextAction = next as MusicEditAction;
@@ -187,24 +188,20 @@ export function MusicEditInputs({
                 : rangeProblem}
             </p>
           ) : extendedBy > 0 ? (
-            <p className="text-ui-11p5 leading-snug text-muted-foreground">
-              Extends the clip by{" "}
-              <span className="font-mono tabular-nums">
+            <p className="text-ui-11p5 leading-snug text-muted-foreground">{translate("uxAudio.extendsTheClipByqe0yl", { p1: " " })}<span className="font-mono tabular-nums">
                 {extendedBy.toFixed(1)}
-              </span>{" "}
-              s.
-            </p>
+              </span>{translate("uxAudio.slfztc", { p1: " " })}</p>
           ) : null}
         </div>
       ) : (
         <p className="text-ui-12 leading-snug text-muted-foreground">
-          This model cannot edit clips. Load ACE-Step or Stable Audio to edit.
+          {translate("uxAudio.thisModelCannotEditxfu7k")}
         </p>
       )}
 
       {editUsesStrength(action) && defaultStrength !== undefined ? (
         <ParamSlider
-          label="How much to change"
+          label={translate("uxAudio.howMuchToChange3vyk9")}
           value={draft.strength ?? defaultStrength}
           min={0}
           max={1}
@@ -212,13 +209,13 @@ export function MusicEditInputs({
           onChange={(strength) => onChange({ strength })}
           format={(v) => v.toFixed(2)}
           disabled={disabled}
-          info="Lower keeps more of the original."
+          info={translate("uxAudio.lowerKeepsMoreOfeuzkx")}
         />
       ) : null}
 
       {action === "extend" ? (
         <ParamSlider
-          label="Add seconds"
+          label={translate("uxAudio.addSeconds1dz0e")}
           value={Math.min(EXTEND_MAX_S, Math.max(EXTEND_MIN_S, draft.extendS))}
           min={EXTEND_MIN_S}
           max={EXTEND_MAX_S}
@@ -226,7 +223,7 @@ export function MusicEditInputs({
           onChange={(extendS) => onChange({ extendS })}
           onDraft={setDraggedExtendS}
           disabled={disabled}
-          info="New music is added after the clip's end."
+          info={translate("uxAudio.newMusicIsAddedujjrm")}
         />
       ) : null}
 
@@ -237,8 +234,8 @@ export function MusicEditInputs({
             className="text-ui-13 font-medium text-foreground"
           >
             {editUsesStrength(action)
-              ? "What should it sound like?"
-              : "What should the new part sound like?"}
+              ? translate("uxAudio.whatShouldItSound9gee9")
+              : translate("uxAudio.whatShouldTheNewuwht5")}
           </label>
           <Textarea
             id={PROMPT_ID}
@@ -247,8 +244,8 @@ export function MusicEditInputs({
             disabled={disabled}
             placeholder={
               editUsesStrength(action)
-                ? "Lo-fi jazz, warm piano, brushed drums…"
-                : "A soaring guitar solo over the same groove…"
+                ? translate("uxAudio.loFiJazzWarmdokj4")
+                : translate("uxAudio.aSoaringGuitarSolotqvrx")
             }
             className="min-h-20 rounded-xl"
           />

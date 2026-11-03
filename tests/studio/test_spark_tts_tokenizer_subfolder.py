@@ -41,7 +41,7 @@ def _helper():
 
 
 def test_a_spark_repo_root_reads_the_llm_subfolder():
-    assert _helper()("bicodec", "LAiM/Spark-TTS-0.5B") == {"subfolder": "LLM"}
+    assert _helper()("bicodec", "unsloth/Spark-TTS-0.5B") == {"subfolder": "LLM"}
 
 
 @pytest.mark.parametrize(
@@ -54,4 +54,4 @@ def test_a_name_already_pointing_at_llm_is_left_alone(lookup_name: str):
 
 @pytest.mark.parametrize("audio_type", ["snac", "csm", "dac", "whisper", "audio_vlm", None])
 def test_every_other_codec_is_untouched(audio_type):
-    assert _helper()(audio_type, "LAiM/orpheus-3b-0.1-ft") == {}
+    assert _helper()(audio_type, "unsloth/orpheus-3b-0.1-ft") == {}

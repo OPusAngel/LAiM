@@ -4,7 +4,7 @@
 """Main-content extraction and boilerplate stripping for the web fetch tool.
 
 The HTML fixtures below snapshot the relevant fragments of a real GitHub repo
-page (github.com/LAiMai/LAiM, fetched 2026-07): the ``hidden``
+page (github.com/OPusAngel/LAiM, fetched 2026-07): the ``hidden``
 client-side error placeholders ("Uh oh! There was an error while loading."),
 the skip-link / nav / footer furniture, and the README rendered inside
 ``<article class="markdown-body">``. No network access is required.
@@ -52,7 +52,7 @@ _GITHUB_HIDDEN_ERROR_BLOCK = """
 
 _GITHUB_PAGE = f"""<!DOCTYPE html>
 <html lang="en">
-<head><title>LAiMai/LAiM</title></head>
+<head><title>OPusAngel/LAiM</title></head>
 <body>
 <a class="px-2 py-4" href="#start-of-content">Skip to content</a>
 <header class="Header-old">
@@ -73,14 +73,14 @@ _GITHUB_PAGE = f"""<!DOCTYPE html>
 <main id="js-repo-pjax-container">
   {_GITHUB_HIDDEN_ERROR_BLOCK}
   <div id="repository-container-header">
-    <a href="/LAiMai">LAiMai</a> / <a href="/LAiMai/LAiM">LAiM</a>
+    <a href="/LAiMai">LAiMai</a> / <a href="/OPusAngel/LAiM">LAiM</a>
     <a href="/login?return_to=%2FLAiMai%2FLAiM">Notifications</a>
     You must be signed in to change notification settings
   </div>
   <div class="repository-content">
     <table aria-labelledby="folders-and-files">
       <tr><th>Name</th><th>Last commit message</th></tr>
-      <tr><td><a href="/LAiMai/LAiM/tree/main/LAiM">LAiM</a></td><td></td></tr>
+      <tr><td><a href="/OPusAngel/LAiM/tree/main/LAiM">LAiM</a></td><td></td></tr>
     </table>
     <article class="markdown-body entry-content container-lg" itemprop="text">
       <h1>LAiM Studio</h1>
@@ -97,8 +97,8 @@ _GITHUB_PAGE = f"""<!DOCTYPE html>
   <div class="Layout-sidebar">
     <h2>Languages</h2>
     <ul>
-      <li><a href="/LAiMai/LAiM/search?l=javascript">JavaScript 89.3%</a></li>
-      <li><a href="/LAiMai/LAiM/search?l=python">Python 9.7%</a></li>
+      <li><a href="/OPusAngel/LAiM/search?l=javascript">JavaScript 89.3%</a></li>
+      <li><a href="/OPusAngel/LAiM/search?l=python">Python 9.7%</a></li>
     </ul>
   </div>
 </main>
@@ -1025,12 +1025,12 @@ def test_aside_callout_inside_article_is_kept():
 
 def test_github_repo_url_maps_to_readme_api():
     assert (
-        _github_repo_readme_api_url("https://github.com/LAiMai/LAiM")
-        == "https://api.github.com/repos/LAiMai/LAiM/readme"
+        _github_repo_readme_api_url("https://github.com/OPusAngel/LAiM")
+        == "https://api.github.com/repos/OPusAngel/LAiM/readme"
     )
     assert (
-        _github_repo_readme_api_url("https://github.com/LAiMai/LAiM/")
-        == "https://api.github.com/repos/LAiMai/LAiM/readme"
+        _github_repo_readme_api_url("https://github.com/OPusAngel/LAiM/")
+        == "https://api.github.com/repos/OPusAngel/LAiM/readme"
     )
     assert (
         _github_repo_readme_api_url("http://www.github.com/owner/repo.git")
@@ -1040,10 +1040,10 @@ def test_github_repo_url_maps_to_readme_api():
 
 def test_github_non_repo_urls_are_not_rewritten():
     for url in (
-        "https://github.com/LAiMai/LAiM/tree/main/studio",
-        "https://github.com/LAiMai/LAiM/issues/123",
+        "https://github.com/OPusAngel/LAiM/tree/main/studio",
+        "https://github.com/OPusAngel/LAiM/issues/123",
         "https://github.com/topics/llm",
-        "https://github.com/orgs/LAiMai/repositories",
+        "https://github.com/orgs/unslothai/repositories",
         "https://github.com/login/oauth",
         "https://github.com/LAiMai",
         "https://example.com/owner/repo",
@@ -1063,13 +1063,13 @@ def test_fetch_page_text_prefers_github_readme(monkeypatch):
         cancel_event = None,
     ):
         calls.append((url, extra_headers))
-        assert url == "https://api.github.com/repos/LAiMai/LAiM/readme"
+        assert url == "https://api.github.com/repos/OPusAngel/LAiM/readme"
         return None, "# LAiM\n\nFine-tune LLMs faster.", "text/plain"
 
     monkeypatch.setattr("core.inference.tools._fetch_url_raw", fake_fetch)
-    out = _fetch_page_text("https://github.com/LAiMai/LAiM")
+    out = _fetch_page_text("https://github.com/OPusAngel/LAiM")
     assert "Fine-tune LLMs faster." in out
-    assert "README of https://github.com/LAiMai/LAiM" in out
+    assert "README of https://github.com/OPusAngel/LAiM" in out
     assert len(calls) == 1
     assert calls[0][1]["Accept"] == "application/vnd.github.raw+json"
 
@@ -1094,13 +1094,13 @@ def test_fetch_page_text_keeps_html_readme_from_api(monkeypatch):
         cancel_event = None,
     ):
         calls.append(url)
-        assert url == "https://api.github.com/repos/LAiMai/LAiM/readme"
+        assert url == "https://api.github.com/repos/OPusAngel/LAiM/readme"
         return None, html_readme, "text/html"
 
     monkeypatch.setattr("core.inference.tools._fetch_url_raw", fake_fetch)
-    out = _fetch_page_text("https://github.com/LAiMai/LAiM")
+    out = _fetch_page_text("https://github.com/OPusAngel/LAiM")
     # The successful README is converted and returned; no fallback fetch fires.
-    assert "README of https://github.com/LAiMai/LAiM" in out
+    assert "README of https://github.com/OPusAngel/LAiM" in out
     assert "Project Title" in out
     assert "Install with the one-line script" in out
     assert "<html" not in out
@@ -1121,7 +1121,7 @@ def test_fetch_page_text_falls_back_to_html_when_readme_api_fails(monkeypatch):
         return None, _GITHUB_PAGE, "text/html"
 
     monkeypatch.setattr("core.inference.tools._fetch_url_raw", fake_fetch)
-    out = _fetch_page_text("https://github.com/LAiMai/LAiM")
+    out = _fetch_page_text("https://github.com/OPusAngel/LAiM")
     # Fallback converts the HTML page with the main-content heuristic.
     assert "LAiM Studio" in out
     assert "Uh oh!" not in out
@@ -1147,10 +1147,10 @@ def test_fetch_page_text_reads_github_file_link_as_raw_file(monkeypatch):
 
     monkeypatch.setattr("core.inference.tools._fetch_url_raw", fake_fetch)
     out = _fetch_page_text(
-        "https://github.com/LAiMai/LAiM/blob/main/studio/frontend/index.html?plain=1#L3"
+        "https://github.com/OPusAngel/LAiM/blob/main/studio/frontend/index.html?plain=1#L3"
     )
     assert calls == [
-        "https://raw.githubusercontent.com/LAiMai/LAiM/main/studio/frontend/index.html"
+        "https://raw.githubusercontent.com/OPusAngel/LAiM/main/studio/frontend/index.html"
     ]
     assert out == source.strip()
 
@@ -1202,10 +1202,10 @@ def test_fetch_page_text_keeps_semicolon_in_github_file_name(monkeypatch):
 @pytest.mark.parametrize(
     "url",
     [
-        "https://github.com/LAiMai/LAiM",
-        "https://github.com/LAiMai/LAiM/tree/main/studio",
-        "https://github.com/LAiMai/LAiM/blob/main",
-        "https://github.com/LAiMai/LAiM/issues/123",
+        "https://github.com/OPusAngel/LAiM",
+        "https://github.com/OPusAngel/LAiM/tree/main/studio",
+        "https://github.com/OPusAngel/LAiM/blob/main",
+        "https://github.com/OPusAngel/LAiM/issues/123",
         "https://example.com/owner/repo/blob/main/app.py",
     ],
 )
@@ -1263,7 +1263,7 @@ def _page_text(monkeypatch, url, body, content_type):
             id = "fetch_page_text_non_html_returned_raw",
         ),
         pytest.param(
-            "https://github.com/LAiMai/LAiM/tree/main",
+            "https://github.com/OPusAngel/LAiM/tree/main",
             _GITHUB_PAGE,
             "text/html",
             ["LAiM Studio"],
@@ -1775,12 +1775,12 @@ def test_fetch_page_text_keeps_a_markdown_readme_verbatim(
         cancel_event = None,
         meta_out = None,
     ):
-        assert url == "https://api.github.com/repos/LAiMai/LAiM/readme"
+        assert url == "https://api.github.com/repos/OPusAngel/LAiM/readme"
         return (None, md_readme, "text/plain")
 
     monkeypatch.setattr("core.inference.tools._fetch_url_raw", fake_fetch)
-    out = _fetch_page_text("https://github.com/LAiMai/LAiM")
-    assert "README of https://github.com/LAiMai/LAiM" in out
+    out = _fetch_page_text("https://github.com/OPusAngel/LAiM")
+    assert "README of https://github.com/OPusAngel/LAiM" in out
     assert first in out
     assert second in out
     assert third in out
@@ -2752,7 +2752,7 @@ def test_fetch_page_text_shares_one_deadline_across_readme_and_fallback(monkeypa
         return "Failed to fetch URL: HTTP 429 rate limited", "", ""
 
     monkeypatch.setattr("core.inference.tools._fetch_url_raw", fake_fetch)
-    out = _fetch_page_text("https://github.com/LAiMai/LAiM", timeout = 30)
+    out = _fetch_page_text("https://github.com/OPusAngel/LAiM", timeout = 30)
     assert out == "Failed to fetch URL: HTTP 429 rate limited"
     # Both attempts ran and shared the same, single deadline value.
     assert len(seen_deadlines) == 2

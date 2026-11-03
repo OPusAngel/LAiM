@@ -6,10 +6,7 @@ import type {
   DiffusionTrainingRunSummary,
   DiffusionTrainingStartRequest,
 } from "../api";
-
-export const RESUME_UNAVAILABLE_MESSAGE =
-  "This run has no checkpoint to continue from. Start a new run instead.";
-
+import { translate } from "@/i18n";
 
 /** Replay a finished diffusion run's stored start config as a resume request, like the LLM tab's
  *  `resumeTrainingRun`: the run's own config is the source of truth, with
@@ -24,14 +21,16 @@ export function buildDiffusionResumePayload(
 ): DiffusionTrainingStartRequest {
   const outputDir = detail.output_dir ?? null;
   if (!(detail.can_resume && outputDir)) {
-    throw new Error(detail.resume_blocked_reason || RESUME_UNAVAILABLE_MESSAGE);
+    throw new Error(
+      detail.resume_blocked_reason || translate("uxImages.thisRunHasNoy3k8"),
+    );
   }
   const config = (detail.config ?? {}) as Partial<DiffusionTrainingStartRequest>;
   if (!config.base_model || !config.data_dir || !config.output_dir) {
     // A record from a much older backend, or a hand-edited one, cannot be replayed safely: a missing
     // path would resolve somewhere else entirely and train the wrong thing.
     throw new Error(
-      "This run's saved settings are incomplete, so it cannot be resumed automatically.",
+      translate("uxImages.thisRunSSavedm6wxx"),
     );
   }
 
@@ -63,6 +62,6 @@ export function resumeActionLabel(
   run: Pick<DiffusionTrainingRunSummary, "checkpoint_step">,
 ): string {
   return run.checkpoint_step != null
-    ? `Resume from step ${run.checkpoint_step}`
-    : "Resume training";
+    ? translate("uxImages.resumeFromStepx2z7q", { p1: run.checkpoint_step })
+    : translate("uxImages.resumeTraining75e3a");
 }

@@ -114,7 +114,7 @@ def run_embedding(monkeypatch, tmp_path):
             types.SimpleNamespace(put = events.append),
             None,
             {
-                "model_name": "LAiM/all-MiniLM-L6-v2",
+                "model_name": "unsloth/all-MiniLM-L6-v2",
                 "training_type": "Full Finetuning",
                 "local_datasets": [str(path)],
                 "output_dir": "embedding-csv-cells",

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { SegmentedPill } from "@/components/segmented-control";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -58,19 +59,19 @@ const SORT_OPTIONS: ReadonlyArray<{
   value: HfSortKey;
   label: string;
 }> = [
-  { value: "fresh", label: "Latest" },
-  { value: "createdAt", label: "Newest" },
-  { value: "trendingScore", label: "Trending" },
-  { value: "downloads", label: "Most downloads" },
-  { value: "lastModified", label: "Recently updated" },
-  { value: "likes", label: "Most likes" },
+  { value: "fresh", get label() { return translate("uxHub.latest11lm8"); } },
+  { value: "createdAt", get label() { return translate("settings.voice.recents.sortNewest"); } },
+  { value: "trendingScore", get label() { return translate("uxHub.trending1jevu"); } },
+  { value: "downloads", get label() { return translate("uxHub.mostDownloadsvk9eu"); } },
+  { value: "lastModified", get label() { return translate("uxHub.recentlyUpdated7x1s0"); } },
+  { value: "likes", get label() { return translate("uxHub.mostLikesqf044"); } },
 ];
 
 const INVENTORY_SORT_OPTIONS: HubOption<InventorySort>[] = [
-  { value: "recent", label: "Recent" },
-  { value: "name", label: "Name" },
-  { value: "size", label: "Size" },
-  { value: "format", label: "Format" },
+  { value: "recent", get label() { return translate("uxHub.recentmg65f"); } },
+  { value: "name", get label() { return translate("browser.bookmarks.name"); } },
+  { value: "size", get label() { return translate("library.toolbar.sortSize"); } },
+  { value: "format", get label() { return translate("uxHub.format1yy13"); } },
 ];
 
 export const ModelsToolbar = memo(function ModelsToolbar({
@@ -255,7 +256,7 @@ export const ModelsToolbar = memo(function ModelsToolbar({
               strokeWidth={1.75}
               className="size-3.5 shrink-0 text-muted-foreground"
             />
-            Fine-tune ready
+            {translate("uxHub.fineTuneReady15m77")}
           </>
         ),
       });
@@ -313,7 +314,7 @@ export const ModelsToolbar = memo(function ModelsToolbar({
           "hub-menu-trigger hub-tab-toggle relative inline-flex h-9 w-full shrink-0 items-center rounded-full lg:w-[calc(280px*var(--ui-space-scale,1))]",
         )}
         role="radiogroup"
-        aria-label="View"
+        aria-label={translate("uxHub.viewq5w46")}
       >
         <button
           type="button"
@@ -328,7 +329,7 @@ export const ModelsToolbar = memo(function ModelsToolbar({
           )}
         >
           {tab === "discover" && <SegmentedPill group={viewPillId} />}
-          Discover
+          {translate("uxHub.cloudilgyc")}
         </button>
         <button
           type="button"
@@ -343,7 +344,7 @@ export const ModelsToolbar = memo(function ModelsToolbar({
           )}
         >
           {tab === "downloaded" && <SegmentedPill group={viewPillId} />}
-          On Device
+          {translate("uxHub.locallw38o")}
         </button>
       </div>
 
@@ -388,10 +389,10 @@ export const ModelsToolbar = memo(function ModelsToolbar({
           }}
           placeholder={
             tab === "downloaded"
-              ? `Search on-device ${isDataset ? "datasets" : "models"}`
+              ? translate("uxHub.searchOnDevice4oqcw", { p1: isDataset ? "datasets" : "models" })
               : isDataset
-                ? "Search datasets"
-                : "Search all models"
+                ? translate("uxHub.searchDatasetskhkdh")
+                : translate("uxHub.searchAllModelsnx68y")
           }
           className={cn(
             "field-soft h-9 rounded-full !border-0 pl-10 text-ui-13 placeholder:text-muted-foreground/80 focus-visible:!ring-0",
@@ -401,7 +402,7 @@ export const ModelsToolbar = memo(function ModelsToolbar({
         {query ? (
           <button
             type="button"
-            aria-label="Clear search"
+            aria-label={translate("skills.clearSearch")}
             // Keep focus on the input so clearing reveals recent searches
             // rather than dismissing the field.
             onMouseDown={(event) => event.preventDefault()}
@@ -463,7 +464,7 @@ export const ModelsToolbar = memo(function ModelsToolbar({
               <button
                 type="button"
                 onClick={onManageLocalFolders}
-                aria-label="Add folder"
+                aria-label={translate("uxHub.addFolder1pq0f")}
                 className={cn(
                   triggerBase,
                   "field-filter relative inline-flex size-9 shrink-0 items-center justify-center rounded-full p-0",
@@ -477,7 +478,7 @@ export const ModelsToolbar = memo(function ModelsToolbar({
               </button>
             </TooltipTrigger>
             <TooltipContent side="bottom" sideOffset={6}>
-              Add folder
+              {translate("uxHub.addFolder1pq0f")}
             </TooltipContent>
           </Tooltip>
         )}
@@ -489,7 +490,7 @@ export const ModelsToolbar = memo(function ModelsToolbar({
                 type="button"
                 onClick={onFreeUpSpace}
                 data-testid="free-up-space-trigger"
-                aria-label="Free up space"
+                aria-label={translate("uxHub.freeUpSpace12zj1")}
                 className={cn(
                   triggerBase,
                   "field-filter relative inline-flex size-9 shrink-0 items-center justify-center rounded-full p-0",
@@ -503,7 +504,7 @@ export const ModelsToolbar = memo(function ModelsToolbar({
               </button>
             </TooltipTrigger>
             <TooltipContent side="bottom" sideOffset={6}>
-              Free up space: remove shared assets no installed model needs
+              {translate("uxHub.freeUpSpaceRemovehcncx")}
             </TooltipContent>
           </Tooltip>
         )}
@@ -519,7 +520,7 @@ export const ModelsToolbar = memo(function ModelsToolbar({
                 onFormatFilterChange(value);
               }
             }}
-            ariaLabel="Format filter"
+            ariaLabel={translate("uxHub.formatFilterqdtgx")}
             className={cn(
               triggerBase,
               "w-[calc(160px*var(--ui-space-scale,1))]",
@@ -532,7 +533,7 @@ export const ModelsToolbar = memo(function ModelsToolbar({
             value={inventorySort}
             options={INVENTORY_SORT_OPTIONS}
             onValueChange={onInventorySortChange}
-            ariaLabel="Sort on-device models"
+            ariaLabel={translate("uxHub.sortOnDeviceModelscm65g")}
             className={cn(
               triggerBase,
               "w-[calc(160px*var(--ui-space-scale,1))]",
@@ -559,7 +560,7 @@ export const ModelsToolbar = memo(function ModelsToolbar({
             value={sortBy}
             options={sortOptions}
             onValueChange={onSortChange}
-            ariaLabel="Sort models"
+            ariaLabel={translate("uxHub.sortModelsnjsvn")}
             className={cn(
               triggerBase,
               "w-[calc(160px*var(--ui-space-scale,1))]",
@@ -594,12 +595,11 @@ export const ModelsToolbar = memo(function ModelsToolbar({
                         aria-hidden={true}
                         className="pointer-events-none size-3.5 rounded-full [&_svg]:!size-2.5"
                       />
-                      Only show models that fit
+                      {translate("settings.chat.modelSelection.fitOnDeviceOnly")}
                     </button>
                   </TooltipTrigger>
                   <TooltipContent side="bottom">
-                    Hides models larger than this device's memory budget.
-                    Downloaded models stay visible.
+                    {translate("uxCopy.hidesModelsLargerThanyug8l")}
                   </TooltipContent>
                 </Tooltip>
               )

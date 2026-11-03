@@ -40,7 +40,7 @@ def test_ntstatus_return_codes_are_recognised(status: int):
 
 
 def test_application_control_phrasing():
-    """The wording from LAiMai/LAiM#8490."""
+    """The wording from OPusAngel/LAiM#8490."""
     text = (
         "Program 'LAiM.exe' failed to run: An Application Control policy has blocked this file"
     )
@@ -129,7 +129,7 @@ def test_a_blocked_start_is_explained_to_the_user_not_blamed_on_the_model():
             r"not designed to run on Windows or it contains an error. Error status 0xc0e90002."
         ),
         gguf_path = "C:\\models\\qwen.gguf",
-        model_identifier = "LAiM/Qwen3.5-2B-MTP-GGUF",
+        model_identifier = "unsloth/Qwen3.5-2B-MTP-GGUF",
         binary = r"C:\Users\x\.LAiM\llama.cpp",
     )
     assert "Smart App Control" in message

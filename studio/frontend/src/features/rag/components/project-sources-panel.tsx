@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the LAiM AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
+import { translate } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { useNativeFileDrop } from "@/features/native-intents";
 import type { NativeIntent } from "@/features/native-intents";
@@ -89,15 +90,15 @@ export function ProjectSourcesPanel({ projectId }: { projectId: string }) {
   const pickFolder = useCallback(() => {
     openFolderPicker(({ files: supported, truncated }) => {
       if (supported.length === 0) {
-        toast.info("No supported files in that folder", {
+        toast.info(translate("uxRag.noSupportedFilesIn1kqn7"), {
           description: SUPPORTED_SOURCES_HINT,
         });
         return;
       }
       if (truncated > 0) {
-        toast.info(`Added the first ${MAX_FOLDER_FILES} files`, {
+        toast.info(translate("uxRag.addedTheFirstFilesuwwy1", { p1: MAX_FOLDER_FILES }), {
           description:
-            "The rest were left out. Pick a smaller folder for them.",
+            translate("uxRag.theRestWereLefttb1hm"),
         });
       }
       handleItems(fileItems(supported));
@@ -178,10 +179,8 @@ export function ProjectSourcesPanel({ projectId }: { projectId: string }) {
       className="text-muted-foreground"
       disabled={loading}
       onClick={pickFolder}
-      title="Upload every supported file in a folder. Linking a folder that stays in sync needs the desktop app."
-    >
-      Add folder
-    </Button>
+      title={translate("uxRag.uploadEverySupportedFile6z2jz")}
+    >{translate("uxRag.addFolderuot79")}</Button>
   );
 
   return (
@@ -221,11 +220,10 @@ export function ProjectSourcesPanel({ projectId }: { projectId: string }) {
           </span>
           <div className="space-y-1">
             <p className="text-ui-15 font-semibold text-foreground">
-              Give this project context
+              {translate("uxRag.giveThisProjectContext811z1")}
             </p>
             <p className="max-w-sm text-sm text-muted-foreground">
-              Add documents, spreadsheets, slides, e-books, email, text or code.
-              Every chat in this project can use them.
+              {translate("uxCopy.addDocumentsSpreadsheetsSlideskp4dj")}
             </p>
           </div>
           <div className="mt-1 flex items-center gap-1">
@@ -235,9 +233,7 @@ export function ProjectSourcesPanel({ projectId }: { projectId: string }) {
               className="border-none bg-background text-foreground shadow-[0_2px_8px_-2px_rgba(0,0,0,0.16)] hover:bg-background/80 dark:bg-card dark:shadow-none dark:hover:bg-accent/50"
               disabled={loading}
               onClick={() => fileInputRef.current?.click()}
-            >
-              Add sources
-            </Button>
+            >{translate("uxRag.addSources2wwqz")}</Button>
             {addFolderButton}
           </div>
           <p className="text-ui-11 text-muted-foreground">
@@ -265,9 +261,7 @@ export function ProjectSourcesPanel({ projectId }: { projectId: string }) {
                 variant="outline"
                 className="border-none bg-background text-foreground shadow-[0_2px_8px_-2px_rgba(0,0,0,0.16)] hover:bg-background/80 dark:bg-card dark:shadow-none dark:hover:bg-accent/50"
                 onClick={() => fileInputRef.current?.click()}
-              >
-                Add sources
-              </Button>
+              >{translate("uxRag.addSources2wwqz")}</Button>
             </div>
           </div>
           <div className="flex flex-row flex-wrap items-center gap-1.5">

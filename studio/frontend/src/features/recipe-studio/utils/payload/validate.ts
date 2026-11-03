@@ -15,6 +15,8 @@ import {
 import { VALIDATOR_OXC_CODE_LANGS } from "../validators/code-lang";
 import { isOxcCodeShape } from "../validators/oxc-code-shape";
 import { isOxcValidationMode } from "../validators/oxc-mode";
+import { translate } from "@/i18n";
+
 
 export function validateSubcategoryConfigs(
   configs: Record<string, NodeConfig>,
@@ -27,7 +29,7 @@ export function validateSubcategoryConfigs(
     }
     const parentName = config.subcategory_parent;
     if (!parentName) {
-      errors.push(`Subcategory ${config.name}: parent category required.`);
+      errors.push(translate("uxRecipestudio.subcategoryParentCategoryRequiret9wll", { p1: config.name }));
       continue;
     }
     const parent = nameToConfig.get(parentName);
@@ -40,7 +42,7 @@ export function validateSubcategoryConfigs(
       const list = mapping[value];
       if (!list || list.length === 0) {
         errors.push(
-          `Subcategory ${config.name}: '${value}' needs at least 1 subcategory.`,
+          translate("uxRecipestudio.subcategoryNeedsAtLeast16esz", { p1: config.name, p2: value }),
         );
       }
     }
@@ -59,7 +61,7 @@ export function validateTimedeltaConfigs(
     const reference = config.reference_column_name?.trim() ?? "";
     if (!reference) {
       errors.push(
-        `Timedelta ${config.name}: reference datetime column required.`,
+        translate("uxRecipestudio.timedeltaReferenceDatetimeColumn9inwx", { p1: config.name }),
       );
       continue;
     }
@@ -70,7 +72,7 @@ export function validateTimedeltaConfigs(
       parent.sampler_type !== "datetime"
     ) {
       errors.push(
-        `Timedelta ${config.name}: reference '${reference}' must be datetime.`,
+        translate("uxRecipestudio.timedeltaReferenceMustBejdcp8", { p1: config.name, p2: reference }),
       );
     }
   }
@@ -83,7 +85,7 @@ export function validateModelAliasLinks(
 ): void {
   for (const alias of modelAliases) {
     if (!modelConfigConfigs.some((config) => config.name === alias)) {
-      errors.push(`LLM model_alias ${alias}: missing model config.`);
+      errors.push(translate("uxRecipestudio.lLMModelAliasMissing8lu2h", { p1: alias }));
     }
   }
 }
@@ -104,17 +106,17 @@ export function validateModelConfigProviders(
     const isLegacyLocalPlaceholder = model.toLowerCase() === "local";
 
     if (!isLocal && isUsed && isLegacyLocalPlaceholder) {
-      errors.push(`Model config ${alias}: model is required.`);
+      errors.push(translate("uxRecipestudio.modelConfigModelIsmnk8h", { p1: alias }));
       continue;
     }
     if (isLocal && isUsed && !model) {
-      errors.push(`Model config ${alias}: choose a local model.`);
+      errors.push(translate("uxRecipestudio.modelConfigChooseAfizoj", { p1: alias }));
     }
     if (!isLocal && isUsed && !model) {
-      errors.push(`Model config ${alias}: model is required.`);
+      errors.push(translate("uxRecipestudio.modelConfigModelIsmnk8h", { p1: alias }));
     }
     if (provider && !modelProviderNames.has(provider)) {
-      errors.push(`Model config ${alias}: provider ${provider} not found.`);
+      errors.push(translate("uxRecipestudio.modelConfigProviderNotsutbw", { p1: alias, p2: provider }));
     }
   }
 }
@@ -135,13 +137,13 @@ export function validateUsedProviders(
       continue;
     }
     if (!provider.endpoint.trim()) {
-      errors.push(`Model provider ${provider.name}: endpoint is required.`);
+      errors.push(translate("uxRecipestudio.modelProviderEndpointIsmuycf", { p1: provider.name }));
     }
     const providerType =
       normalizeModelProviderType(provider.provider_type) || "openai";
     if (!isSupportedModelProviderType(providerType)) {
       errors.push(
-        `Model provider ${provider.name}: provider_type '${providerType}' is not supported by Data Designer. Use openai for OpenAI-compatible providers or anthropic for native Anthropic.`,
+        translate("uxRecipestudio.modelProviderProviderType2mzf1", { p1: provider.name, p2: providerType }),
       );
     }
   }
@@ -162,7 +164,7 @@ export function validateValidatorConfigs(
     }
     const targetConfig = nameToConfig.get(target);
     if (!targetConfig) {
-      errors.push(`Validator ${config.name}: target '${target}' not found.`);
+      errors.push(translate("uxRecipestudio.validatorTargetNotFoundqzo7i", { p1: config.name, p2: target }));
       continue;
     }
     if (
@@ -175,14 +177,14 @@ export function validateValidatorConfigs(
         targetConfig.kind !== "sampler"
       ) {
         errors.push(
-          `Validator ${config.name}: target '${target}' must be a generated field.`,
+          translate("uxRecipestudio.validatorTargetMustBel7h6g", { p1: config.name, p2: target }),
         );
       }
       continue;
     }
     if (targetConfig.kind !== "llm" || targetConfig.llm_type !== "code") {
       errors.push(
-        `Validator ${config.name}: target '${target}' must be LLM Code.`,
+        translate("uxRecipestudio.validatorTargetMustBehtsvc", { p1: config.name, p2: target }),
       );
       continue;
     }
@@ -202,7 +204,7 @@ export function validateValidatorConfigs(
       !isOxcValidationMode(config.oxc_validation_mode)
     ) {
       errors.push(
-        `Validator ${config.name}: oxc_validation_mode '${config.oxc_validation_mode}' is invalid.`,
+        translate("uxRecipestudio.validatorOxcValidationModepp506", { p1: config.name, p2: config.oxc_validation_mode }),
       );
       continue;
     }
@@ -211,7 +213,7 @@ export function validateValidatorConfigs(
       !isOxcCodeShape(config.oxc_code_shape)
     ) {
       errors.push(
-        `Validator ${config.name}: oxc_code_shape '${config.oxc_code_shape}' is invalid.`,
+        translate("uxRecipestudio.validatorOxcCodeShapej0qkb", { p1: config.name, p2: config.oxc_code_shape }),
       );
       continue;
     }
@@ -220,7 +222,7 @@ export function validateValidatorConfigs(
       (targetConfig.code_lang ?? "").trim() !== config.code_lang.trim()
     ) {
       errors.push(
-        `Validator ${config.name}: code_lang '${config.code_lang}' must match target '${target}' (${targetConfig.code_lang ?? "unknown"}).`,
+        translate("uxRecipestudio.validatorCodeLangMusti2q93", { p1: config.name, p2: config.code_lang, p3: target, p4: targetConfig.code_lang ?? "unknown" }),
       );
     }
   }
