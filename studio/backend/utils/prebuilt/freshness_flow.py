@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import http.client
 import json
+import re
 import threading
 import time
 from datetime import datetime, timezone
@@ -29,6 +30,15 @@ GITHUB_RATE_LIMITED_DEFAULT_SECONDS = 15 * 60
 GITHUB_RATE_LIMIT_MAX_SECONDS = 60 * 60
 # Secondary limits can 403 with no rate headers; only the body names them.
 _RATE_LIMIT_BODY_MARKERS = ("rate limit", "abuse detection")
+
+# Upstream llama.cpp marks every nightly build (bNNNN) as a prerelease and cuts occasional
+# milestone tags (v0.9.0, v1.0.0) as plain releases that carry no binaries at all. Filtering on
+# the prerelease flag alone therefore reads a milestone as "the latest release", the banner
+# offers it, and the installer — which resolves assets, not announcements — fails with
+# "no compatible upstream prebuilt asset was found". The installer's own selection rule lives in
+# install_llama_prebuilt.release_is_selectable; this mirrors it so the two can never disagree.
+UPSTREAM_LLAMA_REPO = "ggml-org/llama.cpp"
+_UPSTREAM_BUILD_TAG = re.compile(r"b\d+")
 
 # One lockout for the whole process: the quota is per token or per IP, not per repo.
 _api_rate_limited_lock = threading.Lock()
@@ -163,10 +173,25 @@ def _fetch_newest_published_release(
         return None
 
 
+def _release_is_selectable(repo: str, release: dict) -> bool:
+    """Whether a release is one the installer could actually install, so the banner never offers anything else.
+
+    Upstream llama.cpp is the one repo whose tag shape decides this rather than the prerelease flag: every nightly is published as a prerelease and every milestone (v0.9.0, v1.0.0) as a plain release with no binaries, so accepting "not prerelease" alone selects the milestone and the apply fails. Mirrors install_llama_prebuilt.release_is_selectable, which the installer has always used for its own listing.
+    """
+    if release.get("draft"):
+        return False
+    tag = release.get("tag_name")
+    if not isinstance(tag, str) or not tag.strip():
+        return False
+    if repo == UPSTREAM_LLAMA_REPO:
+        return _UPSTREAM_BUILD_TAG.fullmatch(tag.strip()) is not None
+    return not release.get("prerelease")
+
+
 def _fetch_newest_published_release_blocking(
     repo: str, timeout: float, *, log_message: str
 ) -> Optional[dict]:
-    """Newest published (non-draft, non-prerelease) release object for `repo`, by ``published_at``. Resolves "latest" the way the installers do, NOT via GitHub's ``/releases/latest`` pointer, which sorts by commit date and can lag the build the installer installs, making detection and apply disagree (the downgrade / sticky-banner bug). None on any failure (offline, rate-limited) and while the shared lockout holds."""
+    """Newest installable release object for `repo`, by ``published_at``. Resolves "latest" the way the installers do, NOT via GitHub's ``/releases/latest`` pointer, which sorts by commit date and can lag the build the installer installs, making detection and apply disagree (the downgrade / sticky-banner bug). None on any failure (offline, rate-limited) and while the shared lockout holds."""
     import os
     import urllib.error
     import urllib.request
@@ -203,11 +228,7 @@ def _fetch_newest_published_release_blocking(
     published = [
         r
         for r in data
-        if isinstance(r, dict)
-        and not r.get("draft")
-        and not r.get("prerelease")
-        and isinstance(r.get("tag_name"), str)
-        and r.get("tag_name")
+        if isinstance(r, dict) and _release_is_selectable(repo, r)
     ]
     if not published:
         return None

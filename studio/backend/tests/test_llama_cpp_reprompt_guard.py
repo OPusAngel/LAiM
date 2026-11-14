@@ -493,6 +493,45 @@ def test_step_labelled_results_are_not_a_plan():
         assert is_short_intent_without_action(content), content
 
 
+def test_capability_denials_are_reprompted_and_judgement_refusals_are_not():
+    """A model that says it cannot reach something the tools do reach gets the same nudge as one that
+    announced work and stopped. A refusal that names no capability ("I can't help with that") must not:
+    re-prompting it would push the model to act against its own judgement."""
+    from core.inference.tool_call_parser import is_short_intent_without_action
+
+    denials = [
+        "I can't access your local files.",
+        "I don't have access to the internet.",
+        "I'm unable to run programs on your computer.",
+        "I cannot execute code in this environment.",
+        "Sorry, I can't directly open the folder for you.",
+        "I do not have access to your terminal.",
+        "Я не могу получить доступ к вашим файлам.",
+        "У меня нет доступа к интернету.",
+        "Я не могу запустить программу на вашем компьютере.",
+        "Мне недоступны локальные файлы.",
+        "К сожалению, я не могу открыть папку на вашем диске.",
+    ]
+    for content in denials:
+        assert is_short_intent_without_action(content), content
+
+    refusals = [
+        "I can't do that.",
+        "I cannot help with that request.",
+        "I'm sorry, I can't assist with that.",
+        "I can't find the file in the repository.",
+        "The app cannot access the network.",
+        "You can't access that folder.",
+        "I cannot verify that claim.",
+        "I'm not sure about the file.",
+        "Я не могу это сделать.",
+        "Я не могу помочь с этим.",
+        "Приложение не может получить доступ к сети.",
+    ]
+    for content in refusals:
+        assert not is_short_intent_without_action(content), content
+
+
 # ── End-to-end guard semantics on realistic responses ──────────────
 
 

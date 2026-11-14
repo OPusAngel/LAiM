@@ -181,6 +181,50 @@ _HELP_OFFER = (
     r"|assist\b|help\s+you\b(?!\s+" + _ACTION_VERB + r")|give\s+you\s+accurate\b"
     r"|" + _SIGN_OFF + r")"
 )
+# A capability denial names something the enabled tools DO reach ("I can't access your files", "я не могу
+# запустить программу"). Distinct from a judgement refusal ("I can't help with that"), which names no capability
+# and must never be re-prompted into acting. Both halves are required — a first-person inability AND a capability
+# noun — because either alone matches ordinary prose ("The app cannot access the network", "I can't find the file").
+# Local models answer in the user's language, so the Russian forms are matched alongside the English ones.
+_CAPABILITY = (
+    r"(?:files?|folders?|director(?:y|ies)|disks?|drives?|computers?|machines?|systems?|internet|web"
+    r"|network|browser|terminal|command\s+line|shell|tools?|programs?|applications?|apps?|documents?"
+    r"|desktop|downloads?|code|commands?|scripts?|python"
+    r"|файл\w*|папк\w*|каталог\w*|диск\w*|компьютер\w*|систем\w*|интернет\w*|сет\w*|браузер\w*"
+    r"|терминал\w*|командн\w*\s+строк\w*|шелл\w*|инструмент\w*|программ\w*|приложени\w*|документ\w*"
+    r"|рабочи\w*\s+стол\w*|загрузк\w*|код\w*|команд\w*|скрипт\w*|питон\w*)"
+)
+_DENIAL_VERB_EN = (
+    r"(?:access|open|read|write|edit|create|run|execute|browse|search|download|install|modify|delete"
+    r"|control|interact|reach|connect|use|launch|start)"
+)
+_DENIAL_VERB_RU = (
+    r"(?:получить\s+доступ|открыть|прочитать|записать|запустить|выполнить|искать|найти|скачать"
+    r"|установить|изменить|создать|удалить|управлять|подключиться|взаимодействовать|использовать)"
+)
+_DENIAL_CANNOT_EN = (
+    r"(?:\bi\s+can(?:no|['\u2019])?t|\bi\s+am\s+unable\s+to|\bi['\u2019]m\s+unable\s+to"
+    r"|\bi\s+am\s+not\s+able\s+to|\bi['\u2019]m\s+not\s+able\s+to)"
+)
+CAPABILITY_DENIAL = re.compile(
+    r"(?is)("
+    + _DENIAL_CANNOT_EN
+    + r"\s+(?:directly\s+)?"
+    + _DENIAL_VERB_EN
+    + r"\b[^.\n]{0,40}?"
+    + _CAPABILITY
+    + r"|\bi\s+(?:do\s+not|don['\u2019]?t)\s+have\s+access\s+to\b"
+    r"|\bi\s+have\s+no\s+access\s+to\b"
+    r"|\bi\s+lack\s+access\s+to\b"
+    r"|\b(?:я\s+)?не\s+могу\s+"
+    + _DENIAL_VERB_RU
+    + r"\b[^.\n]{0,40}?"
+    + _CAPABILITY
+    + r"|\b(?:у\s+меня\s+)?нет\s+доступа\b"
+    r"|\bя\s+не\s+имею\s+доступа\b"
+    r"|\bмне\s+недоступн\w*\b"
+    r")"
+)
 # Forward-looking intent: the model says what it *will* do, not a final answer.
 INTENT_SIGNAL = re.compile(
     r"(?im)("
@@ -221,8 +265,13 @@ NUDGE_TOOL_CALLS_STATUS = "Nudging tool calls"
 
 
 def is_short_intent_without_action(text: str) -> bool:
+    """Whether this turn announces work it then did not do — forward-looking intent, or a denial of a
+    capability the enabled tools actually have. Both are answered by the same re-prompt: name the tools and
+    ask for the call. A judgement refusal matches neither and is left alone."""
     stripped = text.strip()
-    return 0 < len(stripped) < REPROMPT_MAX_CHARS and INTENT_SIGNAL.search(stripped) is not None
+    if not 0 < len(stripped) < REPROMPT_MAX_CHARS:
+        return False
+    return INTENT_SIGNAL.search(stripped) is not None or CAPABILITY_DENIAL.search(stripped) is not None
 
 
 # Leading marks are kept unless they are quotes or brackets, so ".NET" survives; stripping all non-word chars would

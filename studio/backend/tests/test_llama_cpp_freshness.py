@@ -552,6 +552,86 @@ def test_fetch_latest_release_tag_uses_publish_time(monkeypatch):
     assert fr._fetch_latest_release_tag("unslothai/llama.cpp") == "b9596-mix-e6f2453"
 
 
+class _ReleaseResp:
+    def __init__(self, payload):
+        self._p = json.dumps(payload).encode()
+
+    def read(self):
+        return self._p
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *a):
+        return False
+
+
+def test_upstream_offers_the_newest_build_not_the_milestone(monkeypatch):
+    """Upstream marks every bNNNN nightly as a prerelease and cuts milestones (v0.9.0, v1.0.0)
+    as plain releases that carry no binaries. Selecting on the prerelease flag alone made the
+    banner offer v1.0.0 while the installer, which resolves assets, could not install it:
+    "no compatible upstream prebuilt asset was found". The tag shape has to decide for upstream,
+    the way install_llama_prebuilt.release_is_selectable already does.
+    """
+    payload = [
+        {
+            "tag_name": "b12383",
+            "draft": False,
+            "prerelease": True,
+            "published_at": "2026-11-14T14:43:25Z",
+        },
+        {
+            "tag_name": "b12380",
+            "draft": False,
+            "prerelease": True,
+            "published_at": "2026-11-14T13:57:38Z",
+        },
+        {
+            "tag_name": "v1.0.0",
+            "draft": False,
+            "prerelease": False,
+            "published_at": "2026-11-13T10:20:19Z",
+        },
+    ]
+    monkeypatch.setattr(freshness_flow, "auth_safe_open", lambda req, timeout = 5.0: _ReleaseResp(payload))
+    assert fr._fetch_latest_release_tag(freshness_flow.UPSTREAM_LLAMA_REPO) == "b12383"
+
+
+def test_upstream_milestone_alone_reads_as_no_release(monkeypatch):
+    # A window in which the only plain release is the milestone: nothing installable, so the
+    # banner must stay quiet rather than offer it.
+    payload = [
+        {
+            "tag_name": "v1.0.0",
+            "draft": False,
+            "prerelease": False,
+            "published_at": "2026-11-13T10:20:19Z",
+        }
+    ]
+    monkeypatch.setattr(freshness_flow, "auth_safe_open", lambda req, timeout = 5.0: _ReleaseResp(payload))
+    assert fr._fetch_latest_release_tag(freshness_flow.UPSTREAM_LLAMA_REPO) is None
+
+
+def test_fork_still_skips_prereleases(monkeypatch):
+    # Only upstream is tag-shaped; the fork's own releases keep the prerelease rule.
+    payload = [
+        {
+            "tag_name": "app-b9300-linux-x64",
+            "draft": False,
+            "prerelease": True,
+            "published_at": "2026-06-12T00:00:00Z",
+        },
+        {
+            "tag_name": "b9200",
+            "draft": False,
+            "prerelease": False,
+            "published_at": "2026-06-01T00:00:00Z",
+        },
+    ]
+    monkeypatch.setattr(freshness_flow, "auth_safe_open", lambda req, timeout = 5.0: _ReleaseResp(payload))
+    assert fr._fetch_latest_release_tag("unslothai/llama.cpp") == "b9200"
+
+
 # reset_caches(drop_disk=...) -- post-update stale same-base mix disk cache.
 
 
