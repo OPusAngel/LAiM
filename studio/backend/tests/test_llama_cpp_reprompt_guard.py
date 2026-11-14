@@ -511,6 +511,11 @@ def test_capability_denials_are_reprompted_and_judgement_refusals_are_not():
         "Я не могу запустить программу на вашем компьютере.",
         "Мне недоступны локальные файлы.",
         "К сожалению, я не могу открыть папку на вашем диске.",
+        # The imperfective and the "не умею" forms: what a local model actually writes.
+        "Я не могу создавать папки на вашем компьютере.",
+        "Не могу открыть файл — у меня нет доступа к диску.",
+        "Я не умею работать с файлами.",
+        "У меня нет возможности запустить команду.",
     ]
     for content in denials:
         assert is_short_intent_without_action(content), content

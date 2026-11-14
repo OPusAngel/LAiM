@@ -199,8 +199,11 @@ _DENIAL_VERB_EN = (
     r"|control|interact|reach|connect|use|launch|start)"
 )
 _DENIAL_VERB_RU = (
-    r"(?:получить\s+доступ|открыть|прочитать|записать|запустить|выполнить|искать|найти|скачать"
-    r"|установить|изменить|создать|удалить|управлять|подключиться|взаимодействовать|использовать)"
+    # Stems, not infinitives: a model writes "не могу создавать папки" as often as "не могу создать папку", and
+    # matching only the perfective let the canonical refusal through.
+    r"(?:получить\s+доступ|откры\w*|прочита\w*|прочест\w*|запис\w*|запуст\w*|выполн\w*|иска\w*"
+    r"|найт\w*|скача\w*|установ\w*|измен\w*|созда\w*|удал\w*|управля\w*|подключ\w*"
+    r"|взаимодейств\w*|использова\w*|работа\w*)"
 )
 _DENIAL_CANNOT_EN = (
     r"(?:\bi\s+can(?:no|['\u2019])?t|\bi\s+am\s+unable\s+to|\bi['\u2019]m\s+unable\s+to"
@@ -216,12 +219,12 @@ CAPABILITY_DENIAL = re.compile(
     + r"|\bi\s+(?:do\s+not|don['\u2019]?t)\s+have\s+access\s+to\b"
     r"|\bi\s+have\s+no\s+access\s+to\b"
     r"|\bi\s+lack\s+access\s+to\b"
-    r"|\b(?:я\s+)?не\s+могу\s+"
+    r"|\b(?:я\s+)?не\s+(?:могу|умею|в\s+состоянии)\s+"
     + _DENIAL_VERB_RU
     + r"\b[^.\n]{0,40}?"
     + _CAPABILITY
-    + r"|\b(?:у\s+меня\s+)?нет\s+доступа\b"
-    r"|\bя\s+не\s+имею\s+доступа\b"
+    + r"|\b(?:у\s+меня\s+)?нет\s+(?:доступа|возможности)\b"
+    r"|\bя\s+не\s+имею\s+(?:доступа|возможности)\b"
     r"|\bмне\s+недоступн\w*\b"
     r")"
 )
