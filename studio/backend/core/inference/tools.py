@@ -10094,6 +10094,68 @@ def _windows_bash_userland_dirs() -> list[str]:
     return dirs
 
 
+# A drive-absolute Windows path, as Explorer shows it and as the tool description tells the model to write one
+# (`C:\Users\me\Desktop\out`). Matched only where a word can start, so `http://` and a bare `a:` in prose stay put.
+_WIN_DRIVE_PATH = re.compile(r"(?<![\w.\\/-])[A-Za-z]:[\\/]")
+# Where an UNQUOTED word ends. A quoted path keeps its spaces because the model quoted it; an unquoted one is cut
+# at the first blank or shell operator, which is where bash would have cut it too.
+_UNQUOTED_WORD_END = frozenset(" \t\r\n'\"`|&;<>()")
+
+
+def _quote_windows_paths(command: str) -> str:
+    """Wrap every unquoted drive-absolute path in double quotes before bash parses the command.
+
+    bash strips the backslashes of an unquoted word as escapes, so the model's
+    ``mkdir C:\\Users\\me\\Desktop\\out`` reached mkdir as ``C:UsersmeDesktopout``: a RELATIVE name, created in
+    the working directory, with the surviving colon turned into U+F03A by the MSYS runtime (ls prints it back as
+    a colon, Explorer shows the private-use glyph). Exit code 0 either way, so the model reported success for a
+    folder that was not there. Measured on Git for Windows: the unquoted form lands beside the working directory
+    while ``mkdir "C:\\Users\\me\\tmp\\zz"`` and ``mkdir /c/Users/me/tmp/zz`` both land in the real folder.
+
+    Only text outside quotes is touched. bash already leaves a backslash alone inside ``"..."`` and inside
+    ``'...'``, so a path the model quoted needs no help -- and rewriting one would change what a program that
+    takes a literal pattern (grep, sed, awk) receives.
+    """
+    if not command or not _WIN_DRIVE_PATH.search(command):
+        return command
+    out: list[str] = []
+    i = 0
+    n = len(command)
+    quote = ""
+    while i < n:
+        ch = command[i]
+        if quote:
+            out.append(ch)
+            if ch == quote:
+                quote = ""
+            i += 1
+            continue
+        if ch == "'" or ch == '"':
+            quote = ch
+            out.append(ch)
+            i += 1
+            continue
+        if ch == "\\":
+            # An escaped character outside quotes, `\;` in a sed script say. Copy it with its escape so the next
+            # character is not mistaken for the start of a word.
+            out.append(command[i : i + 2])
+            i += 2
+            continue
+        match = _WIN_DRIVE_PATH.match(command, i)
+        if match:
+            # The backslashes are part of the path, not escapes, so they never end the word: only a blank or a
+            # shell operator does, which is exactly where bash would have ended it.
+            end = match.end()
+            while end < n and command[end] not in _UNQUOTED_WORD_END:
+                end += 1
+            out.append('"' + command[i:end] + '"')
+            i = end
+            continue
+        out.append(ch)
+        i += 1
+    return "".join(out)
+
+
 def _shell_is_posix() -> bool:
     """True when the shell that will run a command parses POSIX syntax."""
     return sys.platform != "win32" or _windows_bash() is not None
@@ -10107,7 +10169,7 @@ def _get_shell_cmd(command: str) -> list[str]:
         # half-executes. Use a real bash when the host has one.
         bash = _windows_bash()
         if bash:
-            return [bash, "-c", command]
+            return [bash, "-c", _quote_windows_paths(command)]
         return ["cmd", "/c", command]
     return ["bash", "-c", command]
 

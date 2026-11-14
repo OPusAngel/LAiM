@@ -64,6 +64,62 @@ def test_windows_falls_back_to_cmd_without_bash(monkeypatch):
     assert tools._get_shell_cmd("echo hi") == ["cmd", "/c", "echo hi"]
 
 
+@pytest.mark.parametrize(
+    "command, expected",
+    [
+        # The reported bug: an unquoted Windows path lost its separators and landed in the working directory.
+        (
+            r"mkdir C:\Users\me\Desktop\POGDFGPOFG",
+            r'mkdir "C:\Users\me\Desktop\POGDFGPOFG"',
+        ),
+        (r"cd C:\Users\me && ls", r'cd "C:\Users\me" && ls'),
+        (r"cp C:\a\b C:\c\d", r'cp "C:\a\b" "C:\c\d"'),
+        # Already quoted, so bash keeps the backslashes itself; rewriting would only change the literal.
+        (r'echo "C:\Users\me"', r'echo "C:\Users\me"'),
+        (r"grep -r 'C:\Users' .", r"grep -r 'C:\Users' ."),
+        (r"sed 's/a/C:\b/' f", r"sed 's/a/C:\b/' f"),
+        # Not paths: a URL and a quoted forward-slash path.
+        ("curl https://example.com/x", "curl https://example.com/x"),
+        ("cd C:/Users/me && ls", 'cd "C:/Users/me" && ls'),
+        ("echo hi", "echo hi"),
+    ],
+)
+def test_unquoted_windows_paths_are_quoted_before_bash(command, expected):
+    # bash strips the backslashes of an unquoted word as escapes, so `mkdir C:\Users\me\Desktop\out` reached mkdir
+    # as `C:UsersmeDesktopout` -- a relative name, created beside the working directory, with the colon turned into
+    # U+F03A by the MSYS runtime -- and still exited 0. Quoting is the whole fix.
+    assert tools._quote_windows_paths(command) == expected
+
+
+def test_windows_bash_gets_the_quoted_command(monkeypatch):
+    monkeypatch.setattr(sys, "platform", "win32")
+    monkeypatch.setattr(tools, "_windows_bash", lambda: r"C:\Program Files\Git\bin\bash.exe")
+    argv = tools._get_shell_cmd(r"mkdir C:\Users\me\Desktop\out")
+    assert argv[2] == r'mkdir "C:\Users\me\Desktop\out"'
+
+
+def test_cmd_path_is_left_alone(monkeypatch):
+    # cmd /c parses backslashes itself and treats a double quote as a quoting character, so the rewrite is bash-only.
+    monkeypatch.setattr(sys, "platform", "win32")
+    monkeypatch.setattr(tools, "_windows_bash", lambda: None)
+    assert tools._get_shell_cmd(r"mkdir C:\Users\me\Desktop\out")[2] == r"mkdir C:\Users\me\Desktop\out"
+
+
+@pytest.mark.skipif(sys.platform != "win32", reason = "needs a Windows filesystem to resolve a drive path")
+def test_quoted_path_creates_the_real_directory(tmp_path, monkeypatch):
+    """The end-to-end claim: the quoted form lands in the folder that was named."""
+    bash = tools._windows_bash()
+    if not bash:
+        pytest.skip("no trusted bash on this host")
+    target = tmp_path / "real" / "out"
+    monkeypatch.setattr(sys, "platform", "win32")
+    argv = tools._get_shell_cmd(f"mkdir -p {target}")
+    import subprocess
+
+    assert subprocess.run(argv, cwd = str(tmp_path), capture_output = True).returncode == 0
+    assert target.is_dir()
+
+
 def test_prefers_git_for_windows_over_path(monkeypatch, tmp_path):
     git_bash = tmp_path / "Git" / "bin" / "bash.exe"
     git_bash.parent.mkdir(parents = True)
