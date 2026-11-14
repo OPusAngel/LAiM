@@ -39837,6 +39837,10 @@ class LlamaCppBackend:
         # Single-element lists so the nested execution scope can rebind them.
         _last_tool_result_key: list = [None]
         _identical_result_runs: list = [0]
+        # How many times the no-progress guard has already spoken in this turn. The first note
+        # asks the model to move on; the second has to forbid the call, because a small model
+        # reads the first one as advice and keeps re-running the same broken command.
+        _identical_result_fires: list = [0]
         _starved_call: list = [False]
 
         # Reserve extra iterations for re-prompts so they don't consume the
@@ -42605,6 +42609,7 @@ class LlamaCppBackend:
                             _last_tool_result_key[0] = _result_key
                             _identical_result_runs[0] = 1
                         if _identical_result_runs[0] >= _MAX_IDENTICAL_TOOL_RESULTS:
+                            _identical_result_fires[0] += 1
                             logger.info(
                                 "%s returned the same result %d times; saying so instead of "
                                 "letting the turn spend itself repeating it",
@@ -42618,7 +42623,10 @@ class LlamaCppBackend:
                                 result,
                                 decision.tool_name,
                                 lambda body: _repeated_result_message(
-                                    decision.tool_name, _identical_result_runs[0], body
+                                    decision.tool_name,
+                                    _identical_result_runs[0],
+                                    body,
+                                    _identical_result_fires[0],
                                 ),
                             )
                             _identical_result_runs[0] = 0

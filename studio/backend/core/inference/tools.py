@@ -11,6 +11,7 @@ from collections import OrderedDict, deque
 from collections.abc import Iterable
 import fnmatch
 import functools
+import glob
 import hashlib
 from html.parser import HTMLParser
 import json
@@ -9876,6 +9877,39 @@ def _is_secret_env_value(value: str) -> bool:
     return _URL_USERINFO_RE.search(value) is not None or _SECRET_VALUE_RE.search(value) is not None
 
 
+def _windows_python_scripts_dirs() -> list[str]:
+    """The ``Scripts`` folders that hold ``pip``/``pyinstaller``-style console entry points.
+
+    The Python launcher on PATH exposes only its own shim dir (``AppData/Local/Python/bin``),
+    which carries ``pip`` but no package scripts, so ``pyinstaller.exe`` is invisible to a bare
+    ``pyinstaller`` even while ``pip show pyinstaller`` proves it is installed. A model reading
+    "command not found" concludes the package is missing and hands the work back to the user,
+    so these dirs go on the child PATH before it ever runs.
+    """
+    if os.name != "nt":
+        return []
+    roots = (
+        os.environ.get("LOCALAPPDATA"),
+        os.environ.get("APPDATA"),
+        os.environ.get("ProgramFiles"),
+    )
+    patterns = (
+        os.path.join("Python", "pythoncore-*", "Scripts"),
+        os.path.join("Programs", "Python", "Python*", "Scripts"),
+        os.path.join("Python", "Python*", "Scripts"),
+        os.path.join("Python*", "Scripts"),
+    )
+    found: list[str] = []
+    for root in roots:
+        if not root:
+            continue
+        for pattern in patterns:
+            for path in sorted(glob.glob(os.path.join(root, pattern))):
+                if os.path.isdir(path) and path not in found:
+                    found.append(path)
+    return found
+
+
 def _build_bypass_env(workdir: str) -> dict[str, str]:
     """Env for bypass exec: full host env minus credential vars, with the temp vars just inside the
     workdir. HOME and the Windows profile vars stay the operator's real ones, so ``~/Desktop`` and
@@ -9905,6 +9939,21 @@ def _build_bypass_env(workdir: str) -> dict[str, str]:
         part for part in (_TOOL_SITE_DIR, inherited_pythonpath) if part
     )
     env.setdefault("MPLBACKEND", "Agg")
+    # Python's console scripts (`pyinstaller`, `black`, ...) live in a Scripts dir the launcher
+    # does not put on PATH. Adding them here is what makes `pyinstaller calc.py` resolve instead
+    # of returning 127 and reading as "not installed" (see _windows_python_scripts_dirs).
+    scripts_dirs = _windows_python_scripts_dirs()
+    if scripts_dirs:
+        parts = [part for part in env.get("PATH", "").split(os.pathsep) if part]
+        for path in scripts_dirs:
+            if path not in parts:
+                parts.append(path)
+        env["PATH"] = os.pathsep.join(parts)
+    # A Windows console tool that writes Cyrillic prints in the OEM codepage, which arrives here as
+    # replacement characters; the model then reads a real error as a broken shell. Python children
+    # are told to speak UTF-8 so at least their own messages survive.
+    env.setdefault("PYTHONUTF8", "1")
+    env.setdefault("PYTHONIOENCODING", "utf-8")
     return env
 
 
@@ -22003,6 +22052,79 @@ def _is_outside_workdir(abs_path: str, workdir: str | None = None) -> bool:
     return rp != root and not rp.startswith(root + os.sep)
 
 
+_SHELL_MISSING_TOOL_RE = re.compile(
+    r"(?m)^(?:[^\n]*?: line \d+: )?([A-Za-z0-9_.+-]+): command not found[ \t]*$"
+)
+_NO_MODULE_RE = re.compile(r"No module named '?([A-Za-z0-9_.]+)'?")
+
+
+def _find_installed_tool(name: str) -> str | None:
+    """Absolute path of an executable the child shell could not find, if it exists anywhere
+    sensible. PATH alone is not enough: the interpreter's own Scripts dir is usually absent."""
+    dirs = [part for part in os.environ.get("PATH", "").split(os.pathsep) if part]
+    dirs.extend(_windows_python_scripts_dirs())
+    for directory in dirs:
+        for suffix in (".exe", ".cmd", ".bat", ""):
+            candidate = os.path.join(directory, name + suffix)
+            if os.path.isfile(candidate):
+                return candidate
+    return None
+
+
+def _case_fixed_module_name(name: str) -> str | None:
+    """The installed spelling of a module when only its letter case is wrong. Python module names
+    are case-sensitive on Windows too, so ``-m pyinstaller`` fails while ``-m PyInstaller`` works,
+    and the error text names only the lowercase form."""
+    lower = name.lower()
+    for scripts in _windows_python_scripts_dirs():
+        site = os.path.join(os.path.dirname(scripts), "Lib", "site-packages")
+        try:
+            entries = os.listdir(site)
+        except OSError:
+            continue
+        for entry in entries:
+            base = entry[:-3] if entry.endswith(".py") else entry
+            if base.lower() == lower and base != name:
+                return base
+    return None
+
+
+def _missing_tool_hint(output: str) -> str:
+    """Name the real path or the real spelling when a command "does not exist" but is installed.
+
+    Both failures read as "not installed" to a model, which then tells the user to install what
+    they already have instead of retrying. One sentence with the absolute path, or with the
+    capitalisation, turns a dead end into a single retry.
+    """
+    if not output:
+        return ""
+    match = _SHELL_MISSING_TOOL_RE.search(output)
+    if match:
+        name = match.group(1)
+        found = _find_installed_tool(name)
+        if found:
+            # `-m <name>` is only a working alternative when the module is spelled that way; for
+            # PyInstaller it is not, and suggesting it would send the model into the same wall.
+            module = _case_fixed_module_name(name) or name
+            return (
+                f"\nHint: `{name}` IS installed, at {found}. Its folder is just not on this "
+                "shell's PATH. Run it by that full path in quotes, or as "
+                f"`python -m {module}`. Do not ask the user to install it."
+            )
+        return ""
+    match = _NO_MODULE_RE.search(output)
+    if match:
+        name = match.group(1).split(".")[0]
+        fixed = _case_fixed_module_name(name)
+        if fixed:
+            return (
+                f"\nHint: the module is installed as `{fixed}`, not `{name}`. Python module "
+                f"names are case-sensitive, so `-m {name}` fails and `-m {fixed}` works. "
+                "Do not ask the user to install it."
+            )
+    return ""
+
+
 def _missing_path_hint(output: str, workdir: str | None = None) -> str:
     """Model-visible healing when an execution fails on an absolute path missing in the workdir (a
     code-interpreter habit path, or one invented from the CWD). Detected on the full
@@ -22691,7 +22813,7 @@ def _python_exec(
         # Detect the missing-path pattern on the full output (truncation could hide the trailing traceback); append
         # the hint after truncation. External paths are judged against the real workdir (project sessions live outside
         # the default workdir root).
-        hint = _missing_path_hint(result, workdir)
+        hint = _missing_path_hint(result, workdir) + _missing_tool_hint(result)
         # Before the fit, not after it. Defusing inserts a space into every line that opens with a marker, so a result
         # full of them grows after it has been measured and the text replayed to the model is larger than the prefix
         # that was admitted. Before ours is appended, and whether or not one is: a program's own marker line is not an
@@ -22839,7 +22961,7 @@ def _bash_exec(
         if proc.returncode != 0:
             result = f"Exit code {proc.returncode}:\n{result}"
         # Same missing-path healing as _python_exec.
-        hint = _missing_path_hint(result, workdir)
+        hint = _missing_path_hint(result, workdir) + _missing_tool_hint(result)
         result = _defuse_sentinels(result)  # before the fit; see _python_exec
         result = (
             _truncate(result, workdir = spill_dir, scope = spill_scope, hint = hint, omitted = omitted)

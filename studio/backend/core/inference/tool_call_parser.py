@@ -346,10 +346,23 @@ def starved_result_message(tool_name: str, result: str) -> str:
     )
 
 
-def repeated_result_message(tool_name: str, times: int, last_result: str) -> str:
+def repeated_result_message(tool_name: str, times: int, last_result: str, firings: int = 1) -> str:
     """Appended to a result the tool has now returned unchanged several times. The last result is
     kept rather than replaced: it may be the truncation notice that caused the repeats, and
-    dropping it would leave the model with less than it had."""
+    dropping it would leave the model with less than it had.
+
+    ``firings`` counts how often this guard has already spoken in the turn. The first note reads
+    as advice, which a small model happily ignores while it re-runs the same failing command;
+    from the second on the wording has to remove the option rather than suggest against it."""
+    if firings >= 2:
+        return (
+            f"{last_result}\n\n"
+            f"[{tool_name} returned exactly this {times} times; it will not change. This is the "
+            "second time you have been told. Do NOT run this command again in this turn: the "
+            "error above names the cause, so change the command (different path, different "
+            "interpreter, different spelling) or stop. If it still cannot work, say so plainly "
+            "with the exact error text, and never present an unfinished task as done.]"
+        )
     return (
         f"{last_result}\n\n"
         f"[{tool_name} returned exactly this {times} times; it will not change. Continue "
